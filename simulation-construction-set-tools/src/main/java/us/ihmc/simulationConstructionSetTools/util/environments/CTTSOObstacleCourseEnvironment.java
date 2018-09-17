@@ -3,11 +3,16 @@ package us.ihmc.simulationConstructionSetTools.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Cylinder3D;
+import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -81,12 +86,13 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
          combinedTerrainObject3D.addTerrainObject(createBump(1, 1, new Point2D(), bumpHeight, bumpRun, bumpWidth, 0.0));
          combinedTerrainObject3D.addTerrainObject(createBump(2, 1, new Point2D(), bumpHeight, bumpRun, bumpWidth, 0.0));
 
-         combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(1, 2));
-         //combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(2, 2));
+         //         combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(1, 2));
+         combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(1, 2, new Point2D(0.2, 0.0), 0.3, 0.05));
+         //combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(2, 2, 1, 0.1, 0.1));
 
-         //         combinedTerrainObject3D.addTerrainObject(setUpCurb(1, 3));
-         //         combinedTerrainObject3D.addTerrainObject(setUpCurb(2, 3));
-         //         combinedTerrainObject3D.addTerrainObject(createTable(1, 3, new Point2D(0.1, 0.0)));
+         combinedTerrainObject3D.addTerrainObject(setUpCurb(1, 3));
+         combinedTerrainObject3D.addTerrainObject(setUpCurb(2, 3));
+         combinedTerrainObject3D.addTerrainObject(createTable(1, 3, new Point2D(0.1, 0.0)));
 
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(0, 4));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 4));
@@ -289,18 +295,18 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
    }
 
    private static final int POINTS_PER_POTHOLE = 8;
-   private static final double allowablePenetrationThickness = 0.1;
+   private static final double allowablePenetrationThickness = 0.07;
 
-   private CombinedTerrainObject3D setUpPotholeGrid(int row, int column)
+   private CombinedTerrainObject3D setUpPotholeGrid(int row, int column, Point2DReadOnly location, double centerToPoints, double depthToCentroid)
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("PotholeGrid");
 
       AppearanceDefinition potholeAppearance = YoAppearance.DarkGrey();
+      AppearanceDefinition flatAppearance = YoAppearance.Grey();
 
       RigidBodyTransform centroidTransform = new RigidBodyTransform();
       centroidTransform.appendTranslation(getWorldCoordinate(row, column));
-      double centerToPoints = 0.3;
-      double depthToCentroid = 0.1;
+      centroidTransform.appendTranslation(location.getX(), location.getY(), 0.0);
       RegularPolygon potholePolygon = new RegularPolygon(centerToPoints, POINTS_PER_POTHOLE);
 
       PotholePlanarRegionProvider potholePlanarRegionProvider = new PotholePlanarRegionProvider(potholePolygon, centroidTransform.getTranslationVector(),
@@ -314,17 +320,64 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       }
 
       ConvexPolygon2D flatRegionPolygon = new ConvexPolygon2D();
-      flatRegionPolygon.addVertex(gridLength / 2, gridWidth / 2);
-      flatRegionPolygon.addVertex(gridLength / 2, -gridWidth / 2);
-      flatRegionPolygon.addVertex(-gridLength / 2, gridWidth / 2);
-      flatRegionPolygon.addVertex(-gridLength / 2, -gridWidth / 2);
+      flatRegionPolygon.addVertex(gridLength / 2 - location.getX(), gridWidth / 2 - location.getY());
+      flatRegionPolygon.addVertex(gridLength / 2 - location.getX(), -gridWidth / 2 - location.getY());
+      flatRegionPolygon.addVertex(-gridLength / 2 - location.getX(), -gridWidth / 2 - location.getY());
+      flatRegionPolygon.addVertex(-gridLength / 2 - location.getX(), gridWidth / 2 - location.getY());
+      flatRegionPolygon.update();
       List<PlanarRegion> flatPlanarRegions = potholePlanarRegionProvider.getAdjustedFlatPlanarRegions(flatRegionPolygon);
-      
+
       for (int i = 0; i < flatPlanarRegions.size(); i++)
       {
-//         PlanarRegionTerrainObject potholeTerrainObject = new PlanarRegionTerrainObject(flatPlanarRegions.get(i), allowablePenetrationThickness,
-//                                                                                        potholeAppearance);
-//         combinedTerrainObject.addTerrainObject(potholeTerrainObject);
+         PlanarRegionTerrainObject potholeTerrainObject = new PlanarRegionTerrainObject(flatPlanarRegions.get(i), allowablePenetrationThickness,
+                                                                                        flatAppearance);
+         combinedTerrainObject.addTerrainObject(potholeTerrainObject);
+      }
+
+      return combinedTerrainObject;
+   }
+
+   private CombinedTerrainObject3D setUpPotholeGrid(int row, int column, int numberOfPotholes, double centerToPoints, double depthToCentroid)
+   {
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("PotholeGrid");
+
+      AppearanceDefinition potholeAppearance = YoAppearance.DarkGrey();
+      AppearanceDefinition flatAppearance = YoAppearance.Grey();
+
+      for (int i = 0; i < numberOfPotholes; i++)
+      {
+         double intervalX = gridLength / numberOfPotholes;
+         Point2D location = new Point2D(gridLength / 2 - intervalX * (i + 0.5), 0.0);
+
+         RigidBodyTransform centroidTransform = new RigidBodyTransform();
+         centroidTransform.appendTranslation(getWorldCoordinate(row, column));
+         centroidTransform.appendTranslation(location.getX(), location.getY(), 0.0);
+         RegularPolygon potholePolygon = new RegularPolygon(centerToPoints, POINTS_PER_POTHOLE);
+
+         PotholePlanarRegionProvider potholePlanarRegionProvider = new PotholePlanarRegionProvider(potholePolygon, centroidTransform.getTranslationVector(),
+                                                                                                   depthToCentroid);
+         List<PlanarRegion> potholePlanarRegions = potholePlanarRegionProvider.getPlanarRegions();
+         for (int j = 0; j < potholePlanarRegions.size(); j++)
+         {
+            PlanarRegionTerrainObject potholeTerrainObject = new PlanarRegionTerrainObject(potholePlanarRegions.get(j), allowablePenetrationThickness,
+                                                                                           potholeAppearance);
+            combinedTerrainObject.addTerrainObject(potholeTerrainObject);
+         }
+
+         ConvexPolygon2D flatRegionPolygon = new ConvexPolygon2D();
+         flatRegionPolygon.addVertex(intervalX / 2 - location.getX(), gridWidth / 2 - location.getY());
+         flatRegionPolygon.addVertex(intervalX / 2 - location.getX(), -gridWidth / 2 - location.getY());
+         flatRegionPolygon.addVertex(-intervalX / 2 - location.getX(), -gridWidth / 2 - location.getY());
+         flatRegionPolygon.addVertex(-intervalX / 2 - location.getX(), gridWidth / 2 - location.getY());
+         flatRegionPolygon.update();
+         List<PlanarRegion> flatPlanarRegions = potholePlanarRegionProvider.getAdjustedFlatPlanarRegions(flatRegionPolygon);
+
+         for (int j = 0; j < flatPlanarRegions.size(); j++)
+         {
+            PlanarRegionTerrainObject potholeTerrainObject = new PlanarRegionTerrainObject(flatPlanarRegions.get(j), allowablePenetrationThickness,
+                                                                                           flatAppearance);
+            combinedTerrainObject.addTerrainObject(potholeTerrainObject);
+         }
       }
 
       return combinedTerrainObject;
@@ -382,14 +435,124 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
          this.depthToCentroid = depthToCentroid;
          this.ratioToInnerPolygon = ratioToInner;
       }
-      
-      List<PlanarRegion> getAdjustedFlatPlanarRegions(ConvexPolygon2D flatRegionPolygon)
+
+      /*
+       * flatRegionPolygon will be divided into 2 pieces.
+       */
+      public List<PlanarRegion> getAdjustedFlatPlanarRegions(ConvexPolygon2D flatRegionPolygon)
       {
+         RigidBodyTransform transform = new RigidBodyTransform();
+         transform.appendTranslation(centroidLocation);
+
+         List<PlanarRegion> planarRegions = new ArrayList<PlanarRegion>();
+         ConvexPolygon2D polygon = potholeRegularPolygon.getPolygon();
+         int numberOfVertices = polygon.getNumberOfVertices();
+         int numberOfOuterVertices = flatRegionPolygon.getNumberOfVertices();
+
+         List<LineSegment2D> outerPolygonLines = new ArrayList<LineSegment2D>();
+         for (int i = 0; i < numberOfOuterVertices - 1; i++)
+            outerPolygonLines.add(new LineSegment2D(flatRegionPolygon.getVertex(i), flatRegionPolygon.getVertex(i + 1)));
+         outerPolygonLines.add(new LineSegment2D(flatRegionPolygon.getVertex(numberOfOuterVertices - 1), flatRegionPolygon.getVertex(0)));
+
+         List<LineSegment2D> potholePolygonEdges = new ArrayList<LineSegment2D>();
+         for (int i = 0; i < numberOfVertices - 1; i++)
+            potholePolygonEdges.add(new LineSegment2D(polygon.getVertex(i), polygon.getVertex(i + 1)));
+         potholePolygonEdges.add(new LineSegment2D(polygon.getVertex(numberOfVertices - 1), polygon.getVertex(0)));
+
+         for (int i = 0; i < potholePolygonEdges.size(); i++)
+            planarRegions.add(new PlanarRegion(transform, getOuterPolygon(potholePolygonEdges.get(i), outerPolygonLines)));
+
+         for (int i = 0; i < numberOfOuterVertices; i++)
+         {
+            double min = Double.MAX_VALUE;
+            int indexOfClosestPotholeVertex = 0;
+            for (int j = 0; j < numberOfVertices; j++)
+            {
+               double distance = flatRegionPolygon.getVertex(i).distance(polygon.getVertex(j));
+               if (distance < min)
+               {
+                  min = distance;
+                  indexOfClosestPotholeVertex = j;
+               }
+            }
+            Point2DReadOnly closestPotholeVertex = polygon.getVertex(indexOfClosestPotholeVertex);
+            Point2DReadOnly outerVertex = flatRegionPolygon.getVertex(i);
+            LineSegment2D rightLine = outerPolygonLines.get(i);
+            LineSegment2D leftLine;
+            if (i == 0)
+               leftLine = outerPolygonLines.get(numberOfOuterVertices - 1);
+            else
+               leftLine = outerPolygonLines.get(i - 1);
+            
+            //planarRegions.add(new PlanarRegion(transform, getOuterPolygon(leftLine, rightLine, outerVertex, closestPotholeVertex)));
+         }
          
-         return null;
+         return planarRegions;
       }
 
-      List<PlanarRegion> getPlanarRegions()
+      private ConvexPolygon2D getOuterPolygon(LineSegment2D polygonEdge, List<LineSegment2D> outerPolygonLines)
+      {
+         ConvexPolygon2D outerPolygon = new ConvexPolygon2D();
+
+         outerPolygon.addVertex(polygonEdge.getFirstEndpoint());
+         outerPolygon.addVertex(polygonEdge.getSecondEndpoint());
+
+         double minQuery = Double.MAX_VALUE;
+         int indexOfClosestOuterLine = 0;
+         for (int j = 0; j < outerPolygonLines.size(); j++)
+         {
+            LineSegment2D outerLine = outerPolygonLines.get(j);
+            double query = outerLine.distance(polygonEdge.getFirstEndpoint()) + outerLine.distance(polygonEdge.getSecondEndpoint());
+
+            if (query < minQuery)
+            {
+               minQuery = query;
+               indexOfClosestOuterLine = j;
+            }
+         }
+         LineSegment2D closestOuterLine = outerPolygonLines.get(indexOfClosestOuterLine);
+         PrintTools.info(""+indexOfClosestOuterLine);
+
+         Point2D pointOnOuterLineOne = EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(polygonEdge.getFirstEndpoint(),
+                                                                                               closestOuterLine.getFirstEndpoint(),
+                                                                                               closestOuterLine.getSecondEndpoint());
+         Point2D pointOnOuterLineTwo = EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(polygonEdge.getSecondEndpoint(),
+                                                                                               closestOuterLine.getFirstEndpoint(),
+                                                                                               closestOuterLine.getSecondEndpoint());
+
+         outerPolygon.addVertex(pointOnOuterLineOne);
+         outerPolygon.addVertex(pointOnOuterLineTwo);
+
+         outerPolygon.update();
+
+         return outerPolygon;
+      }
+
+      private ConvexPolygon2D getOuterPolygon(LineSegment2D leftLine, LineSegment2D rightLine, Point2DReadOnly vertex, Point2DReadOnly point)
+      {
+         ConvexPolygon2D outerPolygon = new ConvexPolygon2D();
+
+         outerPolygon.addVertex(vertex);
+         outerPolygon.addVertex(point);
+
+         Point2D pointOnOuterLineOne = EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(point, leftLine.getFirstEndpoint(),
+                                                                                               leftLine.getSecondEndpoint());
+         Point2D pointOnOuterLineTwo = EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(point, rightLine.getFirstEndpoint(),
+                                                                                               rightLine.getSecondEndpoint());
+
+         outerPolygon.addVertex(pointOnOuterLineOne);
+         outerPolygon.addVertex(pointOnOuterLineTwo);
+
+         outerPolygon.update();
+
+         return outerPolygon;
+      }
+
+      /*
+       * this method returns planar regions including bottom region and
+       * trapezoid shaped side region.
+       */
+      public List<PlanarRegion> getPlanarRegions()
       {
          List<PlanarRegion> planarRegions = new ArrayList<PlanarRegion>();
          ConvexPolygon2D polygon = potholeRegularPolygon.getPolygon();
@@ -410,7 +573,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
          bottomPolygon.update();
 
          PlanarRegion bottomPlanarRegion = new PlanarRegion(bottomTransform, bottomPolygon);
-         planarRegions.add(bottomPlanarRegion);
+         //planarRegions.add(bottomPlanarRegion);
 
          // Side Regions (trapezoids).
          for (int i = 0; i < numberOfVertices; i++)
@@ -437,8 +600,8 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
             trapezoidPolygon.addVertex(trapezoidHeight / 2, -trapezoidUpperLine / 2);
             trapezoidPolygon.update();
 
-            PlanarRegion sidePlaidenarRegion = new PlanarRegion(sideTransform, trapezoidPolygon);
-            planarRegions.add(sidePlaidenarRegion);
+            PlanarRegion sidePlanarRegion = new PlanarRegion(sideTransform, trapezoidPolygon);
+            planarRegions.add(sidePlanarRegion);
          }
 
          return planarRegions;
