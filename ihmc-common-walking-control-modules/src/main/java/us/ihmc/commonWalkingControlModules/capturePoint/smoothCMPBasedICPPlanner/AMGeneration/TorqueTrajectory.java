@@ -12,10 +12,7 @@ public class TorqueTrajectory extends SegmentedFrameTrajectory3D
       super(maxNumberOfSegments, maxNumberOfCoefficients);
    }
 
-   /**
-    * Sets this trajectory given an angular momentum trajectory and vertical ground reaction force
-    */
-   public void setFromAngularMomentumTrajectory(AngularMomentumTrajectory angularMomentumTrajectory, double verticalGroundReaction)
+   public void setNext(AngularMomentumTrajectory angularMomentumTrajectory)
    {
       this.reset();
       for(int i = 0; i < angularMomentumTrajectory.getNumberOfSegments(); i++)
@@ -26,10 +23,11 @@ public class TorqueTrajectory extends SegmentedFrameTrajectory3D
          TrajectoryMathTools.getDerivative(segment.getTrajectoryX(), angularMomentumTrajectory.getSegment(i).getTrajectoryY());
          segment.getTrajectoryZ().setConstant(segment.getInitialTime(Axis.X), segment.getFinalTime(Axis.X), 0.0);
       }
-
+   }
+   
+   public void scale(double scalar)
+   {
       for(int i = 0; i < getNumberOfSegments(); i++)
-      {
-         TrajectoryMathTools.scale(1.0 / verticalGroundReaction, segments.get(i));
-      }
+         TrajectoryMathTools.scale(scalar, segments.get(i));
    }
 }

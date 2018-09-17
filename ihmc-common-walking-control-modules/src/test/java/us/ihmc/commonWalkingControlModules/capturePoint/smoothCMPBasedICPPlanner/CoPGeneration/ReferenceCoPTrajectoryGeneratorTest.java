@@ -54,25 +54,22 @@ public class ReferenceCoPTrajectoryGeneratorTest
    private final double stepWidth = soleFrameYDisplacement;
    private final double EPSILON = 5e-4;
 
-   private ReferenceCoPTrajectoryGenerator testCoPGenerator;
-   private MidFootZUpGroundFrame midFeetZUpFrame;
-
-   private final SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
-   private final SideDependentList<ContactableFoot> contactableFeet = new SideDependentList<>();
-   private final SideDependentList<RigidBody> feetBodies = new SideDependentList<>();
-   private final YoVariableRegistry parentRegistry = new YoVariableRegistry("TestRegistry");
-   private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
-   private final SmoothCMPPlannerParameters plannerParameters = new TestSmoothCMPPlannerParameters();;
-   private final YoInteger numberOfFootstepsToConsider = new YoInteger("numberOfFootstepsToConsider", parentRegistry);
-   private final YoInteger numberOfUpcomingFootsteps = new YoInteger("NumberOfUpcomingFootsteps", parentRegistry);
+   ReferenceCoPTrajectoryGenerator testCoPGenerator;
+   SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
+   SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
+   SideDependentList<ContactableFoot> contactableFeet = new SideDependentList<>();
+   SideDependentList<RigidBody> feetBodies = new SideDependentList<>();
+   YoVariableRegistry parentRegistry = new YoVariableRegistry("TestRegistry");
+   MidFootZUpGroundFrame midFeetZUpFrame;
+   SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
+   SmoothCMPPlannerParameters plannerParameters;
+   YoInteger numberOfFootstepsToConsider = new YoInteger("numberOfFootstepsToConsider", parentRegistry);
    private final ArrayList<YoDouble> swingDurations = new ArrayList<>();
    private final ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
    private final ArrayList<YoDouble> swingDurationShiftFractions = new ArrayList<>();
    private final ArrayList<YoDouble> transferDurations = new ArrayList<>();
    private final ArrayList<YoDouble> touchdownDurations = new ArrayList<>();
    private final ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
-   private final ArrayList<FootstepData> upcomingFootstepsData = new ArrayList<>();
 
    @Before
    public void setUp()
@@ -113,6 +110,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       midFeetZUpFrame = new MidFootZUpGroundFrame("DummyRobotMidFootZUpFrame", soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, parentRegistry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
+      plannerParameters = new TestSmoothCMPPlannerParameters();
       numberOfFootstepsToConsider.set(plannerParameters.getNumberOfFootstepsToConsider());
 
       for (int i = 0; i < numberOfFootstepsToConsider.getIntegerValue(); i++)
@@ -140,7 +138,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       int maxNumberOfFootstepsToConsider = plannerParameters.getNumberOfFootstepsToConsider();
       testCoPGenerator = new ReferenceCoPTrajectoryGenerator("TestCoPPlanner", maxNumberOfFootstepsToConsider, bipedSupportPolygons,
                                                              contactableFeet, numberOfFootstepsToConsider, swingDurations, transferDurations, touchdownDurations,
-                                                             swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, numberOfUpcomingFootsteps, upcomingFootstepsData, parentRegistry);
+                                                             swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, parentRegistry);
       testCoPGenerator.initializeParameters(plannerParameters);
       assertTrue("Object not initialized", testCoPGenerator != null);
    }
@@ -156,8 +154,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       feetBodies.clear();
       midFeetZUpFrame = null;
       contactStates.clear();
-      numberOfUpcomingFootsteps.set(0);
-      upcomingFootstepsData.clear();
+      plannerParameters = null;
    }
 
    public void sendFootStepMessages(int numberOfFootstepsToPlan)
@@ -165,18 +162,15 @@ public class ReferenceCoPTrajectoryGeneratorTest
       RobotSide robotSide = RobotSide.LEFT;
       FramePoint3D footstepLocation = new FramePoint3D();
       FrameQuaternion footstepOrientation = new FrameQuaternion();
-      upcomingFootstepsData.clear();
-
       for (int i = 1; i < numberOfFootstepsToPlan + 1; i++)
       {
          Footstep footstep = new Footstep(robotSide);
          footstepLocation.set(i * stepLength, robotSide.negateIfRightSide(stepWidth), 0.0);
          footstep.setPose(footstepLocation, footstepOrientation);
          FootstepTiming timing = new FootstepTiming(swingTime, transferTime);
-         upcomingFootstepsData.add(new FootstepData(footstep, timing));
+         testCoPGenerator.addFootstepToPlan(footstep, timing);
          robotSide = robotSide.getOppositeSide();
       }
-      numberOfUpcomingFootsteps.set(upcomingFootstepsData.size());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
@@ -266,8 +260,6 @@ public class ReferenceCoPTrajectoryGeneratorTest
       }
 
       testCoPGenerator.clear();
-      upcomingFootstepsData.clear();
-      numberOfUpcomingFootsteps.set(0);
       assertTrue("Planned footsteps not removed", testCoPGenerator.getNumberOfFootstepsRegistered() == 0);
    }
 

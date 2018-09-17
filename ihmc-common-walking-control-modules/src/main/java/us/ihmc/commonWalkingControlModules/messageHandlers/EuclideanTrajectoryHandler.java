@@ -147,14 +147,6 @@ public class EuclideanTrajectoryHandler
    }
 
    /**
-    * @return true if there are no trajectory points currently stored
-    */
-   public boolean isEmpty()
-   {
-      return trajectoryPoints.isEmpty();
-   }
-
-   /**
     * Will clear all trajectory points from this handler that are in the past. Call this regularly to avoid trajectory
     * point build up. However, when you are computing the trajectory for non-increasing values of time avoid calling this
     * method.

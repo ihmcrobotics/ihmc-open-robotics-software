@@ -30,7 +30,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final static int FIRST_SEGMENT = 0;
 
-   private final static int defaultSize = 300;
+   private final static int defaultSize = 50;
 
    private final boolean debug;
 
@@ -403,8 +403,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          icpToolbox.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(),
                                                            icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpAccelerationDesiredCurrent);
 
-         int currentCoPSegment = getCurrentSegmentIndex(localTimeInCurrentPhase.getDoubleValue(), copTrajectories);
-         getICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), currentCoPSegment); // TODO: add controller dt for proper continuation
+         getICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), currentSegmentIndex.getIntegerValue()); // TODO: add controller dt for proper continuation
          if (debug)
             checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
       }
