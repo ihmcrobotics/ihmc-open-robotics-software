@@ -52,7 +52,7 @@ public class WholeBodyFeedbackController
                                       YoVariableRegistry parentRegistry)
    {
       this.coreToolbox = coreToolbox;
-      this.feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
+      this.feedbackControllerToolbox = new FeedbackControllerToolbox(coreToolbox.getFeedbackControllerSettings(), registry);
 
       if (allPossibleCommands == null)
          return;
@@ -138,7 +138,7 @@ public class WholeBodyFeedbackController
          if (oneDoFJointFeedbackControllerMap.containsKey(joint))
             continue;
 
-         OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, coreToolbox, registry);
+         OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, coreToolbox, feedbackControllerToolbox, registry);
          oneDoFJointFeedbackControllerMap.put(joint, controller);
          allControllers.add(controller);
       }
