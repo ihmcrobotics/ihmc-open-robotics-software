@@ -44,6 +44,8 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -65,6 +67,7 @@ public class WalkingMessageHandler
 
    private final YoBoolean isPausedWithSteps = new YoBoolean("IsPausedWithSteps", registry);
    private final YoDouble timeToContinueWalking = new YoDouble("TimeToContinueWalking", registry);
+   private final DoubleProvider minimumPauseTime = new DoubleParameter("MinimumPauseTime", registry, 0.0);
 
    private final YoBoolean hasNewFootstepAdjustment = new YoBoolean("hasNewFootstepAdjustement", registry);
    private final AdjustFootstepCommand requestedFootstepAdjustment = new AdjustFootstepCommand();
@@ -868,7 +871,7 @@ public class WalkingMessageHandler
       // The transfer is long enough that we can go to standing, pause, and then keep walking:
       double timeToGoToStanding = stepsInQueue == 0 ? 0.0 : finalTransferTime.getValue();
       double pauseTime = timingToSet.getTransferTime() - timeToGoToStanding - defaultInitialTransferTime.getValue();
-      if (pauseTime > 0.0)
+      if (pauseTime >= minimumPauseTime.getValue())
       {
          timingToSet.setTransferTime(defaultInitialTransferTime.getValue());
          pauseDurationToSet.setValue(pauseTime);
