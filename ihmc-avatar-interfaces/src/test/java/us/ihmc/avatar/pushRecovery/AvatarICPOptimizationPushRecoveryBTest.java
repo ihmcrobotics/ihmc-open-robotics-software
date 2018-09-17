@@ -1,17 +1,15 @@
 package us.ihmc.avatar.pushRecovery;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.Random;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+
+import java.util.Random;
+
+import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOptimizationPushRecoveryTestSetup
 {
