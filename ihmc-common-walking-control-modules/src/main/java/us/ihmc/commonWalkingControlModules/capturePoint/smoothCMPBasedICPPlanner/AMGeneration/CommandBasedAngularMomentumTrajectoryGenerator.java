@@ -248,6 +248,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
          return;
       }
 
+      boolean successfulTrajectory = true;
       int numberOfSegments = Math.min(waypointsPerWalkingPhase, waypoints.size() - 1);
       for (int i = 0; i < numberOfSegments; i++)
       {
@@ -255,8 +256,19 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
          double subTrajectoryEndTime = (subTrajectoryDuration * (i + 1)) / (waypointsPerWalkingPhase - 1);
          EuclideanWaypoint startWaypoint = this.waypoints.get(i).getEuclideanWaypoint();
          EuclideanWaypoint endWaypoint = this.waypoints.get(i + 1).getEuclideanWaypoint();
+         if (startWaypoint.containsNaN() || endWaypoint.containsNaN())
+         {
+            successfulTrajectory = false;
+            break;
+         }
          subTrajectory.add().setCubic(subTrajectoryStartTime, subTrajectoryEndTime, startWaypoint.getPosition(), startWaypoint.getLinearVelocity(),
                                       endWaypoint.getPosition(), endWaypoint.getLinearVelocity());
+      }
+
+      if (!successfulTrajectory)
+      {
+         subTrajectory.reset();
+         subTrajectory.add().setConstant(0.0, subTrajectoryDuration, zeroPoint);
       }
    }
 
