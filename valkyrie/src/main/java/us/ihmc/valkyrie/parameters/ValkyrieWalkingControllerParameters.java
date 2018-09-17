@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -634,6 +635,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
       return new ValkyrieMomentumOptimizationSettings(jointMap);
+   }
+
+   @Override
+   public FeedbackControllerSettings getFeedbackControllerSettings()
+   {
+      return new ValkyrieFeedbackControllerSettings();
    }
 
    @Override
