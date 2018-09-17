@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.*;
 import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.*;
 
+import java.util.Map;
+
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -22,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoSpatialVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
 import us.ihmc.robotics.math.frames.YoSpatialVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -29,6 +32,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -57,6 +61,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final YoSpatialVector yoDesiredVelocity;
    private final YoSpatialVector yoCurrentVelocity;
    private final YoSpatialVector yoErrorVelocity;
+   private final AlphaFilteredYoSpatialVector yoFilteredErrorVelocity;
    private final YoSpatialVector yoFeedForwardVelocity;
    private final YoSpatialVector yoFeedbackVelocity;
    private final RateLimitedYoSpatialVector rateLimitedFeedbackVelocity;
@@ -187,6 +192,13 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          yoCurrentVelocity = feedbackControllerToolbox.getVelocity(endEffector, CURRENT, isEnabled);
          yoErrorVelocity = feedbackControllerToolbox.getVelocity(endEffector, ERROR, isEnabled);
 
+         Map<String, DoubleProvider> breakFrequencies = settings.getErrorVelocityFilterBreakFrequencies();
+         DoubleProvider breakFrequency = breakFrequencies != null ? breakFrequencies.get(endEffectorName) : null;
+         if (breakFrequency != null)
+            yoFilteredErrorVelocity = feedbackControllerToolbox.getAlphaFilteredVelocity(endEffector, ERROR, dt, breakFrequency, breakFrequency, isEnabled);
+         else
+            yoFilteredErrorVelocity = null;
+
          if (toolbox.isEnableInverseDynamicsModule())
          {
             yoDesiredAcceleration = feedbackControllerToolbox.getAcceleration(endEffector, DESIRED, isEnabled);
@@ -225,6 +237,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       {
          yoCurrentVelocity = null;
          yoErrorVelocity = null;
+         yoFilteredErrorVelocity = null;
 
          yoDesiredAcceleration = null;
          yoFeedForwardAcceleration = null;
@@ -305,6 +318,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          rateLimitedFeedbackAcceleration.reset();
       if (rateLimitedFeedbackVelocity != null)
          rateLimitedFeedbackVelocity.reset();
+      if (yoFilteredErrorVelocity != null)
+         yoFilteredErrorVelocity.reset();
    }
 
    private final FrameVector3D linearProportionalFeedback = new FrameVector3D();
@@ -560,6 +575,12 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       linearFeedbackTermToPack.clipToMaxLength(positionGains.getMaximumDerivativeError());
       angularFeedbackTermToPack.clipToMaxLength(orientationGains.getMaximumDerivativeError());
       yoErrorVelocity.set(linearFeedbackTermToPack, angularFeedbackTermToPack);
+      if (yoFilteredErrorVelocity != null)
+      {
+         yoFilteredErrorVelocity.update();
+         yoFilteredErrorVelocity.get(linearFeedbackTermToPack, angularFeedbackTermToPack);
+      }
+      
 
       if (linearGainsFrame != null)
          linearFeedbackTermToPack.changeFrame(linearGainsFrame);

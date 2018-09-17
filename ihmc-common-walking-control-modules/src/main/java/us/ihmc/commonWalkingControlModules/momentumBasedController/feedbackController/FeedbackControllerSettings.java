@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public interface FeedbackControllerSettings
@@ -26,6 +27,10 @@ public interface FeedbackControllerSettings
     * cannot be changed later on. If the returned map is {@code null}, no filters at all will be
     * setup, this cannot be changed later on.
     * </p>
+    * <p>
+    * Note: for the center of mass feedback controller, use the following {@code String} for the
+    * key: {@link FeedbackControllerToolbox#centerOfMassName}.
+    * </p>
     * 
     * @return the break frequency providers.
     */
@@ -35,7 +40,8 @@ public interface FeedbackControllerSettings
    }
 
    /**
-    * Creates an instance of {@code FeedbackControllerSettings} for a default setup of the feedback controllers.
+    * Creates an instance of {@code FeedbackControllerSettings} for a default setup of the feedback
+    * controllers.
     * 
     * @return the default settings.
     */

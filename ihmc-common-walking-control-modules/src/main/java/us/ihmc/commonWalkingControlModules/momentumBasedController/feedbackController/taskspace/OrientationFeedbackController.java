@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.*;
 import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.*;
 
+import java.util.Map;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
@@ -18,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -25,6 +28,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -54,6 +58,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final YoFrameVector3D yoDesiredAngularVelocity;
    private final YoFrameVector3D yoCurrentAngularVelocity;
    private final YoFrameVector3D yoErrorAngularVelocity;
+   private final AlphaFilteredYoFrameVector yoFilteredErrorAngularVelocity;
    private final YoFrameVector3D yoFeedForwardAngularVelocity;
    private final YoFrameVector3D yoFeedbackAngularVelocity;
    private final RateLimitedYoFrameVector rateLimitedFeedbackAngularVelocity;
@@ -160,6 +165,12 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       {
          yoCurrentAngularVelocity = feedbackControllerToolbox.getDataVector(endEffector, CURRENT, ANGULAR_VELOCITY, isEnabled);
          yoErrorAngularVelocity = feedbackControllerToolbox.getDataVector(endEffector, ERROR, ANGULAR_VELOCITY, isEnabled);
+         Map<String, DoubleProvider> breakFrequencies = settings.getErrorVelocityFilterBreakFrequencies();
+         DoubleProvider breakFrequency = breakFrequencies != null ? breakFrequencies.get(endEffectorName) : null;
+         if (breakFrequency != null)
+            yoFilteredErrorAngularVelocity = feedbackControllerToolbox.getAlphaFilteredDataVector(endEffector, ERROR, ANGULAR_VELOCITY, dt, breakFrequency, isEnabled);
+         else
+            yoFilteredErrorAngularVelocity = null;
 
          if (toolbox.isEnableInverseDynamicsModule())
          {
@@ -197,6 +208,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       {
          yoCurrentAngularVelocity = null;
          yoErrorAngularVelocity = null;
+         yoFilteredErrorAngularVelocity = null;
 
          yoDesiredAngularAcceleration = null;
          yoFeedForwardAngularAcceleration = null;
@@ -269,6 +281,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          rateLimitedFeedbackAngularAcceleration.reset();
       if (rateLimitedFeedbackAngularVelocity != null)
          rateLimitedFeedbackAngularVelocity.reset();
+      if (yoFilteredErrorAngularVelocity != null)
+         yoFilteredErrorAngularVelocity.reset();
    }
 
    private final FrameVector3D proportionalFeedback = new FrameVector3D();
@@ -451,6 +465,12 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
       yoErrorAngularVelocity.set(feedbackTermToPack);
+
+      if (yoFilteredErrorAngularVelocity != null)
+      {
+         yoFilteredErrorAngularVelocity.update();
+         feedbackTermToPack.set(yoFilteredErrorAngularVelocity);
+      }
 
       if (angularGainsFrame != null)
          feedbackTermToPack.changeFrame(angularGainsFrame);

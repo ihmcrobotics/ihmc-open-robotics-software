@@ -20,10 +20,14 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoSpatialVector;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
 import us.ihmc.robotics.math.frames.YoSpatialVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -47,7 +51,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final String centerOfMassName = "centerOfMass";
+   public static final String centerOfMassName = "centerOfMass";
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -57,6 +61,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    private final Map<RigidBody, EnumMap<Type, Pair<YoFrameQuaternion, List<YoBoolean>>>> endEffectorOrientations = new HashMap<>();
    private final Map<RigidBody, EnumMap<Type, EnumMap<Space, Pair<YoFrameVector3D, List<YoBoolean>>>>> endEffectorDataVectors = new HashMap<>();
    private final Map<RigidBody, EnumMap<Space, Pair<RateLimitedYoFrameVector, List<YoBoolean>>>> endEffectorRateLimitedDataVectors = new HashMap<>();
+   private final Map<RigidBody, EnumMap<Space, Pair<AlphaFilteredYoFrameVector, List<YoBoolean>>>> endEffectorFilteredDataVectors = new HashMap<>();
 
    private final Map<RigidBody, YoPID3DGains> endEffectorOrientationGains = new HashMap<>();
    private final Map<RigidBody, YoPID3DGains> endEffectorPositionGains = new HashMap<>();
@@ -152,8 +157,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param maximumRate the maximum rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoFrameVector} matching the search criteria.
     */
-   public RateLimitedYoFrameVector getCenterOfMassRateLimitedDataVector(Type rawDataType, Space space, double dt, YoDouble maximumRate,
-                                                                        YoBoolean enabled)
+   public RateLimitedYoFrameVector getCenterOfMassRateLimitedDataVector(Type rawDataType, Space space, double dt, YoDouble maximumRate, YoBoolean enabled)
    {
       Pair<RateLimitedYoFrameVector, List<YoBoolean>> rateLimitedYoFrameVectorEnabledPair = centerOfMassRateLimitedDataVectors.get(space);
 
@@ -180,7 +184,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Retrieves and returns the set of gains {@code YoPositionPIDGainsInterface} for the center of
     * mass, if it does not exist it is created.
     *
-    * @param useIntegrator whether to create the gains necessary to compute the integral term. 
+    * @param useIntegrator whether to create the gains necessary to compute the integral term.
     * @return the unique {@code YoPositionPIDGainsInterface} for the center of mass.
     */
    public YoPID3DGains getCenterOfMassGains(boolean useIntegrator)
@@ -386,6 +390,61 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    /**
+    * Retrieves and returns the {@code AlphaFilteredYoFrameVector} associated with the given
+    * end-effector, {@code type}, and {@code space}, if it does not exist it is created.
+    * <p>
+    * Note: the arguments {@code dt} and {@code breakFrequencyProvider} are only used if the data
+    * does not exist yet.
+    * </p>
+    * <p>
+    * The name prefix of the created variable is created as follows:<br>
+    * {@code namePrefix = endEffector.getName() + "Filtered" + rawDataType.getName() + space.getName()}<br>
+    * Such that the filtered vector of the linear velocity error for the rigid-body 'rightHand' will
+    * have the prefix: "rightHandFilteredErrorLinearVelocity".
+    * </p>
+    *
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param space the space of the data to retrieve.
+    * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
+    * @param dt the duration of a control tick.
+    * @param breakFrequencyProvider the break frequency to use for the low-pass filter. Not
+    *           modified.
+    * @return the unique {@code AlphaFilteredYoFrameVector} matching the search criteria.
+    */
+   public AlphaFilteredYoFrameVector getAlphaFilteredDataVector(RigidBody endEffector, Type rawDataType, Space space, double dt,
+                                                                DoubleProvider breakFrequencyProvider, YoBoolean enabled)
+   {
+      EnumMap<Space, Pair<AlphaFilteredYoFrameVector, List<YoBoolean>>> endEffectorDataVectors = endEffectorFilteredDataVectors.get(endEffector);
+
+      if (endEffectorDataVectors == null)
+      {
+         endEffectorDataVectors = new EnumMap<>(Space.class);
+         endEffectorFilteredDataVectors.put(endEffector, endEffectorDataVectors);
+      }
+
+      Pair<AlphaFilteredYoFrameVector, List<YoBoolean>> alphaFilteredYoFrameVectorEnabledPair = endEffectorDataVectors.get(space);
+
+      if (alphaFilteredYoFrameVectorEnabledPair == null)
+      {
+         String namePrefix = endEffector.getName();
+         namePrefix += "Filtered";
+         namePrefix += rawDataType.getName();
+         namePrefix += space.getName();
+         YoFrameVector3D rawYoFrameVector = getDataVector(endEffector, rawDataType, space, enabled);
+         DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequencyProvider.getValue(), dt);
+         AlphaFilteredYoFrameVector alphaFilteredYoFrameVector = new AlphaFilteredYoFrameVector(namePrefix, "", registry, alpha, rawYoFrameVector);
+         List<YoBoolean> endabledList = new ArrayList<>();
+         alphaFilteredYoFrameVectorEnabledPair = new ImmutablePair<>(alphaFilteredYoFrameVector, endabledList);
+         endEffectorDataVectors.put(space, alphaFilteredYoFrameVectorEnabledPair);
+         clearableData.add(alphaFilteredYoFrameVectorEnabledPair);
+      }
+
+      alphaFilteredYoFrameVectorEnabledPair.getRight().add(enabled);
+
+      return alphaFilteredYoFrameVectorEnabledPair.getLeft();
+   }
+
+   /**
     * Retrieves and returns the {@code YoFramePoseUsingQuaternions} associated with the given
     * end-effector and {@code type}, if it does not exist it is created.
     *
@@ -429,9 +488,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    /**
-    * Retrieves and returns the {@code YoSpatialVector} for holding the angular and linear
-    * forces of the given end-effector for representing a given data {@code type}. If it does
-    * not exist it is created.
+    * Retrieves and returns the {@code YoSpatialVector} for holding the angular and linear forces of
+    * the given end-effector for representing a given data {@code type}. If it does not exist it is
+    * created.
     *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
@@ -445,7 +504,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
 
    /**
     * Retrieves and returns the {@code RateLimitedYoSpatialVector} for the rate-limited angular and
-    * linear velocities of the given end-effector. The date type of the vector is defined by
+    * linear velocities of the given end-effector. The data type of the vector is defined by
     * {@code type}. If it does not exist it is created.
     * <p>
     * Note: the arguments {@code dt}, {@code maximumLinearRate}, and {@code maximumAngularRate} are
@@ -467,8 +526,34 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    /**
+    * Retrieves and returns the {@code AlphaFilteredYoSpatialVector} for the filtered angular and
+    * linear velocity errors of the given end-effector. If it does not exist it is created.
+    * <p>
+    * Note: the arguments {@code dt}, {@code breakFrequencyLinearPart}, and
+    * {@code breakFrequencyAngularPart} are only used if the data does not exist yet.
+    * </p>
+    *
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param rawDataType the type of the raw vector onto which the filter is to be applied.
+    * @param dt the duration of a control tick.
+    * @param breakFrequencyLinearPart the break frequency to use for the linear part of the velocity
+    *           error. Not modified.
+    * @param breakFrequencyAngularPart the break frequency to use for the angular part of the
+    *           velocity error. Not modified.
+    * @return the unique {@code AlphaFilteredYoSpatialVector} matching the search criteria.
+    */
+   public AlphaFilteredYoSpatialVector getAlphaFilteredVelocity(RigidBody endEffector, Type rawDataType, double dt, DoubleProvider breakFrequencyLinearPart,
+                                                                DoubleProvider breakFrequencyAngularPart, YoBoolean enabled)
+   {
+      return new AlphaFilteredYoSpatialVector(getAlphaFilteredDataVector(endEffector, rawDataType, Space.LINEAR_VELOCITY, dt, breakFrequencyLinearPart,
+                                                                         enabled),
+                                              getAlphaFilteredDataVector(endEffector, rawDataType, Space.ANGULAR_VELOCITY, dt, breakFrequencyAngularPart,
+                                                                         enabled));
+   }
+
+   /**
     * Retrieves and returns the {@code RateLimitedYoSpatialVector} for the rate-limited angular and
-    * linear accelerations of the given end-effector. The date type of the vector is defined by
+    * linear accelerations of the given end-effector. The data type of the vector is defined by
     * {@code type}. If it does not exist it is created.
     * <p>
     * Note: the arguments {@code dt}, {@code maximumLinearRate}, and {@code maximumAngularRate} are
@@ -506,20 +591,19 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
     */
    public RateLimitedYoSpatialVector getRateLimitedWrench(RigidBody endEffector, Type rawDataType, double dt, YoDouble maximumLinearRate,
-                                                                YoDouble maximumAngularRate, YoBoolean enabled)
+                                                          YoDouble maximumAngularRate, YoBoolean enabled)
    {
       return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_FORCE, dt, maximumLinearRate, enabled),
                                             getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_TORQUE, dt, maximumAngularRate, enabled));
    }
 
    /**
-    * Retrieves and returns the set of orientation gains {@code YoPID3DGains} associated to
-    * the given end-effector, if it does not exist it is created.
+    * Retrieves and returns the set of orientation gains {@code YoPID3DGains} associated to the
+    * given end-effector, if it does not exist it is created.
     *
     * @param endEffector the end-effector to which the gains are associated.
     * @param useIntegrator whether to create the gains necessary to compute the integral term.
-    * @return the unique {@code YoPID3DGains} associated with the given
-    *         end-effector.
+    * @return the unique {@code YoPID3DGains} associated with the given end-effector.
     */
    public YoPID3DGains getOrientationGains(RigidBody endEffector, boolean useIntegrator)
    {
@@ -534,8 +618,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    /**
-    * Retrieves and returns the set of position gains {@code YoPID3DGains} associated to the
-    * given end-effector, if it does not exist it is created.
+    * Retrieves and returns the set of position gains {@code YoPID3DGains} associated to the given
+    * end-effector, if it does not exist it is created.
     *
     * @param endEffector the end-effector to which the gains are associated.
     * @param useIntegrator whether to create the gains necessary to compute the integral term.
