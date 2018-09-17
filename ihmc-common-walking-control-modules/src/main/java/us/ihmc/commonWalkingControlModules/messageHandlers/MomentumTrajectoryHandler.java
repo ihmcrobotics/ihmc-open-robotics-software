@@ -1,8 +1,11 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -31,8 +34,18 @@ public class MomentumTrajectoryHandler extends EuclideanTrajectoryHandler
 
       for (int idx = 0; idx < numberOfPoints; idx++)
       {
-         double time = startTime + (endTime - startTime) * idx / (numberOfPoints - 1);
+         double time = Math.min(startTime + (endTime - startTime) * idx / (numberOfPoints - 1), endTime);
          packDesiredsAtTime(time);
+
+         FramePoint3DReadOnly position = getPosition();
+         FrameVector3DReadOnly velocity = getVelocity();
+
+         if (!Double.isFinite(time) || position.containsNaN() || velocity.containsNaN())
+         {
+            PrintTools.info("Position or velocity of AM contains NaN at time " + time + ". Skipping this trajectory.");
+            trajectoryToPack.clear();
+            return;
+         }
 
          SimpleEuclideanTrajectoryPoint trajectoryPoint = trajectoryToPack.add();
          trajectoryPoint.setTime(time - startTime);
