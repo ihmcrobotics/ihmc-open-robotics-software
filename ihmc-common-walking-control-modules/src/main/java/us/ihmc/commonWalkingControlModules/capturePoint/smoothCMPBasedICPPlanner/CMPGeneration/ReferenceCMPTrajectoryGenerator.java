@@ -12,8 +12,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
@@ -22,7 +20,7 @@ import java.util.List;
 public class ReferenceCMPTrajectoryGenerator
 {
    private static final int maxNumberOfCoefficients = 10;
-   private static final int maxNumberOfSegments = 5;
+   private static final int maxNumberOfSegments = 35;
    
    private final List<CMPTrajectory> transferCMPTrajectories = new ArrayList<>();
    private final List<CMPTrajectory> swingCMPTrajectories = new ArrayList<>();
@@ -146,8 +144,7 @@ public class ReferenceCMPTrajectoryGenerator
       // handle current swing if that's the current walking phase
       if(phase == WalkingTrajectoryType.SWING)
       {
-         torqueTrajectory.setNext(swingAngularMomentumTrajectories.get(index));
-         torqueTrajectory.scale(1.0 / verticalGroundReaction.getDoubleValue());
+         torqueTrajectory.setFromAngularMomentumTrajectory(swingAngularMomentumTrajectories.get(index), verticalGroundReaction.getDoubleValue());
          if(swingCoPTrajectories.get(index).getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
          {
             return;
@@ -160,8 +157,7 @@ public class ReferenceCMPTrajectoryGenerator
       for ( ;index < numberOfFootstepsToSet; index++)
       {
          // transfer
-         torqueTrajectory.setNext(transferAngularMomentumTrajectories.get(index));
-         torqueTrajectory.scale(1.0 / verticalGroundReaction.getDoubleValue());
+         torqueTrajectory.setFromAngularMomentumTrajectory(transferAngularMomentumTrajectories.get(index), verticalGroundReaction.getDoubleValue());
          if(transferCoPTrajectories.get(index).getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
          {
             return;
@@ -169,8 +165,7 @@ public class ReferenceCMPTrajectoryGenerator
          TrajectoryMathTools.addSegmentedTrajectories(transferCMPTrajectories.get(index), transferCoPTrajectories.get(index), torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
 
          // swing
-         torqueTrajectory.setNext(swingAngularMomentumTrajectories.get(index));
-         torqueTrajectory.scale(1.0 / verticalGroundReaction.getDoubleValue());
+         torqueTrajectory.setFromAngularMomentumTrajectory(swingAngularMomentumTrajectories.get(index), verticalGroundReaction.getDoubleValue());
          if(swingCoPTrajectories.get(index).getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
          {
             return;
@@ -179,8 +174,7 @@ public class ReferenceCMPTrajectoryGenerator
       }
 
       // handle final transfer
-      torqueTrajectory.setNext(transferAngularMomentumTrajectories.get(numberOfFootstepsToSet));
-      torqueTrajectory.scale(1.0 / verticalGroundReaction.getDoubleValue());
+      torqueTrajectory.setFromAngularMomentumTrajectory(transferAngularMomentumTrajectories.get(numberOfFootstepsToSet), verticalGroundReaction.getDoubleValue());
       if(transferCoPTrajectories.get(numberOfFootstepsToSet).getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
          return;
       TrajectoryMathTools.addSegmentedTrajectories(transferCMPTrajectories.get(numberOfFootstepsToSet), transferCoPTrajectories.get(numberOfFootstepsToSet),
