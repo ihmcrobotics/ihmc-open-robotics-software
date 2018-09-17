@@ -57,6 +57,7 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;

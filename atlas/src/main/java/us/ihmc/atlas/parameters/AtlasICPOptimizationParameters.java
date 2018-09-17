@@ -177,6 +177,4 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    {
       return false;
    }
-
-
 }

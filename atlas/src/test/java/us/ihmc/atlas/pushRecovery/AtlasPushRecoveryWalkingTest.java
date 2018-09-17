@@ -48,7 +48,8 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Test(timeout = 190000)
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushLeftEarlySwing(700.0);
+      setPushMagnitude(700.0);
+      super.testPushLeftEarlySwing();
    }
 
    // Moved one of the old push recovery tests to fast so it is checked from time to time.
@@ -80,7 +81,8 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Test(timeout = 300000)
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushRightThenLeftMidSwing(800.0);
+      setPushMagnitude(800.0);
+      super.testPushRightThenLeftMidSwing();
    }
 
    @Override
