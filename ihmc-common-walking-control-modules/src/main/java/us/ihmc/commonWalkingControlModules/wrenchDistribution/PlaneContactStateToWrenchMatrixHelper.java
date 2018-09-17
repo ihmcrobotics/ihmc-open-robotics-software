@@ -39,7 +39,7 @@ public class PlaneContactStateToWrenchMatrixHelper
     * one of them will rotate it's friction cone approximation to get better coverage of the cone through the
     * basis vectors.
     */
-   private static final double distanceThresholdBetweenTwoContactPoint = 0.01;
+   private static final double distanceThresholdBetweenTwoContactPoint = 0.005;
 
    /**
     * If the size of the foothold is below this threshold CoP objectives for this plane will be ignored.
@@ -229,7 +229,7 @@ public class PlaneContactStateToWrenchMatrixHelper
          // rotate each friction cone approximation to point one vector towards the center of the foot
          double angleOffset = coneRotationCalculator.computeConeRotation(yoPlaneContactState, contactPointIndex);
 
-         // in case the contact point is close to another point rotate it
+         // If this contact point is in contact check if there is more points in contact close to it.
          if (inContact)
          {
             int matches = 0;
@@ -242,9 +242,14 @@ public class PlaneContactStateToWrenchMatrixHelper
                   matches++;
                }
             }
-            // TODO: If there are more then two contacts in the same spot we should probably disable them.
-            if (matches > 0)
+            if (matches > 1)
             {
+               // If there is at least two more contact points in this location disable this one.
+               inContact = false;
+            }
+            else if (matches == 1)
+            {
+               // If there is one more contact point for this location coming up then rotate this one to get a better friction cone representation.
                angleOffset += basisVectorAngleIncrement / 2.0;
             }
          }
