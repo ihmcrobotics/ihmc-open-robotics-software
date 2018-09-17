@@ -3,7 +3,6 @@ package us.ihmc.simulationConstructionSetTools.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Cylinder3D;
@@ -35,7 +34,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
 {
    private final CombinedTerrainObject3D combinedTerrainObject3D;
 
-   private static final CourseType type = CourseType.B;
+   private static final CourseType type = CourseType.A;
 
    enum CourseType
    {
@@ -60,17 +59,23 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
    private static final double curbHeight = 0.2;
    private static final double fillet = 0.1;
 
-   private static final double bumpHeight = 0.2;
-   private static final double bumpRun = 0.3;
+   private static final double bumpHeight = 0.1;
+   private static final double bumpRun = 0.5;
    private static final double bumpWidth = gridLength;
    private static final double bumpSideMargin = 0.01;
 
    private static final double bollardHeight = 0.7;
    private static final double bollardRadius = 0.075;
 
-   private static final double potholeRadius = 0.3;
-   private static final double potholeDepth = 0.05;
+   private static final double gateHeight = 1.5;
+   private static final double gatePillarWidth = 0.2;
+   private static final double gateEntranceWidth = 1.0;
+
    private static final int POINTS_PER_POTHOLE = 8;
+   private static final double potholeRadius = 0.2;
+   private static final double potholeDepth = 0.05;
+   private static final boolean potholeDebug = false;
+
    private static final double allowablePenetrationThickness = 0.07;
 
    public CTTSOObstacleCourseEnvironment()
@@ -108,6 +113,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(0, 5));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 5));
          combinedTerrainObject3D.addTerrainObject(setUpStormGrate(2, 5));
+         combinedTerrainObject3D.addTerrainObject(createGate(0, 5, new Point2D(-0.3, 0.0), gateHeight, gateEntranceWidth, gatePillarWidth));
 
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(0, 6));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 6));
@@ -216,7 +222,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
 
    private TerrainObject3D createBump(int row, int column, Point2D positionInGrid, double height, double run, double width, double rotateYaw)
    {
-      AppearanceDefinition bumpAppearance = YoAppearance.Yellow();
+      AppearanceDefinition bumpAppearance = YoAppearance.DarkGrey();
 
       double radius = height / 2 + run * run / 8 / height;
       double alpha = Math.asin(run / 2 / radius);
@@ -229,6 +235,75 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       location.appendPitchRotation(Math.PI / 2);
 
       return new CylinderTerrainObject(location, width - bumpSideMargin, radius, bumpAppearance);
+   }
+
+   private CombinedTerrainObject3D createGate(int row, int column, Point2D positionInGrid, double height, double gateWidth, double pillarWidth)
+   {
+      CombinedTerrainObject3D gateTerrainObject = new CombinedTerrainObject3D("TriumphGate");
+      AppearanceDefinition gateAppearance = YoAppearance.DarkGray();
+
+      double cylinderRadius = pillarWidth * 0.2;
+      double pillarTopWidth = pillarWidth * 2.0;
+      double pillarTopHeight = 0.05;
+      double barWidth = gateWidth + 2 * pillarWidth;
+      double barHeight = pillarWidth;
+      double barTopWidth = gateWidth + pillarWidth + pillarTopWidth;
+      double barTopHeight = pillarTopHeight;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (int i = 0; i < 2; i++)
+         {
+            for (int j = 0; j < 2; j++)
+            {
+               RigidBodyTransform pillarLocation = new RigidBodyTransform();
+               pillarLocation.appendTranslation(getWorldCoordinate(row, column));
+               pillarLocation.appendTranslation(positionInGrid.getX(), positionInGrid.getY(), 0.0);
+               pillarLocation.appendTranslation(robotSide.negateIfRightSide((gateWidth + pillarWidth) / 2), 0.0, 0.0);
+               double signOne = 1.0, signTwo = 1.0;
+               if (i == 0)
+                  signOne = -1.0;
+               if (j == 0)
+                  signTwo = -1.0;
+               pillarLocation.appendTranslation(signOne * pillarWidth / 2, signTwo * pillarWidth / 2, height / 2);
+
+               CylinderTerrainObject pillar = new CylinderTerrainObject(pillarLocation, height, cylinderRadius, gateAppearance);
+
+               gateTerrainObject.addTerrainObject(pillar);
+            }
+         }
+         RigidBodyTransform pillarLocation = new RigidBodyTransform();
+         pillarLocation.appendTranslation(getWorldCoordinate(row, column));
+         pillarLocation.appendTranslation(positionInGrid.getX(), positionInGrid.getY(), height / 2);
+         pillarLocation.appendTranslation(robotSide.negateIfRightSide((gateWidth + pillarWidth) / 2), 0.0, 0.0);
+
+         RotatableBoxTerrainObject pillar = new RotatableBoxTerrainObject(pillarLocation, pillarWidth, pillarWidth, height, gateAppearance);
+         gateTerrainObject.addTerrainObject(pillar);
+
+         RigidBodyTransform pillarTopLocation = new RigidBodyTransform();
+         pillarTopLocation.appendTranslation(getWorldCoordinate(row, column));
+         pillarTopLocation.appendTranslation(positionInGrid.getX(), positionInGrid.getY(), height);
+         pillarTopLocation.appendTranslation(robotSide.negateIfRightSide((gateWidth + pillarWidth) / 2), 0.0, pillarTopHeight / 2);
+
+         RotatableBoxTerrainObject pillarTop = new RotatableBoxTerrainObject(pillarTopLocation, pillarTopWidth, pillarTopWidth, pillarTopHeight,
+                                                                             gateAppearance);
+         gateTerrainObject.addTerrainObject(pillarTop);
+      }
+
+      RigidBodyTransform barLocation = new RigidBodyTransform();
+      barLocation.appendTranslation(getWorldCoordinate(row, column));
+      barLocation.appendTranslation(positionInGrid.getX(), positionInGrid.getY(), height + pillarTopHeight + barHeight / 2);
+
+      RotatableBoxTerrainObject bar = new RotatableBoxTerrainObject(barLocation, barWidth, pillarWidth, barHeight, gateAppearance);
+      gateTerrainObject.addTerrainObject(bar);
+
+      RigidBodyTransform barTopLocation = new RigidBodyTransform(barLocation);
+      barTopLocation.appendTranslation(0.0, 0.0, barHeight / 2 + barTopHeight / 2);
+
+      RotatableBoxTerrainObject barTop = new RotatableBoxTerrainObject(barTopLocation, barTopWidth, pillarTopWidth, barTopHeight, gateAppearance);
+      gateTerrainObject.addTerrainObject(barTop);
+
+      return gateTerrainObject;
    }
 
    private CombinedTerrainObject3D setUpCurb(int row, int column)
@@ -361,7 +436,8 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       flatRegionPolygon.update();
       List<PlanarRegion> flatPlanarRegions = potholePlanarRegionProvider.getAdjustedFlatPlanarRegions(flatRegionPolygon);
 
-      PrintTools.info("flatPlanarRegions " + flatPlanarRegions.size());
+      if (potholeDebug)
+         System.out.println("flatPlanarRegions " + flatPlanarRegions.size());
       for (int i = 0; i < flatPlanarRegions.size(); i++)
       {
          PlanarRegionTerrainObject potholeTerrainObject = new PlanarRegionTerrainObject(flatPlanarRegions.get(i), allowablePenetrationThickness,
@@ -377,7 +453,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("PotholeGrid");
 
       AppearanceDefinition potholeAppearance = YoAppearance.Grey();
-      AppearanceDefinition flatAppearance = new YoAppearanceTexture("Textures/asphalt.png");
+      AppearanceDefinition flatAppearance = YoAppearance.DarkGrey();
 
       for (int i = 0; i < numberOfPotholes; i++)
       {
@@ -540,7 +616,8 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
                   break;
                }
             }
-            PrintTools.info("clockwisePolygon " + clockwisePolygon);
+            if (potholeDebug)
+               System.out.println("clockwisePolygon " + clockwisePolygon);
 
             ConvexPolygon2D counterClockwisePolygon = new ConvexPolygon2D();
             counterClockwisePolygon.addVertex(intersectionPoints.get(1));
@@ -559,7 +636,8 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
                   break;
                }
             }
-            PrintTools.info("counterClockwiseIndex " + counterClockwiseIndex);
+            if (potholeDebug)
+               System.out.println("counterClockwiseIndex " + counterClockwiseIndex);
 
             List<Point2DReadOnly> pointsExceptPotholeEdge = new ArrayList<Point2DReadOnly>();
             for (int j = 0; j < numberOfVertices; j++)
@@ -568,14 +646,12 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
                   pointsExceptPotholeEdge.add(polygon.getVertex(j));
             }
 
-            PrintTools.info("" + numberOfVertices + " " + pointsExceptPotholeEdge.size());
             boolean polygonIsOutside = true;
             for (int j = 0; j < pointsExceptPotholeEdge.size(); j++)
             {
                if (clockwisePolygon.isPointInside(pointsExceptPotholeEdge.get(j), 0.01))
                {
                   polygonIsOutside = false;
-                  PrintTools.info("hello " + j);
                }
             }
             if (polygonIsOutside)
@@ -587,7 +663,6 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
                if (counterClockwisePolygon.isPointInside(pointsExceptPotholeEdge.get(j), 0.01))
                {
                   polygonIsOutside2 = false;
-                  PrintTools.info("hello " + j);
                }
             }
             if (polygonIsOutside2)
