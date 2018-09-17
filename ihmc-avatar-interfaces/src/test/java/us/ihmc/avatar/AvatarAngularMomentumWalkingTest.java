@@ -88,7 +88,7 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       setupTest();
       setupCameraSideView();
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
 
       int numberOfSteps = 4;
 
@@ -111,13 +111,42 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
 
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 30000)
-   public void testForwardWalkTransferDelayedMomentum() throws SimulationExceededMaximumTimeException
+   public void testForwardWalkWithCorruptedMomentum() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
       setupCameraSideView();
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      int numberOfSteps = 4;
+
+      double initialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
+      double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
+      double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
+
+      YoBoolean planSwingAngularMomentum = (YoBoolean) drcSimulationTestHelper.getYoVariable("PlanSwingAngularMomentumWithCommand");
+      YoBoolean planTransferAngularMomentum = (YoBoolean) drcSimulationTestHelper.getYoVariable("PlanTransferAngularMomentumWithCommand");
+      planSwingAngularMomentum.set(true);
+      planTransferAngularMomentum.set(true);
+
+      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps));
+      drcSimulationTestHelper.publishToController(createCorruptedMomentumTrajectoryMessage(initialTransfer, transfer, swing, numberOfSteps + 1));
+
+      double simulationTime = initialTransfer + (transfer + swing) * (numberOfSteps + 1) + 1.0;
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 30000)
+   public void testForwardWalkTransferDelayedMomentum() throws SimulationExceededMaximumTimeException
+   {
+      simulationTestingParameters.setKeepSCSUp(true);
+      setupTest();
+      setupCameraSideView();
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
 
       int numberOfSteps = 4;
 
@@ -148,7 +177,7 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       setupTest();
       setupCameraSideView();
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
 
       int numberOfSteps = 4;
 
@@ -316,6 +345,77 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
          point.getPosition().set(xMomentum, yMomentum, 0.0);
          point.getLinearVelocity().setToZero();
       }
+
+      currentTime += swingDuration;
+
+      for (int stepNumber = 1; stepNumber < numberOfSteps; stepNumber++)
+      {
+         for (double time = 0; time < transferDuration; time += dt)
+         {
+            EuclideanTrajectoryPointMessage point = angularMomentum.getTaskspaceTrajectoryPoints().add();
+            point.setTime(currentTime + time);
+            point.getPosition().setToZero();
+            point.getLinearVelocity().setToZero();
+         }
+
+         currentTime += transferDuration;
+
+         for (double time = 0; time < swingDuration; time += dt)
+         {
+            EuclideanTrajectoryPointMessage point = angularMomentum.getTaskspaceTrajectoryPoints().add();
+            point.setTime(currentTime + time);
+
+            double xMomentum = angularMomentumXMagnitude * Math.sin(angularMomentumXFrequency * time);
+            double yMomentum = angularMomentumYMagnitude * Math.sin(angularMomentumYFrequency * time);
+            yMomentum = robotSide.negateIfRightSide(yMomentum);
+
+            point.getPosition().set(xMomentum, yMomentum, 0.0);
+            point.getLinearVelocity().setToZero();
+         }
+
+         currentTime += swingDuration;
+      }
+
+      return momentumTrajectoryMessage;
+   }
+
+   private MomentumTrajectoryMessage createCorruptedMomentumTrajectoryMessage(double initialTransferDuration, double transferDuration, double swingDuration,
+                                                                     int numberOfSteps)
+   {
+      MomentumTrajectoryMessage momentumTrajectoryMessage = new MomentumTrajectoryMessage();
+      EuclideanTrajectoryMessage angularMomentum = momentumTrajectoryMessage.getAngularMomentumTrajectory();
+
+      double dt = 0.001;
+      for (double time = 0; time <= initialTransferDuration; time += dt)
+      {
+         EuclideanTrajectoryPointMessage point = angularMomentum.getTaskspaceTrajectoryPoints().add();
+         point.setTime(time);
+         point.getPosition().setToZero();
+         point.getLinearVelocity().setToZero();
+      }
+
+
+      RobotSide robotSide = RobotSide.LEFT;
+      double currentTime = initialTransferDuration;
+      double angularMomentumXMagnitude = -3.0;
+      double angularMomentumYMagnitude = -10.0;
+      double angularMomentumXFrequency = 2.0 * Math.PI / swingDuration;
+      double angularMomentumYFrequency = 2.0 * Math.PI / (2.0 * swingDuration);
+      for (double time = 0; time <= swingDuration; time += dt)
+      {
+         EuclideanTrajectoryPointMessage point = angularMomentum.getTaskspaceTrajectoryPoints().add();
+         point.setTime(currentTime + time);
+
+         double xMomentum = angularMomentumXMagnitude * Math.sin(angularMomentumXFrequency * time);
+         double yMomentum = angularMomentumYMagnitude * Math.sin(angularMomentumYFrequency * time);
+         yMomentum = robotSide.negateIfRightSide(yMomentum);
+
+         point.getPosition().set(xMomentum, yMomentum, 0.0);
+         point.getLinearVelocity().setToZero();
+      }
+
+      angularMomentum.getTaskspaceTrajectoryPoints().getLast().getPosition().setToNaN();
+      angularMomentum.getTaskspaceTrajectoryPoints().getLast().getLinearVelocity().setToNaN();
 
       currentTime += swingDuration;
 
