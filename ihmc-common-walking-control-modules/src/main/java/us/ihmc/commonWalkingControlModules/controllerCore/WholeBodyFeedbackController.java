@@ -188,6 +188,10 @@ public class WholeBodyFeedbackController
             controller.computeInverseDynamics();
             inverseDynamicsOutput.addCommand(controller.getInverseDynamicsOutput());
          }
+         else
+         {
+            controller.initialize();
+         }
       }
       feedbackControllerTimer.stopMeasurement();
    }
@@ -204,6 +208,10 @@ public class WholeBodyFeedbackController
          {
             controller.computeInverseKinematics();
             inverseKinematicsOutput.addCommand(controller.getInverseKinematicsOutput());
+         }
+         else
+         {
+            controller.initialize();
          }
       }
       feedbackControllerToolbox.clearUnusedData();
@@ -222,6 +230,10 @@ public class WholeBodyFeedbackController
          {
             controller.computeVirtualModelControl();
             virtualModelControlOutput.addCommand(controller.getVirtualModelControlOutput());
+         }
+         else
+         {
+            controller.initialize();
          }
       }
       feedbackControllerToolbox.clearUnusedData();
