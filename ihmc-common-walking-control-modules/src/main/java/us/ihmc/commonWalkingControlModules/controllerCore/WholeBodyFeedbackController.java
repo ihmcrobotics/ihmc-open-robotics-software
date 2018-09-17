@@ -22,10 +22,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.OrientationFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.PointFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class WholeBodyFeedbackController
 {
@@ -138,12 +138,7 @@ public class WholeBodyFeedbackController
          if (oneDoFJointFeedbackControllerMap.containsKey(joint))
             continue;
 
-         double controlDT = coreToolbox.getControlDT();
-         boolean inverseDynamicsEnabled = coreToolbox.isEnableInverseDynamicsModule();
-         boolean inverseKinematicsEnabled = coreToolbox.isEnableInverseKinematicsModule();
-         boolean virtualModelControlEnabled = coreToolbox.isEnableVirtualModelControlModule();
-         OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, controlDT, inverseDynamicsEnabled, inverseKinematicsEnabled,
-                                                                                      virtualModelControlEnabled, registry);
+         OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, coreToolbox, registry);
          oneDoFJointFeedbackControllerMap.put(joint, controller);
          allControllers.add(controller);
       }
