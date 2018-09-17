@@ -63,8 +63,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       this.momentumTrajectoryHandler = momentumTrajectoryHandler;
       this.time = time;
       this.numberOfRegisteredFootsteps = new YoInteger(namePrefix + "NumberOfRegisteredFootsteps", registry);
-      this.planSwingAngularMomentum = new YoBoolean(namePrefix + "PlanSwingAngularMomentumWithCommand", registry);
-      this.planTransferAngularMomentum = new YoBoolean(namePrefix + "PlanTransferAngularMomentumWithCommand", registry);
+      this.planSwingAngularMomentum = new YoBoolean("PlanSwingAngularMomentumWithCommand", registry);
+      this.planTransferAngularMomentum = new YoBoolean("PlanTransferAngularMomentumWithCommand", registry);
 
       transferTrajectories = new ArrayList<>(maxNumberOfStepsToConsider + 1);
       swingTrajectories = new ArrayList<>(maxNumberOfStepsToConsider);
