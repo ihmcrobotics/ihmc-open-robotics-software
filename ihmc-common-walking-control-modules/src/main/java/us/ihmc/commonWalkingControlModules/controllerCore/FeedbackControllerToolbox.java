@@ -9,7 +9,9 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -27,6 +29,7 @@ import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
 import us.ihmc.robotics.math.frames.YoSpatialVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -73,8 +76,28 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    private final EnumMap<Space, Pair<RateLimitedYoFrameVector, List<YoBoolean>>> centerOfMassRateLimitedDataVectors = new EnumMap<>(Space.class);
    private YoPID3DGains centerOfMassPositionGains;
 
+   private final Map<String, DoubleProvider> errorVelocityFilterBreakFrequencies;
+
    public FeedbackControllerToolbox(YoVariableRegistry parentRegistry)
    {
+      this(FeedbackControllerSettings.getDefault(), parentRegistry);
+   }
+
+   public FeedbackControllerToolbox(FeedbackControllerSettings settings, YoVariableRegistry parentRegistry)
+   {
+      errorVelocityFilterBreakFrequencies = new HashMap<>();
+
+      List<GroupParameter<Double>> parameters = settings.getErrorVelocityFilterBreakFrequencies();
+      if (parameters != null)
+      {
+         for (GroupParameter<Double> groupParameter : parameters)
+         {
+            String parameterName = groupParameter.getGroupName() + "ErrorVelocityBreakFrequency";
+            DoubleParameter groupBreakFrequency = new DoubleParameter(parameterName, registry, groupParameter.getParameter());
+            groupParameter.getMemberNames().forEach(name -> errorVelocityFilterBreakFrequencies.put(name, groupBreakFrequency));
+         }
+      }
+
       parentRegistry.addChild(registry);
    }
 
@@ -784,5 +807,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
             return true;
       }
       return false;
+   }
+
+   public DoubleProvider getErrorVelocityFilterBreakFrequency(String endEffectorOrJointName)
+   {
+      return errorVelocityFilterBreakFrequencies.get(endEffectorOrJointName);
    }
 }

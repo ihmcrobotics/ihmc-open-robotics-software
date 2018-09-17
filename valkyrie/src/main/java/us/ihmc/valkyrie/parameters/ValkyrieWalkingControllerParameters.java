@@ -640,7 +640,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public FeedbackControllerSettings getFeedbackControllerSettings()
    {
-      return new ValkyrieFeedbackControllerSettings();
+      return new ValkyrieFeedbackControllerSettings(jointMap, target);
    }
 
    @Override

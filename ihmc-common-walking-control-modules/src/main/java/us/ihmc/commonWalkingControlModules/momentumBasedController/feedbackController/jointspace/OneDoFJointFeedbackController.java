@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace;
 
-import java.util.Map;
-
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
@@ -60,7 +59,8 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
    private final YoDouble weightForSolver;
 
-   public OneDoFJointFeedbackController(OneDoFJoint joint, WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
+   public OneDoFJointFeedbackController(OneDoFJoint joint, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
+                                        YoVariableRegistry parentRegistry)
    {
       String jointName = joint.getName();
       YoVariableRegistry registry = new YoVariableRegistry(jointName + "PDController");
@@ -87,8 +87,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          qDCurrent = new YoDouble("qd_" + jointName, registry);
          qDError = new YoDouble("qd_err_" + jointName, registry);
 
-         Map<String, DoubleProvider> breakFrequencies = toolbox.getFeedbackControllerSettings().getErrorVelocityFilterBreakFrequencies();
-         DoubleProvider breakFrequency = breakFrequencies != null ? breakFrequencies.get(jointName) : null;
+         DoubleProvider breakFrequency = feedbackControllerToolbox.getErrorVelocityFilterBreakFrequency(jointName);
          if (breakFrequency != null)
          {
             DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt);
