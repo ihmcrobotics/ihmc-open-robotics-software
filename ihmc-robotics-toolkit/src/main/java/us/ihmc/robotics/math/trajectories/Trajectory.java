@@ -77,7 +77,7 @@ public class Trajectory
          ddf += coefficients[i] * (i - 1) * (i) * xPowers[i - 2];
    }
 
-   public void setXPowers(double[] xPowers, double x)
+   private void setXPowers(double[] xPowers, double x)
    {
       xPowers[0] = 1.0;
       for (int i = 1; i < xPowers.length; i++)
@@ -690,24 +690,46 @@ public class Trajectory
 
    public void setInitialTimeMaintainingBounds(double tInitial)
    {
-      double oldDuration = getDuration();
-      double newDuration = getFinalTime() - tInitial;
-      for (int power = 0; power < getNumberOfCoefficients(); power++)
+      int numStartingConstraints = Math.floorDiv(getNumberOfCoefficients(), 2);
+      int numEndingConstraints = getNumberOfCoefficients() - numStartingConstraints;
+
+      int constraintNumber = 0;
+      for (int order = 0; order < numStartingConstraints; order++, constraintNumber++)
       {
-         coefficients[power] *= Math.pow(oldDuration / newDuration, power);
+         double value = getDerivative(order, this.tInitial);
+         setConstraintRow(constraintNumber, tInitial, value, order);
       }
+      for (int order = 0; order < numEndingConstraints; order++, constraintNumber++)
+      {
+         double value = getDerivative(order, tFinal);
+         setConstraintRow(constraintNumber, tFinal, value, order);
+      }
+
+      solveForCoefficients();
+      setCoefficientVariables();
 
       this.tInitial = tInitial;
    }
 
    public void setFinalTimeMaintainingBounds(double tFinal)
    {
-      double oldDuration = getDuration();
-      double newDuration = tFinal - getInitialTime();
-      for (int power = 0; power < getNumberOfCoefficients(); power++)
+      int numStartingConstraints = Math.floorDiv(getNumberOfCoefficients(), 2);
+      int numEndingConstraints = getNumberOfCoefficients() - numStartingConstraints;
+
+      int constraintNumber = 0;
+      for (int order = 0; order < numStartingConstraints; order++, constraintNumber++)
       {
-         coefficients[power] *= Math.pow(oldDuration / newDuration, power);
+         double value = getDerivative(order, tInitial);
+         setConstraintRow(constraintNumber, tInitial, value, order);
       }
+      for (int order = 0; order < numEndingConstraints; order++, constraintNumber++)
+      {
+         double value = getDerivative(order, this.tFinal);
+         setConstraintRow(constraintNumber, tFinal, value, order);
+      }
+
+      solveForCoefficients();
+      setCoefficientVariables();
 
       this.tFinal = tFinal;
    }

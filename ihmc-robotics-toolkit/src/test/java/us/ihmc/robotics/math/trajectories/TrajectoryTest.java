@@ -6,15 +6,18 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.commons.MathTools;
 
+import java.util.Random;
+
 public class TrajectoryTest
 {
-   private static double EPSILON = 1e-6;
+   private static double epsilon = 1e-6;
 
    String namePrefix = "TrajectoryTest";
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testLinearSet()
@@ -51,15 +54,15 @@ public class TrajectoryTest
 
       double yLinear = linear.getDerivative(0, x);
       double yManual = a0 + a1 * x;
-      assertEquals(yLinear, yManual, EPSILON);
+      assertEquals(yLinear, yManual, epsilon);
 
       double dyLinear = linear.getDerivative(1, x);
       double dyManual = a1;
-      assertEquals(dyLinear, dyManual, EPSILON);
+      assertEquals(dyLinear, dyManual, epsilon);
 
       double ddyLinear = linear.getDerivative(2, x);
       double ddyManual = 0.0;
-      assertEquals(ddyLinear, ddyManual, EPSILON);
+      assertEquals(ddyLinear, ddyManual, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -97,6 +100,51 @@ public class TrajectoryTest
       double x = 2.0 / 3.0 * (xf - x0);
 
       compareDerivativesPoint(cubic, x);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCubicTimeScaling()
+   {
+      //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
+      Random random = new Random(1738L);
+      int numberOfCoefficients = 4;
+      Trajectory cubic = new Trajectory(numberOfCoefficients);
+
+      for (int i = 0; i < 100; i++)
+      {
+         double t0 = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double tf = RandomNumbers.nextDouble(random, t0, t0 + 10.0);
+         double x0 = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double xf = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double xd0 = RandomNumbers.nextDouble(random, -100.0, 100.0);
+         double xdf = RandomNumbers.nextDouble(random, -100.0, 100.0);
+
+         cubic.setCubic(t0, tf, x0, xd0, xf, xdf);
+
+         cubic.compute(t0);
+         assertEquals(x0, cubic.getPosition(), epsilon);
+         assertEquals(xd0, cubic.getVelocity(), epsilon);
+
+         cubic.compute(tf);
+         assertEquals(xf, cubic.getPosition(), epsilon);
+         assertEquals(xdf, cubic.getVelocity(), epsilon);
+
+         double t0New = RandomNumbers.nextDouble(random, tf - 10.0, tf);
+         cubic.setInitialTimeMaintainingBounds(t0New);
+
+         cubic.compute(t0New);
+         assertEquals(x0, cubic.getPosition(), epsilon);
+         assertEquals(xd0, cubic.getVelocity(), epsilon);
+
+         double tfNew = RandomNumbers.nextDouble(random, t0New, t0New + 10.0);
+         cubic.setFinalTimeMaintainingBounds(tfNew);
+
+         cubic.compute(tfNew);
+         assertEquals(xf, cubic.getPosition(), epsilon);
+         assertEquals(xdf, cubic.getVelocity(), epsilon);
+      }
+
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -142,35 +190,35 @@ public class TrajectoryTest
 
       int order3Exponent1Func = septic.getCoefficientMultiplierForDerivative(3, 1);
       int order3Exponent1Hand = 0;
-      assertEquals(order3Exponent1Func, order3Exponent1Hand, EPSILON);
+      assertEquals(order3Exponent1Func, order3Exponent1Hand, epsilon);
 
       int order6Exponent7Func = septic.getCoefficientMultiplierForDerivative(6, 7);
       int order6Exponent7Hand = 5040;
-      assertEquals(order6Exponent7Func, order6Exponent7Hand, EPSILON);
+      assertEquals(order6Exponent7Func, order6Exponent7Hand, epsilon);
 
       int order0Exponent5Func = septic.getCoefficientMultiplierForDerivative(0, 5);
       int order0Exponent5Hand = 1;
-      assertEquals(order0Exponent5Func, order0Exponent5Hand, EPSILON);
+      assertEquals(order0Exponent5Func, order0Exponent5Hand, epsilon);
 
       int order3Exponent4Func = septic.getCoefficientMultiplierForDerivative(3, 4);
       int order3Exponent4Hand = 24;
-      assertEquals(order3Exponent4Func, order3Exponent4Hand, EPSILON);
+      assertEquals(order3Exponent4Func, order3Exponent4Hand, epsilon);
 
       int order5Exponent2Func = septic.getCoefficientMultiplierForDerivative(5, 2);
       int order5Exponent2Hand = 0;
-      assertEquals(order5Exponent2Func, order5Exponent2Hand, EPSILON);
+      assertEquals(order5Exponent2Func, order5Exponent2Hand, epsilon);
 
       int order1Exponent5Func = septic.getCoefficientMultiplierForDerivative(1, 5);
       int order1Exponent5Hand = 5;
-      assertEquals(order1Exponent5Func, order1Exponent5Hand, EPSILON);
+      assertEquals(order1Exponent5Func, order1Exponent5Hand, epsilon);
 
       int order11Exponent1Func = septic.getCoefficientMultiplierForDerivative(11, 1);
       int order11Exponent1Hand = 0;
-      assertEquals(order11Exponent1Func, order11Exponent1Hand, EPSILON);
+      assertEquals(order11Exponent1Func, order11Exponent1Hand, epsilon);
 
       int order13Exponent8Func = septic.getCoefficientMultiplierForDerivative(13, 8);
       int order13Exponent8Hand = 0;
-      assertEquals(order13Exponent8Func, order13Exponent8Hand, EPSILON);
+      assertEquals(order13Exponent8Func, order13Exponent8Hand, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -220,7 +268,7 @@ public class TrajectoryTest
          {
             generalizedDYHand = 0.0;
          }
-         assertEquals(generalizedDYPoly, generalizedDYHand, EPSILON);
+         assertEquals(generalizedDYPoly, generalizedDYHand, epsilon);
       }
    }
 
@@ -241,7 +289,7 @@ public class TrajectoryTest
          }
          for (int k = 0; k < coefficients.length; k++)
          {
-            assertEquals(generalizedDYPoly.get(k), generalizedDYHand.get(k), EPSILON);
+            assertEquals(generalizedDYPoly.get(k), generalizedDYHand.get(k), epsilon);
          }
       }
    }
@@ -259,7 +307,7 @@ public class TrajectoryTest
          {
             generalizedDYHandScalar += generalizedDYPolyVector.get(j) * coefficients[j];
          }
-         assertEquals(generalizedDYPolyScalar, generalizedDYHandScalar, EPSILON);
+         assertEquals(generalizedDYPolyScalar, generalizedDYHandScalar, epsilon);
       }
    }
 
@@ -282,9 +330,9 @@ public class TrajectoryTest
    @Test(timeout = 30000)
    public void testQuinticTrajectory()
    {
-      Trajectory quinticTrajectory = new Trajectory(-10.0, 10.0, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0});
+      Trajectory quinticTrajectory = new Trajectory(-10.0, 10.0, new double[] {1.0, 1.0, 1.0, 1.0, 1.0, 1.0});
 
-      quinticTrajectory.setQuintic(0.0, 1.0,    1.0, 2.0, 3.0,     4.0, 5.0, 6.0);
+      quinticTrajectory.setQuintic(0.0, 1.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
 
       quinticTrajectory.compute(0.0);
       assertEquals(quinticTrajectory.getPosition(), 1.0, 1e-7);
@@ -296,16 +344,16 @@ public class TrajectoryTest
       assertEquals(quinticTrajectory.getVelocity(), 5.0, 1e-7);
       assertEquals(quinticTrajectory.getAcceleration(), 6.0, 1e-7);
 
-      quinticTrajectory.setQuintic(-1.0, 1.0,  1.0, -2.0, 3.0,     -4.0, -5.0, 6.0);
+      quinticTrajectory.setQuintic(-1.0, 1.0, 1.0, -2.0, 3.0, -4.0, -5.0, 6.0);
 
       quinticTrajectory.compute(-1.0);
-      assertEquals(quinticTrajectory.getPosition(),  1.0, 1e-7);
+      assertEquals(quinticTrajectory.getPosition(), 1.0, 1e-7);
       assertEquals(quinticTrajectory.getVelocity(), -2.0, 1e-7);
-      assertEquals(quinticTrajectory.getAcceleration(),  3.0, 1e-7);
+      assertEquals(quinticTrajectory.getAcceleration(), 3.0, 1e-7);
 
       quinticTrajectory.compute(1.0);
-      assertEquals(quinticTrajectory.getPosition(),  -4.0, 1e-7);
-      assertEquals(quinticTrajectory.getVelocity(),  -5.0, 1e-7);
-      assertEquals(quinticTrajectory.getAcceleration(),   6.0, 1e-7);
+      assertEquals(quinticTrajectory.getPosition(), -4.0, 1e-7);
+      assertEquals(quinticTrajectory.getVelocity(), -5.0, 1e-7);
+      assertEquals(quinticTrajectory.getAcceleration(), 6.0, 1e-7);
    }
 }
