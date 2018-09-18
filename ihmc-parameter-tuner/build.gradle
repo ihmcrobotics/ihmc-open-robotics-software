@@ -4,10 +4,12 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.14.0"
+      classpath "us.ihmc:ihmc-build:0.15.1"
+      classpath "us.ihmc:ihmc-ci-plugin:0.18.0"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
+apply plugin: "us.ihmc.ihmc-ci-plugin"
 
 ihmc {
    loadProductProperties("../product.properties")
@@ -28,4 +30,9 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.1"
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.4'
    compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
+}
+
+testDependencies {
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
+   compile group: 'junit', name: 'junit', version: '4.12'
 }
