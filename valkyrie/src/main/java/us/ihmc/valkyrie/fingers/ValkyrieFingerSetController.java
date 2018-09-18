@@ -159,7 +159,6 @@ public class ValkyrieFingerSetController implements RobotController
       case CLOSE:
          for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
          {
-
             double desiredFingerMotor = ValkyrieFingerControlParameters.getDesiredFingerMotor(robotSide, fingerMotorName, 1.0);
             if (fingerMotorName.getFingerName() == FingerName.THUMB)
                fingerSetTrajectoryGenerator.appendWayPoint(fingerMotorName, extendedTrajectoryTime, desiredFingerMotor);
