@@ -74,6 +74,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    private final EnumMap<Type, Pair<YoFramePoint3D, List<YoBoolean>>> centerOfMassPositions = new EnumMap<>(Type.class);
    private final EnumMap<Type, EnumMap<Space, Pair<YoFrameVector3D, List<YoBoolean>>>> centerOfMassDataVectors = new EnumMap<>(Type.class);
    private final EnumMap<Space, Pair<RateLimitedYoFrameVector, List<YoBoolean>>> centerOfMassRateLimitedDataVectors = new EnumMap<>(Space.class);
+   private final EnumMap<Space, Pair<AlphaFilteredYoFrameVector, List<YoBoolean>>> centerOfMassFilteredDataVectors = new EnumMap<>(Space.class);
    private YoPID3DGains centerOfMassPositionGains;
 
    private final Map<String, DoubleProvider> errorVelocityFilterBreakFrequencies;
@@ -164,6 +165,46 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       yoFrameVectorEnabledPair.getRight().add(enabled);
 
       return yoFrameVectorEnabledPair.getLeft();
+   }
+
+   /**
+    * Retrieves and returns the {@code AlphaFilteredYoFrameVector} for the center of mass associated
+    * with the given {@code type} and {@code space}, if it does not exist it is created.
+    * <p>
+    * Note: the arguments {@code dt} and {@code breakFrequencyProvider} are only used if the data
+    * does not exist yet.
+    * </p>
+    *
+    * @param space the space of the data to retrieve.
+    * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
+    * @param dt the duration of a control tick.
+    * @param breakFrequencyProvider the break frequency to use for the low-pass filter. Not
+    *           modified.
+    * @return the unique {@code AlphaFilteredYoFrameVector} matching the search criteria.
+    */
+   public AlphaFilteredYoFrameVector getCenterOfMassAlphaFilteredDataVector(Type rawDataType, Space space, double dt, DoubleProvider breakFrequencyProvider,
+                                                                            YoBoolean enabled)
+   {
+      Pair<AlphaFilteredYoFrameVector, List<YoBoolean>> alphaFilteredYoFrameVectorEnabledPair = centerOfMassFilteredDataVectors.get(space);
+
+      if (alphaFilteredYoFrameVectorEnabledPair == null)
+      {
+         String namePrefix = centerOfMassName;
+         namePrefix += "Filtered";
+         namePrefix += rawDataType.getName();
+         namePrefix += space.getName();
+         YoFrameVector3D rawYoFrameVector = getCenterOfMassDataVector(rawDataType, space, enabled);
+         DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequencyProvider.getValue(), dt);
+         AlphaFilteredYoFrameVector alphaFilteredYoFrameVector = new AlphaFilteredYoFrameVector(namePrefix, "", registry, alpha, rawYoFrameVector);
+         List<YoBoolean> endabledList = new ArrayList<>();
+         alphaFilteredYoFrameVectorEnabledPair = new ImmutablePair<>(alphaFilteredYoFrameVector, endabledList);
+         centerOfMassFilteredDataVectors.put(space, alphaFilteredYoFrameVectorEnabledPair);
+         clearableData.add(alphaFilteredYoFrameVectorEnabledPair);
+      }
+
+      alphaFilteredYoFrameVectorEnabledPair.getRight().add(enabled);
+
+      return alphaFilteredYoFrameVectorEnabledPair.getLeft();
    }
 
    /**
