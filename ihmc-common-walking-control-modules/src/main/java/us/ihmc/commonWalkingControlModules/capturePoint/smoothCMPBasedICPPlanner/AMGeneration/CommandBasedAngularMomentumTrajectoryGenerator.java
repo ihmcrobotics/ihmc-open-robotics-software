@@ -11,6 +11,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -19,6 +20,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoi
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
@@ -39,8 +41,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final YoDouble time;
    private final YoInteger numberOfRegisteredFootsteps;
-   private final YoDouble[] commandedAngularMomentum = new YoDouble[3];
-   private final YoDouble[] commandedCoMTorque = new YoDouble[3];
+   private final YoFrameVector3D commandedAngularMomentum = new YoFrameVector3D("commandedAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D commandedCoMTorque = new YoFrameVector3D("commandedCoMTorque", ReferenceFrame.getWorldFrame(), registry);
 
    private final RecyclingArrayList<SimpleEuclideanTrajectoryPoint> waypoints = new RecyclingArrayList<>(waypointsPerWalkingPhase,
                                                                                                          SimpleEuclideanTrajectoryPoint::new);
@@ -78,12 +80,6 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       }
       transferTrajectories.add(new AngularMomentumTrajectory(waypointsPerWalkingPhase - 1, numberOfTrajectoryCoefficients));
 
-      for (int i = 0; i < Axis.values.length; i++)
-      {
-         commandedAngularMomentum[i] = new YoDouble("commandedAngularMomentum" + Axis.values[i], registry);
-         commandedCoMTorque[i] = new YoDouble("commandedCoMTorque" + Axis.values[i], registry);
-      }
-
       parentRegistry.addChild(registry);
    }
 
@@ -93,6 +89,9 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       this.smoothCMPPlannerParameters = smoothCMPPlannerParameters;
       this.planSwingAngularMomentum.set(smoothCMPPlannerParameters.planSwingAngularMomentum());
       this.planTransferAngularMomentum.set(smoothCMPPlannerParameters.planTransferAngularMomentum());
+
+      planTransferAngularMomentum.set(true);
+      planSwingAngularMomentum.set(true);
    }
 
    @Override
@@ -123,11 +122,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       desiredAngMomToPack.set(desiredAngularMomentum);
       desiredTorqueToPack.set(desiredTorque);
 
-      for (int i = 0; i < Axis.values.length; i++)
-      {
-         commandedAngularMomentum[i].set(desiredAngularMomentum.getElement(i));
-         commandedCoMTorque[i].set(desiredTorque.getElement(i));
-      }
+      commandedAngularMomentum.set(desiredAngularMomentum);
+      commandedCoMTorque.set(desiredTorque);
    }
 
    @Override
@@ -258,21 +254,24 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
          return;
       }
 
+      double startTime = waypoints.getFirst().getTime();
       boolean successfulTrajectory = true;
-      int numberOfSegments = Math.min(waypointsPerWalkingPhase, waypoints.size() - 1);
+      int numberOfSegments = waypoints.size() - 1;
+
       for (int i = 0; i < numberOfSegments; i++)
       {
-         double subTrajectoryStartTime = (subTrajectoryDuration * i) / (waypointsPerWalkingPhase - 1);
-         double subTrajectoryEndTime = (subTrajectoryDuration * (i + 1)) / (waypointsPerWalkingPhase - 1);
-         EuclideanWaypoint startWaypoint = this.waypoints.get(i).getEuclideanWaypoint();
-         EuclideanWaypoint endWaypoint = this.waypoints.get(i + 1).getEuclideanWaypoint();
+         SimpleEuclideanTrajectoryPoint simpleStart = waypoints.get(i);
+         SimpleEuclideanTrajectoryPoint simpleEnd = waypoints.get(i + 1);
+
+         EuclideanWaypoint startWaypoint = simpleStart.getEuclideanWaypoint();
+         EuclideanWaypoint endWaypoint = simpleEnd.getEuclideanWaypoint();
          if (startWaypoint.containsNaN() || endWaypoint.containsNaN())
          {
             successfulTrajectory = false;
             break;
          }
-         subTrajectory.add().setCubic(subTrajectoryStartTime, subTrajectoryEndTime, startWaypoint.getPosition(), startWaypoint.getLinearVelocity(),
-                                      endWaypoint.getPosition(), endWaypoint.getLinearVelocity());
+         subTrajectory.add().setCubic(simpleStart.getTime() - startTime, simpleEnd.getTime() - startTime, startWaypoint.getPosition(),
+                                      startWaypoint.getLinearVelocity(), endWaypoint.getPosition(), endWaypoint.getLinearVelocity());
       }
 
       if (!successfulTrajectory)
