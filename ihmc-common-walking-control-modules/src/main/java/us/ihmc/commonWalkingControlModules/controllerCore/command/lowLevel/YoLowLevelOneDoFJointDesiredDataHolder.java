@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder.throwJointNotRegisteredException;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,12 +9,14 @@ import java.util.Map;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListReadOnly
+public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListBasics
 {
    private final List<OneDoFJoint> jointsWithDesiredData;
    private final Map<String, YoJointDesiredOutput> lowLevelJointDataMap;
@@ -43,6 +45,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
       }
    }
 
+   @Override
    public void clear()
    {
       for (int i = 0; i < jointsWithDesiredData.size(); i++)
@@ -149,6 +152,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
     * Complete the information held in this using other.
     * Does not overwrite the data already set in this.
     */
+   @Override
    public void completeWith(JointDesiredOutputListReadOnly other)
    {
       for (int i = 0; i < other.getNumberOfJointsWithDesiredOutput(); i++)
@@ -168,6 +172,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    /**
     * Clear this and copy the data held in other.
     */
+   @Override
    public void overwriteWith(JointDesiredOutputListReadOnly other)
    {
       clear();
@@ -180,15 +185,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
             continue;
 
          lowLevelJointData.set(other.getJointDesiredOutput(joint));
-      }
-   }
-
-   public void insertDesiredTorquesIntoOneDoFJoints(OneDoFJoint[] oneDoFJoints)
-   {
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         OneDoFJoint joint = oneDoFJoints[i];
-         joint.setTau(lowLevelJointDataMap.get(joint.getName()).getDesiredTorque());
       }
    }
 
@@ -311,7 +307,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    }
 
    @Override
-   public JointDesiredOutputReadOnly getJointDesiredOutput(OneDoFJoint joint)
+   public JointDesiredOutputBasics getJointDesiredOutput(OneDoFJoint joint)
    {
       return lowLevelJointDataMap.get(joint.getName());
    }
@@ -323,7 +319,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    }
 
    @Override
-   public JointDesiredOutputReadOnly getJointDesiredOutput(int index)
+   public JointDesiredOutputBasics getJointDesiredOutput(int index)
    {
       return getJointDesiredOutput(getOneDoFJoint(index));
    }
