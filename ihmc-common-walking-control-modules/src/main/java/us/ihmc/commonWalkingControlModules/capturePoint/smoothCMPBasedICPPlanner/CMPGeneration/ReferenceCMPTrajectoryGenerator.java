@@ -30,6 +30,7 @@ public class ReferenceCMPTrajectoryGenerator
    private static final int maxNumberOfSegments = 35;
 
    private static final double POINT_SIZE =  0.005;
+   private static final boolean VISUALIZE = false;
 
    private static final double trajectoryEpsilon = Epsilons.ONE_HUNDRED_THOUSANDTH;
 
@@ -54,7 +55,7 @@ public class ReferenceCMPTrajectoryGenerator
    public ReferenceCMPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, YoInteger numberOfFootstepsToConsider,
                                           boolean debug, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-       this.debug = debug && yoGraphicsListRegistry != null;
+       this.debug = debug && yoGraphicsListRegistry != null && VISUALIZE;
       String fullPrefix = namePrefix + "CMPTrajectoryGenerator";
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
 

@@ -245,18 +245,27 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
                                                         comAccelerationDesiredCurrent);
    }
 
-   private int getCurrentSegmentIndex(double timeInCurrentPhase, List<FrameTrajectory3D> cmpTrajectories)
+   private int getCurrentSegmentIndex(double timeInCurrentPhase, List<FrameTrajectory3D> trajectories)
    {
       int currentSegmentIndex = FIRST_SEGMENT;
-      while (timeInCurrentPhase > cmpTrajectories.get(currentSegmentIndex).getFinalTime()
-            && Math.abs(cmpTrajectories.get(currentSegmentIndex).getFinalTime() - cmpTrajectories.get(currentSegmentIndex + 1).getInitialTime()) < 1.0e-5)
+      boolean notLastSegment = currentSegmentIndex < trajectories.size() - 1;
+      while (!trajectories.get(currentSegmentIndex).timeIntervalContains(timeInCurrentPhase) && notLastSegment)
       {
-         currentSegmentIndex++;
-         if (currentSegmentIndex + 1 > cmpTrajectories.size())
+         notLastSegment = currentSegmentIndex < trajectories.size() - 1;
+
+         if (notLastSegment)
          {
-            return currentSegmentIndex;
+            double currentEndTime = trajectories.get(currentSegmentIndex).getFinalTime();
+            double nextStartTime = trajectories.get(currentSegmentIndex + 1).getInitialTime();
+
+            boolean nextSegmentSkipsTime = Math.abs(nextStartTime - currentEndTime) > 1.0e-5;
+            if (nextSegmentSkipsTime)
+               return currentSegmentIndex;
          }
+
+         currentSegmentIndex++;
       }
+
       return currentSegmentIndex;
    }
 
