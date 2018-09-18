@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -32,9 +33,10 @@ public class MomentumTrajectoryHandler extends EuclideanTrajectoryHandler
          return;
       }
 
-      for (int idx = 0; idx < numberOfPoints; idx++)
+      for (int pointIndex = 0; pointIndex < numberOfPoints; pointIndex++)
       {
-         double time = Math.min(startTime + (endTime - startTime) * idx / (numberOfPoints - 1), endTime);
+         double phaseThroughTrajectory = ((double) pointIndex) / ((double) (numberOfPoints - 1));
+         double time = InterpolationTools.linearInterpolate(startTime, endTime, phaseThroughTrajectory);
          packDesiredsAtTime(time);
 
          FramePoint3DReadOnly position = getPosition();
