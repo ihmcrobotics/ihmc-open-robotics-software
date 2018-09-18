@@ -4,12 +4,14 @@ import static junit.framework.Assert.assertEquals;
 
 import java.util.ArrayList;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 
 /**
  * Created by IntelliJ IDEA.
@@ -22,6 +24,12 @@ public class WaypointMotionGeneratorTest
 {
    public WaypointMotionGeneratorTest()
    {
+   }
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

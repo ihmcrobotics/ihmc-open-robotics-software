@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import controller_msgs.msg.dds.LocalizationPacket;
@@ -14,6 +15,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -320,6 +322,12 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          assertTrue(testYawForTranslation(random, externalPelvisPoseCreator, registry, 10));
       }
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    private RigidBodyTransform[] createRandomCorrectionTargets(Random random, int numOfTargets)

@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -105,11 +106,17 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    private final double dt;
    private final boolean isRootBody;
+   private final boolean computeIntegralTerm;
 
    public OrientationFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
                                         YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
+      ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
+      if (optimizationSettings != null)
+         computeIntegralTerm = optimizationSettings.computeIntegralTermInFeedbackControllers();
+      else
+         computeIntegralTerm = true;
 
       if (toolbox.getRootJoint() != null)
       {
@@ -127,7 +134,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       String endEffectorName = endEffector.getName();
       registry = new YoVariableRegistry(endEffectorName + "OrientationFBController");
       dt = toolbox.getControlDT();
-      gains = feedbackControllerToolbox.getOrientationGains(endEffector);
+      gains = feedbackControllerToolbox.getOrientationGains(endEffector, computeIntegralTerm);
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       endEffectorFrame = endEffector.getBodyFixedFrame();
@@ -139,13 +146,13 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       yoCurrentOrientation = feedbackControllerToolbox.getOrientation(endEffector, CURRENT, isEnabled);
       yoErrorOrientation = feedbackControllerToolbox.getOrientation(endEffector, ERROR, isEnabled);
 
-      yoErrorOrientationCumulated = feedbackControllerToolbox.getOrientation(endEffector, ERROR_CUMULATED, isEnabled);
+      yoErrorOrientationCumulated = computeIntegralTerm ? feedbackControllerToolbox.getOrientation(endEffector, ERROR_CUMULATED, isEnabled) : null;
 
       yoDesiredRotationVector = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, ROTATION_VECTOR, isEnabled);
       yoCurrentRotationVector = feedbackControllerToolbox.getDataVector(endEffector, CURRENT, ROTATION_VECTOR, isEnabled);
       yoErrorRotationVector = feedbackControllerToolbox.getDataVector(endEffector, ERROR, ROTATION_VECTOR, isEnabled);
 
-      yoErrorRotationVectorIntegrated = feedbackControllerToolbox.getDataVector(endEffector, ERROR_INTEGRATED, ROTATION_VECTOR, isEnabled);
+      yoErrorRotationVectorIntegrated = computeIntegralTerm ? feedbackControllerToolbox.getDataVector(endEffector, ERROR_INTEGRATED, ROTATION_VECTOR, isEnabled) : null;
 
       yoDesiredAngularVelocity = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, ANGULAR_VELOCITY, isEnabled);
 
@@ -472,6 +479,12 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
     */
    public void computeIntegralTerm(FrameVector3D feedbackTermToPack)
    {
+      if (!computeIntegralTerm)
+      {
+         feedbackTermToPack.setToZero(endEffectorFrame);
+         return;
+      }
+
       double maximumIntegralError = gains.getMaximumIntegralError();
 
       if (maximumIntegralError < 1.0e-5)

@@ -144,13 +144,13 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
 
          double frameScale = 0.1;
 
-         topFrameViz = new YoGraphicReferenceFrame(topFrame, registry, frameScale);
-         afterTopJointFrameViz = new YoGraphicReferenceFrame(afterTopJointFrame, registry, frameScale * 0.8);
-         beforeBottomJointFrameViz = new YoGraphicReferenceFrame(beforeBottomJointFrame, registry, frameScale * 0.6);
-         bottomFrameViz = new YoGraphicReferenceFrame(bottomFrame, registry, frameScale * 0.4);
+         topFrameViz = new YoGraphicReferenceFrame(topFrame, registry, false, frameScale);
+         afterTopJointFrameViz = new YoGraphicReferenceFrame(afterTopJointFrame, registry, false, frameScale * 0.8);
+         beforeBottomJointFrameViz = new YoGraphicReferenceFrame(beforeBottomJointFrame, registry, false, frameScale * 0.6);
+         bottomFrameViz = new YoGraphicReferenceFrame(bottomFrame, registry, false, frameScale * 0.4);
 
-         actuator5SlideFrameViz = new YoGraphicReferenceFrame(actuator5SlideFrame, registry, frameScale * 0.6);
-         actuator6SlideFrameViz = new YoGraphicReferenceFrame(actuator6SlideFrame, registry, frameScale * 0.6);
+         actuator5SlideFrameViz = new YoGraphicReferenceFrame(actuator5SlideFrame, registry, false, frameScale * 0.6);
+         actuator6SlideFrameViz = new YoGraphicReferenceFrame(actuator6SlideFrame, registry, false, frameScale * 0.6);
          
          yoGraphicsList.add(b5Viz);
          yoGraphicsList.add(b6Viz);

@@ -34,10 +34,10 @@ public class MovingMidFrame extends MovingReferenceFrame
       poseOne.setToZero(frameOne);
       poseTwo.setToZero(frameTwo);
 
-      poseOne.changeFrame(parentFrame);
-      poseTwo.changeFrame(parentFrame);
+      poseOne.changeFrame(getParent());
+      poseTwo.changeFrame(getParent());
 
-      pose.setToZero(parentFrame);
+      pose.setToZero(getParent());
       pose.interpolate(poseOne, poseTwo, 0.5);
       pose.get(transformToParent);
    }
@@ -58,7 +58,7 @@ public class MovingMidFrame extends MovingReferenceFrame
    @Override
    protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
    {
-      twistRelativeToParentToPack.setToZero(this, parentFrame, this);
+      twistRelativeToParentToPack.setToZero(this, getParent(), this);
 
       Twist twistOfFrameOne = frameOne.getTwistOfFrame();
       Twist twistOfFrameTwo = frameTwo.getTwistOfFrame();

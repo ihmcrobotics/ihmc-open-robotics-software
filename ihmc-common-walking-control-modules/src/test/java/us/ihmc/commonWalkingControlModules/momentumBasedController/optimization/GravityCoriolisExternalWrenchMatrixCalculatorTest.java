@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
@@ -12,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -50,6 +52,12 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
    int degreesOfFreedom;
    int floatingBaseDoFs;
    int bodyDoFs;
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    /**
     * This should return equivalence, as acceleration should not play a factor in the coriolis, centrifugal, and gravity force matrix.

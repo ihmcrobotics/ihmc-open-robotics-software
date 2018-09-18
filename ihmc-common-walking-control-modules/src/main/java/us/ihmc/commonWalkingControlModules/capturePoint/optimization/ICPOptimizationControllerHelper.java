@@ -85,7 +85,7 @@ public class ICPOptimizationControllerHelper
       public void setXAxis(FixedFrameTuple2DBasics xAxis)
       {
          this.xAxis.setIncludingFrame(xAxis);
-         this.xAxis.changeFrame(parentFrame);
+         this.xAxis.changeFrame(getParent());
          this.xAxis.normalize();
          update();
       }

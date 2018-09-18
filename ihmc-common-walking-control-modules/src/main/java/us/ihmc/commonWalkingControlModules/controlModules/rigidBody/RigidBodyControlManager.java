@@ -65,8 +65,9 @@ public class RigidBodyControlManager
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
                                   Pose3D homePose, Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
-                                  ContactablePlaneBody contactableBody, RigidBodyControlMode defaultControlMode, YoDouble yoTime,
-                                  YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+                                  boolean enablePositionTracking, boolean enableOrientationTracking, ContactablePlaneBody contactableBody,
+                                  RigidBodyControlMode defaultControlMode, YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry,
+                                  YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
@@ -82,8 +83,9 @@ public class RigidBodyControlManager
       RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, parentRegistry);
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
-      taskspaceControlState = new RigidBodyTaskspaceControlState("", bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame, yoTime,
-                                                                 jointControlHelper, graphicsListRegistry, registry);
+      taskspaceControlState = new RigidBodyTaskspaceControlState("", bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
+                                                                 enablePositionTracking, enableOrientationTracking, yoTime, jointControlHelper,
+                                                                 graphicsListRegistry, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
 
       if (contactableBody != null)

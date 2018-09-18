@@ -1,14 +1,22 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
+import static org.junit.Assert.*;
+
+import java.util.Random;
+
+import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
+
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -18,15 +26,16 @@ import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPControlPlaneTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -221,13 +230,44 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.changeFrame(worldFrame);
 
       EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+   }
+
+   /**
+    * FIXME This test was never actually working but was passing before euclid 0.9.0.
+    * <p>
+    * Before that release, both the expected and actual points when transformed to world frame were
+    * filled up with NaNs which caused the assertion to pass. With euclid 0.9.0, the transform are
+    * slightly smarter in the sense that if their rotation part is equal to identity, no operation
+    * is performed when rotating a point. This occurs as the center of mass frame and world frame
+    * are aligned. As a result, the points are not rotated anymore (as it is not needed) and not
+    * filled up with NaNs, now the test fails as it should have always been.
+    * </p>
+    */
+   @Ignore
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testProjectPointForwardAndLeftOntoPlaneEdgeCase()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoDouble omega = new YoDouble("omega", registry);
+      double gravity = 9.81;
+
+      ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.1, 0.1, 1.0);
+      double planeHeightInCoMFrame = -1.0; //
+
+      ICPControlPlane icpControlPlane = new ICPControlPlane(omega, centerOfMassFrame, gravity, registry);
+      omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
+
+
+      // test plane height
+      assertEquals(planeHeightInCoMFrame, icpControlPlane.getControlPlaneHeight(), 1e-10);
 
       // test handling point at CoM
-      pointToProject = new FramePoint3D(centerOfMassFrame, 0.15, 0.15, 0.0);
+      FramePoint3D pointToProject = new FramePoint3D(centerOfMassFrame, 0.15, 0.15, 0.0);
       pointToProject.changeFrame(worldFrame);
 
-      projectedPoint.setToZero(worldFrame);
-      expectedProjectedPoint.setToZero(centerOfMassFrame);
+      FramePoint3D projectedPoint = new FramePoint3D(worldFrame);
+      FramePoint3D expectedProjectedPoint = new FramePoint3D(centerOfMassFrame);
 
       icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, projectedPoint);
 

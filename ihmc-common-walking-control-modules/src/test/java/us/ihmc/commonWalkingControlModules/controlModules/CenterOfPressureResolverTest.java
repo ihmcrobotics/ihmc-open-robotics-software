@@ -17,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -39,6 +40,7 @@ public class CenterOfPressureResolverTest
    @After
    public void showMemoryUsageAfterTest()
    {
+      ReferenceFrameTools.clearWorldFrameTree();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -168,7 +170,7 @@ public class CenterOfPressureResolverTest
 
       if (Double.isNaN(expectedCenterOfPressureFramePoint.getX()) && Double.isNaN(expectedCenterOfPressureFramePoint.getY())
             && Double.isNaN(expectedCenterOfPressureFramePoint.getZ()))
-         assertTrue(Double.isNaN(centerOfPressure.getX()) && Double.isNaN(centerOfPressure.getY()) && Double.isNaN(centerOfPressure.getZ()));
+         assertTrue(Double.isNaN(centerOfPressure.getX()) && Double.isNaN(centerOfPressure.getY()));
       else
          assertTrue("expectedCenterOfPressureFramePoint = " + expectedCenterOfPressureFramePoint + ", centerOfPressure = " + centerOfPressure,
                expectedCenterOfPressureFramePoint.epsilonEquals(centerOfPressure, 1e-7));

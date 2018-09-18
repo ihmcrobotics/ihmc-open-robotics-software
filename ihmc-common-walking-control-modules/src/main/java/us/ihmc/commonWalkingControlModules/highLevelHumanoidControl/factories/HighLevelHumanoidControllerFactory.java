@@ -170,7 +170,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          continuousStepGenerator.setFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
          continuousStepGenerator.configureWith(walkingControllerParameters);
          continuousStepGenerator.setFootstepMessenger(commandInputManager::submitMessage);
-         continuousStepGenerator.setupVisualization(controllerToolbox.getContactableFeet(), yoGraphicsListRegistry);
+         if (yoGraphicsListRegistry != null)
+            continuousStepGenerator.setupVisualization(controllerToolbox.getContactableFeet(), yoGraphicsListRegistry);
          if (heightMapForFootstepZ != null)
             continuousStepGenerator.setHeightMapBasedFootstepAdjustment(heightMapForFootstepZ);
 

@@ -29,6 +29,8 @@ public class ReferenceFrameMemoryTest
          testFrames.add(testFrame);
       }
 
+      ReferenceFrame.getWorldFrame().clearChildren();
+
       try
       {
          Thread.sleep(100);

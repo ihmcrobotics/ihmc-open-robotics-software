@@ -192,7 +192,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    {
       for (int i = 0; i < imuProcessedOutputs.size(); i++)
       {
-         YoGraphicReferenceFrame yoGraphicMeasurementFrame = new YoGraphicReferenceFrame(imuProcessedOutputs.get(i).getMeasurementFrame(), registry, 1.0);
+         YoGraphicReferenceFrame yoGraphicMeasurementFrame = new YoGraphicReferenceFrame(imuProcessedOutputs.get(i).getMeasurementFrame(), registry, false, 1.0);
          yoGraphicMeasurementFrames.add(yoGraphicMeasurementFrame);
       }
       yoGraphicsListRegistry.registerYoGraphics("imuFrame", yoGraphicMeasurementFrames);

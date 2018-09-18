@@ -124,7 +124,7 @@ public class WholeBodyControlCoreToolbox
       rootBody = ScrewTools.getRootBody(controlledJoints[0].getPredecessor());
       jointIndexHandler = new JointIndexHandler(controlledJoints);
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
-      centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
+      centroidalMomentumHandler = new CentroidalMomentumHandler(controlledJoints, centerOfMassFrame);
       inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody, gravityZ);
       spatialAccelerationCalculator = inverseDynamicsCalculator.getSpatialAccelerationCalculator();
 
@@ -364,6 +364,8 @@ public class WholeBodyControlCoreToolbox
 
    public WrenchVisualizer getWrenchVisualizer()
    {
+      if (yoGraphicsListRegistry == null)
+         return null;
       if (wrenchVisualizer == null)
          wrenchVisualizer = createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
       return wrenchVisualizer;
