@@ -14,7 +14,7 @@ import java.util.Random;
 
 public class TrajectoryTest
 {
-   private static double epsilon = 1e-6;
+   private static double epsilon = 1e-2;
 
    String namePrefix = "TrajectoryTest";
 
@@ -104,14 +104,16 @@ public class TrajectoryTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testCubicTimeScaling()
+   public void testTimeScaling()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
       Random random = new Random(1738L);
       int numberOfCoefficients = 4;
-      Trajectory cubic = new Trajectory(numberOfCoefficients);
+      Trajectory trajectory = new Trajectory(numberOfCoefficients);
 
-      for (int i = 0; i < 100; i++)
+      int iters = 100;
+
+      for (int iter = 0; iter < iters; iter++)
       {
          double t0 = RandomNumbers.nextDouble(random, -10.0, 10.0);
          double tf = RandomNumbers.nextDouble(random, t0, t0 + 10.0);
@@ -120,31 +122,156 @@ public class TrajectoryTest
          double xd0 = RandomNumbers.nextDouble(random, -100.0, 100.0);
          double xdf = RandomNumbers.nextDouble(random, -100.0, 100.0);
 
-         cubic.setCubic(t0, tf, x0, xd0, xf, xdf);
+         double[] initialValues = new double[]{x0, xd0};
+         double[] finalValues = new double[]{xf, xdf};
 
-         cubic.compute(t0);
-         assertEquals(x0, cubic.getPosition(), epsilon);
-         assertEquals(xd0, cubic.getVelocity(), epsilon);
+         trajectory.setCubic(t0, tf, x0, xd0, xf, xdf);
 
-         cubic.compute(tf);
-         assertEquals(xf, cubic.getPosition(), epsilon);
-         assertEquals(xdf, cubic.getVelocity(), epsilon);
+         for (int i = 0; i < initialValues.length; i++)
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0), epsilon);
+         for (int i = 0; i < finalValues.length; i++)
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), epsilon);
 
          double t0New = RandomNumbers.nextDouble(random, tf - 10.0, tf);
-         cubic.setInitialTimeMaintainingBounds(t0New);
+         trajectory.setInitialTimeMaintainingBounds(t0New);
 
-         cubic.compute(t0New);
-         assertEquals(x0, cubic.getPosition(), epsilon);
-         assertEquals(xd0, cubic.getVelocity(), epsilon);
+         for (int i = 0; i < initialValues.length; i++)
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), epsilon);
+         for (int i = 0; i < finalValues.length; i++)
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), epsilon);
 
          double tfNew = RandomNumbers.nextDouble(random, t0New, t0New + 10.0);
-         cubic.setFinalTimeMaintainingBounds(tfNew);
+         trajectory.setFinalTimeMaintainingBounds(tfNew);
 
-         cubic.compute(tfNew);
-         assertEquals(xf, cubic.getPosition(), epsilon);
-         assertEquals(xdf, cubic.getVelocity(), epsilon);
+         for (int i = 0; i < initialValues.length; i++)
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), epsilon);
+         for (int i = 0; i < finalValues.length; i++)
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tfNew), epsilon);
       }
 
+      numberOfCoefficients = 5;
+      trajectory = new Trajectory(numberOfCoefficients);
+
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double t0 = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double tf = RandomNumbers.nextDouble(random, t0, t0 + 10.0);
+         double x0 = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double xf = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double xd0 = RandomNumbers.nextDouble(random, -100.0, 100.0);
+         double xdf = RandomNumbers.nextDouble(random, -100.0, 100.0);
+         double xdd0 = RandomNumbers.nextDouble(random, -1000.0, 1000.0);
+
+         double[] initialValues = new double[]{x0, xd0, xdd0};
+         double[] finalValues = new double[]{xf, xdf};
+         trajectory.setQuartic(t0, tf, x0, xd0, xdd0, xf, xdf);
+
+         for (int i = 0; i < initialValues.length; i++)
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0), epsilon);
+         for (int i = 0; i < finalValues.length; i++)
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), epsilon);
+
+
+         double t0New = RandomNumbers.nextDouble(random, tf - 10.0, tf);
+         trajectory.setInitialTimeMaintainingBounds(t0New);
+
+         for (int i = 0; i < initialValues.length; i++)
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), epsilon);
+         for (int i = 0; i < finalValues.length; i++)
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), epsilon);
+
+         double tfNew = RandomNumbers.nextDouble(random, t0New, t0New + 10.0);
+         trajectory.setFinalTimeMaintainingBounds(tfNew);
+
+         for (int i = 0; i < initialValues.length; i++)
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), epsilon);
+         for (int i = 0; i < finalValues.length; i++)
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tfNew), epsilon);
+      }
+
+
+      numberOfCoefficients = 6;
+      trajectory = new Trajectory(numberOfCoefficients);
+
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double t0 = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double tf = RandomNumbers.nextDouble(random, t0, t0 + 10.0);
+         double x0 = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double xf = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double xd0 = RandomNumbers.nextDouble(random, -100.0, 100.0);
+         double xdf = RandomNumbers.nextDouble(random, -100.0, 100.0);
+         double xdd0 = RandomNumbers.nextDouble(random, -1000.0, 1000.0);
+         double xddf = RandomNumbers.nextDouble(random, -1000.0, 1000.0);
+
+         double[] initialValues = new double[]{x0, xd0, xdd0};
+         double[] finalValues = new double[]{xf, xdf, xddf};
+         trajectory.setQuintic(t0, tf, x0, xd0, xdd0, xf, xdf, xddf);
+
+         for (int i = 0; i < initialValues.length; i++)
+            assertEquals("Order " + i + " of iter " + iter + " is wrong.", initialValues[i], trajectory.getDerivative(i, t0), epsilon);
+         for (int i = 0; i < finalValues.length; i++)
+            assertEquals("Order " + i + " of iter " + iter + " is wrong.", finalValues[i], trajectory.getDerivative(i, tf), epsilon);
+
+
+         double t0New = RandomNumbers.nextDouble(random, tf - 10.0, tf);
+         trajectory.setInitialTimeMaintainingBounds(t0New);
+
+         for (int i = 0; i < initialValues.length; i++)
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), epsilon);
+         for (int i = 0; i < finalValues.length; i++)
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), epsilon);
+
+         double tfNew = RandomNumbers.nextDouble(random, t0New, t0New + 10.0);
+         trajectory.setFinalTimeMaintainingBounds(tfNew);
+
+         for (int i = 0; i < initialValues.length; i++)
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), epsilon);
+         for (int i = 0; i < finalValues.length; i++)
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tfNew), epsilon);
+      }
+
+      numberOfCoefficients = 7;
+      trajectory = new Trajectory(numberOfCoefficients);
+
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double t0 = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double tf = RandomNumbers.nextDouble(random, t0, t0 + 10.0);
+         double x0 = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double xf = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double xd0 = RandomNumbers.nextDouble(random, -100.0, 100.0);
+         double xdf = RandomNumbers.nextDouble(random, -100.0, 100.0);
+         double xdd0 = RandomNumbers.nextDouble(random, -1000.0, 1000.0);
+         double xddf = RandomNumbers.nextDouble(random, -1000.0, 1000.0);
+         double xm0 = RandomNumbers.nextDouble(random, -10, 10.0);
+
+         double[] initialValues = new double[]{x0, xd0, xdd0};
+         double[] finalValues = new double[]{xf, xdf, xddf};
+         trajectory.setSexticUsingWaypoint(t0, 0.5 * (tf + t0), tf, x0, xd0, xdd0, xm0, xf, xdf, xddf);
+
+         for (int i = 0; i < initialValues.length; i++)
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0),  1e-1);
+         for (int i = 0; i < finalValues.length; i++)
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), 1e-1);
+
+
+         double t0New = RandomNumbers.nextDouble(random, tf - 10.0, tf);
+         trajectory.setInitialTimeMaintainingBounds(t0New);
+
+         for (int i = 0; i < initialValues.length; i++)
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), 1e-1);
+         for (int i = 0; i < finalValues.length; i++)
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), 1e-1);
+
+         double tfNew = RandomNumbers.nextDouble(random, t0New, t0New + 10.0);
+         trajectory.setFinalTimeMaintainingBounds(tfNew);
+
+         for (int i = 0; i < initialValues.length; i++)
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), 1e-1);
+         for (int i = 0; i < finalValues.length; i++)
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tfNew), 1e-1);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

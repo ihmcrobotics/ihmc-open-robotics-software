@@ -690,7 +690,7 @@ public class Trajectory
 
    public void setInitialTimeMaintainingBounds(double tInitial)
    {
-      int numStartingConstraints = Math.floorDiv(getNumberOfCoefficients(), 2);
+      int numStartingConstraints = (int) Math.ceil(getNumberOfCoefficients() / 2.0);
       int numEndingConstraints = getNumberOfCoefficients() - numStartingConstraints;
 
       int constraintNumber = 0;
@@ -713,7 +713,7 @@ public class Trajectory
 
    public void setFinalTimeMaintainingBounds(double tFinal)
    {
-      int numStartingConstraints = Math.floorDiv(getNumberOfCoefficients(), 2);
+      int numStartingConstraints = (int) Math.ceil(getNumberOfCoefficients() / 2.0);
       int numEndingConstraints = getNumberOfCoefficients() - numStartingConstraints;
 
       int constraintNumber = 0;
