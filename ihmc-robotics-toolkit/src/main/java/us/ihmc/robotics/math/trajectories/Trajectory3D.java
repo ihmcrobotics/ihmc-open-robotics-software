@@ -286,6 +286,23 @@ public class Trajectory3D
          getTrajectory(i).setFinalTime(tFinal);
    }
 
+   public void setInitialTimeMaintainingBounds(double tInitial)
+   {
+      for (int i = 0; i < 3; i++)
+         getTrajectory(i).setInitialTimeMaintainingBounds(tInitial);
+   }
+
+   public void setFinalTimeMaintainingBounds(double tFinal)
+   {
+      for (int i = 0; i < 3; i++)
+         getTrajectory(i).setFinalTimeMaintainingBounds(tFinal);
+   }
+
+   public double getDuration()
+   {
+      return getFinalTime() - getInitialTime();
+   }
+
    public double getInitialTime()
    {
       if (MathTools.epsilonCompare(xTrajectory.getInitialTime(), yTrajectory.getInitialTime(), Epsilons.ONE_THOUSANDTH)

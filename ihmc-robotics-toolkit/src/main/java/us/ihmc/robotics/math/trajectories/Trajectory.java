@@ -688,6 +688,31 @@ public class Trajectory
       this.tInitial = t0;
    }
 
+   public void setInitialTimeMaintainingBounds(double tInitial)
+   {
+      double oldDuration = getDuration();
+      double newDuration = getFinalTime() - tInitial;
+      for (int power = 0; power < getNumberOfCoefficients(); power++)
+      {
+         coefficients[power] *= Math.pow(oldDuration / newDuration, power);
+      }
+
+      this.tInitial = tInitial;
+   }
+
+   public void setFinalTimeMaintainingBounds(double tFinal)
+   {
+      double oldDuration = getDuration();
+      double newDuration = tFinal - getInitialTime();
+      for (int power = 0; power < getNumberOfCoefficients(); power++)
+      {
+         coefficients[power] *= Math.pow(oldDuration / newDuration, power);
+      }
+
+      this.tFinal = tFinal;
+   }
+
+
    public double getFinalTime()
    {
       return this.tFinal;
@@ -696,6 +721,11 @@ public class Trajectory
    public double getInitialTime()
    {
       return this.tInitial;
+   }
+
+   public double getDuration()
+   {
+      return tFinal - tInitial;
    }
 
    public boolean timeIntervalContains(double timeToCheck, double EPSILON)
