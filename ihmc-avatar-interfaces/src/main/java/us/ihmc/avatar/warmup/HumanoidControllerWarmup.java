@@ -233,7 +233,7 @@ public abstract class HumanoidControllerWarmup
       rootJoint.setJointTwist(rootJointTwist);
    }
 
-   private void createControllerCore()
+   private void createControllerCore(YoVariableRegistry walkingControllerRegistry)
    {
       InverseDynamicsJoint[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
@@ -245,7 +245,7 @@ public abstract class HumanoidControllerWarmup
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
 
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame,
-                                                                            momentumOptimizationSettings, yoGraphicsListRegistry, registry);
+                                                                            momentumOptimizationSettings, yoGraphicsListRegistry, walkingControllerRegistry);
       toolbox.setupForInverseDynamicsSolver(contactableBodies);
 
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
@@ -253,7 +253,7 @@ public abstract class HumanoidControllerWarmup
 
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
       controllerOutput = new JointDesiredOutputList(fullRobotModel.getControllableOneDoFJoints());
-      controllerCore = new WholeBodyControllerCore(toolbox, template, controllerOutput, registry);
+      controllerCore = new WholeBodyControllerCore(toolbox, template, controllerOutput, walkingControllerRegistry);
    }
 
    private void createWalkingControllerAndSetUpManagerFactory(YoVariableRegistry walkingControllerParent, YoVariableRegistry managerFactoryParent)
@@ -295,7 +295,6 @@ public abstract class HumanoidControllerWarmup
       HighLevelHumanoidControllerToolbox controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, null,
                                                                                                     yoTime, gravityZ, omega0, feet, controlDT, null,
                                                                                                     contactableBodies, yoGraphicsListRegistry);
-      registry.addChild(controllerToolbox.getYoVariableRegistry());
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
@@ -304,7 +303,7 @@ public abstract class HumanoidControllerWarmup
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultTouchdownTime,
                                                                               defaultInitialTransferTime, defaultFinalTransferTime, feet, statusOutputManager,
-                                                                              yoTime, yoGraphicsListRegistry, registry);
+                                                                              yoTime, yoGraphicsListRegistry, controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory = new HighLevelControlManagerFactory(statusOutputManager, managerFactoryParent);
@@ -315,6 +314,7 @@ public abstract class HumanoidControllerWarmup
       walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
                                                                  controllerToolbox);
       walkingControllerParent.addChild(walkingController.getYoVariableRegistry());
+      walkingControllerParent.getParent().addChild(controllerToolbox.getYoVariableRegistry());
    }
 
    @SuppressWarnings("unchecked")
@@ -337,7 +337,7 @@ public abstract class HumanoidControllerWarmup
       humanoidHighLevelControllerManager.addChild(highLevelHumanoidControllerFactory);
 
       createWalkingControllerAndSetUpManagerFactory(walkingControllerState, highLevelHumanoidControllerFactory);
-      createControllerCore();
+      createControllerCore(walkingControllerState);
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
 
       for (RobotSide robotSide : RobotSide.values)
