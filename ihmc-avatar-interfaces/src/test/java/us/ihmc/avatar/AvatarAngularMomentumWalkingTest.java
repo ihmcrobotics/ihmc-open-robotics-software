@@ -173,7 +173,6 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    @Test(timeout = 30000)
    public void testForwardWalkTransferBigDelayedMomentum() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
       setupCameraSideView();
 
@@ -204,7 +203,6 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    @Test(timeout = 30000)
    public void testForwardWalkSwingDelayedMomentum() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
       setupCameraSideView();
 
@@ -236,7 +234,6 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    @Test(timeout = 30000)
    public void testForwardWalkZeroMomentumFirstStep() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
       setupCameraSideView();
 
@@ -265,7 +262,6 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    @Test(timeout = 30000)
    public void testForwardWalkNoMomentumFirstStep() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
       setupCameraSideView();
 
