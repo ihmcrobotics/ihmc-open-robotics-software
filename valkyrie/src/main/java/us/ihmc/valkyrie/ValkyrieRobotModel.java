@@ -69,6 +69,7 @@ import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.UIParameters;
@@ -534,7 +535,8 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private void modifyChestMass(SDFLinkHolder chestSDFLink)
    {
-      chestSDFLink.setMass(chestSDFLink.getMass() - 8.6);
+      if (ValkyrieRosControlController.HAS_LIGHTER_BACKPACK)
+         chestSDFLink.setMass(chestSDFLink.getMass() - 8.6);
    }
 
    @Override
