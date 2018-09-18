@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -108,11 +109,18 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private final double dt;
    private final boolean isRootBody;
+   private final boolean computeIntegralTerm;
 
    public PointFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
                                   YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
+      ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
+      if (optimizationSettings != null)
+         computeIntegralTerm = optimizationSettings.computeIntegralTermInFeedbackControllers();
+      else
+         computeIntegralTerm = true;
+
       if (toolbox.getRootJoint() != null)
       {
          this.rootBody = toolbox.getRootJoint().getSuccessor();
@@ -129,7 +137,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       String endEffectorName = endEffector.getName();
       registry = new YoVariableRegistry(endEffectorName + "PointFBController");
       dt = toolbox.getControlDT();
-      gains = feedbackControllerToolbox.getPositionGains(endEffector);
+      gains = feedbackControllerToolbox.getPositionGains(endEffector, computeIntegralTerm);
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       controlFrame = feedbackControllerToolbox.getControlFrame(endEffector);
@@ -141,7 +149,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       yoCurrentPosition = feedbackControllerToolbox.getPosition(endEffector, CURRENT, isEnabled);
       yoErrorPosition = feedbackControllerToolbox.getDataVector(endEffector, ERROR, POSITION, isEnabled);
 
-      yoErrorPositionIntegrated = feedbackControllerToolbox.getDataVector(endEffector, ERROR_INTEGRATED, POSITION, isEnabled);
+      yoErrorPositionIntegrated = computeIntegralTerm ? feedbackControllerToolbox.getDataVector(endEffector, ERROR_INTEGRATED, POSITION, isEnabled) : null;
 
       yoDesiredLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, LINEAR_VELOCITY, isEnabled);
 
@@ -462,6 +470,11 @@ public class PointFeedbackController implements FeedbackControllerInterface
     */
    private void computeIntegralTerm(FrameVector3D feedbackTermToPack)
    {
+      if (!computeIntegralTerm)
+      {
+         feedbackTermToPack.setToZero(controlFrame);
+         return;
+      }
       double maximumIntegralError = gains.getMaximumIntegralError();
 
       if (maximumIntegralError < 1.0e-5)

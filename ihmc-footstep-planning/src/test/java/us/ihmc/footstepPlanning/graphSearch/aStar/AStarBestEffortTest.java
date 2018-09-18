@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -27,6 +28,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
+
 public class AStarBestEffortTest
 {
    private static final boolean visualize = false;
@@ -43,6 +46,12 @@ public class AStarBestEffortTest
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
       this.planner = AStarFootstepPlanner.createRoughTerrainPlanner(parameters, null, footPolygons, expansion, registry);
       planner.setTimeout(5.0);
+   }
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.1)

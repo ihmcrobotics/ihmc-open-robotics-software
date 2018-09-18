@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Random;
 
+import org.junit.After;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.commons.PrintTools;
@@ -15,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -189,6 +192,12 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
          inverseKinematicsCalculator.attachInverseKinematicsStepListener(inverseKinematicsStepListener);
       }
+   }
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    public void testSimpleCase()

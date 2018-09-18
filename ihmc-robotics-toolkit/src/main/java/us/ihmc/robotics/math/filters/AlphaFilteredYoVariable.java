@@ -35,7 +35,7 @@ public class AlphaFilteredYoVariable extends YoDouble implements ProcessingYoVar
    private final YoDouble position;
    protected final YoBoolean hasBeenCalled;
 
-   private static DoubleProvider createAlphaYoDouble(String namePrefix, double initialValue, YoVariableRegistry registry)
+   public static DoubleProvider createAlphaYoDouble(String namePrefix, double initialValue, YoVariableRegistry registry)
    {
       YoDouble maxRate = new YoDouble(namePrefix + "AlphaVariable", registry);
       maxRate.set(initialValue);

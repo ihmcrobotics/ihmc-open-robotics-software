@@ -284,7 +284,7 @@ public class KinematicsToolboxController extends ToolboxController
    private YoGraphicCoordinateSystem createCoodinateSystem(RigidBody endEffector, Type type, AppearanceDefinition appearanceDefinition)
    {
       String namePrefix = endEffector.getName() + type.getName();
-      return new YoGraphicCoordinateSystem(namePrefix, "", registry, 0.2, appearanceDefinition);
+      return new YoGraphicCoordinateSystem(namePrefix, "", registry, false, 0.2, appearanceDefinition);
    }
 
    /**

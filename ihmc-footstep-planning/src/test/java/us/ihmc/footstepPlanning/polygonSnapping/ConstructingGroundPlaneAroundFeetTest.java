@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
+import org.junit.After;
 import org.junit.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
@@ -8,6 +9,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -27,6 +29,12 @@ import static junit.framework.TestCase.assertTrue;
 public class ConstructingGroundPlaneAroundFeetTest
 {
    private final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)

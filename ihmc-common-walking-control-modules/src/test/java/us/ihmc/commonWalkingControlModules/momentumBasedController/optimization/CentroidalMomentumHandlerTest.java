@@ -3,11 +3,13 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import java.util.List;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
@@ -21,6 +23,12 @@ public class CentroidalMomentumHandlerTest
 {
    private static final int ITERATIONS = 1000;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)

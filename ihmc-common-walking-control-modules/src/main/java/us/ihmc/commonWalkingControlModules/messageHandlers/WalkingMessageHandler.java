@@ -138,7 +138,10 @@ public class WalkingMessageHandler
       for (int i = 0; i < numberOfFootstepsToVisualize; i++)
          upcomingFoostepSide[i] = new YoEnum<>("upcomingFoostepSide" + i, registry, RobotSide.class, true);
 
-      footstepListVisualizer = new FootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
+      if (yoGraphicsListRegistry != null)
+         footstepListVisualizer = new FootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
+      else
+         footstepListVisualizer = null;
       updateVisualization();
 
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime);
@@ -701,12 +704,14 @@ public class WalkingMessageHandler
          upcomingFoostepSide[i].set(null);
       }
 
-      footstepListVisualizer.update(upcomingFootsteps);
+      if (footstepListVisualizer != null)
+         footstepListVisualizer.update(upcomingFootsteps);
    }
 
    public void updateVisualizationAfterFootstepAdjustement(Footstep adjustedFootstep)
    {
-      footstepListVisualizer.updateFirstFootstep(adjustedFootstep);
+      if (footstepListVisualizer != null)
+         footstepListVisualizer.updateFirstFootstep(adjustedFootstep);
    }
 
    private final TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();

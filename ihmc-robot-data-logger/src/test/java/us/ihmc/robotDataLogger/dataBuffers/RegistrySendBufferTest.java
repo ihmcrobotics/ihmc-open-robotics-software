@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
@@ -30,6 +32,12 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class RegistrySendBufferTest
 {
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 57.0)
    @Test(timeout = 280000)
    public void testYoVariables() throws IOException

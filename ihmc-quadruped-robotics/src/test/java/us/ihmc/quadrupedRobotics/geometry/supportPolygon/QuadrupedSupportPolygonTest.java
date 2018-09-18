@@ -4,6 +4,8 @@ import com.google.caliper.Benchmark;
 import com.google.caliper.api.VmOptions;
 import com.google.caliper.runner.CaliperMain;
 import com.jme3.scene.shape.Quad;
+
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.commons.Assertions;
@@ -14,6 +16,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -38,6 +41,12 @@ import static org.junit.Assert.*;
 public class QuadrupedSupportPolygonTest
 {
    private static final ReferenceFrame WORLD = ReferenceFrame.getWorldFrame();
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)

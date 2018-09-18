@@ -4,9 +4,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import org.junit.After;
+
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.simplePlanners.FlatGroundPlanningUtils;
@@ -23,6 +26,12 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
    public void testJustStraightLine()
    {
       testJustStraightLine(true);
+   }
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    public void testJustStraightLine(boolean assertPlannerReturnedResult)

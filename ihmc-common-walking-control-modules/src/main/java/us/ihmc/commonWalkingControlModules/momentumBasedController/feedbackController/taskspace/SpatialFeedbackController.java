@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
@@ -119,11 +120,17 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final double dt;
    private final boolean isRootBody;
+   private final boolean computeIntegralTerm;
 
    public SpatialFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
                                     YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
+      ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
+      if (optimizationSettings != null)
+         computeIntegralTerm = optimizationSettings.computeIntegralTermInFeedbackControllers();
+      else
+         computeIntegralTerm = true;
 
       if (toolbox.getRootJoint() != null)
       {
@@ -141,7 +148,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       String endEffectorName = endEffector.getName();
       registry = new YoVariableRegistry(endEffectorName + "SpatialFBController");
       dt = toolbox.getControlDT();
-      gains = feedbackControllerToolbox.getSE3PIDGains(endEffector);
+      gains = feedbackControllerToolbox.getSE3PIDGains(endEffector, computeIntegralTerm);
       positionGains = gains.getPositionGains();
       orientationGains = gains.getOrientationGains();
       YoDouble maximumLinearRate = positionGains.getYoMaximumFeedbackRate();
@@ -158,9 +165,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       YoFrameVector3D errorRotationVector = feedbackControllerToolbox.getDataVector(endEffector, ERROR, ROTATION_VECTOR, isEnabled);
       yoErrorVector = new YoSpatialVector(errorPosition, errorRotationVector);
       yoErrorOrientation = feedbackControllerToolbox.getOrientation(endEffector, ERROR, isEnabled);
-      yoErrorPositionIntegrated = feedbackControllerToolbox.getDataVector(endEffector, ERROR_INTEGRATED, POSITION, isEnabled);
-      yoErrorOrientationCumulated = feedbackControllerToolbox.getOrientation(endEffector, ERROR_CUMULATED, isEnabled);
-      yoErrorRotationVectorIntegrated = feedbackControllerToolbox.getDataVector(endEffector, ERROR_INTEGRATED, ROTATION_VECTOR, isEnabled);
+      yoErrorPositionIntegrated = computeIntegralTerm ? feedbackControllerToolbox.getDataVector(endEffector, ERROR_INTEGRATED, POSITION, isEnabled) : null;
+      yoErrorOrientationCumulated = computeIntegralTerm ? feedbackControllerToolbox.getOrientation(endEffector, ERROR_CUMULATED, isEnabled) : null;
+      yoErrorRotationVectorIntegrated = computeIntegralTerm ? feedbackControllerToolbox.getDataVector(endEffector, ERROR_INTEGRATED, ROTATION_VECTOR, isEnabled) : null;
 
       yoDesiredRotationVector = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, ROTATION_VECTOR, isEnabled);
       yoCurrentRotationVector = feedbackControllerToolbox.getDataVector(endEffector, CURRENT, ROTATION_VECTOR, isEnabled);
@@ -589,6 +596,13 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
     */
    private void computeIntegralTerm(FrameVector3D linearFeedbackTermToPack, FrameVector3D angularFeedbackTermToPack)
    {
+      if (!computeIntegralTerm)
+      {
+         linearFeedbackTermToPack.setToZero(controlFrame);
+         angularFeedbackTermToPack.setToZero(controlFrame);
+         return;
+      }
+         
       double maximumLinearIntegralError = positionGains.getMaximumIntegralError();
 
       if (maximumLinearIntegralError < 1.0e-5)

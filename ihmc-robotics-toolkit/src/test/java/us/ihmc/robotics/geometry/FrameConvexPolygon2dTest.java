@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -8,6 +9,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 
 public class FrameConvexPolygon2dTest
 {
@@ -21,6 +23,12 @@ public class FrameConvexPolygon2dTest
    {
       convexPolygon2d = createSomeValidPolygon();
       frameConvexPolygon2d = new FrameConvexPolygon2D(worldFrame, convexPolygon2d);
+   }
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

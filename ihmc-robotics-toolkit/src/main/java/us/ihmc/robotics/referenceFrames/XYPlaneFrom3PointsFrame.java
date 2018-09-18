@@ -30,9 +30,9 @@ public class XYPlaneFrom3PointsFrame extends ReferenceFrame
       this.p2.setIncludingFrame(p2);
       this.p3.setIncludingFrame(p3);
 
-      this.p1.changeFrame(parentFrame);
-      this.p2.changeFrame(parentFrame);
-      this.p3.changeFrame(parentFrame);
+      this.p1.changeFrame(getParent());
+      this.p2.changeFrame(getParent());
+      this.p3.changeFrame(getParent());
    }
 
    @Override

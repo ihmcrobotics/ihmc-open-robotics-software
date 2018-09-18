@@ -23,7 +23,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class Footstep implements Settable<Footstep>
 {
-   public static final int maxNumberOfSwingWaypoints = 100;
+   public static final int maxNumberOfSwingWaypoints = 10;
 
    // --- TODO: GW nuke this:
    public static enum FootstepType

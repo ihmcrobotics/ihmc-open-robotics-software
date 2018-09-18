@@ -373,9 +373,12 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
                                                                   estimatorRealtimeRos2Node, valkyrieLowLevelOutputWriter, yoVariableServer, gravity);
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
 
-      ValkyrieHandStateCommunicator handStateCommunicator = new ValkyrieHandStateCommunicator(robotName, threadDataSynchronizer.getEstimatorFullRobotModel(),
-                                                                                              robotModel.getHandModel(), estimatorRealtimeRos2Node);
-      estimatorThread.addRobotController(handStateCommunicator);
+      if (ENABLE_FINGER_JOINTS)
+      {
+         ValkyrieHandStateCommunicator handStateCommunicator = new ValkyrieHandStateCommunicator(robotName, threadDataSynchronizer.getEstimatorFullRobotModel(),
+                                                                                                 robotModel.getHandModel(), estimatorRealtimeRos2Node);
+         estimatorThread.addRobotController(handStateCommunicator);
+      }
 
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel.getSimpleRobotName(), robotModel, sensorInformation, controllerFactory,
                                                                      threadDataSynchronizer, drcOutputWriter, controllerRealtimeRos2Node, yoVariableServer,

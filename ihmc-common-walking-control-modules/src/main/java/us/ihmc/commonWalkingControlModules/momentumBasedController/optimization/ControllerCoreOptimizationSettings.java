@@ -14,6 +14,21 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 public interface ControllerCoreOptimizationSettings
 {
    /**
+    * Whether to setup the feedback controllers for computing a feedback term proportional to the
+    * position/orientation error integrated. IMPORTANT: This cannot be changed at runtime.
+    * 
+    * TODO This method does not match this class' name. Either it has to move of this interface has
+    * to be renamed to "ControllerCoreSettings.
+    * 
+    * @return {@code true} if the variables to create the integral term are to be created,
+    *         {@code false} otherwise.
+    */
+   default boolean computeIntegralTermInFeedbackControllers()
+   {
+      return true;
+   }
+
+   /**
     * Gets the weight specifying how much high joint velocity values should be penalized in the
     * optimization problem.
     * <p>
@@ -309,8 +324,8 @@ public interface ControllerCoreOptimizationSettings
 
    /**
     * Returns whether or not the optimization should consider the rho variable when its associated
-    * contact point is not in contact. This reduces the optimization size for the whole body controller,
-    * potentially leading to higher speeds.
+    * contact point is not in contact. This reduces the optimization size for the whole body
+    * controller, potentially leading to higher speeds.
     */
    default boolean getDeactivateRhoWhenNotInContact()
    {
@@ -332,7 +347,8 @@ public interface ControllerCoreOptimizationSettings
    }
 
    /**
-    * Sets whether or not to use a warm start in the active set solver where the previous active set is retained between control ticks.
+    * Sets whether or not to use a warm start in the active set solver where the previous active set
+    * is retained between control ticks.
     */
    default boolean useWarmStartInSolver()
    {
@@ -340,7 +356,8 @@ public interface ControllerCoreOptimizationSettings
    }
 
    /**
-    * Sets the maximum number of iterations allowed in the solver before throwing a no convergence exception.
+    * Sets the maximum number of iterations allowed in the solver before throwing a no convergence
+    * exception.
     */
    default int getMaxNumberOfSolverIterations()
    {
@@ -369,8 +386,8 @@ public interface ControllerCoreOptimizationSettings
 
    /**
     * Adds the ability to define a robot specific friction cone rotation. This can be useful when
-    * using friction cone representations with a low number of basis vectors and for feet with
-    * a lot of contact points. By default this will return a zero offset provider.
+    * using friction cone representations with a low number of basis vectors and for feet with a lot
+    * of contact points. By default this will return a zero offset provider.
     */
    default public FrictionConeRotationCalculator getFrictionConeRotation()
    {

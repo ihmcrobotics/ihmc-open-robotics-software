@@ -2,6 +2,8 @@ package us.ihmc.avatar.behaviorTests;
 
 import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
+
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -9,6 +11,7 @@ import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.CollaborativeBehavior;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -25,6 +28,12 @@ public abstract class AvatarCollaborativeBehaviorTest implements MultiRobotTestI
 
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    DRCBehaviorTestHelper drcBehaviorTestHelper;
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    protected void testBehavior() throws SimulationExceededMaximumTimeException
    {
