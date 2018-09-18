@@ -184,12 +184,18 @@ public class PlaneContactStateToWrenchMatrixHelper
       if (!contactFramePose.containsNaN())
          planeFrame.setPoseAndUpdate(contactFramePose);
 
+      int previousNumberOfContacts = yoPlaneContactState.getNumberOfContactPointsInContact();
+
       yoPlaneContactState.updateFromPlaneContactStateCommand(command);
       yoPlaneContactState.computeSupportPolygon();
 
+      int newNumberOfContacts = yoPlaneContactState.getNumberOfContactPointsInContact();
+      boolean touchedDown = previousNumberOfContacts == 0 && newNumberOfContacts > 0;
+      boolean liftedOff = previousNumberOfContacts > 0 && newNumberOfContacts == 0;
+
       if (yoPlaneContactState.pollContactHasChangedNotification())
       {
-         resetRequested.set(true);
+         resetRequested.set(touchedDown || liftedOff);
       }
 
       for (int i = 0; i < command.getNumberOfContactPoints(); i++)
