@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import org.junit.After;
@@ -11,13 +12,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.math.trajectories.*;
+import us.ihmc.robotics.testing.JUnitTools;
 
 import static org.junit.Assert.assertEquals;
 
@@ -27,6 +33,7 @@ public class TrajectoryMathToolsTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static TrajectoryMathTools trajMath = new TrajectoryMathTools(16);
    private static final double epsilon = 1e-6;
+   private static final int iters = 1000;
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -44,6 +51,91 @@ public class TrajectoryMathToolsTest
       assertEquals(traj1.getCoefficient(1), 1.069958847736625, epsilon);
       assertEquals(traj1.getCoefficient(2), -0.588477366255144, epsilon);
       assertEquals(traj1.getCoefficient(3), 0.03566529492455418, epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testScale()
+   {
+      Trajectory traj1 = new Trajectory(7);
+      Trajectory traj2 = new Trajectory(7);
+      Trajectory traj3 = new Trajectory(7);
+
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double startTime = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double duration = RandomNumbers.nextDouble(random, 0.1, 100.0);
+         double endTime = startTime + duration;
+
+         double scalar = RandomNumbers.nextDouble(random, -10.0, 10.0);
+
+         double x0 = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double xd0 = RandomNumbers.nextDouble(random, -100.0, 100.0);
+         double xf = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double xdf = RandomNumbers.nextDouble(random, -100.0, 100.0);
+
+         traj1.setCubic(startTime, endTime, x0, xd0, xf, xdf);
+         traj2.set(traj1);
+
+         TrajectoryMathTools.scale(traj2, scalar);
+         TrajectoryMathTools.scale(traj3, traj1, scalar);
+
+         assertEquals(traj1.getInitialTime(), traj2.getInitialTime(), epsilon);
+         assertEquals(traj1.getInitialTime(), traj3.getInitialTime(), epsilon);
+         assertEquals(traj1.getFinalTime(), traj2.getFinalTime(), epsilon);
+         assertEquals(traj1.getFinalTime(), traj3.getFinalTime(), epsilon);
+         double dt = 0.01;
+         for (double time = startTime; time < endTime; time += dt)
+         {
+            traj1.compute(time);
+            traj2.compute(time);
+            traj3.compute(time);
+            assertEquals(scalar * traj1.getPosition(), traj2.getPosition(), epsilon);
+            assertEquals(scalar * traj1.getPosition(), traj3.getPosition(), epsilon);
+         }
+      }
+
+      Trajectory3D traj3d1 = new Trajectory3D(7);
+      Trajectory3D traj3d2 = new Trajectory3D(7);
+      Trajectory3D traj3d3 = new Trajectory3D(7);
+
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double startTime = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double duration = RandomNumbers.nextDouble(random, 0.1, 100.0);
+         double endTime = startTime + duration;
+
+         double scalar = RandomNumbers.nextDouble(random, -10.0, 10.0);
+
+         Point3D x0 = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
+         Vector3D xd0 = EuclidCoreRandomTools.nextVector3D(random, -100.0, 100.0);
+         Point3D xf = EuclidCoreRandomTools.nextPoint3D(random, -10.0, 10.0);
+         Vector3D xdf = EuclidCoreRandomTools.nextVector3D(random, -100.0, 100.0);
+
+         traj3d1.setCubic(startTime, endTime, x0, xd0, xf, xdf);
+         traj3d2.set(traj3d1);
+
+         TrajectoryMathTools.scale(scalar, traj3d2);
+         TrajectoryMathTools.scale(traj3d3, traj3d1, scalar);
+
+         assertEquals(traj3d1.getInitialTime(), traj3d2.getInitialTime(), epsilon);
+         assertEquals(traj3d1.getInitialTime(), traj3d3.getInitialTime(), epsilon);
+         assertEquals(traj3d1.getFinalTime(), traj3d2.getFinalTime(), epsilon);
+         assertEquals(traj3d1.getFinalTime(), traj3d3.getFinalTime(), epsilon);
+         double dt = 0.01;
+         for (double time = startTime; time < endTime; time += dt)
+         {
+            traj3d1.compute(time);
+            traj3d2.compute(time);
+            traj3d3.compute(time);
+            Point3D expectedPosition = new Point3D(traj3d1.getPosition());
+            expectedPosition.scale(scalar);
+
+            EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedPosition, traj3d2.getPosition(), epsilon);
+            EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedPosition, traj3d3.getPosition(), epsilon);
+         }
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

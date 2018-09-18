@@ -40,6 +40,7 @@ public class TrajectoryMathTools
 
    public static void scale(Trajectory scaledTrajectoryToPack, Trajectory trajectoryToScale, double scalar)
    {
+      scaledTrajectoryToPack.set(trajectoryToScale);
       for (int i = 0; i < trajectoryToScale.getNumberOfCoefficients(); i++)
          scaledTrajectoryToPack.setDirectlyFast(i, trajectoryToScale.getCoefficient(i) * scalar);
    }
@@ -258,7 +259,7 @@ public class TrajectoryMathTools
       scale(trajToPack.getTrajectoryZ(), traj.getTrajectoryZ(), scalarZ);
    }
 
-   public static void scale(Trajectory3D traj, double scalarX, double scalarY, double scalarZ)
+   private static void scale(Trajectory3D traj, double scalarX, double scalarY, double scalarZ)
    {
       scale(traj.getTrajectoryX(), scalarX);
       scale(traj.getTrajectoryY(), scalarY);
