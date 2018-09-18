@@ -1,10 +1,37 @@
 package us.ihmc.communication.packets;
 
-import controller_msgs.msg.dds.*;
-import gnu.trove.list.array.*;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
+import controller_msgs.msg.dds.BoundingBox3DMessage;
+import controller_msgs.msg.dds.BoundingBoxesPacket;
+import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.DetectedFacesPacket;
+import controller_msgs.msg.dds.HeatMapPacket;
+import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
+import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
+import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.LidarScanParametersMessage;
+import controller_msgs.msg.dds.ObjectDetectorResultPacket;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import controller_msgs.msg.dds.SelectionMatrix3DMessage;
+import controller_msgs.msg.dds.SimulatedLidarScanPacket;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.UIPositionCheckerPacket;
+import controller_msgs.msg.dds.WeightMatrix3DMessage;
+import gnu.trove.list.array.TByteArrayList;
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.lists.BoundedRecyclingArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
@@ -28,10 +55,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MessageTools
 {
@@ -508,7 +531,7 @@ public class MessageTools
     *            {@code StringBuilder}, {@code Settable<T>}.
     */
    @SuppressWarnings("unchecked")
-   public static <T> void copyData(List<T> source, BoundedRecyclingArrayList<T> destination)
+   public static <T> void copyData(List<T> source, RecyclingArrayList<T> destination)
    {
       destination.clear();
 
@@ -552,7 +575,7 @@ public class MessageTools
     * @param source the array containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
-   public static <T extends Settable<T>> void copyData(T[] source, BoundedRecyclingArrayList<T> destination)
+   public static <T extends Settable<T>> void copyData(T[] source, RecyclingArrayList<T> destination)
    {
       destination.clear();
 
@@ -580,7 +603,7 @@ public class MessageTools
     * @param source the array containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
-   public static void copyData(String[] source, BoundedRecyclingArrayList<StringBuilder> destination)
+   public static void copyData(String[] source, RecyclingArrayList<StringBuilder> destination)
    {
       destination.clear();
 
