@@ -4,12 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CMPGeneration.ReferenceCMPTrajectoryGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
@@ -32,7 +38,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final static int defaultSize = 300;
 
+   private static final int maxNumberOfSegments = 35;
+   private final static double POINT_SIZE = 0.005;
+   private static final boolean VISUALIZE = true;
+
    private final boolean debug;
+   private final boolean visualize;
 
    private final List<FramePoint3D> cmpDesiredFinalPositions = new ArrayList<>();
 
@@ -78,13 +89,19 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox(icpToolbox);
 
-   public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider,
-                                          YoBoolean isInitialTransfer, boolean debug, YoVariableRegistry registry)
+   private final List<YoFramePoint3D> icpWaypoints = new ArrayList<>();
+
+
+   public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0,
+                                          YoInteger numberOfFootstepsToConsider,
+                                          YoBoolean isInitialTransfer, boolean debug, YoVariableRegistry registry,
+                                          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.omega0 = omega0;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
       this.isInitialTransfer = isInitialTransfer;
       this.debug = debug;
+      this.visualize = VISUALIZE && yoGraphicsListRegistry != null;
 
       areICPDynamicsSatisfied = new YoBoolean(namePrefix + "AreICPDynamicsSatisfied", registry);
       areICPDynamicsSatisfied.set(false);
@@ -123,6 +140,30 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       while (icpQuantitySetInitialConditionList.size() < defaultSize)
       {
          icpQuantitySetInitialConditionList.add(new FrameVector3D());
+      }
+
+      if (visualize)
+      {
+         ArtifactList icpWaypointList = new ArtifactList("ICP Waypoints");
+         YoFramePoint3D waypointStart = new YoFramePoint3D("ICPWaypoint" + 0, ReferenceFrame.getWorldFrame(), registry);
+
+         YoGraphicPosition waypointStartViz = new YoGraphicPosition("ICP Waypoint" + 0, waypointStart, POINT_SIZE, YoAppearance.Blue(), YoGraphicPosition.GraphicType.DIAMOND_WITH_CROSS);
+
+         icpWaypointList.add(waypointStartViz.createArtifact());
+         icpWaypoints.add(waypointStart);
+
+         for (int i = 0; i < defaultSize; i++)
+         {
+            YoFramePoint3D waypoint = new YoFramePoint3D("ICPWaypoint" + i + 1, ReferenceFrame.getWorldFrame(), registry);
+
+            YoGraphicPosition waypointViz = new YoGraphicPosition("ICP Waypoint" + i + 1, waypoint, POINT_SIZE, YoAppearance.Blue(), YoGraphicPosition.GraphicType.DIAMOND_WITH_CROSS);
+
+            icpWaypointList.add(waypointViz.createArtifact());
+
+            icpWaypoints.add(waypoint);
+         }
+
+         yoGraphicsListRegistry.registerArtifactList(icpWaypointList);
       }
    }
 
@@ -387,6 +428,14 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    @Override
    public void compute(double time)
    {
+      if (visualize)
+      {
+          for (int i = 0; i < icpWaypoints.size(); i++)
+          {
+             icpWaypoints.get(i).setToNaN();
+          }
+      }
+
       if (cmpTrajectories.size() > 0)
       {
          localTimeInCurrentPhase.set(time - startTimeOfCurrentPhase.getDoubleValue());
@@ -407,6 +456,17 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          getICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), currentCoPSegment); // TODO: add controller dt for proper continuation
          if (debug)
             checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
+
+         if (visualize)
+         {
+            int waypointIndex = 0;
+            icpWaypoints.get(waypointIndex++).set(icpDesiredInitialPositions.get(0));
+
+            for (int segmentIndex = 0; segmentIndex < icpDesiredFinalPositions.size(); segmentIndex++, waypointIndex++)
+            {
+               icpWaypoints.get(waypointIndex).set(icpDesiredFinalPositions.get(segmentIndex));
+            }
+         }
       }
    }
 
