@@ -1,11 +1,12 @@
 package us.ihmc.avatar.initialSetup;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class OffsetAndYawRobotInitialSetup
 {
    private final Vector3D additionalOffset = new Vector3D();
-   private final double yaw;
+   private double yaw;
    private double groundHeight;
 
    public OffsetAndYawRobotInitialSetup()
@@ -54,4 +55,21 @@ public class OffsetAndYawRobotInitialSetup
    {
       return yaw;
    }
+
+   public void addAdditionalOffset(Vector3DReadOnly additionalOffset)
+   {
+      this.additionalOffset.add(additionalOffset);
+   }
+
+   public void addAdditionalYaw(double additionalYaw)
+   {
+      this.yaw += additionalYaw;
+   }
+
+   public void addAdditionalOffsetAndYaw(Vector3DReadOnly additionalOffset, double additionalYaw)
+   {
+      addAdditionalOffset(additionalOffset);
+      addAdditionalYaw(additionalYaw);
+   }
+
 }
