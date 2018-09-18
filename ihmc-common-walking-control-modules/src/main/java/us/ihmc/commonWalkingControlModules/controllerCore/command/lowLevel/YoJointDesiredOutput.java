@@ -245,4 +245,10 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
    {
       this.maxVelocityError.set(maxVelocityError);
    }
+
+   @Override
+   public String toString()
+   {
+      return getRepresentativeString();
+   }
 }
