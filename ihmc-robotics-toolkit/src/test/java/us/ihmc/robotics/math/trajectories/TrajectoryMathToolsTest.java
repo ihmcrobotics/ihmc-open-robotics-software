@@ -28,16 +28,6 @@ public class TrajectoryMathToolsTest
    private static TrajectoryMathTools trajMath = new TrajectoryMathTools(16);
    private static final double epsilon = 1e-6;
 
-   @Before
-   public void setupTest()
-   {
-   }
-
-   @After
-   public void finishTest()
-   {
-   }
-
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTrajectoryAddition()
@@ -901,6 +891,87 @@ public class TrajectoryMathToolsTest
       assertEquals(2.1, traj3.getSegment(5).getInitialTime(), epsilon);
       assertEquals(3.0, traj3.getSegment(5).getFinalTime(), epsilon);
 
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSegmentedAdditionWithLimitsC()
+   {
+      SegmentedFrameTrajectory3D traj1 = new SegmentedFrameTrajectory3D(4, 2);
+      SegmentedFrameTrajectory3D traj2 = new SegmentedFrameTrajectory3D(4, 2);
+      SegmentedFrameTrajectory3D traj3 = new SegmentedFrameTrajectory3D(10, 2);
+
+      traj1.add().setLinear(0.0, 0.5, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setLinear(0.5, 1.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+
+      traj2.add().setLinear(0.0, 0.7, new FramePoint3D(worldFrame, 1, 2, 3), new FramePoint3D(worldFrame, 3, 2, 1));
+      traj2.add().setLinear(0.7, 0.9, new FramePoint3D(worldFrame, 3, 2, 1), new FramePoint3D(worldFrame, 4, 5, 6));
+
+      double minimumDuration = 0.11;
+      TrajectoryMathTools.addSegmentedTrajectories(traj3, traj1, traj2, minimumDuration, Epsilons.ONE_BILLIONTH);
+
+      assertEquals(0.0, traj3.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(0.5, traj3.getSegment(0).getFinalTime(), epsilon);
+
+      assertEquals(0.5, traj3.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(0.7, traj3.getSegment(1).getFinalTime(), epsilon);
+
+      assertEquals(0.7, traj3.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(1.0, traj3.getSegment(2).getFinalTime(), epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSegmentedAdditionWithLimitsD()
+   {
+      SegmentedFrameTrajectory3D traj1 = new SegmentedFrameTrajectory3D(4, 2);
+      SegmentedFrameTrajectory3D traj2 = new SegmentedFrameTrajectory3D(4, 2);
+      SegmentedFrameTrajectory3D traj3 = new SegmentedFrameTrajectory3D(10, 2);
+
+      traj1.add().setLinear(0.0, 0.5, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setLinear(0.5, 1.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+
+      traj2.add().setLinear(0.1, 0.7, new FramePoint3D(worldFrame, 1, 2, 3), new FramePoint3D(worldFrame, 3, 2, 1));
+      traj2.add().setLinear(0.7, 0.9, new FramePoint3D(worldFrame, 3, 2, 1), new FramePoint3D(worldFrame, 4, 5, 6));
+
+      double minimumDuration = 0.11;
+      TrajectoryMathTools.addSegmentedTrajectories(traj3, traj1, traj2, minimumDuration, Epsilons.ONE_BILLIONTH);
+
+      assertEquals(0.0, traj3.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(0.5, traj3.getSegment(0).getFinalTime(), epsilon);
+
+      assertEquals(0.5, traj3.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(0.7, traj3.getSegment(1).getFinalTime(), epsilon);
+
+      assertEquals(0.7, traj3.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(1.0, traj3.getSegment(2).getFinalTime(), epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSegmentedAdditionWithLimitsE()
+   {
+      SegmentedFrameTrajectory3D traj1 = new SegmentedFrameTrajectory3D(4, 2);
+      SegmentedFrameTrajectory3D traj2 = new SegmentedFrameTrajectory3D(4, 2);
+      SegmentedFrameTrajectory3D traj3 = new SegmentedFrameTrajectory3D(10, 2);
+
+      traj1.add().setLinear(0.0, 0.5, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setLinear(0.5, 0.9, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+
+      traj2.add().setLinear(0.1, 0.7, new FramePoint3D(worldFrame, 1, 2, 3), new FramePoint3D(worldFrame, 3, 2, 1));
+      traj2.add().setLinear(0.7, 1.0, new FramePoint3D(worldFrame, 3, 2, 1), new FramePoint3D(worldFrame, 4, 5, 6));
+
+      double minimumDuration = 0.11;
+      TrajectoryMathTools.addSegmentedTrajectories(traj3, traj1, traj2, minimumDuration, Epsilons.ONE_BILLIONTH);
+
+      assertEquals(0.0, traj3.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(0.5, traj3.getSegment(0).getFinalTime(), epsilon);
+
+      assertEquals(0.5, traj3.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(0.7, traj3.getSegment(1).getFinalTime(), epsilon);
+
+      assertEquals(0.7, traj3.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(1.0, traj3.getSegment(2).getFinalTime(), epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
