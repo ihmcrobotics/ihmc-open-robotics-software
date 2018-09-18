@@ -33,10 +33,10 @@ public class ValkyrieFeedbackControllerSettings implements FeedbackControllerSet
       if (target == RobotTarget.SCS)
          return null;
 
-      GroupParameter<Double> pelvisGroup = new GroupParameter<>(jointMap.getPelvisName(), Double.POSITIVE_INFINITY);
-      GroupParameter<Double> chestGroup = new GroupParameter<>(jointMap.getChestName(), Double.POSITIVE_INFINITY);
-      GroupParameter<Double> footGroup = new GroupParameter<>("foot", Double.POSITIVE_INFINITY, new ArrayList<>());
-      GroupParameter<Double> armJointsGroup = new GroupParameter<>("armJoints", Double.POSITIVE_INFINITY, new ArrayList<>());
+      GroupParameter<Double> pelvisGroup = new GroupParameter<>(jointMap.getPelvisName(), 25.0);
+      GroupParameter<Double> chestGroup = new GroupParameter<>(jointMap.getChestName(), 25.0);
+      GroupParameter<Double> footGroup = new GroupParameter<>("foot", 16.0, new ArrayList<>());
+      GroupParameter<Double> armJointsGroup = new GroupParameter<>("armJoints", 25.0, new ArrayList<>());
 
       for (RobotSide robotSide : RobotSide.values)
       {
