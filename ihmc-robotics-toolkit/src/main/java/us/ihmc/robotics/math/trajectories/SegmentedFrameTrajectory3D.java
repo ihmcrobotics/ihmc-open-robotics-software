@@ -162,6 +162,11 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
       return segments.get(segmentIndex);
    }
 
+   public void removeSegment(int segmentToRemove)
+   {
+      segments.remove(segmentToRemove);
+   }
+
    public double[] getNodeTimes()
    {
       nodeTime[0] = segments.get(0).getInitialTime();
