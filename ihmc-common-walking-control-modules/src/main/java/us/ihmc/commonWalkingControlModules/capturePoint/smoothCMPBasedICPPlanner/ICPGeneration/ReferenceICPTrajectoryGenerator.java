@@ -5,6 +5,7 @@ import java.util.List;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CMPGeneration.ReferenceCMPTrajectoryGenerator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -25,6 +26,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import javax.management.relation.RoleUnresolved;
 
 /**
  * @author Tim Seyde
@@ -187,7 +190,13 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       copTrajectories.clear();
    }
 
-   public void getICPInitialConditionsForAdjustment(double localTime, List<FramePoint3D> exitCornerPointsFromCoPs, List<FrameTrajectory3D> copPolynomials3D,
+
+   private void getICPInitialConditionsForAdjustment(double time, int currentSwingSegment)
+   {
+      getICPInitialConditionsForAdjustment(time, icpDesiredFinalPositionsFromCoPs, copTrajectories, currentSwingSegment, omega0.getDoubleValue());
+   }
+
+   private void getICPInitialConditionsForAdjustment(double localTime, List<FramePoint3D> exitCornerPointsFromCoPs, List<FrameTrajectory3D> copPolynomials3D,
                                                     int currentSwingSegment, double omega0)
    {
       if (currentSwingSegment < 0)
@@ -404,11 +413,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       icpPositionDesiredTerminal.set(icpDesiredFinalPositions.get(cmpTrajectories.size() - 1));
    }
 
-   private void getICPInitialConditionsForAdjustment(double time, int currentSwingSegment)
-   {
-      getICPInitialConditionsForAdjustment(time, icpDesiredFinalPositionsFromCoPs, copTrajectories, currentSwingSegment, omega0.getDoubleValue());
-   }
-   
+
    public void setInitialConditionsForAdjustment()
    {
       for(int i = 0; i < icpQuantityCalculatedInitialConditionList.size() && i < icpQuantitySetInitialConditionList.size(); i++)
@@ -452,8 +457,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          icpToolbox.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(),
                                                            icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpAccelerationDesiredCurrent);
 
-         int currentCoPSegment = getCurrentSegmentIndex(localTimeInCurrentPhase.getDoubleValue(), copTrajectories);
-         getICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), currentCoPSegment); // TODO: add controller dt for proper continuation
+         int currentCoPSegmentIndex = getCurrentSegmentIndex(localTimeInCurrentPhase.getDoubleValue(), copTrajectories);
+         getICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), currentCoPSegmentIndex); // TODO: add controller dt for proper continuation
          if (debug)
             checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
 
@@ -483,14 +488,27 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       areICPDynamicsSatisfied.set(icpVelocityDesiredCurrent.epsilonEquals(icpVelocityDynamicsCurrent, 10e-5));
    }
 
-   private int getCurrentSegmentIndex(double timeInCurrentPhase, List<FrameTrajectory3D> cmpTrajectories)
+   private int getCurrentSegmentIndex(double timeInCurrentPhase, List<FrameTrajectory3D> trajectories)
    {
       int currentSegmentIndex = FIRST_SEGMENT;
-      while (timeInCurrentPhase > cmpTrajectories.get(currentSegmentIndex).getFinalTime()
-            && Math.abs(cmpTrajectories.get(currentSegmentIndex).getFinalTime() - cmpTrajectories.get(currentSegmentIndex + 1).getInitialTime()) < 1.0e-5)
+      int numberOfTrajectories = trajectories.size() - 1;
+      while (timeInCurrentPhase > trajectories.get(currentSegmentIndex).getFinalTime()
+            && Math.abs(trajectories.get(currentSegmentIndex).getFinalTime() - trajectories.get(currentSegmentIndex + 1).getInitialTime()) < 1.0e-5)
       {
+         if (debug && currentSegmentIndex > numberOfTrajectories)
+         {
+            double finalTime = trajectories.get(numberOfTrajectories).getFinalTime();
+            String info = "The timeInCurrentPhase" + timeInCurrentPhase + " exceeds the maximum trajectory time " + finalTime + ". " +
+                    "There are " + numberOfTrajectories + " trajectories in the list. Their order is as follows: ";
+            for (int i = 0; i < trajectories.size(); i++)
+            {
+               info += "\n\t Start = " + trajectories.get(i).getInitialTime() + ". End = " + trajectories.get(i).getFinalTime();
+            }
+            throw new RuntimeException(info);
+         }
+
          currentSegmentIndex++;
-         if (currentSegmentIndex + 1 > cmpTrajectories.size())
+         if (currentSegmentIndex + 1 > trajectories.size())
          {
             return currentSegmentIndex;
          }
