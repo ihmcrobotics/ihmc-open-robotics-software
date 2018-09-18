@@ -136,7 +136,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       @Override
       public boolean shouldAddToDisplay(Announcement description)
       {
-         return description.getHostNameAsString().startsWith("link");
+         return true;
       }
    }
 }
