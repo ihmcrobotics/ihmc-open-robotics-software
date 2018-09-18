@@ -53,6 +53,8 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
        */
       while (segments.size() < maxNumberOfSegments)
          segments.add();
+
+      segments.clear();
    }
 
    public void reset()
