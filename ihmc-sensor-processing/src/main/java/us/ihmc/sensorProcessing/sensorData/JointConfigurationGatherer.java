@@ -1,13 +1,10 @@
 package us.ihmc.sensorProcessing.sensorData;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
+import us.ihmc.commons.lists.BoundedRecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -17,6 +14,9 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class JointConfigurationGatherer
 {
@@ -102,7 +102,7 @@ public class JointConfigurationGatherer
       jointConfigurationData.setTimestamp(timestamp);
       jointConfigurationData.setSensorHeadPpsTimestamp(sensorHeadPPSTimestamp);
 
-      RecyclingArrayList<SpatialVectorMessage> momentAndForceDataAllForceSensors = jointConfigurationData.getForceSensorData();
+      BoundedRecyclingArrayList<SpatialVectorMessage> momentAndForceDataAllForceSensors = jointConfigurationData.getForceSensorData();
       momentAndForceDataAllForceSensors.clear();
 
       for (int sensorNumber = 0; sensorNumber < getNumberOfForceSensors(); sensorNumber++)

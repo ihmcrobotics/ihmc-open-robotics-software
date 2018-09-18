@@ -1,10 +1,5 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
@@ -13,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepVisualizer;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.BoundedRecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -29,18 +25,17 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.*;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Use this class to generate a stream of footsteps which path can be controlled given desired
@@ -137,7 +132,7 @@ public class ContinuousStepGenerator implements Updatable
    private FootstepAdjustment footstepAdjustment;
 
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-   private final RecyclingArrayList<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
+   private final BoundedRecyclingArrayList<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
    private final FootstepDataMessage firstFootstep = new FootstepDataMessage();
 
    private final SideDependentList<List<FootstepVisualizer>> footstepSideDependentVisualizers = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
