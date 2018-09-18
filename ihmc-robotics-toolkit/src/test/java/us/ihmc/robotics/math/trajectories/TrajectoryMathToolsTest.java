@@ -729,12 +729,74 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void testDifferentiation()
    {
-      Trajectory traj1 = new Trajectory(3);
-      Trajectory traj2 = new Trajectory(2);
-      traj1.setQuadratic(1, 11, 4, 0, 5);
-      TrajectoryMathTools.getDerivative(traj2, traj1);
-      assertEquals(traj2.getCoefficient(0), traj1.getCoefficient(1), epsilon);
-      assertEquals(traj2.getCoefficient(1), 2 * traj1.getCoefficient(2), epsilon);
+      Trajectory baseTrajectory = new Trajectory(3);
+      Trajectory trajectoryDerivative = new Trajectory(2);
+
+      baseTrajectory.setDirectlyFast(0, 3.0);
+      baseTrajectory.setDirectlyFast(1, 4.0);
+      baseTrajectory.setDirectlyFast(2, 5.0);
+
+      TrajectoryMathTools.getDerivative(trajectoryDerivative, baseTrajectory);
+
+      assertEquals(4.0, trajectoryDerivative.getCoefficient(0), epsilon);
+      assertEquals(10.0, trajectoryDerivative.getCoefficient(1), epsilon);
+
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double startTtime = RandomNumbers.nextDouble(random, 10.0);
+         double duration = RandomNumbers.nextDouble(random, 0.01, 1000.0);
+
+         double x0 = RandomNumbers.nextDouble(random, 10.0);
+         double xd0 = RandomNumbers.nextDouble(random, 100.0);
+         double xf = RandomNumbers.nextDouble(random, 10.0);
+         double xdf = RandomNumbers.nextDouble(random, 100.0);
+
+         baseTrajectory.setQuadratic(startTtime, startTtime + duration, x0, xd0, xf);
+
+         TrajectoryMathTools.getDerivative(trajectoryDerivative, baseTrajectory);
+
+         assertEquals(baseTrajectory.getCoefficient(1), trajectoryDerivative.getCoefficient(0), epsilon);
+         assertEquals(2.0 * baseTrajectory.getCoefficient(2), trajectoryDerivative.getCoefficient(1), epsilon);
+      }
+
+
+      baseTrajectory = new Trajectory(5);
+      trajectoryDerivative = new Trajectory(4);
+
+      baseTrajectory.setDirectlyFast(0, 4.0);
+      baseTrajectory.setDirectlyFast(1, 5.0);
+      baseTrajectory.setDirectlyFast(2, 6.0);
+      baseTrajectory.setDirectlyFast(3, 7.0);
+      baseTrajectory.setDirectlyFast(4, 8.0);
+
+      TrajectoryMathTools.getDerivative(trajectoryDerivative, baseTrajectory);
+
+      assertEquals(5.0, trajectoryDerivative.getCoefficient(0), epsilon);
+      assertEquals(12.0, trajectoryDerivative.getCoefficient(1), epsilon);
+      assertEquals(21.0, trajectoryDerivative.getCoefficient(2), epsilon);
+      assertEquals(32.0, trajectoryDerivative.getCoefficient(3), epsilon);
+
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double startTime = RandomNumbers.nextDouble(random, 10.0);
+         double duration = RandomNumbers.nextDouble(random, 0.01, 1000.0);
+
+         double x0 = RandomNumbers.nextDouble(random, 10.0);
+         double xd0 = RandomNumbers.nextDouble(random, 100.0);
+         double xdd0 = RandomNumbers.nextDouble(random, 1000.0);
+         double xf = RandomNumbers.nextDouble(random, 10.0);
+         double xdf = RandomNumbers.nextDouble(random, 100.0);
+
+         baseTrajectory.setQuartic(startTime, startTime + duration, x0, xd0, xdd0, xf, xdf);
+
+         TrajectoryMathTools.getDerivative(trajectoryDerivative, baseTrajectory);
+
+         assertEquals(baseTrajectory.getCoefficient(1), trajectoryDerivative.getCoefficient(0), epsilon);
+         assertEquals(2.0 * baseTrajectory.getCoefficient(2), trajectoryDerivative.getCoefficient(1), epsilon);
+         assertEquals(3.0 * baseTrajectory.getCoefficient(3), trajectoryDerivative.getCoefficient(2), epsilon);
+         assertEquals(4.0 * baseTrajectory.getCoefficient(4), trajectoryDerivative.getCoefficient(3), epsilon);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -755,7 +817,6 @@ public class TrajectoryMathToolsTest
       assertEquals(traj1.getCoefficient(1), 14, epsilon);
       assertEquals(traj1.getCoefficient(2), 3, epsilon);
    }
-
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -810,8 +871,6 @@ public class TrajectoryMathToolsTest
 
       assertEquals(7, traj3.getNumberOfSegments());
 
-
-
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -852,9 +911,7 @@ public class TrajectoryMathToolsTest
       assertEquals(1.2, traj2.getSegment(2).getInitialTime(), epsilon);
       assertEquals(2.2, traj2.getSegment(2).getFinalTime(), epsilon);
 
-
       TrajectoryMathTools.addSegmentedTrajectories(traj3, traj1, traj2, Epsilons.ONE_BILLIONTH);
-
 
       // should have 0.0-0.5, 0.5-0.6, 0.6-0.7, 0.7-1.0, 1.0-1.2, 1.2-2.0, 2.0-2.2, 2.2-2.7,
       // 2.7-3.0, 3.0-3.5, 3.5-3.9, 3.9-4.0, 4.0-4.7
@@ -916,7 +973,6 @@ public class TrajectoryMathToolsTest
       traj1.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
       traj1.add().setLinear(2.0, 3.0, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
 
-
       traj2.add().setLinear(0.5, 0.6, new FramePoint3D(worldFrame, 1, 2, 3), new FramePoint3D(worldFrame, 3, 2, 1));
       traj2.add().setLinear(1.1, 2.2, new FramePoint3D(worldFrame, 3, 2, 1), new FramePoint3D(worldFrame, 4, 5, 6));
 
@@ -957,7 +1013,6 @@ public class TrajectoryMathToolsTest
       traj1.add().setLinear(0.0, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
       traj1.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
       traj1.add().setLinear(2.0, 3.0, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
-
 
       traj2.add().setLinear(0.5, 0.6, new FramePoint3D(worldFrame, 1, 2, 3), new FramePoint3D(worldFrame, 3, 2, 1));
       traj2.add().setLinear(1.2, 2.1, new FramePoint3D(worldFrame, 3, 2, 1), new FramePoint3D(worldFrame, 4, 5, 6));
@@ -1087,7 +1142,6 @@ public class TrajectoryMathToolsTest
       assertEquals(2.0, traj1.getSegment(1).getFinalTime(), epsilon);
       assertEquals(2.0, traj1.getSegment(2).getInitialTime(), epsilon);
       assertEquals(3.0, traj1.getSegment(2).getFinalTime(), epsilon);
-
 
       TrajectoryMathTools.setCurrentSegmentPolynomial(traj3.add(), traj1.getSegment(0), 0.0, 1.0, Epsilons.ONE_MILLIONTH);
 
