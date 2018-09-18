@@ -197,7 +197,7 @@ public class FootstepAngularMomentumPredictorTest
                                                                    testParameters.getNumberOfFootstepsToConsider(), bipedSupportPolygons, contactableFeet,
                                                                    numberOfFootstepsToConsider, swingDurations, transferDurations, touchdownDurations, swingSplitFractions,
                                                                    swingShiftFractions, transferSplitFractions, numberOfUpcomingFootsteps, upcomingFootstepsData, testRegistry);
-      icpTrajectoryGenerator = new ReferenceICPTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, false, testRegistry);
+      icpTrajectoryGenerator = new ReferenceICPTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, false, testRegistry, null);
       comTrajectoryGenerator = new ReferenceCoMTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isDoubleSupport,
                                                                    testRegistry);
       int maxNumberOfStepsToConsider = 4;

@@ -66,7 +66,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final String fullPrefix;
    // Standard declarations
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double COP_POINT_SIZE = 0.005;
+   static final double COP_POINT_SIZE = 0.005;
 
    private static final int numberOfSwingSegments = 3;
    private static final int numberOfTransferSegments = 2;

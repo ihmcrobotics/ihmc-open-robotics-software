@@ -53,7 +53,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
       clear();
       YoInteger numberOfFootstepsToConsider = new YoInteger(testName + "NumberOfFootstepsToConsider", registry);
       numberOfFootstepsToConsider.set(numberOfFootsteps);
-      cmpTrajectoryGenerator = new ReferenceCMPTrajectoryGenerator(testName, numberOfFootsteps, numberOfFootstepsToConsider, registry);
+      cmpTrajectoryGenerator = new ReferenceCMPTrajectoryGenerator(testName, numberOfFootsteps, numberOfFootstepsToConsider, false, registry, null);
       cmpTrajectoryGenerator.setGroundReaction(groundReactionForce);
       for (int i = 0; i < numberOfFootsteps; i++)
       {
