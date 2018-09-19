@@ -232,7 +232,7 @@ public class SmoothCapturePointToolbox
       for(int i = 0; i < numberOfCoefficients; i++)
       {
          double scalar = Math.pow(omega0, -i);
-         CommonOps.addEquals(generalizedAlphaPrimeRow, scalar, cmpPolynomial.getXPowersDerivativeVector(i + alphaDerivativeOrder, time));
+         CommonOps.addEquals(generalizedAlphaPrimeRow, scalar, cmpPolynomial.evaluateGeometricSequenceDerivative(i + alphaDerivativeOrder, time));
       }
    }
    
@@ -268,7 +268,7 @@ public class SmoothCapturePointToolbox
       for(int i = 0; i < numberOfCoefficients; i++)
       {
          double scalar = Math.pow(omega0, betaDerivativeOrder-i) * Math.exp(omega0*(time-timeSegmentTotal));
-         CommonOps.addEquals(generalizedBetaPrimeRowToPack, scalar, cmpPolynomial.getXPowersDerivativeVector(i, timeSegmentTotal));
+         CommonOps.addEquals(generalizedBetaPrimeRowToPack, scalar, cmpPolynomial.evaluateGeometricSequenceDerivative(i, timeSegmentTotal));
       }
    }
 

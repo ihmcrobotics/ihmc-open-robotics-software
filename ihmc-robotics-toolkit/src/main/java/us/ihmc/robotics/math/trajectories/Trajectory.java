@@ -77,11 +77,21 @@ public class Trajectory
          ddf += coefficients[i] * (i - 1) * (i) * xPowers[i - 2];
    }
 
-   private void setXPowers(double[] xPowers, double x)
+   /**
+    * Sets the given array to be:
+    * <br> [1, x, x<sup>2</sup>, ..., x<sup>N</sup>]
+    * <br> where N+1 is the length of the given array
+    *
+    * @param xPowers vector to set
+    * @param x base of the power series
+    */
+   private static void setXPowers(double[] xPowers, double x)
    {
       xPowers[0] = 1.0;
       for (int i = 1; i < xPowers.length; i++)
+      {
          xPowers[i] = xPowers[i - 1] * x;
+      }
    }
 
    public double getDerivative(int derivativeOrder, double x)
@@ -94,17 +104,23 @@ public class Trajectory
    }
 
    /**
-    * Returns the order-th derivative of the xPowers vector at value x (Note: does NOT return the Trajectories order-th derivative at x)
-    * @param order
-    * @param x
-    * @return
+    * Given the following vector and it's n-th derivative:
+    * <br> v(x) = [ 1, x, ... , x<sup>N-1</sup>, x<sup>N</sup> ]
+    * <br> d<sup>n</sup>v(x)/dx<sup>n</sup> = [ a<sub>0</sub>, a<sub>1</sub>x , ... , a<sub>N-n-1</sub>x<sup>N-n-1</sup> , a<sub>N-n</sub>x<sup>N-n</sup>, ... , 0, 0 ]
+    *
+    * <br> This method returns a matrix such that matrixToPack.get(i) returns the i-th element of d<sup>n</sup>v(x)/dx<sup>n</sup> evaluated at x0
+    *
+    * @param order highest order exponent, the value N in the above equation
+    * @param x0 value at which the derivative is evaluated
     */
-   public DenseMatrix64F getXPowersDerivativeVector(int order, double x)
+   public DenseMatrix64F evaluateGeometricSequenceDerivative(int order, double x0)
    {
-      setXPowers(xPowers, x);
+      setXPowers(xPowers, x0);
       xPowersDerivativeVector.zero();
       for (int i = order; i < numberOfCoefficients; i++)
+      {
          xPowersDerivativeVector.set(i, getCoefficientMultiplierForDerivative(order, i) * xPowers[i - order]);
+      }
       return xPowersDerivativeVector;
    }
 
@@ -115,11 +131,13 @@ public class Trajectory
          trajectory.setDirectlyFast(i - 1, getCoefficient(i) * (i));
    }
 
-   public int getCoefficientMultiplierForDerivative(int order, int exponent)
+   private static int getCoefficientMultiplierForDerivative(int order, int exponent)
    {
       int coeff = 1;
       for (int i = exponent; i > exponent - order; i--)
+      {
          coeff *= i;
+      }
       return coeff;
    }
 
