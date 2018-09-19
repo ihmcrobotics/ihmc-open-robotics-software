@@ -29,6 +29,9 @@ public class ReferenceCMPTrajectoryGenerator
    private static final boolean REMOVE_SHORT_SEGMENTS = true;
    private static final double minimumSegmentDuration = 0.01;
 
+   private static final boolean RESAMPLE_COP_TRAJECTORY_FOR_QUALITY = true;
+   private static final double minSegmentDurationToResampleWaypoint = 0.05;
+
    private static final int maxNumberOfCoefficients = 10;
    private static final int maxNumberOfSegments = 35;
 
@@ -53,6 +56,8 @@ public class ReferenceCMPTrajectoryGenerator
    private final List<YoFramePoint3D> swingBounds = new ArrayList<>();
    private final List<YoFramePoint3D> transferBounds = new ArrayList<>();
    private final List<YoDouble> segmentDurations = new ArrayList<>();
+
+   private final TrajectoryMathTools trajectoryMathTools = new TrajectoryMathTools(10);
 
    private final boolean debug;
 
@@ -231,28 +236,36 @@ public class ReferenceCMPTrajectoryGenerator
       // handle current swing if that's the current walking phase
       if (currentPhase == WalkingTrajectoryType.SWING)
       {
-         torqueTrajectory.setFromAngularMomentumTrajectory(swingAngularMomentumTrajectories.get(phaseIndex), verticalGroundReaction.getDoubleValue());
-         if (swingCoPTrajectories.get(phaseIndex).getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
+         AngularMomentumTrajectory swingAngularMomentumTrajectory = swingAngularMomentumTrajectories.get(phaseIndex);
+         CoPTrajectory swingCoPTrajectory = swingCoPTrajectories.get(phaseIndex);
+         CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(phaseIndex);
+
+         torqueTrajectory.setFromAngularMomentumTrajectory(swingAngularMomentumTrajectory, verticalGroundReaction.getDoubleValue());
+         if (swingCoPTrajectory.getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
          {
             return;
          }
-         TrajectoryMathTools.addSegmentedTrajectories(swingCMPTrajectories.get(phaseIndex), swingCoPTrajectories.get(phaseIndex), torqueTrajectory,
+         if (RESAMPLE_COP_TRAJECTORY_FOR_QUALITY)
+            trajectoryMathTools.resampleTrajectoryToMatchWaypoints(swingCoPTrajectory, swingAngularMomentumTrajectory, minSegmentDurationToResampleWaypoint);
+
+         TrajectoryMathTools.addSegmentedTrajectories(swingCMPTrajectory, swingCoPTrajectory, torqueTrajectory,
                                                       trajectoryEpsilon);
+
          if (REMOVE_SHORT_SEGMENTS)
-            TrajectoryMathTools.removeShortSegments(swingCMPTrajectories.get(phaseIndex), minimumSegmentDuration);
+            TrajectoryMathTools.removeShortSegments(swingCMPTrajectory, minimumSegmentDuration);
 
          phaseIndex++;
 
          if (debug)
          {
-            if (swingCMPTrajectories.get(phaseIndex).getNumberOfSegments() > 1)
+            if (swingCMPTrajectory.getNumberOfSegments() > 1)
             {
-               swingCMPTrajectories.get(phaseIndex).getSegment(0).getStartPoint(swingBounds.get(swingWaypointNumber++));
+               swingCMPTrajectory.getSegment(0).getStartPoint(swingBounds.get(swingWaypointNumber++));
             }
-            for (int i = 0; i < swingCMPTrajectories.get(phaseIndex).getNumberOfSegments(); i++)
+            for (int i = 0; i < swingCMPTrajectory.getNumberOfSegments(); i++)
             {
-               swingCMPTrajectories.get(phaseIndex).getSegment(i).getEndPoint(swingBounds.get(swingWaypointNumber++));
-               segmentDurations.get(segmentIndex++).set(swingCMPTrajectories.get(phaseIndex).getSegment(i).getDuration());
+               swingCMPTrajectory.getSegment(i).getEndPoint(swingBounds.get(swingWaypointNumber++));
+               segmentDurations.get(segmentIndex++).set(swingCMPTrajectory.getSegment(i).getDuration());
             }
          }
       }
@@ -261,50 +274,62 @@ public class ReferenceCMPTrajectoryGenerator
       for (; phaseIndex < numberOfFootstepsToSet; phaseIndex++)
       {
          // transfer
-         torqueTrajectory.setFromAngularMomentumTrajectory(transferAngularMomentumTrajectories.get(phaseIndex), verticalGroundReaction.getDoubleValue());
-         if (transferCoPTrajectories.get(phaseIndex).getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
-         {
+         AngularMomentumTrajectory transferAngularMomentumTrajectory = transferAngularMomentumTrajectories.get(phaseIndex);
+         CoPTrajectory transferCoPTrajectory = transferCoPTrajectories.get(phaseIndex);
+         CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(phaseIndex);
+
+         torqueTrajectory.setFromAngularMomentumTrajectory(transferAngularMomentumTrajectory, verticalGroundReaction.getDoubleValue());
+         if (transferCoPTrajectory.getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
             return;
-         }
-         TrajectoryMathTools.addSegmentedTrajectories(transferCMPTrajectories.get(phaseIndex), transferCoPTrajectories.get(phaseIndex), torqueTrajectory,
+
+         if (RESAMPLE_COP_TRAJECTORY_FOR_QUALITY)
+            trajectoryMathTools.resampleTrajectoryToMatchWaypoints(transferCoPTrajectory, transferAngularMomentumTrajectory, minSegmentDurationToResampleWaypoint);
+
+         TrajectoryMathTools.addSegmentedTrajectories(transferCMPTrajectory, transferCoPTrajectory, torqueTrajectory,
                                                       trajectoryEpsilon);
          if (REMOVE_SHORT_SEGMENTS)
-            TrajectoryMathTools.removeShortSegments(transferCMPTrajectories.get(phaseIndex), minimumSegmentDuration);
+            TrajectoryMathTools.removeShortSegments(transferCMPTrajectory, minimumSegmentDuration);
 
          if (debug)
          {
-            if (transferCMPTrajectories.get(phaseIndex).getNumberOfSegments() > 1)
+            if (transferCMPTrajectory.getNumberOfSegments() > 1)
             {
-               transferCMPTrajectories.get(phaseIndex).getSegment(0).getStartPoint(transferBounds.get(transferWaypointNumber++));
+               transferCMPTrajectory.getSegment(0).getStartPoint(transferBounds.get(transferWaypointNumber++));
             }
-            for (int i = 0; i < transferCMPTrajectories.get(phaseIndex).getNumberOfSegments(); i++)
+            for (int i = 0; i < transferCMPTrajectory.getNumberOfSegments(); i++)
             {
-               transferCMPTrajectories.get(phaseIndex).getSegment(i).getEndPoint(transferBounds.get(transferWaypointNumber++));
-               segmentDurations.get(segmentIndex++).set(transferCMPTrajectories.get(phaseIndex).getSegment(i).getDuration());
+               transferCMPTrajectory.getSegment(i).getEndPoint(transferBounds.get(transferWaypointNumber++));
+               segmentDurations.get(segmentIndex++).set(transferCMPTrajectory.getSegment(i).getDuration());
             }
          }
 
          // swing
-         torqueTrajectory.setFromAngularMomentumTrajectory(swingAngularMomentumTrajectories.get(phaseIndex), verticalGroundReaction.getDoubleValue());
-         if (swingCoPTrajectories.get(phaseIndex).getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
-         {
+         AngularMomentumTrajectory swingAngularMomentumTrajectory = swingAngularMomentumTrajectories.get(phaseIndex);
+         CoPTrajectory swingCoPTrajectory = swingCoPTrajectories.get(phaseIndex);
+         CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(phaseIndex);
+
+         torqueTrajectory.setFromAngularMomentumTrajectory(swingAngularMomentumTrajectory, verticalGroundReaction.getDoubleValue());
+         if (swingCoPTrajectory.getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
             return;
-         }
-         TrajectoryMathTools.addSegmentedTrajectories(swingCMPTrajectories.get(phaseIndex), swingCoPTrajectories.get(phaseIndex), torqueTrajectory,
+
+         if (RESAMPLE_COP_TRAJECTORY_FOR_QUALITY)
+            trajectoryMathTools.resampleTrajectoryToMatchWaypoints(swingCoPTrajectory, swingAngularMomentumTrajectory, minSegmentDurationToResampleWaypoint);
+
+         TrajectoryMathTools.addSegmentedTrajectories(swingCMPTrajectory, swingCoPTrajectory, torqueTrajectory,
                                                       trajectoryEpsilon);
          if (REMOVE_SHORT_SEGMENTS)
-            TrajectoryMathTools.removeShortSegments(swingCMPTrajectories.get(phaseIndex), minimumSegmentDuration);
+            TrajectoryMathTools.removeShortSegments(swingCMPTrajectory, minimumSegmentDuration);
 
          if (debug)
          {
-            if (swingCMPTrajectories.get(phaseIndex).getNumberOfSegments() > 1)
+            if (swingCMPTrajectory.getNumberOfSegments() > 1)
             {
-               swingCMPTrajectories.get(phaseIndex).getSegment(0).getStartPoint(swingBounds.get(swingWaypointNumber++));
+               swingCMPTrajectory.getSegment(0).getStartPoint(swingBounds.get(swingWaypointNumber++));
             }
-            for (int i = 0; i < swingCMPTrajectories.get(phaseIndex).getNumberOfSegments(); i++)
+            for (int i = 0; i < swingCMPTrajectory.getNumberOfSegments(); i++)
             {
-               swingCMPTrajectories.get(phaseIndex).getSegment(i).getEndPoint(swingBounds.get(swingWaypointNumber++));
-               segmentDurations.get(segmentIndex++).set(swingCMPTrajectories.get(phaseIndex).getSegment(i).getDuration());
+               swingCMPTrajectory.getSegment(i).getEndPoint(swingBounds.get(swingWaypointNumber++));
+               segmentDurations.get(segmentIndex++).set(swingCMPTrajectory.getSegment(i).getDuration());
             }
          }
       }
