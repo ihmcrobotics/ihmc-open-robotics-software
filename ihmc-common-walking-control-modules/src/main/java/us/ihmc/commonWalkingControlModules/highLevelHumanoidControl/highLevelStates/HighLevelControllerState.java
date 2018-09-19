@@ -18,26 +18,28 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    private final JointSettingsHelper jointSettingsHelper;
 
    private final HighLevelControllerName highLevelControllerName;
+   protected final OneDoFJoint[] controlledJoints;
 
    public HighLevelControllerState(HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
-                                   HighLevelHumanoidControllerToolbox controllerToolbox)
+                                   OneDoFJoint[] controlledJoints)
    {
-      this("", stateEnum, parameters, controllerToolbox);
+      this("", stateEnum, parameters, controlledJoints);
    }
 
    public HighLevelControllerState(String namePrefix, HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
-                                   HighLevelHumanoidControllerToolbox controllerToolbox)
+                                   OneDoFJoint[] controlledJoints)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.highLevelControllerName = stateEnum;
-      OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
+      this.controlledJoints = controlledJoints;
       jointSettingsHelper = new JointSettingsHelper(parameters, controlledJoints, this, stateEnum, registry);
    }
 
-   public HighLevelControllerState(String namePrefix, HighLevelControllerName stateEnum)
+   public HighLevelControllerState(String namePrefix, HighLevelControllerName stateEnum, OneDoFJoint[] controlledJoints)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.highLevelControllerName = stateEnum;
+      this.controlledJoints = controlledJoints;
       jointSettingsHelper = null;
    }
 

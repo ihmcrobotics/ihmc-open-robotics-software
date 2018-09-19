@@ -8,7 +8,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
@@ -50,10 +49,8 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
                                              JointDesiredOutputListReadOnly highLevelControlOutput,
                                              ValkyrieCalibrationParameters calibrationParameters, TorqueOffsetPrinter torqueOffsetPrinter)
    {
-      super(controllerState, highLevelControllerParameters, highLevelControllerToolbox);
+      super(controllerState, highLevelControllerParameters, highLevelControllerToolbox.getControlledOneDoFJoints());
       this.highLevelControlOutput = highLevelControlOutput;
-
-      OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(highLevelControllerToolbox.getControlledJoints(), OneDoFJoint.class);
 
       for (OneDoFJoint controlledJoint : controlledJoints)
       {
