@@ -580,11 +580,18 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       linearFeedbackTermToPack.clipToMaxLength(positionGains.getMaximumDerivativeError());
       angularFeedbackTermToPack.clipToMaxLength(orientationGains.getMaximumDerivativeError());
-      yoErrorVelocity.setAndMatchFrame(linearFeedbackTermToPack, angularFeedbackTermToPack);
+
       if (yoFilteredErrorVelocity != null)
       {
+         linearFeedbackTermToPack.changeFrame(worldFrame);
+         angularFeedbackTermToPack.changeFrame(worldFrame);
+         yoErrorVelocity.set(linearFeedbackTermToPack, angularFeedbackTermToPack);
          yoFilteredErrorVelocity.update();
          yoFilteredErrorVelocity.get(linearFeedbackTermToPack, angularFeedbackTermToPack);
+      }
+      else
+      {
+         yoErrorVelocity.setAndMatchFrame(linearFeedbackTermToPack, angularFeedbackTermToPack);
       }
       
 

@@ -454,12 +454,17 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.changeFrame(controlFrame);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
-      yoErrorLinearVelocity.setMatchingFrame(feedbackTermToPack);
 
       if (yoFilteredErrorLinearVelocity != null)
       {
+         feedbackTermToPack.changeFrame(worldFrame);
+         yoErrorLinearVelocity.set(feedbackTermToPack);
          yoFilteredErrorLinearVelocity.update();
          feedbackTermToPack.set(yoFilteredErrorLinearVelocity);
+      }
+      else
+      {
+         yoErrorLinearVelocity.setMatchingFrame(feedbackTermToPack);
       }
 
       if (linearGainsFrame != null)

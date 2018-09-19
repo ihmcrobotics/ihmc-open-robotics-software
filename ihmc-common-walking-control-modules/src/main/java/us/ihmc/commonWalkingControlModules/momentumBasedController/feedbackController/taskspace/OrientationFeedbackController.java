@@ -472,12 +472,17 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       feedbackTermToPack.changeFrame(endEffectorFrame);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
-      yoErrorAngularVelocity.setMatchingFrame(feedbackTermToPack);
 
       if (yoFilteredErrorAngularVelocity != null)
       {
+         feedbackTermToPack.changeFrame(worldFrame);
+         yoErrorAngularVelocity.set(feedbackTermToPack);
          yoFilteredErrorAngularVelocity.update();
          feedbackTermToPack.set(yoFilteredErrorAngularVelocity);
+      }
+      else
+      {
+         yoErrorAngularVelocity.setMatchingFrame(feedbackTermToPack);
       }
 
       if (angularGainsFrame != null)
