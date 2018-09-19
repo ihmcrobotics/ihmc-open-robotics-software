@@ -4,15 +4,13 @@ import java.security.InvalidParameterException;
 import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.math.FastFourierTransform;
 
@@ -26,6 +24,7 @@ public class TrajectoryMathTools
    private final FastFourierTransform fft;
    private final ComplexNumber[] tempComplex1;
    private final ComplexNumber[] tempComplex2;
+
 
    public TrajectoryMathTools(int maxNumberOfCoefficients)
    {
@@ -861,8 +860,152 @@ public class TrajectoryMathTools
 
          currentSegmentIndex++;
       }
-
    }
+
+   private final RecyclingArrayList<Point3D> initialBounds = new RecyclingArrayList<>(Point3D::new);
+   private final RecyclingArrayList<Point3D> midpointBounds = new RecyclingArrayList<>(Point3D::new);
+   private final RecyclingArrayList<Point3D> finalBounds = new RecyclingArrayList<>(Point3D::new);
+
+
+   public void resampleTrajectoryToMatchWaypoints(SegmentedFrameTrajectory3D trajectoryToResample, SegmentedFrameTrajectory3D trajectoryToMatch, double minimumTimeDeltaForResample)
+   {
+      stretchTrajectoriesToMatchBounds(trajectoryToResample, trajectoryToMatch);
+
+      for (int currentSegmentIndex = 0; currentSegmentIndex < trajectoryToResample.getNumberOfSegments() - 1; currentSegmentIndex++)
+      {
+         double waypointTime = trajectoryToResample.getSegment(currentSegmentIndex).getFinalTime();
+         int closestOtherKnotIndex = 0;
+         double minDistanceToOtherKnot = Double.POSITIVE_INFINITY;
+         for (int otherKnotIndex = 0; otherKnotIndex < trajectoryToMatch.getNumberOfSegments() - 1; otherKnotIndex++)
+         {
+            double timeDelta = Math.abs(trajectoryToMatch.getSegment(otherKnotIndex).getFinalTime() - waypointTime);
+            if (timeDelta < minDistanceToOtherKnot)
+            {
+               minDistanceToOtherKnot = timeDelta;
+               closestOtherKnotIndex = otherKnotIndex;
+            }
+         }
+
+         if (minDistanceToOtherKnot > minimumTimeDeltaForResample)
+            continue;
+
+
+         double timeToResampleTo = trajectoryToMatch.getSegment(closestOtherKnotIndex).getFinalTime();
+         FrameTrajectory3D nextTrajectory = trajectoryToResample.getSegment(currentSegmentIndex + 1);
+         FrameTrajectory3D currentTrajectory = trajectoryToResample.getSegment(currentSegmentIndex);
+         FrameTrajectory3D trajectoryAtTime = trajectoryToResample.getCurrentSegment(timeToResampleTo);
+
+         double startTime = currentTrajectory.getInitialTime();
+         double endTime = nextTrajectory.getFinalTime();
+
+         int maxOrder = Math.max(currentTrajectory.getNumberOfCoefficients(), nextTrajectory.getNumberOfCoefficients());
+
+         int currentNumberOfInitialBounds = Math.floorDiv(currentTrajectory.getNumberOfCoefficients(), 2);
+         int currentNumberOfFinalBounds = maxOrder - currentNumberOfInitialBounds;
+         int nextNumberOfFinalBounds = Math.floorDiv(currentTrajectory.getNumberOfCoefficients(), 2);
+         int nextNumberOfInitialBounds = maxOrder - nextNumberOfFinalBounds;
+
+         // get bounds
+         initialBounds.clear();
+         midpointBounds.clear();
+         finalBounds.clear();
+
+         for (int order = 0; order < currentNumberOfInitialBounds; order++)
+         {
+            for (Axis axis : Axis.values)
+            {
+               initialBounds.getAndGrowIfNeeded(order).setElement(axis.ordinal(), currentTrajectory.getDerivative(axis.ordinal(), order, startTime));
+            }
+         }
+         for (int order = 0; order < Math.max(currentNumberOfFinalBounds, nextNumberOfInitialBounds); order++)
+         {
+            for (Axis axis : Axis.values)
+            {
+               midpointBounds.getAndGrowIfNeeded(order).setElement(axis.ordinal(), trajectoryAtTime.getDerivative(axis.ordinal(), order, timeToResampleTo));
+            }
+         }
+         for (int order = 0; order < nextNumberOfFinalBounds; order++)
+         {
+            for (Axis axis : Axis.values)
+            {
+               finalBounds.getAndGrowIfNeeded(order).setElement(axis.ordinal(), nextTrajectory.getDerivative(axis.ordinal(), order, endTime));
+            }
+         }
+
+         currentTrajectory.reshape(maxOrder);
+         currentTrajectory.setTime(startTime, timeToResampleTo);
+
+         int currentConstraintRow = 0;
+         for (int initialConstraintOrder = 0; initialConstraintOrder < currentNumberOfInitialBounds; initialConstraintOrder++, currentConstraintRow++)
+         {
+            currentTrajectory.setConstraintRow(currentConstraintRow, startTime, initialBounds.get(initialConstraintOrder), initialConstraintOrder);
+         }
+
+         for (int finalConstraintOrder = 0; finalConstraintOrder < currentNumberOfFinalBounds; finalConstraintOrder++, currentConstraintRow++)
+         {
+            currentTrajectory.setConstraintRow(currentConstraintRow, timeToResampleTo, midpointBounds.get(finalConstraintOrder), finalConstraintOrder);
+         }
+
+         currentTrajectory.solveForCoefficients();
+         currentTrajectory.setCoefficientVariables();
+
+         nextTrajectory.reshape(maxOrder);
+         nextTrajectory.setTime(timeToResampleTo, endTime);
+
+         int nextConstraintRow = 0;
+         for (int initialConstraintOrder = 0; initialConstraintOrder < nextNumberOfInitialBounds; initialConstraintOrder++, nextConstraintRow++)
+         {
+            nextTrajectory.setConstraintRow(nextConstraintRow, timeToResampleTo, midpointBounds.get(initialConstraintOrder), initialConstraintOrder);
+         }
+
+         for (int finalConstraintOrder = 0; finalConstraintOrder < nextNumberOfFinalBounds; finalConstraintOrder++, nextConstraintRow++)
+         {
+            nextTrajectory.setConstraintRow(nextConstraintRow, endTime, finalBounds.get(finalConstraintOrder), finalConstraintOrder);
+         }
+
+         nextTrajectory.solveForCoefficients();
+         nextTrajectory.setCoefficientVariables();
+      }
+   }
+
+   public static void stretchTrajectoriesToMatchBounds(SegmentedFrameTrajectory3D trajectory1, SegmentedFrameTrajectory3D trajectory2)
+   {
+      FrameTrajectory3D firstSegment1 = trajectory1.getFirstSegment();
+      FrameTrajectory3D firstSegment2 = trajectory2.getFirstSegment();
+
+      FrameTrajectory3D lastSegment1 = trajectory1.getLastSegment();
+      FrameTrajectory3D lastSegment2 = trajectory2.getLastSegment();
+
+      if (firstSegment1.getInitialTime() < firstSegment2.getInitialTime())
+         firstSegment2.setInitialTimeMaintainingBounds(firstSegment1.getInitialTime());
+      else
+         firstSegment1.setInitialTimeMaintainingBounds(firstSegment2.getInitialTime());
+
+      if (lastSegment1.getFinalTime() > lastSegment2.getFinalTime())
+         lastSegment2.setFinalTimeMaintainingBounds(lastSegment1.getFinalTime());
+      else
+         lastSegment1.setFinalTimeMaintainingBounds(lastSegment2.getFinalTime());
+   }
+
+   public static void shrinkTrajectoriesToMatchBounds(SegmentedFrameTrajectory3D trajectory1, SegmentedFrameTrajectory3D trajectory2)
+   {
+      FrameTrajectory3D firstSegment1 = trajectory1.getFirstSegment();
+      FrameTrajectory3D firstSegment2 = trajectory2.getFirstSegment();
+
+      FrameTrajectory3D lastSegment1 = trajectory1.getLastSegment();
+      FrameTrajectory3D lastSegment2 = trajectory2.getLastSegment();
+
+      if (firstSegment1.getInitialTime() < firstSegment2.getInitialTime())
+         firstSegment1.setInitialTimeMaintainingBounds(firstSegment2.getInitialTime());
+      else
+         firstSegment2.setInitialTimeMaintainingBounds(firstSegment1.getInitialTime());
+
+      if (lastSegment1.getFinalTime() > lastSegment2.getFinalTime())
+         lastSegment1.setFinalTimeMaintainingBounds(lastSegment2.getFinalTime());
+      else
+         lastSegment2.setFinalTimeMaintainingBounds(lastSegment1.getFinalTime());
+   }
+
 
    public static void combineSegments(SegmentedFrameTrajectory3D trajectory, int firstSegmentIndex)
    {

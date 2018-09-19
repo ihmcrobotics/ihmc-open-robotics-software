@@ -692,6 +692,41 @@ public class Trajectory3D
       }
    }
 
+   public void reshape(int numberOfCoefficientsRequired)
+   {
+      for (Axis axis : Axis.values)
+      {
+         getTrajectory(axis).reshape(numberOfCoefficientsRequired);
+      }
+   }
+
+   public void setConstraintRow(int row, double time, Tuple3DReadOnly value, int derivativeOrder)
+   {
+      for (Axis axis : Axis.values)
+      {
+         int index = axis.ordinal();
+         getTrajectory(index).setConstraintRow(row, time, value.getElement(index), derivativeOrder);
+      }
+   }
+
+   public void solveForCoefficients()
+   {
+      for (Axis axis : Axis.values)
+      {
+         getTrajectory(axis).solveForCoefficients();
+      }
+   }
+
+   public void setCoefficientVariables()
+   {
+      for (Axis axis : Axis.values)
+      {
+         getTrajectory(axis).setCoefficientVariables();
+      }
+   }
+
+
+
    @Override
    public String toString()
    {
@@ -706,6 +741,11 @@ public class Trajectory3D
    public void getDerivative(int order, double x, Tuple3DBasics dTrajectory)
    {
       dTrajectory.set(xTrajectory.getDerivative(order, x), yTrajectory.getDerivative(order, x), zTrajectory.getDerivative(order, x));
+   }
+
+   public double getDerivative(int index, int order, double time)
+   {
+      return getTrajectory(index).getDerivative(order, time);
    }
 
    public void getStartPoint(Point3DBasics positionToPack)

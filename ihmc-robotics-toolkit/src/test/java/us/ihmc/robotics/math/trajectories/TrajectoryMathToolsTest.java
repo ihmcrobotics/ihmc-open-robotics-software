@@ -9,6 +9,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -1339,7 +1340,7 @@ public class TrajectoryMathToolsTest
 
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000000)
+   @Test(timeout = 30000)
    public void testRemoveShortSegments()
    {
       SegmentedFrameTrajectory3D traj = new SegmentedFrameTrajectory3D(4, 2);
@@ -1426,4 +1427,554 @@ public class TrajectoryMathToolsTest
 
    }
 
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testStretchTrajectoryToMatchBounds()
+   {
+      SegmentedFrameTrajectory3D traj1 = new SegmentedFrameTrajectory3D(4, 2);
+      SegmentedFrameTrajectory3D traj2 = new SegmentedFrameTrajectory3D(4, 2);
+
+      traj1.add().setLinear(0.0, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.1, 3.0, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      traj2.add().setLinear(0.1, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj2.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.1, 2.9, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      TrajectoryMathTools.stretchTrajectoriesToMatchBounds(traj1, traj2);
+
+      assertEquals(0.0, traj1.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(3.0, traj1.getSegment(3).getFinalTime(), epsilon);
+
+      assertEquals(0.0, traj2.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(3.0, traj2.getSegment(3).getFinalTime(), epsilon);
+
+
+      traj1.reset();
+      traj2.reset();
+
+      traj2.add().setLinear(0.0, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj2.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.1, 3.0, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      traj1.add().setLinear(0.1, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.1, 2.9, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      TrajectoryMathTools.stretchTrajectoriesToMatchBounds(traj1, traj2);
+
+      assertEquals(0.0, traj1.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(3.0, traj1.getSegment(3).getFinalTime(), epsilon);
+
+      assertEquals(0.0, traj2.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(3.0, traj2.getSegment(3).getFinalTime(), epsilon);
+
+
+      traj1.reset();
+      traj2.reset();
+
+      traj2.add().setLinear(0.1, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj2.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.1, 3.0, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      traj1.add().setLinear(0.0, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.1, 2.9, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      TrajectoryMathTools.stretchTrajectoriesToMatchBounds(traj1, traj2);
+
+      assertEquals(0.0, traj1.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(3.0, traj1.getSegment(3).getFinalTime(), epsilon);
+
+      assertEquals(0.0, traj2.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(3.0, traj2.getSegment(3).getFinalTime(), epsilon);
+
+
+      traj1.reset();
+      traj2.reset();
+
+      traj2.add().setLinear(0.0, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj2.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.1, 2.9, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      traj1.add().setLinear(0.1, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.1, 3.0, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      TrajectoryMathTools.stretchTrajectoriesToMatchBounds(traj1, traj2);
+
+      assertEquals(0.0, traj1.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(3.0, traj1.getSegment(3).getFinalTime(), epsilon);
+
+      assertEquals(0.0, traj2.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(3.0, traj2.getSegment(3).getFinalTime(), epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testShrinkTrajectoryToMatchBounds()
+   {
+      SegmentedFrameTrajectory3D traj1 = new SegmentedFrameTrajectory3D(4, 2);
+      SegmentedFrameTrajectory3D traj2 = new SegmentedFrameTrajectory3D(4, 2);
+
+      traj1.add().setLinear(0.0, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.1, 3.0, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      traj2.add().setLinear(0.1, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj2.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.1, 2.9, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      TrajectoryMathTools.shrinkTrajectoriesToMatchBounds(traj1, traj2);
+
+      assertEquals(0.1, traj1.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(2.9, traj1.getSegment(3).getFinalTime(), epsilon);
+
+      assertEquals(0.1, traj2.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(2.9, traj2.getSegment(3).getFinalTime(), epsilon);
+
+
+      traj1.reset();
+      traj2.reset();
+
+      traj2.add().setLinear(0.0, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj2.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.1, 3.0, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      traj1.add().setLinear(0.1, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.1, 2.9, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      TrajectoryMathTools.shrinkTrajectoriesToMatchBounds(traj1, traj2);
+
+      assertEquals(0.1, traj1.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(2.9, traj1.getSegment(3).getFinalTime(), epsilon);
+
+      assertEquals(0.1, traj2.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(2.9, traj2.getSegment(3).getFinalTime(), epsilon);
+
+
+      traj1.reset();
+      traj2.reset();
+
+      traj2.add().setLinear(0.1, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj2.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.1, 3.0, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      traj1.add().setLinear(0.0, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.1, 2.9, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      TrajectoryMathTools.shrinkTrajectoriesToMatchBounds(traj1, traj2);
+
+      assertEquals(0.1, traj1.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(2.9, traj1.getSegment(3).getFinalTime(), epsilon);
+
+      assertEquals(0.1, traj2.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(2.9, traj2.getSegment(3).getFinalTime(), epsilon);
+
+
+      traj1.reset();
+      traj2.reset();
+
+      traj2.add().setLinear(0.0, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj2.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.1, 2.9, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      traj1.add().setLinear(0.1, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setLinear(1.0, 2.0, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.0, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.add().setLinear(2.1, 3.0, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      TrajectoryMathTools.shrinkTrajectoriesToMatchBounds(traj1, traj2);
+
+      assertEquals(0.1, traj1.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj1.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj1.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(2.9, traj1.getSegment(3).getFinalTime(), epsilon);
+
+      assertEquals(0.1, traj2.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(2.0, traj2.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(2.9, traj2.getSegment(3).getFinalTime(), epsilon);
+   }
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testResampleTrajectoryToMatchWaypoints()
+   {
+      TrajectoryMathTools tools = new TrajectoryMathTools(10);
+
+      SegmentedFrameTrajectory3D traj1 = new SegmentedFrameTrajectory3D(4, 5);
+      SegmentedFrameTrajectory3D traj1Desired = new SegmentedFrameTrajectory3D(4, 5);
+      SegmentedFrameTrajectory3D traj2 = new SegmentedFrameTrajectory3D(4, 5);
+
+      traj1.add().setLinear(0.0, 1.5, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setLinear(1.5, 3.0, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      traj1Desired.setAll(traj1);
+
+      traj2.add().setLinear(0.1, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj2.add().setLinear(1.0, 1.4, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(1.4, 1.6, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(1.6, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setLinear(2.1, 2.9, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      tools.resampleTrajectoryToMatchWaypoints(traj1, traj2, 0.11);
+
+      FramePoint3D expectedPosition = new FramePoint3D();
+      FrameVector3D expectedVelocity = new FrameVector3D();
+      FrameVector3D expectedAcceleration = new FrameVector3D();
+
+      FramePoint3D actualPosition = new FramePoint3D();
+      FrameVector3D actualVelocity = new FrameVector3D();
+      FrameVector3D actualAcceleration = new FrameVector3D();
+
+      double[] timesToTest = new double[]{0.0, 1.4, 3.0};
+
+      for (double time : timesToTest)
+      {
+         traj1Desired.update(time, expectedPosition, expectedVelocity, expectedAcceleration);
+         traj1.update(time, actualPosition, actualVelocity, actualAcceleration);
+
+         EuclidCoreTestTools.assertTuple3DEquals("Failed at time " + time + ".", expectedPosition, actualPosition, epsilon);
+      }
+
+      assertEquals(0.0, traj1.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.4, traj1.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.4, traj1.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(3.0, traj1.getSegment(1).getFinalTime(), epsilon);
+
+      assertEquals(0.0, traj2.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.0, traj2.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(1.4, traj2.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(1.4, traj2.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(1.6, traj2.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(1.6, traj2.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(3).getFinalTime(), epsilon);
+      assertEquals(2.1, traj2.getSegment(4).getInitialTime(), epsilon);
+      assertEquals(3.0, traj2.getSegment(4).getFinalTime(), epsilon);
+
+
+
+      traj1.reset();
+      traj1Desired.reset();
+      traj2.reset();
+
+      traj1.add().setCubic(0.0, 1.5, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setCubic(1.5, 3.0, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      traj1Desired.setAll(traj1);
+
+      traj2.add().setCubic(0.1, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj2.add().setCubic(1.0, 1.4, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setCubic(1.4, 1.6, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setCubic(1.6, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setCubic(2.1, 2.9, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      tools.resampleTrajectoryToMatchWaypoints(traj1, traj2, 0.11);
+
+      expectedPosition = new FramePoint3D();
+      expectedVelocity = new FrameVector3D();
+      expectedAcceleration = new FrameVector3D();
+
+      actualPosition = new FramePoint3D();
+      actualVelocity = new FrameVector3D();
+      actualAcceleration = new FrameVector3D();
+
+      timesToTest = new double[]{0.0, 1.4, 3.0};
+
+      for (double time : timesToTest)
+      {
+         traj1Desired.update(time, expectedPosition, expectedVelocity, expectedAcceleration);
+         traj1.update(time, actualPosition, actualVelocity, actualAcceleration);
+
+         EuclidCoreTestTools.assertTuple3DEquals("Failed at time " + time + ".", expectedPosition, actualPosition, epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals("Failed at time " + time + ".", expectedVelocity, actualVelocity, epsilon);
+      }
+
+      assertEquals(0.0, traj1.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.4, traj1.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.4, traj1.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(3.0, traj1.getSegment(1).getFinalTime(), epsilon);
+
+
+
+
+
+
+      traj1.reset();
+      traj1Desired.reset();
+      traj2.reset();
+
+      traj1.add().setCubic(0.0, 1.5, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setCubic(1.5, 3.0, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      traj1Desired.setAll(traj1);
+
+      traj2.add().setCubic(0.1, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj2.add().setCubic(1.0, 1.3, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setCubic(1.4, 1.6, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setCubic(1.6, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setCubic(2.1, 2.9, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      tools.resampleTrajectoryToMatchWaypoints(traj1, traj2, 0.11);
+
+      expectedPosition = new FramePoint3D();
+      expectedVelocity = new FrameVector3D();
+      expectedAcceleration = new FrameVector3D();
+
+      actualPosition = new FramePoint3D();
+      actualVelocity = new FrameVector3D();
+      actualAcceleration = new FrameVector3D();
+
+
+      assertEquals(0.0, traj1.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.6, traj1.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.6, traj1.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(3.0, traj1.getSegment(1).getFinalTime(), epsilon);
+
+      timesToTest = new double[]{0.0, 1.6, 3.0};
+
+      for (double time : timesToTest)
+      {
+         traj1Desired.update(time, expectedPosition, expectedVelocity, expectedAcceleration);
+         traj1.update(time, actualPosition, actualVelocity, actualAcceleration);
+
+         EuclidCoreTestTools.assertTuple3DEquals("Failed at time " + time + ".", expectedPosition, actualPosition, epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals("Failed at time " + time + ".", expectedVelocity, actualVelocity, epsilon);
+      }
+
+
+
+
+      traj1.reset();
+      traj1Desired.reset();
+      traj2.reset();
+
+      traj1.add().setCubic(0.0, 1.5, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.add().setCubic(1.5, 3.0, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      traj1Desired.setAll(traj1);
+
+      traj2.add().setCubic(0.1, 1.0, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj2.add().setCubic(1.0, 1.3, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setCubic(1.4, 1.7, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setCubic(1.6, 2.1, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj2.add().setCubic(2.1, 2.9, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+
+      tools.resampleTrajectoryToMatchWaypoints(traj1, traj2, 0.11);
+
+      expectedPosition = new FramePoint3D();
+      expectedVelocity = new FrameVector3D();
+      expectedAcceleration = new FrameVector3D();
+
+      actualPosition = new FramePoint3D();
+      actualVelocity = new FrameVector3D();
+      actualAcceleration = new FrameVector3D();
+
+
+      assertEquals(0.0, traj1.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(1.5, traj1.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(1.5, traj1.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(3.0, traj1.getSegment(1).getFinalTime(), epsilon);
+
+      timesToTest = new double[]{0.0, 1.5, 3.0};
+
+      for (double time : timesToTest)
+      {
+         traj1Desired.update(time, expectedPosition, expectedVelocity, expectedAcceleration);
+         traj1.update(time, actualPosition, actualVelocity, actualAcceleration);
+
+         EuclidCoreTestTools.assertTuple3DEquals("Failed at time " + time + ".", expectedPosition, actualPosition, epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals("Failed at time " + time + ".", expectedVelocity, actualVelocity, epsilon);
+      }
+
+
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testResampleTrajectoryToMatchWaypointsHard()
+   {
+      TrajectoryMathTools tools = new TrajectoryMathTools(10);
+
+      SegmentedFrameTrajectory3D traj1 = new SegmentedFrameTrajectory3D(4, 5);
+      SegmentedFrameTrajectory3D traj1Desired = new SegmentedFrameTrajectory3D(4, 5);
+      SegmentedFrameTrajectory3D traj2 = new SegmentedFrameTrajectory3D(4, 5);
+
+      Random random = new Random(1738L);
+
+      traj1.add().setCubic(0.0, 0.25,  EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0,10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj1.add().setCubic(0.25, 0.5,  EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0,10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj1.add().setCubic(0.5, 0.75,  EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0,10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj1.add().setCubic(0.75, 1.0,  EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0,10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj1.add().setCubic(1.0, 1.25,  EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0,10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj1.add().setCubic(1.25, 1.50, EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0,10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj1.add().setCubic(1.5, 1.75,  EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0,10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj1.add().setCubic(1.75, 2.0,  EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0,10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+
+      traj1Desired.setAll(traj1);
+
+      traj2.add().setCubic(0.0, 0.13, EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj2.add().setCubic(0.13, 0.26, EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj2.add().setCubic(0.26, 0.4, EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj2.add().setCubic(0.4, 0.52, EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj2.add().setCubic(0.52, 1.01, EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj2.add().setCubic(1.01, 1.05, EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj2.add().setCubic(1.05, 1.26, EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj2.add().setCubic(1.26, 1.48, EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+      traj2.add().setCubic(1.48, 1.9, EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0), EuclidCoreRandomTools.nextPoint3D(random, 10.0), EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+
+      tools.resampleTrajectoryToMatchWaypoints(traj1, traj2, 0.11);
+
+      FramePoint3D expectedPosition = new FramePoint3D();
+      FrameVector3D expectedVelocity = new FrameVector3D();
+      FrameVector3D expectedAcceleration = new FrameVector3D();
+
+      FramePoint3D actualPosition = new FramePoint3D();
+      FrameVector3D actualVelocity = new FrameVector3D();
+      FrameVector3D actualAcceleration = new FrameVector3D();
+
+      assertEquals(0.0, traj1.getSegment(0).getInitialTime(), epsilon);
+      assertEquals(0.26, traj1.getSegment(0).getFinalTime(), epsilon);
+      assertEquals(0.26, traj1.getSegment(1).getInitialTime(), epsilon);
+      assertEquals(0.52, traj1.getSegment(1).getFinalTime(), epsilon);
+      assertEquals(0.52, traj1.getSegment(2).getInitialTime(), epsilon);
+      assertEquals(0.75, traj1.getSegment(2).getFinalTime(), epsilon);
+      assertEquals(0.75, traj1.getSegment(3).getInitialTime(), epsilon);
+      assertEquals(1.01, traj1.getSegment(3).getFinalTime(), epsilon);
+      assertEquals(1.01, traj1.getSegment(4).getInitialTime(), epsilon);
+      assertEquals(1.26, traj1.getSegment(4).getFinalTime(), epsilon);
+      assertEquals(1.26, traj1.getSegment(5).getInitialTime(), epsilon);
+      assertEquals(1.48, traj1.getSegment(5).getFinalTime(), epsilon);
+      assertEquals(1.48, traj1.getSegment(6).getInitialTime(), epsilon);
+      assertEquals(1.75, traj1.getSegment(6).getFinalTime(), epsilon);
+      assertEquals(1.75, traj1.getSegment(7).getInitialTime(), epsilon);
+      assertEquals(2.0, traj1.getSegment(7).getFinalTime(), epsilon);
+
+      double[] timesToTest = new double[]{0.0, 0.26, 0.52, 0.75, 1.01, 1.26, 1.48, 1.75, 2.0};
+
+      for (double time : timesToTest)
+      {
+         traj1Desired.update(time, expectedPosition, expectedVelocity, expectedAcceleration);
+         traj1.update(time, actualPosition, actualVelocity, actualAcceleration);
+
+         EuclidCoreTestTools.assertTuple3DEquals("Failed at time " + time + ".", expectedPosition, actualPosition, epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals("Failed at time " + time + ".", expectedVelocity, actualVelocity, epsilon);
+      }
+
+
+   }
 }

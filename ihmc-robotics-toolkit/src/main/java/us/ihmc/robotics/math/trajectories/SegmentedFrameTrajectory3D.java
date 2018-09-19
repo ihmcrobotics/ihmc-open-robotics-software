@@ -159,6 +159,16 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
       return segments.add();
    }
 
+   public FrameTrajectory3D getFirstSegment()
+   {
+      return segments.getFirst();
+   }
+
+   public FrameTrajectory3D getLastSegment()
+   {
+      return segments.getLast();
+   }
+
    public FrameTrajectory3D getSegment(int segmentIndex)
    {
       return segments.get(segmentIndex);
