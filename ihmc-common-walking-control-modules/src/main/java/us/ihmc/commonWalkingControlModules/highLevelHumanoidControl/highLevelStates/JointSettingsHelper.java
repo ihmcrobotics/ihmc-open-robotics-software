@@ -146,6 +146,10 @@ public class JointSettingsHelper
             jointDesiredOutput.setResetIntegrators(isLoaded != wasLoaded);
             jointsLoaded[jointIdx].set(isLoaded);
          }
+         else
+         {
+            jointDesiredOutput.setResetIntegrators(false);
+         }
 
          JointAccelerationIntegrationParametersReadOnly integrationParametersNoLoad = accelerationIntegrationSettingsNoLoad[jointIdx];
          JointAccelerationIntegrationParametersReadOnly integrationParametersLoaded = accelerationIntegrationSettingsLoaded[jointIdx];
