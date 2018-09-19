@@ -635,17 +635,21 @@ public class TrajectoryMathTools
    public static void getDerivative(Trajectory derivativeToPack, Trajectory trajectoryToDifferentiate)
    {
       if (derivativeToPack.getMaximumNumberOfCoefficients() < trajectoryToDifferentiate.getNumberOfCoefficients() - 1)
+      {
          throw new InvalidParameterException("Not enough coefficients to store the result of differentiation");
+      }
 
       derivativeToPack.reshape(Math.max(trajectoryToDifferentiate.getNumberOfCoefficients() - 1, 1));
-
       if (trajectoryToDifferentiate.getNumberOfCoefficients() == 1)
       {
          derivativeToPack.setConstant(trajectoryToDifferentiate.getInitialTime(), trajectoryToDifferentiate.getFinalTime(), 0);
          return;
       }
+
       for (int i = trajectoryToDifferentiate.getNumberOfCoefficients() - 1; i > 0; i--)
+      {
          derivativeToPack.setDirectlyFast(i - 1, i * trajectoryToDifferentiate.getCoefficient(i));
+      }
       derivativeToPack.setTime(trajectoryToDifferentiate.getInitialTime(), trajectoryToDifferentiate.getFinalTime());
    }
 
