@@ -479,21 +479,6 @@ public class TrajectoryTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testGetDerivative()
-   {
-      Trajectory traj = new Trajectory(10);
-      Trajectory dervTraj = new Trajectory(9);
-      traj.setCubic(1, 10, 0, 8);
-      traj.getDerivative(dervTraj, 1);
-
-      assert (dervTraj.getNumberOfCoefficients() == 3);
-      assert (MathTools.epsilonCompare(1.0 * traj.getCoefficient(1), dervTraj.getCoefficient(0), 1));
-      assert (MathTools.epsilonCompare(2.0 * traj.getCoefficient(2), dervTraj.getCoefficient(1), 1));
-      assert (MathTools.epsilonCompare(3.0 * traj.getCoefficient(3), dervTraj.getCoefficient(2), 1));
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testQuinticTrajectory()
    {
       Trajectory quinticTrajectory = new Trajectory(-10.0, 10.0, new double[] {1.0, 1.0, 1.0, 1.0, 1.0, 1.0});
