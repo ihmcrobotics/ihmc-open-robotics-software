@@ -638,7 +638,7 @@ public class Trajectory
       setCoefficientVariables();
    }
 
-   private void solveForCoefficients()
+   public void solveForCoefficients()
    {
       solver.setA(constraintMatrix);
       solver.solve(constraintVector, coefficientVector);
@@ -821,7 +821,7 @@ public class Trajectory
       return maximumNumberOfCoefficients;
    }
 
-   private void setConstraintRow(int row, double x, double desiredZDerivative, int derivativeOrderWithPositionBeingZero)
+   public void setConstraintRow(int row, double x, double desiredZDerivative, int derivativeOrderWithPositionBeingZero)
    {
       double xPower = 1.0;
 
@@ -854,7 +854,7 @@ public class Trajectory
       setConstraintRow(row, x, zAcceleration, 2);
    }
 
-   private void setCoefficientVariables()
+   public void setCoefficientVariables()
    {
       int row = 0;
       for (; row < numberOfCoefficients; row++)
