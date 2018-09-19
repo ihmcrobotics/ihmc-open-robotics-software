@@ -94,6 +94,25 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
       }
    }
 
+   public void updateRobotConfigurationBasedOnJointDesiredOutputPositions()
+   {
+      for (int i = 0; i < revoluteJoints.size(); i++)
+      {
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = revoluteJoints.get(i);
+         OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
+         OneDoFJoint revoluteJoint = jointPair.getRight();
+         
+         double q = jointDesiredOutputList.getJointDesiredOutput(revoluteJoint).getDesiredPosition();
+         pinJoint.setQ(q);
+
+         double qd = jointDesiredOutputList.getJointDesiredOutput(revoluteJoint).getDesiredVelocity();
+         pinJoint.setQd(qd);
+
+         double qdd = jointDesiredOutputList.getJointDesiredOutput(revoluteJoint).getDesiredAcceleration();
+         pinJoint.setQdd(qdd);
+      }
+   }
+
    public void updateRobotConfigurationBasedOnFullRobotModel()
    {
       for (int i = 0; i < revoluteJoints.size(); i++)

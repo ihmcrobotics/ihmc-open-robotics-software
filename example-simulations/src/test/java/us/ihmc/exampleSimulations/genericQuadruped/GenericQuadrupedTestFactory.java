@@ -5,6 +5,7 @@ import java.io.IOException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.NetClassList;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
@@ -35,7 +36,9 @@ import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedSimulationFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
@@ -58,7 +61,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private static final double SIMULATION_DT = 1e-4;
    private static final double SIMULATION_GRAVITY = -9.81;
    private static final int RECORD_FREQUENCY = (int) (0.01 / SIMULATION_DT);
-   private static final boolean USE_STATE_ESTIMATOR = false;
+   private static final boolean USE_STATE_ESTIMATOR = true;
    private static final boolean SHOW_PLOTTER = true;
    private static final boolean USE_TRACK_AND_DOLLY = false;
    private static final int TEST_INPUT_UPDATE_FREQUENCY = (int) (0.05 / SIMULATION_DT);
@@ -75,18 +78,15 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<Boolean> useNetworking = new OptionalFactoryField<>("useNetworking");
    private final OptionalFactoryField<SimulationConstructionSetParameters> scsParameters = new OptionalFactoryField<>("scsParameters");
 
+   private FullQuadrupedRobotModel fullRobotModel;
    private QuadrupedTeleopManager stepTeleopManager;
    private YoGraphicsListRegistry graphicsListRegistry;
    private String robotName;
+   private QuadrupedSimulationFactory simulationFactory;
 
    public GenericQuadrupedTestFactory()
    {
-      this(false);
-   }
-
-   public GenericQuadrupedTestFactory(boolean keepSCSUp)
-   {
-      simulationTestingParameters.setKeepSCSUp(keepSCSUp);
+      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
    }
 
    @Override
@@ -106,11 +106,11 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       QuadrupedInitialPositionParameters initialPositionParameters = initialPosition.get();
       GroundContactParameters groundContactParameters = new GenericQuadrupedGroundContactParameters();
       QuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
-      StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters();
+      StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters(false, CONTROL_DT);
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new GenericQuadrupedPositionBasedCrawlControllerParameters();
       GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
 
-      FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
+      fullRobotModel = modelFactory.createFullRobotModel();
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(
             fullRobotModel.getTotalMass());
@@ -122,7 +122,9 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       OutputWriter outputWriter = new SimulatedQuadrupedOutputWriter(sdfRobot, fullRobotModel, jointDesiredOutputList, CONTROL_DT);
 
-      QuadrupedSimulationFactory simulationFactory = new QuadrupedSimulationFactory();
+      QuadrantDependentList<Boolean> kneeOrientationsOutward = new QuadrantDependentList<>(false, false, false, false);
+
+      simulationFactory = new QuadrupedSimulationFactory();
       simulationFactory.setControlDT(CONTROL_DT);
       simulationFactory.setSimulationDT(SIMULATION_DT);
       simulationFactory.setGravity(SIMULATION_GRAVITY);
@@ -140,6 +142,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setInitialPositionParameters(initialPositionParameters);
       simulationFactory.setInitialOffset(initialOffset.get());
       simulationFactory.setFullRobotModel(fullRobotModel);
+      simulationFactory.setKneeOrientationsOutward(kneeOrientationsOutward);
       simulationFactory.setControllerCoreOptimizationSettings(controllerCoreOptimizationSettings);
       simulationFactory.setPhysicalProperties(physicalProperties);
       simulationFactory.setUseNetworking(useNetworking.get());
@@ -272,5 +275,17 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    public String getRobotName()
    {
       return robotName;
+   }
+
+   @Override
+   public FullRobotModel getFullRobotModel()
+   {
+      return fullRobotModel;
+   }
+
+   @Override
+   public void close()
+   {
+      simulationFactory.close();
    }
 }

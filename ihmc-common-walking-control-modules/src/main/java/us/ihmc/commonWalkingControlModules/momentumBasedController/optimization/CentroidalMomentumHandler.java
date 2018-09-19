@@ -19,6 +19,7 @@ import us.ihmc.robotics.screwTheory.SpatialForceVector;
 public class CentroidalMomentumHandler
 {
    private final SpatialForceVector centroidalMomentumRate;
+   private final Momentum centroidalMomentum;
 
    private final DenseMatrix64F centroidalMomentumEquationRightHandSide = new DenseMatrix64F(Momentum.SIZE, 1);
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
@@ -33,6 +34,7 @@ public class CentroidalMomentumHandler
    public CentroidalMomentumHandler(InverseDynamicsJoint[] jointsToConsider, ReferenceFrame centerOfMassFrame)
    {
       centroidalMomentumRate = new SpatialForceVector(centerOfMassFrame);
+      centroidalMomentum = new Momentum(centerOfMassFrame);
       this.centerOfMassFrame = centerOfMassFrame;
       this.centroidalMomentumRateTermCalculator = new CentroidalMomentumRateTermCalculator(jointsToConsider, centerOfMassFrame);
    }
@@ -41,7 +43,19 @@ public class CentroidalMomentumHandler
    {
    }
 
+   /**
+    * Invalidates the internal data such that it will be updated when accessing any information such as the momentum or the centroidal momentum matrix.
+    * @deprecated Use {@link #reset()} instead
+    */
    public void compute()
+   {
+      reset();
+   }
+
+   /**
+    * Invalidates the internal data such that it will be updated when accessing any information such as the momentum or the centroidal momentum matrix.
+    */
+   public void reset()
    {
       centroidalMomentumRateTermCalculator.reset();
    }
@@ -76,9 +90,19 @@ public class CentroidalMomentumHandler
       centroidalMomentumRateTermCalculator.getMomentumRate(jointAccelerations, centroidalMomentumRate);
    }
 
+   public void computeCentroidalMomentum(DenseMatrix64F jointVelocities)
+   {
+      centroidalMomentumRateTermCalculator.getMomentum(jointVelocities, centroidalMomentum);
+   }
+
    public SpatialForceVector getCentroidalMomentumRate()
    {
       return centroidalMomentumRate;
+   }
+
+   public Momentum getCentroidalMomentum()
+   {
+      return centroidalMomentum;
    }
 
    public DenseMatrix64F getMomentumDotEquationRightHandSide(MomentumRateCommand momentumRateCommand)

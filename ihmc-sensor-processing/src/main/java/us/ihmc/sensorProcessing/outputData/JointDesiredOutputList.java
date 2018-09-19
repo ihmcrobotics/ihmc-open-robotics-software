@@ -114,4 +114,12 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
          }
       }
    }
+
+   public void requestIntegratorReset()
+   {
+      for (int jointIdx = 0; jointIdx < jointsAndData.size(); jointIdx++)
+      {
+         jointsAndData.get(jointIdx).getValue().setResetIntegrators(true);
+      }
+   }
 }

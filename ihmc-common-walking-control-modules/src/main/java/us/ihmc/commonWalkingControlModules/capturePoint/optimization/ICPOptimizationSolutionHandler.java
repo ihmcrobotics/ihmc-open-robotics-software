@@ -37,9 +37,11 @@ public class ICPOptimizationSolutionHandler
    private final YoBoolean footstepWasAdjusted;
    private final YoFrameVector2D footstepAdjustment;
    private final YoFrameVector2D clippedFootstepAdjustment;
+   private final YoFrameVector2D totalFootstepAdjustment;
 
    private final YoDouble residualCostToGo;
    private final YoDouble costToGo;
+   private final YoDouble dynamicsCostToGo;
    private final YoDouble footstepCostToGo;
    private final YoDouble copFeedbackCostToGo;
    private final YoDouble cmpFeedbackCostToGo;
@@ -81,6 +83,7 @@ public class ICPOptimizationSolutionHandler
       {
          residualCostToGo = new YoDouble(yoNamePrefix + "ResidualCostToGo", registry);
          costToGo = new YoDouble(yoNamePrefix + "CostToGo", registry);
+         dynamicsCostToGo = new YoDouble(yoNamePrefix + "DynamicsCostToGo", registry);
          footstepCostToGo = new YoDouble(yoNamePrefix + "FootstepCostToGo", registry);
          copFeedbackCostToGo = new YoDouble(yoNamePrefix + "CoPFeedbackCostToGo", registry);
          cmpFeedbackCostToGo = new YoDouble(yoNamePrefix + "CMPFeedbackCostToGo", registry);
@@ -88,6 +91,7 @@ public class ICPOptimizationSolutionHandler
       else
       {
          residualCostToGo = null;
+         dynamicsCostToGo = null;
          costToGo = null;
          footstepCostToGo = null;
          copFeedbackCostToGo = null;
@@ -100,6 +104,8 @@ public class ICPOptimizationSolutionHandler
       footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
       footstepAdjustment = new YoFrameVector2D(yoNamePrefix + "FootstepAdjustment", worldFrame, registry);
       clippedFootstepAdjustment = new YoFrameVector2D(yoNamePrefix + "ClippedFootstepAdjustment", worldFrame, registry);
+      totalFootstepAdjustment = new YoFrameVector2D(yoNamePrefix + "TotalFootstepAdjustment", worldFrame, registry);
+
 
       adjustedICPReferenceLocation = new YoFramePoint2D(yoNamePrefix + "AdjustedICPReferenceLocation", worldFrame, registry);
       footstepSolutionInControlPlane = new YoFramePoint2D(yoNamePrefix + "FootstepSolutionReturned", worldFrame, registry);
@@ -121,6 +127,7 @@ public class ICPOptimizationSolutionHandler
       if (debug)
       {
          residualCostToGo.set(solver.getCostToGo());
+         dynamicsCostToGo.set(solver.getDynamicsCostToGo());
          costToGo.set(solver.getCostToGo());
          footstepCostToGo.set(solver.getFootstepCostToGo());
          copFeedbackCostToGo.set(solver.getCoPFeedbackCostToGo());
@@ -154,6 +161,7 @@ public class ICPOptimizationSolutionHandler
       footstepAdjustment.set(locationSolution);
       footstepAdjustment.sub(referenceFootstepLocation2D);
       clippedFootstepAdjustment.sub(clippedLocationSolution, referenceFootstepLocation2D);
+      totalFootstepAdjustment.add(clippedFootstepAdjustment);
 
       footstepSolutionToPack.setPosition(clippedLocationSolution);
       unclippedFootstepSolutionToPack.set(locationSolution);
@@ -161,7 +169,6 @@ public class ICPOptimizationSolutionHandler
       this.footstepWasAdjusted.set(footstepWasAdjusted);
    }
 
-   // fixme this is wrong
    public void extractFootstepSolution(FixedFramePose3DBasics footstepSolutionToPack, FixedFrameTuple2DBasics unclippedFootstepSolutionToPack, Footstep upcomingFootstep,
                                        PlanarRegion activePlanarRegion, ICPOptimizationQPSolver solver)
    {
@@ -192,6 +199,7 @@ public class ICPOptimizationSolutionHandler
       footstepAdjustment.set(locationSolution);
       footstepAdjustment.sub(referenceFootstepLocation2D);
       clippedFootstepAdjustment.sub(clippedLocationSolution, referenceFootstepLocation2D);
+      totalFootstepAdjustment.add(clippedFootstepAdjustment);
 
       footstepSolutionToPack.setPosition(clippedLocationSolution);
       unclippedFootstepSolutionToPack.set(locationSolution);
@@ -204,6 +212,12 @@ public class ICPOptimizationSolutionHandler
       footstepAdjustment.setToZero();
       clippedFootstepAdjustment.setToZero();
       footstepWasAdjusted.set(false);
+   }
+
+   public void resetAdjustment()
+   {
+      zeroAdjustment();
+      totalFootstepAdjustment.setToZero();
    }
 
    public void updateVisualizers(FramePoint2DReadOnly desiredICP, double footstepMultiplier)
@@ -280,6 +294,11 @@ public class ICPOptimizationSolutionHandler
    public FrameVector2DReadOnly getClippedFootstepAdjustment()
    {
       return clippedFootstepAdjustment;
+   }
+
+   public FrameVector2DReadOnly getTotalFootstepAdjustment()
+   {
+      return totalFootstepAdjustment;
    }
 }
 

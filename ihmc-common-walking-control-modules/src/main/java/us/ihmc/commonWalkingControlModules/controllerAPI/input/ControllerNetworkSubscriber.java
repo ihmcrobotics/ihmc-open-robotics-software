@@ -44,7 +44,7 @@ public class ControllerNetworkSubscriber
    /** Used to filter messages coming in and report an error. */
    private final AtomicReference<MessageValidator> messageValidator;
    /** Used to synchronize the execution of a message collection. */
-   private MessageCollector messageCollector = MessageCollector.createDummyCollector();
+   private final List<MessageCollector> messageCollectors = new ArrayList<>();
 
    /** All the possible status message that can be sent to the communicator. */
    private final List<Class<? extends Settable<?>>> listOfSupportedStatusMessages;
@@ -146,17 +146,37 @@ public class ControllerNetworkSubscriber
 
    public void addMessageCollector(MessageIDExtractor messageIDExtractor)
    {
-      messageCollector = new MessageCollector(messageIDExtractor, listOfSupportedControlMessages);
+      addMessageCollectors(messageIDExtractor, 1);
+   }
+
+   public void addMessageCollectors(MessageIDExtractor messageIDExtractor, int numberOfSimultaneousCollectionsToSupport)
+   {
       IHMCRealtimeROS2Publisher<MessageCollectionNotification> publisher = createPublisher(MessageCollectionNotification.class);
       listOfSupportedStatusMessages.add(MessageCollectionNotification.class);
+
+      for (int i = 0; i < numberOfSimultaneousCollectionsToSupport; i++)
+      {
+         messageCollectors.add(new MessageCollector(messageIDExtractor, listOfSupportedControlMessages));
+      }
 
       MessageCollection messageCollection = new MessageCollection();
 
       String topicName = subscriberTopicNameGenerator.generateTopicName(MessageCollection.class);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, MessageCollection.class, topicName, s -> {
          s.takeNextData(messageCollection, null);
-         MessageCollectionNotification notification = messageCollector.startCollecting(messageCollection);
-         publisher.publish(notification);
+
+         for (int i = 0; i < numberOfSimultaneousCollectionsToSupport; i++)
+         {
+            MessageCollector collector = messageCollectors.get(i);
+
+            if (!collector.isCollecting())
+            {
+               publisher.publish(collector.startCollecting(messageCollection));
+               return;
+            }
+         }
+
+         PrintTools.warn("No collector available to process the MessageCollection with ID: " + messageCollection.getSequenceId());
       });
    }
 
@@ -215,22 +235,27 @@ public class ControllerNetworkSubscriber
       if (DEBUG)
          PrintTools.debug(ControllerNetworkSubscriber.this, "Received message: " + message.getClass().getSimpleName() + ", " + message);
 
-      if (messageCollector.isCollecting() && messageCollector.interceptMessage(message))
+      for (int collectorIndex = 0; collectorIndex < messageCollectors.size(); collectorIndex++)
       {
-         if (DEBUG)
-            PrintTools.debug(ControllerNetworkSubscriber.this, "Collecting message: " + message.getClass().getSimpleName() + ", " + message);
+         MessageCollector messageCollector = messageCollectors.get(collectorIndex);
 
-         if (!messageCollector.isCollecting())
+         if (messageCollector.isCollecting() && messageCollector.interceptMessage(message))
          {
-            List<Settable<?>> collectedMessages = messageCollector.getCollectedMessages();
-            for (int i = 0; i < collectedMessages.size(); i++)
-            {
-               receivedMessage(collectedMessages.get(i));
-            }
-            messageCollector.reset();
-         }
+            if (DEBUG)
+               PrintTools.debug(ControllerNetworkSubscriber.this, "Collecting message: " + message.getClass().getSimpleName() + ", " + message);
 
-         return;
+            if (!messageCollector.isCollecting())
+            {
+               List<Settable<?>> collectedMessages = messageCollector.getCollectedMessages();
+               for (int i = 0; i < collectedMessages.size(); i++)
+               {
+                  receivedMessage(collectedMessages.get(i));
+               }
+               messageCollector.reset();
+            }
+
+            return;
+         }
       }
 
       String errorMessage = messageValidator.get().validate(message);

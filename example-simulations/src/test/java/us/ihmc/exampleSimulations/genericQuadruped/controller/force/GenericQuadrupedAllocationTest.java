@@ -83,6 +83,7 @@ public class GenericQuadrupedAllocationTest
    @After
    public void tearDown()
    {
+      quadrupedTestFactory.close();
       conductor.concludeTesting();
       conductor = null;
       variables = null;

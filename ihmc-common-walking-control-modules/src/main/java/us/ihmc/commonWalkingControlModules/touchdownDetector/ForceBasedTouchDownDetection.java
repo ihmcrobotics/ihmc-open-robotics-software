@@ -44,7 +44,7 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       zForceThreshold = new YoDouble(prefix + "zForceThreshold", registry);
       measuredZForce = new YoDouble(prefix + "measuredZForce", registry);
       
-      zForceThreshold.set(80.0);
+      zForceThreshold.set(40.0);
       
       RigidBody body = robotModel.getRootBody();
       RigidBody foot = robotModel.getFoot(robotQuadrant);
@@ -83,9 +83,15 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       CommonOps.multTransA(linearJacobianInverse, jointTorques, footLinearForce);
       
       footForce.setToZero(footJacobian.getJacobianFrame());
-      footForce.set(footLinearForce.get(0), footLinearForce.get(1), footLinearForce.get(2));
+      footForce.set(footLinearForce);
       footForce.changeFrame(ReferenceFrame.getWorldFrame());
       measuredZForce.set(footForce.getZ() * -1.0);
       isInContact.set(measuredZForce.getDoubleValue() > zForceThreshold.getDoubleValue());
+   }
+
+   public void reset()
+   {
+      measuredZForce.set(0.0);
+      isInContact.set(false);
    }
 }

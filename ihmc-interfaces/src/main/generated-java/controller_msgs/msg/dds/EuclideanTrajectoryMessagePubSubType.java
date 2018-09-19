@@ -42,7 +42,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -99,7 +99,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if(data.getTaskspaceTrajectoryPoints().size() <= 1)
+      if(data.getTaskspaceTrajectoryPoints().size() <= 50)
       cdr.write_type_e(data.getTaskspaceTrajectoryPoints());else
           throw new RuntimeException("taskspace_trajectory_points field exceeds the maximum length");
 

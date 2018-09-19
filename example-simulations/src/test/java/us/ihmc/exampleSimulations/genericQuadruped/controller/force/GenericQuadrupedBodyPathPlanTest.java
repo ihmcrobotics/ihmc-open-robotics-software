@@ -11,12 +11,10 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedBodyPathPlanTest;
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GenericQuadrupedBodyPathPlanTest extends QuadrupedBodyPathPlanTest
 {
-   private static final boolean keepSCSUp = false;
-
    @Override
    public QuadrupedTestFactory createQuadrupedTestFactory()
    {
-      return new GenericQuadrupedTestFactory(keepSCSUp);
+      return new GenericQuadrupedTestFactory();
    }
 
    @Test(timeout = 200000)

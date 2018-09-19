@@ -6,15 +6,16 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneContactStateCommand>, VirtualModelControlCommand<PlaneContactStateCommand>
@@ -31,12 +32,18 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
 
    private boolean hasMaxContactPointNormalForce = false;
    private final RecyclingArrayList<MutableDouble> maxContactPointNormalForces = new RecyclingArrayList<>(initialSize, MutableDouble.class);
-   
+
    /**
-    * Holds on to the rho weights, which are described in {@code ControllerCoreOptimizationSettings.getRhoWeight()}
-    * If a rho weight is to Double.NaN, the controller core will use the default rho weight set in the MomentumOptimizationSetting
+    * Holds on to the rho weights, which are described in
+    * {@code ControllerCoreOptimizationSettings.getRhoWeight()} If a rho weight is to Double.NaN,
+    * the controller core will use the default rho weight set in the MomentumOptimizationSetting
     */
    private final RecyclingArrayList<MutableDouble> rhoWeights = new RecyclingArrayList<>(initialSize, MutableDouble.class);
+
+   /**
+    * Defines the pose of the contact frame expressed in the contacting body fixed frame.
+    */
+   private final RigidBodyTransform contactFramePoseInBodyFixedFrame = new RigidBodyTransform();
 
    public PlaneContactStateCommand()
    {
@@ -64,6 +71,19 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       contactPoints.clear();
       maxContactPointNormalForces.clear();
       rhoWeights.clear();
+      contactFramePoseInBodyFixedFrame.setToNaN();
+   }
+
+   /**
+    * Optional: Use this method to redefine the pose of the contact frame to use with this
+    * contacting rigid-body.
+    * 
+    * @param contactFrame the reference frame to use for updating the contact frame used in the
+    *           controller core.
+    */
+   public void setContactFramePose(ReferenceFrame contactFrame)
+   {
+      contactFrame.getTransformToDesiredFrame(contactFramePoseInBodyFixedFrame, rigidBody.getBodyFixedFrame());
    }
 
    public void addPointInContact(FramePoint3DReadOnly newPointInContact)
@@ -153,10 +173,11 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    {
       contactNormalToPack.setIncludingFrame(contactNormal);
    }
-   
+
    /**
-    * Sets the rho weights, which are described in {@code ControllerCoreOptimizationSettings.getRhoWeight()}
-    * If a rho weight is to Double.NaN, the controller core will use the default rho weight set in the MomentumOptimizationSetting
+    * Sets the rho weights, which are described in
+    * {@code ControllerCoreOptimizationSettings.getRhoWeight()} If a rho weight is to Double.NaN,
+    * the controller core will use the default rho weight set in the MomentumOptimizationSetting
     */
    public void setRhoWeight(int pointIndex, double rhoWeight)
    {
@@ -188,6 +209,11 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       return maxContactPointNormalForces.get(pointIndex).doubleValue();
    }
 
+   public RigidBodyTransform getContactFramePoseInBodyFixedFrame()
+   {
+      return contactFramePoseInBodyFixedFrame;
+   }
+
    @Override
    public void set(PlaneContactStateCommand other)
    {
@@ -200,10 +226,10 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       hasContactStateChanged = other.hasContactStateChanged;
 
       hasMaxContactPointNormalForce = other.hasMaxContactPointNormalForce;
-      
+
       maxContactPointNormalForces.clear();
       rhoWeights.clear();
-      
+
       for (int i = 0; i < other.contactPoints.size(); i++)
       {
          maxContactPointNormalForces.add().setValue(other.maxContactPointNormalForces.get(i));

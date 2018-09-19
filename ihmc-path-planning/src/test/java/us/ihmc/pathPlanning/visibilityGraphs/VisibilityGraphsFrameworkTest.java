@@ -151,7 +151,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 13.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @ContinuousIntegrationTest(estimatedDuration = 13.0)
    public void testDatasetsWithoutOcclusion() throws Exception
    {
       if (VISUALIZE)
@@ -164,7 +164,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testDatasetsNoOcclusionSimulateDynamicReplanning() throws Exception
    {
       if (VISUALIZE)
@@ -175,7 +175,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testDatasetsSimulateOcclusionAndDynamicReplanning() throws Exception
    {
       if (VISUALIZE)
@@ -744,14 +744,20 @@ public class VisibilityGraphsFrameworkTest extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ui = new VisibilityGraphsTestVisualizer(primaryStage, messager);
-      ui.show();
+      if (VISUALIZE)
+      {
+         ui = new VisibilityGraphsTestVisualizer(primaryStage, messager);
+         ui.show();
+      }
    }
 
    @Override
    public void stop() throws Exception
    {
-      ui.stop();
+      if (VISUALIZE)
+      {
+         ui.stop();
+      }
    }
 
    private static interface DatasetTestRunner

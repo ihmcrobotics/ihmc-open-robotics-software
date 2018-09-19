@@ -15,11 +15,10 @@ import java.util.List;
 
 public class SimulatedQuadrupedOutputWriter implements OutputWriter
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final OneDoFJoint[] controllerJoints;
 
-   private final JointDesiredOutputListReadOnly jointDesiredOutputList;
-   private final LowLevelStateList lowLevelStateList;
+   protected final JointDesiredOutputListReadOnly jointDesiredOutputList;
+   protected final LowLevelStateList lowLevelStateList;
    private final HashMap<OneDoFJoint, LowLevelActuatorSimulator> quadrupedActuators = new HashMap<>();
 
    private final List<QuadrupedJointController> quadrupedJoints = new ArrayList<>();
@@ -32,6 +31,7 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
       controllerJoints = fullRobotModel.getOneDoFJoints();
       lowLevelStateList = new LowLevelStateList(controllerJoints);
 
+      YoVariableRegistry registry = new YoVariableRegistry("quadrupedOutputWriter");
       for (OneDoFJoint controllerJoint : controllerJoints)
       {
          String name = controllerJoint.getName();
@@ -90,7 +90,7 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
       }
    }
 
-   public LowLevelActuatorMode getDesiredActuatorMode(JointDesiredOutputReadOnly jointDesiredSetpoints)
+   private LowLevelActuatorMode getDesiredActuatorMode(JointDesiredOutputReadOnly jointDesiredSetpoints)
    {
       if (jointDesiredSetpoints.hasControlMode())
       {

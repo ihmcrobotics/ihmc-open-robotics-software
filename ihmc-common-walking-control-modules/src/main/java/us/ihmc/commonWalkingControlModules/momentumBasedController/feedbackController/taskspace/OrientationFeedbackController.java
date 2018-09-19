@@ -469,9 +469,10 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredAngularVelocity, currentAngularVelocity);
+      feedbackTermToPack.changeFrame(endEffectorFrame);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
-      yoErrorAngularVelocity.set(feedbackTermToPack);
+      yoErrorAngularVelocity.setMatchingFrame(feedbackTermToPack);
 
       if (yoFilteredErrorAngularVelocity != null)
       {
@@ -529,9 +530,10 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       errorOrientationCumulated.getRotationVector(feedbackTermToPack);
       feedbackTermToPack.scale(dt);
+      feedbackTermToPack.changeFrame(endEffectorFrame);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(maximumIntegralError);
-      yoErrorRotationVectorIntegrated.set(feedbackTermToPack);
+      yoErrorRotationVectorIntegrated.setMatchingFrame(feedbackTermToPack);
 
       if (angularGainsFrame != null)
          feedbackTermToPack.changeFrame(angularGainsFrame);

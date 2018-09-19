@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -14,7 +15,6 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -37,7 +37,7 @@ public class MomentumTrajectoryHandlerTest
 
       // offset time by 5.0s
       yoTime.set(5.0);
-      MomentumTrajectoryHandler handler = new MomentumTrajectoryHandler(yoTime);
+      MomentumTrajectoryHandler handler = new MomentumTrajectoryHandler(yoTime, registry);
       handler.handleMomentumTrajectory(command);
 
       // get trajectory for time 6.0 to 7.0 which should be equivalent to 1.0 to 2.0 before time offset
@@ -75,7 +75,7 @@ public class MomentumTrajectoryHandlerTest
       command.getAngularMomentumTrajectory().addTrajectoryPoint(2.0, new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
 
       // offset time by 5.0s
-      MomentumTrajectoryHandler handler = new MomentumTrajectoryHandler(yoTime);
+      MomentumTrajectoryHandler handler = new MomentumTrajectoryHandler(yoTime, registry);
       handler.handleMomentumTrajectory(command);
 
       int samples = 3;
@@ -85,8 +85,6 @@ public class MomentumTrajectoryHandlerTest
       handler.getAngularMomentumTrajectory(-1.0, 0.0, samples, momentumTrajectory);
       assertEquals(0, momentumTrajectory.size());
       handler.getAngularMomentumTrajectory(2.0, 3.0, samples, momentumTrajectory);
-      assertEquals(0, momentumTrajectory.size());
-      handler.getAngularMomentumTrajectory(0.0, 1.0, samples, momentumTrajectory);
       assertEquals(0, momentumTrajectory.size());
 
       // try valid example
@@ -104,13 +102,15 @@ public class MomentumTrajectoryHandlerTest
       MomentumTrajectoryCommand command1 = new MomentumTrajectoryCommand();
       command1.getAngularMomentumTrajectory().addTrajectoryPoint(0.0, new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
       command1.getAngularMomentumTrajectory().addTrajectoryPoint(1.0, new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0));
+      command1.getAngularMomentumTrajectory().setCommandId(0L);
 
-      MomentumTrajectoryHandler handler = new MomentumTrajectoryHandler(yoTime);
+      MomentumTrajectoryHandler handler = new MomentumTrajectoryHandler(yoTime, registry);
       handler.handleMomentumTrajectory(command1);
 
       MomentumTrajectoryCommand command2 = new MomentumTrajectoryCommand();
       command2.getAngularMomentumTrajectory().setExecutionMode(ExecutionMode.QUEUE);
       command2.getAngularMomentumTrajectory().addTrajectoryPoint(1.0, new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
+      command2.getAngularMomentumTrajectory().setPreviousCommandId(0L);
       handler.handleMomentumTrajectory(command2);
 
       // get trajectory for time 0.5 to 1.5

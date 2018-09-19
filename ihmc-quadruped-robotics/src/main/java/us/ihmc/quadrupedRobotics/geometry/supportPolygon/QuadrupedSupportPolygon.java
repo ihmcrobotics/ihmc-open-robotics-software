@@ -1,34 +1,21 @@
 package us.ihmc.quadrupedRobotics.geometry.supportPolygon;
 
-import static us.ihmc.robotics.robotSide.RobotQuadrant.FRONT_LEFT;
-import static us.ihmc.robotics.robotSide.RobotQuadrant.FRONT_RIGHT;
-import static us.ihmc.robotics.robotSide.RobotQuadrant.HIND_LEFT;
-import static us.ihmc.robotics.robotSide.RobotQuadrant.HIND_RIGHT;
-import static us.ihmc.robotics.robotSide.RobotQuadrant.getQuadrant;
-
-import java.io.Serializable;
-
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RecyclingQuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+
+import java.io.Serializable;
+
+import static us.ihmc.robotics.robotSide.RobotQuadrant.*;
 
 public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Serializable
 {
@@ -241,6 +228,7 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
          return;
 
       footsteps.add(robotQuadrant).setIncludingFrame(footstep);
+      footsteps.get(robotQuadrant).changeFrame(getReferenceFrame());
       updatePolygon();
    }
 
@@ -250,6 +238,7 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
          return;
 
       footsteps.add(robotQuadrant).setToZero(footstepFrame);
+      footsteps.get(robotQuadrant).changeFrame(getReferenceFrame());
       updatePolygon();
    }
 

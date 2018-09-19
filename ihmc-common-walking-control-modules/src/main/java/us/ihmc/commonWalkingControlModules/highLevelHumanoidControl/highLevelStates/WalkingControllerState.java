@@ -23,6 +23,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class WalkingControllerState extends HighLevelControllerState
@@ -39,6 +40,9 @@ public class WalkingControllerState extends HighLevelControllerState
    private boolean setupVirtualModelControlSolver = false;
 
    private final boolean deactivateAccelerationIntegrationInWBC;
+
+   private boolean requestIntegratorReset = false;
+   private final YoBoolean yoRequestingIntegratorReset = new YoBoolean("RequestingIntegratorReset", registry);
 
    public WalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                  HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -128,6 +132,7 @@ public class WalkingControllerState extends HighLevelControllerState
    {
       controllerCore.initialize();
       walkingController.initialize();
+      requestIntegratorReset = true;
    }
 
    public void initializeDesiredHeightToCurrent()
@@ -143,6 +148,18 @@ public class WalkingControllerState extends HighLevelControllerState
       ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
 
       JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();
+
+      if (requestIntegratorReset)
+      {
+         stateSpecificJointSettings.requestIntegratorReset();
+         requestIntegratorReset = false;
+         yoRequestingIntegratorReset.set(true);
+      }
+      else
+      {
+         yoRequestingIntegratorReset.set(false);
+      }
+
       JointAccelerationIntegrationCommand accelerationIntegrationCommand = getAccelerationIntegrationCommand();
       if (!deactivateAccelerationIntegrationInWBC)
       {

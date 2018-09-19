@@ -157,7 +157,7 @@ public class DebugInterruptableWorker extends InterruptableWorker
       System.out.println("starting worker");
       worker.startWorkOnANewThread();
 
-      Thread thread = new Thread(new SetState(worker));
+      Thread thread = new Thread(new SetState(worker), "IHMC-InterruptableWorker");
       thread.setDaemon(true);
       thread.start();
 

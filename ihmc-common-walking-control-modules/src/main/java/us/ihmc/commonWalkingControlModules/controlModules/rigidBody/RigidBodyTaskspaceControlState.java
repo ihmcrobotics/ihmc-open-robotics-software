@@ -51,6 +51,8 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 {
+   public static final double timeEpsilonForInitialPoint = 0.05;
+
    public static final int maxPoints = 10000;
    public static final int maxPointsInGenerator = 5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -467,6 +469,30 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       startTracking();
    }
 
+   public void holdCurrentDesired()
+   {
+      clear();
+      setWeightsToDefaults();
+      resetLastCommandId();
+      setTrajectoryStartTimeToCurrentTime();
+
+      if (enableOrientationTracking)
+         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
+
+      if (enablePositionTracking)
+         positionTrajectoryGenerator.getPosition(desiredPosition);
+      else
+         desiredPosition.setToZero(desiredOrientation.getReferenceFrame());
+
+      if (!enableOrientationTracking)
+         desiredOrientation.setToZero(desiredPosition.getReferenceFrame());
+
+      initialPose.setIncludingFrame(desiredPosition, desiredOrientation);
+      queueInitialPoint(initialPose);
+
+      startTracking();
+   }
+
    public void goToPoseFromCurrent(FramePose3D homePose, double trajectoryTime)
    {
       clear();
@@ -581,7 +607,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       {
          clear();
          trajectoryFrame = command.getTrajectoryFrame();
-         if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
+         if (command.getTrajectoryPoint(0).getTime() > timeEpsilonForInitialPoint)
          {
             queueInitialPoint(initialPose);
          }
@@ -704,7 +730,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       {
          clear();
          trajectoryFrame = command.getTrajectoryFrame();
-         if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
+         if (command.getTrajectoryPoint(0).getTime() > timeEpsilonForInitialPoint)
          {
             queueInitialPoint(initialPose);
          }
@@ -806,7 +832,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       {
          clear();
          trajectoryFrame = command.getTrajectoryFrame();
-         if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
+         if (command.getTrajectoryPoint(0).getTime() > timeEpsilonForInitialPoint)
          {
             queueInitialPoint(initialPose);
          }
@@ -910,6 +936,24 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          positionTrajectoryGenerator.getPosition(desiredPosition);
       else
          desiredPosition.setToNaN(orientationTrajectoryGenerator.getCurrentTrajectoryFrame());
+
+      if (!enableOrientationTracking || orientationTrajectoryGenerator.isEmpty())
+      {
+         desiredOrientation.setToZero(controlFrame);
+      }
+      else
+      {
+         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
+      }
+
+      if (!enablePositionTracking || positionTrajectoryGenerator.isEmpty())
+      {
+         desiredPosition.setToZero(controlFrame);
+      }
+      else
+      {
+         positionTrajectoryGenerator.getPosition(desiredPosition);
+      }
       desiredPoseToPack.setIncludingFrame(desiredPosition, desiredOrientation);
    }
 

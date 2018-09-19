@@ -16,8 +16,10 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -34,9 +36,11 @@ public class QuadrupedStepAdjustmentController
 
    private final QuadrantDependentList<YoDouble> dcmStepAdjustmentMultipliers = new QuadrantDependentList<>();
    private final YoFrameVector3D dcmError = new YoFrameVector3D("dcmError", worldFrame, registry);
+   private final YoBoolean stepHasBeenAdjusted = new YoBoolean("stepHasBeenAdjusted", registry);
 
    private final DoubleParameter dcmStepAdjustmentGain = new DoubleParameter("dcmStepAdjustmentGain", registry, 1.0);
    private final DoubleParameter dcmErrorThresholdForStepAdjustment = new DoubleParameter("dcmErrorThresholdForStepAdjustment", registry, 0.0);
+   private final BooleanParameter useStepAdjustment = new BooleanParameter("useStepAdjustment", registry, true);
 
    private final QuadrupedControllerToolbox controllerToolbox;
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -69,7 +73,7 @@ public class QuadrupedStepAdjustmentController
 
          YoDouble dcmStepAdjustmentMultiplier = new YoDouble(prefix + "DcmStepAdjustmentMultiplier", registry);
          instantaneousStepAdjustment.setToNaN();
-         limitedInstantaneousStepAdjustment.setToNaN();
+         limitedInstantaneousStepAdjustment.setToZero();
          dcmStepAdjustmentMultiplier.setToNaN();
 
          instantaneousStepAdjustments.put(robotQuadrant, instantaneousStepAdjustment);
@@ -103,8 +107,9 @@ public class QuadrupedStepAdjustmentController
       dcmPositionSetpoint.setIncludingFrame(desiredDCMPosition);
       dcmPositionSetpoint.changeFrame(worldFrame);
 
-
       dcmError.sub(dcmPositionSetpoint, dcmPositionEstimate);
+
+      boolean stepHasBeenAdjusted = false;
 
       // adjust nominal step goal positions in foot state machine
       for (int i = 0; i < activeSteps.size(); i++)
@@ -113,14 +118,21 @@ public class QuadrupedStepAdjustmentController
          QuadrupedStep adjustedStep = adjustedActiveSteps.add();
          adjustedStep.set(activeStep);
 
+
          RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
 
          FixedFrameVector3DBasics instantaneousStepAdjustment = instantaneousStepAdjustments.get(robotQuadrant);
          RateLimitedYoFrameVector limitedInstantaneousStepAdjustment = limitedInstantaneousStepAdjustments.get(robotQuadrant);
 
+         if (instantaneousStepAdjustment.containsNaN())
+         {
+            limitedInstantaneousStepAdjustment.update();
+            limitedInstantaneousStepAdjustment.setToZero();
+         }
+
          YoDouble dcmStepAdjustmentMultiplier = dcmStepAdjustmentMultipliers.get(robotQuadrant);
 
-         if (dcmError.length() > dcmErrorThresholdForStepAdjustment.getValue() || instantaneousStepAdjustment.length() > 0.0)
+         if (useStepAdjustment.getValue() && (dcmError.length() > dcmErrorThresholdForStepAdjustment.getValue() || instantaneousStepAdjustment.length() > 0.0))
          {
             double timeRemainingInStep = Math.max(activeStep.getTimeInterval().getEndTime() - controllerTime.getDoubleValue(), 0.0);
             dcmStepAdjustmentMultiplier.set(dcmStepAdjustmentGain.getValue() * Math.exp(timeRemainingInStep * lipModel.getNaturalFrequency()));
@@ -128,6 +140,8 @@ public class QuadrupedStepAdjustmentController
             instantaneousStepAdjustment.set(dcmError);
             instantaneousStepAdjustment.scale(-dcmStepAdjustmentMultiplier.getDoubleValue());
             instantaneousStepAdjustment.setZ(0);
+
+            stepHasBeenAdjusted = true;
          }
          else
          {
@@ -143,11 +157,18 @@ public class QuadrupedStepAdjustmentController
          adjustedStep.setGoalPosition(tempPoint);
       }
 
+      this.stepHasBeenAdjusted.set(stepHasBeenAdjusted);
+
       return adjustedActiveSteps;
    }
 
    public FrameVector3DReadOnly getStepAdjustment(RobotQuadrant robotQuadrant)
    {
       return limitedInstantaneousStepAdjustments.get(robotQuadrant);
+   }
+
+   public boolean stepHasBeenAdjusted()
+   {
+      return stepHasBeenAdjusted.getBooleanValue();
    }
 }

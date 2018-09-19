@@ -28,6 +28,8 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
 
    private final YoBoolean enableDrives;
 
+   private final SDFPerfectSimulatedSensorReader sdfPerfectSimulatedSensorReader;
+
    public SDFQuadrupedPerfectSimulatedSensor(FloatingRootJointRobot sdfRobot, FullQuadrupedRobotModel fullRobotModel, CommonQuadrupedReferenceFrames referenceFrames)
    {
       this(RobotQuadrant.values, sdfRobot, fullRobotModel, referenceFrames);
@@ -58,6 +60,8 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
 
       enableDrives = new YoBoolean("enableDrives", getYoVariableRegistry());
       enableDrives.set(true);
+
+      sdfPerfectSimulatedSensorReader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
    }
 
    @Override
@@ -151,12 +155,12 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    @Override
    public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
    {
-      return null;
+      return sdfPerfectSimulatedSensorReader;
    }
 
    @Override
    public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
    {
-      return null;
+      return sdfPerfectSimulatedSensorReader;
    }
 }

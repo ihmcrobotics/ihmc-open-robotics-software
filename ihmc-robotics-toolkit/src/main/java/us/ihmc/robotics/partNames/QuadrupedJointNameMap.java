@@ -9,6 +9,8 @@ public interface QuadrupedJointNameMap extends LeggedJointNameMap<RobotQuadrant>
    String getSDFNameForJointName(QuadrupedJointName name);
 
    String getBodyName();
+   
+   String getLegJointName(RobotQuadrant robotQuadrant, LegJointName legJointName);
 
    @Override
    default RobotQuadrant[] getRobotSegments()

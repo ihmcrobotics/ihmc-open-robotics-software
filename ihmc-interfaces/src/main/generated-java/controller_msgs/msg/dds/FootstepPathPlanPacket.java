@@ -21,7 +21,7 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket> imple
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage>  path_plan_;
    public us.ihmc.idl.IDLSequence.Boolean  footstep_unknown_;
    public double sub_optimality_;
-   public double path_cost_ = Double.POSITIVE_INFINITY;
+   public double path_cost_ = 1000000.0;
 
    public FootstepPathPlanPacket()
    {

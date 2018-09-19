@@ -197,6 +197,11 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       return ret;
    }
 
+   @Override
+   public boolean peekContactHasChangedNotification()
+   {
+      return hasContactStateChanged;
+   }
 
    private class ContactPointWrapper implements ContactPointInterface
    {

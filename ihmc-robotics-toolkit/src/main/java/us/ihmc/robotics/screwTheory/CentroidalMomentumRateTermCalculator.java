@@ -298,6 +298,14 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       return momentumRate;
    }
 
+   public void getMomentum(DenseMatrix64F jointVelocityMatrix, Momentum momentumToPack)
+   {
+      CommonOps.mult(getCentroidalMomentumMatrix(), jointVelocityMatrix, momentumMatrix);
+      momentumToPack.setToZero(matrixFrame);
+      momentumToPack.angularPart.set(0, momentumMatrix);
+      momentumToPack.linearPart.set(3, momentumMatrix);
+   }
+
    public void getMomentumRate(DenseMatrix64F jointAccelerationMatrix, SpatialForceVector momentumRateToPack)
    {
       CommonOps.mult(getCentroidalMomentumMatrix(), jointAccelerationMatrix, momentumMatrix);
