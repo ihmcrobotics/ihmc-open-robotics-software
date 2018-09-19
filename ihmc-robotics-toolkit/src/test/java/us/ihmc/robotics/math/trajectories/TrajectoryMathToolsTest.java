@@ -1,16 +1,8 @@
 package us.ihmc.robotics.math.trajectories;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-
 import gnu.trove.list.array.TDoubleArrayList;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -22,8 +14,10 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.math.trajectories.*;
-import us.ihmc.robotics.testing.JUnitTools;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
@@ -834,6 +828,76 @@ public class TrajectoryMathToolsTest
       assertEquals(traj2.getCoefficient(0), -4.00, epsilon);
       assertEquals(traj2.getCoefficient(1), 3.90, epsilon);
       assertEquals(traj2.getCoefficient(2), 0.05, epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSimpleDerivative()
+   {
+      Trajectory cubicTrajectory = new Trajectory(4);
+      double[] coefficients = new double[]{-4.0, 3.0, -2.0, 0.5};
+      cubicTrajectory.setDirectly(coefficients);
+      cubicTrajectory.setTime(1.0, 2.0);
+
+      // check valid derivative call
+      Trajectory derivativeTrajectory = new Trajectory(3);
+      TrajectoryMathTools.getDerivative(derivativeTrajectory, cubicTrajectory);
+
+      Assert.assertEquals(derivativeTrajectory.getInitialTime(), 1.0, epsilon);
+      Assert.assertEquals(derivativeTrajectory.getFinalTime(), 2.0, epsilon);
+      Assert.assertEquals(derivativeTrajectory.getNumberOfCoefficients(), 3);
+      Assert.assertEquals(derivativeTrajectory.getCoefficient(0), 3.0, epsilon);
+      Assert.assertEquals(derivativeTrajectory.getCoefficient(1), -4.0, epsilon);
+      Assert.assertEquals(derivativeTrajectory.getCoefficient(2), 1.5, epsilon);
+
+      // try taking derivative without enough coefficients
+      try
+      {
+         TrajectoryMathTools.getDerivative(new Trajectory(2), cubicTrajectory);
+         Assert.fail();
+      }
+      catch(Exception e)
+      {
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testDerivativeOfConstantTrajectory()
+   {
+      Trajectory constantTrajectory = new Trajectory(1);
+      Trajectory derivativeTrajectory = new Trajectory(1);
+
+      constantTrajectory.setConstant(0.0, 1.0, 2.0);
+      TrajectoryMathTools.getDerivative(derivativeTrajectory, constantTrajectory);
+
+      Assert.assertEquals(derivativeTrajectory.getInitialTime(), 0.0, epsilon);
+      Assert.assertEquals(derivativeTrajectory.getFinalTime(), 1.0, epsilon);
+      Assert.assertEquals(derivativeTrajectory.getNumberOfCoefficients(), 1);
+      Assert.assertEquals(derivativeTrajectory.getCoefficient(0), 0.0, epsilon);
+   }
+
+      @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testDerivativeOnRandomTrajectories()
+   {
+      int maximumNumberOfCoefficients = 10;
+      Trajectory trajectory = new Trajectory(maximumNumberOfCoefficients);
+      Trajectory derivative = new Trajectory(maximumNumberOfCoefficients - 1);
+
+      int iterations = 50;
+      for (int i = 0; i < iterations; i++)
+      {
+         int numberOfCoefficients = 2 + random.nextInt(maximumNumberOfCoefficients - 1);
+         double[] coefficients = RandomNumbers.nextDoubleArray(random, numberOfCoefficients, 10.0);
+         trajectory.setDirectly(coefficients);
+         TrajectoryMathTools.getDerivative(derivative, trajectory);
+
+         for (int j = 0; j < numberOfCoefficients - 1; j++)
+         {
+            Assert.assertEquals(derivative.getCoefficient(j), coefficients[j + 1] * (j + 1), epsilon);
+         }
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
