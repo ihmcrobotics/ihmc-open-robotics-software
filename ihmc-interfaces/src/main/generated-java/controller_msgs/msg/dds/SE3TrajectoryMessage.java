@@ -58,7 +58,7 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
 
    public SE3TrajectoryMessage()
    {
-      taskspace_trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage> (1, new controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
+      taskspace_trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage> (50, new controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
       angular_selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
       linear_selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
       frame_information_ = new controller_msgs.msg.dds.FrameInformation();

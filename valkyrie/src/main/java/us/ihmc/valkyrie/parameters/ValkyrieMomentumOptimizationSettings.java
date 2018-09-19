@@ -33,14 +33,14 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    private final int nContactableBodies = 2;
 
    private final double jointAccelerationWeight = 0.005;
-   private final double jointJerkWeight = 0.1;
+   private final double jointJerkWeight = 1.6E-6;
    private final double rhoWeight = 0.00001;
    private final double rhoMin = 4.0;
-   private final double rhoRateDefaultWeight = 0.002;
-   private final double rhoRateHighWeight = 0.05;
-   private final Vector2D copWeight = new Vector2D(100.0, 200.0);
-   private final Vector2D copRateDefaultWeight = new Vector2D(20000.0, 20000.0);
-   private final Vector2D copRateHighWeight = new Vector2D(2500000.0, 10000000.0);
+   private final double rhoRateDefaultWeight = 3.2E-8;
+   private final double rhoRateHighWeight = 8.0E-7;
+   private final Vector2D copWeight = new Vector2D(0.001, 0.002);
+   private final Vector2D copRateDefaultWeight = new Vector2D(0.0000032, 0.0000032);
+   private final Vector2D copRateHighWeight = new Vector2D(0.0004, 0.0016);
 
    private final double neckJointspaceWeight = 5.0;
    private final double spineJointspaceWeight = 10.0;

@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.quadrupedRobotics.util.PreallocatedList;
+import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -52,7 +52,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
 
    public QuadrupedTimedContactSequence(int pastContactPhaseCapacity, int futureContactPhaseCapacity)
    {
-      super(pastContactPhaseCapacity + futureContactPhaseCapacity + 1, QuadrupedTimedContactPhase.class);
+      super(QuadrupedTimedContactPhase.class, QuadrupedTimedContactPhase::new, pastContactPhaseCapacity + futureContactPhaseCapacity + 1);
       this.pastContactPhaseCapacity = pastContactPhaseCapacity;
 
       if (capacity() < 1)
@@ -83,7 +83,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
    /**
     * compute piecewise center of pressure plan given an array of upcoming steps
     * @param stepSequence list of upcoming steps (input)
-    * @param currentSolePosition current sole positions (input)
+    * @param soleFrames current sole frames (input)
     * @param currentContactState current sole contact state (input)
     * @param currentTime current time (input)
     */
@@ -202,10 +202,9 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
 
    private QuadrupedTimedContactPhase createNewContactPhase(double startTime, QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePosition)
    {
-      if (super.add())
+      if (remaining() > 0)
       {
-         QuadrupedTimedContactPhase contactPhase;
-         contactPhase = super.get(super.size() - 1);
+         QuadrupedTimedContactPhase contactPhase = add();
          contactPhase.getTimeInterval().setStartTime(startTime);
          contactPhase.setContactState(contactState);
          contactPhase.setSolePosition(solePosition);

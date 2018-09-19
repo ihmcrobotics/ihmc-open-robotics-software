@@ -31,7 +31,8 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Test(timeout = 180000)
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushLeftEarlySwing(700.0);
+      setPushMagnitude(700.0);
+      super.testPushLeftEarlySwing();
    }
 
    @Override
@@ -62,7 +63,8 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Test(timeout = 320000)
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushRightThenLeftMidSwing(700.0);
+      setPushMagnitude(700.0);
+      super.testPushRightThenLeftMidSwing();
    }
 
    @Override

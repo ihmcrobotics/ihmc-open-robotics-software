@@ -29,7 +29,7 @@ public class PlanarGroundPointFootSnapper implements PointFootSnapper
    }
 
    @Override
-   public Point3DReadOnly snapStep(double xPosition, double yPosition)
+   public Point3DReadOnly snapStep(double xPosition, double yPosition, double minimumZPosition)
    {
       QuadrupedGroundPlaneMessage groundPlaneMessage = this.groundPlaneMessage.get();
 

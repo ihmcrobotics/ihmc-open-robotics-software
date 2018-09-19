@@ -7,11 +7,13 @@ import java.util.EnumMap;
 import java.util.Random;
 
 import org.junit.After;
+import org.junit.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -200,6 +202,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSimpleCase()
    {
       Random random = new Random(1984L);
@@ -216,6 +220,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       assertTrue(success);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 16.2)
+   @Test(timeout = 81000)
    public void testRandomFeasibleRobotPoses()
    {
       Random random = new Random(1776L);

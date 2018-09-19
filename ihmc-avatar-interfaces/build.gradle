@@ -4,10 +4,12 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.13.7"
+      classpath "us.ihmc:ihmc-build:0.15.1"
+      classpath "us.ihmc:ihmc-ci-plugin:0.18.0"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
+apply plugin: "us.ihmc.ihmc-ci-plugin"
 
 ihmc {
    loadProductProperties("../product.properties")
@@ -24,6 +26,7 @@ testSuites {
 mainDependencies {
    compile group: "com.martiansoftware", name: "jsap", version: "2.1"
    compile group: "org.apache.commons", name: "commons-lang3", version: "3.7"
+   compile group: "org.apache.poi", name: "poi", version: "3.15" // I/O library for xls files.
    compile group: "us.ihmc.thirdparty.jinput", name: "jinput", version: "160414"
    compile group: "org.ros.rosjava_core", name: "rosjava", version: "0.2.1"
    compile group: "org.ros.rosjava_bootstrap", name: "message_generation", version: "0.2.1"
@@ -64,6 +67,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robot-behaviors", version: "source"
    compile group: "us.ihmc", name: "ihmc-mocap", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
    compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning", version: "source"
@@ -73,7 +77,7 @@ mainDependencies {
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
 
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.23.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning-test", version: "source"

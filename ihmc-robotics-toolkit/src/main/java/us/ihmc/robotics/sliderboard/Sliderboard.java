@@ -134,6 +134,22 @@ public class Sliderboard
    }
 
    /**
+    * Attaches a listener to the specified button that will get called whenever a button is pressed.
+    *
+    * @param buttonListener the listener for the button
+    * @param buttonIndex the index of the button
+    */
+   public boolean addListener(ButtonListener buttonListener, int buttonIndex)
+   {
+      if (!isConnected())
+      {
+         return false;
+      }
+
+      return sliderboardDataReciever.addListener(buttonListener, buttonIndex);
+   }
+
+   /**
     * Sets the value of a slider.
     *
     * @param sliderPercent the new value for the slider between 0.0 and 1.0
@@ -168,19 +184,48 @@ public class Sliderboard
       }
    }
 
+   public void setButtonValue(boolean status, int buttonIndex)
+   {
+      if (!isConnected())
+      {
+         return;
+      }
+
+      int channel = channelMapper.getButtonChannel(buttonIndex);
+      if (channel == -1)
+      {
+         PrintTools.info("Unknown button index: " + buttonIndex);
+         return;
+      }
+
+      try
+      {
+         ShortMessage message = new ShortMessage();
+         int data = SliderboardTools.toDataByte(status);
+         message.setMessage(SliderboardTools.STATUS, channel, data);
+
+         // Should this be done on a thread?
+         receiver.send(message, -1);
+      }
+      catch (InvalidMidiDataException e)
+      {
+         PrintTools.info("Was unable to create slider board message.");
+      }
+   }
+
    public void clearListeners()
    {
       sliderboardDataReciever.clearListeners();
    }
 
-   public void clearListeners(int sliderIndex)
-   {
-      sliderboardDataReciever.clearListeners(sliderIndex);
-   }
-
    public void removeListener(SliderboardListener sliderListener, int sliderIndex)
    {
       sliderboardDataReciever.removeListener(sliderListener, sliderIndex);
+   }
+
+   public void removeListener(ButtonListener buttonListener, int buttonIndex)
+   {
+      sliderboardDataReciever.removeListener(buttonListener, buttonIndex);
    }
 
 }

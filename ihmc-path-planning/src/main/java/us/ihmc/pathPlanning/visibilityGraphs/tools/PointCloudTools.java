@@ -193,7 +193,7 @@ public class PointCloudTools
 
    public static void savePlanarRegionsToFile(PlanarRegionsList planarRegionsList, Point3D start, Point3D goal)
    {
-      Thread thread = new Thread()
+      Thread thread = new Thread("IHMC-SavePlanarRegions")
       {
          @Override
          public void run()

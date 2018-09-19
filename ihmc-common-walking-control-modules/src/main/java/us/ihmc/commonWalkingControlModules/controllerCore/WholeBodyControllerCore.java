@@ -255,6 +255,7 @@ public class WholeBodyControllerCore
       InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getInverseDynamicsOutput();
       numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
       inverseDynamicsSolver.submitInverseDynamicsCommandList(feedbackControllerOutput);
+      inverseDynamicsSolver.submitResetIntegratorRequests(yoLowLevelOneDoFJointDesiredDataHolder);
       inverseDynamicsSolver.compute();
       feedbackController.computeAchievedAccelerations();
       LowLevelOneDoFJointDesiredDataHolder inverseDynamicsOutput = inverseDynamicsSolver.getOutput();

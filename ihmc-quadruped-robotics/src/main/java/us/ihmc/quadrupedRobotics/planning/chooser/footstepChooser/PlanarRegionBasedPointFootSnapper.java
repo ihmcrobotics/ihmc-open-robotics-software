@@ -66,7 +66,7 @@ public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
    }
 
    @Override
-   public Point3DReadOnly snapStep(double xPosition, double yPosition)
+   public Point3DReadOnly snapStep(double xPosition, double yPosition, double minimumZPosition)
    {
       List<PlanarRegion> intersectingRegions = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(xPosition, yPosition);
       if(intersectingRegions == null)
@@ -77,18 +77,18 @@ public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
       else
       {
          double maxZ = Double.NEGATIVE_INFINITY;
-         PlanarRegion planarRegion = null;
+         int highestPlanarRegionIndex = -1;
          for (int i = 0; i < intersectingRegions.size(); i++)
          {
             double regionHeight = intersectingRegions.get(i).getPlaneZGivenXY(xPosition, yPosition);
             if(regionHeight > maxZ)
             {
-               planarRegion = intersectingRegions.get(i);
+               highestPlanarRegionIndex = i;
                maxZ = regionHeight;
             }
          }
 
-         return projectPointIntoPlanarRegion(xPosition, yPosition, planarRegion, parameters.distanceInsidePlanarRegion());
+         return projectPointIntoPlanarRegion(xPosition, yPosition, intersectingRegions.get(highestPlanarRegionIndex), parameters.distanceInsidePlanarRegion());
       }
    }
 

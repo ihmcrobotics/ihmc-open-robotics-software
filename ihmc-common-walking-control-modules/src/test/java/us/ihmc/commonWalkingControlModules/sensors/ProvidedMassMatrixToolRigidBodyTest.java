@@ -3,7 +3,9 @@ package us.ihmc.commonWalkingControlModules.sensors;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
+import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -26,6 +28,8 @@ public abstract class ProvidedMassMatrixToolRigidBodyTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testprovidedMassMatrixToolRigidBody()
    {
       FullHumanoidRobotModel fullRobotModel = getFullRobotModel();

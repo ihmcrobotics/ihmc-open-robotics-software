@@ -43,7 +43,7 @@ public class JointSettingsHelper
                               HighLevelControllerName stateEnum, YoVariableRegistry parentRegistry)
    {
       this(JointSettingConfiguration.extract(parameters, stateEnum), joints, jointLoadStatusProvider,
-           CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, stateEnum.toString()), parentRegistry);
+           CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, stateEnum.toString()), parentRegistry);
    }
 
    public JointSettingsHelper(JointSettingConfiguration configuration, List<OneDoFJoint> joints, JointLoadStatusProvider jointLoadStatusProvider,
@@ -141,7 +141,11 @@ public class JointSettingsHelper
          JointDesiredOutput jointDesiredOutput = stateSpecificJointSettings.getJointDesiredOutput(jointIdx);
          boolean isLoaded = jointLoadStatusProvider.isJointLoadBearing(jointNames[jointIdx]);
          if (jointsLoaded[jointIdx] != null)
+         {
+            boolean wasLoaded = jointsLoaded[jointIdx].getValue();
+            jointDesiredOutput.setResetIntegrators(isLoaded != wasLoaded);
             jointsLoaded[jointIdx].set(isLoaded);
+         }
 
          JointAccelerationIntegrationParametersReadOnly integrationParametersNoLoad = accelerationIntegrationSettingsNoLoad[jointIdx];
          JointAccelerationIntegrationParametersReadOnly integrationParametersLoaded = accelerationIntegrationSettingsLoaded[jointIdx];

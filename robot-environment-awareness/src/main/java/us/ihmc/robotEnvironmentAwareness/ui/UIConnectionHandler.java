@@ -27,7 +27,7 @@ public class UIConnectionHandler
                while (!mainWindow.isShowing())
                   ThreadTools.sleep(100);
                refreshUIControls();
-            }).start();
+            }, "REAUIConnectionHandler").start();
          else
             displayWarning();
       });

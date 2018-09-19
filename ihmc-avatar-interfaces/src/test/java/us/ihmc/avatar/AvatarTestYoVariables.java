@@ -1,24 +1,24 @@
 package us.ihmc.avatar;
 
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public abstract class AvatarTestYoVariables
 {
    private final YoDouble yoTime;
-   
+
    private final YoDouble pelvisX;
    private final YoDouble pelvisY;
    private final YoDouble pelvisZ;
    private final YoDouble pelvisYaw;
-   
+
    private final YoDouble midFeetZUpZ;
    private final YoDouble desiredCOMHeight;
-   
+
    private final SideDependentList<YoFramePoint3D> solePositions = new SideDependentList<>();
 
    public AvatarTestYoVariables(SimulationConstructionSet scs)
@@ -29,9 +29,18 @@ public abstract class AvatarTestYoVariables
       pelvisY = (YoDouble) scs.getVariable("q_y");
       pelvisZ = (YoDouble) scs.getVariable("q_z");
       pelvisYaw = (YoDouble) scs.getVariable("q_yaw");
-      
+
       midFeetZUpZ = (YoDouble) scs.getVariable("midFeetZUpZ");
-      desiredCOMHeight = (YoDouble) scs.getVariable("desiredCOMHeight");
+
+      if (scs.getVariable("desiredCOMHeight") == null)
+      {
+         // We might be controlling the desired pelvis height in this case.
+         desiredCOMHeight = (YoDouble) scs.getVariable("pelvisDesiredPositionZ");
+      }
+      else
+      {
+         desiredCOMHeight = (YoDouble) scs.getVariable("desiredCOMHeight");
+      }
 
       solePositions.set(RobotSide.LEFT, new YoFramePoint3D((YoDouble) scs.getVariable("leftSoleX"), (YoDouble) scs.getVariable("leftSoleY"),
                                                          (YoDouble) scs.getVariable("leftSoleZ"), ReferenceFrame.getWorldFrame()));
@@ -73,7 +82,7 @@ public abstract class AvatarTestYoVariables
    {
       return desiredCOMHeight;
    }
-   
+
    public YoFramePoint3D getSolePosition(RobotSide robotSide)
    {
       return solePositions.get(robotSide);

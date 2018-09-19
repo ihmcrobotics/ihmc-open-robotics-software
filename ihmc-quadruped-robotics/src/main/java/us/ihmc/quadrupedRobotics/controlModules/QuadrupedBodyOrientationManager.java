@@ -99,6 +99,7 @@ public class QuadrupedBodyOrientationManager
 
       double currentTime = robotTimestamp.getDoubleValue();
 
+      offsetBodyOrientationTrajectory.clear();
       offsetBodyOrientationTrajectory.appendWaypoint(currentTime, desiredBodyOrientation, desiredBodyAngularVelocity);
       offsetBodyOrientationTrajectory.initialize();
 

@@ -9,13 +9,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedPlanarBodyPathProvider;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PointFootSnapper;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPlanarFootstepPlan;
-import us.ihmc.quadrupedRobotics.util.PreallocatedList;
+import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.*;
 
 public class QuadrupedXGaitPlanner
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final double maximumStepDown = 0.2;
 
    private final FramePoint3D goalPosition = new FramePoint3D();
    private final QuadrantDependentList<FramePoint3D> xGaitRectangle = new QuadrantDependentList<>();
@@ -175,15 +176,19 @@ public class QuadrupedXGaitPlanner
       {
          snapStep(plannedSteps.get(i));
       }
-
    }
 
    private void snapStep(QuadrupedTimedOrientedStep step)
    {
+      snapStep(step, Double.NEGATIVE_INFINITY);
+   }
+
+   private void snapStep(QuadrupedTimedOrientedStep step, double previousStepZValue)
+   {
       if (snapper != null)
       {
          goalPosition.setIncludingFrame(worldFrame, step.getGoalPosition());
-         step.setGoalPosition(snapper.snapStep(goalPosition.getX(), goalPosition.getY()));
+         step.setGoalPosition(snapper.snapStep(goalPosition.getX(), goalPosition.getY(), previousStepZValue - maximumStepDown));
       }
    }
 

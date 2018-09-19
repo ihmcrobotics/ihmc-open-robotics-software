@@ -3,7 +3,6 @@ package us.ihmc.idl;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
-import us.ihmc.ros2.rosidl.Ros2MessageGenerator;
 import us.ihmc.ros2.rosidl.RosInterfaceGenerator;
 
 import java.io.IOException;
@@ -25,22 +24,23 @@ public class IHMCInterfacesGenerateMessages
 
       RosInterfaceGenerator generator = new RosInterfaceGenerator();
 
-//      generator.addPackageRoot(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces"));
-//      generator.addPackageRoot(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/common_interfaces"));
-//      generator.addPackageRoot(Paths.get("src/main/rosidl/ihmc_interfaces"));
+//      generator.addPackageRootToIDLGenerator(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces"));
+//      generator.addPackageRootToIDLGenerator(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/common_interfaces"));
+//      generator.addPackageRootToIDLGenerator(Paths.get("src/main/rosidl/ihmc_interfaces"));
 //
 //      generator.addCustomIDLFiles(Paths.get("build/tmp/generateMessages/ros2-common-interfaces"));
 //
 //      generator.generate(Paths.get("build/tmp/idl"), Paths.get("build/tmp/generateMessages/java"));
 
       // Temp stuff for Sylvain
-      generator.addPackageRoot(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces"));
-      generator.addPackageRoot(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/common_interfaces"));
-      generator.addPackageRoot(Paths.get("src/main/messages/ihmc_interfaces"));
+      generator.addPackageRootToIDLGenerator(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces"));
+      generator.addPackageRootToIDLGenerator(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/common_interfaces"));
+      generator.addPackageRootToIDLGenerator(Paths.get("src/main/messages/ihmc_interfaces"));
+      generator.addPackageRootToROS1Generator(Paths.get("src/main/messages/ihmc_interfaces"));
 
       generator.addCustomIDLFiles(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/"));
 
-      generator.generate(Paths.get("src/main/generated-idl"), Paths.get("src/main/generated-java"));
+      generator.generate(Paths.get("src/main/generated-idl"), Paths.get("src/main/messages/ros1"), Paths.get("src/main/generated-java"));
 
       deleteDuplicateFiles("src/main/generated-idl");
       deleteDuplicateFiles("src/main/generated-java");

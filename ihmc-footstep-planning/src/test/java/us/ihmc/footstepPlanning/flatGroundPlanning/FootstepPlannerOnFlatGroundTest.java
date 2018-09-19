@@ -5,7 +5,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.Random;
 
 import org.junit.After;
+import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -23,9 +25,13 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
    private static final double stepWidth = 0.3;
    private final Random random = new Random(727434726273L);
 
+   public abstract boolean assertPlannerReturnedResult();
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testJustStraightLine()
    {
-      testJustStraightLine(true);
+      runJustStraightLine(assertPlannerReturnedResult());
    }
 
    @After
@@ -34,7 +40,7 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   public void testJustStraightLine(boolean assertPlannerReturnedResult)
+   public void runJustStraightLine(boolean assertPlannerReturnedResult)
    {
       double xGoal = 5.0;
       double yGoal = -stepWidth/2.0;
@@ -60,13 +66,11 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose3d, footstepPlan));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @Test(timeout = 30000)
    public void testATightTurn()
    {
-      testJustStraightLine(true);
-   }
-
-   public void testATightTurn(boolean assertPlannerReturnedResult)
-   {
+      boolean assertPlannerReturnedResult = assertPlannerReturnedResult();
       double xGoal = 1.0;
       double yGoal = 0.5;
       double yawGoal = 0.0;
@@ -92,13 +96,11 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
          PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testStraightLineWithInitialTurn()
    {
-      testStraightLineWithInitialTurn(true);
-   }
-
-   public void testStraightLineWithInitialTurn(boolean assertPlannerReturnedResult)
-   {
+      boolean assertPlannerReturnedResult = assertPlannerReturnedResult();
       double xGoal = 5.0;
       double yGoal = -stepWidth/2.0;
       double yawGoal = Math.toRadians(20.0);
@@ -124,11 +126,7 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
    public void testJustTurnInPlace()
    {
-      testJustTurnInPlace(true);
-   }
-
-   public void testJustTurnInPlace(boolean assertPlannerReturnedResult)
-   {
+      boolean assertPlannerReturnedResult = assertPlannerReturnedResult();
       double xGoal = 0.0;
       double yGoal = -stepWidth/2.0;
       double yawGoal = Math.toRadians(160.0);
@@ -152,13 +150,13 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose3d, footstepPlan));
    }
 
+
+   @ContinuousIntegrationTest(estimatedDuration = 2.0)
+   @Test(timeout = 30000)
    public void testRandomPoses()
    {
-      testRandomPoses(true);
-   }
+      boolean assertPlannerReturnedResult = assertPlannerReturnedResult();
 
-   public void testRandomPoses(boolean assertPlannerReturnedResult)
-   {
       double xGoal = random.nextDouble();
       double yGoal = random.nextDouble();
       double yawGoal = 0.0;

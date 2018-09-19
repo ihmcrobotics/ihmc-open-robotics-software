@@ -22,6 +22,7 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedSimulationFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.OutputWriter;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -55,7 +56,7 @@ public class GenericQuadrupedSimulationFactory
       QuadrupedInitialPositionParameters initialPositionParameters = new GenericQuadrupedDefaultInitialPosition();
       GroundContactParameters groundContactParameters = new GenericQuadrupedGroundContactParameters();
       QuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
-      StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters();
+      StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters(false, CONTROL_DT);
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new GenericQuadrupedPositionBasedCrawlControllerParameters();
       GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
 
@@ -65,6 +66,7 @@ public class GenericQuadrupedSimulationFactory
             fullRobotModel.getTotalMass());
 
       SensorTimestampHolder timestampProvider = new GenericQuadrupedTimestampProvider(sdfRobot);
+      QuadrantDependentList<Boolean> kneeOrientationsOutward = new QuadrantDependentList<>(false, false, false, false);
 
       JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
@@ -78,6 +80,7 @@ public class GenericQuadrupedSimulationFactory
       simulationFactory.setGroundContactParameters(groundContactParameters);
       simulationFactory.setModelFactory(modelFactory);
       simulationFactory.setSDFRobot(sdfRobot);
+      simulationFactory.setKneeOrientationsOutward(kneeOrientationsOutward);
       simulationFactory.setSCSParameters(scsParameters);
       simulationFactory.setOutputWriter(outputWriter);
       simulationFactory.setShowPlotter(SHOW_PLOTTER);

@@ -24,6 +24,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.Momentum;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -103,7 +104,7 @@ public class MotionQPInputCalculator
 
    public void initialize()
    {
-      centroidalMomentumHandler.compute();
+      centroidalMomentumHandler.reset();
       allTaskJacobian.reshape(0, numberOfDoFs);
    }
 
@@ -130,7 +131,7 @@ public class MotionQPInputCalculator
    }
 
 
-   public boolean computePrivilegedJointAccelerations(MotionQPInput motionQPInputToPack)
+   public boolean computePrivilegedJointAccelerations(QPInput motionQPInputToPack)
    {
       if (privilegedConfigurationHandler == null || !privilegedConfigurationHandler.isEnabled())
          return false;
@@ -166,7 +167,7 @@ public class MotionQPInputCalculator
       return robotTaskSize > 0;
    }
 
-   public boolean computePrivilegedJointVelocities(MotionQPInput motionQPInputToPack)
+   public boolean computePrivilegedJointVelocities(QPInput motionQPInputToPack)
    {
       if (privilegedConfigurationHandler == null || !privilegedConfigurationHandler.isEnabled())
          return false;
@@ -200,7 +201,7 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link SpatialAccelerationCommand} into a {@link MotionQPInput}.
+    * Converts a {@link SpatialAccelerationCommand} into a {@link QPInput}.
     * <p>
     * The idea is to convert the information held in the {@code commandToConvert} such that it ends
     * up being formulated as follows:<br>
@@ -212,7 +213,7 @@ public class MotionQPInputCalculator
     * 
     * @return true if the command was successfully converted.
     */
-   public boolean convertSpatialAccelerationCommand(SpatialAccelerationCommand commandToConvert, MotionQPInput motionQPInputToPack)
+   public boolean convertSpatialAccelerationCommand(SpatialAccelerationCommand commandToConvert, QPInput motionQPInputToPack)
    {
       commandToConvert.getControlFrame(controlFrame);
       // Gets the M-by-6 selection matrix S.
@@ -318,7 +319,7 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link SpatialVelocityCommand} into a {@link MotionQPInput}.
+    * Converts a {@link SpatialVelocityCommand} into a {@link QPInput}.
     * <p>
     * The idea is to convert the information held in the {@code commandToConvert} such that it ends
     * up being formulated as follows:<br>
@@ -330,7 +331,7 @@ public class MotionQPInputCalculator
     * 
     * @return true if the command was successfully converted.
     */
-   public boolean convertSpatialVelocityCommand(SpatialVelocityCommand commandToConvert, MotionQPInput motionQPInputToPack)
+   public boolean convertSpatialVelocityCommand(SpatialVelocityCommand commandToConvert, QPInput motionQPInputToPack)
    {
       // Gets the M-by-6 selection matrix S.
       commandToConvert.getControlFrame(controlFrame);
@@ -433,11 +434,11 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link MomentumRateCommand} into a {@link MotionQPInput}.
+    * Converts a {@link MomentumRateCommand} into a {@link QPInput}.
     * 
     * @return true if the command was successfully converted.
     */
-   public boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, MotionQPInput motionQPInputToPack)
+   public boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, QPInput motionQPInputToPack)
    {
       commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();
@@ -477,11 +478,11 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link MomentumCommand} into a {@link MotionQPInput}.
+    * Converts a {@link MomentumCommand} into a {@link QPInput}.
     * 
     * @return true if the command was successfully converted.
     */
-   public boolean convertMomentumCommand(MomentumCommand commandToConvert, MotionQPInput motionQPInputToPack)
+   public boolean convertMomentumCommand(MomentumCommand commandToConvert, QPInput motionQPInputToPack)
    {
       commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();
@@ -519,11 +520,11 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link JointspaceAccelerationCommand} into a {@link MotionQPInput}.
+    * Converts a {@link JointspaceAccelerationCommand} into a {@link QPInput}.
     * 
     * @return true if the command was successfully converted.
     */
-   public boolean convertJointspaceAccelerationCommand(JointspaceAccelerationCommand commandToConvert, MotionQPInput motionQPInputToPack)
+   public boolean convertJointspaceAccelerationCommand(JointspaceAccelerationCommand commandToConvert, QPInput motionQPInputToPack)
    {
       int taskSize = ScrewTools.computeDegreesOfFreedom(commandToConvert.getJoints());
 
@@ -559,11 +560,11 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link JointspaceVelocityCommand} into a {@link MotionQPInput}.
+    * Converts a {@link JointspaceVelocityCommand} into a {@link QPInput}.
     * 
     * @return true if the command was successfully converted.
     */
-   public boolean convertJointspaceVelocityCommand(JointspaceVelocityCommand commandToConvert, MotionQPInput motionQPInputToPack)
+   public boolean convertJointspaceVelocityCommand(JointspaceVelocityCommand commandToConvert, QPInput motionQPInputToPack)
    {
       int taskSize = ScrewTools.computeDegreesOfFreedom(commandToConvert.getJoints());
 
@@ -619,5 +620,11 @@ public class MotionQPInputCalculator
    {
       centroidalMomentumHandler.computeCentroidalMomentumRate(jointAccelerations);
       return centroidalMomentumHandler.getCentroidalMomentumRate();
+   }
+
+   public Momentum computeCentroidalMomentumFromSolution(DenseMatrix64F jointVelocities)
+   {
+      centroidalMomentumHandler.computeCentroidalMomentum(jointVelocities);
+      return centroidalMomentumHandler.getCentroidalMomentum();
    }
 }

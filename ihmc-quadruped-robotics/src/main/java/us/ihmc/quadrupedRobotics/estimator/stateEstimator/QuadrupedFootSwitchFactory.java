@@ -6,8 +6,8 @@ import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTou
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -25,11 +25,13 @@ public class QuadrupedFootSwitchFactory
          "footContactableBodies");
    private final RequiredFactoryField<FullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
    private final RequiredFactoryField<FootSwitchType> footSwitchType = new RequiredFactoryField<>("footSwitchType");
+   private final RequiredFactoryField<QuadrantDependentList<Boolean>> kneeOrientationsOutward = new RequiredFactoryField<>("kneeOrientationsOutward");
 
    // Private fields
    protected final YoVariableRegistry registry = new YoVariableRegistry("QuadrupedFootSwitchManagerRegistry");
 
-   private final QuadrantDependentList<Double> defaultJointTorqueTouchdownThresholds = new QuadrantDependentList<>(5.0, 5.0, -5.0, -5.0);
+   private static final double torqueThreshold = 20.0;
+   private final QuadrantDependentList<Double> defaultJointTorqueTouchdownThresholds = new QuadrantDependentList<>();
 
    protected void setupTouchdownBasedFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
    {
@@ -37,14 +39,34 @@ public class QuadrupedFootSwitchFactory
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         double sign;
+         if (kneeOrientationsOutward.get().get(robotQuadrant))
+         {
+            if (robotQuadrant.isQuadrantInFront())
+               sign = -1.0;
+            else
+               sign = 1.0;
+         }
+         else
+         {
+            if (robotQuadrant.isQuadrantInFront())
+               sign = 1.0;
+            else
+               sign = -1.0;
+         }
+
+         defaultJointTorqueTouchdownThresholds.put(robotQuadrant, sign * torqueThreshold);
+      }
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
          QuadrupedTouchdownDetectorBasedFootSwitch touchdownDetectorBasedFootSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(robotQuadrant,
                                                                                                                                     footContactableBodies.get()
                                                                                                                                                          .get(robotQuadrant),
                                                                                                                                     totalRobotWeight, registry);
-
          JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector;
-         jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(
-               fullRobotModel.get().getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), registry);
+         boolean dontDetectTouchdownIfAtJointLimit = true;
+         jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(fullRobotModel.get().getLegJoint(robotQuadrant, LegJointName.KNEE_PITCH), dontDetectTouchdownIfAtJointLimit, registry);
          jointTorqueBasedTouchdownDetector.setTorqueThreshold(defaultJointTorqueTouchdownThresholds.get(robotQuadrant));
          touchdownDetectorBasedFootSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
 
@@ -125,5 +147,10 @@ public class QuadrupedFootSwitchFactory
    public void setFootSwitchType(FootSwitchType footSwitchType)
    {
       this.footSwitchType.set(footSwitchType);
+   }
+
+   public void setKneeOrientationsOutward(QuadrantDependentList<Boolean> kneeOrientationsOutward)
+   {
+      this.kneeOrientationsOutward.set(kneeOrientationsOutward);
    }
 }

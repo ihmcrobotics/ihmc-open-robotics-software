@@ -409,12 +409,12 @@ public class PointFeedbackController implements FeedbackControllerInterface
       yoCurrentPosition.set(currentPosition);
 
       desiredPosition.setIncludingFrame(yoDesiredPosition);
+      desiredPosition.changeFrame(controlFrame);
 
-      feedbackTermToPack.setToZero(worldFrame);
-      feedbackTermToPack.sub(desiredPosition, currentPosition);
+      feedbackTermToPack.setIncludingFrame(desiredPosition);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
-      yoErrorPosition.set(feedbackTermToPack);
+      yoErrorPosition.setMatchingFrame(feedbackTermToPack);
 
       if (linearGainsFrame != null)
          feedbackTermToPack.changeFrame(linearGainsFrame);
@@ -451,9 +451,10 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
+      feedbackTermToPack.changeFrame(controlFrame);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
-      yoErrorLinearVelocity.set(feedbackTermToPack);
+      yoErrorLinearVelocity.setMatchingFrame(feedbackTermToPack);
 
       if (yoFilteredErrorLinearVelocity != null)
       {
@@ -504,9 +505,10 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.setIncludingFrame(yoErrorPosition);
       feedbackTermToPack.scale(dt);
       feedbackTermToPack.add(yoErrorPositionIntegrated);
+      feedbackTermToPack.changeFrame(controlFrame);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(maximumIntegralError);
-      yoErrorPositionIntegrated.set(feedbackTermToPack);
+      yoErrorPositionIntegrated.setMatchingFrame(feedbackTermToPack);
 
       if (linearGainsFrame != null)
          feedbackTermToPack.changeFrame(linearGainsFrame);

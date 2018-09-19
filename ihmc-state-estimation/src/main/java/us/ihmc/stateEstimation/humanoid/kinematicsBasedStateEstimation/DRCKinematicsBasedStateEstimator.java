@@ -6,15 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -32,10 +26,9 @@ import us.ihmc.sensorProcessing.imu.FusedIMUSensor;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.stateEstimation.humanoid.DRCStateEstimatorInterface;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -43,7 +36,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
+public class DRCKinematicsBasedStateEstimator implements StateEstimatorController
 {
    public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = true;
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
@@ -199,12 +192,6 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    }
 
    @Override
-   public StateEstimator getStateEstimator()
-   {
-      return this;
-   }
-
-   @Override
    public void initialize()
    {
       if (fusedIMUSensor != null)
@@ -306,9 +293,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    }
 
    @Override
-   public void initializeEstimatorToActual(Tuple3DReadOnly initialCoMPosition, QuaternionReadOnly initialEstimationLinkOrientation)
+   public void initializeEstimator(RigidBodyTransform initialRootJointTranform)
    {
-      pelvisLinearStateUpdater.initializeCoMPositionToActual(initialCoMPosition);
+      pelvisLinearStateUpdater.initializeRootJointPosition(initialRootJointTranform.getTranslationVector());
       // Do nothing for the orientation since the IMU is trusted
    }
 
@@ -328,88 +315,6 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public String getDescription()
    {
       return getName();
-   }
-
-   @Override
-   public void getEstimatedOrientation(FrameQuaternion estimatedOrientationToPack)
-   {
-      pelvisRotationalStateUpdater.getEstimatedOrientation(estimatedOrientationToPack);
-   }
-
-   @Override
-   public void setEstimatedOrientation(FrameQuaternion estimatedOrientation)
-   {
-      // Do nothing, IMU is trusted
-   }
-
-   @Override
-   public void getEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocityToPack)
-   {
-      pelvisRotationalStateUpdater.getEstimatedAngularVelocity(estimatedAngularVelocityToPack);
-   }
-
-   @Override
-   public void setEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocity)
-   {
-      // Do nothing, IMU is trusted
-   }
-
-   @Override
-   public void getEstimatedCoMPosition(FramePoint3D estimatedCoMPositionToPack)
-   {
-      pelvisLinearStateUpdater.getEstimatedCoMPosition(estimatedCoMPositionToPack);
-   }
-
-   @Override
-   public void setEstimatedCoMPosition(FramePoint3D estimatedCoMPosition)
-   {
-      pelvisLinearStateUpdater.initializeCoMPositionToActual(estimatedCoMPosition);
-   }
-
-   @Override
-   public void getEstimatedCoMVelocity(FrameVector3D estimatedCoMVelocityToPack)
-   {
-      pelvisLinearStateUpdater.getEstimatedCoMVelocity(estimatedCoMVelocityToPack);
-   }
-
-   @Override
-   public void setEstimatedCoMVelocity(FrameVector3D estimatedCoMVelocity)
-   {
-   }
-
-   @Override
-   public void getEstimatedPelvisPosition(FramePoint3D estimatedPelvisPositionToPack)
-   {
-      pelvisLinearStateUpdater.getEstimatedPelvisPosition(estimatedPelvisPositionToPack);
-   }
-
-   @Override
-   public void getEstimatedPelvisLinearVelocity(FrameVector3D estimatedPelvisLinearVelocityToPack)
-   {
-      pelvisLinearStateUpdater.getEstimatedPelvisLinearVelocity(estimatedPelvisLinearVelocityToPack);
-   }
-
-   @Override
-   public DenseMatrix64F getCovariance()
-   {
-      return null;
-   }
-
-   @Override
-   public DenseMatrix64F getState()
-   {
-      return null;
-   }
-
-   @Override
-   public void setState(DenseMatrix64F x, DenseMatrix64F covariance)
-   {
-   }
-
-   @Override
-   public void initializeOrientationEstimateToMeasurement()
-   {
-      // Do nothing
    }
 
    public ForceSensorDataHolderReadOnly getForceSensorOutput()

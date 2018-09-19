@@ -11,16 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import controller_msgs.msg.dds.QuadrupedBodyHeightMessage;
-import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
-import controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage;
-import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
-import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
-import controller_msgs.msg.dds.QuadrupedRequestedControllerStateMessage;
-import controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage;
-import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.SoleTrajectoryMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
 import us.ihmc.communication.ROS2Tools;
@@ -67,6 +58,7 @@ public class QuadrupedControllerAPIDefinition
       quadrupedStatusMessages.add(QuadrupedControllerStateChangeMessage.class);
       quadrupedStatusMessages.add(QuadrupedFootstepStatusMessage.class);
       quadrupedStatusMessages.add(QuadrupedGroundPlaneMessage.class);
+      quadrupedStatusMessages.add(WalkingControllerFailureStatusMessage.class);
 
       quadrupedSupportedStatusMessages = Collections.unmodifiableList(quadrupedStatusMessages);
 
