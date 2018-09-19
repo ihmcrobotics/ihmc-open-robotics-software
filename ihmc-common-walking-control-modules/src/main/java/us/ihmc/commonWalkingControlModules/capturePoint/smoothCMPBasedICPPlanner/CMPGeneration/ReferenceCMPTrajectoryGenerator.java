@@ -26,6 +26,9 @@ import java.util.List;
 
 public class ReferenceCMPTrajectoryGenerator
 {
+   private static final boolean REMOVE_SHORT_SEGMENTS = true;
+   private static final double minimumSegmentDuration = 0.01;
+
    private static final int maxNumberOfCoefficients = 10;
    private static final int maxNumberOfSegments = 35;
 
@@ -235,6 +238,9 @@ public class ReferenceCMPTrajectoryGenerator
          }
          TrajectoryMathTools.addSegmentedTrajectories(swingCMPTrajectories.get(phaseIndex), swingCoPTrajectories.get(phaseIndex), torqueTrajectory,
                                                       trajectoryEpsilon);
+         if (REMOVE_SHORT_SEGMENTS)
+            TrajectoryMathTools.removeShortSegments(swingCMPTrajectories.get(phaseIndex), minimumSegmentDuration);
+
          phaseIndex++;
 
          if (debug)
@@ -262,6 +268,8 @@ public class ReferenceCMPTrajectoryGenerator
          }
          TrajectoryMathTools.addSegmentedTrajectories(transferCMPTrajectories.get(phaseIndex), transferCoPTrajectories.get(phaseIndex), torqueTrajectory,
                                                       trajectoryEpsilon);
+         if (REMOVE_SHORT_SEGMENTS)
+            TrajectoryMathTools.removeShortSegments(transferCMPTrajectories.get(phaseIndex), minimumSegmentDuration);
 
          if (debug)
          {
@@ -284,6 +292,8 @@ public class ReferenceCMPTrajectoryGenerator
          }
          TrajectoryMathTools.addSegmentedTrajectories(swingCMPTrajectories.get(phaseIndex), swingCoPTrajectories.get(phaseIndex), torqueTrajectory,
                                                       trajectoryEpsilon);
+         if (REMOVE_SHORT_SEGMENTS)
+            TrajectoryMathTools.removeShortSegments(swingCMPTrajectories.get(phaseIndex), minimumSegmentDuration);
 
          if (debug)
          {
@@ -306,6 +316,8 @@ public class ReferenceCMPTrajectoryGenerator
          return;
       TrajectoryMathTools.addSegmentedTrajectories(transferCMPTrajectories.get(numberOfFootstepsToSet), transferCoPTrajectories.get(numberOfFootstepsToSet),
                                                    torqueTrajectory, trajectoryEpsilon);
+      if (REMOVE_SHORT_SEGMENTS)
+         TrajectoryMathTools.removeShortSegments(transferCMPTrajectories.get(phaseIndex), minimumSegmentDuration);
 
       if (debug)
       {
