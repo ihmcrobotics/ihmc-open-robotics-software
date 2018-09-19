@@ -82,7 +82,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final RecyclingArrayList<FrameTuple3DBasics> calculatedInitialICPConditions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FrameTuple3DBasics> setInitialICPConditions = new RecyclingArrayList<>(FramePoint3D::new);
 
-   private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox(icpToolbox);
+   private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox();
 
    private final List<YoFramePoint3D> icpWaypoints = new ArrayList<>();
 
