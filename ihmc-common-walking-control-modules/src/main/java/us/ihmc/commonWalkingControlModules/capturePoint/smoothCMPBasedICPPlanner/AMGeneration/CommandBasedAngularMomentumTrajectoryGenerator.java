@@ -89,9 +89,6 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       this.smoothCMPPlannerParameters = smoothCMPPlannerParameters;
       this.planSwingAngularMomentum.set(smoothCMPPlannerParameters.planSwingAngularMomentum());
       this.planTransferAngularMomentum.set(smoothCMPPlannerParameters.planTransferAngularMomentum());
-
-      planTransferAngularMomentum.set(true);
-      planSwingAngularMomentum.set(true);
    }
 
    @Override
