@@ -34,23 +34,54 @@ public class TrajectoryMathToolsTest
    private static TrajectoryMathTools trajMath = new TrajectoryMathTools(16);
    private static final double epsilon = 1e-6;
    private static final int iters = 1000;
+   private final Random random = new Random(12903L);
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testTrajectoryAddition()
+   public void testTrajectoryAdditionAndSubtraction()
    {
-      Trajectory traj1 = new Trajectory(7);
-      Trajectory traj2 = new Trajectory(7);
-      traj1.setCubic(1, 10, 1.5, -2.5);
-      traj2.setCubic(1, 10, 12.5, 3.5);
-      Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
-      Assert.assertTrue(traj2.getNumberOfCoefficients() == 4);
-      TrajectoryMathTools.add(traj1, traj1, traj2);
-      Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
-      assertEquals(traj1.getCoefficient(0), 13.482853223593963, epsilon);
-      assertEquals(traj1.getCoefficient(1), 1.069958847736625, epsilon);
-      assertEquals(traj1.getCoefficient(2), -0.588477366255144, epsilon);
-      assertEquals(traj1.getCoefficient(3), 0.03566529492455418, epsilon);
+      int maxNumberOfCoefficients = 10;
+      Trajectory trajectory1 = new Trajectory(maxNumberOfCoefficients);
+      Trajectory trajectory2 = new Trajectory(maxNumberOfCoefficients);
+
+      int iterations = 50;
+      for (int i = 0; i < iterations; i++)
+      {
+         int numberOfCoefficients = 1 + random.nextInt(maxNumberOfCoefficients);
+         double[] trajectory1Coefficients = new double[numberOfCoefficients];
+         double[] trajectory2Coefficients = new double[numberOfCoefficients];
+
+         for (int j = 0; j < numberOfCoefficients; j++)
+         {
+            trajectory1Coefficients[j] = EuclidCoreRandomTools.nextDouble(random, 5.0);
+            trajectory2Coefficients[j] = EuclidCoreRandomTools.nextDouble(random, 5.0);
+         }
+
+         trajectory1.setDirectly(trajectory1Coefficients);
+         trajectory2.setDirectly(trajectory2Coefficients);
+
+         Assert.assertEquals(trajectory1.getNumberOfCoefficients(), numberOfCoefficients);
+         Assert.assertEquals(trajectory2.getNumberOfCoefficients(), numberOfCoefficients);
+
+         // test addition
+         TrajectoryMathTools.add(trajectory1, trajectory1, trajectory2);
+         Assert.assertEquals(trajectory1.getNumberOfCoefficients(), numberOfCoefficients);
+
+         for (int j = 0; j < numberOfCoefficients; j++)
+         {
+            Assert.assertEquals(trajectory1.getCoefficient(j), trajectory1Coefficients[j] + trajectory2Coefficients[j], epsilon);
+         }
+
+         // test subtraction
+         trajectory1.setDirectly(trajectory1Coefficients);
+         TrajectoryMathTools.subtract(trajectory1, trajectory1, trajectory2);
+         Assert.assertEquals(trajectory1.getNumberOfCoefficients(), numberOfCoefficients);
+
+         for (int j = 0; j < numberOfCoefficients; j++)
+         {
+            Assert.assertEquals(trajectory1.getCoefficient(j), trajectory1Coefficients[j] - trajectory2Coefficients[j], epsilon);
+         }
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -140,47 +171,109 @@ public class TrajectoryMathToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testTrajectoryMultiTimeScaleAddition()
+   public void testTrajectoryMultiTimeScaleAdditionAndSubtraction()
    {
-      List<Trajectory> resultTrajectoryList = new ArrayList<>(3);
-      resultTrajectoryList.add(new Trajectory(6));
-      resultTrajectoryList.add(new Trajectory(6));
-      resultTrajectoryList.add(new Trajectory(6));
-      resultTrajectoryList.add(new Trajectory(6));
-      Trajectory traj1 = new Trajectory(7);
-      Trajectory traj2 = new Trajectory(7);
-      traj1.setCubic(1, 6, 1.5, -2.5);
-      traj2.setCubic(3, 5, 12.5, 3.5);
-      Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
-      Assert.assertTrue(traj2.getNumberOfCoefficients() == 4);
-      int numberOfSegments = trajMath.add(resultTrajectoryList, traj1, traj2, Epsilons.ONE_MILLIONTH);
-      Assert.assertTrue(numberOfSegments == 3);
-      Trajectory traj3 = resultTrajectoryList.get(0);
-      Trajectory traj4 = resultTrajectoryList.get(1);
-      Trajectory traj5 = resultTrajectoryList.get(2);
-      assertEquals(traj3.getInitialTime(), 1.0, epsilon);
-      assertEquals(traj3.getFinalTime(), 3.0, epsilon);
-      Assert.assertTrue(traj3.getNumberOfCoefficients() == 4);
-      assertEquals(traj3.getCoefficient(0), 0.9560, epsilon);
-      assertEquals(traj3.getCoefficient(1), 1.1520, epsilon);
-      assertEquals(traj3.getCoefficient(2), -0.6720, epsilon);
-      assertEquals(traj3.getCoefficient(3), 0.0640, epsilon);
+      int maxNumberOfCoefficients = 10;
+      int iterations = 25;
 
-      assertEquals(traj4.getInitialTime(), 3.0, epsilon);
-      assertEquals(traj4.getFinalTime(), 5.0, epsilon);
-      Assert.assertTrue(traj4.getNumberOfCoefficients() == 4);
-      assertEquals(traj4.getCoefficient(0), 0.9560 - 109.0000, epsilon);
-      assertEquals(traj4.getCoefficient(1), 1.1520 + 101.2500, epsilon);
-      assertEquals(traj4.getCoefficient(2), -0.6720 - 27.0000, epsilon);
-      assertEquals(traj4.getCoefficient(3), 0.0640 + 2.2500, epsilon);
+      // test addition
+      for (int i = 0; i < iterations; i++)
+      {
+         int numberOfCoefficients = 1 + random.nextInt(maxNumberOfCoefficients);
+         testAdditionOrSubtraction(maxNumberOfCoefficients, numberOfCoefficients, true);
+      }
 
-      assertEquals(traj5.getInitialTime(), 5.0, epsilon);
-      assertEquals(traj5.getFinalTime(), 6.0, epsilon);
-      Assert.assertTrue(traj5.getNumberOfCoefficients() == 4);
-      assertEquals(traj5.getCoefficient(0), 0.9560, epsilon);
-      assertEquals(traj5.getCoefficient(1), 1.1520, epsilon);
-      assertEquals(traj5.getCoefficient(2), -0.6720, epsilon);
-      assertEquals(traj5.getCoefficient(3), 0.0640, epsilon);
+      // test subtraction
+      for (int i = 0; i < iterations; i++)
+      {
+         int numberOfCoefficients = 1 + random.nextInt(maxNumberOfCoefficients);
+         testAdditionOrSubtraction(maxNumberOfCoefficients, numberOfCoefficients, false);
+      }
+   }
+
+   private void testAdditionOrSubtraction(int maxNumberOfCoefficients, int numberOfCoefficients, boolean testAddition)
+   {
+      List<Trajectory> trajectoryList = new ArrayList<>();
+      Trajectory trajectory1 = new Trajectory(maxNumberOfCoefficients);
+      Trajectory trajectory2 = new Trajectory(maxNumberOfCoefficients);
+      TrajectoryMathTools trajectoryMathTools = new TrajectoryMathTools(maxNumberOfCoefficients);
+
+      trajectoryList.clear();
+      trajectoryList.add(new Trajectory(numberOfCoefficients));
+      trajectoryList.add(new Trajectory(numberOfCoefficients));
+      trajectoryList.add(new Trajectory(numberOfCoefficients));
+
+      double[] trajectory1Coefficients = new double[numberOfCoefficients];
+      double[] trajectory2Coefficients = new double[numberOfCoefficients];
+
+      double trajectory1StartTime = EuclidCoreRandomTools.nextDouble(random, 5.0);
+      double trajectory2StartTime = EuclidCoreRandomTools.nextDouble(random, 5.0);
+      double trajectory1EndTime = Math.max(trajectory1StartTime, trajectory2StartTime) + EuclidCoreRandomTools.nextDouble(random, 0.01, 5.0) + epsilon;
+      double trajectory2EndTime = Math.max(trajectory1StartTime, trajectory2StartTime) + EuclidCoreRandomTools.nextDouble(random, 0.01, 5.0) + epsilon;
+
+      Trajectory firstTrajectoryToStart = trajectory1StartTime < trajectory2StartTime ? trajectory1 : trajectory2;
+      Trajectory lastTrajectoryToEnd = trajectory1EndTime > trajectory2EndTime ? trajectory1 : trajectory2;
+      double firstStartTime = Math.min(trajectory1StartTime, trajectory2StartTime);
+      double secondStartTime = Math.max(trajectory1StartTime, trajectory2StartTime);
+      double firstEndTime = Math.min(trajectory1EndTime, trajectory2EndTime);
+      double secondEndTime = Math.max(trajectory1EndTime, trajectory2EndTime);
+
+      for (int j = 0; j < numberOfCoefficients; j++)
+      {
+         trajectory1Coefficients[j] = EuclidCoreRandomTools.nextDouble(random, 5.0);
+         trajectory2Coefficients[j] = EuclidCoreRandomTools.nextDouble(random, 5.0);
+      }
+
+      trajectory1.setDirectly(trajectory1Coefficients);
+      trajectory2.setDirectly(trajectory2Coefficients);
+
+      trajectory1.setTime(trajectory1StartTime, trajectory1EndTime);
+      trajectory2.setTime(trajectory2StartTime, trajectory2EndTime);
+
+      if(testAddition)
+      {
+         trajectoryMathTools.add(trajectoryList, trajectory1, trajectory2, epsilon);
+      }
+      else
+      {
+         trajectoryMathTools.subtract(trajectoryList, trajectory1, trajectory2, epsilon);
+      }
+
+      Assert.assertEquals(trajectoryList.size(), 3);
+
+      Trajectory firstSummedTrajectory = trajectoryList.get(0);
+      Trajectory secondSummedTrajectory = trajectoryList.get(1);
+      Trajectory thirdSummedTrajectory = trajectoryList.get(2);
+      Assert.assertEquals(firstSummedTrajectory.getNumberOfCoefficients(), numberOfCoefficients);
+      Assert.assertEquals(secondSummedTrajectory.getNumberOfCoefficients(), numberOfCoefficients);
+      Assert.assertEquals(thirdSummedTrajectory.getNumberOfCoefficients(), numberOfCoefficients);
+
+      // check first trajectory
+      Assert.assertEquals(firstSummedTrajectory.getInitialTime(), firstStartTime, epsilon);
+      Assert.assertEquals(firstSummedTrajectory.getFinalTime(), secondStartTime, epsilon);
+      double sign = !testAddition && firstTrajectoryToStart == trajectory2 ? -1.0 : 1.0;
+      for (int j = 0; j < numberOfCoefficients; j++)
+      {
+         Assert.assertEquals(sign * firstTrajectoryToStart.getCoefficient(j), firstSummedTrajectory.getCoefficient(j), epsilon);
+      }
+
+      // check middle trajectory
+      Assert.assertEquals(secondSummedTrajectory.getInitialTime(), secondStartTime, epsilon);
+      Assert.assertEquals(secondSummedTrajectory.getFinalTime(), firstEndTime, epsilon);
+      sign = testAddition ? 1.0 : -1.0;
+      for (int j = 0; j < numberOfCoefficients; j++)
+      {
+         Assert.assertEquals(trajectory1.getCoefficient(j) + sign * trajectory2.getCoefficient(j), secondSummedTrajectory.getCoefficient(j), epsilon);
+      }
+
+      // check last trajectory
+      Assert.assertEquals(thirdSummedTrajectory.getInitialTime(), firstEndTime, epsilon);
+      Assert.assertEquals(thirdSummedTrajectory.getFinalTime(), secondEndTime, epsilon);
+      sign = !testAddition && lastTrajectoryToEnd == trajectory2 ? -1.0 : 1.0;
+      for (int j = 0; j < numberOfCoefficients; j++)
+      {
+         Assert.assertEquals(sign * lastTrajectoryToEnd.getCoefficient(j), thirdSummedTrajectory.getCoefficient(j), epsilon);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -438,38 +531,56 @@ public class TrajectoryMathToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testTrajectoryMultiplication2()
-   {
-      Trajectory traj1 = new Trajectory(8);
-      Trajectory traj2 = new Trajectory(8);
-      traj1.setLinear(0, 10, 1, 2);
-      traj2.setLinear(0, 10, 2, 3);
-      trajMath.multiply(traj1, traj1, traj2);
-      assertEquals(traj1.getCoefficient(0), 2, epsilon);
-      assertEquals(traj1.getCoefficient(1), 0.3, epsilon);
-      assertEquals(traj1.getCoefficient(2), 0.01, epsilon);
-
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testTrajectoryMultiplication()
    {
-      Trajectory traj1 = new Trajectory(7);
-      Trajectory traj2 = new Trajectory(7);
-      traj1.setCubic(12, 15, 19.5, 200.5);
-      traj2.setCubic(12, 15, 0.5, 0.1);
-      Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
-      Assert.assertTrue(traj2.getNumberOfCoefficients() == 4);
-      trajMath.multiply(traj1, traj1, traj2);
-      Assert.assertTrue(traj1.getNumberOfCoefficients() == 7);
-      assertEquals(traj1.getCoefficient(0), -2.228097449999825e+06, epsilon);
-      assertEquals(traj1.getCoefficient(1), 1.016083999999920e+06, epsilon);
-      assertEquals(traj1.getCoefficient(2), -1.920462999999848e+05, epsilon);
-      assertEquals(traj1.getCoefficient(3), 1.925763703703550e+04, epsilon);
-      assertEquals(traj1.getCoefficient(4), -1.080637037036950e+03, epsilon);
-      assertEquals(traj1.getCoefficient(5), 32.177777777775184, epsilon);
-      assertEquals(traj1.getCoefficient(6), -0.397256515775002, epsilon);
+      int maxNumberOfCoefficientsPreMultiply = 5;
+      int maxNumberOfCoefficientsPostMultiply = 2 * maxNumberOfCoefficientsPreMultiply - 1;
+      Trajectory trajectory1 = new Trajectory(maxNumberOfCoefficientsPostMultiply);
+      Trajectory trajectory2 = new Trajectory(maxNumberOfCoefficientsPostMultiply);
+      TrajectoryMathTools trajectoryMathTools = new TrajectoryMathTools(maxNumberOfCoefficientsPostMultiply);
+
+      int iterations = 50;
+      for (int i = 0; i < iterations; i++)
+      {
+         int numberOfCoefficients1 = 1 + random.nextInt(maxNumberOfCoefficientsPreMultiply);
+         int numberOfCoefficients2 = 1 + random.nextInt(maxNumberOfCoefficientsPreMultiply);
+
+         double[] trajectory1Coefficients = new double[numberOfCoefficients1];
+         double[] trajectory2Coefficients = new double[numberOfCoefficients2];
+
+         for (int j = 0; j < numberOfCoefficients1; j++)
+         {
+            trajectory1Coefficients[j] = EuclidCoreRandomTools.nextDouble(random, 5.0);
+         }
+
+         for (int j = 0; j < numberOfCoefficients2; j++)
+         {
+            trajectory2Coefficients[j] = EuclidCoreRandomTools.nextDouble(random, 5.0);
+         }
+
+         trajectory1.setDirectly(trajectory1Coefficients);
+         trajectory2.setDirectly(trajectory2Coefficients);
+
+         trajectoryMathTools.multiply(trajectory1, trajectory1, trajectory2);
+         int numberOfCoefficientsPostMultiply = numberOfCoefficients1 + numberOfCoefficients2 - 1;
+         Assert.assertEquals(trajectory1.getNumberOfCoefficients(), numberOfCoefficientsPostMultiply);
+
+         for (int j = 0; j < numberOfCoefficientsPostMultiply; j++)
+         {
+            double expectedCoefficient = 0.0;
+            for (int k = 0; k <= j; k++)
+            {
+               if(k >= numberOfCoefficients1 || j - k < 0)
+                  break;
+               else if(j - k >= numberOfCoefficients2)
+                  continue;
+
+               expectedCoefficient += trajectory1Coefficients[k] * trajectory2Coefficients[j - k];
+            }
+
+            Assert.assertEquals(trajectory1.getCoefficient(j), expectedCoefficient, epsilon);
+         }
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
