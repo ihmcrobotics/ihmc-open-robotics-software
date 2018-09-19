@@ -610,7 +610,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       int i = 0;
       for (; i < icpPhaseEntryCornerPointIndices.size(); i++)
       {
-         FramePoint3D icpPhaseEntryCornerPoint = icpDesiredInitialPositions.get(icpPhaseEntryCornerPointIndices.get(i));
+         FramePoint3D icpPhaseEntryCornerPoint = icpDesiredInitialPositions.getAndGrowIfNeeded(icpPhaseEntryCornerPointIndices.get(i));
          icpPhaseEntryCornerPointsToPack.get(i).set(icpPhaseEntryCornerPoint);
          icpPhaseEntryCornerPointsToPack.get(i).add(0.0, 0.0, 0.03);
       }
@@ -624,7 +624,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       int i = 0;
       for (; i < icpPhaseExitCornerPointIndices.size(); i++)
       {
-         FramePoint3D icpPhaseExitCornerPoint = icpDesiredFinalPositions.get(icpPhaseExitCornerPointIndices.get(i) - 1);
+         FramePoint3D icpPhaseExitCornerPoint = icpDesiredFinalPositions.getAndGrowIfNeeded(icpPhaseExitCornerPointIndices.get(i) - 1);
          icpPhaseExitCornerPointsToPack.get(i).set(icpPhaseExitCornerPoint);
          icpPhaseExitCornerPointsToPack.get(i).add(0.0, 0.0, 0.05);
       }
