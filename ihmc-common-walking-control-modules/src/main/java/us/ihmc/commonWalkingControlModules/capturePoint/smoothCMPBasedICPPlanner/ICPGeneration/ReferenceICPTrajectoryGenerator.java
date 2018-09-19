@@ -83,6 +83,9 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final RecyclingArrayList<FrameTuple3DBasics> calculatedInitialICPConditions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FrameTuple3DBasics> setInitialICPConditions = new RecyclingArrayList<>(FramePoint3D::new);
 
+   private final YoFramePoint3D initialICPConditionForContinuity;
+   private final YoFramePoint3D finalICPConditionForContinuity;
+
    private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox();
 
    private final List<YoFramePoint3D> icpWaypoints = new ArrayList<>();
@@ -113,6 +116,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       localTimeInCurrentPhase.set(0.0);
 
       yoICPVelocityDynamicsCurrent = new YoFrameVector3D(namePrefix + "ICPVelocityDynamics", ReferenceFrame.getWorldFrame(), registry);
+      initialICPConditionForContinuity = new YoFramePoint3D("InitialICPConditionForContinuity", ReferenceFrame.getWorldFrame(), registry);
+      finalICPConditionForContinuity = new YoFramePoint3D("FinalICPConditionForContinuity", ReferenceFrame.getWorldFrame(), registry);
 
       currentSegmentIndex = new YoInteger(namePrefix + "CurrentSegment", registry);
 
@@ -374,14 +379,16 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       setInitialICPConditions.clear();
       for(int i = 0; i < calculatedInitialICPConditions.size(); i++)
          setInitialICPConditions.add().setIncludingFrame(calculatedInitialICPConditions.get(i));
+      initialICPConditionForContinuity.set(calculatedInitialICPConditions.get(0));
    }
 
    public void adjustDesiredTrajectoriesForInitialSmoothing()
    {
       if ((isInitialTransfer.getBooleanValue() || (continuouslyAdjustForICPContinuity.getBooleanValue())) && copTrajectories.size() > 1)
       {
+         finalICPConditionForContinuity.set(icpDesiredFinalPositionsFromCoPs.get(1));
          icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing3D(omega0.getDoubleValue(), copTrajectories, setInitialICPConditions,
-                                                                             icpDesiredFinalPositionsFromCoPs.get(1));
+                                                                             finalICPConditionForContinuity);
          icpToolbox.computeDesiredCornerPoints3D(icpDesiredInitialPositionsFromCoPs, icpDesiredFinalPositionsFromCoPs, copTrajectories, omega0.getDoubleValue());
       }
    }
