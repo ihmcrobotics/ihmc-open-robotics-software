@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -29,8 +28,6 @@ import java.util.List;
 public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final static boolean CONTINUOUSLY_ADJUST_FOR_ICP_DISCONTINUITY = true;
-
-   private final static int FIRST_SEGMENT = 0;
 
    private final static int defaultSize = 300;
 
@@ -60,11 +57,15 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final YoBoolean continuouslyAdjustForICPContinuity;
    private final YoBoolean areICPDynamicsSatisfied;
 
+   private final YoInteger totalNumberOfCoPSegments;
    private final YoInteger totalNumberOfCMPSegments;
    private final YoInteger numberOfFootstepsToConsider;
 
-   private final YoInteger currentSegmentIndex;
-   private final YoInteger numberOfSegmentsInCurrentPhase;
+   private final YoInteger currentCMPSegmentIndex;
+   private final YoInteger currentCoPSegmentIndex;
+
+   private final YoInteger numberOfCoPSegmentsInCurrentPhase;
+   private final YoInteger numberOfCMPSegmentsInCurrentPhase;
 
    private final YoDouble startTimeOfCurrentPhase;
    private final YoDouble localTimeInCurrentPhase;
@@ -114,7 +115,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       continuouslyAdjustForICPContinuity = new YoBoolean(namePrefix + "ContinuouslyAdjustForICPContinuity", registry);
       continuouslyAdjustForICPContinuity.set(CONTINUOUSLY_ADJUST_FOR_ICP_DISCONTINUITY);
 
-      totalNumberOfCMPSegments = new YoInteger(namePrefix + "TotalNumberOfICPSegments", registry);
+      totalNumberOfCoPSegments = new YoInteger(namePrefix + "TotalNumberOfCoPSegments", registry);
+      totalNumberOfCMPSegments = new YoInteger(namePrefix + "TotalNumberOfCMPSegments", registry);
 
       startTimeOfCurrentPhase = new YoDouble(namePrefix + "StartTimeCurrentPhase", registry);
       localTimeInCurrentPhase = new YoDouble(namePrefix + "LocalTimeCurrentPhase", registry);
@@ -127,8 +129,10 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       endOfPhaseICPPosition = new YoFramePoint3D("EndOfPhaseICPPosition", ReferenceFrame.getWorldFrame(), registry);
       endOfSegmentICPPosition = new YoFramePoint3D("EndOfSegmentICPPosition", ReferenceFrame.getWorldFrame(), registry);
 
-      currentSegmentIndex = new YoInteger(namePrefix + "CurrentSegment", registry);
-      numberOfSegmentsInCurrentPhase = new YoInteger(namePrefix + "NumberOfSegmentInCurrentPhase", registry);
+      currentCMPSegmentIndex = new YoInteger(namePrefix + "CurrentCMPSegment", registry);
+      currentCoPSegmentIndex = new YoInteger(namePrefix + "CurrentCoPSegment", registry);
+      numberOfCMPSegmentsInCurrentPhase = new YoInteger( "NumberOfCMPSegmentsInCurrentPhase", registry);
+      numberOfCoPSegmentsInCurrentPhase = new YoInteger( "NumberOfCoPSegmentsInCurrentPhase", registry);
 
 
       for (int i = 0; i < defaultSize; i++)
@@ -177,10 +181,28 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    {
       cmpTrajectories.clear();
       totalNumberOfCMPSegments.set(0);
+      numberOfCoPSegmentsInCurrentPhase.set(0);
+      numberOfCMPSegmentsInCurrentPhase.set(0);
       localTimeInCurrentPhase.set(0.0);
 
       icpPhaseEntryCornerPointIndices.resetQuick();
       icpPhaseExitCornerPointIndices.resetQuick();
+
+      if (visualize)
+      {
+         for (int i = 0; i < icpWaypoints.size(); i++)
+         {
+            icpWaypoints.get(i).setToNaN();
+         }
+
+         for (int i = 0; i < icpSegmentDurations.size(); i++)
+         {
+            icpSegmentDurations.get(i).setToNaN();
+            icpSegmentStartTimes.get(i).setToNaN();
+            icpSegmentEndTimes.get(i).setToNaN();
+         }
+
+      }
    }
 
    public void resetCoPs()
@@ -240,7 +262,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          icpPhaseExitCornerPointIndices.add(totalNumberOfCMPSegments.getIntegerValue());
 
          if (stepIndex == 0)
-            numberOfSegmentsInCurrentPhase.set(numberOfCMPSegments);
+            numberOfCMPSegmentsInCurrentPhase.set(numberOfCMPSegments);
 
          SegmentedFrameTrajectory3D swingCMPTrajectory = swingCMPTrajectories.get(stepIndex);
          numberOfCMPSegments = swingCMPTrajectory.getNumberOfSegments();
@@ -255,6 +277,9 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       cmpTrajectories.addAll(transferCMPTrajectory.getSegments());
       totalNumberOfCMPSegments.add(numberOfCMPSegments);
       icpPhaseExitCornerPointIndices.add(totalNumberOfCMPSegments.getIntegerValue());
+
+      if (numberOfSteps == 0)
+         numberOfCMPSegmentsInCurrentPhase.set(numberOfCMPSegments);
 
 
 
@@ -276,7 +301,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       icpPhaseEntryCornerPointIndices.add(totalNumberOfCMPSegments.getIntegerValue());
       icpPhaseExitCornerPointIndices.add(totalNumberOfCMPSegments.getIntegerValue());
 
-      numberOfSegmentsInCurrentPhase.set(numberOfCMPSegments);
+      numberOfCMPSegmentsInCurrentPhase.set(numberOfCMPSegments);
 
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 1; stepIndex < numberOfSteps; stepIndex++)
@@ -314,14 +339,25 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
       {
          SegmentedFrameTrajectory3D transferCoPTrajectory = transferCoPTrajectories.get(stepIndex);
+         int numberOfCoPSegments = transferCoPTrajectory.getNumberOfSegments();
          copTrajectories.addAll(transferCoPTrajectory.getSegments());
+         totalNumberOfCoPSegments.add(numberOfCoPSegments);
+
+         if (stepIndex == 0)
+            numberOfCoPSegmentsInCurrentPhase.set(numberOfCoPSegments);
 
          SegmentedFrameTrajectory3D swingCoPTrajectory = swingCoPTrajectories.get(stepIndex);
+         numberOfCoPSegments = swingCoPTrajectory.getNumberOfSegments();
          copTrajectories.addAll(swingCoPTrajectory.getSegments());
+         totalNumberOfCoPSegments.add(numberOfCoPSegments);
       }
 
       SegmentedFrameTrajectory3D transferCoPTrajectory = transferCoPTrajectories.get(numberOfSteps);
+      int numberOfCoPSegments = transferCoPTrajectory.getNumberOfSegments();
       copTrajectories.addAll(transferCoPTrajectory.getSegments());
+      totalNumberOfCoPSegments.add(numberOfCoPSegments);
+      if (numberOfSteps == 0)
+         numberOfCoPSegmentsInCurrentPhase.set(numberOfCoPSegments);
 
       icpToolbox.computeDesiredCornerPoints(icpDesiredInitialPositionsFromCoPs, icpDesiredFinalPositionsFromCoPs, copTrajectories, omega0.getDoubleValue());
 
@@ -339,19 +375,25 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       SegmentedFrameTrajectory3D swingCoPTrajectory = swingCoPTrajectories.get(0);
       copTrajectories.addAll(swingCoPTrajectory.getSegments());
+      int numberOfCoPSegments = swingCoPTrajectory.getNumberOfSegments();
+      totalNumberOfCoPSegments.add(numberOfCoPSegments);
+      numberOfCoPSegmentsInCurrentPhase.set(numberOfCoPSegments);
 
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 1; stepIndex < numberOfSteps; stepIndex++)
       {
          SegmentedFrameTrajectory3D transferCoPTrajectory = transferCoPTrajectories.get(stepIndex);
          copTrajectories.addAll(transferCoPTrajectory.getSegments());
+         totalNumberOfCoPSegments.add(transferCoPTrajectory.getNumberOfSegments());
 
          swingCoPTrajectory = swingCoPTrajectories.get(stepIndex);
          copTrajectories.addAll(swingCoPTrajectory.getSegments());
+         totalNumberOfCoPSegments.add(swingCoPTrajectory.getNumberOfSegments());
       }
 
       SegmentedFrameTrajectory3D transferCoPTrajectory = transferCoPTrajectories.get(numberOfSteps);
       copTrajectories.addAll(transferCoPTrajectory.getSegments());
+      totalNumberOfCoPSegments.add(transferCoPTrajectory.getNumberOfSegments());
 
       icpToolbox.computeDesiredCornerPoints(icpDesiredInitialPositionsFromCoPs, icpDesiredFinalPositionsFromCoPs, copTrajectories, omega0.getDoubleValue());
    }
@@ -372,11 +414,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       if (visualize)
       {
-         for (int i = 0; i < icpWaypoints.size(); i++)
-         {
-            icpWaypoints.get(i).setToNaN();
-         }
-
          int waypointIndex = 0;
          icpWaypoints.get(waypointIndex++).set(icpDesiredInitialPositions.get(0));
 
@@ -391,6 +428,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
             icpSegmentStartTimes.get(i).set(cmpTrajectories.get(i).getInitialTime());
             icpSegmentEndTimes.get(i).set(cmpTrajectories.get(i).getFinalTime());
          }
+
+         endOfSegmentICPPosition.setToNaN();
+         endOfPhaseICPPosition.setToNaN();
+
+         initialICPConditionForContinuity.setToNaN();
+         finalICPConditionForContinuity.setToNaN();
       }
    }
 
@@ -398,9 +441,13 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    public void setInitialConditionsForAdjustment()
    {
       setInitialICPConditions.clear();
-      for(int i = 0; i < calculatedInitialICPConditions.size(); i++)
+      for (int i = 0; i < calculatedInitialICPConditions.size(); i++)
          setInitialICPConditions.add().setIncludingFrame(calculatedInitialICPConditions.get(i));
-      initialICPConditionForContinuity.set(calculatedInitialICPConditions.get(0));
+
+      if (calculatedInitialICPConditions.size() > 0)
+         initialICPConditionForContinuity.set(calculatedInitialICPConditions.get(0));
+      else
+         initialICPConditionForContinuity.setToNaN();
    }
 
    public void adjustDesiredTrajectoriesForInitialSmoothing()
@@ -421,9 +468,9 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       {
          localTimeInCurrentPhase.set(time - startTimeOfCurrentPhase.getDoubleValue());
 
-         currentSegmentIndex.set(getCurrentSegmentIndex(localTimeInCurrentPhase.getDoubleValue(), cmpTrajectories));
-         FrameTrajectory3D cmpPolynomial3D = cmpTrajectories.get(currentSegmentIndex.getIntegerValue());
-         getICPPositionDesiredFinalFromSegment(endOfSegmentICPPosition, currentSegmentIndex.getIntegerValue());
+         currentCMPSegmentIndex.set(getCurrentSegmentIndex(localTimeInCurrentPhase.getDoubleValue(), numberOfCMPSegmentsInCurrentPhase.getIntegerValue(), cmpTrajectories));
+         FrameTrajectory3D cmpPolynomial3D = cmpTrajectories.get(currentCMPSegmentIndex.getIntegerValue());
+         getICPPositionDesiredFinalFromSegment(endOfSegmentICPPosition, currentCMPSegmentIndex.getIntegerValue());
 
          // ICP
          icpToolbox.computeDesiredCapturePointPosition(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), endOfSegmentICPPosition,
@@ -433,8 +480,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          icpToolbox.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(),
                                                            endOfSegmentICPPosition, cmpPolynomial3D, icpAccelerationDesiredCurrent);
 
-         int currentCoPSegmentIndex = getCurrentSegmentIndex(localTimeInCurrentPhase.getDoubleValue(), copTrajectories);
-         getICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), currentCoPSegmentIndex); // TODO: add controller dt for proper continuation
+         currentCoPSegmentIndex.set(getCurrentSegmentIndex(localTimeInCurrentPhase.getDoubleValue(), numberOfCoPSegmentsInCurrentPhase.getIntegerValue(), copTrajectories));
+         getICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), currentCoPSegmentIndex.getIntegerValue()); // TODO: add controller dt for proper continuation
          if (debug)
             checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
 
@@ -454,27 +501,26 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       areICPDynamicsSatisfied.set(icpVelocityDesiredCurrent.epsilonEquals(icpVelocityDynamicsCurrent, 10e-5));
    }
 
-   private int getCurrentSegmentIndex(double timeInCurrentPhase, List<FrameTrajectory3D> trajectories)
+
+
+   private int getCurrentSegmentIndex(double timeInCurrentPhase, int numberOfSegmentsInCurrentPhase, List<FrameTrajectory3D> trajectories)
    {
-      // remember, the trajectories are stored in their relative phase time.
-      int currentSegmentIndex = 0;
-      // check first segment
-      if (trajectories.get(currentSegmentIndex).timeIntervalContains(timeInCurrentPhase))
-         return currentSegmentIndex;
-
-      for (currentSegmentIndex = 1; currentSegmentIndex < trajectories.size(); currentSegmentIndex++)
+      int currentSegmentIndex = numberOfSegmentsInCurrentPhase - 1;
+      if (currentSegmentIndex < 0)
       {
-         boolean startedNextPhase = MathTools.epsilonEquals(trajectories.get(currentSegmentIndex).getInitialTime(), 0.0, 1e-6);
-         if (startedNextPhase)
-            return currentSegmentIndex - 1;
+         return 0;
+      }
 
-         boolean thisPhaseIsValid = trajectories.get(currentSegmentIndex).timeIntervalContains(timeInCurrentPhase, 1e-6);
-         if (thisPhaseIsValid)
-            return currentSegmentIndex;
+      while (timeInCurrentPhase < trajectories.get(currentSegmentIndex).getInitialTime() - 1e-6 && currentSegmentIndex > 0)
+      {
+         currentSegmentIndex--;
       }
 
       return currentSegmentIndex;
    }
+
+
+
 
 
    public void getICPPositionDesiredFinalFromSegment(FixedFramePoint3DBasics icpPositionDesiredFinal, int segment)
