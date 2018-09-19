@@ -927,28 +927,26 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    public void getDesiredPose(FramePose3D desiredPoseToPack)
    {
-      if (enableOrientationTracking)
-         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
-      else
+      if (!enableOrientationTracking)
+      {
          desiredOrientation.setToNaN(positionTrajectoryGenerator.getCurrentTrajectoryFrame());
-
-      if (enablePositionTracking)
-         positionTrajectoryGenerator.getPosition(desiredPosition);
-      else
-         desiredPosition.setToNaN(orientationTrajectoryGenerator.getCurrentTrajectoryFrame());
-
-      if (!enableOrientationTracking || orientationTrajectoryGenerator.isEmpty())
+      }
+      else if (orientationTrajectoryGenerator.isEmpty())
       {
-         desiredOrientation.setToZero(controlFrame);
+         desiredOrientation.setToZero(orientationTrajectoryGenerator.getCurrentTrajectoryFrame());
       }
       else
       {
          orientationTrajectoryGenerator.getOrientation(desiredOrientation);
       }
 
-      if (!enablePositionTracking || positionTrajectoryGenerator.isEmpty())
+      if (!enablePositionTracking)
       {
-         desiredPosition.setToZero(controlFrame);
+         desiredPosition.setToNaN(orientationTrajectoryGenerator.getCurrentTrajectoryFrame());
+      }
+      else if (positionTrajectoryGenerator.isEmpty())
+      {
+         desiredPosition.setToZero(positionTrajectoryGenerator.getCurrentTrajectoryFrame());
       }
       else
       {
