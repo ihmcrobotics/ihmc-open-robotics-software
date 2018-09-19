@@ -708,15 +708,6 @@ public class Trajectory3D
       dTrajectory.set(xTrajectory.getDerivative(order, x), yTrajectory.getDerivative(order, x), zTrajectory.getDerivative(order, x));
    }
 
-   public void getDerivative(Trajectory3D dervTraj, int order)
-   {
-      for (Axis axis : Axis.values)
-      {
-         int index = axis.ordinal();
-         getTrajectory(index).getDerivative(dervTraj.getTrajectory(index), order);
-      }
-   }
-
    public void getStartPoint(Point3DBasics positionToPack)
    {
       compute(getInitialTime());

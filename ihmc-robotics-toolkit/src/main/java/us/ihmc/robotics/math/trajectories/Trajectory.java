@@ -124,13 +124,6 @@ public class Trajectory
       return xPowersDerivativeVector;
    }
 
-   public void getDerivative(Trajectory trajectory, int order)
-   {
-      trajectory.reshape(numberOfCoefficients - 1);
-      for (int i = 1; i < numberOfCoefficients; i++)
-         trajectory.setDirectlyFast(i - 1, getCoefficient(i) * (i));
-   }
-
    private static int getCoefficientMultiplierForDerivative(int order, int exponent)
    {
       int coeff = 1;
