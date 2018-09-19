@@ -814,6 +814,56 @@ public class TrajectoryMathTools
       return result;
    }
 
+   public static void removeShortSegments(SegmentedFrameTrajectory3D trajectory, double minimumSegmentDuration)
+   {
+      int numberOfSegments = trajectory.getNumberOfSegments();
+
+      // check last segment duration
+      while (trajectory.getSegment(numberOfSegments - 1).getDuration() < minimumSegmentDuration && numberOfSegments > 1)
+      { // stretch time of previous segment end forward
+         double finalTime = trajectory.getSegment(numberOfSegments - 1).getFinalTime();
+         trajectory.getSegment(numberOfSegments - 2).setFinalTimeMaintainingBounds(finalTime);
+         trajectory.removeSegment(numberOfSegments - 1);
+         numberOfSegments = trajectory.getNumberOfSegments();
+      }
+
+      // check first segment duration
+      while (trajectory.getSegment(0).getDuration() < minimumSegmentDuration && numberOfSegments > 1)
+      { // pull time of next segment start back
+         double initialTime = trajectory.getSegment(0).getInitialTime();
+         trajectory.getSegment(1).setInitialTimeMaintainingBounds(initialTime);
+         trajectory.removeSegment(0);
+         numberOfSegments = trajectory.getNumberOfSegments();
+      }
+
+
+      // iterate over all the internal segments
+      int currentSegmentIndex = 1;
+      while (currentSegmentIndex < trajectory.getNumberOfSegments())
+      {
+         while (trajectory.getSegment(currentSegmentIndex).getDuration() < minimumSegmentDuration && currentSegmentIndex < trajectory.getNumberOfSegments())
+         {
+             boolean hasNextSegment = currentSegmentIndex < trajectory.getNumberOfSegments() - 1;
+             boolean nextSegmentIsLarger = hasNextSegment && trajectory.getSegment(currentSegmentIndex - 1).getDuration() < trajectory.getSegment(currentSegmentIndex + 1).getDuration();
+
+             if (nextSegmentIsLarger)
+             { // stretch time of previous segment end forward
+                double finalTime = trajectory.getSegment(currentSegmentIndex).getFinalTime();
+                trajectory.getSegment(currentSegmentIndex - 1).setFinalTimeMaintainingBounds(finalTime);
+             }
+             else
+             { // pull time of previous segment start back
+                double initialTime = trajectory.getSegment(currentSegmentIndex).getInitialTime();
+                trajectory.getSegment(currentSegmentIndex + 1).setInitialTimeMaintainingBounds(initialTime);
+             }
+            trajectory.removeSegment(currentSegmentIndex);
+         }
+
+         currentSegmentIndex++;
+      }
+
+   }
+
    public static void combineSegments(SegmentedFrameTrajectory3D trajectory, int firstSegmentIndex)
    {
       int secondSegmentIndex = firstSegmentIndex + 1;
