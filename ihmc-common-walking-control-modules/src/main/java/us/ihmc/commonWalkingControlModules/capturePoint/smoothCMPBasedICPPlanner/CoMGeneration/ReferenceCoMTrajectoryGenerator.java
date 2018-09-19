@@ -58,6 +58,7 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
    private final YoBoolean isDoubleSupport;
 
    private final YoInteger totalNumberOfCMPSegments;
+   private final YoInteger numberOfSegmentsInCurrentPhase;
    private final YoInteger numberOfFootstepsToConsider;
 
    private int numberOfFootstepsRegistered;
@@ -80,7 +81,8 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       this.isInitialTransfer = isInitialTransfer;
       this.isDoubleSupport = isDoubleSupport;
 
-      totalNumberOfCMPSegments = new YoInteger(namePrefix + "CoMGeneratorTotalNumberOfICPSegments", registry);
+      totalNumberOfCMPSegments = new YoInteger("CoMGeneratorTotalNumberOfCMPSegments", registry);
+      numberOfSegmentsInCurrentPhase = new YoInteger("CoMGeneratorNumberOfCMPSegmentsInCurrentPhase", registry);
 
       startTimeOfCurrentPhase = new YoDouble(namePrefix + "CoMGeneratorStartTimeCurrentPhase", registry);
       localTimeInCurrentPhase = new YoDouble(namePrefix + "CoMGeneratorLocalTimeCurrentPhase", registry);
@@ -120,6 +122,9 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
          cmpTrajectories.addAll(transferCMPTrajectory.getSegments());
          totalNumberOfCMPSegments.add(numberOfCMPSegments);
 
+         if (stepIndex == 0)
+            numberOfSegmentsInCurrentPhase.set(numberOfCMPSegments);
+
          SegmentedFrameTrajectory3D swingCMPTrajectory = swingCMPTrajectories.get(stepIndex);
          numberOfCMPSegments = swingCMPTrajectory.getNumberOfSegments();
          cmpTrajectories.addAll(swingCMPTrajectory.getSegments());
@@ -131,6 +136,9 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       cmpTrajectories.addAll(transferCMPTrajectory.getSegments());
       totalNumberOfCMPSegments.add(numberOfCMPSegments);
 
+      if (numberOfSteps == 0)
+         numberOfSegmentsInCurrentPhase.set(numberOfCMPSegments);
+
       numberOfSegmentsTransfer0 = transferCMPTrajectories.get(0).getNumberOfSegments();
       initialize();
    }
@@ -139,6 +147,7 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
    {
       cmpTrajectories.clear();
       totalNumberOfCMPSegments.set(0);
+      numberOfSegmentsInCurrentPhase.set(0);
       localTimeInCurrentPhase.set(0.0);
    }
 
@@ -154,6 +163,8 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       int numberOfCMPSegments = swingCMPTrajectory.getNumberOfSegments();
       cmpTrajectories.addAll(swingCMPTrajectory.getSegments());
       totalNumberOfCMPSegments.add(numberOfCMPSegments);
+
+      numberOfSegmentsInCurrentPhase.set(numberOfCMPSegments);
 
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 1; stepIndex < numberOfSteps; stepIndex++)
@@ -226,21 +237,15 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
 
    private int getCurrentSegmentIndex(double timeInCurrentPhase, List<FrameTrajectory3D> trajectories)
    {
-      // remember, the trajectories are stored in their relative phase time.
-      int currentSegmentIndex = 0;
-      // check first segment
-      if (trajectories.get(currentSegmentIndex).timeIntervalContains(timeInCurrentPhase))
-         return currentSegmentIndex;
-
-      for (currentSegmentIndex = 1; currentSegmentIndex < trajectories.size(); currentSegmentIndex++)
+      int currentSegmentIndex = numberOfSegmentsInCurrentPhase.getIntegerValue() - 1;
+      if (currentSegmentIndex < 0)
       {
-         boolean startedNextPhase = MathTools.epsilonEquals(trajectories.get(currentSegmentIndex).getInitialTime(), 0.0, 1e-6);
-         if (startedNextPhase)
-            return currentSegmentIndex - 1;
+         return 0;
+      }
 
-         boolean thisPhaseIsValid = trajectories.get(currentSegmentIndex).timeIntervalContains(timeInCurrentPhase, 1e-6);
-         if (thisPhaseIsValid)
-            return currentSegmentIndex;
+      while (timeInCurrentPhase < trajectories.get(currentSegmentIndex).getInitialTime() - 1e-6 && currentSegmentIndex > 0)
+      {
+         currentSegmentIndex--;
       }
 
       return currentSegmentIndex;
