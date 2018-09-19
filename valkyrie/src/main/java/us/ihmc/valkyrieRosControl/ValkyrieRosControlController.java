@@ -1,10 +1,6 @@
 package us.ihmc.valkyrieRosControl;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.EXIT_WALKING;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_PREP_STATE;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_READY;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_TRANSITION_STATE;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,6 +61,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 {
    public static final boolean HAS_FOREARMS_ON = false;
    public static final boolean ENABLE_FINGER_JOINTS = true && HAS_FOREARMS_ON;
+   public static final boolean HAS_LIGHTER_BACKPACK = true;
 
    private static final String[] torqueControlledJoints;
    static

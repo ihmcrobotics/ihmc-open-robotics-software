@@ -14,21 +14,6 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 public interface ControllerCoreOptimizationSettings
 {
    /**
-    * Whether to setup the feedback controllers for computing a feedback term proportional to the
-    * position/orientation error integrated. IMPORTANT: This cannot be changed at runtime.
-    * 
-    * TODO This method does not match this class' name. Either it has to move of this interface has
-    * to be renamed to "ControllerCoreSettings.
-    * 
-    * @return {@code true} if the variables to create the integral term are to be created,
-    *         {@code false} otherwise.
-    */
-   default boolean computeIntegralTermInFeedbackControllers()
-   {
-      return true;
-   }
-
-   /**
     * Gets the weight specifying how much high joint velocity values should be penalized in the
     * optimization problem.
     * <p>
