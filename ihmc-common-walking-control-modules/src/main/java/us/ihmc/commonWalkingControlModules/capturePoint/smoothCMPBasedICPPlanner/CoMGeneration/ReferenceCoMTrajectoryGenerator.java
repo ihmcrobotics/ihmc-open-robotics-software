@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -225,23 +226,21 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
 
    private int getCurrentSegmentIndex(double timeInCurrentPhase, List<FrameTrajectory3D> trajectories)
    {
-      int currentSegmentIndex = FIRST_SEGMENT;
-      boolean notLastSegment = currentSegmentIndex < trajectories.size() - 1;
-      while (!trajectories.get(currentSegmentIndex).timeIntervalContains(timeInCurrentPhase) && notLastSegment)
+      // remember, the trajectories are stored in their relative phase time.
+      int currentSegmentIndex = 0;
+      // check first segment
+      if (trajectories.get(currentSegmentIndex).timeIntervalContains(timeInCurrentPhase))
+         return currentSegmentIndex;
+
+      for (currentSegmentIndex = 1; currentSegmentIndex < trajectories.size(); currentSegmentIndex++)
       {
-         notLastSegment = currentSegmentIndex < trajectories.size() - 1;
+         boolean startedNextPhase = MathTools.epsilonEquals(trajectories.get(currentSegmentIndex).getInitialTime(), 0.0, 1e-6);
+         if (startedNextPhase)
+            return currentSegmentIndex - 1;
 
-         if (notLastSegment)
-         {
-            double currentEndTime = trajectories.get(currentSegmentIndex).getFinalTime();
-            double nextStartTime = trajectories.get(currentSegmentIndex + 1).getInitialTime();
-
-            boolean nextSegmentSkipsTime = Math.abs(nextStartTime - currentEndTime) > 1.0e-5;
-            if (nextSegmentSkipsTime)
-               return currentSegmentIndex;
-         }
-
-         currentSegmentIndex++;
+         boolean thisPhaseIsValid = trajectories.get(currentSegmentIndex).timeIntervalContains(timeInCurrentPhase, 1e-6);
+         if (thisPhaseIsValid)
+            return currentSegmentIndex;
       }
 
       return currentSegmentIndex;
