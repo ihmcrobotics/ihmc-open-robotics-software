@@ -22,18 +22,20 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -57,6 +59,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final YoFrameVector3D yoDesiredLinearVelocity;
    private final YoFrameVector3D yoCurrentLinearVelocity;
    private final YoFrameVector3D yoErrorLinearVelocity;
+   private final AlphaFilteredYoFrameVector yoFilteredErrorLinearVelocity;
    private final YoFrameVector3D yoFeedForwardLinearVelocity;
    private final YoFrameVector3D yoFeedbackLinearVelocity;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearVelocity;
@@ -115,9 +118,9 @@ public class PointFeedbackController implements FeedbackControllerInterface
                                   YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
-      ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
-      if (optimizationSettings != null)
-         computeIntegralTerm = optimizationSettings.computeIntegralTermInFeedbackControllers();
+      FeedbackControllerSettings settings = toolbox.getFeedbackControllerSettings();
+      if (settings != null)
+         computeIntegralTerm = settings.enableIntegralTerm();
       else
          computeIntegralTerm = true;
 
@@ -157,6 +160,11 @@ public class PointFeedbackController implements FeedbackControllerInterface
       {
          yoCurrentLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, CURRENT, LINEAR_VELOCITY, isEnabled);
          yoErrorLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, ERROR, LINEAR_VELOCITY, isEnabled);
+         DoubleProvider breakFrequency = feedbackControllerToolbox.getErrorVelocityFilterBreakFrequency(endEffectorName);
+         if (breakFrequency != null)
+            yoFilteredErrorLinearVelocity = feedbackControllerToolbox.getAlphaFilteredDataVector(endEffector, ERROR, LINEAR_VELOCITY, dt, breakFrequency, isEnabled);
+         else
+            yoFilteredErrorLinearVelocity = null;
 
          if (toolbox.isEnableInverseDynamicsModule())
          {
@@ -194,6 +202,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       {
          yoCurrentLinearVelocity = null;
          yoErrorLinearVelocity = null;
+         yoFilteredErrorLinearVelocity = null;
 
          yoDesiredLinearAcceleration = null;
          yoFeedForwardLinearAcceleration = null;
@@ -263,6 +272,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
          rateLimitedFeedbackLinearAcceleration.reset();
       if (rateLimitedFeedbackLinearVelocity != null)
          rateLimitedFeedbackLinearVelocity.reset();
+      if (yoFilteredErrorLinearVelocity != null)
+         yoFilteredErrorLinearVelocity.reset();
    }
 
    private final FrameVector3D proportionalFeedback = new FrameVector3D();
@@ -443,6 +454,12 @@ public class PointFeedbackController implements FeedbackControllerInterface
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
       yoErrorLinearVelocity.set(feedbackTermToPack);
+
+      if (yoFilteredErrorLinearVelocity != null)
+      {
+         yoFilteredErrorLinearVelocity.update();
+         feedbackTermToPack.set(yoFilteredErrorLinearVelocity);
+      }
 
       if (linearGainsFrame != null)
          feedbackTermToPack.changeFrame(linearGainsFrame);
