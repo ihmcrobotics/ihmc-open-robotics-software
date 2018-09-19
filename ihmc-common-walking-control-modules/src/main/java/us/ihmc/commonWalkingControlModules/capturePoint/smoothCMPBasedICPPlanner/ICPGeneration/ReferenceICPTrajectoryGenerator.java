@@ -181,7 +181,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    {
       cmpTrajectories.clear();
       totalNumberOfCMPSegments.set(0);
-      numberOfCoPSegmentsInCurrentPhase.set(0);
       numberOfCMPSegmentsInCurrentPhase.set(0);
       localTimeInCurrentPhase.set(0.0);
 
@@ -208,6 +207,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    public void resetCoPs()
    {
       copTrajectories.clear();
+      totalNumberOfCoPSegments.set(0);
+      numberOfCoPSegmentsInCurrentPhase.set(0);
    }
 
 
