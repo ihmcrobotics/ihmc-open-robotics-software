@@ -49,6 +49,7 @@ public class ReferenceCMPTrajectoryGenerator
 
    private final List<YoFramePoint3D> swingBounds = new ArrayList<>();
    private final List<YoFramePoint3D> transferBounds = new ArrayList<>();
+   private final List<YoDouble> segmentDurations = new ArrayList<>();
 
    private final boolean debug;
 
@@ -80,7 +81,7 @@ public class ReferenceCMPTrajectoryGenerator
             YoFramePoint3D swingStart = new YoFramePoint3D("SwingCMPWaypoint" + i + 0, ReferenceFrame.getWorldFrame(), registry);
 
             YoGraphicPosition transferStartViz = new YoGraphicPosition("Transfer CMP Waypoint" + i + 0, transferStart, POINT_SIZE, YoAppearance.Green(), YoGraphicPosition.GraphicType.SQUARE_WITH_CROSS);
-            YoGraphicPosition swingStartViz = new YoGraphicPosition("Swing CMP Waypoint" + i + 0, swingStart, POINT_SIZE, YoAppearance.Green(), YoGraphicPosition.GraphicType.SOLID_BALL);
+            YoGraphicPosition swingStartViz = new YoGraphicPosition("Swing CMP Waypoint" + i + 0, swingStart, POINT_SIZE, YoAppearance.Green(), YoGraphicPosition.GraphicType.SQUARE_WITH_CROSS);
 
             cmpWaypointList.add(transferStartViz.createArtifact());
             cmpWaypointList.add(swingStartViz.createArtifact());
@@ -91,15 +92,19 @@ public class ReferenceCMPTrajectoryGenerator
 
             for (int j = 0; j < maxNumberOfSegments; j++)
             {
-               YoFramePoint3D transferEnd = new YoFramePoint3D("TransferCMPWaypoint" + i + j + 1, ReferenceFrame.getWorldFrame(), registry);
-               YoFramePoint3D swingEnd = new YoFramePoint3D("SwingCMPWaypoint" + i + j + 1, ReferenceFrame.getWorldFrame(), registry);
+               YoDouble segmentDuration = new YoDouble("CMPSegmentDuration" + (i * maxNumberOfSegments + j) , registry);
 
-               YoGraphicPosition transferViz = new YoGraphicPosition("Transfer CMP Waypoint" + i + j + 1, transferEnd, POINT_SIZE, YoAppearance.Green(), YoGraphicPosition.GraphicType.SQUARE_WITH_CROSS);
-               YoGraphicPosition swingViz = new YoGraphicPosition("Swing CMP Waypoint" + i + j + 1, swingEnd, POINT_SIZE, YoAppearance.Green(), YoGraphicPosition.GraphicType.SQUARE_WITH_CROSS);
+
+               YoFramePoint3D transferEnd = new YoFramePoint3D("TransferCMPWaypoint" + i + (j + 1), ReferenceFrame.getWorldFrame(), registry);
+               YoFramePoint3D swingEnd = new YoFramePoint3D("SwingCMPWaypoint" + i + (j + 1), ReferenceFrame.getWorldFrame(), registry);
+
+               YoGraphicPosition transferViz = new YoGraphicPosition("Transfer CMP Waypoint" + i + (j + 1), transferEnd, POINT_SIZE, YoAppearance.Green(), YoGraphicPosition.GraphicType.SQUARE_WITH_CROSS);
+               YoGraphicPosition swingViz = new YoGraphicPosition("Swing CMP Waypoint" + (i + j + 1), swingEnd, POINT_SIZE, YoAppearance.Green(), YoGraphicPosition.GraphicType.SQUARE_WITH_CROSS);
 
                cmpWaypointList.add(transferViz.createArtifact());
                cmpWaypointList.add(swingViz.createArtifact());
 
+               segmentDurations.add(segmentDuration);
                transferBounds.add(transferEnd);
                swingBounds.add(swingEnd);
             }
@@ -202,6 +207,9 @@ public class ReferenceCMPTrajectoryGenerator
             transferBounds.get(i).setToNaN();
             swingBounds.get(i).setToNaN();
          }
+
+         for (int i = 0; i < segmentDurations.size(); i++)
+            segmentDurations.get(i).setToNaN();
       }
       copyCoPTrajectoriesToCMPTrajectories(transferCoPTrajectories, swingCoPTrajectories);
 
@@ -212,6 +220,7 @@ public class ReferenceCMPTrajectoryGenerator
 
       int numberOfFootstepsToSet = Math.min(numberOfFootstepsToConsider.getIntegerValue(), numberOfRegisteredSteps);
       int phaseIndex = 0;
+      int segmentIndex = 0;
 
       int swingWaypointNumber = 0;
       int transferWaypointNumber = 0;
@@ -237,6 +246,7 @@ public class ReferenceCMPTrajectoryGenerator
             for (int i = 0; i < swingCMPTrajectories.get(phaseIndex).getNumberOfSegments(); i++)
             {
                swingCMPTrajectories.get(phaseIndex).getSegment(i).getEndPoint(swingBounds.get(swingWaypointNumber++));
+               segmentDurations.get(segmentIndex++).set(swingCMPTrajectories.get(phaseIndex).getSegment(i).getDuration());
             }
          }
       }
@@ -262,6 +272,7 @@ public class ReferenceCMPTrajectoryGenerator
             for (int i = 0; i < transferCMPTrajectories.get(phaseIndex).getNumberOfSegments(); i++)
             {
                transferCMPTrajectories.get(phaseIndex).getSegment(i).getEndPoint(transferBounds.get(transferWaypointNumber++));
+               segmentDurations.get(segmentIndex++).set(transferCMPTrajectories.get(phaseIndex).getSegment(i).getDuration());
             }
          }
 
@@ -283,6 +294,7 @@ public class ReferenceCMPTrajectoryGenerator
             for (int i = 0; i < swingCMPTrajectories.get(phaseIndex).getNumberOfSegments(); i++)
             {
                swingCMPTrajectories.get(phaseIndex).getSegment(i).getEndPoint(swingBounds.get(swingWaypointNumber++));
+               segmentDurations.get(segmentIndex++).set(swingCMPTrajectories.get(phaseIndex).getSegment(i).getDuration());
             }
          }
       }

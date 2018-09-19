@@ -85,6 +85,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox();
 
    private final List<YoFramePoint3D> icpWaypoints = new ArrayList<>();
+   private final List<YoDouble> icpSegmentDurations = new ArrayList<>();
 
 
    public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0,
@@ -133,13 +134,15 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
          for (int i = 0; i < defaultSize; i++)
          {
-            YoFramePoint3D waypoint = new YoFramePoint3D("ICPWaypoint" + i + 1, ReferenceFrame.getWorldFrame(), registry);
+            YoFramePoint3D waypoint = new YoFramePoint3D("ICPWaypoint" + (i + 1), ReferenceFrame.getWorldFrame(), registry);
+            YoDouble segmentDurations = new YoDouble("ICPSegmentDuration" + i, registry);
 
-            YoGraphicPosition waypointViz = new YoGraphicPosition("ICP Waypoint" + i + 1, waypoint, POINT_SIZE, YoAppearance.Blue(), YoGraphicPosition.GraphicType.DIAMOND_WITH_CROSS);
+            YoGraphicPosition waypointViz = new YoGraphicPosition("ICP Waypoint" + (i + 1), waypoint, POINT_SIZE, YoAppearance.Blue(), YoGraphicPosition.GraphicType.DIAMOND_WITH_CROSS);
 
             icpWaypointList.add(waypointViz.createArtifact());
 
             icpWaypoints.add(waypoint);
+            icpSegmentDurations.add(segmentDurations);
          }
 
          yoGraphicsListRegistry.registerArtifactList(icpWaypointList);
@@ -230,6 +233,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       cmpTrajectories.addAll(transferCMPTrajectory.getSegments());
       totalNumberOfCMPSegments.add(numberOfCMPSegments);
       icpPhaseExitCornerPointIndices.add(totalNumberOfCMPSegments.getIntegerValue());
+
+      if (visualize) {
+         for (int i = 0; i < totalNumberOfCMPSegments.getIntegerValue(); i++) {
+            icpSegmentDurations.get(i).set(cmpTrajectories.get(i).getDuration());
+         }
+      }
 
       initialize();
    }
@@ -339,6 +348,23 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       icpToolbox.computeDesiredCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
 
       icpPositionDesiredTerminal.set(icpDesiredFinalPositions.get(cmpTrajectories.size() - 1));
+
+
+      if (visualize)
+      {
+         for (int i = 0; i < icpWaypoints.size(); i++)
+         {
+            icpWaypoints.get(i).setToNaN();
+         }
+
+         int waypointIndex = 0;
+         icpWaypoints.get(waypointIndex++).set(icpDesiredInitialPositions.get(0));
+
+         for (int segmentIndex = 0; segmentIndex < icpDesiredFinalPositions.size(); segmentIndex++, waypointIndex++)
+         {
+            icpWaypoints.get(waypointIndex).set(icpDesiredFinalPositions.get(segmentIndex));
+         }
+      }
    }
 
 
@@ -362,14 +388,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    @Override
    public void compute(double time)
    {
-      if (visualize)
-      {
-          for (int i = 0; i < icpWaypoints.size(); i++)
-          {
-             icpWaypoints.get(i).setToNaN();
-          }
-      }
-
       if (cmpTrajectories.size() > 0)
       {
          localTimeInCurrentPhase.set(time - startTimeOfCurrentPhase.getDoubleValue());
@@ -391,16 +409,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          if (debug)
             checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
 
-         if (visualize)
-         {
-            int waypointIndex = 0;
-            icpWaypoints.get(waypointIndex++).set(icpDesiredInitialPositions.get(0));
-
-            for (int segmentIndex = 0; segmentIndex < icpDesiredFinalPositions.size(); segmentIndex++, waypointIndex++)
-            {
-               icpWaypoints.get(waypointIndex).set(icpDesiredFinalPositions.get(segmentIndex));
-            }
-         }
       }
    }
 
