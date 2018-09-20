@@ -102,6 +102,13 @@ public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkin
       super.testForwardWalkZeroMomentumFirstStep();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 300000)
+   public void testForwardWalkNoMomentumFirstStep() throws SimulationExceededMaximumTimeException
+   {
+      super.testForwardWalkNoMomentumFirstStep();
+   }
+
 
    @Override
    public DRCRobotModel getRobotModel()
