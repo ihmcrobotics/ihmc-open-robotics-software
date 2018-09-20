@@ -1,12 +1,9 @@
 package us.ihmc.atlas;
 
 import org.junit.Test;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarDoubleStepTest;
-import us.ihmc.avatar.AvatarPauseWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
@@ -31,8 +28,32 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
    @ContinuousIntegrationTest(estimatedDuration = 76.4)
    @Test(timeout = 380000)
    @Override
-   public void testTwoStepsSameSide() throws SimulationExceededMaximumTimeException
+   public void testTwoStepsInARowSameSide() throws SimulationExceededMaximumTimeException
    {
-      super.testTwoStepsSameSide();
+      super.testTwoStepsInARowSameSide();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 76.4)
+   @Test(timeout = 380000)
+   @Override
+   public void testTwoStepsInARowSameSideAfterFirstSep() throws SimulationExceededMaximumTimeException
+   {
+      super.testTwoStepsInARowSameSideAfterFirstSep();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 76.4)
+   @Test(timeout = 380000)
+   @Override
+   public void testTwoStepsInARowLongTransferSameSide() throws SimulationExceededMaximumTimeException
+   {
+      super.testTwoStepsInARowLongTransferSameSide();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 76.4)
+   @Test(timeout = 380000)
+   @Override
+   public void testTwoStepsStandingInBetween() throws SimulationExceededMaximumTimeException
+   {
+      super.testTwoStepsStandingInBetween();
    }
 }

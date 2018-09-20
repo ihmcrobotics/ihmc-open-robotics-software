@@ -11,8 +11,10 @@ import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -29,8 +31,10 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
@@ -72,9 +76,9 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
    @Test(timeout = 100000)
-   public void testTwoStepsSameSide() throws SimulationExceededMaximumTimeException
+   public void testTwoStepsInARowSameSide() throws SimulationExceededMaximumTimeException
    {
       setupTest();
       setupPlanContinuityTesters();
@@ -93,6 +97,91 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       drcSimulationTestHelper.publishToController(footstepMessage);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.0));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
+   public void testTwoStepsInARowSameSideAfterFirstSep() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      setupPlanContinuityTesters();
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+
+      RobotSide stepSide = RobotSide.RIGHT;
+      FramePoint3D stepLocation1 = new FramePoint3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(stepSide.getOppositeSide()));
+      FramePoint3D stepLocation2 = new FramePoint3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(stepSide));
+      FramePoint3D stepLocation3 = new FramePoint3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(stepSide.getOppositeSide()));
+      stepLocation1.changeFrame(ReferenceFrame.getWorldFrame());
+      stepLocation2.changeFrame(ReferenceFrame.getWorldFrame());
+      stepLocation1.addX(0.2);
+      stepLocation2.addX(0.4);
+      stepLocation3.addX(0.6);
+
+
+      FootstepDataListMessage footstepMessage = HumanoidMessageTools.createFootstepDataListMessage(1.0, 2.0);
+      footstepMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(stepSide.getOppositeSide(), stepLocation1, new Quaternion()));
+      footstepMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(stepSide, stepLocation2, new Quaternion()));
+      footstepMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(stepSide, stepLocation2, new Quaternion()));
+      footstepMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(stepSide.getOppositeSide(), stepLocation3, new Quaternion()));
+      footstepMessage.setFinalTransferDuration(2.0);
+
+      drcSimulationTestHelper.publishToController(footstepMessage);
+
+      double stepDuration = 3.0;
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4 * stepDuration + 3.0));
+   }
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
+   public void testTwoStepsInARowLongTransferSameSide() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      setupPlanContinuityTesters();
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+
+      RobotSide stepSide = RobotSide.LEFT;
+      FramePoint3D stepLocation = new FramePoint3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(stepSide));
+      stepLocation.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FootstepDataListMessage footstepMessage = HumanoidMessageTools.createFootstepDataListMessage(1.0, 20.0);
+      footstepMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(stepSide, stepLocation, new Quaternion()));
+      footstepMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(stepSide, stepLocation, new Quaternion()));
+      footstepMessage.setFinalTransferDuration(2.0);
+
+      drcSimulationTestHelper.publishToController(footstepMessage);
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.0));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
+   public void testTwoStepsStandingInBetween() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      setupPlanContinuityTesters();
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+
+      RobotSide stepSide = RobotSide.LEFT;
+      FramePoint3D stepLocation = new FramePoint3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(stepSide));
+      stepLocation.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FootstepDataListMessage footstepMessage = HumanoidMessageTools.createFootstepDataListMessage(1.0, 2.0);
+      footstepMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(stepSide, stepLocation, new Quaternion()));
+      footstepMessage.setFinalTransferDuration(2.0);
+
+      drcSimulationTestHelper.publishToController(footstepMessage);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0));
+
+      YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) drcSimulationTestHelper.getYoVariable("walkingCurrentState");
+      assertEquals("Robot isn't yet standing.", WalkingStateEnum.STANDING, walkingState.getEnumValue());
+
+      drcSimulationTestHelper.publishToController(footstepMessage);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0));
    }
 
    private void setupTest()
@@ -114,7 +203,6 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       drcSimulationTestHelper.setStartingLocation(startingLocation);
       drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
       drcSimulationTestHelper.createSimulation(className);
-      YoVariableRegistry registry = drcSimulationTestHelper.getYoVariableRegistry();
       ThreadTools.sleep(1000);
       setupCameraSideView();
    }
