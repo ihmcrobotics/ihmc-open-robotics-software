@@ -1,14 +1,15 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.robotics.dataStructures.ComplexNumber;
-
 import java.util.List;
+
+import us.ihmc.robotics.dataStructures.ComplexNumber;
 
 /**
  * Garbage free implementation of the FFT algorithm
  */
 public class FastFourierTransform
 {
+   private static final double logTwo = Math.log(2.0);
    /**
     * standard FFT object available for all to use
     */
@@ -28,7 +29,7 @@ public class FastFourierTransform
 
    public FastFourierTransform(int maxNumberOfCoefficients)
    {
-      this.logMaxNumberOfCoefficients = (int) Math.ceil(Math.log(maxNumberOfCoefficients) / Math.log(2.0));
+      this.logMaxNumberOfCoefficients = (int) Math.ceil(Math.log(maxNumberOfCoefficients) / logTwo);
       this.maxNumberOfCoefficients = (int) Math.pow(2, logMaxNumberOfCoefficients);
       this.rootsOfUnity = RootsOfUnity.getRootsOfUnity(this.maxNumberOfCoefficients);
       this.coefficients = new ComplexNumber[this.maxNumberOfCoefficients];
@@ -90,7 +91,7 @@ public class FastFourierTransform
          this.coefficients[index].setToPurelyReal(0.0);
       }
    }
-   
+
    private ComplexNumber tempComplex1 = new ComplexNumber(), tempComplex2 = new ComplexNumber(), tempComplex = new ComplexNumber();
 
    public ComplexNumber[] getForwardTransform()
@@ -108,18 +109,23 @@ public class FastFourierTransform
    private void transform(boolean inverse)
    {
       bitReverseCopy(transformedCoeffs, coefficients);
+
+      int m = 1;
+
       for (int i = 1; i <= logMaxNumberOfCoefficients; i++)
       {
-         int m = (int) Math.pow(2.0, i);
+         int half_m = m;
+         m = m << 1; // Computing m = 2^i
+
          tempComplex.setToPurelyReal(1.0);
-         for (int j = 0; j < m / 2; j++)
+         for (int j = 0; j < half_m; j++)
          {
             for (int k = j; k < maxNumberOfCoefficients - 1; k += m)
             {
-               tempComplex1.timesAndStore(tempComplex, transformedCoeffs[k + m / 2]);
+               tempComplex1.timesAndStore(tempComplex, transformedCoeffs[k + half_m]);
                tempComplex2.set(transformedCoeffs[k]);
                transformedCoeffs[k].plusAndStore(tempComplex1, tempComplex2);
-               transformedCoeffs[k + m / 2].minusAndStore(tempComplex2, tempComplex1);
+               transformedCoeffs[k + half_m].minusAndStore(tempComplex2, tempComplex1);
             }
             if (!inverse)
                tempComplex.timesAndStore(rootsOfUnity.get(maxNumberOfCoefficients - maxNumberOfCoefficients / m));
@@ -136,7 +142,7 @@ public class FastFourierTransform
 
    private void bitReverseCopy(ComplexNumber[] arrayToPack, ComplexNumber[] arrayToCopy)
    {
-      int temp = (int) (Math.log(arrayToCopy.length) / Math.log(2.0));
+      int temp = (int) (Math.log(arrayToCopy.length) / logTwo);
       for (int i = 0; i < arrayToCopy.length; i++)
       {
          arrayToPack[i].set(arrayToCopy[bitReverse(i, temp)]);
@@ -173,7 +179,7 @@ public class FastFourierTransform
    {
       return maxNumberOfCoefficients;
    }
-   
+
    public List<ComplexNumber> getRootsOfUnity()
    {
       return rootsOfUnity;
