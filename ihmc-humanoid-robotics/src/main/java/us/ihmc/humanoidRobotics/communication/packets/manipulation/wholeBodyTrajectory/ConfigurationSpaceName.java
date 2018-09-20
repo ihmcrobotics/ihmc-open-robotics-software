@@ -111,7 +111,7 @@ public enum ConfigurationSpaceName
             double theta2 = Math.PI * 2 * configuration[2];
 
             quat.set(Math.sin(theta1) * s1, Math.cos(theta1) * s1, Math.sin(theta2) * s2, Math.cos(theta2) * s2);
-            quat.norm();
+            quat.normalize();
 
             RotationMatrix rotationMatrix = new RotationMatrix(quat);
             ret.setRotation(rotationMatrix);
