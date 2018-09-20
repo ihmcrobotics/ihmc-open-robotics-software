@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -8,8 +8,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -17,7 +18,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SmoothCoMIntegrationToolboxTest
@@ -38,7 +38,6 @@ public class SmoothCoMIntegrationToolboxTest
    public void testMatricesCoMPrime3DLinear()
    {
       // Linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
       int numberOfCoefficients = 2;
       FrameTrajectory3D linear3D = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       
@@ -110,7 +109,6 @@ public class SmoothCoMIntegrationToolboxTest
    public void testDMatricesCoMPrime3DLinear()
    {
       // Linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
       int numberOfCoefficients = 2;
       FrameTrajectory3D linear3D = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       
@@ -185,7 +183,6 @@ public class SmoothCoMIntegrationToolboxTest
    public void testCalculateCoMPositionAndVelocityOnSegment3DLinear()
    {
    // Linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
       int numberOfCoefficients = 2;
       FrameTrajectory3D linear3D = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       
@@ -265,6 +262,22 @@ public class SmoothCoMIntegrationToolboxTest
       }
    }
    
+   @Test
+   public void testPower() throws Exception
+   {
+      Random random = new Random(34549037);
+
+      for (int i = 0; i < 5000; i++)
+      {
+         double scalar = RandomNumbers.nextDouble(random, 10.0);
+         int exponent = random.nextInt(10);
+         double expected = Math.pow(scalar, exponent);
+         double actual = SmoothCoMIntegrationToolbox.power(scalar, exponent);
+         double epsilon = Math.min(Math.abs(expected) * 1.0e-15, 1.0e-6);
+         assertEquals("Difference: " + Math.abs(expected - actual), expected, actual, epsilon);
+      }
+   }
+
    public static void calculateCoMPositionByHand3DLinear(double omega0, double time, FrameTrajectory3D linear3D, FramePoint3D icpPositionDesiredFinal, FramePoint3D comPositionDesiredInitial, FramePoint3D comPositionDesiredCurrent)
    {      
       linear3D.compute(linear3D.getInitialTime());
