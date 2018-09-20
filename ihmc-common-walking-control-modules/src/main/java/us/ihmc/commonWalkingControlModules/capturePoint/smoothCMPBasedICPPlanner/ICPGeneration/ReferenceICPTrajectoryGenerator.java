@@ -51,7 +51,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final FrameVector3D icpVelocityDynamicsCurrent = new FrameVector3D();
    private final YoFrameVector3D yoICPVelocityDynamicsCurrent;
 
-
+   private final YoBoolean copWaypointsWereAdjusted;
    private final YoBoolean isInitialTransfer;
 
    private final YoBoolean continuouslyAdjustForICPContinuity;
@@ -111,6 +111,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       areICPDynamicsSatisfied = new YoBoolean(namePrefix + "AreICPDynamicsSatisfied", registry);
       areICPDynamicsSatisfied.set(false);
+
+      copWaypointsWereAdjusted = new YoBoolean("CoPWaypointsWereAdjusted", registry);
 
       continuouslyAdjustForICPContinuity = new YoBoolean(namePrefix + "ContinuouslyAdjustForICPContinuity", registry);
       continuouslyAdjustForICPContinuity.set(CONTINUOUSLY_ADJUST_FOR_ICP_DISCONTINUITY);
@@ -209,6 +211,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       copTrajectories.clear();
       totalNumberOfCoPSegments.set(0);
       numberOfCoPSegmentsInCurrentPhase.set(0);
+      copWaypointsWereAdjusted.set(false);
    }
 
 
@@ -459,6 +462,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing3D(omega0.getDoubleValue(), copTrajectories, setInitialICPConditions,
                                                                              finalICPConditionForContinuity);
          icpToolbox.computeDesiredCornerPoints3D(icpDesiredInitialPositionsFromCoPs, icpDesiredFinalPositionsFromCoPs, copTrajectories, omega0.getDoubleValue());
+         copWaypointsWereAdjusted.set(true);
       }
    }
 
