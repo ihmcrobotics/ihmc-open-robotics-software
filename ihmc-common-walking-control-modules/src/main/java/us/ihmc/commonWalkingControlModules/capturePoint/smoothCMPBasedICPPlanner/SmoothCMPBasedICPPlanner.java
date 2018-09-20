@@ -3,10 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanne
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.AbstractICPPlanner;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration.AngularMomentumTrajectoryGeneratorInterface;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration.AngularMomentumTrajectoryMultiplexer;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration.CommandBasedAngularMomentumTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration.FootstepAngularMomentumPredictor;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CMPGeneration.ReferenceCMPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration.ReferenceCoMTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
@@ -16,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -53,25 +49,26 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private boolean adjustICPForSingleSupport = false;
    private boolean adjustICPForInitialDoubleSupport = true;
    private boolean adjustICPForEachDoubleSupport = true;
+   private boolean adjustICPWhenGoingToStand = false;
 
    /** Desired velocity for the Center of Mass (CoM) */
-   private final YoFrameVector3D desiredCoMVelocity = new YoFrameVector3D(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
+   final YoFrameVector3D desiredCoMVelocity = new YoFrameVector3D(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
    /** Desired acceleration for the Center of Mass (CoM) */
-   private final YoFrameVector3D desiredCoMAcceleration = new YoFrameVector3D(namePrefix + "DesiredCoMAcceleration", worldFrame, registry);
+   final YoFrameVector3D desiredCoMAcceleration = new YoFrameVector3D(namePrefix + "DesiredCoMAcceleration", worldFrame, registry);
    /** Desired position for the Center of Pressure (CoP) */
    private final YoFramePoint3D desiredCoPPosition = new YoFramePoint3D(namePrefix + "DesiredCoPPosition", worldFrame, registry);
    /** Desired velocity for the Center of Pressure (CoP) */
    private final YoFrameVector3D desiredCoPVelocity = new YoFrameVector3D(namePrefix + "DesiredCoPVelocity", worldFrame, registry);
 
    /** Desired Centroidal Angular Momentum (CAM) */
-   private final YoFrameVector3D desiredCentroidalAngularMomentum = new YoFrameVector3D(namePrefix + "DesiredCentroidalAngularMomentum", worldFrame, registry);
+   final YoFrameVector3D desiredCentroidalAngularMomentum = new YoFrameVector3D(namePrefix + "DesiredCentroidalAngularMomentum", worldFrame, registry);
    /** Desired Centroidal Torque (CT) */
-   private final YoFrameVector3D desiredCentroidalTorque = new YoFrameVector3D(namePrefix + "DesiredCentroidalTorque", worldFrame, registry);
+   final YoFrameVector3D desiredCentroidalTorque = new YoFrameVector3D(namePrefix + "DesiredCentroidalTorque", worldFrame, registry);
 
-   private final ReferenceCoPTrajectoryGenerator referenceCoPGenerator;
+   final ReferenceCoPTrajectoryGenerator referenceCoPGenerator;
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
-   private final ReferenceICPTrajectoryGenerator referenceICPGenerator;
-   private final ReferenceCoMTrajectoryGenerator referenceCoMGenerator;
+   final ReferenceICPTrajectoryGenerator referenceICPGenerator;
+   final ReferenceCoMTrajectoryGenerator referenceCoMGenerator;
    private final AngularMomentumTrajectoryMultiplexer angularMomentumTrajectoryGenerator;
 
    private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
@@ -323,7 +320,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
-      updateTransferPlan(false);
+      updateTransferPlan(adjustICPWhenGoingToStand);
    }
 
    /** {@inheritDoc} */
@@ -538,14 +535,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       }
    }
 
-   public void updateListeners()
+   private void updateListeners()
    {
       referenceCoPGenerator.updateListeners();
-   }
-
-   public List<CoPPointsInFoot> getCoPWaypoints()
-   {
-      return referenceCoPGenerator.getWaypoints();
    }
 
    private final FramePoint3D tempFinalICP = new FramePoint3D();
@@ -560,13 +552,14 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       }
       else if (!isInDoubleSupport())
       {
-         tempFinalICP.set(getFinalDesiredCapturePointPositions().get(referenceCMPGenerator.getSwingCMPTrajectories().get(0).getNumberOfSegments() - 1));
+         List<? extends FramePoint3DReadOnly> finalDesiredICPPositions = referenceICPGenerator.getICPPositionDesiredFinalList();
+         tempFinalICP.set(finalDesiredICPPositions.get(referenceCMPGenerator.getSwingCMPTrajectories().get(0).getNumberOfSegments() - 1));
          tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
-         finalDesiredCapturePointPositionToPack.set(tempFinalICP);
       }
       else
       {
-         tempFinalICP.set(getFinalDesiredCapturePointPositions().get(referenceCMPGenerator.getTransferCMPTrajectories().get(0).getNumberOfSegments() - 1));
+         List<? extends FramePoint3DReadOnly> finalDesiredICPPositions = referenceICPGenerator.getICPPositionDesiredFinalList();
+         tempFinalICP.set(finalDesiredICPPositions.get(referenceCMPGenerator.getTransferCMPTrajectories().get(0).getNumberOfSegments() - 1));
          tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
          finalDesiredCapturePointPositionToPack.set(tempFinalICP);
       }
@@ -578,26 +571,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    {
       getFinalDesiredCapturePointPosition(tempFinalICP);
       finalDesiredCapturePointPositionToPack.set(tempFinalICP);
-   }
-
-   public List<? extends FramePoint3DReadOnly> getInitialDesiredCapturePointPositions()
-   {
-      return referenceICPGenerator.getICPPositionDesiredInitialList();
-   }
-
-   public List<? extends FramePoint3DReadOnly> getFinalDesiredCapturePointPositions()
-   {
-      return referenceICPGenerator.getICPPositionDesiredFinalList();
-   }
-
-   public List<? extends FramePoint3DReadOnly> getInitialDesiredCenterOfMassPositions()
-   {
-      return referenceCoMGenerator.getCoMPositionDesiredInitialList();
-   }
-
-   public List<? extends FramePoint3DReadOnly> getFinalDesiredCenterOfMassPositions()
-   {
-      return referenceCoMGenerator.getCoMPositionDesiredFinalList();
    }
 
    private final FramePoint3D tempFinalCoM = new FramePoint3D();
@@ -650,11 +623,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       return referenceCoPGenerator.getNumberOfFootstepsRegistered();
    }
 
-   public int getTotalNumberOfSegments()
-   {
-      return referenceICPGenerator.getTotalNumberOfSegments();
-   }
-
    /** {@inheritDoc} */
    @Override
    public void holdCurrentICP(FramePoint3D icpPositionToHold)
@@ -681,26 +649,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.setDefaultPhaseTimes(defaultSwingTime, defaultTransferTime);
    }
 
-   public void getDesiredCenterOfMassVelocity(YoFrameVector3D desiredCenterOfMassVelocityToPack)
-   {
-      desiredCenterOfMassVelocityToPack.set(desiredCoMVelocity);
-   }
-
-   public void getDesiredCenterOfMassVelocity(FrameVector3D desiredCenterOfMassVelocityToPack)
-   {
-      desiredCenterOfMassVelocityToPack.setIncludingFrame(desiredCoMVelocity);
-   }
-
-   public void getDesiredCenterOfMassAcceleration(YoFrameVector3D desiredCenterOfMassAccelerationToPack)
-   {
-      desiredCenterOfMassAccelerationToPack.set(desiredCoMAcceleration);
-   }
-
-   public void getDesiredCenterOfMassAcceleration(FrameVector3D desiredCenterOfMassAccelerationToPack)
-   {
-      desiredCenterOfMassAccelerationToPack.setIncludingFrame(desiredCoMAcceleration);
-   }
-
    /** {@inheritDoc} */
    @Override
    public void getDesiredCenterOfPressurePosition(FramePoint3D desiredCenterOfPressurePositionToPack)
@@ -715,11 +663,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       desiredCenterOfPressurePositionToPack.setIncludingFrame(desiredCoPPosition);
    }
 
-   public void getDesiredCenterOfPressurePosition(YoFramePoint3D desiredCenterOfPressurePositionToPack)
-   {
-      desiredCenterOfPressurePositionToPack.set(desiredCoPPosition);
-   }
-
    /** {@inheritDoc} */
    @Override
    public void getDesiredCenterOfPressureVelocity(FrameVector3D desiredCenterOfPressureVelocityToPack)
@@ -732,31 +675,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    public void getDesiredCenterOfPressureVelocity(FrameVector2D desiredCenterOfPressureVelocityToPack)
    {
       desiredCenterOfPressureVelocityToPack.setIncludingFrame(desiredCoPVelocity);
-   }
-
-   public void getDesiredCentroidalAngularMomentum(FrameVector3D desiredCentroidalAngularMomentumToPack)
-   {
-      desiredCentroidalAngularMomentumToPack.setIncludingFrame(desiredCentroidalAngularMomentum);
-   }
-
-   public void getDesiredCentroidalTorque(YoFrameVector3D desiredCentroidalTorqueToPack)
-   {
-      desiredCentroidalTorqueToPack.set(desiredCentroidalTorque);
-   }
-
-   public void getDesiredCentroidalTorque(FrameVector3D desiredCentroidalTorqueToPack)
-   {
-      desiredCentroidalTorqueToPack.setIncludingFrame(desiredCentroidalTorque);
-   }
-
-   void ensureContinuityEnteringSingleSupport(boolean ensureContinuity)
-   {
-      this.adjustICPForSingleSupport = ensureContinuity;
-   }
-
-   void ensureContinuityEnteringFirstTransfer(boolean ensureContinuity)
-   {
-      this.adjustICPForInitialDoubleSupport = ensureContinuity;
    }
 
    void ensureContinuityEnteringEachTransfer(boolean ensureContinuity)
