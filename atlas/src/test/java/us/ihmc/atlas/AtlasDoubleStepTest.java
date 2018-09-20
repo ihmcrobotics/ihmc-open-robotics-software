@@ -5,6 +5,7 @@ import us.ihmc.avatar.AvatarDoubleStepTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasDoubleStepTest extends AvatarDoubleStepTest
@@ -33,7 +34,7 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
       super.testTwoStepsInARowSameSide();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 76.4)
+   @ContinuousIntegrationTest(estimatedDuration = 76.4, categoriesOverride = IntegrationCategory.SLOW)
    @Test(timeout = 380000)
    @Override
    public void testTwoStepsInARowSameSideAfterFirstSep() throws SimulationExceededMaximumTimeException
@@ -41,7 +42,7 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
       super.testTwoStepsInARowSameSideAfterFirstSep();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 76.4)
+   @ContinuousIntegrationTest(estimatedDuration = 76.4, categoriesOverride = IntegrationCategory.SLOW)
    @Test(timeout = 380000)
    @Override
    public void testTwoStepsInARowLongTransferSameSide() throws SimulationExceededMaximumTimeException
@@ -49,7 +50,7 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
       super.testTwoStepsInARowLongTransferSameSide();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 76.4)
+   @ContinuousIntegrationTest(estimatedDuration = 76.4, categoriesOverride = IntegrationCategory.SLOW)
    @Test(timeout = 380000)
    @Override
    public void testTwoStepsStandingInBetween() throws SimulationExceededMaximumTimeException
