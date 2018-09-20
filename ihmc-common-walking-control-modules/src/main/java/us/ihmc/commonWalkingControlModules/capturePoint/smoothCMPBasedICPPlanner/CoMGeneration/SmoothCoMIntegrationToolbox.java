@@ -7,8 +7,6 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
 import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -295,7 +293,7 @@ public class SmoothCoMIntegrationToolbox
          for (int j = i; j < numberOfCoefficients; j++)
          {
             double scalar = Math.pow(-1.0, i) * Math.pow(omega0, -j);
-            CommonOps.addEquals(generalizedAlphaCoMPrimeRow, scalar, cmpPolynomial.getXPowersDerivativeVector(j + alphaCoMDerivativeOrder, time));
+            CommonOps.addEquals(generalizedAlphaCoMPrimeRow, scalar, cmpPolynomial.evaluateGeometricSequenceDerivative(j + alphaCoMDerivativeOrder, time));
          }
       }
    }
@@ -334,7 +332,7 @@ public class SmoothCoMIntegrationToolbox
          for (int j = i; j < numberOfCoefficients; j++)
          {
             double scalar = Math.pow(-1.0, i + betaCoMDerivativeOrder) * Math.pow(omega0, -j + betaCoMDerivativeOrder) * Math.exp(omega0 * (timeSegmentInitial - time));
-            CommonOps.addEquals(generalizedBetaCoMPrimeRow, scalar, cmpPolynomial.getXPowersDerivativeVector(j, timeSegmentInitial));
+            CommonOps.addEquals(generalizedBetaCoMPrimeRow, scalar, cmpPolynomial.evaluateGeometricSequenceDerivative(j, timeSegmentInitial));
          }
       }
    }
