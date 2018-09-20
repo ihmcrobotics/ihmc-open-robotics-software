@@ -13,6 +13,9 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.yoVariables.variable.YoBoolean;
+
+import static org.junit.Assert.assertTrue;
 
 public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkingTest
 {
@@ -63,6 +66,42 @@ public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkin
    {
       super.testForwardWalk();
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 300000)
+   public void testForwardWalkWithCorruptedMomentum() throws SimulationExceededMaximumTimeException
+   {
+      super.testForwardWalkWithCorruptedMomentum();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 300000)
+   public void testForwardWalkTransferDelayedMomentum() throws SimulationExceededMaximumTimeException
+   {
+      super.testForwardWalkTransferDelayedMomentum();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 300000)
+   public void testForwardWalkTransferBigDelayedMomentum() throws SimulationExceededMaximumTimeException
+   {
+      super.testForwardWalkTransferBigDelayedMomentum();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 300000)
+   public void testForwardWalkSwingDelayedMomentum() throws SimulationExceededMaximumTimeException
+   {
+      super.testForwardWalkSwingDelayedMomentum();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 300000)
+   public void testForwardWalkZeroMomentumFirstStep() throws SimulationExceededMaximumTimeException
+   {
+      super.testForwardWalkZeroMomentumFirstStep();
+   }
+
 
    @Override
    public DRCRobotModel getRobotModel()
