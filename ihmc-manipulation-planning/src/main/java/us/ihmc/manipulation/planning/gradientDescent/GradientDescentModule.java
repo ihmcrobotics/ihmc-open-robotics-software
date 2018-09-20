@@ -93,11 +93,11 @@ public class GradientDescentModule
                perturbedInput.add(pastInput.get(k));
 
             if (perturbedInput.get(j) == inputUpperLimit.get(j))
+            {
                tempSignForPerturb = -1.0;
-
-            if (perturbedInput.get(j) == inputUpperLimit.get(j))
                if (DEBUG)
                   System.out.println("current input is meeting with upper limit");
+            }
 
             double tempInput = perturbedInput.get(j) + perturb * tempSignForPerturb;
 
