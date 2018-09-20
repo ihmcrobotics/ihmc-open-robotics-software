@@ -413,6 +413,7 @@ public class BalanceManager
    }
 
    private final FramePoint3D copEstimate = new FramePoint3D();
+   private final FrameVector2D emptyVector = new FrameVector2D();
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
@@ -496,13 +497,18 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setPerfectCoP(yoPerfectCoP);
       linearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
       desiredCMP.set(yoDesiredCMP);
-      linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP, desiredCoP);
+      boolean success = linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP, desiredCoP);
       yoDesiredCMP.set(desiredCMP);
 
       desiredCoP.changeFrame(midFootZUpFrame);
       tempVector2D.setIncludingFrame(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
       centerOfPressureCommand.setDesiredCoP(desiredCoP);
       centerOfPressureCommand.setWeight(tempVector2D);
+
+      if (!success)
+      {
+         controllerToolbox.reportControllerFailureToListeners(emptyVector);
+      }
    }
 
    public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
