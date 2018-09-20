@@ -32,6 +32,11 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       }
    };
 
+   @Override
+   public double getMaxICPPlanError()
+   {
+      return 0.02;
+   }
 
    @Override
    public DRCRobotModel getRobotModel()
