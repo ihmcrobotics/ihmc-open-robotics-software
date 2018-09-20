@@ -15,9 +15,9 @@ public class HexapodMomentumOptimizationSettings implements ControllerCoreOptimi
    private final double rhoMin = 4.0;
    private final double rhoRateDefaultWeight = 2.0E-9;
    private final double rhoRateHighWeight = 5.0E-8;
-   private final Vector2D copWeight = new Vector2D(100.0, 200.0);
-   private final Vector2D copRateDefaultWeight = new Vector2D(0.02, 0.02);
-   private final Vector2D copRateHighWeight = new Vector2D(2.5, 10.0);
+   private final Vector2D copWeight = new Vector2D(0.001, 0.002);
+   private final Vector2D copRateDefaultWeight = new Vector2D(0.0000002, 0.0000002);
+   private final Vector2D copRateHighWeight = new Vector2D(0.000025, 0.0001);
 
    /** @inheritDoc */
    @Override

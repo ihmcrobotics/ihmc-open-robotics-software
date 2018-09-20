@@ -2,37 +2,30 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 public class DoNothingControllerState extends HighLevelControllerState
 {
    private static final HighLevelControllerName controllerState = HighLevelControllerName.DO_NOTHING_BEHAVIOR;
-
-   private final OneDoFJoint[] allRobotJoints;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
 
-   public DoNothingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
+   public DoNothingControllerState(OneDoFJoint[] controlledJoints, HighLevelControllerParameters highLevelControllerParameters)
    {
-      super(controllerState, highLevelControllerParameters, controllerToolbox);
-
-      allRobotJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
-
-      lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(allRobotJoints.length);
-      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(allRobotJoints);
+      super(controllerState, highLevelControllerParameters, controlledJoints);
+      lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controlledJoints.length);
+      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
    }
 
    @Override
    public void doAction(double timeInState)
    {
-      for (int i = 0; i < allRobotJoints.length; i++)
+      for (int i = 0; i < controlledJoints.length; i++)
       {
-         allRobotJoints[i].setTau(0.0);
-         lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(allRobotJoints[i]).clear();
-         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(allRobotJoints[i], 0.0);
+         controlledJoints[i].setTau(0.0);
+         lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(controlledJoints[i]).clear();
+         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(controlledJoints[i], 0.0);
       }
 
       lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());

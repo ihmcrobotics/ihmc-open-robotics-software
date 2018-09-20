@@ -137,6 +137,10 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
 
    public void setTrajectoryTime(double trajectoryTime)
    {
+      if (trajectoryTime < 0.0)
+      {
+         throw new RuntimeException("Negative trajectory time: " + trajectoryTime);
+      }
       pelvisOrientationTrajectoryGenerator.setTrajectoryTime(trajectoryTime);
    }
 

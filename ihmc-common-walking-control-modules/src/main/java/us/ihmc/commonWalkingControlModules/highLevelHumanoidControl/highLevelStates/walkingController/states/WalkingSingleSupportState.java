@@ -37,6 +37,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
 
    private final FramePose3D actualFootPoseInWorld = new FramePose3D(worldFrame);
+   private final FramePoint3D adjustedFootstepPositionInWorld = new FramePoint3D(worldFrame);
    private final FramePose3D desiredFootPoseInWorld = new FramePose3D(worldFrame);
    private final FramePoint3D nextExitCMP = new FramePoint3D();
 
@@ -132,6 +133,9 @@ public class WalkingSingleSupportState extends SingleSupportState
             balanceManager.updateCurrentICPPlan();
             //legConfigurationManager.prepareForLegBracing(swingSide);
          }
+
+         // if the footstep was adjusted, shift the CoM plan, if there is one.
+         walkingMessageHandler.setPlanOffsetFromAdjustment(balanceManager.getEffectiveICPAdjustment());
       }
       else if (balanceManager.isPushRecoveryEnabled())
       {
@@ -286,6 +290,8 @@ public class WalkingSingleSupportState extends SingleSupportState
          pelvisOrientationManager.initializeSwing(supportSide, swingTime, nextTiming.getTransferTime(), nextTiming.getSwingTime());
       }
 
+      balanceManager.computeICPPlan(supportSide);
+
       nextFootstep.getPose(desiredFootPoseInWorld);
       desiredFootPoseInWorld.changeFrame(worldFrame);
 
@@ -307,7 +313,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       actualFootPoseInWorld.checkReferenceFrameMatch(desiredFootPoseInWorld);
       touchdownErrorVector.sub(actualFootPoseInWorld.getPosition(), desiredFootPoseInWorld.getPosition());
       touchdownErrorVector.setZ(0.0);
-      walkingMessageHandler.addOffsetVector(touchdownErrorVector);
+      walkingMessageHandler.addOffsetVectorOnTouchdown(touchdownErrorVector);
 
       walkingMessageHandler.reportFootstepCompleted(swingSide, actualFootPoseInWorld);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
@@ -347,7 +353,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    /**
     * Request the swing trajectory to speed up using
-    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2d)}.
+    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2D)}.
     * It is clamped w.r.t. to
     * {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     *
