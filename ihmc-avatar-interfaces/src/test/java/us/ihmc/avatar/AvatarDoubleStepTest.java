@@ -1,17 +1,12 @@
 package us.ihmc.avatar;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -28,12 +23,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -82,7 +72,6 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
    public void testTwoStepsInARowSameSide() throws SimulationExceededMaximumTimeException
    {
       setupTest();
-      setupPlanContinuityTesters();
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
 
@@ -105,7 +94,6 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
    public void testTwoStepsInARowSameSideAfterFirstSep() throws SimulationExceededMaximumTimeException
    {
       setupTest();
-      setupPlanContinuityTesters();
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
 
@@ -140,7 +128,6 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
    public void testTwoStepsInARowLongTransferSameSide() throws SimulationExceededMaximumTimeException
    {
       setupTest();
-      setupPlanContinuityTesters();
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
 
@@ -163,7 +150,6 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
    public void testTwoStepsStandingInBetween() throws SimulationExceededMaximumTimeException
    {
       setupTest();
-      setupPlanContinuityTesters();
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
 
@@ -201,61 +187,12 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       };
       robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(true, getMaxICPPlanError());
       drcSimulationTestHelper.setStartingLocation(startingLocation);
       drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
       drcSimulationTestHelper.createSimulation(className);
       ThreadTools.sleep(1000);
       setupCameraSideView();
-   }
-
-   private void setupPlanContinuityTesters()
-   {
-      final YoDouble desiredICPX = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPX");
-      final YoDouble desiredICPY = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPY");
-
-      final MutableDouble previousDesiredICPX = new MutableDouble();
-      final MutableDouble previousDesiredICPY = new MutableDouble();
-
-      final MutableBoolean xInitialized = new MutableBoolean(false);
-      final MutableBoolean yInitialized = new MutableBoolean(false);
-
-      desiredICPX.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
-         {
-            if (xInitialized.getValue())
-            {
-               assertTrue("ICP plan desired X jumped from " + previousDesiredICPX.getValue() + " to " + desiredICPX.getDoubleValue() + " in one control DT.",
-                          Math.abs(desiredICPX.getDoubleValue() - previousDesiredICPX.getValue()) < getMaxICPPlanError());
-            }
-            else
-            {
-               xInitialized.setValue(true);
-            }
-            previousDesiredICPX.setValue(desiredICPX.getDoubleValue());
-
-         }
-      });
-
-      desiredICPY.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
-         {
-            if (yInitialized.getValue())
-            {
-               assertTrue("ICP plan desired Y jumped from " + previousDesiredICPY.getValue() + " to " + desiredICPY.getDoubleValue() + " in one control DT.",
-                          Math.abs(desiredICPY.getDoubleValue() - previousDesiredICPY.getValue()) < getMaxICPPlanError());
-            }
-            else
-            {
-               yInitialized.setValue(true);
-            }
-            previousDesiredICPY.setValue(desiredICPY.getDoubleValue());
-
-         }
-      });
    }
 
    private void setupCameraSideView()

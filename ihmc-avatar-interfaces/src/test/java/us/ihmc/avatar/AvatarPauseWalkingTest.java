@@ -1,16 +1,11 @@
 package us.ihmc.avatar;
 
-import static org.junit.Assert.assertTrue;
-
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.apache.commons.lang3.mutable.MutableDouble;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -27,11 +22,10 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoVariable;
+
+import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 {
@@ -58,7 +52,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 
    public abstract double getMaxICPPlanError();
 
-
    @Before
    public void showMemoryUsageBeforeTest()
    {
@@ -69,7 +62,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      System.out.println("blah? " + simulationTestingParameters.getKeepSCSUp());
       if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
@@ -92,7 +84,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    public void testPauseWalking() throws SimulationExceededMaximumTimeException
    {
       setupTest();
-      setupPlanContinuityTesters();
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
       sendFootstepCommand(0.0, getNumberOfFootsteps());
@@ -112,7 +103,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    public void testPauseWalkingForward() throws SimulationExceededMaximumTimeException
    {
       setupTest();
-      setupPlanContinuityTesters();
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
       sendFootstepCommand(getStepLength(), getNumberOfFootsteps());
@@ -132,11 +122,33 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    public void testPauseWalkingInitialTransfer() throws SimulationExceededMaximumTimeException
    {
       setupTest();
-      setupPlanContinuityTesters();
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       sendFootstepCommand(0.0, getNumberOfFootsteps());
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
+      PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
+
+      drcSimulationTestHelper.publishToController(pauseWalkingMessage);
+      walkPaused.set(true);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
+
+      pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
+      drcSimulationTestHelper.publishToController(pauseWalkingMessage);
+      walkPaused.set(false);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
+   public void testPauseWalkingInitialTransferOneStep() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      walkPaused.set(false);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
+      sendFootstepCommand(0.0, 1);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
@@ -156,7 +168,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    public void testPauseWalkingForwardInitialTransfer() throws SimulationExceededMaximumTimeException
    {
       setupTest();
-      setupPlanContinuityTesters();
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
@@ -184,8 +195,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
          addFootstep(new Point3D(i * stepLength, side.negateIfRightSide(getStepWidth() / 2.0), 0.0), orientation, side, footstepMessage);
          side = side.getOppositeSide();
       }
-      addFootstep(new Point3D((numberOfFootsteps - 1) * stepLength, side.negateIfRightSide(getStepWidth() / 2.0), 0.0), orientation, side,
-                  footstepMessage);
+      addFootstep(new Point3D((numberOfFootsteps - 1) * stepLength, side.negateIfRightSide(getStepWidth() / 2.0), 0.0), orientation, side, footstepMessage);
       footstepMessage.setFinalTransferDuration(getFinalTransferDuration());
       drcSimulationTestHelper.publishToController(footstepMessage);
    }
@@ -215,6 +225,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       };
       robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(true, getMaxICPPlanError());
       drcSimulationTestHelper.setStartingLocation(startingLocation);
       drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
       drcSimulationTestHelper.createSimulation(className);
@@ -222,56 +233,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       walkPaused = new YoBoolean("isWalkPaused", registry);
       ThreadTools.sleep(1000);
       setupCameraSideView();
-   }
-
-   private void setupPlanContinuityTesters()
-   {
-      final YoDouble desiredICPX = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPX");
-      final YoDouble desiredICPY = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPY");
-
-      final MutableDouble previousDesiredICPX = new MutableDouble();
-      final MutableDouble previousDesiredICPY = new MutableDouble();
-
-      final MutableBoolean xInitialized = new MutableBoolean(false);
-      final MutableBoolean yInitialized = new MutableBoolean(false);
-
-      desiredICPX.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
-         {
-            if (xInitialized.getValue())
-            {
-               assertTrue("ICP plan desired X jumped from " + previousDesiredICPX.getValue() + " to " + desiredICPX.getDoubleValue() + " in one control DT.",
-                          Math.abs(desiredICPX.getDoubleValue() - previousDesiredICPX.getValue()) < getMaxICPPlanError());
-            }
-            else
-            {
-               xInitialized.setValue(true);
-            }
-            previousDesiredICPX.setValue(desiredICPX.getDoubleValue());
-
-         }
-      });
-
-      desiredICPY.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
-         {
-            if (yInitialized.getValue())
-            {
-               assertTrue("ICP plan desired Y jumped from " + previousDesiredICPY.getValue() + " to " + desiredICPY.getDoubleValue() + " in one control DT.",
-                          Math.abs(desiredICPY.getDoubleValue() - previousDesiredICPY.getValue()) < getMaxICPPlanError());
-            }
-            else
-            {
-               yInitialized.setValue(true);
-            }
-            previousDesiredICPY.setValue(desiredICPY.getDoubleValue());
-
-         }
-      });
    }
 
    private void setupCameraSideView()

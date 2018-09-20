@@ -1,6 +1,7 @@
 package us.ihmc.avatar.testTools;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.InputStream;
@@ -12,6 +13,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import controller_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
@@ -63,7 +66,9 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class DRCSimulationTestHelper
@@ -101,6 +106,8 @@ public class DRCSimulationTestHelper
    private final DRCGuiInitialSetup guiInitialSetup;
 
    private final boolean checkIfDesiredICPHasBeenInvalid = true;
+   private boolean checkForDesiredICPContinuity = false;
+   private double maxICPPlanError = 0.04;
    protected final String robotName;
 
    @SuppressWarnings("rawtypes")
@@ -203,6 +210,9 @@ public class DRCSimulationTestHelper
       {
          nothingChangedVerifier = null;
       }
+
+      if (checkForDesiredICPContinuity)
+         setupPlanContinuityTesters();
    }
 
    public YoVariable<?> getYoVariable(String name)
@@ -521,6 +531,12 @@ public class DRCSimulationTestHelper
       }
    }
 
+   public void setCheckForDesiredICPContinuity(boolean checkForDesiredICPContinuity, double maxICPPlanError)
+   {
+      this.checkForDesiredICPContinuity = checkForDesiredICPContinuity;
+      this.maxICPPlanError = maxICPPlanError;
+   }
+
    public void setStartingLocation(DRCStartingLocation startingLocation)
    {
       if (startingLocation != null)
@@ -614,4 +630,56 @@ public class DRCSimulationTestHelper
    {
       ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
    }
+
+   private void setupPlanContinuityTesters()
+   {
+      final YoDouble desiredICPX = (YoDouble) getYoVariable("desiredICPX");
+      final YoDouble desiredICPY = (YoDouble) getYoVariable("desiredICPY");
+
+      final MutableDouble previousDesiredICPX = new MutableDouble();
+      final MutableDouble previousDesiredICPY = new MutableDouble();
+
+      final MutableBoolean xInitialized = new MutableBoolean(false);
+      final MutableBoolean yInitialized = new MutableBoolean(false);
+
+      desiredICPX.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            if (xInitialized.getValue())
+            {
+               assertTrue("ICP plan desired X jumped from " + previousDesiredICPX.getValue() + " to " + desiredICPX.getDoubleValue() + " in one control DT.",
+                          Math.abs(desiredICPX.getDoubleValue() - previousDesiredICPX.getValue()) < maxICPPlanError);
+            }
+            else
+            {
+               xInitialized.setValue(true);
+            }
+            previousDesiredICPX.setValue(desiredICPX.getDoubleValue());
+
+         }
+      });
+
+      desiredICPY.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            if (yInitialized.getValue())
+            {
+               assertTrue("ICP plan desired Y jumped from " + previousDesiredICPY.getValue() + " to " + desiredICPY.getDoubleValue() + " in one control DT.",
+                          Math.abs(desiredICPY.getDoubleValue() - previousDesiredICPY.getValue()) < maxICPPlanError);
+            }
+            else
+            {
+               yInitialized.setValue(true);
+            }
+            previousDesiredICPY.setValue(desiredICPY.getDoubleValue());
+
+         }
+      });
+   }
+
+
 }
