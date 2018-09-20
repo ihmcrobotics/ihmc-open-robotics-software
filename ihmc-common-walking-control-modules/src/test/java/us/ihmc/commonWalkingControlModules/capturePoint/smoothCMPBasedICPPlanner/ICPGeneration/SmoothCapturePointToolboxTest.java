@@ -9,6 +9,7 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -50,14 +51,14 @@ public class SmoothCapturePointToolboxTest
       ArrayList<FramePoint3D> copsToPack = new ArrayList<FramePoint3D>();
       List<FrameTrajectory3D> cmpPolynomials3D = new ArrayList<FrameTrajectory3D>();
       
-      ArrayList<FramePoint3D> entryCornerPointsToPack = new ArrayList<FramePoint3D>();
-      ArrayList<FramePoint3D> exitCornerPointsToPack = new ArrayList<FramePoint3D>();
+      RecyclingArrayList<FramePoint3D> entryCornerPointsToPack = new RecyclingArrayList<>(FramePoint3D::new);
+      RecyclingArrayList<FramePoint3D> exitCornerPointsToPack = new RecyclingArrayList<>(FramePoint3D::new);
       
-      ArrayList<FramePoint3D> entryCornerPointsToPackDecoupled = new ArrayList<FramePoint3D>();
-      ArrayList<FramePoint3D> exitCornerPointsToPackDecoupled = new ArrayList<FramePoint3D>();
+      RecyclingArrayList<FramePoint3D> entryCornerPointsToPackDecoupled = new RecyclingArrayList<>(FramePoint3D::new);
+      RecyclingArrayList<FramePoint3D> exitCornerPointsToPackDecoupled = new RecyclingArrayList<>(FramePoint3D::new);
       
-      ArrayList<FramePoint3D> entryCornerPointsByHandToPack = new ArrayList<FramePoint3D>();
-      ArrayList<FramePoint3D> exitCornerPointsByHandToPack = new ArrayList<FramePoint3D>();
+      RecyclingArrayList<FramePoint3D> entryCornerPointsByHandToPack = new RecyclingArrayList<>(FramePoint3D::new);
+      RecyclingArrayList<FramePoint3D> exitCornerPointsByHandToPack = new RecyclingArrayList<>(FramePoint3D::new);
 
       for (int i = 0; i < numberOfCoPWaypoints; i++)
       {
@@ -65,15 +66,6 @@ public class SmoothCapturePointToolboxTest
       }
       for (int i = 0; i < numberOfCoPWaypoints-1; i++)
       {
-         entryCornerPointsToPack.add(new FramePoint3D(ReferenceFrame.getWorldFrame()));
-         exitCornerPointsToPack.add(new FramePoint3D(ReferenceFrame.getWorldFrame()));
-         
-         entryCornerPointsToPackDecoupled.add(new FramePoint3D(ReferenceFrame.getWorldFrame()));
-         exitCornerPointsToPackDecoupled.add(new FramePoint3D(ReferenceFrame.getWorldFrame()));
-         
-         entryCornerPointsByHandToPack.add(new FramePoint3D(ReferenceFrame.getWorldFrame()));
-         exitCornerPointsByHandToPack.add(new FramePoint3D(ReferenceFrame.getWorldFrame()));
-         
          cmpPolynomials3D.add(new FrameTrajectory3D(numberOfCoefficients, ReferenceFrame.getWorldFrame()));
       }
 
@@ -105,16 +97,16 @@ public class SmoothCapturePointToolboxTest
          icpToolbox.computeDesiredCornerPoints3D(entryCornerPointsToPack, exitCornerPointsToPack, cmpPolynomials3D, omega0);
          icpToolbox.computeDesiredCornerPoints(entryCornerPointsToPackDecoupled, exitCornerPointsToPackDecoupled, cmpPolynomials3D, omega0);
          
-         exitCornerPointsByHandToPack.set(exitCornerPointsByHandToPack.size()-1, copsToPack.get(copsToPack.size()-1));
+         exitCornerPointsByHandToPack.getAndGrowIfNeeded(numberOfCoPWaypoints-1).set(copsToPack.get(copsToPack.size()-1));
          for(int i = numberOfCoPWaypoints-2; i >= 0; i--)
          {
             double time = 0.0;
             FramePoint3D newEntryICP = new FramePoint3D(ReferenceFrame.getWorldFrame());
             SmoothCapturePointToolboxTest.calculateICPPositionByHand3DLinear(omega0, time, cmpPolynomials3D.get(i), exitCornerPointsByHandToPack.get(i), newEntryICP);
-            entryCornerPointsByHandToPack.set(i, newEntryICP);
+            entryCornerPointsByHandToPack.getAndGrowIfNeeded(i).set(newEntryICP);
             if(i > 0)
             {
-               exitCornerPointsByHandToPack.set(i-1, newEntryICP);
+               exitCornerPointsByHandToPack.getAndGrowIfNeeded(i-1).set(newEntryICP);
             }
          }
 //         PrintTools.debug("Test " + j + ":");
