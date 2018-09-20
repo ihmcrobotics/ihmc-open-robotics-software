@@ -1,4 +1,4 @@
-package us.ihmc.atlas.commonWalkingControlModules.sensors;
+package us.ihmc.atlas;
 
 import org.junit.Test;
 
