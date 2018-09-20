@@ -49,7 +49,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private boolean adjustICPForSingleSupport = false;
    private boolean adjustICPForInitialDoubleSupport = true;
    private boolean adjustICPForEachDoubleSupport = true;
-   private boolean adjustICPWhenGoingToStand = false;
+   private boolean adjustICPWhenGoingToStand = true;
 
    /** Desired velocity for the Center of Mass (CoM) */
    final YoFrameVector3D desiredCoMVelocity = new YoFrameVector3D(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
