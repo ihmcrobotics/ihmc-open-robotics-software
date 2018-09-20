@@ -135,6 +135,7 @@ public class HighLevelHumanoidControllerToolbox
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final InverseDynamicsJoint[] controlledJoints;
+   private final OneDoFJoint[] controlledOneDoFJoints;
 
    private final SideDependentList<Wrench> handWrenches = new SideDependentList<>();
 
@@ -260,6 +261,7 @@ public class HighLevelHumanoidControllerToolbox
       }
 
       controlledJoints = computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+      controlledOneDoFJoints = ScrewTools.filterJoints(controlledJoints, OneDoFJoint.class);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -668,6 +670,13 @@ public class HighLevelHumanoidControllerToolbox
    public void initialize()
    {
       update();
+
+      // This removes rate objectives from the inverse dynamics QP solver in case an old solution is around from a fall and the
+      // robot is reinitialized.
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footContactStates.get(robotSide).notifyContactStateHasChanged();
+      }
    }
 
    private void readWristSensorData()
@@ -926,6 +935,11 @@ public class HighLevelHumanoidControllerToolbox
    public InverseDynamicsJoint[] getControlledJoints()
    {
       return controlledJoints;
+   }
+
+   public OneDoFJoint[] getControlledOneDoFJoints()
+   {
+      return controlledOneDoFJoints;
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)

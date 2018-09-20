@@ -180,7 +180,7 @@ public class ICPOptimizationControllerTest
       currentICP.set(desiredICP);
       currentICP.add(icpError);
 
-      controller.initializeForTransfer(0.0, RobotSide.LEFT, omega);
+      controller.initializeForTransfer(0.0, RobotSide.LEFT);
       controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentICPVelocity, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
