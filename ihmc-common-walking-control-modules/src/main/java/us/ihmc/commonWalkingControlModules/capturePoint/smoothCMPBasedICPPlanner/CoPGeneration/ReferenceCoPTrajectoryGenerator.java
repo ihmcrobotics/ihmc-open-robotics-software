@@ -57,8 +57,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       POSITION, TIME
    }
 
-   ;
-
    private final String fullPrefix;
    // Standard declarations
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -613,7 +611,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          // Put first CoP at the exitCoP of the swing foot if not starting from rest
          clearHeldPosition();
          isDoneWalking.set(true);
-         initializeFootPolygons(transferToSide.getOppositeSide(), footstepIndex);
+         initializeFootPolygons(transferToSide.getOppositeSide(), footstepIndex, transferringToSameSideAsStartingFrom);
 
          computeCoPPointLocation(tempPointForCoPCalculation, copPointParametersMap.get(exitCoPName), transferToSide.getOppositeSide(), footstepIndex);
          copLocationWaypoint.addAndSetIncludingFrame(exitCoPName, 0.0, tempPointForCoPCalculation);
@@ -713,9 +711,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    /**
     * Assumes foot polygon and double support polygon has been updated
-    *
-    * @param framePointToPack
-    * @param transferToSide
     */
    private void computeMidFeetPointWithChickenSupport(FramePoint3D framePointToPack, FrameConvexPolygon2D supportFootPolygon,
                                                       FrameConvexPolygon2D swingFootPolygon)
@@ -1393,11 +1388,29 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     */
    private void initializeFootPolygons(RobotSide defaultSupportSide, int footstepIndex)
    {
+      initializeFootPolygons(defaultSupportSide, footstepIndex, false);
+   }
+
+   /**
+    * Initialize the swing and support foot polygons based on footstep index
+    */
+   private void initializeFootPolygons(RobotSide defaultSupportSide, int footstepIndex, boolean transferringToSameSideAsStartingFrom)
+   {
+      // in final transfer, or in stand
       if (upcomingFootstepsData.size() == 0)
       {
-         setFootPolygonFromCurrentState(swingFootInitialPolygon, defaultSupportSide.getOppositeSide());
-         swingFootPredictedFinalPolygon.setIncludingFrame(swingFootInitialPolygon);
-         setFootPolygonFromCurrentState(supportFootPolygon, defaultSupportSide);
+         if (transferringToSameSideAsStartingFrom)
+         {
+            setFootPolygonFromCurrentState(swingFootInitialPolygon, defaultSupportSide.getOppositeSide());
+            setFootPolygonFromCurrentState(swingFootPredictedFinalPolygon, defaultSupportSide);
+            setFootPolygonFromCurrentState(supportFootPolygon, defaultSupportSide.getOppositeSide());
+         }
+         else
+         {
+            setFootPolygonFromCurrentState(swingFootInitialPolygon, defaultSupportSide.getOppositeSide());
+            swingFootPredictedFinalPolygon.setIncludingFrame(swingFootInitialPolygon);
+            setFootPolygonFromCurrentState(supportFootPolygon, defaultSupportSide);
+         }
          return;
       }
 
