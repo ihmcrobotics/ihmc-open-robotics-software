@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import controller_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.MessageCollectionNotification;
@@ -42,7 +41,7 @@ public class MessageCollectionMessenger
     */
    public MessageCollectionMessenger()
    {
-      this(new Random(1651).nextLong());
+      this(500); // FIXME: There is a type mismatch between a long in Java and the unsigned long in DDS.
    }
 
    /**

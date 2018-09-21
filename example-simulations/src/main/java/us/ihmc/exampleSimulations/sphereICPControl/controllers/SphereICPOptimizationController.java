@@ -435,7 +435,7 @@ public class SphereICPOptimizationController implements GenericSphereController
          icpPlanner.setTransferToSide(transferToSide);
          icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
 
-         icpOptimizationController.initializeForTransfer(yoTime.getDoubleValue(), transferToSide, omega0.getDoubleValue());
+         icpOptimizationController.initializeForTransfer(yoTime.getDoubleValue(), transferToSide);
 
          updateViz(true);
       }

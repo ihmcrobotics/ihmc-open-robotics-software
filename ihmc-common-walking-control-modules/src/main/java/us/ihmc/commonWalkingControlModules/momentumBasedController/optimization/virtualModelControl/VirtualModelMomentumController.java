@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualEffortCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -102,7 +102,7 @@ public class VirtualModelMomentumController
    }
 
    /**
-    * Adds a {@link JointspaceAccelerationCommand} into a {@link MotionQPInput}.
+    * Adds a {@link JointspaceAccelerationCommand} into a {@link QPInput}.
     *
     * @return true if the command was successfully added.
     */

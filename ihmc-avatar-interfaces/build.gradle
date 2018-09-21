@@ -4,10 +4,12 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.14.0"
+      classpath "us.ihmc:ihmc-build:0.15.1"
+      classpath "us.ihmc:ihmc-ci-plugin:0.18.0"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
+apply plugin: "us.ihmc.ihmc-ci-plugin"
 
 ihmc {
    loadProductProperties("../product.properties")
@@ -64,6 +66,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-mocap", version: "source"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.4"
    compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
    compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning", version: "source"
@@ -71,8 +74,8 @@ mainDependencies {
 }
 
 testDependencies {
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
    compile group: "junit", name: "junit", version: "4.12"
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.20.1"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning-test", version: "source"

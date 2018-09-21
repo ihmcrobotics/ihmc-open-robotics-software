@@ -2,9 +2,10 @@ package us.ihmc.commonWalkingControlModules.inverseKinematics;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -106,7 +107,7 @@ public class InverseKinematicsQPSolver
    private final DenseMatrix64F tempTask_H = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F tempTask_f = new DenseMatrix64F(1, 1);
 
-   public void addMotionInput(MotionQPInput input)
+   public void addMotionInput(QPInput input)
    {
       switch (input.getConstraintType())
       {

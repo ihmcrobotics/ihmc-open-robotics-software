@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -39,7 +41,7 @@ public class PlanarRegionFileTools
    /**
     * Generates a default timestamped name that can be used to generate automated and unique
     * folders.
-    * 
+    *
     * @return a {@code String} of the form: "20171201_163422_PlanarRegion".
     */
    public static String createDefaultTimeStampedFolderName()
@@ -49,7 +51,7 @@ public class PlanarRegionFileTools
 
    /**
     * Generates a {@code String} representing the data & time as of right now, like just right now.
-    * 
+    *
     * @return the data & time as a {@code String}.
     */
    public static String getDate()
@@ -61,7 +63,7 @@ public class PlanarRegionFileTools
    /**
     * Creates a directory with the given path and export into files the data contained in
     * {@code planarRegionData}.
-    * 
+    *
     * @param folderPath the path of the folder that will contain the exported files.
     * @param planarRegionData the planar regions to be exported to files. Not modified.
     * @return whether the exportation succeeded or not.
@@ -99,7 +101,7 @@ public class PlanarRegionFileTools
    /**
     * Load from the given data folder planar region data that has been previously exported via
     * {@link #exportPlanarRegionData(Path, PlanarRegionsList)}.
-    * 
+    *
     * @param dataFolder the data folder containing the files with the planar region data.
     * @return the planar regions if succeeded, {@code null} otherwise.
     */
@@ -122,7 +124,34 @@ public class PlanarRegionFileTools
    /**
     * Load from the given data folder planar region data that has been previously exported via
     * {@link #exportPlanarRegionData(Path, PlanarRegionsList)}.
-    * 
+    *
+    * @param clazz the class which has the resource folder.
+    * @param dataFolder the name of data folder containing the files with the planar region data.
+    * @return the planar regions if succeeded, {@code null} otherwise.
+    */
+   public static PlanarRegionsList importPlanarRegionData(Class<?> clazz, String dataFolder)
+   {
+      try
+      {
+         PlanarRegionsList loadedRegions = importPlanarRegionDataInternalForTests(filename -> {
+            InputStream inputStream = clazz.getResourceAsStream(dataFolder + "/" + filename);
+            return new BufferedReader(new InputStreamReader(inputStream));
+         });
+         if (loadedRegions == null)
+            PrintTools.error(PlanarRegionFileTools.class, "Could not load the file: " + dataFolder);
+         return loadedRegions;
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return null;
+      }
+   }
+
+   /**
+    * Load from the given data folder planar region data that has been previously exported via
+    * {@link #exportPlanarRegionData(Path, PlanarRegionsList)}.
+    *
     * @param dataFolder the data folder containing the files with the planar region data.
     * @return the planar regions if succeeded, {@code null} otherwise.
     */
@@ -164,8 +193,11 @@ public class PlanarRegionFileTools
             break;
 
          File regionFile = fileCreator.createFile(fileName);
-         PlanarRegion loadedRegion = loadPlanarRegionVertices(regionFile, concaveHullSize.intValue(), convexPolygonsSize.toArray(),
+         FileReader regionFileReader = new FileReader(regionFile);
+         BufferedReader regionBufferedReader = new BufferedReader(regionFileReader);
+         PlanarRegion loadedRegion = loadPlanarRegionVertices(regionBufferedReader, concaveHullSize.intValue(), convexPolygonsSize.toArray(),
                                                               regionId.intValue(), origin, normal);
+         regionBufferedReader.close();
 
          if (loadedRegion != null)
          {
@@ -186,6 +218,50 @@ public class PlanarRegionFileTools
    private interface FileCreator
    {
       File createFile(String filename);
+   }
+
+   private static PlanarRegionsList importPlanarRegionDataInternalForTests(ReaderCreator readerCreator) throws IOException
+   {
+      BufferedReader headerFile = readerCreator.createReader("header.txt");
+      List<PlanarRegion> planarRegions = new ArrayList<>();
+
+      while (true)
+      {
+         Point3D origin = new Point3D();
+         Vector3D normal = new Vector3D();
+         MutableInt regionId = new MutableInt();
+         MutableInt concaveHullSize = new MutableInt();
+         TIntArrayList convexPolygonsSize = new TIntArrayList();
+
+         String fileName = readHeaderLine(headerFile, origin, normal, regionId, concaveHullSize, convexPolygonsSize);
+
+         if (fileName == null)
+            break;
+
+         BufferedReader regionFile = readerCreator.createReader(fileName);
+         PlanarRegion loadedRegion = loadPlanarRegionVertices(regionFile, concaveHullSize.intValue(), convexPolygonsSize.toArray(),
+                                                              regionId.intValue(), origin, normal);
+         regionFile.close();
+
+         if (loadedRegion != null)
+         {
+            planarRegions.add(loadedRegion);
+         }
+         else
+         {
+            headerFile.close();
+            return null;
+         }
+      }
+
+      headerFile.close();
+
+      return new PlanarRegionsList(planarRegions);
+   }
+
+   private interface ReaderCreator
+   {
+      BufferedReader createReader(String filename);
    }
 
    private static String readHeaderLine(BufferedReader bufferedReader, Point3D originToPack, Vector3D normalToPack, MutableInt regionIdToPack,
@@ -297,14 +373,11 @@ public class PlanarRegionFileTools
       fileWriter.close();
    }
 
-   private static PlanarRegion loadPlanarRegionVertices(File regionFile, int concaveHullSize, int[] convexPolygonsSize, int regionId, Point3D origin,
+   private static PlanarRegion loadPlanarRegionVertices(BufferedReader regionFile, int concaveHullSize, int[] convexPolygonsSize, int regionId, Point3D origin,
                                                         Vector3D normal)
    {
       try
       {
-         FileReader fileReader = new FileReader(regionFile);
-         BufferedReader bufferedReader = new BufferedReader(fileReader);
-
          String line = "";
          String cvsSplitBy = ",";
 
@@ -313,15 +386,13 @@ public class PlanarRegionFileTools
 
          List<Point2D> loadedPoints = new ArrayList<>();
 
-         while ((line = bufferedReader.readLine()) != null)
+         while ((line = regionFile.readLine()) != null)
          {
             String[] coordsAsString = line.split(cvsSplitBy);
             float x = Float.parseFloat(coordsAsString[0]);
             float y = Float.parseFloat(coordsAsString[1]);
             loadedPoints.add(new Point2D(x, y));
          }
-
-         bufferedReader.close();
 
          Point2D[] concaveHullVertices = new Point2D[concaveHullSize];
 
