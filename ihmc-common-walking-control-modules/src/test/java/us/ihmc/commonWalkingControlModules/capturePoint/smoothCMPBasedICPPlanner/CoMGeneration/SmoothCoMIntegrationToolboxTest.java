@@ -261,8 +261,9 @@ public class SmoothCoMIntegrationToolboxTest
          EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrentByHand, comVelocityDesiredCurrentDynamicsByHand, EPSILON);
       }
    }
-   
-   @Test
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testPower() throws Exception
    {
       Random random = new Random(34549037);
