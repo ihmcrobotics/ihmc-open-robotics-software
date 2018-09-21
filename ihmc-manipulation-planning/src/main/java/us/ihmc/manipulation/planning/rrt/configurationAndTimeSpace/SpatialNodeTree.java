@@ -1,7 +1,9 @@
-package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
+package us.ihmc.manipulation.planning.rrt.configurationAndTimeSpace;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import us.ihmc.manipulation.planning.exploringSpatial.SpatialNode;
 
 public class SpatialNodeTree
 {

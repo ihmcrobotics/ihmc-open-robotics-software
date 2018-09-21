@@ -1,7 +1,7 @@
-package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
+package us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule;
 
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
+import us.ihmc.manipulation.planning.rrt.configurationAndTimeSpace.CTTaskNode;
+import us.ihmc.manipulation.planning.rrt.configurationAndTimeSpace.CTTaskNodeTree;
 
 public class WholeBodyTrajectoryToolboxDataHandler
 {
