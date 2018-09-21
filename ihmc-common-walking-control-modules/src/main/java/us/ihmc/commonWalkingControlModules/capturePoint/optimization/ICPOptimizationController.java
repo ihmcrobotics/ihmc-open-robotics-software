@@ -128,7 +128,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final BooleanProvider limitReachabilityFromAdjustment;
 
    private final BooleanProvider useICPControlPolygons;
-   private final boolean hasICPControlPoygons;
+   private final boolean hasICPControlPolygons;
 
    private final ICPControlGainsReadOnly feedbackGains;
 
@@ -137,12 +137,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoInteger hasNotConvergedCounts = new YoInteger(yoNamePrefix + "HasNotConvergedCounts", registry);
 
    private final YoDouble footstepMultiplier = new YoDouble(yoNamePrefix + "TotalFootstepMultiplier", registry);
+   private final YoDouble recursionTime = new YoDouble(yoNamePrefix + "RecursionTime", registry);
    private final YoDouble recursionMultiplier = new YoDouble(yoNamePrefix + "RecursionMultiplier", registry);
-   private final YoDouble phaseInMultiplier = new YoDouble(yoNamePrefix + "PhaseInMultiplier", registry);
 
-   private final DoubleProvider phaseInFraction;
-   private final DoubleProvider phaseInScalar;
-
+   private final DoubleProvider minimumFootstepMultiplier;
+   private final DoubleProvider maximumTimeFromTransfer;
 
    private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
@@ -219,7 +218,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          this.icpControlPlane = icpControlPolygons.getIcpControlPlane();
       else
          this.icpControlPlane = null;
-      hasICPControlPoygons = this.icpControlPlane != null;
+      hasICPControlPolygons = this.icpControlPlane != null;
 
       dynamicsObjectiveDoubleSupportWeightModifier = new DoubleParameter(yoNamePrefix + "DynamicsObjectiveDoubleSupportWeightModifier", registry,
                                                                          icpOptimizationParameters.getDynamicsObjectiveDoubleSupportWeightModifier());
@@ -287,11 +286,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       isICPStuck = new GlitchFilteredYoBoolean(yoNamePrefix + "IsICPStuck", registry, (int) (0.03 / controlDT));
 
       minimumTimeRemaining = new DoubleParameter(yoNamePrefix + "MinimumTimeRemaining", registry, icpOptimizationParameters.getMinimumTimeRemaining());
-
-
-      phaseInFraction = new DoubleParameter(yoNamePrefix + "PhaseInFraction", registry, icpOptimizationParameters.getStepAdjustmentPhaseInFraction());
-      phaseInScalar = new DoubleParameter(yoNamePrefix + "PhaseInScalar", registry, icpOptimizationParameters.getPhaseInScalar());
-
+      minimumFootstepMultiplier = new DoubleParameter(yoNamePrefix + "MinimumFootstepMultiplier", registry,
+                                                      icpOptimizationParameters.getMinimumFootstepMultiplier());
+      maximumTimeFromTransfer = new DoubleParameter(yoNamePrefix + "MaximumTimeFromTransfer", registry,
+                                                    icpOptimizationParameters.maximumTimeFromTransferInFootstepMultiplier());
 
       int totalVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
@@ -309,7 +307,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       solutionHandler = new ICPOptimizationSolutionHandler(icpControlPlane, icpOptimizationParameters, useICPControlPolygons, DEBUG, yoNamePrefix, registry);
 
-      copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons, useICPControlPolygons, hasICPControlPoygons,
+      copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons, useICPControlPolygons, hasICPControlPolygons,
                                                                      registry);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons,
                                                                                        walkingControllerParameters.getSteppingParameters(), yoNamePrefix,
@@ -533,7 +531,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       {
          upcomingFootsteps.get(0).getPosition(tempPoint3d);
 
-         if (useICPControlPolygons.getValue() && hasICPControlPoygons)
+         if (useICPControlPolygons.getValue() && hasICPControlPolygons)
             icpControlPlane.projectPointOntoControlPlane(worldFrame, tempPoint3d, projectedTempPoint3d);
          else
             projectedTempPoint3d.set(tempPoint3d);
@@ -786,14 +784,14 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          predictedEndOfStateICP.sub(desiredICP, yoPerfectCMP);
          predictedEndOfStateICP.scaleAdd(Math.exp(omega0 * timeRemainingInState.getDoubleValue()), yoPerfectCMP);
 
-         if (useICPControlPolygons.getValue() && hasICPControlPoygons)
+         if (useICPControlPolygons.getValue() && hasICPControlPolygons)
             icpControlPlane.projectPointOntoControlPlane(worldFrame, upcomingFootstepLocation.getPosition(), projectedTempPoint3d);
          else
             projectedTempPoint3d.set(upcomingFootstepLocation.getPosition());
 
          footstepLocationSubmitted.set(projectedTempPoint3d);
-         solver.setFootstepAdjustmentConditions(footstepMultiplier.getDoubleValue(), footstepWeights.getX(), footstepWeights.getY(), footstepAdjustmentSafetyFactor.getValue(),
-                                                projectedTempPoint3d);
+         solver.setFootstepAdjustmentConditions(footstepMultiplier.getDoubleValue(), footstepWeights.getX(), footstepWeights.getY(),
+                                                footstepAdjustmentSafetyFactor.getValue(), projectedTempPoint3d);
       }
 
       if (useFootstepRate.getValue())
@@ -802,23 +800,15 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private double computeFootstepAdjustmentMultiplier(double omega0)
    {
-      double recursionTime =
-            Math.max(timeRemainingInState.getDoubleValue(), 0.0) + transferDurationSplitFraction.getValue() * nextTransferDuration.getDoubleValue();
-      recursionMultiplier.set(Math.exp(-omega0 * recursionTime));
+      double timeInTransferForShifting = Math
+            .min(maximumTimeFromTransfer.getValue(), transferDurationSplitFraction.getValue() * nextTransferDuration.getDoubleValue());
+      recursionTime.set(Math.max(timeRemainingInState.getDoubleValue(), 0.0) + timeInTransferForShifting);
+      recursionMultiplier.set(Math.exp(-omega0 * recursionTime.getDoubleValue()));
 
-      double phaseThroughState = timeInCurrentState.getDoubleValue() / swingDuration.getDoubleValue();
-      double phaseForIdentity = Math.min(phaseInFraction.getValue(), 1.0);
-      if (phaseForIdentity > 0.0)
-      {
-         double fractionThroughPhaseIn = Math.min(phaseThroughState / phaseForIdentity, 1.0);
-         phaseInMultiplier.set(Math.max(phaseInScalar.getValue() * (1.0 - fractionThroughPhaseIn) + fractionThroughPhaseIn, 1.0));
-      }
-      else
-      {
-         phaseInMultiplier.set(1.0);
-      }
+      double finalRecursionMultiplier = Math.exp(-omega0 * timeInTransferForShifting);
 
-      return phaseInMultiplier.getDoubleValue() * recursionMultiplier.getDoubleValue();
+      double minimumFootstepMultiplier = Math.min(this.minimumFootstepMultiplier.getValue(), finalRecursionMultiplier);
+      return minimumFootstepMultiplier + (1 - minimumFootstepMultiplier / finalRecursionMultiplier) * recursionMultiplier.getDoubleValue();
    }
 
    private boolean solveQP()
