@@ -34,7 +34,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
 {
    private final CombinedTerrainObject3D combinedTerrainObject3D;
 
-   private static final CourseType type = CourseType.C;
+   private static final CourseType type = CourseType.B;
 
    enum CourseType
    {
