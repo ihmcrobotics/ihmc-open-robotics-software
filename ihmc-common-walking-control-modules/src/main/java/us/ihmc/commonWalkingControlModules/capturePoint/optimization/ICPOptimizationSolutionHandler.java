@@ -37,6 +37,7 @@ public class ICPOptimizationSolutionHandler
    private final YoBoolean footstepWasAdjusted;
    private final YoFrameVector2D footstepAdjustment;
    private final YoFrameVector2D clippedFootstepAdjustment;
+   private final YoFrameVector2D totalFootstepAdjustment;
 
    private final YoDouble residualCostToGo;
    private final YoDouble costToGo;
@@ -103,6 +104,7 @@ public class ICPOptimizationSolutionHandler
       footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
       footstepAdjustment = new YoFrameVector2D(yoNamePrefix + "FootstepAdjustment", worldFrame, registry);
       clippedFootstepAdjustment = new YoFrameVector2D(yoNamePrefix + "ClippedFootstepAdjustment", worldFrame, registry);
+      totalFootstepAdjustment = new YoFrameVector2D(yoNamePrefix + "TotalFootstepAdjustment", worldFrame, registry);
 
 
       adjustedICPReferenceLocation = new YoFramePoint2D(yoNamePrefix + "AdjustedICPReferenceLocation", worldFrame, registry);
@@ -159,6 +161,7 @@ public class ICPOptimizationSolutionHandler
       footstepAdjustment.set(locationSolution);
       footstepAdjustment.sub(referenceFootstepLocation2D);
       clippedFootstepAdjustment.sub(clippedLocationSolution, referenceFootstepLocation2D);
+      totalFootstepAdjustment.add(clippedFootstepAdjustment);
 
       footstepSolutionToPack.setPosition(clippedLocationSolution);
       unclippedFootstepSolutionToPack.set(locationSolution);
@@ -166,7 +169,6 @@ public class ICPOptimizationSolutionHandler
       this.footstepWasAdjusted.set(footstepWasAdjusted);
    }
 
-   // fixme this is wrong
    public void extractFootstepSolution(FixedFramePose3DBasics footstepSolutionToPack, FixedFrameTuple2DBasics unclippedFootstepSolutionToPack, Footstep upcomingFootstep,
                                        PlanarRegion activePlanarRegion, ICPOptimizationQPSolver solver)
    {
@@ -197,6 +199,7 @@ public class ICPOptimizationSolutionHandler
       footstepAdjustment.set(locationSolution);
       footstepAdjustment.sub(referenceFootstepLocation2D);
       clippedFootstepAdjustment.sub(clippedLocationSolution, referenceFootstepLocation2D);
+      totalFootstepAdjustment.add(clippedFootstepAdjustment);
 
       footstepSolutionToPack.setPosition(clippedLocationSolution);
       unclippedFootstepSolutionToPack.set(locationSolution);
@@ -209,6 +212,12 @@ public class ICPOptimizationSolutionHandler
       footstepAdjustment.setToZero();
       clippedFootstepAdjustment.setToZero();
       footstepWasAdjusted.set(false);
+   }
+
+   public void resetAdjustment()
+   {
+      zeroAdjustment();
+      totalFootstepAdjustment.setToZero();
    }
 
    public void updateVisualizers(FramePoint2DReadOnly desiredICP, double footstepMultiplier)
@@ -285,6 +294,11 @@ public class ICPOptimizationSolutionHandler
    public FrameVector2DReadOnly getClippedFootstepAdjustment()
    {
       return clippedFootstepAdjustment;
+   }
+
+   public FrameVector2DReadOnly getTotalFootstepAdjustment()
+   {
+      return totalFootstepAdjustment;
    }
 }
 

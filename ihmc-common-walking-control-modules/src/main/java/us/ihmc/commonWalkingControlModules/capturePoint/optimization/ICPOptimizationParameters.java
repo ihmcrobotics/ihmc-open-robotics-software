@@ -26,6 +26,15 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
+    * Specifies how long the controller must have been in the swing date (as a function of the swing duration) before it will allow step adjustment.
+    * By default, this is set to 0.0, meaning the controller can immediately adjust the desired step at the start of swing.
+    */
+   public double getFractionThroughSwingForAdjustment()
+   {
+      return 0.0;
+   }
+
+   /**
     * The weight for tracking the desired footsteps.
     * Setting this weight fairly high ensures that the footsteps will only be adjusted when the CoP control authority has been saturated.
     */
@@ -246,11 +255,21 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
-    * Specifies the transfer split fraction to use for the ICP value recursion multiplier.
+    * Specifies the transfer split fraction to use for the ICP value recursion multiplier. This value is added to the time remaining
+    * to compute the recursion multiplier. Increasing this value effectively causes more step adjustment to occur.
     */
    public double getTransferSplitFraction()
    {
-      return 0.3;
+      return 0.1;
+   }
+
+   /**
+    * Specifies the maximum duration that can be included in the footstep multiplier by the {@link #getTransferSplitFraction()}.
+    * This is useful when the robot by default has long split fractions.
+    */
+   public double maximumTimeFromTransferInFootstepMultiplier()
+   {
+      return 0.1;
    }
 
    /**
@@ -258,7 +277,7 @@ public abstract class ICPOptimizationParameters
     */
    public boolean considerAngularMomentumInAdjustment()
    {
-      return false;
+      return true;
    }
 
    /**
@@ -284,4 +303,16 @@ public abstract class ICPOptimizationParameters
    {
       return true;
    }
+   
+   /**
+    * Specifies the minimum footstep multiplier that the robot will use to compute the desired step adjustment. This is
+    * particularly useful when walking slowly or when recovering early in the, to avoid extremely large
+    * footstep adjustment magnitudes.
+    */
+   public double getMinimumFootstepMultiplier()
+   {
+      return 0.33;
+   }
+
+
 }

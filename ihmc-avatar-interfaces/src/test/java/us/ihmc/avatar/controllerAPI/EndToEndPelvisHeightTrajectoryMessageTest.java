@@ -8,19 +8,22 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
-import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -29,7 +32,9 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -82,7 +87,8 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
          System.out.println(desiredPosition);
       }
 
-      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime, desiredPosition.getZ());
+      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime,
+                                                                                                                             desiredPosition.getZ());
 
       drcSimulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
 
@@ -92,13 +98,47 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
       // Hard to figure out how to verify the desired there
-//      trajOutput = scs.getVariable("pelvisHeightOffsetSubTrajectoryCubicPolynomialTrajectoryGenerator", "pelvisHeightOffsetSubTrajectoryCurrentValue").getValueAsDouble();
-//      assertEquals(desiredPosition.getZ(), trajOutput, epsilon);
+      //      trajOutput = scs.getVariable("pelvisHeightOffsetSubTrajectoryCubicPolynomialTrajectoryGenerator", "pelvisHeightOffsetSubTrajectoryCurrentValue").getValueAsDouble();
+      //      assertEquals(desiredPosition.getZ(), trajOutput, epsilon);
       // Ending up doing a rough check on the actual height
       double pelvisHeight = scs.getVariable("PelvisLinearStateUpdater", "estimatedRootJointPositionZ").getValueAsDouble();
       assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
+   }
+
+   public void testSingleWaypointWithControlFrame() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      assertTrue(success);
+
+      RigidBody pelvis = drcSimulationTestHelper.getControllerFullRobotModel().getPelvis();
+      MovingReferenceFrame pelvisBodyFrame = pelvis.getBodyFixedFrame();
+      FramePoint3D expectedPosition = new FramePoint3D(pelvisBodyFrame);
+      expectedPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
+      double trajectoryTime = 0.1;
+      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime,
+                                                                                                                             expectedPosition.getZ());
+
+      pelvisHeightTrajectoryMessage.getEuclideanTrajectory().setUseCustomControlFrame(true);
+
+      drcSimulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
+      assertTrue(success);
+
+      FramePoint3D actualPosition = new FramePoint3D(pelvisBodyFrame);
+      actualPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
+      EuclidCoreTestTools.assertTuple3DEquals(expectedPosition, actualPosition, 2.0e-3);
    }
 
    protected FramePoint3D getRandomPelvisPosition(Random random, RigidBody pelvis)
@@ -140,7 +180,8 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       desiredPosition.set(desiredRandomPelvisPosition);
       System.out.println(desiredPosition);
 
-      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime, desiredPosition.getZ());
+      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime,
+                                                                                                                             desiredPosition.getZ());
 
       pelvisHeightTrajectoryMessage.setEnableUserPelvisControl(true);
       drcSimulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
@@ -210,24 +251,35 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
-
+      drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.4, 0.0, 1.2), new Point3D(0.4, 12.0, 1.2));
       ThreadTools.sleep(1000);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
-      CommonHumanoidReferenceFrames referenceFrames = drcSimulationTestHelper.getReferenceFrames();
 
+      // Apply a push to the robot so we get some tracking error going
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      double forceMagnitude = fullRobotModel.getTotalMass() * 2.0;
+      String pushJointName = fullRobotModel.getPelvis().getParentJoint().getName();
+      PushRobotController pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), pushJointName, new Vector3D(),
+                                                                   1.0 / forceMagnitude);
+      drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphic(pushController.getForceVisualizer());
+      pushController.applyForce(new Vector3D(0.0, 0.0, 1.0), forceMagnitude, Double.POSITIVE_INFINITY);
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(RigidBodyControlManager.INITIAL_GO_HOME_TIME + 1.0));
+      CommonHumanoidReferenceFrames referenceFrames = drcSimulationTestHelper.getReferenceFrames();
       referenceFrames.updateFrames();
       double initialPelvisHeight = referenceFrames.getPelvisFrame().getTransformToWorldFrame().getTranslationZ();
 
+      // Step the trajectory repeatedly
       StopAllTrajectoryMessage stopMessage = new StopAllTrajectoryMessage();
-      for (int i = 0; i < 10; i++)
+      for (int i = 0; i < 50; i++)
       {
          drcSimulationTestHelper.publishToController(stopMessage);
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
       }
 
+      // Would be nicer to check desired values but we currently have so many difference height control schemes that that would not be easy.
       referenceFrames.updateFrames();
       double finalPelvisHeight = referenceFrames.getPelvisFrame().getTransformToWorldFrame().getTranslationZ();
-      Assert.assertEquals(initialPelvisHeight, finalPelvisHeight, 1.0e-3);
+      Assert.assertEquals(initialPelvisHeight, finalPelvisHeight, 1.0e-5);
    }
 
    @Before

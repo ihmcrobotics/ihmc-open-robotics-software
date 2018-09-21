@@ -30,7 +30,14 @@ public class HumanoidControllerWarumupTools
    {
       PrintTools.info("Starting to warm up...");
       long startTime = System.currentTimeMillis();
-      controllerWarmup.runWarmup();
+      try
+      {
+         controllerWarmup.runWarmup();
+      }
+      catch (Exception e)
+      {
+         PrintTools.info("Warmup failed with an exception.");
+      }
       double duration = 0.001 * (System.currentTimeMillis() - startTime);
       PrintTools.info("Warmup took " + duration + "s.");
    }

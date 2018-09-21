@@ -77,6 +77,14 @@ public class WholeBodyTrajectoryToolboxMessageTools
       return HumanoidMessageTools.createWaypointBasedTrajectoryMessage(endEffector, waypointTimes, waypoints, selectionMatrix);
    }
 
+   public static double[] createDefaultExplorationAmplitudeArray(ConfigurationSpaceName... configurationSpaceNames)
+   {
+      double[] lowerLimit = new double[configurationSpaceNames.length];
+      for (int i = 0; i < configurationSpaceNames.length; i++)
+         lowerLimit[i] = configurationSpaceNames[i].getDefaultExplorationAmplitude();
+      return lowerLimit;
+   }
+
    public static double[] createDefaultExplorationUpperLimitArray(ConfigurationSpaceName... configurationSpaceNames)
    {
       double[] upperLimit = new double[configurationSpaceNames.length];

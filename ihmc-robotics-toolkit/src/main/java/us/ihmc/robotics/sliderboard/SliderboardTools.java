@@ -34,9 +34,19 @@ public class SliderboardTools
       return MathTools.clamp(((double) dataByte) / MAX_VALUE, 0.0, 1.0);
    }
 
+   public static boolean toButtonStatus(int dataByte)
+   {
+      return dataByte == MAX_VALUE;
+   }
+
    public static int toDataByte(double sliderPercent)
    {
       return (int) (MAX_VALUE * MathTools.clamp(sliderPercent, 0.0, 1.0));
+   }
+
+   public static int toDataByte(boolean status)
+   {
+      return status ? MAX_VALUE : 0;
    }
 
    public static boolean infoMatchesSliderboard(MidiDevice.Info info, String sliderBoardName)
