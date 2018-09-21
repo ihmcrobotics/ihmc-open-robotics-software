@@ -149,6 +149,11 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
       }
    }
 
+   public double getInitialTime()
+   {
+      return segments.getFirst().getInitialTime();
+   }
+
    public double getFinalTime()
    {
       return segments.getLast().getFinalTime();
