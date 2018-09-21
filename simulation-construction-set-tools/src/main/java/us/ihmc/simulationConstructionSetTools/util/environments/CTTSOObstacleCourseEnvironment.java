@@ -30,6 +30,13 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableRampTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.SimpleTableTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
+/**
+ * Each course types are suggested by NASA JSC.
+ * Download and see this file.
+ * <p>
+ * {@link https://confluence.ihmc.us/display/VAL/Valkyrie+CTTSO+obstacle+course+environment+layouts}
+ * <p>
+ */
 public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject3D;
