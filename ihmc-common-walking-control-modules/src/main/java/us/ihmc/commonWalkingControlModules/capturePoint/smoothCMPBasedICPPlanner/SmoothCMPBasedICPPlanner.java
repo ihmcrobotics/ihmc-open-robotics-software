@@ -438,6 +438,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       clearPlanWithoutClearingPlannedFootsteps();
       RobotSide supportSide = this.supportSide.getEnumValue();
 
+      boolean goingToPerformSmoothingAdjustment = maintainContinuity && adjustICPForSingleSupport;
+      referenceCoPGenerator.setGoingToPerformSmoothingAdjustment(goingToPerformSmoothingAdjustment);
+
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs
       referenceCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(supportSide);
       referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
@@ -445,7 +448,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       referenceCoPGenerator.initializeForSwing(ZERO_TIME);
       referenceICPGenerator.initializeForSwingFromCoPs(referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories());
-      if (maintainContinuity && adjustICPForSingleSupport)
+      if (goingToPerformSmoothingAdjustment)
          referenceICPGenerator.adjustDesiredTrajectoriesForInitialSmoothing();
 
       referenceCoMGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
