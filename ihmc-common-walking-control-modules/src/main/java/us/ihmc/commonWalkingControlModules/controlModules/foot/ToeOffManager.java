@@ -67,6 +67,8 @@ public class ToeOffManager
    private final BooleanProvider checkECMPForToeOff;
    private final BooleanProvider checkCoPForToeOff;
 
+   private final BooleanProvider lookAtTwoStepCapturabilityForToeOff;
+
    private final DoubleProvider ankleLowerLimitToTriggerToeOff;
    private final DoubleProvider kneeUpperLimitToTriggerToeOff;
    private final DoubleProvider kneeLowerLimitToTriggerToeOff;
@@ -175,6 +177,8 @@ public class ToeOffManager
 
       checkECMPForToeOff = new BooleanParameter("checkECMPForToeOff", registry, toeOffParameters.checkECMPLocationToTriggerToeOff());
       checkCoPForToeOff = new BooleanParameter("checkCoPForToeOff", registry, toeOffParameters.checkCoPLocationToTriggerToeOff());
+
+      lookAtTwoStepCapturabilityForToeOff = new BooleanParameter("lookAtTwoStepCapturabilityForToeOff", registry, toeOffParameters.lookAtTwoStepCapturabilityForToeOff());
 
       this.toeOffCalculator = toeOffCalculator;
 
@@ -389,7 +393,7 @@ public class ToeOffManager
       }
 
       setPolygonFromSupportFoot(trailingLeg, leadingFootSupportPolygon);
-      if (setPolygonFromNextFootstep(nextFootSupportPolygon))
+      if (lookAtTwoStepCapturabilityForToeOff.getValue() && setPolygonFromNextFootstep(nextFootSupportPolygon))
       {
          leadingFootSupportPolygon.addVertices(nextFootSupportPolygon);
          leadingFootSupportPolygon.update();
