@@ -134,7 +134,6 @@ public class ReferenceCMPTrajectoryGeneratorTest
       cmpTrajectoryGenerator.initializeForTransfer(0.0, transferCoPTrajectories, swingCoPTrajectories, null, null);
       checkTransferTrajectoriesForCopy();
       checkSwingTrajectoriesForCopy();
-
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -190,9 +189,9 @@ public class ReferenceCMPTrajectoryGeneratorTest
          assertTrue("Number of segments mismatch for segment " + i + " got: " + swingCMPTrajectory.getNumberOfSegments() + " should have been: "
                + swingCoPTrajectories.get(i).getNumberOfSegments(),
                     swingCMPTrajectory.getNumberOfSegments() == swingCoPTrajectories.get(i).getNumberOfSegments());
+
          for (int j = 0; j < swingCMPTrajectory.getNumberOfSegments(); j++)
          {
-            TrajectoryMathTools.add(cmpSegmentTrajectory, swingCoPTrajectories.get(i).getSegment(j), torqueTrajectory.getSegment(j));
             assertTrue("Got: \n" + swingCMPTrajectories.get(i).getSegment(j).toString() + " should have been: \n"
                   + swingCoPTrajectories.get(i).getSegment(j).toString(),
                        TrajectoryMathTools.epsilonEquals(swingCoPTrajectories.get(i).getSegment(j), swingCMPTrajectories.get(i).getSegment(j),
