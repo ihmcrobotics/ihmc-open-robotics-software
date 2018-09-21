@@ -66,7 +66,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @Override
    public double getFinalTransferDuration()
    {
-      return getTransferTime();
+      return 1.5;
    }
 
    @Override
