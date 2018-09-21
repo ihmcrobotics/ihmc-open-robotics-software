@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 
 public enum ConfigurationSpaceName
 {
-   X, Y, Z, ROLL, PITCH, YAW, SE3;
+   X, Y, Z, ROLL, PITCH, YAW, SO3;
 
    private static final boolean generateSE3ByQuaternion = true;
 
@@ -25,7 +25,7 @@ public enum ConfigurationSpaceName
       case PITCH:
       case YAW:
          return 0.3 * Math.PI;
-      case SE3:
+      case SO3:
          return 1.0;
       default:
          throw new RuntimeException("Unexpected value: " + this);
@@ -44,7 +44,7 @@ public enum ConfigurationSpaceName
       case PITCH:
       case YAW:
          return -0.3 * Math.PI;
-      case SE3:
+      case SO3:
          return 0.0;
       default:
          throw new RuntimeException("Unexpected value: " + this);
@@ -63,16 +63,13 @@ public enum ConfigurationSpaceName
       case PITCH:
       case YAW:
          return 0.3 * Math.PI;
-      case SE3:
+      case SO3:
          return 1.0;
       default:
          throw new RuntimeException("Unexpected value: " + this);
       }
    }
 
-   /**
-    * All configuration value for SE3 should be 0~1.
-    */
    public RigidBodyTransform getLocalRigidBodyTransform(double... configuration)
    {
       RigidBodyTransform ret = new RigidBodyTransform();
@@ -97,7 +94,7 @@ public enum ConfigurationSpaceName
       case YAW:
          ret.appendYawRotation(configuration[0]);
          break;
-      case SE3:
+      case SO3:
          // uniform quat         
          if (generateSE3ByQuaternion)
          {
