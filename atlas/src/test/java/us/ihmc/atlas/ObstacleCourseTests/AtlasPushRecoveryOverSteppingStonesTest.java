@@ -8,6 +8,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarPushRecoveryOverSteppingStonesTest;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
@@ -57,6 +58,19 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
                      public boolean usePlanarRegionConstraints()
                      {
                         return true;
+                     }
+                  };
+               }
+
+               @Override
+               public SteppingParameters getSteppingParameters()
+               {
+                  return new AtlasSteppingParameters(getJointMap())
+                  {
+                     @Override
+                     public double getMaxStepLength()
+                     {
+                        return 1.0;
                      }
                   };
                }
