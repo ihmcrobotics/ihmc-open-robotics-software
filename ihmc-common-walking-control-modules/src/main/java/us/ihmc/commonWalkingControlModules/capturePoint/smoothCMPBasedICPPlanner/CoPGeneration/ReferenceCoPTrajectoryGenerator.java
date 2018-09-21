@@ -1083,10 +1083,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             double initialSegmentDurationMoved = Math.max(initialSegmentDuration - maxContinuityAdjustmentSegmentDurationSS.getDoubleValue(), 0.0);
             segmentDuration += initialSegmentDurationMoved;
          }
-         else
-         {
-            throw new RuntimeException("Shouldn't be here....");
-         }
       }
 
       return segmentDuration;
