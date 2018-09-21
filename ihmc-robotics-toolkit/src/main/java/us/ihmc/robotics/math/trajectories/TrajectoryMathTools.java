@@ -5,12 +5,11 @@ import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.math.FastFourierTransform;
 
@@ -203,6 +202,44 @@ public class TrajectoryMathTools
       for (int i = 0; i < numberOfCoeffsToSet; i++)
          trajectoryToPack.setDirectlyFast(i, tempComplexReference[i].real());
       trajectoryToPack.reshape(numberOfCoeffsToSet);
+   }
+
+   public static void multiplyNaive(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   {
+      validatePackingTrajectoryForMultiplication(trajToPack, traj1, traj2);
+      validateTrajectoryTimes(traj1, traj2);
+      trajToPack.setTime(traj1.getInitialTime(), traj2.getFinalTime());
+      setCoefficientsByNaiveMultiplication(trajToPack, traj1, traj2);
+   }
+
+   /*
+    * TODO The FFT algorithm is supposed to be faster than simple brute-force multiplication, but it
+    * appears to be even slower. It is possible that either the FFT implementation is slow or that
+    * the fact that it requires the use of temporary variables prevents a good usage of the memory.
+    * I think we could implement a divide-and-conquer alogrithm that could still be static and thus
+    * definitely faster than the FFT based or naive approach. (Sylvain)
+    */
+   private static void setCoefficientsByNaiveMultiplication(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   {
+      int aLength = traj1.getNumberOfCoefficients();
+      int bLength = traj2.getNumberOfCoefficients();
+      int n = aLength + bLength;
+      trajToPack.reshape(n - 1);
+
+      double[] a = traj1.getCoefficients();
+      double[] b = traj2.getCoefficients();
+
+      for (int k = 0; k < n; k++)
+      {
+         double ck = 0.0;
+
+         for (int i = Math.max(k - bLength + 1, 0); i <= Math.min(aLength - 1, k); i++)
+         {
+            ck += a[i] * b[k - i];
+         }
+
+         trajToPack.setDirectly(k, ck);
+      }
    }
 
    private void addCoefficientsByMultiplication(Trajectory trajectoryToPack, Trajectory trajectory1, Trajectory trajectory2)

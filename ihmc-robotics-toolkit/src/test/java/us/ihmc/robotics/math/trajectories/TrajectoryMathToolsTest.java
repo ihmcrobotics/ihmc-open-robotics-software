@@ -1,8 +1,15 @@
 package us.ihmc.robotics.math.trajectories;
 
-import gnu.trove.list.array.TDoubleArrayList;
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -15,12 +22,6 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class TrajectoryMathToolsTest
@@ -574,6 +575,27 @@ public class TrajectoryMathToolsTest
             }
 
             Assert.assertEquals(trajectory1.getCoefficient(j), expectedCoefficient, epsilon);
+         }
+      }
+
+      for (int i = 0; i < iters; i++)
+      {
+         Trajectory traj1 = new Trajectory(4);
+         Trajectory traj2 = new Trajectory(4);
+
+         double t0 = random.nextDouble();
+         double tf = t0 + RandomNumbers.nextDouble(random, 0.25, 1.0);
+         traj1.setCubic(t0, tf, random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
+         traj2.setCubic(t0, tf, random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
+
+         Trajectory expected = new Trajectory(10);
+         trajectoryMathTools.multiply(expected, traj1, traj2);
+         Trajectory actual = new Trajectory(10);
+         TrajectoryMathTools.multiplyNaive(actual, traj1, traj2);
+
+         for (int j = 0; j < expected.getNumberOfCoefficients(); j++)
+         {
+            assertEquals(expected.getCoefficient(j), actual.getCoefficient(j), epsilon);
          }
       }
    }
