@@ -37,6 +37,12 @@ public class SmoothCapturePointAdjustmentToolbox
 
    private final LinearSolver<DenseMatrix64F> pseudoInverseSolver = new ConfigurableSolvePseudoInverseSVD(defaultSize, defaultSize, 1.0e-10);
 
+   private double maxAdjustedSegmentDuration = 0.1;
+
+   public void setMaxAdjustedSegmentDuration(double maxAdjustedSegmentDuration)
+   {
+      this.maxAdjustedSegmentDuration = maxAdjustedSegmentDuration;
+   }
 
    public void adjustDesiredTrajectoriesForInitialSmoothing3D(double omega0, List<FrameTrajectory3D> copPolynomials3D,
                                                               List<? extends FrameTuple3DReadOnly> icpQuantityInitialConditionList,
