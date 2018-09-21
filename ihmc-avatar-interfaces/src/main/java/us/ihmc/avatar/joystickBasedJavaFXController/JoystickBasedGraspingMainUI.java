@@ -3,8 +3,6 @@ package us.ihmc.avatar.joystickBasedJavaFXController;
 import java.io.IOException;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
-import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -15,7 +13,6 @@ import javafx.stage.Stage;
 import us.ihmc.avatar.handControl.HandFingerTrajectoryMessagePublisher;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -36,12 +33,11 @@ public class JoystickBasedGraspingMainUI
    private final JavaFXMessager messager = new SharedMemoryJavaFXMessager(GraspingJavaFXTopics.API);
    private final XBoxOneJavaFXController xBoxOneJavaFXController;
 
-   private final AnimationTimer cameraTracking;
-
    @FXML
    private GraspingPaneController graspingPaneController;
 
-   public JoystickBasedGraspingMainUI(String robotName, Stage primaryStage, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory, HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher)
+   public JoystickBasedGraspingMainUI(String robotName, Stage primaryStage, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                      HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher)
          throws Exception
    {
       this.primaryStage = primaryStage;
@@ -64,21 +60,14 @@ public class JoystickBasedGraspingMainUI
                                            s -> javaFXRobotVisualizer.submitNewConfiguration(s.takeNextData()));
       view3dFactory.addNodeToView(javaFXRobotVisualizer.getRootNode());
 
-      graspingJavaFXController = new GraspingJavaFXController(robotName, messager, ros2Node, fullRobotModelFactory, javaFXRobotVisualizer, handFingerTrajectoryMessagePublisher);
+      graspingJavaFXController = new GraspingJavaFXController(robotName, messager, ros2Node, fullRobotModelFactory, javaFXRobotVisualizer,
+                                                              handFingerTrajectoryMessagePublisher);
       view3dFactory.addNodeToView(graspingJavaFXController.getRootNode());
 
       FocusBasedCameraMouseEventHandler cameraController = view3dFactory.addCameraController(true);
 
       Translate rootJointOffset = new Translate();
       cameraController.prependTransform(rootJointOffset);
-
-      cameraTracking = new AnimationTimer()
-      {
-         @Override
-         public void handle(long now)
-         {
-         }
-      };
 
       messager.startMessager();
 
@@ -96,7 +85,6 @@ public class JoystickBasedGraspingMainUI
       primaryStage.show();
       javaFXRobotVisualizer.start();
       graspingJavaFXController.start();
-      cameraTracking.start();
    }
 
    public void stop()
@@ -112,7 +100,6 @@ public class JoystickBasedGraspingMainUI
       xBoxOneJavaFXController.stop();
       javaFXRobotVisualizer.stop();
       graspingJavaFXController.stop();
-      cameraTracking.stop();
 
       ThreadTools.sleep(100); // Give some time to send the message.:
    }
