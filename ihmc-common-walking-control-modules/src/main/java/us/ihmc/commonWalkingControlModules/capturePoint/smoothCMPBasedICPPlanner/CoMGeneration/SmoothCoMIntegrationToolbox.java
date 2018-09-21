@@ -359,6 +359,17 @@ public class SmoothCoMIntegrationToolbox
       }
    }
 
+   /**
+    * Raise the scalar {@code a} to the power of {@code exponent}.
+    * <p>
+    * Compared to {@link Math#pow(double, double)}, this algorithm is optimized for integer
+    * exponents.
+    * </p>
+    * 
+    * @param a the base.
+    * @param exponent the exponent.
+    * @return the value {@code a}<sup>{@code exponent}</sup>.
+    */
    public static double power(double a, int exponent)
    {
       if (exponent < 0)
