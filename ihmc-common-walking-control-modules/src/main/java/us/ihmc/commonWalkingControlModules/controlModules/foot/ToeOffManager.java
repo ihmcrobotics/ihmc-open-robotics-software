@@ -67,6 +67,8 @@ public class ToeOffManager
    private final BooleanProvider checkECMPForToeOff;
    private final BooleanProvider checkCoPForToeOff;
 
+   private final BooleanProvider lookAtTwoStepCapturabilityForToeOff;
+
    private final DoubleProvider ankleLowerLimitToTriggerToeOff;
    private final DoubleProvider kneeUpperLimitToTriggerToeOff;
    private final DoubleProvider kneeLowerLimitToTriggerToeOff;
@@ -175,6 +177,8 @@ public class ToeOffManager
 
       checkECMPForToeOff = new BooleanParameter("checkECMPForToeOff", registry, toeOffParameters.checkECMPLocationToTriggerToeOff());
       checkCoPForToeOff = new BooleanParameter("checkCoPForToeOff", registry, toeOffParameters.checkCoPLocationToTriggerToeOff());
+
+      lookAtTwoStepCapturabilityForToeOff = new BooleanParameter("lookAtTwoStepCapturabilityForToeOff", registry, toeOffParameters.lookAtTwoStepCapturabilityForToeOff());
 
       this.toeOffCalculator = toeOffCalculator;
 
@@ -389,7 +393,7 @@ public class ToeOffManager
       }
 
       setPolygonFromSupportFoot(trailingLeg, leadingFootSupportPolygon);
-      if (setPolygonFromNextFootstep(nextFootSupportPolygon))
+      if (lookAtTwoStepCapturabilityForToeOff.getValue() && setPolygonFromNextFootstep(nextFootSupportPolygon))
       {
          leadingFootSupportPolygon.addVertices(nextFootSupportPolygon);
          leadingFootSupportPolygon.update();
@@ -479,7 +483,7 @@ public class ToeOffManager
       if (checkECMPForToeOff.getValue())
       {
          desiredECMP.changeFrameAndProjectToXYPlane(onToesSupportPolygon.getReferenceFrame());
-         isDesiredECMPOKForToeOff.set(onToesSupportPolygon.distance(desiredECMP) <= ecmpProximityForToeOff.getValue());
+         isDesiredECMPOKForToeOff.set(onToesSupportPolygon.signedDistance(desiredECMP) <= ecmpProximityForToeOff.getValue());
          isDesiredECMPOKForToeOffFilt.update();
       }
       else
@@ -494,7 +498,7 @@ public class ToeOffManager
       if (checkCoPForToeOff.getValue())
       {
          desiredCoP.changeFrameAndProjectToXYPlane(onToesSupportPolygon.getReferenceFrame());
-         isDesiredCoPOKForToeOff.set(onToesSupportPolygon.distance(desiredCoP) <= copProximityForToeOff.getValue());
+         isDesiredCoPOKForToeOff.set(onToesSupportPolygon.signedDistance(desiredCoP) <= copProximityForToeOff.getValue());
          isDesiredCoPOKForToeOffFilt.update();
       }
       else
