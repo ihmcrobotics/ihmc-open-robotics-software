@@ -1216,7 +1216,7 @@ public class TrajectoryMathToolsTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 30000)
    public void testSegmentedAdditionWithLimitsC()
    {
@@ -1243,7 +1243,7 @@ public class TrajectoryMathToolsTest
       assertEquals(1.0, traj3.getSegment(2).getFinalTime(), epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 30000)
    public void testSegmentedAdditionWithLimitsD()
    {
