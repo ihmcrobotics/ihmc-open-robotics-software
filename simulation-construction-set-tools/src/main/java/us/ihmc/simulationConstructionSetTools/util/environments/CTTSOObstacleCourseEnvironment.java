@@ -154,27 +154,27 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(0, 0));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 0));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 0));
-         
+
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(0, 1));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 1));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 1));
-         
+
          combinedTerrainObject3D.addTerrainObject(setUpCurb(0, 2));
          combinedTerrainObject3D.addTerrainObject(setUpCurb(1, 2));
          combinedTerrainObject3D.addTerrainObject(setUpCurb(2, 2));
-         
+
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(0, 3));
          combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(1, 3, new Point2D(0.2, 0.2), potholeRadius, potholeDepth));
          combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(2, 3, new Point2D(0.2, -0.2), potholeRadius, potholeDepth));
-         
+
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(0, 4));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 4));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 4));
-         
+
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(0, 5));
          combinedTerrainObject3D.addTerrainObject(setUpStormGrate(1, 5));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 5));
-         
+
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(0, 6));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 6));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 6));

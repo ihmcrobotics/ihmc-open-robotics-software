@@ -14,8 +14,8 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class CTTSOEnvironmentViewer
 {
-   private final boolean SHOWGRAPHICS = true;
-   private final boolean SHOWCOLLISIONTERRAIN = false;
+   private final boolean SHOW_GRAPHICS = true;
+   private final boolean SHOW_COLLISION_TERRAIN = false;
 
    private final double[] CAMFIX = {0, 0, 0};
    private final double[] CAMPOS = {-14, -7, 12};
@@ -62,9 +62,9 @@ public class CTTSOEnvironmentViewer
       scs.setCameraFix(CAMFIX[0], CAMFIX[1], CAMFIX[2]);
       scs.setCameraPosition(CAMPOS[0], CAMPOS[1], CAMPOS[2]);
 
-      scs.setGroundVisible(SHOWCOLLISIONTERRAIN);
+      scs.setGroundVisible(SHOW_COLLISION_TERRAIN);
 
-      if (SHOWGRAPHICS)
+      if (SHOW_GRAPHICS)
       {
          TerrainObject3D environmentTerrain3D = commonAvatarEnvironmentInterface.getTerrainObject3D();
          if (environmentTerrain3D != null)
