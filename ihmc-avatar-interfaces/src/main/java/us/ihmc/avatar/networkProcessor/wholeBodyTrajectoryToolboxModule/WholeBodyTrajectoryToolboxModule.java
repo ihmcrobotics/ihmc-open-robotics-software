@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
+package us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,11 +6,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
@@ -21,33 +23,31 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Reac
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 {
    private final WholeBodyTrajectoryToolboxController wholeBodyTrajectoryToolboxController;
 
-   public WholeBodyTrajectoryToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel, LogModelProvider modelProvider,
-                                           boolean startYoVariableServer)
+   public WholeBodyTrajectoryToolboxModule(DRCRobotModel drcRobotModel, boolean startYoVariableServer) throws IOException
+   {
+      this(drcRobotModel, startYoVariableServer, PubSubImplementation.FAST_RTPS);
+   }
+
+   public WholeBodyTrajectoryToolboxModule(DRCRobotModel drcRobotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
          throws IOException
    {
-      super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), drcRobotModel.getLogModelProvider(), startYoVariableServer);
+      super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), drcRobotModel.getLogModelProvider(), startYoVariableServer,
+            DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
 
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
 
       wholeBodyTrajectoryToolboxController = new WholeBodyTrajectoryToolboxController(drcRobotModel, fullRobotModel, commandInputManager, statusOutputManager,
                                                                                       registry, yoGraphicsListRegistry, startYoVariableServer);
-      commandInputManager.registerConversionHelper(new WholeBodyTrajectoryToolboxCommandConverter(fullRobotModel));
-      startYoVariableServer();
-   }
-
-   @Override
-   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
-   {
       controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryToolboxMessage.class, 10,
                                                                        MessageUnpackingTools.createWholeBodyTrajectoryToolboxMessageUnpacker());
+      commandInputManager.registerConversionHelper(new WholeBodyTrajectoryToolboxCommandConverter(fullRobotModel));
    }
 
    @Override
@@ -116,5 +116,16 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
       return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WHOLE_BODY_TRAJECTORY_TOOLBOX, ROS2TopicQualifier.INPUT);
+   }
+
+   @Override
+   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
+   {
+      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> {
+         if (wholeBodyTrajectoryToolboxController != null)
+            wholeBodyTrajectoryToolboxController.updateRobotConfigurationData(s.takeNextData());
+      });
    }
 }

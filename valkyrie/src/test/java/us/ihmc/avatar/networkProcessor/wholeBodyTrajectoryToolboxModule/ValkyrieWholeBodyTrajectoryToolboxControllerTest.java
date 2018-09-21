@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.rrTToolboxModule;
+package us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule;
 
 import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName.PITCH;
 import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName.YAW;
@@ -15,7 +15,7 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.rrtToolboxModule.AvatarWholeBodyTrajectoryToolboxControllerTest;
+import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.AvatarWholeBodyTrajectoryToolboxControllerTest;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -27,7 +27,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.FunctionTrajectory;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.TrajectoryLibraryForDRC;
+import us.ihmc.manipulation.planning.exploringSpatial.TrajectoryLibraryForDRC;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
