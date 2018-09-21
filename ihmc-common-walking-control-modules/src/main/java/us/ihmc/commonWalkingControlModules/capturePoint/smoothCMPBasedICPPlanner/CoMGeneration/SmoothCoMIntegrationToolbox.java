@@ -415,7 +415,7 @@ public class SmoothCoMIntegrationToolbox
       double powOmega0 = power(omega0, deltaCoMDerivativeOrder);
       double sign = deltaCoMDerivativeOrder % 2 == 0 ? 1.0 : -1.0;
 
-      return 0.5 * Math.exp(omega0 * (timeSegmentInitial - timeSegmentTotal)) * (powOmega0 * expOmega0Time - sign * powOmega0 / expOmega0Time);
+      return 0.5 * Math.exp(omega0 * (timeSegmentInitial - timeSegmentTotal)) * powOmega0 * (expOmega0Time - sign / expOmega0Time);
    }
 
    private void initializeMatrices3D(int numberOfCoefficients)
