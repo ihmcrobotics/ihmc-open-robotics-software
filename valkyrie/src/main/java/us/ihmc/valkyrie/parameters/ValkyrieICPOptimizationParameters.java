@@ -1,17 +1,17 @@
-package us.ihmc.atlas.parameters;
+package us.ihmc.valkyrie.parameters;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 
 /** {@inheritDoc} */
-public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
+public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
 {
    private final boolean runningOnRealRobot;
    private final boolean useAngularMomentum = true;
    private final boolean useStepAdjustment = true;
 
-   public AtlasICPOptimizationParameters(boolean runningOnRealRobot)
+   public ValkyrieICPOptimizationParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
    }
@@ -20,21 +20,21 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getForwardFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 20.0;
+      return runningOnRealRobot ? 7.5 : 20.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getLateralFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 20.0;
+      return runningOnRealRobot ? 7.5 : 20.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFootstepRateWeight()
    {
-      return runningOnRealRobot ? 4e-9 : 4e-7;
+      return runningOnRealRobot ? 4e-7 : 4e-7;
    }
 
    /** {@inheritDoc} */
@@ -50,12 +50,20 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    {
       return runningOnRealRobot ? 0.5 : 0.5;
    }
+   
+   /**
+    * Specifies the amount of ICP error (the 2D distance in XY from desired to current) that is required for the controller to consider step adjustment.
+    */
+   public double getMinICPErrorForStepAdjustment()
+   {
+      return 0.04;
+   }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackRateWeight()
    {
-      return 4e-13;
+      return 1e-8;
    }
 
    /** {@inheritDoc} */
@@ -64,7 +72,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    {
       ICPControlGains gains = new ICPControlGains();
       gains.setKpOrthogonalToMotion(1.5);
-      gains.setKpParallelToMotion(2.5);
+      gains.setKpParallelToMotion(2.0);
 
       gains.setIntegralLeakRatio(0.97);
       gains.setMaxIntegralError(0.05);
@@ -92,6 +100,13 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    public double getAngularMomentumMinimizationWeight()
    {
       return 10.0;
+   }
+   
+   /** {@inheritDoc} */
+   @Override
+   public boolean getUseAngularMomentumIntegrator()
+   {
+      return false;
    }
 
    /** {@inheritDoc} */
@@ -177,17 +192,4 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    {
       return false;
    }
-
-   @Override
-   public double getTransferSplitFraction()
-   {
-      return 0.2;
-   }
-
-   @Override
-   public double getMinimumFootstepMultiplier()
-   {
-      return 0.25;
-   }
-
 }
