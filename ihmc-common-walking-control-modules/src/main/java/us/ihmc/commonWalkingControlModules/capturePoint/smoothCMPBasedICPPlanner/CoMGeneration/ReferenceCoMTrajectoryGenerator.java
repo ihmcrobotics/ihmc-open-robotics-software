@@ -119,7 +119,8 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       {
          SegmentedFrameTrajectory3D transferCMPTrajectory = transferCMPTrajectories.get(stepIndex);
          int numberOfCMPSegments = transferCMPTrajectory.getNumberOfSegments();
-         cmpTrajectories.addAll(transferCMPTrajectory.getSegments());
+         for (int i = 0; i < transferCMPTrajectory.getSegments().size(); i++)
+            cmpTrajectories.add(transferCMPTrajectory.getSegments().get(i));
          totalNumberOfCMPSegments.add(numberOfCMPSegments);
 
          if (stepIndex == 0)
@@ -127,13 +128,15 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
 
          SegmentedFrameTrajectory3D swingCMPTrajectory = swingCMPTrajectories.get(stepIndex);
          numberOfCMPSegments = swingCMPTrajectory.getNumberOfSegments();
-         cmpTrajectories.addAll(swingCMPTrajectory.getSegments());
+         for (int i = 0; i < swingCMPTrajectory.getSegments().size(); i++)
+            cmpTrajectories.add(swingCMPTrajectory.getSegments().get(i));
          totalNumberOfCMPSegments.add(numberOfCMPSegments);
       }
 
       SegmentedFrameTrajectory3D transferCMPTrajectory = transferCMPTrajectories.get(numberOfSteps);
       int numberOfCMPSegments = transferCMPTrajectory.getNumberOfSegments();
-      cmpTrajectories.addAll(transferCMPTrajectory.getSegments());
+      for (int i = 0; i < transferCMPTrajectory.getSegments().size(); i++)
+         cmpTrajectories.add(transferCMPTrajectory.getSegments().get(i));
       totalNumberOfCMPSegments.add(numberOfCMPSegments);
 
       if (numberOfSteps == 0)
@@ -161,7 +164,8 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
 
       SegmentedFrameTrajectory3D swingCMPTrajectory = swingCMPTrajectories.get(0);
       int numberOfCMPSegments = swingCMPTrajectory.getNumberOfSegments();
-      cmpTrajectories.addAll(swingCMPTrajectory.getSegments());
+      for (int i = 0; i < swingCMPTrajectory.getSegments().size(); i++)
+         cmpTrajectories.add(swingCMPTrajectory.getSegments().get(i));
       totalNumberOfCMPSegments.add(numberOfCMPSegments);
 
       numberOfSegmentsInCurrentPhase.set(numberOfCMPSegments);
@@ -171,18 +175,21 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       {
          SegmentedFrameTrajectory3D transferCMPTrajectory = transferCMPTrajectories.get(stepIndex);
          numberOfCMPSegments = transferCMPTrajectory.getNumberOfSegments();
-         cmpTrajectories.addAll(transferCMPTrajectory.getSegments());
+         for (int i = 0; i < transferCMPTrajectory.getSegments().size(); i++)
+            cmpTrajectories.add(transferCMPTrajectory.getSegments().get(i));
          totalNumberOfCMPSegments.add(numberOfCMPSegments);
 
          swingCMPTrajectory = swingCMPTrajectories.get(stepIndex);
          numberOfCMPSegments = swingCMPTrajectory.getNumberOfSegments();
-         cmpTrajectories.addAll(swingCMPTrajectory.getSegments());
+         for (int i = 0; i < swingCMPTrajectory.getSegments().size(); i++)
+            cmpTrajectories.add(swingCMPTrajectory.getSegments().get(i));
          totalNumberOfCMPSegments.add(numberOfCMPSegments);
       }
 
       SegmentedFrameTrajectory3D transferCMPTrajectory = transferCMPTrajectories.get(numberOfSteps);
       numberOfCMPSegments = transferCMPTrajectory.getNumberOfSegments();
-      cmpTrajectories.addAll(transferCMPTrajectory.getSegments());
+      for (int i = 0; i < transferCMPTrajectory.getSegments().size(); i++)
+         cmpTrajectories.add(transferCMPTrajectory.getSegments().get(i));
       totalNumberOfCMPSegments.add(numberOfCMPSegments);
 
       numberOfSegmentsSwing0 = swingCMPTrajectories.get(0).getNumberOfSegments();
