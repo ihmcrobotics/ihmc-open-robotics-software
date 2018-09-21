@@ -368,6 +368,21 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       startTracking();
    }
 
+   public void holdCurrentDesired()
+   {
+      clear();
+      setWeightsToDefaults();
+      resetLastCommandId();
+      setTrajectoryStartTimeToCurrentTime();
+
+      orientationTrajectoryGenerator.getOrientation(desiredOrientation);
+      positionTrajectoryGenerator.getPosition(desiredPosition);
+      initialPose.setIncludingFrame(desiredPosition, desiredOrientation);
+      queueInitialPoint(initialPose);
+
+      startTracking();
+   }
+
    public void goToPoseFromCurrent(FramePose3D homePose, double trajectoryTime)
    {
       clear();

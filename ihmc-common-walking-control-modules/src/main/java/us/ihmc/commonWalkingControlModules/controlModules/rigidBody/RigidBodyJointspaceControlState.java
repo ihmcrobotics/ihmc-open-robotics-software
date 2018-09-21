@@ -74,6 +74,19 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       trajectoryDone.set(false);
    }
 
+   public void holdCurrentDesired()
+   {
+      jointControlHelper.overrideTrajectory();
+      jointControlHelper.setWeightsToDefaults();
+      resetLastCommandId();
+      setTrajectoryStartTimeToCurrentTime();
+
+      jointControlHelper.queueInitialPointsAtCurrentDesired();
+
+      jointControlHelper.startTrajectoryExecution();
+      trajectoryDone.set(false);
+   }
+
    public void goHome(double trajectoryTime, double[] initialJointPositions)
    {
       jointControlHelper.overrideTrajectory();

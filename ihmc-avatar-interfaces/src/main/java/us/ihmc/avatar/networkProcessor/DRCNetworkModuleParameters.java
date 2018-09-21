@@ -24,8 +24,8 @@ public class DRCNetworkModuleParameters
    private boolean runAutomaticDiagnostic;
    private boolean useMultisenseManualTestModule;
    private boolean useDrillDetectionModule;
-   private boolean useConstrainedWholeBodyPlanningToolbox;
-   private boolean useConstrainedWholeBodyPlanningToolboxVisualizer;
+   private boolean useWholeBodyTrajectoryToolbox;
+   private boolean useWholeBodyTrajectoryToolboxVisualizer;
    private boolean useKinematicsToolbox;
    private boolean useFootstepPlanningToolbox;
    private boolean useKinematicsToolboxVisualizer;
@@ -64,9 +64,9 @@ public class DRCNetworkModuleParameters
       return useBehaviorVisualizer;
    }
    
-   public boolean isConstrainedWholeBodyPlanningToolboxEnabled()
+   public boolean isWholeBodyTrajectoryToolboxEnabled()
    {
-      return useConstrainedWholeBodyPlanningToolbox;
+      return useWholeBodyTrajectoryToolbox;
    }
 
    public boolean isKinematicsToolboxEnabled()
@@ -84,9 +84,9 @@ public class DRCNetworkModuleParameters
       return useKinematicsToolboxVisualizer;
    }
    
-   public boolean isConstrainedWholeBodyToolboxVisualizerEnabled()
+   public boolean isWholeBodyTrajectoryToolboxVisualizerEnabled()
    {
-      return useConstrainedWholeBodyPlanningToolboxVisualizer;
+      return useWholeBodyTrajectoryToolboxVisualizer;
    }
 
    public boolean isFootstepPlanningToolboxVisualizerEnabled()
@@ -170,7 +170,7 @@ public class DRCNetworkModuleParameters
    
    public void enableWholeBodyTrajectoryToolbox(boolean useConstrainedWholeBodyPlanningToolbox)
    {
-      this.useConstrainedWholeBodyPlanningToolbox = useConstrainedWholeBodyPlanningToolbox;
+      this.useWholeBodyTrajectoryToolbox = useConstrainedWholeBodyPlanningToolbox;
    }
    
    public void enableFootstepPlanningToolbox(boolean useFootstepPlanningToolbox)
@@ -185,7 +185,7 @@ public class DRCNetworkModuleParameters
    
    public void enableConstrainedWholeBodyPlanningToolboxVisualizer(boolean useConstrainedWholeBodyPlanningToolboxVisualizer)
    {
-      this.useConstrainedWholeBodyPlanningToolboxVisualizer = useConstrainedWholeBodyPlanningToolboxVisualizer;
+      this.useWholeBodyTrajectoryToolboxVisualizer = useConstrainedWholeBodyPlanningToolboxVisualizer;
    }
 
    public void enableFootstepPlanningToolboxVisualizer(boolean useFootstepPlanningToolboxVisualizer)

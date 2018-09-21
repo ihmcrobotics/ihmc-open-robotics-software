@@ -190,7 +190,9 @@ public class RigidBodyControlManager
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
       if (command.isStopAllTrajectory())
-         hold();
+      {
+         holdCurrentDesired();
+      }
    }
 
    public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand command)
@@ -305,10 +307,40 @@ public class RigidBodyControlManager
       requestState(jointspaceControlState.getControlMode());
    }
 
+   public void holdCurrentDesiredInJointspace()
+   {
+      // It is only safe to hold the current desired if the body was controlled in the control mode. Otherwise the
+      // desired values might be out of date or they might have never been set. In that case hold the current.
+      if (getActiveControlMode() == jointspaceControlState.getControlMode())
+      {
+         jointspaceControlState.holdCurrentDesired();
+         requestState(jointspaceControlState.getControlMode());
+      }
+      else
+      {
+         holdInJointspace();
+      }
+   }
+
    public void holdInTaskspace()
    {
       taskspaceControlState.holdCurrent();
       requestState(taskspaceControlState.getControlMode());
+   }
+
+   public void holdCurrentDesiredInTaskspace()
+   {
+      // It is only safe to hold the current desired if the body was controlled in the control mode. Otherwise the
+      // desired values might be out of date or they might have never been set. In that case hold the current.
+      if (getActiveControlMode() == taskspaceControlState.getControlMode())
+      {
+         taskspaceControlState.holdCurrentDesired();
+         requestState(taskspaceControlState.getControlMode());
+      }
+      else
+      {
+         holdInTaskspace();
+      }
    }
 
    public void hold()
@@ -320,6 +352,21 @@ public class RigidBodyControlManager
          break;
       case TASKSPACE:
          holdInTaskspace();
+         break;
+      default:
+         throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
+      }
+   }
+
+   public void holdCurrentDesired()
+   {
+      switch (defaultControlMode.getValue())
+      {
+      case JOINTSPACE:
+         holdCurrentDesiredInJointspace();
+         break;
+      case TASKSPACE:
+         holdCurrentDesiredInTaskspace();
          break;
       default:
          throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
