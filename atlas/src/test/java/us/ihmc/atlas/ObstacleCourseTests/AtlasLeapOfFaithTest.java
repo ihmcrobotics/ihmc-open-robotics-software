@@ -40,7 +40,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    @Test(timeout = 370000)
    public void testUnknownStepDownOneFootOnEachStep() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.08;
+      double stepDownHeight = 0.07;
       double stepLength = 0.31;
       double stairLength = 0.35;
       super.testUnknownStepDownOneFootOnEachStep(stepLength, stairLength, stepDownHeight);
@@ -51,7 +51,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    @Test(timeout = 350000)
    public void testUnknownStepDownOneFootOnEachStepLong() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.10;
+      double stepDownHeight = 0.08;
       double stepLength = 0.37;
       double stairLength = 0.5;
       super.testUnknownStepDownOneFootOnEachStepLong(stepLength, stairLength, stepDownHeight);
@@ -83,7 +83,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    @Test(timeout = 540000)
    public void testDropOffsWhileWalking() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.095;
+      double stepDownHeight = 0.08;
       super.testDropOffsWhileWalking(stepDownHeight);
    }
 
