@@ -479,7 +479,7 @@ public class ToeOffManager
       if (checkECMPForToeOff.getValue())
       {
          desiredECMP.changeFrameAndProjectToXYPlane(onToesSupportPolygon.getReferenceFrame());
-         isDesiredECMPOKForToeOff.set(onToesSupportPolygon.distance(desiredECMP) <= ecmpProximityForToeOff.getValue());
+         isDesiredECMPOKForToeOff.set(onToesSupportPolygon.signedDistance(desiredECMP) <= ecmpProximityForToeOff.getValue());
          isDesiredECMPOKForToeOffFilt.update();
       }
       else
@@ -494,7 +494,7 @@ public class ToeOffManager
       if (checkCoPForToeOff.getValue())
       {
          desiredCoP.changeFrameAndProjectToXYPlane(onToesSupportPolygon.getReferenceFrame());
-         isDesiredCoPOKForToeOff.set(onToesSupportPolygon.distance(desiredCoP) <= copProximityForToeOff.getValue());
+         isDesiredCoPOKForToeOff.set(onToesSupportPolygon.signedDistance(desiredCoP) <= copProximityForToeOff.getValue());
          isDesiredCoPOKForToeOffFilt.update();
       }
       else
