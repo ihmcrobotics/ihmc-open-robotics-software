@@ -37,9 +37,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.providers.IntegerProvider;
@@ -102,6 +100,11 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final YoInteger numberOfPointsPerFoot;
    private final YoInteger numberFootstepsToConsider;
    private final IntegerProvider numberOfUpcomingFootsteps;
+
+   private final YoBoolean goingToPerformInitialSmoothingAdjustment;
+
+   private final YoDouble maxContinuityAdjustmentSegmentDurationDS;
+   private final YoDouble maxContinuityAdjustmentSegmentDurationSS;
 
    private final List<YoDouble> swingDurations;
    private final List<YoDouble> transferDurations;
@@ -189,6 +192,11 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       percentageChickenSupport = new YoDouble(fullPrefix + "PercentageChickenSupport", registry);
 
+      maxContinuityAdjustmentSegmentDurationDS = new YoDouble(namePrefix + "MaxContinuityAdjustmentSegmentDurationDS", registry);
+      maxContinuityAdjustmentSegmentDurationSS = new YoDouble(namePrefix + "MaxContinuityAdjustmentSegmentDurationSS", registry);
+      maxContinuityAdjustmentSegmentDurationDS.set(0.2);
+      maxContinuityAdjustmentSegmentDurationSS.set(0.15);
+
       this.swingDurations = swingDurations;
       this.transferDurations = transferDurations;
       this.touchdownDurations = touchdownDurations;
@@ -208,6 +216,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       this.putExitCoPOnToes = new YoBoolean(fullPrefix + "PutExitCoPOnToes", parentRegistry);
       this.putExitCoPOnToesWhenSteppingDown = new YoBoolean(fullPrefix + "PutExitCoPOnToesWhenSteppingDown", parentRegistry);
       this.planIsAvailable = new YoBoolean(fullPrefix + "CoPPlanAvailable", parentRegistry);
+      this.goingToPerformInitialSmoothingAdjustment = new YoBoolean(fullPrefix + "GoingToPerformInitialSmoothingAdjustment", parentRegistry);
 
       for (CoPPointName pointName : CoPPointName.values)
       {
@@ -356,6 +365,11 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          artifactList.add(copWaypointViz.createArtifact());
          copWaypointsViz.add(yoCoPWaypoint);
       }
+   }
+
+   public void setGoingToPerformSmoothingAdjustment(boolean goingToPerformInitialSmoothingAdjustment)
+   {
+      this.goingToPerformInitialSmoothingAdjustment.set(goingToPerformInitialSmoothingAdjustment);
    }
 
    public void holdPosition(FramePoint3DReadOnly desiredCoPPositionToHold)
@@ -537,7 +551,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       lastTransferToSide = transferToSide;
       // Put first CoP as per chicken support computations in case starting from rest
       if (atAStop && numberOfUpcomingFootsteps.getValue() == 0)
-      {
+      { // this guy is standing
          isDoneWalking.set(true);
 
          if (holdDesiredState.getBooleanValue())
@@ -589,7 +603,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          computeCoPPointsForUpcomingFootsteps(copLocationIndex, footstepIndex);
       }
       else if (numberOfUpcomingFootsteps.getValue() == 0)
-      {
+      { // last step
          // Put first CoP at the exitCoP of the swing foot if not starting from rest
          clearHeldPosition();
          isDoneWalking.set(true);
@@ -608,7 +622,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          computeCoPPointsForFinalTransfer(copLocationIndex, transferToSide, true, footstepIndex);
       }
       else
-      {
+      { // walking
          clearHeldPosition();
          isDoneWalking.set(false);
          updateFootPolygons(null, footstepIndex);
@@ -964,22 +978,48 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             PrintTools.warn("Using a transfer split fraction of 0.5 because it is currently unset.");
       }
 
+      double segmentDuration;
+
       if (useTransferSplitFractionFor.get(footstepIndex) == UseSplitFractionFor.TIME)
       {
-         switch (segmentIndex)
+         if (segmentIndex == 0)
          {
-         case 0:
-            return transferTime * splitFraction;
-         case 1:
-            return transferTime * (1.0 - splitFraction);
-         default:
+            segmentDuration = transferTime * splitFraction;
+         }
+         else if (segmentIndex == 1)
+         {
+            segmentDuration = transferTime * (1.0 - splitFraction);
+         }
+         else
+         {
             throw new RuntimeException("For some reason we didn't just use a array that summed to one");
          }
       }
       else
       {
-         return transferTime * 0.5;
+         segmentDuration = transferTime * 0.5;
       }
+
+      // modifying durations if it's the first step, and the robot is going to perform a continuity adjustment
+      if (footstepIndex == 0 && goingToPerformInitialSmoothingAdjustment.getBooleanValue())
+      {
+         if (segmentIndex == 0)
+         {
+            segmentDuration = Math.min(segmentDuration, maxContinuityAdjustmentSegmentDurationDS.getDoubleValue());
+         }
+         else if (segmentIndex == 1)
+         {
+            double initialSegmentDuration = transferTime - segmentDuration;
+            double initialSegmentDurationMoved = Math.max(initialSegmentDuration - maxContinuityAdjustmentSegmentDurationDS.getDoubleValue(), 0.0);
+            segmentDuration += initialSegmentDurationMoved;
+         }
+         else
+         {
+            throw new RuntimeException("Shouldn't be here....");
+         }
+      }
+
+      return segmentDuration;
    }
 
    private void computeCoPPointsForFootstepSwing(int copLocationsIndex, int footstepIndex)
@@ -1013,17 +1053,39 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          swingTime += touchdownDuration;
       }
 
+      double initialSegmentDuration = swingTime * swingDurationShiftFractions.get(footstepIndex).getDoubleValue() * swingSplitFractions.get(footstepIndex).getDoubleValue();
+      double segmentDuration;
+
       switch (segmentIndex)
       {
       case 0:
-         return swingTime * swingDurationShiftFractions.get(footstepIndex).getDoubleValue() * swingSplitFractions.get(footstepIndex).getDoubleValue();
+         segmentDuration = initialSegmentDuration;
+         break;
       case 1:
-         return swingTime * swingDurationShiftFractions.get(footstepIndex).getDoubleValue() * (1.0 - swingSplitFractions.get(footstepIndex).getDoubleValue());
+         segmentDuration = swingTime * swingDurationShiftFractions.get(footstepIndex).getDoubleValue() * (1.0 - swingSplitFractions.get(footstepIndex).getDoubleValue());
+         break;
       case 2:
-         return swingTime * (1.0 - swingDurationShiftFractions.get(footstepIndex).getDoubleValue());
+         segmentDuration = swingTime * (1.0 - swingDurationShiftFractions.get(footstepIndex).getDoubleValue());
+         break;
       default:
          throw new RuntimeException("For some reason we didn't just use a array that summed to one here as well");
       }
+
+
+      if (footstepIndex == 0 && goingToPerformInitialSmoothingAdjustment.getBooleanValue())
+      {
+         if (segmentIndex == 0)
+         {
+            segmentDuration = Math.min(segmentDuration, maxContinuityAdjustmentSegmentDurationSS.getDoubleValue());
+         }
+         else if (segmentIndex == 1)
+         {
+            double initialSegmentDurationMoved = Math.max(initialSegmentDuration - maxContinuityAdjustmentSegmentDurationSS.getDoubleValue(), 0.0);
+            segmentDuration += initialSegmentDurationMoved;
+         }
+      }
+
+      return segmentDuration;
    }
 
    private void computeCoPPointLocation(FramePoint3D copPointToPlan, CoPPointPlanningParameters copPointParameters, RobotSide supportSide, int footstepIndex)
