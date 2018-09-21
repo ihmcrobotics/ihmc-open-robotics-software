@@ -76,13 +76,13 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    @Override
    public boolean planSwingAngularMomentum()
    {
-      return false;
+      return true;
    }
 
    @Override
    public boolean planTransferAngularMomentum()
    {
-      return false;
+      return true;
    }
 
    /** {@inheritDoc} */
