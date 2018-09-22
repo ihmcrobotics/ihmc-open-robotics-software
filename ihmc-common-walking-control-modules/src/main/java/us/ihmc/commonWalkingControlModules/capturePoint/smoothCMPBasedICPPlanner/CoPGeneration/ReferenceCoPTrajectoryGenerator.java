@@ -101,7 +101,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final YoInteger numberFootstepsToConsider;
    private final IntegerProvider numberOfUpcomingFootsteps;
 
-   private final YoBoolean goingToPerformInitialSmoothingAdjustment;
+   private final YoBoolean goingToPerformInitialDSSmoothingAdjustment;
+   private final YoBoolean goingToPerformInitialSSSmoothingAdjustment;
 
    private final YoDouble maxContinuityAdjustmentSegmentDurationDS;
    private final YoDouble maxContinuityAdjustmentSegmentDurationSS;
@@ -216,7 +217,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       this.putExitCoPOnToes = new YoBoolean(fullPrefix + "PutExitCoPOnToes", parentRegistry);
       this.putExitCoPOnToesWhenSteppingDown = new YoBoolean(fullPrefix + "PutExitCoPOnToesWhenSteppingDown", parentRegistry);
       this.planIsAvailable = new YoBoolean(fullPrefix + "CoPPlanAvailable", parentRegistry);
-      this.goingToPerformInitialSmoothingAdjustment = new YoBoolean(fullPrefix + "GoingToPerformInitialSmoothingAdjustment", parentRegistry);
+      this.goingToPerformInitialDSSmoothingAdjustment = new YoBoolean(fullPrefix + "GoingToPerformInitialDSSmoothingAdjustment", parentRegistry);
+      this.goingToPerformInitialSSSmoothingAdjustment = new YoBoolean(fullPrefix + "GoingToPerformInitialSSSmoothingAdjustment", parentRegistry);
 
       for (CoPPointName pointName : CoPPointName.values)
       {
@@ -367,9 +369,14 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
    }
 
-   public void setGoingToPerformSmoothingAdjustment(boolean goingToPerformInitialSmoothingAdjustment)
+   public void setGoingToPerformDSSmoothingAdjustment(boolean goingToPerformInitialDSSmoothingAdjustment)
    {
-      this.goingToPerformInitialSmoothingAdjustment.set(goingToPerformInitialSmoothingAdjustment);
+      this.goingToPerformInitialDSSmoothingAdjustment.set(goingToPerformInitialDSSmoothingAdjustment);
+   }
+
+   public void setGoingToPerformSSSmoothingAdjustment(boolean goingToPerformInitialSSSmoothingAdjustment)
+   {
+      this.goingToPerformInitialSSSmoothingAdjustment.set(goingToPerformInitialSSSmoothingAdjustment);
    }
 
    public void holdPosition(FramePoint3DReadOnly desiredCoPPositionToHold)
@@ -1001,7 +1008,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
 
       // modifying durations if it's the first step, and the robot is going to perform a continuity adjustment
-      if (footstepIndex == 0 && goingToPerformInitialSmoothingAdjustment.getBooleanValue())
+      if (footstepIndex == 0 && goingToPerformInitialDSSmoothingAdjustment.getBooleanValue())
       {
          if (segmentIndex == 0)
          {
@@ -1072,7 +1079,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
 
 
-      if (footstepIndex == 0 && goingToPerformInitialSmoothingAdjustment.getBooleanValue())
+      if (footstepIndex == 0 && goingToPerformInitialSSSmoothingAdjustment.getBooleanValue())
       {
          if (segmentIndex == 0)
          {
