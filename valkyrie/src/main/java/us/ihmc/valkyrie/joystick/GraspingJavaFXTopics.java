@@ -1,5 +1,6 @@
-package us.ihmc.avatar.joystickBasedJavaFXController;
+package us.ihmc.valkyrie.joystick;
 
+import us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Category;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.CategoryTheme;

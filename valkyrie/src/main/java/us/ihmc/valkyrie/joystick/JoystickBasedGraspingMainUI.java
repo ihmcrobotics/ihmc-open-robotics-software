@@ -1,4 +1,4 @@
-package us.ihmc.avatar.joystickBasedJavaFXController;
+package us.ihmc.valkyrie.joystick;
 
 import java.io.IOException;
 
@@ -11,7 +11,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import us.ihmc.avatar.handControl.HandFingerTrajectoryMessagePublisher;
+import us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
@@ -45,6 +47,12 @@ public class JoystickBasedGraspingMainUI
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
+      PrintTools.info(""+getClass().getResource(getClass().getSimpleName()));
+      PrintTools.info(""+getClass().getSimpleName());
+      PrintTools.info(""+getClass());
+      PrintTools.info(""+getClass().getName());
+      PrintTools.info(""+getClass().getResource(getClass().getName()));
+      loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
       loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
 
       mainPane = loader.load();
