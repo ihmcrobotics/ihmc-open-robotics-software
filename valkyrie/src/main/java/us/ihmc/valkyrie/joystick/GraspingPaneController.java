@@ -1,4 +1,4 @@
-package us.ihmc.avatar.joystickBasedJavaFXController;
+package us.ihmc.valkyrie.joystick;
 
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
