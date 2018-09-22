@@ -40,7 +40,7 @@ import java.util.List;
 
 public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
    private static final boolean debug = false;
    private static final int maxNumberOfFootstepsToConsider = 4;
 
@@ -77,7 +77,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final YoInteger numberOfUpcomingFootsteps;
    private final RecyclingArrayList<FootstepData> upcomingFootstepsData = new RecyclingArrayList<>(maxNumberOfFootstepsToConsider, FootstepData.class);
 
-   private static final double ICP_CORNER_POINT_SIZE = 0.01;
+   private static final double ICP_CORNER_POINT_SIZE = 0.002;
    private List<YoFramePointInMultipleFrames> icpPhaseEntryCornerPoints = new ArrayList<>();
    private List<YoFramePointInMultipleFrames> icpPhaseExitCornerPoints = new ArrayList<>();
 
