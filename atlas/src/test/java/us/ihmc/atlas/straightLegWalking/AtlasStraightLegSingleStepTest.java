@@ -39,7 +39,7 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
    @Test(timeout = 70000)
    public void testForwardStepWithPause() throws SimulationExceededMaximumTimeException
    {
-      double stepLength = 1.0;
+      double stepLength = 0.9;
       double stepWidth = 0.25;
 
       setStepLength(stepLength);

@@ -125,7 +125,7 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
    public void setConstant(double t0, double tFinal, FramePoint3DReadOnly z0)
    {
       checkReferenceFrameMatch(z0);
-      setConstant(t0, tFinal, z0);
+      super.setConstant(t0, tFinal, z0);
    }
 
    public void setCubic(double t0, double tFinal, FramePoint3DReadOnly z0, FramePoint3DReadOnly zFinal)
