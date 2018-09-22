@@ -189,7 +189,8 @@ public class FootControlModule
       contactStatesMap.put(ConstraintType.SWING, falses);
       contactStatesMap.put(ConstraintType.MOVE_VIA_WAYPOINTS, falses);
       contactStatesMap.put(ConstraintType.FULL, trues);
-      contactStatesMap.put(ConstraintType.TOES, getOnEdgeContactPointStates(contactableFoot, ConstraintType.TOES));
+//      contactStatesMap.put(ConstraintType.TOES, getOnEdgeContactPointStates(contactableFoot, ConstraintType.TOES));
+      contactStatesMap.put(ConstraintType.TOES, trues);
       contactStatesMap.put(ConstraintType.TOUCHDOWN, falses);
    }
 
@@ -500,7 +501,7 @@ public class FootControlModule
 
    public void unload(double percentInUnloading)
    {
-      minZForce.set(0.0);
+      minZForce.set((1.0 - percentInUnloading) * minWeightFractionPerFoot.getValue() * robotWeightFz);
       maxZForce.set((1.0 - percentInUnloading) * maxWeightFractionPerFoot.getValue() * robotWeightFz);
 
       updateWrenchCommands();

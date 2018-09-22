@@ -171,7 +171,7 @@ public class ICPQPInputTest
       Assert.assertEquals(shouldBe, cost, 1e-7);
 
       icpqpInput.linearTerm.set(linear);
-      shouldBe += 21.0;
+      shouldBe -= 21.0;
       cost = icpqpInput.computeCost(solution);
       Assert.assertEquals(shouldBe, cost, 1e-7);
 

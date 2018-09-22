@@ -9,6 +9,9 @@ public class ICPControlGains extends IntegratorGains implements ICPControlGainsR
 
    private double feedbackPartMaxRate = Double.POSITIVE_INFINITY;
 
+   private double feedbackPartMaxValueParallelToMotion = Double.POSITIVE_INFINITY;
+   private double feedbackPartMaxValueOrthogonalToMotion = Double.POSITIVE_INFINITY;
+
    @Override
    public double getKpParallelToMotion()
    {
@@ -40,5 +43,27 @@ public class ICPControlGains extends IntegratorGains implements ICPControlGainsR
    public void setFeedbackPartMaxRate(double feedbackPartMaxRate)
    {
       this.feedbackPartMaxRate = feedbackPartMaxRate;
+   }
+
+   @Override
+   public double getFeedbackPartMaxValueParallelToMotion()
+   {
+      return feedbackPartMaxValueParallelToMotion;
+   }
+
+   public void setFeedbackPartMaxValueParallelToMotion(double feedbackPartMaxValueParallelToMotion)
+   {
+      this.feedbackPartMaxValueParallelToMotion = feedbackPartMaxValueParallelToMotion;
+   }
+
+   @Override
+   public double getFeedbackPartMaxValueOrthogonalToMotion()
+   {
+      return feedbackPartMaxValueOrthogonalToMotion;
+   }
+
+   public void setFeedbackPartMaxValueOrthogonalToMotion(double feedbackPartMaxValueOrthogonalToMotion)
+   {
+      this.feedbackPartMaxValueOrthogonalToMotion = feedbackPartMaxValueOrthogonalToMotion;
    }
 }

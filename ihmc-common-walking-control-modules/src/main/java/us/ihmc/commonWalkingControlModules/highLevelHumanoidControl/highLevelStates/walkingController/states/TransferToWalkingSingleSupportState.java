@@ -76,7 +76,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
          if (i == 0)
          {
             adjustTiming(timing);
-            walkingMessageHandler.adjustTimings(0, timing.getSwingTime(), timing.getTouchdownDuration(), timing.getTransferTime());
+            walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTouchdownDuration(), timing.getTransferTime());
          }
 
          balanceManager.addFootstepToPlan(footstep, timing);
