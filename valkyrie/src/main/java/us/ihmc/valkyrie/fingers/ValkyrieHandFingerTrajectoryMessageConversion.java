@@ -123,7 +123,7 @@ public class ValkyrieHandFingerTrajectoryMessageConversion
          messageToPack.getJointspaceTrajectory().set(HumanoidMessageTools.createJointspaceTrajectoryMessage(trajectoryTimes, desiredJointPositions));
          for (int i = 0; i < dimension; i++)
          {
-            messageToPack.getFingerMotorNames().add(valkyrieFingerMotorNames[i].toByte());
+            messageToPack.getValkyrieFingerMotorNames().add(valkyrieFingerMotorNames[i].toByte());
          }
       }
    }

@@ -354,7 +354,7 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
 
             for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
             {
-               int indexOfTrajectory = hasTrajectory(handFingerTrajectoryMessage.getFingerMotorNames(), fingerMotorName);
+               int indexOfTrajectory = hasTrajectory(handFingerTrajectoryMessage.getValkyrieFingerMotorNames(), fingerMotorName);
 
                if (indexOfTrajectory == -1)
                {
@@ -411,7 +411,7 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
       {
          ValkyrieHandJointName handJointName = fingerMotorName.getCorrespondingJointName(i);
 
-         int indexOfTrajectory = hasTrajectory(handFingerTrajectoryMessage.getFingerMotorNames(), fingerMotorName);
+         int indexOfTrajectory = hasTrajectory(handFingerTrajectoryMessage.getValkyrieFingerMotorNames(), fingerMotorName);
 
          Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = handFingerTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
          Object<TrajectoryPoint1DMessage> trajectoryPoints = jointTrajectoryMessages.get(indexOfTrajectory).getTrajectoryPoints();
