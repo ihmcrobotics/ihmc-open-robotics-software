@@ -140,7 +140,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 100000)
    public void testPauseWalkingInitialTransferOneStep() throws SimulationExceededMaximumTimeException
    {
@@ -160,7 +160,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
       drcSimulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(false);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1 * (getSwingTime() + getTransferTime())));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = IntegrationCategory.SLOW)
