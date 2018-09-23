@@ -1412,6 +1412,14 @@ public class HumanoidMessageTools
       return message;
    }
 
+   public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(double[] trajectoryTimes, double[] desiredJointPositions)
+   {
+      JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
+      for (int jointIndex = 0; jointIndex < desiredJointPositions.length; jointIndex++)
+         message.getJointTrajectoryMessages().add().set(createOneDoFJointTrajectoryMessage(trajectoryTimes[jointIndex], desiredJointPositions[jointIndex]));
+      return message;
+   }
+
    /**
     * Create a message using the given joint trajectory points. Set the id of the message to
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.

@@ -86,4 +86,16 @@ public enum ValkyrieFingerMotorName
          return null;
       }
    }
+   
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+   
+   public static ValkyrieFingerMotorName fromByte(byte enumAsByte)
+   {
+      if (enumAsByte == -1)
+         return null;
+      return values[enumAsByte];
+   }
 }
