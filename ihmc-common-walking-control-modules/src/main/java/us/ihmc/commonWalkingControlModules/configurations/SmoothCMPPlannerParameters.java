@@ -94,7 +94,12 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
       copOffsetBoundsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.08));
    }
 
-   public boolean planWithAngularMomentum()
+   public boolean planSwingAngularMomentum()
+   {
+      return false;
+   }
+
+   public boolean planTransferAngularMomentum()
    {
       return false;
    }

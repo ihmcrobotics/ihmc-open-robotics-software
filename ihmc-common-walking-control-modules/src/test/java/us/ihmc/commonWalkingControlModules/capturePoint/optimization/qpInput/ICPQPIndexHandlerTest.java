@@ -1,8 +1,9 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
+package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
 import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPIndexHandler;
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -161,5 +162,10 @@ public class ICPQPIndexHandlerTest
       Assert.assertEquals(8, indexHandler.getNumberOfFreeVariables());
       Assert.assertTrue(indexHandler.hasCMPFeedbackTask());
       Assert.assertTrue(indexHandler.useStepAdjustment());
+   }
+
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(ICPQPIndexHandler.class, ICPQPIndexHandlerTest.class);
    }
 }

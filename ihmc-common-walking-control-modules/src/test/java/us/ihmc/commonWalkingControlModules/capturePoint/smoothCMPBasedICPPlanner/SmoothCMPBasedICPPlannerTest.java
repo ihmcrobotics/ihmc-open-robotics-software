@@ -385,7 +385,13 @@ public class SmoothCMPBasedICPPlannerTest
       plannerParameters = new SmoothCMPPlannerParameters()
       {
          @Override
-         public boolean planWithAngularMomentum()
+         public boolean planSwingAngularMomentum()
+         {
+            return isAMOn;
+         };
+
+         @Override
+         public boolean planTransferAngularMomentum()
          {
             return isAMOn;
          };
