@@ -705,7 +705,13 @@ public class SphereControlToolbox
       }
 
       @Override
-      public boolean planWithAngularMomentum()
+      public boolean planSwingAngularMomentum()
+      {
+         return true;
+      }
+
+      @Override
+      public boolean planTransferAngularMomentum()
       {
          return true;
       }

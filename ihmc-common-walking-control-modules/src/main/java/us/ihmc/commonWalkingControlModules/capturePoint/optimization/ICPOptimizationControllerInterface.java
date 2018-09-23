@@ -64,6 +64,12 @@ public interface ICPOptimizationControllerInterface
    void getDesiredCMP(FramePoint2D desiredCMPToPack);
 
    /**
+    * Gets the desired CoP location computed by the ICP controller.
+    * @param desiredCoPToPack where the CoP location is stored. Modified.
+    */
+   void getDesiredCoP(FramePoint2D desiredCoPToPack);
+
+   /**
     * Gets the desired Footstep location computed by the ICP controller.
     * Only modifies {@param footstepSolutionToPack} if {@link #useStepAdjustment()} is true.
     * @param footstepSolutionToPack desired footstep solution. Modified.
