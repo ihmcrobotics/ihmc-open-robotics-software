@@ -67,19 +67,19 @@ public class ValkyrieFingerSetController implements RobotController
 
    private void mapJointsAndVariables(YoPIDGains gains)
    {
-      for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
+      for (ValkyrieFingerMotorName fingerMotorNameEnum : ValkyrieFingerMotorName.values)
       {
-         String jointName = jointEnum.getJointName(robotSide);
+         String jointName = fingerMotorNameEnum.getJointName(robotSide);
 
          YoDouble desiredAngle = new YoDouble("q_d_" + jointName, registry);
-         desiredAngle.set(fingerStateEstimator.getMotorBasedFingerJointPosition(robotSide, jointEnum.getCorrespondingJointName(1)));
-         desiredAngles.put(jointEnum, desiredAngle);
+         desiredAngle.set(fingerStateEstimator.getMotorBasedFingerJointPosition(robotSide, fingerMotorNameEnum));
+         desiredAngles.put(fingerMotorNameEnum, desiredAngle);
 
          YoDouble desiredVelocity = new YoDouble("qd_d_" + jointName, registry);
-         desiredVelocities.put(jointEnum, desiredVelocity);
+         desiredVelocities.put(fingerMotorNameEnum, desiredVelocity);
 
-         PIDController pidController = new PIDController(jointEnum.getPascalCaseJointName(robotSide), registry);
-         pidControllers.put(jointEnum, pidController);
+         PIDController pidController = new PIDController(fingerMotorNameEnum.getPascalCaseJointName(robotSide), registry);
+         pidControllers.put(fingerMotorNameEnum, pidController);
       }
    }
 
@@ -90,26 +90,25 @@ public class ValkyrieFingerSetController implements RobotController
       fingerSetTrajectoryGenerator.doControl();
 
       // set desired values.
-      for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
+      for (ValkyrieFingerMotorName fingerMotorNameEnum : ValkyrieFingerMotorName.values)
       {
-         desiredAngles.get(jointEnum).set(fingerSetTrajectoryGenerator.getDesired(jointEnum));
-         desiredVelocities.get(jointEnum).set(fingerSetTrajectoryGenerator.getDesiredVelocity(jointEnum));
+         desiredAngles.get(fingerMotorNameEnum).set(fingerSetTrajectoryGenerator.getDesired(fingerMotorNameEnum));
+         desiredVelocities.get(fingerMotorNameEnum).set(fingerSetTrajectoryGenerator.getDesiredVelocity(fingerMotorNameEnum));
       }
 
       // PID control.
-      for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
+      for (ValkyrieFingerMotorName fingerMotorNameEnum : ValkyrieFingerMotorName.values)
       {
-         PIDController pidController = pidControllers.get(jointEnum);
+         PIDController pidController = pidControllers.get(fingerMotorNameEnum);
          pidController.setGains(gains);
-         double fingerJointTransmissionScale = fingerStateEstimator.getFingerJointTransmissionScale(robotSide, jointEnum.getCorrespondingJointName(1));
-         pidController.setProportionalGain(gains.getKp() / fingerJointTransmissionScale);
-         pidController.setIntegralGain(gains.getKi() / fingerJointTransmissionScale);
-         YoEffortJointHandleHolder handle = jointHandles.get(jointEnum);
+         pidController.setProportionalGain(gains.getKp());
+         pidController.setIntegralGain(gains.getKi());
+         YoEffortJointHandleHolder handle = jointHandles.get(fingerMotorNameEnum);
 
-         double q = fingerStateEstimator.getMotorBasedFingerJointPosition(robotSide, jointEnum.getCorrespondingJointName(1));
-         double q_d = desiredAngles.get(jointEnum).getDoubleValue();
+         double q = fingerStateEstimator.getMotorBasedFingerJointPosition(robotSide, fingerMotorNameEnum);
+         double q_d = desiredAngles.get(fingerMotorNameEnum).getDoubleValue();
          double qd = handle.getQd();
-         double qd_d = desiredVelocities.get(jointEnum).getDoubleValue();
+         double qd_d = desiredVelocities.get(fingerMotorNameEnum).getDoubleValue();
 
          double tau = pidController.compute(q, q_d, qd, qd_d, controlDT);
 
@@ -160,7 +159,6 @@ public class ValkyrieFingerSetController implements RobotController
       case CLOSE:
          for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
          {
-
             double desiredFingerMotor = ValkyrieFingerControlParameters.getDesiredFingerMotor(robotSide, fingerMotorName, 1.0);
             if (fingerMotorName.getFingerName() == FingerName.THUMB)
                fingerSetTrajectoryGenerator.appendWayPoint(fingerMotorName, extendedTrajectoryTime, desiredFingerMotor);
@@ -204,6 +202,7 @@ public class ValkyrieFingerSetController implements RobotController
 
          if (indexOfTrajectory == -1)
          {
+            fingerSetTrajectoryGenerator.appendStopPoint(fingerMotorName, fingerStateEstimator.getMotorBasedFingerJointPosition(robotSide, fingerMotorName));
             fingerSetTrajectoryGenerator.appendStopPoint(fingerMotorName,
                                                          fingerStateEstimator.getMotorBasedFingerJointPosition(robotSide,
                                                                                                                fingerMotorName.getCorrespondingJointName(1)));
@@ -224,6 +223,14 @@ public class ValkyrieFingerSetController implements RobotController
          }
       }
       fingerSetTrajectoryGenerator.executeTrajectories();
+   }
+
+   public void initializeDesiredTrajectoryGenerator()
+   {
+      for (ValkyrieFingerMotorName fingerMotorNameEnum : ValkyrieFingerMotorName.values)
+      {
+         desiredAngles.get(fingerMotorNameEnum).set(fingerStateEstimator.getMotorBasedFingerJointPosition(robotSide, fingerMotorNameEnum));
+      }
    }
 
    private int hasTrajectory(us.ihmc.idl.IDLSequence.Byte namesInMessage, ValkyrieFingerMotorName fingerMotorName)

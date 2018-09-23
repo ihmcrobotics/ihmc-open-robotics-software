@@ -162,4 +162,27 @@ public class ValkyrieFingerController implements RobotController
    {
       return name;
    }
+
+   public void goToInitialConfiguration()
+   {
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         ValkyrieFingerSetController controller = fingerSetControllers.get(robotSide);
+         controller.initializeDesiredTrajectoryGenerator();
+      }
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         ValkyrieHandFingerTrajectoryMessage handFingerTrajectoryMessage = new ValkyrieHandFingerTrajectoryMessage();
+         
+         HandConfiguration handConfiguration = HandConfiguration.OPEN;         
+         ValkyrieHandFingerTrajectoryMessageConversion.convertHandConfiguration(robotSide, handConfiguration, handFingerTrajectoryMessage);
+         
+         ValkyrieFingerSetController controller = fingerSetControllers.get(robotSide);
+         if (controller == null)
+            continue;
+         
+         controller.getHandFingerTrajectoryMessage(handFingerTrajectoryMessage);
+      }
+   }
 }
