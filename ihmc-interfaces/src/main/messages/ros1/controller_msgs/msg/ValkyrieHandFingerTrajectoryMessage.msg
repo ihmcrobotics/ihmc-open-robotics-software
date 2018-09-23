@@ -23,7 +23,7 @@ uint32 sequence_id
 int8 robot_side
 
 # Specifies the list of finger motor names that we want to control.
-int8[] finger_motor_names
+int8[] valkyrie_finger_motor_names
 
 # The indexing for the joints refers the list of finger motor names.
 controller_msgs/JointspaceTrajectoryMessage jointspace_trajectory

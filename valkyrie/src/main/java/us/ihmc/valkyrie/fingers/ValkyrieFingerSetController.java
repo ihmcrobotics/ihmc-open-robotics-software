@@ -198,7 +198,7 @@ public class ValkyrieFingerSetController implements RobotController
 
       for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
       {
-         int indexOfTrajectory = hasTrajectory(handFingerTrajectoryMessage.getFingerMotorNames(), fingerMotorName);
+         int indexOfTrajectory = hasTrajectory(handFingerTrajectoryMessage.getValkyrieFingerMotorNames(), fingerMotorName);
 
          if (indexOfTrajectory == -1)
          {

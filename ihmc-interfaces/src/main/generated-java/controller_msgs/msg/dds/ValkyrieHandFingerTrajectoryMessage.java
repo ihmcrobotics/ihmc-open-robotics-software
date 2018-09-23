@@ -30,7 +30,7 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
    /**
             * Specifies the list of finger motor names that we want to control.
             */
-   public us.ihmc.idl.IDLSequence.Byte  finger_motor_names_;
+   public us.ihmc.idl.IDLSequence.Byte  valkyrie_finger_motor_names_;
    /**
             * The indexing for the joints refers the list of finger motor names.
             */
@@ -38,7 +38,7 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
 
    public ValkyrieHandFingerTrajectoryMessage()
    {
-      finger_motor_names_ = new us.ihmc.idl.IDLSequence.Byte (6, "type_9");
+      valkyrie_finger_motor_names_ = new us.ihmc.idl.IDLSequence.Byte (6, "type_9");
 
       jointspace_trajectory_ = new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
    }
@@ -55,7 +55,7 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
 
       robot_side_ = other.robot_side_;
 
-      finger_motor_names_.set(other.finger_motor_names_);
+      valkyrie_finger_motor_names_.set(other.valkyrie_finger_motor_names_);
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.staticCopy(other.jointspace_trajectory_, jointspace_trajectory_);
    }
 
@@ -93,9 +93,9 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
    /**
             * Specifies the list of finger motor names that we want to control.
             */
-   public us.ihmc.idl.IDLSequence.Byte  getFingerMotorNames()
+   public us.ihmc.idl.IDLSequence.Byte  getValkyrieFingerMotorNames()
    {
-      return finger_motor_names_;
+      return valkyrie_finger_motor_names_;
    }
 
 
@@ -129,7 +129,7 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.finger_motor_names_, other.finger_motor_names_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.valkyrie_finger_motor_names_, other.valkyrie_finger_motor_names_, epsilon)) return false;
 
       if (!this.jointspace_trajectory_.epsilonEquals(other.jointspace_trajectory_, epsilon)) return false;
 
@@ -149,7 +149,7 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
-      if (!this.finger_motor_names_.equals(otherMyClass.finger_motor_names_)) return false;
+      if (!this.valkyrie_finger_motor_names_.equals(otherMyClass.valkyrie_finger_motor_names_)) return false;
       if (!this.jointspace_trajectory_.equals(otherMyClass.jointspace_trajectory_)) return false;
 
       return true;
@@ -165,8 +165,8 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
-      builder.append("finger_motor_names=");
-      builder.append(this.finger_motor_names_);      builder.append(", ");
+      builder.append("valkyrie_finger_motor_names=");
+      builder.append(this.valkyrie_finger_motor_names_);      builder.append(", ");
       builder.append("jointspace_trajectory=");
       builder.append(this.jointspace_trajectory_);
       builder.append("}");

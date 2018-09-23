@@ -3,15 +3,17 @@ package us.ihmc.avatar.roughTerrainWalking;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -29,6 +31,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -81,8 +85,6 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       double stepLength = walkingControllerParameters.getSteppingParameters().getDefaultStepLength() / 2.0;
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
-      double finalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      double finalTouchdownTime = walkingControllerParameters.getDefaultTouchdownTime();
 
       FootstepDataListMessage footstepMessage1 = new FootstepDataListMessage();
       footstepMessage1.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
@@ -203,7 +205,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
                expectedStartTimeOfNextStep = time;
             }
 
-            //added this to allow the test to keep going with printouts if you comment out the assert
+            // added this to allow the test to keep going with printouts if you comment out the assert
             boolean success = MathTools.epsilonEquals(expectedStartTimeOfNextStep, time, swingStartTimeEpsilon);
             if (!success)
             {
@@ -262,8 +264,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       String className = getClass().getSimpleName();
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
       drcSimulationTestHelper.createSimulation(className);
       ThreadTools.sleep(1000);
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -289,6 +290,67 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       drcSimulationTestHelper.publishToController(footsteps);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(minimumTransferTime / 2.0));
       checkTransferTimes(scs, minimumTransferTime);
+   }
+
+   @SuppressWarnings("unchecked")
+   public void testPausingWalkDuringLongTransfers() throws SimulationExceededMaximumTimeException
+   {
+      DRCRobotModel robotModel = getRobotModel();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, new FlatGroundEnvironment());
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      ThreadTools.sleep(1000);
+      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+
+      double finalTransferDuration = 0.5;
+      double swingDuration = 0.6;
+      double defaultInitialTransferDuration = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
+      double minTransferDuration = robotModel.getWalkingControllerParameters().getMinimumTransferTime();
+
+      FootstepDataListMessage message = new FootstepDataListMessage();
+      message.setFinalTransferDuration(finalTransferDuration);
+      message.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
+
+      int steps = 10;
+      Random random = new Random(149L);
+
+      List<Double> stepTime = new ArrayList<>();
+      List<Boolean> expectPause = new ArrayList<>();
+
+      for (int i = 0; i < steps; i++)
+      {
+         // If the transfer time is larger then the final transfer and initial transfer duration the robot will pause:
+         double transferSwitchDuration = finalTransferDuration + defaultInitialTransferDuration;
+         double transferDuration = transferSwitchDuration + 2.0 * (transferSwitchDuration - minTransferDuration) * (random.nextDouble() - 0.5);
+
+         RobotSide side = RobotSide.generateRandomRobotSide(random);
+         ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(side);
+         FramePose3D footstepPose = new FramePose3D(soleFrame);
+         footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         FootstepDataMessage footstepMessage = message.getFootstepDataList().add();
+         footstepMessage.setRobotSide(side.toByte());
+         footstepMessage.setTransferDuration(transferDuration);
+         footstepMessage.setSwingDuration(swingDuration);
+         footstepMessage.getLocation().set(footstepPose.getPosition());
+         footstepMessage.getOrientation().set(footstepPose.getOrientation());
+
+         expectPause.add(transferDuration > transferSwitchDuration);
+         stepTime.add(transferDuration + swingDuration);
+      }
+
+      drcSimulationTestHelper.publishToController(message);
+      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
+      YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) drcSimulationTestHelper.getYoVariable("WalkingCurrentState");
+      for (int i = 0; i < steps; i++)
+      {
+         Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(stepTime.get(i)));
+         if (i + 1 < steps)
+         {
+            boolean isPaused = WalkingStateEnum.TO_STANDING == walkingState.getEnumValue();
+            Assert.assertEquals(expectPause.get(i + 1), isPaused);
+         }
+      }
+      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(finalTransferDuration));
    }
 
    private void checkTransferTimes(SimulationConstructionSet scs, double minimumTransferTime)

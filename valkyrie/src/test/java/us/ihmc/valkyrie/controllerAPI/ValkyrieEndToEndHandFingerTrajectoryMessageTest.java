@@ -81,7 +81,7 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
    {
       ValkyrieHandFingerTrajectoryMessage valkyrieFingerTrajectoryMessage = createTrajectoryMessage(robotSide, handConfiguration);
 
-      int numberOfFingers = valkyrieFingerTrajectoryMessage.getFingerMotorNames().size();
+      int numberOfFingers = valkyrieFingerTrajectoryMessage.getValkyrieFingerMotorNames().size();
 
       for (int i = 0; i < numberOfFingers; i++)
       {
@@ -109,7 +109,7 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
 
    private double[] getExpectedHandJointPosition(ValkyrieHandFingerTrajectoryMessage valkyrieFingerTrajectoryMessage, int indexOfFinger, double desiredPosition)
    {
-      ValkyrieFingerMotorName fingerMotorName = ValkyrieFingerMotorName.fromByte(valkyrieFingerTrajectoryMessage.getFingerMotorNames().get(indexOfFinger));
+      ValkyrieFingerMotorName fingerMotorName = ValkyrieFingerMotorName.fromByte(valkyrieFingerTrajectoryMessage.getValkyrieFingerMotorNames().get(indexOfFinger));
       RobotSide robotSide = RobotSide.fromByte(valkyrieFingerTrajectoryMessage.getRobotSide());
 
       ArrayList<OneDegreeOfFreedomJoint> handJoints = getAllHandJoints(robotSide, fingerMotorName);
@@ -126,7 +126,7 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
 
    private double[] getCurrentHandJointPosition(ValkyrieHandFingerTrajectoryMessage valkyrieFingerTrajectoryMessage, int indexOfFinger)
    {
-      ValkyrieFingerMotorName fingerMotorName = ValkyrieFingerMotorName.fromByte(valkyrieFingerTrajectoryMessage.getFingerMotorNames().get(indexOfFinger));
+      ValkyrieFingerMotorName fingerMotorName = ValkyrieFingerMotorName.fromByte(valkyrieFingerTrajectoryMessage.getValkyrieFingerMotorNames().get(indexOfFinger));
       RobotSide robotSide = RobotSide.fromByte(valkyrieFingerTrajectoryMessage.getRobotSide());
 
       ArrayList<OneDegreeOfFreedomJoint> handJoints = getAllHandJoints(robotSide, fingerMotorName);
