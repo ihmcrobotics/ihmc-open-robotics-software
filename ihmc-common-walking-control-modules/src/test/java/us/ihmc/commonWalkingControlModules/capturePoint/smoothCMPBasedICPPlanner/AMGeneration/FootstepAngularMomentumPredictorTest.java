@@ -64,10 +64,15 @@ public class FootstepAngularMomentumPredictorTest
 
    private final SmoothCMPPlannerParameters testParameters = new SmoothCMPPlannerParameters()
    {
-      public boolean planWithAngularMomentum()
+      public boolean planSwingAngularMomentum()
       {
          return true;
-      };
+      }
+
+      public boolean planTransferAngularMomentum()
+      {
+         return true;
+      }
    };
    AngularMomentumEstimationParameters angularMomentumEstimationParameters = testParameters.getAngularMomentumEstimationParameters();
    private final double swingLegMass = angularMomentumEstimationParameters.getPercentageSwingLegMass() * robotMass;

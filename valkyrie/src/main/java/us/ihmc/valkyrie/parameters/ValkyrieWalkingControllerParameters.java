@@ -8,6 +8,7 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
@@ -50,6 +51,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
    private final ValkyrieSteppingParameters steppingParameters;
+   private final ICPOptimizationParameters icpOptimizationParameters;
 
    public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap)
    {
@@ -66,6 +68,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       toeOffParameters = new ValkyrieToeOffParameters(runningOnRealRobot);
       swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
       steppingParameters = new ValkyrieSteppingParameters(target);
+      icpOptimizationParameters = new ValkyrieICPOptimizationParameters(runningOnRealRobot);
 
       // Generated using ValkyrieFullRobotModelVisualizer
       RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
@@ -687,12 +690,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return Double.POSITIVE_INFINITY;
    }
 
-   @Override
-   public boolean useOptimizationBasedICPController()
-   {
-      return false;
-   }
-
    /** {@inheritDoc} */
    @Override
    public LegConfigurationParameters getLegConfigurationParameters()
@@ -734,5 +731,19 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public double getMinSwingTrajectoryClearanceFromStanceFoot()
    {
       return 0.18;
+   }
+   
+   /** {@inheritDoc} */
+   @Override
+   public boolean useOptimizationBasedICPController()
+   {
+      return true;
+   }
+   
+   /** {@inheritDoc} */
+   @Override
+   public ICPOptimizationParameters getICPOptimizationParameters()
+   {
+      return icpOptimizationParameters;
    }
 }

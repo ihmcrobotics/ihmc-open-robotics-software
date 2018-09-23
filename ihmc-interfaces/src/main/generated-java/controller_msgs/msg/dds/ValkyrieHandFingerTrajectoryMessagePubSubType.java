@@ -68,7 +68,7 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getFingerMotorNames().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += (data.getValkyrieFingerMotorNames().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getCdrSerializedSize(data.getJointspaceTrajectory(), current_alignment);
@@ -83,9 +83,9 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
 
       cdr.write_type_9(data.getRobotSide());
 
-      if(data.getFingerMotorNames().size() <= 6)
-      cdr.write_type_e(data.getFingerMotorNames());else
-          throw new RuntimeException("finger_motor_names field exceeds the maximum length");
+      if(data.getValkyrieFingerMotorNames().size() <= 6)
+      cdr.write_type_e(data.getValkyrieFingerMotorNames());else
+          throw new RuntimeException("valkyrie_finger_motor_names field exceeds the maximum length");
 
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.write(data.getJointspaceTrajectory(), cdr);
    }
@@ -96,7 +96,7 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
       	
       data.setRobotSide(cdr.read_type_9());
       	
-      cdr.read_type_e(data.getFingerMotorNames());	
+      cdr.read_type_e(data.getValkyrieFingerMotorNames());	
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.read(data.getJointspaceTrajectory(), cdr);	
 
    }
@@ -106,7 +106,7 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
-      ser.write_type_e("finger_motor_names", data.getFingerMotorNames());
+      ser.write_type_e("valkyrie_finger_motor_names", data.getValkyrieFingerMotorNames());
       ser.write_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
 
    }
@@ -116,7 +116,7 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
-      ser.read_type_e("finger_motor_names", data.getFingerMotorNames());
+      ser.read_type_e("valkyrie_finger_motor_names", data.getValkyrieFingerMotorNames());
       ser.read_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
 
    }

@@ -34,7 +34,7 @@ public class ValkyrieMessageTools
       int dimension = valkyrieFingerMotorNames.length;
 
       for (int i = 0; i < dimension; i++)
-         message.getFingerMotorNames().add(valkyrieFingerMotorNames[i]);
+         message.getValkyrieFingerMotorNames().add(valkyrieFingerMotorNames[i]);
 
       message.getJointspaceTrajectory().set(HumanoidMessageTools.createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions));
 
@@ -66,7 +66,7 @@ public class ValkyrieMessageTools
 
       for (int i = 0; i < dimension; i++)
       {
-         message.getFingerMotorNames().add(valkyrieFingerMotorNames[i]);
+         message.getValkyrieFingerMotorNames().add(valkyrieFingerMotorNames[i]);
          message.getJointspaceTrajectory().getJointTrajectoryMessages().add(HumanoidMessageTools.createOneDoFJointTrajectoryMessage(trajectoryData[i]));
       }
 
@@ -82,7 +82,7 @@ public class ValkyrieMessageTools
    public static void appendDesiredFingerConfiguration(byte motorNameByteToAppend, double time, double desiredConfiguration,
                                                        ValkyrieHandFingerTrajectoryMessage messageToAppend)
    {
-      messageToAppend.getFingerMotorNames().add(motorNameByteToAppend);
+      messageToAppend.getValkyrieFingerMotorNames().add(motorNameByteToAppend);
       Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = messageToAppend.getJointspaceTrajectory().getJointTrajectoryMessages();
       jointTrajectoryMessages.add().set(HumanoidMessageTools.createOneDoFJointTrajectoryMessage(time, desiredConfiguration));
    }
@@ -96,7 +96,7 @@ public class ValkyrieMessageTools
    public static void appendDesiredFingerConfiguration(byte motorNameByteToAppend, SimpleTrajectoryPoint1DList trajectoryData,
                                                        ValkyrieHandFingerTrajectoryMessage messageToAppend)
    {
-      messageToAppend.getFingerMotorNames().add(motorNameByteToAppend);
+      messageToAppend.getValkyrieFingerMotorNames().add(motorNameByteToAppend);
       Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = messageToAppend.getJointspaceTrajectory().getJointTrajectoryMessages();
       jointTrajectoryMessages.add().set(HumanoidMessageTools.createOneDoFJointTrajectoryMessage(trajectoryData));
    }

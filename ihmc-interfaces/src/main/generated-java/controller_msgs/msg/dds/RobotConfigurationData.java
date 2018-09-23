@@ -12,8 +12,9 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class RobotConfigurationData extends Packet<RobotConfigurationData> implements Settable<RobotConfigurationData>, EpsilonComparable<RobotConfigurationData>
 {
-   public static final byte ROBOT_MOTION_STATUS_STANDING = (byte) 0;
-   public static final byte ROBOT_MOTION_STATUS_IN_MOTION = (byte) 1;
+   public static final byte ROBOT_MOTION_STATUS_UNKNOWN = (byte) 0;
+   public static final byte ROBOT_MOTION_STATUS_STANDING = (byte) 1;
+   public static final byte ROBOT_MOTION_STATUS_IN_MOTION = (byte) 2;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
