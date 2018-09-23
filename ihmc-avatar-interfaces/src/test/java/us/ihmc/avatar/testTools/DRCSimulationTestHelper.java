@@ -537,6 +537,11 @@ public class DRCSimulationTestHelper
       this.maxICPPlanError = maxICPPlanError;
    }
 
+   public void setMaxICPPlanError(double maxICPPlanError)
+   {
+      this.maxICPPlanError = maxICPPlanError;
+   }
+
    public void setStartingLocation(DRCStartingLocation startingLocation)
    {
       if (startingLocation != null)
