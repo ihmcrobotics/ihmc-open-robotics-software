@@ -440,6 +440,11 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
          }
       });
    }
+   
+   public double getMotorBasedFingerJointPosition(RobotSide robotSide, ValkyrieFingerMotorName motorName)
+   {
+      return sideDependentFingerMotorHandles.get(robotSide).get(motorName).getQ();
+   }
 
    public double getMotorBasedFingerJointPosition(RobotSide robotSide, ValkyrieHandJointName jointName)
    {

@@ -42,12 +42,12 @@ public class ValkyrieFingerControlParameters
       {
          EnumMap<ValkyrieFingerMotorName, Double> closedDesiredDefinition = closedDesiredDefinitions.get(robotSide);
 
-         closedDesiredDefinition.put(ValkyrieFingerMotorName.ThumbMotorRoll, robotSide.negateIfLeftSide(0.0));
-         closedDesiredDefinition.put(ValkyrieFingerMotorName.ThumbMotorPitch1, robotSide.negateIfLeftSide(0.9));
-         closedDesiredDefinition.put(ValkyrieFingerMotorName.ThumbMotorPitch2, robotSide.negateIfLeftSide(0.9));
-         closedDesiredDefinition.put(ValkyrieFingerMotorName.IndexFingerMotorPitch1, robotSide.negateIfLeftSide(1.9));
-         closedDesiredDefinition.put(ValkyrieFingerMotorName.MiddleFingerMotorPitch1, robotSide.negateIfLeftSide(1.9));
-         closedDesiredDefinition.put(ValkyrieFingerMotorName.PinkyMotorPitch1, robotSide.negateIfLeftSide(1.9));
+         closedDesiredDefinition.put(ValkyrieFingerMotorName.ThumbMotorRoll, (0.0));
+         closedDesiredDefinition.put(ValkyrieFingerMotorName.ThumbMotorPitch1, (0.9));
+         closedDesiredDefinition.put(ValkyrieFingerMotorName.ThumbMotorPitch2, (0.9));
+         closedDesiredDefinition.put(ValkyrieFingerMotorName.IndexFingerMotorPitch1, (1.9));
+         closedDesiredDefinition.put(ValkyrieFingerMotorName.MiddleFingerMotorPitch1, (1.9));
+         closedDesiredDefinition.put(ValkyrieFingerMotorName.PinkyMotorPitch1, (1.9));
       }
    }
 
