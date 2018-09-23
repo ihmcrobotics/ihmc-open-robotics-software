@@ -546,13 +546,13 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private RobotSide lastTransferToSide = RobotSide.LEFT;
 
    @Override
-   public void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide)
+   public void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide, RobotSide previousTransferToSide)
    {
       int footstepIndex = 0;
       int copLocationIndex = 1;
-      boolean transferringToSameSideAsStartingFrom = lastTransferToSide.equals(transferToSide);
+      boolean transferringToSameSideAsStartingFrom = previousTransferToSide == null ? false : previousTransferToSide.equals(transferToSide);
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.get(footstepIndex);
-      lastTransferToSide = transferToSide;
+      lastTransferToSide = previousTransferToSide;
       // Put first CoP as per chicken support computations in case starting from rest
       if (atAStop && numberOfUpcomingFootsteps.getValue() == 0)
       { // this guy is standing
@@ -1394,22 +1394,22 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    /**
     * Initialize the swing and support foot polygons based on footstep index
     */
-   private void initializeFootPolygons(RobotSide defaultSupportSide, int footstepIndex, boolean transferringToSameSideAsStartingFrom)
+   private void initializeFootPolygons(RobotSide upcomingSupportSide, int footstepIndex, boolean transferringToSameSideAsStartingFrom)
    {
       // in final transfer, or in stand
       if (upcomingFootstepsData.size() == 0)
       {
          if (transferringToSameSideAsStartingFrom)
          {
-            setFootPolygonFromCurrentState(swingFootInitialPolygon, defaultSupportSide.getOppositeSide());
-            setFootPolygonFromCurrentState(swingFootPredictedFinalPolygon, defaultSupportSide);
-            setFootPolygonFromCurrentState(supportFootPolygon, defaultSupportSide.getOppositeSide());
+            setFootPolygonFromCurrentState(swingFootInitialPolygon, upcomingSupportSide.getOppositeSide());
+            setFootPolygonFromCurrentState(swingFootPredictedFinalPolygon, upcomingSupportSide);
+            setFootPolygonFromCurrentState(supportFootPolygon, upcomingSupportSide.getOppositeSide());
          }
          else
          {
-            setFootPolygonFromCurrentState(swingFootInitialPolygon, defaultSupportSide.getOppositeSide());
+            setFootPolygonFromCurrentState(swingFootInitialPolygon, upcomingSupportSide.getOppositeSide());
             swingFootPredictedFinalPolygon.setIncludingFrame(swingFootInitialPolygon);
-            setFootPolygonFromCurrentState(supportFootPolygon, defaultSupportSide);
+            setFootPolygonFromCurrentState(supportFootPolygon, upcomingSupportSide);
          }
          return;
       }

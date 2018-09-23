@@ -186,7 +186,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       int numberOfFootsteps = 3;
       sendFootStepMessages(numberOfFootsteps);
       assertTrue("Footstep registration error", testCoPGenerator.getNumberOfFootstepsRegistered() == numberOfFootsteps);
-      testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(true, RobotSide.RIGHT);
+      testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(true, RobotSide.RIGHT, null);
       List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
 
       CoPPointName exitCoPName = plannerParameters.getExitCoPName();
@@ -277,7 +277,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
    {
       sendFootStepMessages(10);
       //testCoPGenerator.setInitialCoPPosition(new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.0, 0.1));
-      testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(false, RobotSide.RIGHT);
+      testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(false, RobotSide.RIGHT, RobotSide.LEFT);
       List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
       CoPPointName exitCoPName = plannerParameters.getExitCoPName();
 
