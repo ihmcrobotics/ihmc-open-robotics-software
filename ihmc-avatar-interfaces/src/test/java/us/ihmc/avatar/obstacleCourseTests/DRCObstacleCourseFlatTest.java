@@ -305,6 +305,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       queuedControllerCommands.add(footstepList);
 
+      double perStepDuration = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime() + getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+      double simulationDuration = footstepList.getNumberOfFootsteps() * perStepDuration + getRobotModel().getWalkingControllerParameters().getDefaultFinalTransferTime() +
+            getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime();
+
       footstepList = new FootstepDataListCommand();
       footstepCommand = new FootstepDataCommand();
 
@@ -334,8 +338,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       queuedControllerCommands.add(footstepList);
 
-      double perStepDuration = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime() + getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
-      double simulationDuration = footstepList.getNumberOfFootsteps() * perStepDuration + getRobotModel().getWalkingControllerParameters().getDefaultFinalTransferTime() +
+      perStepDuration += getRobotModel().getWalkingControllerParameters().getDefaultSwingTime() + getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+      simulationDuration += footstepList.getNumberOfFootsteps() * perStepDuration + getRobotModel().getWalkingControllerParameters().getDefaultFinalTransferTime() +
             getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime();
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationDuration + 1.5);
