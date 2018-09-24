@@ -74,7 +74,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       super.testDropOffsWhileWalking(stepDownHeight);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration =  140, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 680000)
    public void testSteppingDown() throws Exception
    {
