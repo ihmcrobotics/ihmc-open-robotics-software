@@ -128,4 +128,28 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
          }
       };
    }
+
+   @Override
+   public boolean adjustCoPPlanForSingleSupportContinuity()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean adjustInitialCoPPlanForDoubleSupportContinuity()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean adjustEveryCoPPlanForDoubleSupportContinuity()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean adjustCoPPlanForStandingContinuity()
+   {
+      return true;
+   }
 }
