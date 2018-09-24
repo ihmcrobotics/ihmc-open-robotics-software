@@ -40,7 +40,7 @@ import java.util.List;
 
 public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    private static final boolean debug = false;
    private static final int maxNumberOfFootstepsToConsider = 4;
 
@@ -386,7 +386,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          transferToSide = RobotSide.LEFT;
 
       boolean goingToPerformSmoothingAdjustment =
-            maintainContinuity && ((adjustPlanForInitialDSContinuity.getBooleanValue() && isStanding.getBooleanValue()) || adjustPlanForDSContinuity.getBooleanValue());
+            maintainContinuity && (adjustPlanForDSContinuity.getBooleanValue() || (adjustPlanForInitialDSContinuity.getBooleanValue() && (isStanding.getBooleanValue() || isInitialTransfer.getBooleanValue())));
       referenceCoPGenerator.setGoingToPerformDSSmoothingAdjustment(goingToPerformSmoothingAdjustment);
 
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs      
