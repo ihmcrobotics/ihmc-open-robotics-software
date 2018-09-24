@@ -413,10 +413,14 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       message.getFootstepDataList().add().set(footstepData);
       //message.setOffsetFootstepsWithExecutionError(true);
 
+      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
+      double stepDuration = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
+      double addedTime = walkingControllerParameters.getDefaultInitialTransferTime() - walkingControllerParameters.getDefaultTransferTime() + walkingControllerParameters.getDefaultFinalTransferTime();
+
       drcSimulationTestHelper.publishToController(message);
 
-      double timeOverrunFactor = 1.2;
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.getFootstepDataList().size() * 2.0);
+      double timeOverrunFactor = 1.03;
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.getFootstepDataList().size() * stepDuration + addedTime);
 
       assertTrue(success);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());

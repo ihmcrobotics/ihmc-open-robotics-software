@@ -24,11 +24,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -59,7 +55,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    public enum UseSplitFractionFor
    {
       POSITION, TIME
-   };
+   }
 
    private final String fullPrefix;
    // Standard declarations
@@ -425,8 +421,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       int swingTrajectoryIndex = 0;
       int waypointIndex = 0;
       int additionalTransferIndex = 0;
-      for (int i = 0; waypointIndex < copWaypointsViz.size() && i < copLocationWaypoints.size()
-            && !copLocationWaypoints.get(i).getCoPPointList().isEmpty(); i++)
+      for (int i = 0;
+           waypointIndex < copWaypointsViz.size() && i < copLocationWaypoints.size() && !copLocationWaypoints.get(i).getCoPPointList().isEmpty(); i++)
       {
          CoPPointsInFoot copPointsInFoot = copLocationWaypoints.get(i);
          List<CoPPointName> copPointNames = copPointsInFoot.getCoPPointList();
@@ -550,12 +546,13 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private RobotSide lastTransferToSide = RobotSide.LEFT;
 
    @Override
-   public void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide)
+   public void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide, RobotSide previousTransferToSide)
    {
       int footstepIndex = 0;
       int copLocationIndex = 1;
+      boolean transferringToSameSideAsStartingFrom = previousTransferToSide == null ? false : previousTransferToSide.equals(transferToSide);
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.get(footstepIndex);
-      lastTransferToSide = transferToSide;
+      lastTransferToSide = previousTransferToSide;
       // Put first CoP as per chicken support computations in case starting from rest
       if (atAStop && numberOfUpcomingFootsteps.getValue() == 0)
       { // this guy is standing
@@ -614,7 +611,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          // Put first CoP at the exitCoP of the swing foot if not starting from rest
          clearHeldPosition();
          isDoneWalking.set(true);
-         initializeFootPolygons(transferToSide.getOppositeSide(), footstepIndex);
+         initializeFootPolygons(transferToSide.getOppositeSide(), footstepIndex, transferringToSameSideAsStartingFrom);
 
          computeCoPPointLocation(tempPointForCoPCalculation, copPointParametersMap.get(exitCoPName), transferToSide.getOppositeSide(), footstepIndex);
          copLocationWaypoint.addAndSetIncludingFrame(exitCoPName, 0.0, tempPointForCoPCalculation);
@@ -636,7 +633,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
          // compute starting cop
          computeCoPPointLocationForPreviousPlan(tempPointForCoPCalculation, copPointParametersMap.get(exitCoPName),
-                                                upcomingFootstepsData.get(footstepIndex).getSwingSide(), footstepIndex);
+                                                upcomingFootstepsData.get(footstepIndex).getSwingSide(), footstepIndex, transferringToSameSideAsStartingFrom);
          tempPointForCoPCalculation.changeFrame(worldFrame);
          copLocationWaypoint.addAndSetIncludingFrame(exitCoPName, 0.0, tempPointForCoPCalculation);
 
@@ -675,7 +672,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
          // compute cop waypoint location
          computeCoPPointLocationForPreviousPlan(tempPointForCoPCalculation, copPointParametersMap.get(exitCoPName), upcomingFootstepData.getSwingSide(),
-                                                footstepIndex);
+                                                footstepIndex, false);
          tempPointForCoPCalculation.changeFrame(worldFrame);
          copLocationWaypoint.addAndSetIncludingFrame(exitCoPName, 0.0, tempPointForCoPCalculation);
 
@@ -714,9 +711,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    /**
     * Assumes foot polygon and double support polygon has been updated
-    * 
-    * @param framePointToPack
-    * @param transferToSide
     */
    private void computeMidFeetPointWithChickenSupport(FramePoint3D framePointToPack, FrameConvexPolygon2D supportFootPolygon,
                                                       FrameConvexPolygon2D swingFootPolygon)
@@ -729,8 +723,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final FramePoint3D fractionTempMidPoint = new FramePoint3D();
    private final FramePoint3D fractionTempPoint1 = new FramePoint3D();
    private final FramePoint3D fractionTempPoint2 = new FramePoint3D();
-   private void computeMidFeetPointByPositionFraction(FramePoint3D framePointToPack, FrameConvexPolygon2D footPolygonA, FrameConvexPolygon2D footPolygonB,
-                                                      double fraction, ReferenceFrame referenceFrameToConvertTo)
+
+   private void computeMidFeetPointByPositionFraction(FramePoint3D framePointToPack, FrameConvexPolygon2DReadOnly footPolygonA,
+                                                      FrameConvexPolygon2DReadOnly footPolygonB, double fraction, ReferenceFrame referenceFrameToConvertTo)
    {
       getDoubleSupportPolygonCentroid(fractionTempMidPoint, footPolygonA, footPolygonB, referenceFrameToConvertTo);
 
@@ -753,27 +748,49 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
    }
 
-   private void computeCoPPointLocationForPreviousPlan(FramePoint3D framePointToPack, CoPPointPlanningParameters copPointParameters, RobotSide swingSide,
-                                                       int footstepIndex)
+   private void computeCoPPointLocationForPreviousPlan(FramePoint3D exitCoPFromLastPlanToPack, CoPPointPlanningParameters copPointParameters,
+                                                       RobotSide swingSide, int footstepIndex, boolean transferringToSameSideAsStartingFrom)
    {
       CoPPointName copPointName = copPointParameters.getCopPointName();
+      RobotSide previousSupportSide = transferringToSameSideAsStartingFrom ? swingSide.getOppositeSide() : swingSide;
 
-      if (copPointName == exitCoPName && setInitialExitCoPUnderSpecialCases(framePointToPack, swingSide))
+      FrameConvexPolygon2DReadOnly footPolygonOfSideTransferringTo = supportFootPolygon;
+      FrameConvexPolygon2DReadOnly footPolygonOfSideTransferringFrom = transferringToSameSideAsStartingFrom ? supportFootPolygon : swingFootInitialPolygon;
+
+      // checks if the previous CoP goes to a special location. If so, use this guy, and complete the function
+      if (copPointName == exitCoPName && setInitialExitCoPUnderSpecialCases(exitCoPFromLastPlanToPack, previousSupportSide, footPolygonOfSideTransferringTo,
+                                                                            footPolygonOfSideTransferringFrom))
+      {
          return;
-      setInitialCoPPointToPolygonOrigin(framePointToPack, copPointParameters.getSupportPolygonName(), copPointName, footstepIndex);
-      FrameVector2DReadOnly copOffset = copPointParameters.getCoPOffsets(swingSide);
-      double copXOffset = copOffset.getX()
-            + getInitialStepLengthToCoPOffset(copPointParameters.getStepLengthOffsetPolygon(), copPointParameters.getStepLengthToCoPOffsetFactor());
+      }
 
+      // get the base CoP location, which the origin of the side that the robot is transferring from
+      setInitialCoPPointToPolygonOrigin(exitCoPFromLastPlanToPack, copPointParameters.getSupportPolygonName(), copPointName, footstepIndex,
+                                        footPolygonOfSideTransferringTo, footPolygonOfSideTransferringFrom);
+
+      // add the offset, which is the sum of the static offset value, and a ratio of factor of the current step length
+      FrameVector2DReadOnly copOffset = copPointParameters.getCoPOffsets(previousSupportSide);
+      double copXOffset = copOffset.getX() + getInitialStepLengthToCoPOffset(copPointParameters.getStepLengthOffsetPolygon(),
+                                                                             copPointParameters.getStepLengthToCoPOffsetFactor(),
+                                                                             footPolygonOfSideTransferringTo, footPolygonOfSideTransferringFrom);
+
+      // clamp the offset value
       if (copPointParameters.getIsConstrainedToMinMax())
          copXOffset = MathTools.clamp(copXOffset, copPointParameters.getMinCoPOffset().getDoubleValue(), copPointParameters.getMaxCoPOffset().getDoubleValue());
-      framePointToPack.add(copXOffset, copOffset.getY(), 0.0);
+
+      // add the offset to the origin point
+      exitCoPFromLastPlanToPack.add(copXOffset, copOffset.getY(), 0.0);
+
       if (copPointParameters.getIsConstrainedToSupportPolygon())
-         constrainInitialCoPPointToSupportPolygon(framePointToPack, copPointParameters.getSupportPolygonName());
-      framePointToPack.changeFrame(worldFrame);
+         constrainInitialCoPPointToSupportPolygon(exitCoPFromLastPlanToPack, copPointParameters.getSupportPolygonName(), footPolygonOfSideTransferringTo,
+                                                  footPolygonOfSideTransferringFrom);
+
+      exitCoPFromLastPlanToPack.changeFrame(worldFrame);
    }
 
-   private double getInitialStepLengthToCoPOffset(CoPSupportPolygonNames stepLengthOffsetPolygon, double stepLengthToCoPOffsetFactor)
+   private double getInitialStepLengthToCoPOffset(CoPSupportPolygonNames stepLengthOffsetPolygon, double stepLengthToCoPOffsetFactor,
+                                                  FrameConvexPolygon2DReadOnly footPolygonOfSideTransferringTo,
+                                                  FrameConvexPolygon2DReadOnly footPolygonOfSideTransferringFrom)
    {
       switch (stepLengthOffsetPolygon)
       {
@@ -781,13 +798,14 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       case INITIAL_SWING_POLYGON:
          throw new RuntimeException("Unable to constrain given the " + stepLengthOffsetPolygon);
       case FINAL_SWING_POLYGON:
-         tempFramePoint2d.setIncludingFrame(supportFootPolygon.getVertex(EuclidGeometryPolygonTools.findVertexIndex(supportFootPolygon, true, Bound.MAX, Bound.MAX)));
-         convertToFramePointRetainingZ(tempFramePoint1, tempFramePoint2d, swingFootInitialPolygon.getReferenceFrame());
-         return getStepLengthBasedOffset(swingFootInitialPolygon, tempFramePoint1, stepLengthToCoPOffsetFactor);
+         tempFramePoint2d.setIncludingFrame(footPolygonOfSideTransferringTo.getVertex(
+               EuclidGeometryPolygonTools.findVertexIndex(footPolygonOfSideTransferringTo, true, Bound.MAX, Bound.MAX)));
+         convertToFramePointRetainingZ(tempFramePoint1, tempFramePoint2d, footPolygonOfSideTransferringFrom.getReferenceFrame());
+         return getStepLengthBasedOffset(footPolygonOfSideTransferringFrom, tempFramePoint1, stepLengthToCoPOffsetFactor);
       case FINAL_DOUBLE_SUPPORT_POLYGON:
-         getDoubleSupportPolygonCentroid(tempDoubleSupportPolygonCentroid, swingFootInitialPolygon, supportFootPolygon,
-                                         swingFootInitialPolygon.getReferenceFrame());
-         return getStepLengthBasedOffset(swingFootInitialPolygon, tempDoubleSupportPolygonCentroid, stepLengthToCoPOffsetFactor);
+         getDoubleSupportPolygonCentroid(tempDoubleSupportPolygonCentroid, footPolygonOfSideTransferringFrom, footPolygonOfSideTransferringTo,
+                                         footPolygonOfSideTransferringFrom.getReferenceFrame());
+         return getStepLengthBasedOffset(footPolygonOfSideTransferringFrom, tempDoubleSupportPolygonCentroid, stepLengthToCoPOffsetFactor);
       case SUPPORT_FOOT_POLYGON:
       case NULL:
       default:
@@ -795,7 +813,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
    }
 
-   private void constrainInitialCoPPointToSupportPolygon(FramePoint3D copPointToPlan, CoPSupportPolygonNames copSupportPolygon)
+   private void constrainInitialCoPPointToSupportPolygon(FramePoint3D copPointToPlan, CoPSupportPolygonNames copSupportPolygon,
+                                                         FrameConvexPolygon2DReadOnly footPolygonOfSideTransferringTo,
+                                                         FrameConvexPolygon2DReadOnly footPolygonOfSideTransferringFrom)
    {
       switch (copSupportPolygon)
       {
@@ -804,7 +824,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       case INITIAL_SWING_POLYGON:
          throw new RuntimeException("Unable to constrain initial exit CoP using given parameters");
       case FINAL_SWING_POLYGON:
-         constrainToPolygon(copPointToPlan, supportFootPolygon, safeDistanceFromCoPToSupportEdges.getDoubleValue());
+         constrainToPolygon(copPointToPlan, footPolygonOfSideTransferringTo, safeDistanceFromCoPToSupportEdges.getDoubleValue());
          return;
       case FINAL_DOUBLE_SUPPORT_POLYGON:
          //TODO
@@ -814,12 +834,13 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          //return;
       case SUPPORT_FOOT_POLYGON:
       default:
-         constrainToPolygon(copPointToPlan, swingFootInitialPolygon, safeDistanceFromCoPToSupportEdges.getDoubleValue());
+         constrainToPolygon(copPointToPlan, footPolygonOfSideTransferringFrom, safeDistanceFromCoPToSupportEdges.getDoubleValue());
       }
    }
 
    private void setInitialCoPPointToPolygonOrigin(FramePoint3D copPointToPlan, CoPSupportPolygonNames copSupportPolygon, CoPPointName copPointName,
-                                                  int footstepIndex)
+                                                  int footstepIndex, FrameConvexPolygon2DReadOnly footPolygonOfSideTransferringTo,
+                                                  FrameConvexPolygon2DReadOnly footPolygonOfSideTransferringFrom)
    {
       switch (copSupportPolygon)
       {
@@ -828,18 +849,20 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       case INITIAL_SWING_POLYGON:
          throw new RuntimeException("Unable to compute initial exit CoP using given parameters");
       case FINAL_SWING_POLYGON:
-         convertToFramePointRetainingZ(copPointToPlan, supportFootPolygon.getCentroid(), swingFootInitialPolygon.getReferenceFrame());
+         convertToFramePointRetainingZ(copPointToPlan, footPolygonOfSideTransferringTo.getCentroid(), footPolygonOfSideTransferringFrom.getReferenceFrame());
          return;
       case FINAL_DOUBLE_SUPPORT_POLYGON:
          if (copPointName == CoPPointName.MIDFEET_COP)
-            computeMidFeetPointByPositionFraction(copPointToPlan, swingFootInitialPolygon, supportFootPolygon,
-                                                  transferSplitFractions.get(footstepIndex).getDoubleValue(), swingFootInitialPolygon.getReferenceFrame());
+            computeMidFeetPointByPositionFraction(copPointToPlan, footPolygonOfSideTransferringFrom, footPolygonOfSideTransferringTo,
+                                                  transferSplitFractions.get(footstepIndex).getDoubleValue(),
+                                                  footPolygonOfSideTransferringFrom.getReferenceFrame());
          else
-            getDoubleSupportPolygonCentroid(copPointToPlan, swingFootInitialPolygon, supportFootPolygon, swingFootInitialPolygon.getReferenceFrame());
+            getDoubleSupportPolygonCentroid(copPointToPlan, footPolygonOfSideTransferringFrom, footPolygonOfSideTransferringTo,
+                                            footPolygonOfSideTransferringFrom.getReferenceFrame());
          return;
       case SUPPORT_FOOT_POLYGON:
       default:
-         convertToFramePointRetainingZ(copPointToPlan, swingFootInitialPolygon.getCentroid(), swingFootInitialPolygon.getReferenceFrame());
+         convertToFramePointRetainingZ(copPointToPlan, footPolygonOfSideTransferringFrom.getCentroid(), footPolygonOfSideTransferringFrom.getReferenceFrame());
       }
    }
 
@@ -889,7 +912,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
    }
 
-   private static void convertToFramePointRetainingZ(FramePoint3D framePointToPack, FramePoint2DReadOnly framePoint2dToCopy, ReferenceFrame referenceFrameToConvertTo)
+   private static void convertToFramePointRetainingZ(FramePoint3D framePointToPack, FramePoint2DReadOnly framePoint2dToCopy,
+                                                     ReferenceFrame referenceFrameToConvertTo)
    {
       framePointToPack.setIncludingFrame(framePoint2dToCopy, 0.0);
       framePointToPack.changeFrame(referenceFrameToConvertTo);
@@ -1042,8 +1066,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
       computeCoPPointLocation(tempPointForCoPCalculation, copPointParametersMap.get(swingCoPPointList[swingCoPPointList.length - 1]),
                               upcomingFootstepData.getSupportSide(), footstepIndex);
-      copLocationWaypoint.addAndSetIncludingFrame(swingCoPPointList[swingCoPPointList.length - 1],
-                                                  getSwingSegmentTimes(swingCoPPointList.length, footstepIndex), tempPointForCoPCalculation);
+      copLocationWaypoint
+            .addAndSetIncludingFrame(swingCoPPointList[swingCoPPointList.length - 1], getSwingSegmentTimes(swingCoPPointList.length, footstepIndex),
+                                     tempPointForCoPCalculation);
    }
 
    private double getSwingSegmentTimes(int segmentIndex, int footstepIndex)
@@ -1103,8 +1128,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       setCoPPointInPolygon(copPointToPlan, copPointParameters.getSupportPolygonName(), copPointName, footstepIndex);
 
       YoFrameVector2D copOffset = copPointParameters.getCoPOffsets(supportSide);
-      double copXOffset = copOffset.getX()
-            + getStepLengthToCoPOffset(copPointParameters.getStepLengthOffsetPolygon(), copPointParameters.getStepLengthToCoPOffsetFactor());
+      double copXOffset =
+            copOffset.getX() + getStepLengthToCoPOffset(copPointParameters.getStepLengthOffsetPolygon(), copPointParameters.getStepLengthToCoPOffsetFactor());
       if (copPointParameters.getIsConstrainedToMinMax())
          copXOffset = MathTools.clamp(copXOffset, copPointParameters.getMinCoPOffset().getDoubleValue(), copPointParameters.getMaxCoPOffset().getDoubleValue());
       copPointToPlan.add(copXOffset, copOffset.getY(), 0.0);
@@ -1114,18 +1139,44 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       copPointToPlan.changeFrame(worldFrame);
    }
 
-   private boolean setInitialExitCoPUnderSpecialCases(FramePoint3D framePointToPack, RobotSide supportSide)
+   /**
+    * Checks for the following conditions to have been the case:
+    *  - the support polygon is empty
+    *  - the exit CoP goes in the toes
+    *  - the exit CoP goes in the toes when stepping down
+    *
+    * @return true if any of these cases held, at which point the CoP has been placed. False if none of them held, at which it still needs to be computed.
+    */
+   private boolean setInitialExitCoPUnderSpecialCases(FramePoint3D exitCoPToPack, RobotSide previousSupportSide,
+                                                      FrameConvexPolygon2DReadOnly footPolygonOfSideTransferringTo,
+                                                      FrameConvexPolygon2DReadOnly footPolygonOfSideTransferringFrom)
    {
-      return setExitCoPUnderSpecialCases(framePointToPack, swingFootInitialPolygon, supportFootPolygon, supportSide);
+      return setExitCoPUnderSpecialCases(exitCoPToPack, footPolygonOfSideTransferringFrom, footPolygonOfSideTransferringTo, previousSupportSide);
    }
 
-   private boolean setExitCoPUnderSpecialCases(FramePoint3D framePointToPack, RobotSide supportSide)
+   /**
+    * Checks for the following conditions to have been the case:
+    *  - the support polygon is empty
+    *  - the exit CoP goes in the toes
+    *  - the exit CoP goes in the toes when stepping down
+    *
+    * @return true if any of these cases held, at which point the CoP has been placed. False if none of them held, at which it still needs to be computed.
+    */
+   private boolean setExitCoPUnderSpecialCases(FramePoint3D exitCoPToPack, RobotSide supportSide)
    {
-      return setExitCoPUnderSpecialCases(framePointToPack, supportFootPolygon, swingFootPredictedFinalPolygon, supportSide);
+      return setExitCoPUnderSpecialCases(exitCoPToPack, supportFootPolygon, swingFootPredictedFinalPolygon, supportSide);
    }
 
-   private boolean setExitCoPUnderSpecialCases(FramePoint3D framePointToPack, FrameConvexPolygon2D supportFootPolygon, FrameConvexPolygon2D swingFootPolygon,
-                                               RobotSide supportSide)
+   /**
+    * Checks for the following conditions to have been the case:
+    *  - the support polygon is empty
+    *  - the exit CoP goes in the toes
+    *  - the exit CoP goes in the toes when stepping down
+    *
+    * @return true if any of these cases held, at which point the CoP has been placed. False if none of them held, at which it still needs to be computed.
+    */
+   private boolean setExitCoPUnderSpecialCases(FramePoint3D framePointToPack, FrameConvexPolygon2DReadOnly supportFootPolygon,
+                                               FrameConvexPolygon2DReadOnly swingFootPolygon, RobotSide supportSide)
    {
       convertToFramePointRetainingZ(tempFramePoint1, swingFootPolygon.getCentroid(), supportFootPolygon.getReferenceFrame());
       convertToFramePointRetainingZ(tempFramePoint2, supportFootPolygon.getCentroid(), supportFootPolygon.getReferenceFrame());
@@ -1138,9 +1189,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          framePointToPack.changeFrame(worldFrame);
          return true;
       }
-      else if (putExitCoPOnToes.getBooleanValue()
-            && MathTools.isGreaterThanWithPrecision(supportToSwingStepLength, footstepLengthThresholdToPutExitCoPOnToes.getDoubleValue(),
-                                                    Epsilons.ONE_HUNDREDTH))
+      else if (putExitCoPOnToes.getBooleanValue() && MathTools
+            .isGreaterThanWithPrecision(supportToSwingStepLength, footstepLengthThresholdToPutExitCoPOnToes.getDoubleValue(), Epsilons.ONE_HUNDREDTH))
       {
          framePointToPack.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
          framePointToPack.add(supportFootPolygon.getMaxX() - exitCoPForwardSafetyMarginOnToes.getDoubleValue(),
@@ -1148,10 +1198,11 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          framePointToPack.changeFrame(worldFrame);
          return true;
       }
-      else if (putExitCoPOnToesWhenSteppingDown.getBooleanValue() && MathTools.isGreaterThanWithPrecision(-supportToSwingStepHeight, footstepHeightThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue(),
-                                                    Epsilons.ONE_HUNDREDTH)
-            && MathTools.isGreaterThanWithPrecision(supportToSwingStepLength, footstepLengthThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue(),
-                                                    Epsilons.ONE_HUNDREDTH))
+      else if (putExitCoPOnToesWhenSteppingDown.getBooleanValue() && MathTools
+            .isGreaterThanWithPrecision(-supportToSwingStepHeight, footstepHeightThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue(),
+                                        Epsilons.ONE_HUNDREDTH) && MathTools
+            .isGreaterThanWithPrecision(supportToSwingStepLength, footstepLengthThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue(),
+                                        Epsilons.ONE_HUNDREDTH))
       {
          framePointToPack.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
          framePointToPack.add(supportFootPolygon.getMaxX(), 0.0, 0.0);
@@ -1169,11 +1220,13 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       {
       //TODO should all the calculations be done with respect to the support polygon
       case INITIAL_SWING_POLYGON:
-         tempFramePoint2d.setIncludingFrame(swingFootInitialPolygon.getVertex(EuclidGeometryPolygonTools.findVertexIndex(swingFootInitialPolygon, true, Bound.MAX, Bound.MAX)));
+         tempFramePoint2d.setIncludingFrame(
+               swingFootInitialPolygon.getVertex(EuclidGeometryPolygonTools.findVertexIndex(swingFootInitialPolygon, true, Bound.MAX, Bound.MAX)));
          convertToFramePointRetainingZ(tempFramePoint1, tempFramePoint2d, supportFootPolygon.getReferenceFrame());
          return getStepLengthBasedOffset(supportFootPolygon, tempFramePoint1, stepLengthToCoPOffsetFactor);
       case FINAL_SWING_POLYGON:
-         tempFramePoint2d.setIncludingFrame(swingFootPredictedFinalPolygon.getVertex(EuclidGeometryPolygonTools.findVertexIndex(swingFootPredictedFinalPolygon, true, Bound.MAX, Bound.MAX)));
+         tempFramePoint2d.setIncludingFrame(swingFootPredictedFinalPolygon.getVertex(
+               EuclidGeometryPolygonTools.findVertexIndex(swingFootPredictedFinalPolygon, true, Bound.MAX, Bound.MAX)));
          convertToFramePointRetainingZ(tempFramePoint1, tempFramePoint2d, supportFootPolygon.getReferenceFrame());
          return getStepLengthBasedOffset(supportFootPolygon, tempFramePoint1, stepLengthToCoPOffsetFactor);
       case INITIAL_DOUBLE_SUPPORT_POLYGON:
@@ -1222,20 +1275,22 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
    }
 
-   private static double getStepLengthBasedOffset(FrameConvexPolygon2D supportPolygon, FramePoint3D referencePoint, double stepLengthToCoPOffsetFactor)
+   private static double getStepLengthBasedOffset(FrameConvexPolygon2DReadOnly supportPolygon, FramePoint3DReadOnly referencePoint,
+                                                  double stepLengthToCoPOffsetFactor)
    {
+      supportPolygon.checkReferenceFrameMatch(referencePoint);
       return stepLengthToCoPOffsetFactor * (referencePoint.getX() - supportPolygon.getMaxX());
    }
 
    /**
     * Constrains the specified CoP point to a safe distance within the specified support polygon by
     * projection
-    * 
+    *
     * @param copPointToConstrain
     * @param supportFoot
     * @param safeDistanceFromSupportPolygonEdges
     */
-   private void constrainToPolygon(FramePoint3D copPointToConstrain, FrameConvexPolygon2D constraintPolygon, double safeDistanceFromSupportPolygonEdges)
+   private void constrainToPolygon(FramePoint3D copPointToConstrain, FrameConvexPolygon2DReadOnly constraintPolygon, double safeDistanceFromSupportPolygonEdges)
    {
       polygonScaler.scaleConvexPolygon(constraintPolygon, safeDistanceFromSupportPolygonEdges, tempPolygon);
       copPointToConstrain.changeFrame(constraintPolygon.getReferenceFrame());
@@ -1277,12 +1332,13 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    // do not use these temporary variables anywhere except this method to avoid modifying them in unwanted places.
    private final FramePoint3D doubleSupportCentroidTempPoint1 = new FramePoint3D();
    private final FramePoint3D doubleSupportCentroidTempPoint2 = new FramePoint3D();
+
    /**
     * Updates the variable {@code currentDoubleSupportPolygon} from the specified swing and support
     * polygons
     */
-   private void getDoubleSupportPolygonCentroid(FramePoint3D framePointToPack, FrameConvexPolygon2D supportFootPolygon, FrameConvexPolygon2D swingFootPolygon,
-                                                ReferenceFrame referenceFrameToStoreResultIn)
+   private void getDoubleSupportPolygonCentroid(FramePoint3D framePointToPack, FrameConvexPolygon2DReadOnly supportFootPolygon,
+                                                FrameConvexPolygon2DReadOnly swingFootPolygon, ReferenceFrame referenceFrameToStoreResultIn)
    {
       doubleSupportCentroidTempPoint1.setIncludingFrame(swingFootPolygon.getCentroid(), 0.0);
       doubleSupportCentroidTempPoint1.changeFrame(referenceFrameToStoreResultIn);
@@ -1301,8 +1357,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private void updateFootPolygons(RobotSide supportSide, int footstepIndex)
    {
       if (!(upcomingFootstepsData.size() == 0) && footstepIndex >= upcomingFootstepsData.size())
-         throw new RuntimeException("CoP planner: Attempting to plan for footstep index, " + footstepIndex + " with only " + upcomingFootstepsData.size()
-               + " upcoming footsteps");
+         throw new RuntimeException(
+               "CoP planner: Attempting to plan for footstep index, " + footstepIndex + " with only " + upcomingFootstepsData.size() + " upcoming footsteps");
       else if (footstepIndex == plannedFootstepIndex)
          return;
 
@@ -1332,11 +1388,29 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     */
    private void initializeFootPolygons(RobotSide defaultSupportSide, int footstepIndex)
    {
+      initializeFootPolygons(defaultSupportSide, footstepIndex, false);
+   }
+
+   /**
+    * Initialize the swing and support foot polygons based on footstep index
+    */
+   private void initializeFootPolygons(RobotSide upcomingSupportSide, int footstepIndex, boolean transferringToSameSideAsStartingFrom)
+   {
+      // in final transfer, or in stand
       if (upcomingFootstepsData.size() == 0)
       {
-         setFootPolygonFromCurrentState(swingFootInitialPolygon, defaultSupportSide.getOppositeSide());
-         swingFootPredictedFinalPolygon.setIncludingFrame(swingFootInitialPolygon);
-         setFootPolygonFromCurrentState(supportFootPolygon, defaultSupportSide);
+         if (transferringToSameSideAsStartingFrom)
+         {
+            setFootPolygonFromCurrentState(swingFootInitialPolygon, upcomingSupportSide.getOppositeSide());
+            setFootPolygonFromCurrentState(swingFootPredictedFinalPolygon, upcomingSupportSide);
+            setFootPolygonFromCurrentState(supportFootPolygon, upcomingSupportSide.getOppositeSide());
+         }
+         else
+         {
+            setFootPolygonFromCurrentState(swingFootInitialPolygon, upcomingSupportSide.getOppositeSide());
+            swingFootPredictedFinalPolygon.setIncludingFrame(swingFootInitialPolygon);
+            setFootPolygonFromCurrentState(supportFootPolygon, upcomingSupportSide);
+         }
          return;
       }
 
@@ -1444,8 +1518,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       int transferTrajectoryIndex = -1;
       int swingTrajectoryIndex = -1;
 
-      for (int waypointIndex = 0; waypointIndex < copLocationWaypoints.size()
-            && !copLocationWaypoints.get(waypointIndex).getCoPPointList().isEmpty(); waypointIndex++)
+      for (int waypointIndex = 0;
+           waypointIndex < copLocationWaypoints.size() && !copLocationWaypoints.get(waypointIndex).getCoPPointList().isEmpty(); waypointIndex++)
       {
          CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.get(waypointIndex);
          List<CoPPointName> copList = copLocationWaypoint.getCoPPointList();
@@ -1457,13 +1531,13 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             {
                if (trajectoryType == WalkingTrajectoryType.SWING)
                {
-                  swingCoPTrajectories.get(swingTrajectoryIndex).setNextSegment(timeInState, timeInState + currentPoint.getTime(), tempFramePoint1,
-                                                                                currentPoint.getPosition());
+                  swingCoPTrajectories.get(swingTrajectoryIndex)
+                                      .setNextSegment(timeInState, timeInState + currentPoint.getTime(), tempFramePoint1, currentPoint.getPosition());
                }
                else
                {
-                  transferCoPTrajectories.get(transferTrajectoryIndex).setNextSegment(timeInState, timeInState + currentPoint.getTime(), tempFramePoint1,
-                                                                                      currentPoint.getPosition());
+                  transferCoPTrajectories.get(transferTrajectoryIndex)
+                                         .setNextSegment(timeInState, timeInState + currentPoint.getTime(), tempFramePoint1, currentPoint.getPosition());
                }
             }
             else
