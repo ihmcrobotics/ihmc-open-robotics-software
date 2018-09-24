@@ -15,6 +15,7 @@ import controller_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
+import sun.java2d.xr.MutableInteger;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
@@ -42,6 +43,7 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -641,28 +643,27 @@ public class DRCSimulationTestHelper
       final YoDouble desiredICPX = (YoDouble) getYoVariable("desiredICPX");
       final YoDouble desiredICPY = (YoDouble) getYoVariable("desiredICPY");
 
-      final MutableDouble previousDesiredICPX = new MutableDouble();
-      final MutableDouble previousDesiredICPY = new MutableDouble();
+      final Point2D previousDesiredICP = new Point2D();
+      final Point2D desiredICP = new Point2D();
 
-      final MutableBoolean xInitialized = new MutableBoolean(false);
-      final MutableBoolean yInitialized = new MutableBoolean(false);
+      final int ticksToInitialize = 100;
+      final MutableInteger xTicks = new MutableInteger(0);
+      final MutableInteger yTicks = new MutableInteger(0);
 
       desiredICPX.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
-            if (xInitialized.getValue())
+            desiredICP.setX(desiredICPX.getDoubleValue());
+            if (xTicks.getValue() > ticksToInitialize && yTicks.getValue() > ticksToInitialize)
             {
-               assertTrue("ICP plan desired X jumped from " + previousDesiredICPX.getValue() + " to " + desiredICPX.getDoubleValue() + " in one control DT.",
-                          Math.abs(desiredICPX.getDoubleValue() - previousDesiredICPX.getValue()) < maxICPPlanError);
+               assertTrue("ICP plan desired jumped from " + previousDesiredICP + " to " + desiredICP + " in one control DT.",
+                          previousDesiredICP.distance(desiredICP) < maxICPPlanError);
             }
-            else
-            {
-               xInitialized.setValue(true);
-            }
-            previousDesiredICPX.setValue(desiredICPX.getDoubleValue());
+            previousDesiredICP.set(desiredICP);
 
+            xTicks.setValue(xTicks.getValue() + 1);
          }
       });
 
@@ -671,17 +672,15 @@ public class DRCSimulationTestHelper
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
-            if (yInitialized.getValue())
+            desiredICP.setY(desiredICPY.getDoubleValue());
+            if (xTicks.getValue() > ticksToInitialize && yTicks.getValue() > ticksToInitialize)
             {
-               assertTrue("ICP plan desired Y jumped from " + previousDesiredICPY.getValue() + " to " + desiredICPY.getDoubleValue() + " in one control DT.",
-                          Math.abs(desiredICPY.getDoubleValue() - previousDesiredICPY.getValue()) < maxICPPlanError);
+               assertTrue("ICP plan desired jumped from " + previousDesiredICP + " to " + desiredICP + " in one control DT.",
+                          previousDesiredICP.distance(desiredICP) < maxICPPlanError);
             }
-            else
-            {
-               yInitialized.setValue(true);
-            }
-            previousDesiredICPY.setValue(desiredICPY.getDoubleValue());
+            previousDesiredICP.set(desiredICP);
 
+            yTicks.setValue(yTicks.getValue() + 1);
          }
       });
    }
