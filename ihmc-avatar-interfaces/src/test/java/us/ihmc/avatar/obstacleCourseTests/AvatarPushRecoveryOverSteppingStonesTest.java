@@ -124,15 +124,10 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
 
 
       swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
-      double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
       totalMass = fullRobotModel.getTotalMass();
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
 
-      FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
-      footstepDataList.setAreFootstepsAdjustable(true);
-      drcSimulationTestHelper.publishToController(footstepDataList);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
 
@@ -142,6 +137,12 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
    public void testWalkingOverSteppingStonesForwardPush() throws SimulationExceededMaximumTimeException
    {
       setupTest();
+      double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+
+
+      FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
+      footstepDataList.setAreFootstepsAdjustable(true);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
       double delay = 0.5 * swingTime;
@@ -151,7 +152,8 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
+      double stepDuration = swingTime + transferTime;
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footstepDataList.getFootstepDataList().size() * stepDuration + 1.5);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
