@@ -31,7 +31,7 @@ public class SmoothCoMIntegrationToolboxTest
    String namePrefix = "SmoothCoMIntegrationToolboxTest";
    
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
-   private final SmoothCoMIntegrationToolbox comToolbox = new SmoothCoMIntegrationToolbox(icpToolbox);
+   private final SmoothCoMIntegrationToolbox comToolbox = new SmoothCoMIntegrationToolbox();
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -56,7 +56,7 @@ public class SmoothCoMIntegrationToolboxTest
          DenseMatrix64F alphaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F alphaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         comToolbox.calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(omega0, time, alphaCoMPrimeAutomatic, 0, linear3D);
+         SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(omega0, time, alphaCoMPrimeAutomatic, 0, linear3D);
          calculateAlphaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, alphaCoMPrimeManual);
          
 //         PrintTools.debug("A linear calc: " + alphaCoMPrimeAutomatic.toString());
@@ -73,7 +73,7 @@ public class SmoothCoMIntegrationToolboxTest
          DenseMatrix64F betaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F betaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         comToolbox.calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(omega0, time, betaCoMPrimeAutomatic, 0, linear3D);
+         SmoothCoMIntegrationToolbox.calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(omega0, time, betaCoMPrimeAutomatic, 0, linear3D);
          calculateBetaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, betaCoMPrimeManual);
          
 //         PrintTools.debug("B linear calc: " + betaCoMPrimeAutomatic.toString());
@@ -89,7 +89,7 @@ public class SmoothCoMIntegrationToolboxTest
          
          DenseMatrix64F gammaCoMPrimeManual = new DenseMatrix64F(1, 1);
       
-         double gammaCoMPrimeAutomatic = comToolbox.calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, 0, linear3D);
+         double gammaCoMPrimeAutomatic = SmoothCoMIntegrationToolbox.calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, 0, linear3D);
          calculateGammaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, gammaCoMPrimeManual);
          
 //         PrintTools.debug("C linear calc: " + gammaCoMPrimeAutomatic.toString());
@@ -97,7 +97,7 @@ public class SmoothCoMIntegrationToolboxTest
          
          assertEquals(gammaCoMPrimeAutomatic, gammaCoMPrimeManual.get(0), EPSILON);
          
-         double deltaCoMPrimeAutomatic = comToolbox.calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, 0, linear3D);
+         double deltaCoMPrimeAutomatic = SmoothCoMIntegrationToolbox.calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, 0, linear3D);
          double deltaCoMPrimeManual = calculateDeltaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal);
 
          assertEquals(deltaCoMPrimeAutomatic, deltaCoMPrimeManual, EPSILON);
@@ -127,7 +127,7 @@ public class SmoothCoMIntegrationToolboxTest
          DenseMatrix64F dAlphaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F dAlphaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         comToolbox.calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(omega0, time, dAlphaCoMPrimeAutomatic, 1, linear3D);
+         SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(omega0, time, dAlphaCoMPrimeAutomatic, 1, linear3D);
          calculateDAlphaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, dAlphaCoMPrimeManual);
          
 //         PrintTools.debug("dA linear calc: " + dAlphaCoMPrimeAutomatic.toString());
@@ -144,7 +144,7 @@ public class SmoothCoMIntegrationToolboxTest
          DenseMatrix64F dBetaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F dBetaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         comToolbox.calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(omega0, time, dBetaCoMPrimeAutomatic, 1, linear3D);
+         SmoothCoMIntegrationToolbox.calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(omega0, time, dBetaCoMPrimeAutomatic, 1, linear3D);
          calculateDBetaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, dBetaCoMPrimeManual);
          
 //         PrintTools.debug("dB linear calc: " + dBetaCoMPrimeAutomatic.toString());
@@ -160,7 +160,7 @@ public class SmoothCoMIntegrationToolboxTest
          
          DenseMatrix64F dGammaCoMPrimeManual = new DenseMatrix64F(1, 1);
       
-         double dGammaCoMPrimeAutomatic = comToolbox.calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, 1, linear3D);
+         double dGammaCoMPrimeAutomatic = SmoothCoMIntegrationToolbox.calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, 1, linear3D);
          calculateDGammaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, dGammaCoMPrimeManual);
          
 //         PrintTools.debug("dC linear calc: " + dGammaCoMPrimeAutomatic.toString());
@@ -168,7 +168,7 @@ public class SmoothCoMIntegrationToolboxTest
          
          assertEquals(dGammaCoMPrimeAutomatic, dGammaCoMPrimeManual.get(0), EPSILON);
 
-         double dDeltaCoMPrimeAutomatic = comToolbox.calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, 1, linear3D);
+         double dDeltaCoMPrimeAutomatic = SmoothCoMIntegrationToolbox.calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, 1, linear3D);
          double dDeltaCoMPrimeManual = calculateDDeltaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal);
          
 //         PrintTools.debug("dD linear calc: " + dDeltaCoMPrimeAutomatic.toString());
