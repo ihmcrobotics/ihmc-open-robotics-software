@@ -128,6 +128,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    protected final YoFramePoint3D icpPositionToHold = new YoFramePoint3D(namePrefix + "CapturePointPositionToHold", worldFrame, registry);
 
    protected final YoEnum<RobotSide> transferToSide = new YoEnum<>(namePrefix + "TransferToSide", registry, RobotSide.class, true);
+   protected final YoEnum<RobotSide> previousTransferToSide = new YoEnum<>(namePrefix + "PreviousTransferToSide", registry, RobotSide.class, true);
    protected final YoEnum<RobotSide> supportSide = new YoEnum<>(namePrefix + "SupportSide", registry, RobotSide.class, true);
 
    protected final List<YoDouble> swingDurations = new ArrayList<>();
@@ -220,6 +221,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    @Override
    public void setTransferToSide(RobotSide robotSide)
    {
+      previousTransferToSide.set(transferToSide.getEnumValue());
       transferToSide.set(robotSide);
    }
 
@@ -228,7 +230,10 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    public void setTransferFromSide(RobotSide robotSide)
    {
       if (robotSide != null)
+      {
+         previousTransferToSide.set(transferToSide.getEnumValue());
          transferToSide.set(robotSide.getOppositeSide());
+      }
    }
 
    /** {@inheritDoc} */

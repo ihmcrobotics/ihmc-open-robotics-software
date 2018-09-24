@@ -160,7 +160,9 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatEnvironment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(true, 0.02);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
+
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, defaultChickenPercentage);
       YoBoolean doFootExplorationInTransferToStanding = (YoBoolean) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
       doFootExplorationInTransferToStanding.set(false);
@@ -185,6 +187,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       setupCameraForWalkingUpToRamp();
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+
       setUpMomentum();
 
       // take one step forward onto a line contact
@@ -224,7 +227,9 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatEnvironment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(true, 0.02);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
+
       ThreadTools.sleep(1000);
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, defaultChickenPercentage);
       YoBoolean doFootExplorationInTransferToStanding = (YoBoolean) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
@@ -257,6 +262,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       drcSimulationTestHelper.getSimulationConstructionSet().hideAllYoGraphics();
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+
       setUpMomentum();
 
       SideDependentList<String> jointNames = getFootJointNames(fullRobotModel);
@@ -302,7 +308,9 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatEnvironment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(true, 0.02);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
+
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, defaultChickenPercentage);
       YoBoolean doFootExplorationInTransferToStanding = (YoBoolean) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
       doFootExplorationInTransferToStanding.set(false);
@@ -321,6 +329,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+
 
       ArrayList<FootstepDataListMessage> footstepDataLists = createFootstepsWithRandomPredictedContactPointLines(swingTime, transferTime);
 
@@ -352,7 +361,9 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatGroundEnvironment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(false, 10.0);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
+
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper);
 
       HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
@@ -363,6 +374,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+
       SideDependentList<String> jointNames = getFootJointNames(fullRobotModel);
 
       Point3D rootPositionAtStart = new Point3D();
@@ -419,7 +431,9 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatGroundEnvironment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(true, 0.02);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
+
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper);
       YoBoolean doFootExplorationInTransferToStanding = (YoBoolean) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
       doFootExplorationInTransferToStanding.set(false);
@@ -475,13 +489,17 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatGroundEnvironment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(true, 0.02);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
+
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper);
 
       setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      drcSimulationTestHelper.setMaxICPPlanError(0.02);
+
 
       HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
@@ -546,7 +564,9 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatGroundEnvironment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(true, 0.02);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
+
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, defaultChickenPercentage);
       YoBoolean doFootExplorationInTransferToStanding = (YoBoolean) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
       doFootExplorationInTransferToStanding.set(false);
@@ -632,7 +652,9 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatGroundEnvironment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(true, 0.02);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
+
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, 0.2);
 
       setupSupportViz();
@@ -706,6 +728,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
    public void testWalkingForwardWithHalfFootContactChangesContinuousSteps() throws SimulationExceededMaximumTimeException
    {
+//      simulationTestingParameters.setKeepSCSUp(true);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double swingTime = 0.5;
@@ -715,6 +738,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatGroundEnvironment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(false, 10.0);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, 0.15);
 
@@ -775,7 +799,9 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatEnvironment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(false, 10.0);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
+
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper);
 
       // Since the foot support points change while standing, the parts of the support polygon that need to be cut off might have had the CoP in them.

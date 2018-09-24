@@ -253,7 +253,7 @@ public class FootstepAngularMomentumPredictorTest
       isInitialTransfer.set(true);
       isStanding.set(true);
       isDoubleSupport.set(true);
-      copTrajectoryGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), null);
+      copTrajectoryGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), null, null);
       icpTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
 
       copTrajectoryGenerator.initializeForTransfer(0.0);
@@ -338,7 +338,7 @@ public class FootstepAngularMomentumPredictorTest
       isInitialTransfer.set(false);
       isStanding.set(false);
       isDoubleSupport.set(true);
-      copTrajectoryGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), null);
+      copTrajectoryGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), null, null);
       icpTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
 
       copTrajectoryGenerator.initializeForTransfer(0.0);

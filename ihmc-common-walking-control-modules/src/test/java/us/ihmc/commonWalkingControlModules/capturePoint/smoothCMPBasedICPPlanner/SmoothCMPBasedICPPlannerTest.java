@@ -465,11 +465,11 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void testForPlanningConsistency(boolean isDoubleSupport, int stepNumber)
    {
-      List<CoPPointsInFoot> copWaypointsFromPlanner = planner.getCoPWaypoints();
-      List<? extends FramePoint3DReadOnly> icpInitialCornerPointsFromPlanner = planner.getInitialDesiredCapturePointPositions();
-      List<? extends FramePoint3DReadOnly> icpFinalCornerPointsFromPlanner = planner.getFinalDesiredCapturePointPositions();
-      List<? extends FramePoint3DReadOnly> comInitialCornerPointsFromPlanner = planner.getInitialDesiredCenterOfMassPositions();
-      List<? extends FramePoint3DReadOnly> comFinalCornerPointsFromPlanner = planner.getFinalDesiredCenterOfMassPositions();
+      List<CoPPointsInFoot> copWaypointsFromPlanner = planner.referenceCoPGenerator.getWaypoints();
+      List<? extends FramePoint3DReadOnly> icpInitialCornerPointsFromPlanner = planner.referenceICPGenerator.getICPPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> icpFinalCornerPointsFromPlanner = planner.referenceICPGenerator.getICPPositionDesiredFinalList();
+      List<? extends FramePoint3DReadOnly> comInitialCornerPointsFromPlanner = planner.referenceCoMGenerator.getCoMPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> comFinalCornerPointsFromPlanner = planner.referenceCoMGenerator.getCoMPositionDesiredFinalList();
 
       if (!newTestStartConsistency)
       {
@@ -723,8 +723,8 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateCoMCornerPoints()
    {
-      List<? extends FramePoint3DReadOnly> comInitialDesiredPositions = planner.getInitialDesiredCenterOfMassPositions();
-      List<? extends FramePoint3DReadOnly> comFinalDesiredPositions = planner.getFinalDesiredCenterOfMassPositions();
+      List<? extends FramePoint3DReadOnly> comInitialDesiredPositions = planner.referenceCoMGenerator.getCoMPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> comFinalDesiredPositions = planner.referenceCoMGenerator.getCoMPositionDesiredFinalList();
       comInitialCornerPoints.reset();
       for (int i = 0; i < comInitialDesiredPositions.size(); i++)
       {
@@ -739,8 +739,8 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateICPCornerPoints()
    {
-      List<? extends FramePoint3DReadOnly> icpInitialDesiredPositions = planner.getInitialDesiredCapturePointPositions();
-      List<? extends FramePoint3DReadOnly> icpFinalDesiredPositions = planner.getFinalDesiredCapturePointPositions();
+      List<? extends FramePoint3DReadOnly> icpInitialDesiredPositions = planner.referenceICPGenerator.getICPPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> icpFinalDesiredPositions = planner.referenceICPGenerator.getICPPositionDesiredFinalList();
       icpInitialCornerPoints.reset();
       for (int i = 0; i < icpInitialDesiredPositions.size(); i++)
       {
@@ -758,7 +758,7 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateCoPCornerPoints()
    {
-      List<CoPPointsInFoot> copCornerPointPositions = planner.getCoPWaypoints();
+      List<CoPPointsInFoot> copCornerPointPositions = planner.referenceCoPGenerator.getWaypoints();
       copCornerPoints.reset();
       for (int i = 0; i < copCornerPointPositions.size(); i++)
       {
@@ -886,16 +886,16 @@ public class SmoothCMPBasedICPPlannerTest
       planner.getDesiredCenterOfPressurePosition(copPosition);
       planner.getDesiredCenterOfPressureVelocity(copVelocity);
       planner.getDesiredCenterOfPressureVelocity(copAcceleration);
-      planner.getDesiredCentroidalAngularMomentum(centroidalAngularMomentum);
-      planner.getDesiredCentroidalTorque(centroidalTorque);
+      centroidalAngularMomentum.setIncludingFrame(planner.desiredCentroidalAngularMomentum);
+      centroidalTorque.setIncludingFrame(planner.desiredCentroidalTorque);
       planner.getDesiredCentroidalMomentumPivotPosition(cmpPosition);
       planner.getDesiredCentroidalMomentumPivotVelocity(cmpVelocity);
       planner.getDesiredCapturePointPosition(icpPosition);
       planner.getDesiredCapturePointVelocity(icpVelocity);
       planner.getDesiredCapturePointAcceleration(icpAcceleration);
       planner.getDesiredCenterOfMassPosition(comPosition);
-      planner.getDesiredCenterOfMassVelocity(comVelocity);
-      planner.getDesiredCenterOfMassAcceleration(comAcceleration);
+      comVelocity.setIncludingFrame(planner.desiredCoMVelocity);
+      comAcceleration.setIncludingFrame(planner.desiredCoMAcceleration);
    }
 
    private void planFootsteps()

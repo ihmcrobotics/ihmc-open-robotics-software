@@ -41,7 +41,7 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
 
    void initializeForSwing(double currentTime);
 
-   void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide);
+   void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide, RobotSide previousTransferToSide);
 
    void computeReferenceCoPsStartingFromSingleSupport(RobotSide supportSide);
 
