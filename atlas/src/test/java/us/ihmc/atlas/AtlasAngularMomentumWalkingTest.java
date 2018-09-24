@@ -67,42 +67,42 @@ public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkin
       super.testForwardWalk();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testForwardWalkWithCorruptedMomentum() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalkWithCorruptedMomentum();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testForwardWalkTransferDelayedMomentum() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalkTransferDelayedMomentum();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testForwardWalkTransferBigDelayedMomentum() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalkTransferBigDelayedMomentum();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testForwardWalkSwingDelayedMomentum() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalkSwingDelayedMomentum();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testForwardWalkZeroMomentumFirstStep() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalkZeroMomentumFirstStep();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testForwardWalkNoMomentumFirstStep() throws SimulationExceededMaximumTimeException
    {
