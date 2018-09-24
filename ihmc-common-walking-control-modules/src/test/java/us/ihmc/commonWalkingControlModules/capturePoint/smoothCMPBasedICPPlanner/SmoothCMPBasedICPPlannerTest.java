@@ -339,7 +339,12 @@ public class SmoothCMPBasedICPPlannerTest
    @After
    public void cleanUpTest()
    {
-      if (scs != null)
+      if (keepSCSUp)
+      {
+         ThreadTools.sleepForever();
+      }
+
+      if (scs != null && !keepSCSUp)
          scs.closeAndDispose();
    }
 
@@ -423,25 +428,20 @@ public class SmoothCMPBasedICPPlannerTest
    {
       if (!newTestStartDiscontinuity)
       {
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comPositionForDiscontinuity, comPosition, spatialEpsilonForDiscontinuity);
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(icpPositionForDiscontinuity, icpPosition, spatialEpsilonForDiscontinuity);
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(cmpPositionForDiscontinuity, cmpPosition, spatialEpsilonForDiscontinuity * 4);
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(copPositionForDiscontinuity, copPosition, spatialEpsilonForDiscontinuity * 4);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("CoM position doesn't pass continuity test.", comPositionForDiscontinuity, comPosition, spatialEpsilonForDiscontinuity);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("ICP position doesn't pass continuity test.", icpPositionForDiscontinuity, icpPosition, spatialEpsilonForDiscontinuity);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("CMP position doesn't pass continuity test.", cmpPositionForDiscontinuity, cmpPosition, spatialEpsilonForDiscontinuity * 4);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("CoP position doesn't pass continuity test.", copPositionForDiscontinuity, copPosition, spatialEpsilonForDiscontinuity * 4);
       }
       else
+      {
          newTestStartDiscontinuity = false;
-      getPredictedValue(comPositionForDiscontinuity, comPosition, comVelocity, dt);
-      getPredictedValue(icpPositionForDiscontinuity, icpPosition, icpVelocity, dt);
-      getPredictedValue(cmpPositionForDiscontinuity, cmpPosition, cmpVelocity, dt);
-      getPredictedValue(copPositionForDiscontinuity, copPosition, copVelocity, dt);
-   }
+      }
 
-   private void getPredictedValue(FramePoint3D predictedValueToPack, FramePoint3D currentValue, FrameVector3D rateOfChange, double deltaT)
-   {
-      predictedValueToPack.setIncludingFrame(rateOfChange);
-      predictedValueToPack.scale(deltaT);
-      predictedValueToPack.changeFrame(currentValue.getReferenceFrame());
-      predictedValueToPack.add(currentValue);
+      comPositionForDiscontinuity.scaleAdd(dt, comVelocity, comPosition);
+      icpPositionForDiscontinuity.scaleAdd(dt, icpVelocity, icpPosition);
+      cmpPositionForDiscontinuity.scaleAdd(dt, cmpVelocity, cmpPosition);
+      copPositionForDiscontinuity.scaleAdd(dt, copVelocity, copPosition);
    }
 
    private void setupConsistencyChecks()
