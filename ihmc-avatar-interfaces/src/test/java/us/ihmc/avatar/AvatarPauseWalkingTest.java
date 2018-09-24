@@ -146,7 +146,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    @Test(timeout = 100000)
    public void testPauseWalkingInitialTransferOneStep() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
