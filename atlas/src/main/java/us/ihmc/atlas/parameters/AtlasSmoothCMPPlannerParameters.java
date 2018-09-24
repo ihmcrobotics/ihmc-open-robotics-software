@@ -144,7 +144,7 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    @Override
    public boolean adjustEveryCoPPlanForDoubleSupportContinuity()
    {
-      return false;
+      return true;
    }
 
    @Override
