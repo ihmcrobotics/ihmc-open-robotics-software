@@ -213,8 +213,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       this.putExitCoPOnToes = new YoBoolean(fullPrefix + "PutExitCoPOnToes", parentRegistry);
       this.putExitCoPOnToesWhenSteppingDown = new YoBoolean(fullPrefix + "PutExitCoPOnToesWhenSteppingDown", parentRegistry);
       this.planIsAvailable = new YoBoolean(fullPrefix + "CoPPlanAvailable", parentRegistry);
-      this.goingToPerformInitialDSSmoothingAdjustment = new YoBoolean(fullPrefix + "GoingToPerformInitialDSSmoothingAdjustment", parentRegistry);
-      this.goingToPerformInitialSSSmoothingAdjustment = new YoBoolean(fullPrefix + "GoingToPerformInitialSSSmoothingAdjustment", parentRegistry);
+      this.goingToPerformInitialDSSmoothingAdjustment = new YoBoolean("GoingToPerformInitialDSSmoothingAdjustment", parentRegistry);
+      this.goingToPerformInitialSSSmoothingAdjustment = new YoBoolean("GoingToPerformInitialSSSmoothingAdjustment", parentRegistry);
 
       for (CoPPointName pointName : CoPPointName.values)
       {
