@@ -15,7 +15,7 @@ import controller_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
-import sun.java2d.xr.MutableInteger;
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
@@ -647,8 +647,8 @@ public class DRCSimulationTestHelper
       final Point2D desiredICP = new Point2D();
 
       final int ticksToInitialize = 100;
-      final MutableInteger xTicks = new MutableInteger(0);
-      final MutableInteger yTicks = new MutableInteger(0);
+      final MutableInt xTicks = new MutableInt(0);
+      final MutableInt yTicks = new MutableInt(0);
 
       desiredICPX.addVariableChangedListener(new VariableChangedListener()
       {
