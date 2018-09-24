@@ -12,6 +12,8 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -144,11 +146,22 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    @Test(timeout = 100000)
    public void testPauseWalkingInitialTransferOneStep() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
-      sendFootstepCommand(0.0, 1);
+      FramePoint3D stepLocation = new FramePoint3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT));
+      stepLocation.changeFrame(ReferenceFrame.getWorldFrame());
+
+      double swingTime = 1.0;
+
+      FootstepDataListMessage footstepMessage = HumanoidMessageTools.createFootstepDataListMessage(swingTime, getTransferTime());
+      footstepMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, stepLocation, new Quaternion()));
+      footstepMessage.setFinalTransferDuration(getFinalTransferDuration());
+
+      drcSimulationTestHelper.publishToController(footstepMessage);
+
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
@@ -160,7 +173,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
       drcSimulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(false);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1 * (getSwingTime() + getTransferTime())));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingTime + getTransferTime() + getFinalTransferDuration()));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = IntegrationCategory.SLOW)
