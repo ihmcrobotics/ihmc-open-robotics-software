@@ -1,7 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
-import us.ihmc.commons.MathTools;
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -16,9 +17,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Tim Seyde
@@ -70,8 +68,7 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
    private final YoDouble startTimeOfCurrentPhase;
    private final YoDouble localTimeInCurrentPhase;
 
-   private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
-   private final SmoothCoMIntegrationToolbox comToolbox = new SmoothCoMIntegrationToolbox(icpToolbox);
+   private final SmoothCoMIntegrationToolbox comToolbox = new SmoothCoMIntegrationToolbox();
 
    public ReferenceCoMTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider,
                                           YoBoolean isInitialTransfer, YoBoolean isDoubleSupport, YoVariableRegistry registry)
