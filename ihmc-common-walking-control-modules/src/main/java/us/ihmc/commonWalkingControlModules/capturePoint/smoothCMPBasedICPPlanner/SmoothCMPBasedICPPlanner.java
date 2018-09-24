@@ -40,16 +40,11 @@ import java.util.List;
 
 public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    private static final boolean debug = false;
    private static final int maxNumberOfFootstepsToConsider = 4;
 
    private static final double ZERO_TIME = 0.0;
-
-   private boolean adjustICPForSingleSupport = false;
-   private boolean adjustICPForInitialDoubleSupport = true;
-   private boolean adjustICPForEachDoubleSupport = true;
-   private boolean adjustICPWhenGoingToStand = true;
 
    /** Desired velocity for the Center of Mass (CoM) */
    final YoFrameVector3D desiredCoMVelocity = new YoFrameVector3D(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
@@ -64,6 +59,11 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    final YoFrameVector3D desiredCentroidalAngularMomentum = new YoFrameVector3D(namePrefix + "DesiredCentroidalAngularMomentum", worldFrame, registry);
    /** Desired Centroidal Torque (CT) */
    final YoFrameVector3D desiredCentroidalTorque = new YoFrameVector3D(namePrefix + "DesiredCentroidalTorque", worldFrame, registry);
+
+   private final YoBoolean adjustPlanForSSContinuity = new YoBoolean("adjustCoPPlanForSSContinuity", registry);
+   private final YoBoolean adjustPlanForDSContinuity = new YoBoolean("adjustEveryCoPPlanForDSContinuity", registry);
+   private final YoBoolean adjustPlanForInitialDSContinuity = new YoBoolean("adjustInitialCoPPlanForDSContinuity", registry);
+   private final YoBoolean adjustPlanForStandingContinuity = new YoBoolean("adjustCoPPlanForInitialDSContinuity", registry);
 
    final ReferenceCoPTrajectoryGenerator referenceCoPGenerator;
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
@@ -170,9 +170,13 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
          referenceCoPGenerator.initializeParameters(smoothCMPPlannerParameters);
          referenceCMPGenerator.setGroundReaction(robotMass * gravityZ);
-         //FIXME have the angular momentum parameters be passed into or as part of the ICP Planner parameters to the trajectory generator
          angularMomentumTrajectoryGenerator.initializeParameters(smoothCMPPlannerParameters, robotMass, gravityZ);
          defaultSwingDurationShiftFraction.set(smoothCMPPlannerParameters.getSwingDurationShiftFraction());
+
+         adjustPlanForSSContinuity.set(smoothCMPPlannerParameters.adjustCoPPlanForSingleSupportContinuity());
+         adjustPlanForDSContinuity.set(smoothCMPPlannerParameters.adjustEveryCoPPlanForDoubleSupportContinuity());
+         adjustPlanForInitialDSContinuity.set(smoothCMPPlannerParameters.adjustInitialCoPPlanForDoubleSupportContinuity());
+         adjustPlanForStandingContinuity.set(smoothCMPPlannerParameters.adjustCoPPlanForStandingContinuity());
       }
       else
       {
@@ -320,7 +324,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
-      updateTransferPlan(adjustICPWhenGoingToStand);
+      updateTransferPlan(adjustPlanForStandingContinuity.getBooleanValue());
    }
 
    /** {@inheritDoc} */
@@ -382,7 +386,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          transferToSide = RobotSide.LEFT;
 
       boolean goingToPerformSmoothingAdjustment =
-            maintainContinuity && ((adjustICPForInitialDoubleSupport && isStanding.getBooleanValue()) || adjustICPForEachDoubleSupport);
+            maintainContinuity && (adjustPlanForDSContinuity.getBooleanValue() || (adjustPlanForInitialDSContinuity.getBooleanValue() && (isStanding.getBooleanValue() || isInitialTransfer.getBooleanValue())));
       referenceCoPGenerator.setGoingToPerformDSSmoothingAdjustment(goingToPerformSmoothingAdjustment);
 
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs      
@@ -435,7 +439,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       clearPlanWithoutClearingPlannedFootsteps();
       RobotSide supportSide = this.supportSide.getEnumValue();
 
-      boolean goingToPerformSmoothingAdjustment = maintainContinuity && adjustICPForSingleSupport;
+      boolean goingToPerformSmoothingAdjustment = maintainContinuity && adjustPlanForSSContinuity.getBooleanValue();
       referenceCoPGenerator.setGoingToPerformSSSmoothingAdjustment(goingToPerformSmoothingAdjustment);
 
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs
@@ -679,6 +683,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    void ensureContinuityEnteringEachTransfer(boolean ensureContinuity)
    {
-      this.adjustICPForEachDoubleSupport = ensureContinuity;
+      this.adjustPlanForDSContinuity.set(ensureContinuity);
    }
 }
