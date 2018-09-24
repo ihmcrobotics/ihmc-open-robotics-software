@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -42,6 +44,12 @@ public class SmoothCapturePointAdjustmentToolboxTest
       icpQuantityInitialConditionList.add(new FramePoint3D());
       while(icpQuantityInitialConditionList.size() < SmoothCapturePointAdjustmentToolbox.defaultSize)
          icpQuantityInitialConditionList.add(new FrameVector3D());
+   }
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.4)

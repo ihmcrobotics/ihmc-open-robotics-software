@@ -7,6 +7,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -25,6 +27,7 @@ public class QuadrupedRuntimeEnvironment
    private final GlobalDataProducer globalDataProducer;
    private final JointDesiredOutputList jointDesiredOutputList;
    private final ControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
+   private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
 
    private final double gravityZ;
 
@@ -38,7 +41,7 @@ public class QuadrupedRuntimeEnvironment
                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
                                       YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead, GlobalDataProducer globalDataProducer,
                                       QuadrantDependentList<ContactablePlaneBody> contactableFeet, List<ContactablePlaneBody> contactablePlaneBodies,
-                                      QuadrantDependentList<FootSwitchInterface> footSwitches, double gravity)
+                                      CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches, double gravity)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -53,6 +56,7 @@ public class QuadrupedRuntimeEnvironment
       this.contactablePlaneBodies = contactablePlaneBodies;
       this.gravityZ = Math.abs(gravity);
       this.jointDesiredOutputList = jointDesiredOutputList;
+      this.centerOfMassDataHolder = centerOfMassDataHolder;
    }
 
    public double getControlDT()
@@ -118,5 +122,10 @@ public class QuadrupedRuntimeEnvironment
    public double getGravity()
    {
       return gravityZ;
+   }
+
+   public CenterOfMassDataHolderReadOnly getCenterOfMassDataHolder()
+   {
+      return centerOfMassDataHolder;
    }
 }

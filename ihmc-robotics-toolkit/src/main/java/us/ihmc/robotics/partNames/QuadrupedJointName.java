@@ -13,23 +13,30 @@ public enum QuadrupedJointName
    DISTAL_NECK_ROLL(NeckJointName.DISTAL_NECK_ROLL),
 
    /* Leg joints */
+   FRONT_LEFT_HIP_YAW(RobotQuadrant.FRONT_LEFT, LegJointName.HIP_YAW),
    FRONT_LEFT_HIP_ROLL(RobotQuadrant.FRONT_LEFT, LegJointName.HIP_ROLL),
    FRONT_LEFT_HIP_PITCH(RobotQuadrant.FRONT_LEFT, LegJointName.HIP_PITCH),
    FRONT_LEFT_KNEE_PITCH(RobotQuadrant.FRONT_LEFT, LegJointName.KNEE_PITCH),
+   FRONT_LEFT_ANKLE_ROLL(RobotQuadrant.FRONT_LEFT, LegJointName.ANKLE_ROLL),
    FRONT_LEFT_ANKLE_PITCH(RobotQuadrant.FRONT_LEFT, LegJointName.ANKLE_PITCH),
+   FRONT_RIGHT_HIP_YAW(RobotQuadrant.FRONT_RIGHT, LegJointName.HIP_YAW),
    FRONT_RIGHT_HIP_ROLL(RobotQuadrant.FRONT_RIGHT, LegJointName.HIP_ROLL),
    FRONT_RIGHT_HIP_PITCH(RobotQuadrant.FRONT_RIGHT, LegJointName.HIP_PITCH),
    FRONT_RIGHT_KNEE_PITCH(RobotQuadrant.FRONT_RIGHT, LegJointName.KNEE_PITCH),
+   FRONT_RIGHT_ANKLE_ROLL(RobotQuadrant.FRONT_RIGHT, LegJointName.ANKLE_ROLL),
    FRONT_RIGHT_ANKLE_PITCH(RobotQuadrant.FRONT_RIGHT, LegJointName.ANKLE_PITCH),
+   HIND_RIGHT_HIP_YAW(RobotQuadrant.HIND_RIGHT, LegJointName.HIP_YAW),
    HIND_RIGHT_HIP_ROLL(RobotQuadrant.HIND_RIGHT, LegJointName.HIP_ROLL),
    HIND_RIGHT_HIP_PITCH(RobotQuadrant.HIND_RIGHT, LegJointName.HIP_PITCH),
    HIND_RIGHT_KNEE_PITCH(RobotQuadrant.HIND_RIGHT, LegJointName.KNEE_PITCH),
+   HIND_RIGHT_ANKLE_ROLL(RobotQuadrant.HIND_RIGHT, LegJointName.ANKLE_ROLL),
    HIND_RIGHT_ANKLE_PITCH(RobotQuadrant.HIND_RIGHT, LegJointName.ANKLE_PITCH),
+   HIND_LEFT_HIP_YAW(RobotQuadrant.HIND_LEFT, LegJointName.HIP_YAW),
    HIND_LEFT_HIP_ROLL(RobotQuadrant.HIND_LEFT, LegJointName.HIP_ROLL),
    HIND_LEFT_HIP_PITCH(RobotQuadrant.HIND_LEFT, LegJointName.HIP_PITCH),
    HIND_LEFT_KNEE_PITCH(RobotQuadrant.HIND_LEFT, LegJointName.KNEE_PITCH),
+   HIND_LEFT_ANKLE_ROLL(RobotQuadrant.HIND_LEFT, LegJointName.ANKLE_ROLL),
    HIND_LEFT_ANKLE_PITCH(RobotQuadrant.HIND_LEFT, LegJointName.ANKLE_PITCH),
-   
    ;
    
    public static final QuadrupedJointName[] values = values();
@@ -72,6 +79,11 @@ public enum QuadrupedJointName
       }
    }
 
+   public LegJointName getLegJointName()
+   {
+      return legJointName;
+   }
+
    @SuppressWarnings("incomplete-switch")
    public static QuadrupedJointName getName(RobotQuadrant quadrant, LegJointName legJointName)
    {
@@ -80,6 +92,8 @@ public enum QuadrupedJointName
       case FRONT_LEFT:
          switch(legJointName)
          {
+         case HIP_YAW:
+            return FRONT_LEFT_HIP_YAW;
          case HIP_ROLL:
             return FRONT_LEFT_HIP_ROLL;
          case HIP_PITCH:
@@ -88,11 +102,15 @@ public enum QuadrupedJointName
             return FRONT_LEFT_KNEE_PITCH;
          case ANKLE_PITCH:
             return FRONT_LEFT_ANKLE_PITCH;
+         case ANKLE_ROLL:
+            return FRONT_LEFT_ANKLE_ROLL;
          }
          break;
       case FRONT_RIGHT:
          switch(legJointName)
          {
+         case HIP_YAW:
+            return FRONT_RIGHT_HIP_YAW;
          case HIP_ROLL:
             return FRONT_RIGHT_HIP_ROLL;
          case HIP_PITCH:
@@ -101,11 +119,15 @@ public enum QuadrupedJointName
             return FRONT_RIGHT_KNEE_PITCH;
          case ANKLE_PITCH:
             return FRONT_RIGHT_ANKLE_PITCH;
+         case ANKLE_ROLL:
+            return FRONT_RIGHT_ANKLE_ROLL;
          }
          break;
       case HIND_RIGHT:
          switch(legJointName)
          {
+         case HIP_YAW:
+            return HIND_RIGHT_HIP_YAW;
          case HIP_ROLL:
             return HIND_RIGHT_HIP_ROLL;
          case HIP_PITCH:
@@ -114,11 +136,15 @@ public enum QuadrupedJointName
             return HIND_RIGHT_KNEE_PITCH;
          case ANKLE_PITCH:
             return HIND_RIGHT_ANKLE_PITCH;
+         case ANKLE_ROLL:
+            return HIND_RIGHT_ANKLE_ROLL;
          }
          break;
       case HIND_LEFT:
          switch(legJointName)
          {
+         case HIP_YAW:
+            return HIND_LEFT_HIP_YAW;
          case HIP_ROLL:
             return HIND_LEFT_HIP_ROLL;
          case HIP_PITCH:
@@ -127,6 +153,8 @@ public enum QuadrupedJointName
             return HIND_LEFT_KNEE_PITCH;
          case ANKLE_PITCH:
             return HIND_LEFT_ANKLE_PITCH;
+         case ANKLE_ROLL:
+            return HIND_LEFT_ANKLE_ROLL;
          }
          break;
       }

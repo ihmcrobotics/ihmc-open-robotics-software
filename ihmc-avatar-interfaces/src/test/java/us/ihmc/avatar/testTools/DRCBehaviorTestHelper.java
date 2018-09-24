@@ -1,10 +1,5 @@
 package us.ihmc.avatar.testTools;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import controller_msgs.msg.dds.BehaviorControlModePacket;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
@@ -26,11 +21,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
-import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
-import us.ihmc.humanoidBehaviors.utilities.StopThreadUpdatable;
-import us.ihmc.humanoidBehaviors.utilities.TimeBasedStopThreadUpdatable;
-import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
-import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.*;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
@@ -52,6 +43,12 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Optional;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Do not execute more than one behavior thread at a time. Instead, run multiple behaviors in a
@@ -131,10 +128,18 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       capturePointUpdatable = createCapturePointUpdateable(yoGraphicsListRegistry);
-      wristForceSensorUpdatables = createWristForceSensorUpdateables();
       updatables.add(capturePointUpdatable);
-      updatables.add(wristForceSensorUpdatables.get(RobotSide.LEFT));
-      updatables.add(wristForceSensorUpdatables.get(RobotSide.RIGHT));
+
+      if (drcRobotModel.getSensorInformation().getWristForceSensorNames() != null && !drcRobotModel.getSensorInformation().getWristForceSensorNames().isEmpty())
+      {
+         wristForceSensorUpdatables = createWristForceSensorUpdateables();
+         updatables.add(wristForceSensorUpdatables.get(RobotSide.LEFT));
+         updatables.add(wristForceSensorUpdatables.get(RobotSide.RIGHT));
+      }
+      else
+      {
+         wristForceSensorUpdatables = null;
+      }
 
       behaviorDispatcher = setupBehaviorDispatcher(fullRobotModel, ros2Node, robotDataReceiver, yoGraphicsListRegistry);
 
@@ -185,14 +190,17 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return capturePointUpdatable;
    }
 
-   public WristForceSensorFilteredUpdatable getWristForceSensorUpdatable(RobotSide robotSide)
+   public Optional<WristForceSensorFilteredUpdatable> getWristForceSensorUpdatable(RobotSide robotSide)
    {
-      return wristForceSensorUpdatables.get(robotSide);
+      if (wristForceSensorUpdatables == null)
+         return Optional.empty();
+
+      return Optional.ofNullable(wristForceSensorUpdatables.get(robotSide));
    }
 
-   public SideDependentList<WristForceSensorFilteredUpdatable> getWristForceSensorUpdatableSideDependentList()
+   public Optional<SideDependentList<WristForceSensorFilteredUpdatable>> getWristForceSensorUpdatableSideDependentList()
    {
-      return wristForceSensorUpdatables;
+      return Optional.ofNullable(wristForceSensorUpdatables);
    }
 
    public void updateRobotModel()
@@ -244,8 +252,12 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
                                                                               yoGraphicsListRegistry);
 
       ret.addUpdatable(capturePointUpdatable);
-      ret.addUpdatable(wristForceSensorUpdatables.get(RobotSide.LEFT));
-      ret.addUpdatable(wristForceSensorUpdatables.get(RobotSide.RIGHT));
+
+      if (wristForceSensorUpdatables != null)
+      {
+         ret.addUpdatable(wristForceSensorUpdatables.get(RobotSide.LEFT));
+         ret.addUpdatable(wristForceSensorUpdatables.get(RobotSide.RIGHT));
+      }
 
       ret.finalizeStateMachine();
 

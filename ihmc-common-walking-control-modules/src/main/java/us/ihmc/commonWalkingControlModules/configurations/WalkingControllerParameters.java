@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetect
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -460,6 +461,17 @@ public abstract class WalkingControllerParameters
    public abstract MomentumOptimizationSettings getMomentumOptimizationSettings();
 
    /**
+    * Returns the {@link FeedbackControllerSettings} for this robot. These parameters additional
+    * configuration options for the the {@code WholeBodyFeedbackController}.
+    * 
+    * @return the feedback controller settings.
+    */
+   public FeedbackControllerSettings getFeedbackControllerSettings()
+   {
+      return null;
+   }
+
+   /**
     * Returns the {@link ICPAngularMomentumModifierParameters} for this robot. The parameters are used when
     * angular momentum rates are considered in the ICP planner.
     */
@@ -799,5 +811,14 @@ public abstract class WalkingControllerParameters
    public AnkleIKSolver getAnkleIKSolver()
    {
       return null;
+   }
+
+   /**
+    * A boolean to determine whether the CoM height manager should be created or not. If this returns true
+    * the robot will use a rigid body manager to control the pelvis height only.
+    */
+   public boolean usePelvisHeightControllerOnly()
+   {
+      return false;
    }
 }

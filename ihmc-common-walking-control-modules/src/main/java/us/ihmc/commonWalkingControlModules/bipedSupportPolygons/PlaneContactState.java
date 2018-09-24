@@ -44,4 +44,6 @@ public interface PlaneContactState
    public abstract void notifyContactStateHasChanged();
 
    public abstract boolean pollContactHasChangedNotification();
+
+   public abstract boolean peekContactHasChangedNotification();
 }

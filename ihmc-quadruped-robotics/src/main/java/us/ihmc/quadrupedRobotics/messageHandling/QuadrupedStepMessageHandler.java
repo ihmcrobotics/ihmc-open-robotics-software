@@ -2,16 +2,15 @@ package us.ihmc.quadrupedRobotics.messageHandling;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
-import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -25,7 +24,6 @@ import java.util.List;
 
 public class QuadrupedStepMessageHandler
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int STEP_QUEUE_SIZE = 40;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -33,6 +31,7 @@ public class QuadrupedStepMessageHandler
    private final QuadrantDependentList<RecyclingArrayDeque<SoleTrajectoryCommand>> upcomingFootTrajectoryCommandList = new QuadrantDependentList<>();
 
    private final YoInteger numberOfStepsToRecover = new YoInteger("numberOfStepsToRecover", registry);
+   private final YoDouble initialTransferDurationForShifting = new YoDouble("initialTransferDurationForShifting", registry);
 
    private final ArrayList<YoQuadrupedTimedStep> activeSteps = new ArrayList<>();
    private final YoDouble robotTimestamp;
@@ -45,7 +44,9 @@ public class QuadrupedStepMessageHandler
    public QuadrupedStepMessageHandler(YoDouble robotTimestamp, YoVariableRegistry parentRegistry)
    {
       this.robotTimestamp = robotTimestamp;
-      this.receivedStepSequence = new YoPreallocatedList<>("receivedStepSequence", registry, STEP_QUEUE_SIZE, YoQuadrupedTimedStep::new);
+      this.receivedStepSequence = new YoPreallocatedList<>(YoQuadrupedTimedStep.class, "receivedStepSequence", STEP_QUEUE_SIZE, registry);
+
+      initialTransferDurationForShifting.set(0.5);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          upcomingFootTrajectoryCommandList.put(robotQuadrant, new RecyclingArrayDeque<>(SoleTrajectoryCommand.class, SoleTrajectoryCommand::set));
@@ -62,9 +63,6 @@ public class QuadrupedStepMessageHandler
       return receivedStepSequence.size() > 0;
    }
 
-   /**
-    * Consumes incoming footsteps and adjusts their position by the given vector
-    */
    public void process()
    {
       TimeIntervalTools.removeEndTimesLessThan(robotTimestamp.getDoubleValue(), receivedStepSequence);
@@ -83,7 +81,7 @@ public class QuadrupedStepMessageHandler
       receivedStepSequence.clear();
       for (int i = 0; i < Math.min(stepCommands.size(), STEP_QUEUE_SIZE); i++)
       {
-         double timeShift = isExpressedInAbsoluteTime ? 0.0 : currentTime;
+         double timeShift = isExpressedInAbsoluteTime ? 0.0 : currentTime + initialTransferDurationForShifting.getDoubleValue();
          double touchdownTime = stepCommands.get(i).getTimeIntervalCommand().getEndTime();
          if (touchdownTime + timeShift >= currentTime)
          {
@@ -94,7 +92,7 @@ public class QuadrupedStepMessageHandler
          }
       }
 
-      TimeIntervalTools.sortByEndTime(receivedStepSequence);
+      receivedStepSequence.sort(TimeIntervalTools.endTimeComparator);
    }
 
    public void clearSteps()

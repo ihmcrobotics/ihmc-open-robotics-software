@@ -2,7 +2,7 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.tools.TupleTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class SpatialNode
@@ -106,7 +106,7 @@ public class SpatialNode
 
    public void interpolate(SpatialNode nodeOne, SpatialNode nodeTwo, double alpha)
    {
-      time = TupleTools.interpolate(nodeOne.time, nodeTwo.time, alpha);
+      time = EuclidCoreTools.interpolate(nodeOne.time, nodeTwo.time, alpha);
 
       spatialData.interpolate(nodeOne.getSpatialData(), nodeTwo.getSpatialData(), alpha);
    }

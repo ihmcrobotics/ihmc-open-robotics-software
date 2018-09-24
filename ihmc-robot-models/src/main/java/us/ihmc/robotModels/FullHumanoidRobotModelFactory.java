@@ -1,7 +1,9 @@
 package us.ihmc.robotModels;
 
-public interface FullHumanoidRobotModelFactory extends FullRobotModelFactory
+import us.ihmc.robotics.robotSide.RobotSide;
+
+public interface FullHumanoidRobotModelFactory extends FullLeggedRobotModelFactory<RobotSide>
 {
    @Override
-   public FullHumanoidRobotModel createFullRobotModel();
+   FullHumanoidRobotModel createFullRobotModel();
 }

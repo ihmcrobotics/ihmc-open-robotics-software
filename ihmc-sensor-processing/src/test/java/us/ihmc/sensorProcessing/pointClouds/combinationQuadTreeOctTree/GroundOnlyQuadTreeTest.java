@@ -1,20 +1,26 @@
 package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -30,12 +36,11 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.AbstractHeightMapTest;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 {
@@ -44,6 +49,12 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    private static final float HEIGHT_THRESHOLD = 0.05f;
 
    private static final boolean DO_ASSERTS = true;
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.1)
@@ -223,11 +234,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       }
    }
 
-/*   @Test(timeout=300000)
-   public void testUnhandledPoints()
-   {
-      super.testUnhandledPoints();
-   }*/
+
 
    @Override
    public HeightMapWithPoints getHeightMap(double minX, double minY, double maxX, double maxY, double resolution)

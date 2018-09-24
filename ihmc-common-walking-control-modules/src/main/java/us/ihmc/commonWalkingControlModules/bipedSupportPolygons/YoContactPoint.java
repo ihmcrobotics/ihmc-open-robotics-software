@@ -86,7 +86,7 @@ public class YoContactPoint implements ContactPointInterface
    @Override
    public void setPosition(FrameTuple3DReadOnly position)
    {
-      this.yoPosition.set(position);
+      this.yoPosition.setMatchingFrame(position);
    }
 
    @Override

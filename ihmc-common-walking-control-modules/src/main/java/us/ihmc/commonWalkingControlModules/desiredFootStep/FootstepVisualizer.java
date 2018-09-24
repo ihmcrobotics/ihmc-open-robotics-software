@@ -17,7 +17,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 public class FootstepVisualizer
 {
@@ -25,7 +25,7 @@ public class FootstepVisualizer
 
    private static final int maxNumberOfContactPoints = 6;
 
-   private final YoFramePoseUsingYawPitchRoll yoFootstepPose;
+   private final YoFramePose3D yoFootstepPose;
    private final YoFrameConvexPolygon2D yoFoothold;
 
    private final ConvexPolygon2D foothold = new ConvexPolygon2D();
@@ -46,7 +46,7 @@ public class FootstepVisualizer
                              AppearanceDefinition footstepColor, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       this.robotSide = robotSide;
-      yoFootstepPose = new YoFramePoseUsingYawPitchRoll(name + "Pose", worldFrame, registry);
+      yoFootstepPose = new YoFramePose3D(name + "Pose", worldFrame, registry);
       yoFoothold = new YoFrameConvexPolygon2D(name + "Foothold", "", worldFrame, maxNumberOfContactPoints, registry);
 
       double coordinateSystemSize = 0.2;

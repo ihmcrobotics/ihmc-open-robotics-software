@@ -2,6 +2,8 @@ package us.ihmc.quadrupedRobotics.controller.force;
 
 import java.io.IOException;
 
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 import org.junit.After;
@@ -31,16 +33,23 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    private QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
    private PushRobotTestConductor pusher;
+   private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      quadrupedTestFactory = createQuadrupedTestFactory();
+      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
+      quadrupedTestFactory.setUsePushRobotController(true);
+      quadrupedTestFactory.setUseNetworking(true);
    }
 
    @After
    public void tearDown()
    {
+      quadrupedTestFactory.close();
       conductor.concludeTesting();
       conductor = null;
       variables = null;
@@ -50,45 +59,40 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   public abstract double getTranslationShift();
+   public abstract double getTranslationDelta();
+   public abstract double getOrientationShift();
+   public abstract double getOrientationDelta();
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 320000)
    public void testStandingAndResistingPushesOnFrontRightHipRoll() throws IOException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.FRONT_RIGHT_HIP_ROLL.getUnderBarName());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 320000)
    public void testStandingAndResistingPushesOnHindLeftHipRoll() throws IOException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.HIND_LEFT_HIP_ROLL.getUnderBarName());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 320000)
    public void testStandingAndResistingPushesOnHindRightHipRoll() throws IOException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.HIND_RIGHT_HIP_ROLL.getUnderBarName());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 320000)
    public void testStandingAndResistingPushesOnFrontLeftHipRoll() throws IOException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.FRONT_LEFT_HIP_ROLL.getUnderBarName());
    }
+
 
    private void pushOnShoulder(QuadrupedTestFactory quadrupedTestFactory, String jointToPushOn) throws IOException, AssertionFailedError
    {
@@ -151,11 +155,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
 
    public void testStandingAndResistingHumanPowerKickToFace() throws IOException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
@@ -174,13 +173,10 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.simulate();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
+   @Test(timeout = 550000)
    public void testStandingAndResistingPushesOnBody() throws IOException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
@@ -220,13 +216,15 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.simulate();
    }
 
-   public void testStandingUpAndAdjustingCoM(double translationShift, double translationDelta, double orientationShift, double orientationDelta)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 390000)
+   public void testStandingUpAndAdjustingCoM()
          throws IOException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUseNetworking(true);
+      double translationShift = getTranslationShift();
+      double translationDelta = getTranslationDelta();
+      double orientationShift = getOrientationShift();
+      double orientationDelta = getOrientationDelta();
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
@@ -238,18 +236,18 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
 
-      double initialComZ = variables.getCurrentHeightInWorld().getDoubleValue();
-      testMovingCoM(initialComZ + translationShift, orientationShift, orientationShift, orientationShift, translationDelta, orientationDelta);
-      testMovingCoM(initialComZ, orientationShift, -orientationShift, orientationShift, translationDelta, orientationDelta);
-      testMovingCoM(initialComZ - translationShift, -orientationShift, -orientationShift, -orientationShift, translationDelta, orientationDelta);
-      testMovingCoM(initialComZ + translationShift, -orientationShift, -orientationShift, -orientationShift, translationDelta, orientationDelta);
-      testMovingCoM(initialComZ, 0.0, 0.0, 0.0, translationDelta, orientationDelta);
+      double initialBodyHeight = variables.getCurrentHeightInWorld().getDoubleValue();
+      runMovingCoM(initialBodyHeight + translationShift, orientationShift, orientationShift, orientationShift, translationDelta, orientationDelta);
+      runMovingCoM(initialBodyHeight, orientationShift, -orientationShift, orientationShift, translationDelta, orientationDelta);
+      runMovingCoM(initialBodyHeight - translationShift, -orientationShift, -orientationShift, -orientationShift, translationDelta, orientationDelta);
+      runMovingCoM(initialBodyHeight + translationShift, -orientationShift, -orientationShift, -orientationShift, translationDelta, orientationDelta);
+      runMovingCoM(initialBodyHeight, 0.0, 0.0, 0.0, translationDelta, orientationDelta);
    }
 
-   private void testMovingCoM(double comPositionZ, double bodyOrientationYaw, double bodyOrientationPitch, double bodyOrientationRoll, double translationDelta,
-                              double orientationDelta)
+   private void runMovingCoM(double bodyHeight, double bodyOrientationYaw, double bodyOrientationPitch, double bodyOrientationRoll, double translationDelta,
+                             double orientationDelta)
    {
-      stepTeleopManager.setDesiredCoMHeight(comPositionZ);
+      stepTeleopManager.setDesiredBodyHeight(bodyHeight);
       stepTeleopManager.setDesiredBodyOrientation(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll, 0.1);
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));

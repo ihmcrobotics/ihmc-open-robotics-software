@@ -17,7 +17,7 @@ public abstract class PlanarRegionEnvironmentInterface implements CommonAvatarEn
    protected PlanarRegionsListDefinedEnvironment environment;
    protected final PlanarRegionsListGenerator generator;
    
-   private boolean hasBeenGenerated;
+   protected boolean hasBeenGenerated;
    
    public PlanarRegionEnvironmentInterface()
    {

@@ -25,13 +25,13 @@ public interface JointSettingConfiguration
          @Override
          public List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersUnderLoad()
          {
-            return parameters.getJointAccelerationIntegrationParametersUnderLoad();
+            return parameters.getJointAccelerationIntegrationParametersUnderLoad(stateEnum);
          }
 
          @Override
          public List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParameters()
          {
-            return parameters.getJointAccelerationIntegrationParameters();
+            return parameters.getJointAccelerationIntegrationParameters(stateEnum);
          }
 
          @Override

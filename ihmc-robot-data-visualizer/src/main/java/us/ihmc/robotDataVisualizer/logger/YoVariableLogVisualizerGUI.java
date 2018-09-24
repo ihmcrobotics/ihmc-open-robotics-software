@@ -141,7 +141,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
             }
             else
             {
-               new Thread()
+               new Thread("IHMC-LogVisualizerGUI")
                {
                   @Override
                   public void run()
@@ -165,7 +165,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       {
          final long startTimestamp = robot.getTimestamp(start);
          final long endTimestamp = robot.getTimestamp(end);
-         new Thread()
+         new Thread("IHMC-LogVisualizerGUI")
          {
             @Override
             public void run()
@@ -232,7 +232,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
          {
 
             final File selectedFile = saveDialog.getSelectedFile();
-            new Thread()
+            new Thread("IHMC-LogVisualizerGUI")
             {
                @Override
                public void run()

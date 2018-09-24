@@ -16,6 +16,7 @@ import org.junit.Before;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -28,9 +29,11 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualize
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -54,7 +57,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -98,6 +100,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
     */
    public abstract double getLegLength();
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 32.6)
+   @Test(timeout = 160000)
    public void testSingleTrajectoryPoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -172,6 +176,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 37.0)
+   @Test(timeout = 180000)
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -249,6 +255,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       // TODO: add assert to make sure the hand did not move significantly.
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 31.8)
+   @Test(timeout = 160000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -372,7 +380,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          }
       }
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + firstTrajectoryPointTime);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + firstTrajectoryPointTime + 0.5);
       assertTrue(success);
       fullRobotModel.updateFrames();
 
@@ -393,6 +401,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 15.8)
+   @Test(timeout = 79000)
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -420,7 +430,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
          message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
-         double time = 0.05;
+         double time = 0.05 + RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
             message.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
@@ -443,7 +453,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
          message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
-         double time = 0.05;
+         double time = 0.05 + RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
             message.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
@@ -460,6 +470,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 51.8)
+   @Test(timeout = 260000)
    public void testQueuedMessages() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -650,6 +662,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 19.3)
+   @Test(timeout = 97000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -772,6 +786,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 26.3)
+   @Test(timeout = 130000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

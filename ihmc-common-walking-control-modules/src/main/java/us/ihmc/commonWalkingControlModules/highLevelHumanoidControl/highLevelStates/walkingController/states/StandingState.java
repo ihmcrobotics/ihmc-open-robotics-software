@@ -62,7 +62,7 @@ public class StandingState extends WalkingState
             if(hand != null)
             {
                ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
-               RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, trajectoryFrames);
+               RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, true, true, trajectoryFrames);
                handManagers.put(robotSide, handManager);
             }
          }
@@ -90,11 +90,12 @@ public class StandingState extends WalkingState
       consumePrepareForLocomotion();
       commandInputManager.clearAllCommands();
 
+      // need to always update biped support polygons after a change to the contact states
+      controllerToolbox.updateBipedSupportPolygons();
+
       balanceManager.clearICPPlan();
       balanceManager.resetPushRecovery();
       balanceManager.enablePelvisXYControl();
-
-      controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
       walkingMessageHandler.reportWalkingComplete();
 

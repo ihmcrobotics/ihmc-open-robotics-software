@@ -79,6 +79,8 @@ public class PlanarRegionConstraintProvider
 
    private final FramePoint2D tempPoint2D = new FramePoint2D();
 
+   private boolean hasConstraintChanged = false;
+
    public PlanarRegionConstraintProvider(ICPControlPlane icpControlPlane, WalkingControllerParameters walkingParameters, ICPOptimizationParameters optimizationParameters,
                                          BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                          String yoNamePrefix, boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -187,12 +189,11 @@ public class PlanarRegionConstraintProvider
    }
 
 
-   public void updatePlanarRegionConstraintForDoubleSupport(ICPOptimizationQPSolver solver)
+   public void updatePlanarRegionConstraintForDoubleSupport()
    {
       reset();
 
       captureRegionCalculator.hideCaptureRegion();
-      solver.resetPlanarRegionConstraint();
 
       yoActivePlanarRegion.clear();
       yoActivePlanarRegionInControlPlane.clear();
@@ -200,13 +201,12 @@ public class PlanarRegionConstraintProvider
    }
 
 
-   public void updatePlanarRegionConstraintForSingleSupport(Footstep footstep, double swingTimeRemaining, FramePoint2DReadOnly currentICP, double omega0,
-                                                            ICPOptimizationQPSolver solver)
+   public ConvexPolygon2D updatePlanarRegionConstraintForSingleSupport(Footstep footstep, double swingTimeRemaining, FramePoint2DReadOnly currentICP, double omega0)
    {
       captureRegionCalculator.calculateCaptureRegion(footstep.getRobotSide(), swingTimeRemaining, currentICP, omega0,
                                                      bipedSupportPolygons.getFootPolygonInWorldFrame(footstep.getRobotSide().getOppositeSide()));
 
-      solver.resetPlanarRegionConstraint();
+      hasConstraintChanged = false;
 
       if (usePlanarRegionConstraints.getValue())
       {
@@ -221,15 +221,28 @@ public class PlanarRegionConstraintProvider
                planarRegionNeedsUpdating = checkCurrentPlanarRegion();
 
             if (planarRegionNeedsUpdating)
+            {
                activePlanarRegion = findPlanarRegionWithLargestIntersectionArea();
+               hasConstraintChanged = true;
+            }
          }
 
          if (activePlanarRegion != null)
          {
             ConvexPolygon2D projectedAndShrunkPlanarRegion = computeShrunkAndProjectedConvexHull(activePlanarRegion, footstep);
-            solver.setPlanarRegionConstraint(projectedAndShrunkPlanarRegion);
+            return projectedAndShrunkPlanarRegion;
          }
       }
+
+      return null;
+   }
+
+   /**
+    * Returns whether or not the constraint region has changed. This is useful for resetting the active set of the optimizer.
+    */
+   public boolean hasConstraintChanged()
+   {
+      return hasConstraintChanged;
    }
 
 

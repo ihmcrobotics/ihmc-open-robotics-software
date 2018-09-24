@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
@@ -19,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -57,6 +59,12 @@ public class OneStepCaptureRegionCalculatorTest
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<ReferenceFrame>(leftAnkleZUpFrame, rightAnkleZUpFrame);
 
    private final YoVariableRegistry registry = new YoVariableRegistry("CaptureRegionCalculatorTest");
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @SuppressWarnings("unused")
 

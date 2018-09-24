@@ -4,8 +4,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -26,65 +26,28 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    private FootstepNodeVisualization visualization = null;
 
    @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
-   public void testWalkingAroundBox()
+   public boolean assertPlannerReturnedResult()
    {
-      super.testWalkingAroundBox();
+      return true;
+   }
+
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @Test(timeout = 51000)
+   public void testPartialGaps()
+   {
+      super.testPartialGaps();
    }
 
    @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testWalkingAroundHole()
+   @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @Test(timeout = 51000)
+   public void testSpiralStaircase()
    {
-      super.testWalkingAroundHole();
+      super.testSpiralStaircase();
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 2.5)
-   @Test(timeout = 30000)
-   public void testWithWall()
-   {
-      super.testWithWall(true);
-   }
-
-   @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testOnStaircase()
-   {
-      super.testOnStaircase();
-   }
-
-   @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
-   public void testSimpleGaps()
-   {
-      super.testSimpleGaps();
-   }
-
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testStepUpsAndDownsScoringDifficult()
-   {
-      super.testStepUpsAndDownsScoringDifficult(false);
-   }
-
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
-   public void testSteppingStones()
-   {
-      super.testSteppingStones(!visualizePlanner);
-   }
-
-   @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
-   public void testOverCinderBlockField()
-   {
-      super.testOverCinderBlockField(!visualizePlanner);
-   }
 
    @Before
    public void createPlanner()

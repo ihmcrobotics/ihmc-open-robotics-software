@@ -48,7 +48,7 @@ public class MovingWalkingReferenceFrame extends MovingReferenceFrame
       pelvisPosition.changeFrame(midFootZUpGroundFrame);
       pose.setToZero(midFootZUpGroundFrame);
       pose.setX(pelvisPosition.getX());
-      pose.changeFrame(parentFrame);
+      pose.changeFrame(getParent());
       pose.get(transformToParent);
    }
 
@@ -62,7 +62,7 @@ public class MovingWalkingReferenceFrame extends MovingReferenceFrame
    @Override
    protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
    {
-      twistRelativeToParentToPack.setToZero(this, parentFrame, this);
+      twistRelativeToParentToPack.setToZero(this, getParent(), this);
 
       Twist twistOfMidFootFrame = midFootZUpGroundFrame.getTwistOfFrame();
       twistOfMidFootFrame.getAngularPart(angularVelocity);

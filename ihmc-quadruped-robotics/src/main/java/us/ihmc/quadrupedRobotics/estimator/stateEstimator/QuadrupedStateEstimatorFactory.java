@@ -3,15 +3,14 @@ package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 import java.util.HashMap;
 import java.util.Map;
 
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
@@ -20,6 +19,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -34,10 +34,10 @@ public class QuadrupedStateEstimatorFactory
    private final RequiredFactoryField<QuadrantDependentList<FootSwitchInterface>> footSwitches = new RequiredFactoryField<>("footSwitches");
    private final RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
    private final RequiredFactoryField<Double> estimatorDT = new RequiredFactoryField<>("estimatorDT");
-   private final RequiredFactoryField<YoVariableRegistry> yoVariableRegistry = new RequiredFactoryField<>("yoVariableRegistry");
+   private final RequiredFactoryField<CenterOfMassDataHolder> centerOfMassDataHolder = new RequiredFactoryField<>("centerOfMassDataHolder");
    private final RequiredFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistry = new RequiredFactoryField<>("yoGraphicsListRegistry");
 
-   public DRCKinematicsBasedStateEstimator createStateEstimator()
+   public StateEstimatorController createStateEstimator()
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -49,7 +49,6 @@ public class QuadrupedStateEstimatorFactory
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
       robotMotionStatusFromController.setCurrentRobotMotionStatus(RobotMotionStatus.IN_MOTION);
       ForceSensorDataHolder forceSensorDataHolderToUpdate = null;
-      CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate = new CenterOfMassDataHolder();
       CenterOfPressureDataHolder centerOfPressureDataHolder = null;
 
       Map<RigidBody, ContactablePlaneBody> feetMap = new HashMap<RigidBody, ContactablePlaneBody>();
@@ -66,17 +65,14 @@ public class QuadrupedStateEstimatorFactory
       String[] imuSensorsToUseInStateEstimator = sensorInformation.get().getImuNames();
       double gravityMagnitude = Math.abs(gravity.get());
 
-      DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters.get(),
-                                                                                             sensorOutputMapReadOnly.get(), forceSensorDataHolderToUpdate,
-                                                                                             estimatorCenterOfMassDataHolderToUpdate,
-                                                                                             imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
-                                                                                             centerOfPressureDataHolder , robotMotionStatusFromController, feetMap,
-                                                                                             yoGraphicsListRegistry.get());
-
-      yoVariableRegistry.get().addChild(stateEstimator.getYoVariableRegistry());
+      StateEstimatorController stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters.get(),
+                                                                                     sensorOutputMapReadOnly.get(), forceSensorDataHolderToUpdate,
+                                                                                     centerOfMassDataHolder.get(), imuSensorsToUseInStateEstimator,
+                                                                                     gravityMagnitude, footSwitchMap, centerOfPressureDataHolder,
+                                                                                     robotMotionStatusFromController, feetMap, yoGraphicsListRegistry.get());
 
       FactoryTools.disposeFactory(this);
-      
+
       return stateEstimator;
    }
 
@@ -120,13 +116,13 @@ public class QuadrupedStateEstimatorFactory
       this.estimatorDT.set(estimatorDT);
    }
 
-   public void setYoVariableRegistry(YoVariableRegistry yoVariableRegistry)
-   {
-      this.yoVariableRegistry.set(yoVariableRegistry);
-   }
-
    public void setYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.yoGraphicsListRegistry.set(yoGraphicsListRegistry);
+   }
+
+   public void setCenterOfMassDataHolder(CenterOfMassDataHolder centerOfMassDataHolder)
+   {
+      this.centerOfMassDataHolder.set(centerOfMassDataHolder);
    }
 }

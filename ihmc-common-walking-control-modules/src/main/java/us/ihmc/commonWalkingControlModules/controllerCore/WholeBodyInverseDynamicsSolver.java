@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -44,6 +45,8 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -155,6 +158,7 @@ public class WholeBodyInverseDynamicsSolver
    public void reinitialize()
    {
       initialize();
+      optimizationControlModule.resetRateRegularization();
       for (int i = 0; i < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
          lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(i).clear();
    }
@@ -229,7 +233,21 @@ public class WholeBodyInverseDynamicsSolver
       }
 
       planeContactWrenchProcessor.compute(externalWrenchSolution);
-      wrenchVisualizer.visualize(externalWrenchSolution);
+      if (wrenchVisualizer != null)
+         wrenchVisualizer.visualize(externalWrenchSolution);
+   }
+
+   public void submitResetIntegratorRequests(JointDesiredOutputListReadOnly jointDesiredOutputList)
+   {
+      for (int i = 0; i < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
+      {
+         OneDoFJoint joint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(i);
+         if (jointDesiredOutputList.hasDataForJoint(joint))
+         {
+            JointDesiredOutputReadOnly jointDesiredOutputOther = jointDesiredOutputList.getJointDesiredOutput(joint);
+            lowLevelOneDoFJointDesiredDataHolder.setResetJointIntegrators(joint, jointDesiredOutputOther.peekResetIntegratorsRequest());
+         }
+      }
    }
 
    private void updateLowLevelData()
@@ -275,6 +293,9 @@ public class WholeBodyInverseDynamicsSolver
             optimizationControlModule.submitExternalWrenchCommand((ExternalWrenchCommand) command);
             if (USE_DYNAMIC_MATRIX_CALCULATOR)
                dynamicsMatrixCalculator.setExternalWrench(((ExternalWrenchCommand) command).getRigidBody(), ((ExternalWrenchCommand) command).getExternalWrench());
+            break;
+         case CONTACT_WRENCH:
+            optimizationControlModule.submitContactWrenchCommand((ContactWrenchCommand) command);
             break;
          case PLANE_CONTACT_STATE:
             optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);

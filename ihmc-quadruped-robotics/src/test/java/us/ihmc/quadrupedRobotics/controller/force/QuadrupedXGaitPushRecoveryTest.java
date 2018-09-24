@@ -9,7 +9,9 @@ import org.junit.Before;
 
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
@@ -33,6 +35,7 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
    private QuadrupedForceTestYoVariables variables;
    private PushRobotTestConductor pusher;
    private QuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
    public void setup()
@@ -41,7 +44,7 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
 
       try
       {
-         QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
+         quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUsePushRobotController(true);
@@ -60,6 +63,7 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
    @After
    public void tearDown()
    {
+      quadrupedTestFactory.close();
       conductor.concludeTesting();
 
       conductor = null;
@@ -70,7 +74,24 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void testWalkingWithPush(double endPhaseShift, double walkingSpeed)
+   public abstract double getWalkingSpeed();
+   public abstract double getStepDuration();
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 630000)
+   public void testWalkingForwardFastWithPush()
+   {
+      testWalkingWithPush(90.0, getWalkingSpeed());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 630000)
+   public void testScriptedWalkingForwardFastWithPush()
+   {
+      testScriptedWalkingWithPush(90.0, getWalkingSpeed(), getStepDuration());
+   }
+
+   private void testWalkingWithPush(double endPhaseShift, double walkingSpeed)
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -90,23 +111,23 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 4.0));
       conductor.simulate();
 
-      pusher.applyForce(new Vector3D(0.0, 1.0, 0.0), 50.0, 0.3);
+      pusher.applyForce(new Vector3D(0.0, 1.0, 0.0), 35.0, 0.15);
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTimeLimit(variables.getYoTime(), 5.0);
+      conductor.addTimeLimit(variables.getYoTime(), 10.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 7.0));
       conductor.simulate();
    }
 
-   public void testScriptedWalkingWithPush(double endPhaseShift, double walkingSpeed, double stepDuration)
+   private void testScriptedWalkingWithPush(double endPhaseShift, double walkingSpeed, double stepDuration)
    {
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       double stepLength = walkingSpeed * (2 * stepDuration);
-      List<QuadrupedTimedStepMessage> steps = getSteps(endPhaseShift, stepLength, 1.0, 0.5, stepDuration, 10);
+      List<QuadrupedTimedStepMessage> steps = getSteps(endPhaseShift, stepLength, 1.0, 0.0, stepDuration, 10);
       QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
-      stepTeleopManager.pulishTimedStepListToController(message);
+      stepTeleopManager.publishTimedStepListToController(message);
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 5.0);

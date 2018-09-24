@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -155,6 +156,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       midFeetZUpFrame = null;
       contactStates.clear();
       plannerParameters = null;
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    public void sendFootStepMessages(int numberOfFootstepsToPlan)

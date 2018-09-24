@@ -12,6 +12,7 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.NormOps;
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -20,7 +21,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -30,6 +31,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
@@ -48,6 +50,12 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public final class PointFeedbackControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -100,7 +108,7 @@ public final class PointFeedbackControllerTest
       pointFeedbackController.setEnabled(true);
 
       int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      MotionQPInput motionQPInput = new MotionQPInput(numberOfDoFs);
+      QPInput motionQPInput = new QPInput(numberOfDoFs);
       LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
       DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -190,7 +198,7 @@ public final class PointFeedbackControllerTest
       pointFeedbackController.setEnabled(true);
 
       int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      MotionQPInput motionQPInput = new MotionQPInput(numberOfDoFs);
+      QPInput motionQPInput = new QPInput(numberOfDoFs);
       LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
       DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -299,8 +307,8 @@ public final class PointFeedbackControllerTest
       spatialFeedbackControlCommand.getSpatialAccelerationCommand().setSelectionMatrixForLinearControl();
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
-      MotionQPInput pointMotionQPInput = new MotionQPInput(toolbox.getJointIndexHandler().getNumberOfDoFs());
-      MotionQPInput spatialMotionQPInput = new MotionQPInput(toolbox.getJointIndexHandler().getNumberOfDoFs());
+      QPInput pointMotionQPInput = new QPInput(toolbox.getJointIndexHandler().getNumberOfDoFs());
+      QPInput spatialMotionQPInput = new QPInput(toolbox.getJointIndexHandler().getNumberOfDoFs());
 
       SpatialAccelerationCommand pointControllerOutput = pointFeedbackController.getInverseDynamicsOutput();
       SpatialAccelerationCommand spatialControllerOutput = spatialFeedbackController.getInverseDynamicsOutput();

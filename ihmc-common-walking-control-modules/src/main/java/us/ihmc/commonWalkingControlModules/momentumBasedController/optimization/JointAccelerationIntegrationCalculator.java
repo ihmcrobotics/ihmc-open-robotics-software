@@ -99,9 +99,11 @@ public class JointAccelerationIntegrationCalculator
          JointDesiredOutput lowLevelJointData = lowLevelJointDataHolderToUpdate.getJointDesiredOutput(joint);
          if (lowLevelJointData == null || !lowLevelJointData.hasDesiredAcceleration())
         	 continue;
-         if (!lowLevelJointData.hasDesiredVelocity())
+
+         boolean resetIntegrators = lowLevelJointData.pollResetIntegratorsRequest();
+         if (!lowLevelJointData.hasDesiredVelocity() || resetIntegrators)
             lowLevelJointData.setDesiredVelocity(joint.getQd());
-         if (!lowLevelJointData.hasDesiredPosition())
+         if (!lowLevelJointData.hasDesiredPosition() || resetIntegrators)
             lowLevelJointData.setDesiredPosition(joint.getQ());
 
          double desiredAcceleration = lowLevelJointData.getDesiredAcceleration();
@@ -127,7 +129,9 @@ public class JointAccelerationIntegrationCalculator
 
          // Limit the desired position to the joint range and recompute the desired velocity.
          desiredPosition = MathTools.clamp(desiredPosition, joint.getJointLimitLower(), joint.getJointLimitUpper());
-         desiredVelocity = (desiredPosition - lowLevelJointData.getDesiredPosition()) / controlDT;
+
+         // June 20, 2018: Removed this as is seems to cause instability.
+//         desiredVelocity = (desiredPosition - lowLevelJointData.getDesiredPosition()) / controlDT;
 
          lowLevelJointData.setDesiredVelocity(desiredVelocity);
          lowLevelJointData.setDesiredPosition(desiredPosition);

@@ -8,7 +8,6 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
@@ -89,14 +88,7 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
          rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          rootJoint.getPredecessor().updateFramesRecursively();
          
-         try
-         {
-            updateFrames();
-         }
-         catch (NotARotationMatrixException e)
-         {
-//            e.printStackTrace();
-         }
+         updateFrames();
          
 
          if (forceSensorDataHolder != null)

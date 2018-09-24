@@ -609,4 +609,31 @@ public class RotationTools
          return originalNegated.epsilonEquals(result, epsilon);
       }
    }
+
+   /**
+    * Computes the yaw angle rate of the yaw-pitch-roll representation of a orientation given the
+    * angular velocity.
+    * 
+    * @param yawPitchRoll the Euler angles describing a 3D rotation. Not modified.
+    * @param angularVelocity the angular velocity. Not modified.
+    * @param isVelocityInLocalCoordinates whether the angular velocity is expressed in the
+    *           coordinates described by the yaw-pitch-roll angles or in the base coordinates of the
+    *           yaw-pitch-roll angles.
+    * @return the value of the rate of change of the yaw angle.
+    */
+   public static double computeYawRate(double[] yawPitchRoll, Vector3DReadOnly angularVelocity, boolean isVelocityInLocalCoordinates)
+   {
+      double wx = angularVelocity.getX();
+      double wy = angularVelocity.getY();
+      double wz = angularVelocity.getZ();
+   
+      double yaw = yawPitchRoll[0];
+      double pitch = yawPitchRoll[1];
+      double roll = yawPitchRoll[2];
+   
+      if (isVelocityInLocalCoordinates)
+         return (Math.sin(roll) * wy + Math.cos(roll) * wz) / Math.cos(pitch);
+      else
+         return wz + Math.tan(pitch) * (Math.sin(yaw) * wy + Math.cos(yaw) * wx);
+   }
 }

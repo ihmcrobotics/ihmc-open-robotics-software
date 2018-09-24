@@ -18,9 +18,10 @@ public class SliderboardDataReciever implements Receiver
 {
    private final MidiControlMap channelMapper;
 
-   private final TIntObjectMap<List<SliderboardListener>> listeners = new TIntObjectHashMap<>();
+   private final TIntObjectMap<List<SliderboardListener>> sliderListeners = new TIntObjectHashMap<>();
+   private final TIntObjectMap<List<ButtonListener>> buttonListeners = new TIntObjectHashMap<>();
 
-   private final TIntDoubleMap values = new TIntDoubleHashMap();
+   private final TIntDoubleMap sliderValues = new TIntDoubleHashMap();
 
    public SliderboardDataReciever(MidiControlMap channelMapper)
    {
@@ -41,44 +42,83 @@ public class SliderboardDataReciever implements Receiver
          return;
       }
 
-      int sliderChannel = shortMessage.getData1();
-      int sliderIndex = channelMapper.getSliderIndex(sliderChannel);
-
-      if (sliderIndex == -1)
+      int midiChannel = shortMessage.getData1();
+      if (channelMapper.getSliderIndex(midiChannel) != MidiControlMap.INVALID)
       {
-         PrintTools.info("Unknown controller: " + sliderChannel);
+         handleSliderInput(channelMapper.getSliderIndex(midiChannel), shortMessage.getData2());
+      }
+      else if (channelMapper.getButtonIndex(midiChannel) != MidiControlMap.INVALID)
+      {
+         handleButtonInput(channelMapper.getButtonIndex(midiChannel), shortMessage.getData2());
+      }
+      else if (channelMapper.getDelayVariationChannel() == midiChannel)
+      {
+         PrintTools.info("Got a 'Delay/Variation Send' message.");
+      }
+      else
+      {
+         PrintTools.info("Unknown controller: " + midiChannel + " - " + shortMessage.getData2());
          return;
       }
+   }
 
-      double value = SliderboardTools.toSliderPercent(shortMessage.getData2());
+   private void handleSliderInput(int sliderIndex, int data)
+   {
+      double value = SliderboardTools.toSliderPercent(data);
 
-      List<SliderboardListener> sliderListeners = listeners.get(sliderIndex);
-      double previousValue = values.containsKey(sliderIndex) ? values.get(sliderIndex) : -1.0;
-      if (sliderListeners != null && previousValue != value)
+      List<SliderboardListener> listeners = sliderListeners.get(sliderIndex);
+      double previousValue = sliderValues.containsKey(sliderIndex) ? sliderValues.get(sliderIndex) : -1.0;
+      if (listeners != null && previousValue != value)
       {
-         sliderListeners.forEach(listener -> listener.sliderMoved(value));
+         listeners.forEach(listener -> listener.sliderMoved(value));
       }
-      values.put(sliderIndex, value);
+      sliderValues.put(sliderIndex, value);
+   }
+
+   private void handleButtonInput(int buttonIndex, int data)
+   {
+      boolean status = SliderboardTools.toButtonStatus(data);
+
+      List<ButtonListener> listeners = buttonListeners.get(buttonIndex);
+      if (listeners != null)
+      {
+         listeners.forEach(listener -> listener.buttonPressed(status));
+      }
    }
 
    public boolean addListener(SliderboardListener sliderListener, int sliderIndex)
    {
-      if (channelMapper.getSliderChannel(sliderIndex) == -1)
+      if (channelMapper.getSliderChannel(sliderIndex) == MidiControlMap.INVALID)
       {
          return false;
       }
 
-      if (!listeners.containsKey(sliderIndex))
+      if (!sliderListeners.containsKey(sliderIndex))
       {
-         listeners.put(sliderIndex, new ArrayList<>());
+         sliderListeners.put(sliderIndex, new ArrayList<>());
       }
-      listeners.get(sliderIndex).add(sliderListener);
+      sliderListeners.get(sliderIndex).add(sliderListener);
+      return true;
+   }
+
+   public boolean addListener(ButtonListener buttonListener, int buttonIndex)
+   {
+      if (channelMapper.getButtonChannel(buttonIndex) == MidiControlMap.INVALID)
+      {
+         return false;
+      }
+
+      if (!buttonListeners.containsKey(buttonIndex))
+      {
+         buttonListeners.put(buttonIndex, new ArrayList<>());
+      }
+      buttonListeners.get(buttonIndex).add(buttonListener);
       return true;
    }
 
    public void clearListeners()
    {
-      listeners.forEachValue(new TObjectProcedure<List<SliderboardListener>>()
+      sliderListeners.forEachValue(new TObjectProcedure<List<SliderboardListener>>()
       {
          @Override
          public boolean execute(List<SliderboardListener> listenerList)
@@ -87,21 +127,31 @@ public class SliderboardDataReciever implements Receiver
             return true;
          }
       });
-   }
 
-   public void clearListeners(int sliderIndex)
-   {
-      if (listeners.containsKey(sliderIndex))
+      buttonListeners.forEachValue(new TObjectProcedure<List<ButtonListener>>()
       {
-         listeners.get(sliderIndex).clear();
-      }
+         @Override
+         public boolean execute(List<ButtonListener> listenerList)
+         {
+            listenerList.clear();
+            return true;
+         }
+      });
    }
 
    public void removeListener(SliderboardListener sliderListener, int sliderIndex)
    {
-      if (listeners.containsKey(sliderIndex))
+      if (sliderListeners.containsKey(sliderIndex))
       {
-         listeners.get(sliderIndex).remove(sliderListener);
+         sliderListeners.get(sliderIndex).remove(sliderListener);
+      }
+   }
+
+   public void removeListener(ButtonListener buttonListener, int buttonIndex)
+   {
+      if (buttonListeners.containsKey(buttonIndex))
+      {
+         buttonListeners.get(buttonIndex).remove(buttonListener);
       }
    }
 

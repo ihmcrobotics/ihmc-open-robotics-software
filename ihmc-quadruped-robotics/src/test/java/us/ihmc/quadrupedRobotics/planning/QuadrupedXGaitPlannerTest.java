@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import org.junit.After;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -7,6 +8,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedPlanarBodyPathProvider;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPlanarFootstepPlan;
@@ -21,6 +23,12 @@ import static org.junit.Assert.assertTrue;
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class QuadrupedXGaitPlannerTest
 {
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testInitialForwardVelocityPlan()
@@ -35,7 +43,7 @@ public class QuadrupedXGaitPlannerTest
       xGaitSettings.setEndPhaseShift(90);
       QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, xGaitSettings);
 
-      xGaitPlanner.setStepSnapper((x, y) -> new Point3D(x, y, 0.0));
+      xGaitPlanner.setStepSnapper((x, y, minZ) -> new Point3D(x, y, 0.0));
 
 
 
@@ -100,7 +108,7 @@ public class QuadrupedXGaitPlannerTest
          xGaitSettings.setEndDoubleSupportDuration(0);
          xGaitSettings.setEndPhaseShift(90);
          QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, xGaitSettings);
-         xGaitPlanner.setStepSnapper((x, y) -> new Point3D(x, y, 0.0));
+         xGaitPlanner.setStepSnapper((x, y, minZ) -> new Point3D(x, y, 0.0));
 
          double currentTime = 0.125;
          double currentYaw = 0.0;

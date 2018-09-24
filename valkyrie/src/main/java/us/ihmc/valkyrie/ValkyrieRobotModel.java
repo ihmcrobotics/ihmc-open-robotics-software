@@ -69,6 +69,7 @@ import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.UIParameters;
@@ -132,7 +133,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints,
                              boolean useShapeCollision)
    {
-      this(target, headless, model, simulationContactPoints, useShapeCollision, false);
+      this(target, headless, model, simulationContactPoints, useShapeCollision, true);
    }
 
    public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics)
@@ -523,11 +524,19 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
          case "hokuyo_link":
             modifyHokuyoInertia(linkHolder);
             break;
+         case "torso":
+            modifyChestMass(linkHolder);
+            break;
          default:
             break;
          }
-
       }
+   }
+
+   private void modifyChestMass(SDFLinkHolder chestSDFLink)
+   {
+      if (ValkyrieRosControlController.HAS_LIGHTER_BACKPACK)
+         chestSDFLink.setMass(chestSDFLink.getMass() - 8.6);
    }
 
    @Override

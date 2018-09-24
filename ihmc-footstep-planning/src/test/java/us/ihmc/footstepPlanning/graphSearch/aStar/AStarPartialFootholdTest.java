@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.aStar;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
@@ -8,12 +9,13 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
+import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 import us.ihmc.footstepPlanning.simplePlanners.FlatGroundPlanningUtils;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -43,6 +45,12 @@ public class AStarPartialFootholdTest
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
       planner = AStarFootstepPlanner.createRoughTerrainPlanner(parameters, null, footPolygons, expansion, registry);
       planner.setTimeout(5.0);
+   }
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)

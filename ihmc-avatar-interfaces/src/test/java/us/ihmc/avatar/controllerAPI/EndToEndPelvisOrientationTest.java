@@ -14,6 +14,7 @@ import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -24,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientati
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -37,6 +39,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -56,6 +59,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    private HumanoidReferenceFrames humanoidReferenceFrames;
    private SimulationConstructionSet scs;
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 26.9)
+   @Test(timeout = 130000)
    public void testGoHome() throws SimulationExceededMaximumTimeException
    {
       double epsilon = 1.0e-5;
@@ -87,6 +92,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, home, scs, epsilon);
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 25.5)
+   @Test(timeout = 130000)
    public void testSingleTrajectoryPoint() throws SimulationExceededMaximumTimeException
    {
       double epsilon = 1.0e-10;
@@ -120,9 +127,11 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 42.5)
+   @Test(timeout = 210000)
    public void testWalking() throws SimulationExceededMaximumTimeException
    {
-      double epsilon = 3.0e-3;
+      double epsilon = 1.0e-4;
       int steps = 4;
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
@@ -141,6 +150,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 40.8)
+   @Test(timeout = 200000)
    public void testWalkingAfterTrajectory() throws SimulationExceededMaximumTimeException
    {
       double epsilon = 3.0e-3;
@@ -177,6 +188,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 33.4)
+   @Test(timeout = 170000)
    public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
    {
       double epsilon = 1.0e-10;
@@ -251,6 +264,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 34.9)
+   @Test(timeout = 170000)
    public void testWalkingWithUserControl() throws SimulationExceededMaximumTimeException
    {
       double trajectoryTime = 0.5;
@@ -272,6 +287,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 29.3)
+   @Test(timeout = 150000)
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
    {
       double pitch = Math.toRadians(20.0);
@@ -356,7 +373,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       double swingDuration = walkingControllerParameters.getDefaultSwingTime();
       double transferDuration = walkingControllerParameters.getDefaultTransferTime();
       double stepLength = 0.6 * walkingControllerParameters.getSteppingParameters().getDefaultStepLength();
-      double stepWidth = stepLength / 2.0;
+      double stepWidth = walkingControllerParameters.getSteppingParameters().getInPlaceWidth();
       RobotSide robotSide = RobotSide.LEFT;
       ReferenceFrame midFootZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
       double time = walkingControllerParameters.getDefaultInitialTransferTime();
@@ -379,6 +396,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          robotSide = robotSide.getOppositeSide();
          time += swingDuration + transferDuration;
       }
+      double finalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
+      time += (finalTransferTime - transferDuration);
       return time;
    }
 

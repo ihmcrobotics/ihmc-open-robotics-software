@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
@@ -18,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -31,13 +35,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.commons.lists.RecyclingArrayDeque;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -45,6 +46,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 
@@ -67,6 +69,7 @@ public class WalkingMessageHandler
    private final SideDependentList<RecyclingArrayDeque<FootTrajectoryCommand>> upcomingFootTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
 
    private final StatusMessageOutputManager statusOutputManager;
+   private final PlanOffsetStatus planOffsetStatus = new PlanOffsetStatus();
 
    private final YoInteger currentFootstepIndex = new YoInteger("currentFootstepIndex", registry);
    private final YoInteger currentNumberOfFootsteps = new YoInteger("currentNumberOfFootsteps", registry);
@@ -99,16 +102,22 @@ public class WalkingMessageHandler
    private final PlanarRegionsListHandler planarRegionsListHandler;
 
    private final YoBoolean offsettingPlanWithFootstepError = new YoBoolean("offsettingPlanWithFootstepError", registry);
-   private final FrameVector3D planOffsetInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final YoFrameVector3D planOffsetInWorld = new YoFrameVector3D("planOffsetInWorld", worldFrame, registry);
+   private final YoFrameVector3D planOffsetFromAdjustment = new YoFrameVector3D("comPlanOffsetFromAdjustment", worldFrame, registry);
 
-   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime, double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-         StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime,
+                                double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                YoVariableRegistry parentRegistry)
    {
-      this(defaultTransferTime, defaultSwingTime, defaultTouchdownTime, defaultInitialTransferTime, defaultFinalTransferTime, contactableFeet, statusOutputManager, null, yoGraphicsListRegistry, parentRegistry);
+      this(defaultTransferTime, defaultSwingTime, defaultTouchdownTime, defaultInitialTransferTime, defaultFinalTransferTime, contactableFeet,
+           statusOutputManager, null, yoGraphicsListRegistry, parentRegistry);
    }
 
-   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime, double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-         StatusMessageOutputManager statusOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime,
+                                double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                StatusMessageOutputManager statusOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
 
@@ -138,11 +147,14 @@ public class WalkingMessageHandler
       for (int i = 0; i < numberOfFootstepsToVisualize; i++)
          upcomingFoostepSide[i] = new YoEnum<>("upcomingFoostepSide" + i, registry, RobotSide.class, true);
 
-      footstepListVisualizer = new FootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
+      if (yoGraphicsListRegistry != null)
+         footstepListVisualizer = new FootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
+      else
+         footstepListVisualizer = null;
       updateVisualization();
 
-      momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime);
-      comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime);
+      momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
+      comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
       planarRegionsListHandler = new PlanarRegionsListHandler(statusOutputManager, registry);
 
       parentRegistry.addChild(registry);
@@ -153,27 +165,29 @@ public class WalkingMessageHandler
       offsettingPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
       if (!offsettingPlanWithFootstepError.getBooleanValue())
       {
-         planOffsetInWorld.setToZero(ReferenceFrame.getWorldFrame());
+         planOffsetInWorld.setToZero();
       }
 
       if (command.getNumberOfFootsteps() > 0)
       {
-         switch(command.getExecutionMode())
+         switch (command.getExecutionMode())
          {
          case OVERRIDE:
             clearFootsteps();
             clearFootTrajectory();
-            if (yoTime != null)
-            {
-               footstepDataListReceivedTime.set(yoTime.getDoubleValue());
-            }
             break;
          case QUEUE:
             if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue())
             {
-               //if we queued a command and the previous already finished, just continue as if everything is normal
-               if(command.getPreviousCommandId() == lastCommandID.getValue())
+               if (command.getExecutionTiming() == ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS)
                {
+                  PrintTools.warn("Can not command a queued message with absolute timings if all footsteps were already exectuted. You gotta send faster!");
+                  return;
+               }
+
+               if (command.getPreviousCommandId() == lastCommandID.getValue())
+               {
+                  // If we queued a command and the previous already finished, just continue as if everything is normal
                   break;
                }
                else
@@ -200,7 +214,8 @@ public class WalkingMessageHandler
       isWalkingPaused.set(false);
       double commandDefaultTransferTime = command.getDefaultTransferDuration();
       double commandDefaultSwingTime = command.getDefaultSwingDuration();
-      if (!Double.isNaN(commandDefaultSwingTime) && commandDefaultSwingTime > 1.0e-2 && !Double.isNaN(commandDefaultTransferTime) && commandDefaultTransferTime >= 0.0)
+      if (!Double.isNaN(commandDefaultSwingTime) && commandDefaultSwingTime > 1.0e-2 && !Double.isNaN(commandDefaultTransferTime)
+            && commandDefaultTransferTime >= 0.0)
       {
          defaultTransferTime.set(commandDefaultTransferTime);
          defaultSwingTime.set(commandDefaultSwingTime);
@@ -286,7 +301,8 @@ public class WalkingMessageHandler
     * @param numberOfPoints the number of sampling points of the trajectory
     * @param trajectoryToPack the trajectory will be packed in here
     */
-   public void getAngularMomentumTrajectory(double startTime, double endTime, int numberOfPoints, RecyclingArrayList<SimpleEuclideanTrajectoryPoint> trajectoryToPack)
+   public void getAngularMomentumTrajectory(double startTime, double endTime, int numberOfPoints,
+                                            RecyclingArrayList<SimpleEuclideanTrajectoryPoint> trajectoryToPack)
    {
       momentumTrajectoryHandler.getAngularMomentumTrajectory(startTime, endTime, numberOfPoints, trajectoryToPack);
    }
@@ -383,7 +399,8 @@ public class WalkingMessageHandler
    {
       if (upcomingFootstepTimings.size() <= stepIndex)
       {
-         throw new RuntimeException("Can not adjust timing of upciming step " + stepIndex + ", only have " + upcomingFootstepTimings.size() + " upcoming steps.");
+         throw new RuntimeException("Can not adjust timing of upciming step " + stepIndex + ", only have " + upcomingFootstepTimings.size()
+               + " upcoming steps.");
       }
       upcomingFootstepTimings.get(stepIndex).setTimings(newSwingDuration, newTouchdownDuration, newTransferDuration);
    }
@@ -400,7 +417,8 @@ public class WalkingMessageHandler
 
       if (footstepToAdjust.getRobotSide() != requestedFootstepAdjustment.getRobotSide())
       {
-         PrintTools.warn(this, "RobotSide does not match: side of footstep to be adjusted: " + footstepToAdjust.getRobotSide() + ", side of adjusted footstep: " + requestedFootstepAdjustment.getRobotSide());
+         PrintTools.warn(this, "RobotSide does not match: side of footstep to be adjusted: " + footstepToAdjust.getRobotSide() + ", side of adjusted footstep: "
+               + requestedFootstepAdjustment.getRobotSide());
          hasNewFootstepAdjustment.set(false);
          requestedFootstepAdjustment.clear();
          return false;
@@ -444,7 +462,7 @@ public class WalkingMessageHandler
       }
       return hasNewFootstepAdjustment.getBooleanValue();
    }
-   
+
    public boolean isNextFootstepUsingAbsoluteTiming()
    {
       if (!hasUpcomingFootsteps())
@@ -548,8 +566,8 @@ public class WalkingMessageHandler
       footstepStatus.getDesiredFootPositionInWorld().set(desiredFootPositionInWorld);
       statusOutputManager.reportStatusMessage(footstepStatus);
 
-//      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FOOTSTEP_COMPLETED);
-//      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
+      //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FOOTSTEP_COMPLETED);
+      //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
       executingFootstep.set(false);
    }
 
@@ -569,8 +587,8 @@ public class WalkingMessageHandler
       walkingStatusMessage.setWalkingStatus(WalkingStatus.COMPLETED.toByte());
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
       isWalking.set(false);
-//      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FINISHED_WALKING);
-//      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
+      //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FINISHED_WALKING);
+      //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
    }
 
    public void reportWalkingAbortRequested()
@@ -578,8 +596,8 @@ public class WalkingMessageHandler
       WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
       walkingStatusMessage.setWalkingStatus(WalkingStatus.ABORT_REQUESTED.toByte());
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
-//      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.WALKING_ABORTED);
-//      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
+      //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.WALKING_ABORTED);
+      //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
    }
 
    public void reportControllerFailure(FrameVector3D fallingDirection)
@@ -641,19 +659,19 @@ public class WalkingMessageHandler
    {
       return defaultSwingTime.getDoubleValue();
    }
-   
+
    public double getNextSwingTime()
    {
       if (upcomingFootstepTimings.isEmpty())
          return getDefaultSwingTime();
       return upcomingFootstepTimings.get(0).getSwingTime();
    }
-   
+
    public double getDefaultTouchdownTime()
    {
       return defaultTouchdownTime.getDoubleValue();
    }
-   
+
    public double getNextTouchdownDuration()
    {
       if (upcomingFootstepTimings.isEmpty())
@@ -701,12 +719,14 @@ public class WalkingMessageHandler
          upcomingFoostepSide[i].set(null);
       }
 
-      footstepListVisualizer.update(upcomingFootsteps);
+      if (footstepListVisualizer != null)
+         footstepListVisualizer.update(upcomingFootsteps);
    }
 
    public void updateVisualizationAfterFootstepAdjustement(Footstep adjustedFootstep)
    {
-      footstepListVisualizer.updateFirstFootstep(adjustedFootstep);
+      if (footstepListVisualizer != null)
+         footstepListVisualizer.updateFirstFootstep(adjustedFootstep);
    }
 
    private final TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
@@ -777,12 +797,13 @@ public class WalkingMessageHandler
       double transferDuration = footstep.getTransferDuration();
       if (Double.isNaN(transferDuration) || transferDuration <= 0.0)
       {
-         if (stepsInQueue == 0 && !isWalking.getBooleanValue() && executionMode != ExecutionMode.QUEUE)
+         // There are no upcoming steps, we are not walking, and this is an overwrite message:
+         if (stepsInQueue == 0 && !isWalking.getBooleanValue() && executionMode == ExecutionMode.OVERRIDE)
             transferDuration = defaultInitialTransferTime.getDoubleValue();
          else
             transferDuration = defaultTransferTime.getDoubleValue();
       }
-      
+
       double touchdownDuration = footstep.getTouchdownDuration();
       if(Double.isNaN(touchdownDuration) || touchdownDuration < 0.0)
       {
@@ -794,19 +815,30 @@ public class WalkingMessageHandler
       switch (executionTiming)
       {
       case CONTROL_DURATIONS:
+         timingToSet.removeAbsoluteTime();
          break;
       case CONTROL_ABSOLUTE_TIMINGS:
-         if (stepsInQueue == 0 && !executingFootstep.getBooleanValue() && executionMode != ExecutionMode.QUEUE)
+         if (stepsInQueue == 0 && !executingFootstep.getBooleanValue() && executionMode == ExecutionMode.OVERRIDE)
          {
+            // There are no upcoming steps, we are not executing a step, and this is an overwrite message:
+            footstepDataListReceivedTime.set(yoTime.getDoubleValue());
             timingToSet.setAbsoluteTime(transferDuration, footstepDataListReceivedTime.getDoubleValue());
+         }
+         else if (stepsInQueue == 0 && !executingFootstep.getBooleanValue())
+         {
+            // This message should have been rejected above.
+            throw new RuntimeException("This should not happen. We are not executing a footstep and there is no steps in "
+                  + "queue so there is no way to compute absolute timings for the step as was requested.");
          }
          else if (stepsInQueue == 0)
          {
+            // In this case the step we are executing right now is the last step we have. So compute the timings from that step.
             double swingStartTime = lastTimingExecuted.getSwingStartTime() + lastTimingExecuted.getSwingTime() + transferDuration;
             timingToSet.setAbsoluteTime(swingStartTime, footstepDataListReceivedTime.getDoubleValue());
          }
          else
          {
+            // In this case we still have steps in queue so we compute the timings from the last step in the queue.
             FootstepTiming previousTiming = upcomingFootstepTimings.get(stepsInQueue - 1);
             double swingStartTime = previousTiming.getSwingStartTime() + previousTiming.getSwingTime() + transferDuration;
             timingToSet.setAbsoluteTime(swingStartTime, footstepDataListReceivedTime.getDoubleValue());
@@ -887,12 +919,13 @@ public class WalkingMessageHandler
       return true;
    }
 
-   public void addOffsetVector(FrameVector3D offset)
+   public void addOffsetVectorOnTouchdown(FrameVector3DReadOnly offset)
    {
       if (!offsettingPlanWithFootstepError.getBooleanValue())
       {
          return;
       }
+
 
       for (int stepIdx = 0; stepIdx < upcomingFootsteps.size(); stepIdx++)
       {
@@ -901,9 +934,27 @@ public class WalkingMessageHandler
       }
 
       this.planOffsetInWorld.add(offset);
-      comTrajectoryHandler.setPositionOffset(this.planOffsetInWorld);
+      setPlanOffsetInternal(planOffsetInWorld);
+
+      planOffsetFromAdjustment.setToZero();
 
       updateVisualization();
-      statusOutputManager.reportStatusMessage(HumanoidMessageTools.createPlanOffsetStatus(planOffsetInWorld));
+   }
+
+   private final FrameVector3D totalOffset = new FrameVector3D();
+
+   public void setPlanOffsetFromAdjustment(FrameVector3DReadOnly planOffsetFromAdjustment)
+   {
+      this.planOffsetFromAdjustment.set(planOffsetFromAdjustment);
+      totalOffset.add(planOffsetInWorld, planOffsetFromAdjustment);
+      setPlanOffsetInternal(totalOffset);
+   }
+
+   private void setPlanOffsetInternal(FrameVector3DReadOnly planOffset)
+   {
+      comTrajectoryHandler.setPositionOffset(planOffset);
+      planOffsetStatus.getOffsetVector().set(planOffset);
+      statusOutputManager.reportStatusMessage(planOffsetStatus);
+
    }
 }

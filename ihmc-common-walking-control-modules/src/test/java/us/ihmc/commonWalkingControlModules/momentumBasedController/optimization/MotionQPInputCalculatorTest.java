@@ -6,11 +6,13 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -27,6 +29,12 @@ public class MotionQPInputCalculatorTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int ITERATIONS = 500;
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
@@ -50,7 +58,7 @@ public class MotionQPInputCalculatorTest
       CentroidalMomentumHandler centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
       MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, centroidalMomentumHandler, jointIndexHandler, null, registry);
 
-      MotionQPInput motionQPInput = new MotionQPInput(numberOfDoFs);
+      QPInput motionQPInput = new QPInput(numberOfDoFs);
       SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
       spatialAccelerationCommand.set(rootBody, endEffector);
       spatialAccelerationCommand.setWeight(random.nextDouble());

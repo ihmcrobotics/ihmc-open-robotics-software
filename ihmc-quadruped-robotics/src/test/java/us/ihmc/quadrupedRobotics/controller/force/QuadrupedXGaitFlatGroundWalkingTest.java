@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -13,7 +15,6 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
@@ -23,6 +24,14 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedTestFactory quadrupedTestFactory;
+
+   public abstract double getPacingWidth();
+
+   public abstract double getFastWalkingSpeed();
+   public abstract double getSlowWalkingSpeed();
+   public abstract double getWalkingAngularVelocity();
+   public abstract double getWalkingSpeedWhileTurning();
 
    @Before
    public void setup()
@@ -31,7 +40,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
 
       try
       {
-         QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
+         quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseNetworking(true);
@@ -48,14 +57,129 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @After
    public void tearDown()
    {
+      quadrupedTestFactory.close();
       conductor.concludeTesting();
       conductor = null;
       variables = null;
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   public void testFlatGroundWalking(double endPhaseShift, double walkingSpeed)
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 630000)
+   public void testWalkingForwardFast()
+   {
+      testFlatGroundWalking(90.0, getFastWalkingSpeed());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 720000)
+   public void testWalkingForwardSlow()
+   {
+      testFlatGroundWalking(90.0, getSlowWalkingSpeed());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 460000)
+   public void testWalkingBackwardsFast()
+   {
+      testFlatGroundWalking(90.0, -getFastWalkingSpeed());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 670000)
+   public void testWalkingBackwardsSlow()
+   {
+      testFlatGroundWalking(90.0, -getSlowWalkingSpeed());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1100000)
+   public void testWalkingInAForwardLeftCircle()
+   {
+      testWalkingInASemiCircle(90.0, getWalkingSpeedWhileTurning(), getWalkingAngularVelocity());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1200000)
+   public void testWalkingInAForwardRightCircle()
+   {
+      testWalkingInASemiCircle(90.0, getWalkingSpeedWhileTurning(), -getWalkingAngularVelocity());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1200000)
+   public void testWalkingInABackwardLeftCircle()
+   {
+      testWalkingInASemiCircle(90.0, -getWalkingSpeedWhileTurning(), -getWalkingAngularVelocity());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1500000)
+   public void testWalkingInABackwardRightCircle()
+   {
+      testWalkingInASemiCircle(90.0, -getWalkingSpeedWhileTurning(), getWalkingAngularVelocity());
+   }
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 630000)
+   public void testTrottingForwardFast()
+   {
+      testFlatGroundWalking(180.0, getFastWalkingSpeed());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 720000)
+   public void testTrottingForwardSlow()
+   {
+      testFlatGroundWalking(180.0, getSlowWalkingSpeed());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 460000)
+   public void testTrottingBackwardsFast()
+   {
+      testFlatGroundWalking(180.0, -getFastWalkingSpeed());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 670000)
+   public void testTrottingBackwardsSlow()
+   {
+      testFlatGroundWalking(180.0, -getSlowWalkingSpeed());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1100000)
+   public void testTrottingInAForwardLeftCircle()
+   {
+      testWalkingInASemiCircle(180.0, getWalkingSpeedWhileTurning(), getWalkingAngularVelocity());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1200000)
+   public void testTrottingInAForwardRightCircle()
+   {
+      testWalkingInASemiCircle(180.0, getWalkingSpeedWhileTurning(), -getWalkingAngularVelocity());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1200000)
+   public void testTrottingInABackwardLeftCircle()
+   {
+      testWalkingInASemiCircle(180.0, -getWalkingSpeedWhileTurning(), -getWalkingAngularVelocity());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1500000)
+   public void testTrottingInABackwardRightCircle()
+   {
+      testWalkingInASemiCircle(180.0, -getWalkingSpeedWhileTurning(), getWalkingAngularVelocity());
+   }
+
+   private void testFlatGroundWalking(double endPhaseShift, double walkingSpeed)
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -80,28 +204,148 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.simulate();
    }
 
-   public void testWalkingInASemiCircle(double endPhaseShift, double forwardVelocity, double angularVelocity)
+
+   private void testWalkingInASemiCircle(double endPhaseShift, double walkingSpeed, double angularVelocity)
    {
+      stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      double radius = Math.abs(forwardVelocity / angularVelocity);
+      double radius = Math.abs(walkingSpeed / angularVelocity);
       double expectedSemiCircleWalkTime = Math.PI / Math.abs(angularVelocity);
 
       stepTeleopManager.requestXGait();
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift);
-      stepTeleopManager.setDesiredVelocity(forwardVelocity, 0.0, angularVelocity);
+      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, angularVelocity);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), expectedSemiCircleWalkTime * 1.5);
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.signum(angularVelocity) * Math.PI / 2, 0.1));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.45));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.signum(angularVelocity) * Math.PI, 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.2));
+      conductor.addTerminalGoal(YoVariableTestGoal.or(
+            YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI, 0.2),
+            YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI, 0.2)));
 
-      if(Math.signum(forwardVelocity) > 0.0)
+      if(Math.signum(walkingSpeed) > 0.0)
       {
-         conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), radius * forwardVelocity * 0.6));
+         conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), radius * walkingSpeed * 0.6));
       }
       else
       {
-         conductor.addWaypointGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), radius * forwardVelocity * 0.6));
+         conductor.addWaypointGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), radius * walkingSpeed * 0.6));
+      }
+
+      conductor.simulate();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 630000)
+   public void testPacingForwardFast()
+   {
+      testFlatGroundPacing(getFastWalkingSpeed());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 720000)
+   public void testPacingForwardSlow()
+   {
+      testFlatGroundPacing(getSlowWalkingSpeed());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 460000)
+   public void testPacingBackwardsFast()
+   {
+      testFlatGroundPacing(-getFastWalkingSpeed());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 670000)
+   public void testPacingBackwardsSlow()
+   {
+      testFlatGroundPacing(-getSlowWalkingSpeed());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1100000)
+   public void testPacingInAForwardLeftCircle()
+   {
+      testPacingInASemiCircle(getWalkingSpeedWhileTurning(), getWalkingAngularVelocity());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 246.9)
+   @Test(timeout = 1200000)
+   public void testPacingInAForwardRightCircle()
+   {
+      testPacingInASemiCircle(getWalkingSpeedWhileTurning(), -getWalkingAngularVelocity());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1200000)
+   public void testPacingInABackwardLeftCircle()
+   {
+      testPacingInASemiCircle(-getWalkingSpeedWhileTurning(), -getWalkingAngularVelocity());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1500000)
+   public void testPacingInABackwardRightCircle()
+   {
+      testPacingInASemiCircle(-getWalkingSpeedWhileTurning(), getWalkingAngularVelocity());
+   }
+
+
+   private void testFlatGroundPacing(double walkingSpeed)
+   {
+      stepTeleopManager.getXGaitSettings().setStanceWidth(getPacingWidth());
+
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(0.0);
+
+      double walkTime = 5.0;
+      stepTeleopManager.requestXGait();
+      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), walkTime));
+
+      double finalPositionX = walkTime * walkingSpeed * 0.7;
+      if(walkingSpeed > 0.0)
+      {
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), finalPositionX));
+      }
+      else
+      {
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), finalPositionX));
+      }
+
+      conductor.simulate();
+   }
+
+   private void testPacingInASemiCircle(double walkingSpeed, double angularVelocity)
+   {
+      stepTeleopManager.getXGaitSettings().setStanceWidth(getPacingWidth());
+
+      stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+      double radius = Math.abs(walkingSpeed / angularVelocity);
+      double expectedSemiCircleWalkTime = Math.PI / Math.abs(angularVelocity);
+
+      stepTeleopManager.requestXGait();
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(0.0);
+      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, angularVelocity);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTimeLimit(variables.getYoTime(), expectedSemiCircleWalkTime * 1.5);
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.signum(angularVelocity) * Math.PI / 2, 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.2));
+      conductor.addTerminalGoal(YoVariableTestGoal.or(
+            YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI, 0.2),
+            YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI, 0.2)));
+
+      if(Math.signum(walkingSpeed) > 0.0)
+      {
+         conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), radius * walkingSpeed * 0.6));
+      }
+      else
+      {
+         conductor.addWaypointGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), radius * walkingSpeed * 0.6));
       }
 
       conductor.simulate();
