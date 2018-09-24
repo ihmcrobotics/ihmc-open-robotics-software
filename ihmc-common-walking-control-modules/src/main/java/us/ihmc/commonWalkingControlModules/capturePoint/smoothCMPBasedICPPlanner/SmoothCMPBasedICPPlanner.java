@@ -44,7 +44,7 @@ import java.util.List;
 
 public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    private static final boolean debug = false;
    private static final int maxNumberOfFootstepsToConsider = 4;
 
@@ -80,7 +80,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final YoInteger numberOfUpcomingFootsteps;
    private final RecyclingArrayList<FootstepData> upcomingFootstepsData = new RecyclingArrayList<>(maxNumberOfFootstepsToConsider, FootstepData.class);
 
-   private static final double ICP_CORNER_POINT_SIZE = 0.002;
+   private static final double ICP_CORNER_POINT_SIZE = 0.01;
    private List<YoFramePointInMultipleFrames> icpPhaseEntryCornerPoints = new ArrayList<>();
    private List<YoFramePointInMultipleFrames> icpPhaseExitCornerPoints = new ArrayList<>();
 
@@ -386,7 +386,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       boolean goingToPerformSmoothingAdjustment =
             maintainContinuity && ((adjustICPForInitialDoubleSupport && isStanding.getBooleanValue()) || adjustICPForEachDoubleSupport);
-      referenceCoPGenerator.setGoingToPerformSmoothingAdjustment(goingToPerformSmoothingAdjustment);
+      referenceCoPGenerator.setGoingToPerformDSSmoothingAdjustment(goingToPerformSmoothingAdjustment);
 
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs      
       referenceCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), transferToSide);
@@ -439,7 +439,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       RobotSide supportSide = this.supportSide.getEnumValue();
 
       boolean goingToPerformSmoothingAdjustment = maintainContinuity && adjustICPForSingleSupport;
-      referenceCoPGenerator.setGoingToPerformSmoothingAdjustment(goingToPerformSmoothingAdjustment);
+      referenceCoPGenerator.setGoingToPerformSSSmoothingAdjustment(goingToPerformSmoothingAdjustment);
 
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs
       referenceCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(supportSide);
