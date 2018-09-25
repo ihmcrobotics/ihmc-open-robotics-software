@@ -226,8 +226,22 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          }
          else
          { // called when moving
-            icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0.getDoubleValue(), localTime, order, cmpTrajectories.get(currentSegmentIndex),
-                                                                            icpDesiredFinalPositions.get(currentSegmentIndex), icpQuantityInitialCondition);
+            switch (order)
+            {
+            case 0:
+               icpQuantityInitialCondition.set(icpPositionDesiredCurrent);
+               break;
+            case 1:
+               icpQuantityInitialCondition.set(icpVelocityDesiredCurrent);
+               break;
+            case 2:
+               icpQuantityInitialCondition.set(icpAccelerationDesiredCurrent);
+               break;
+            default:
+               icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0.getDoubleValue(), localTime, order, cmpTrajectories.get(currentSegmentIndex),
+                                                                               icpDesiredFinalPositions.get(currentSegmentIndex), icpQuantityInitialCondition);
+               break;
+            }
          }
       }
    }
