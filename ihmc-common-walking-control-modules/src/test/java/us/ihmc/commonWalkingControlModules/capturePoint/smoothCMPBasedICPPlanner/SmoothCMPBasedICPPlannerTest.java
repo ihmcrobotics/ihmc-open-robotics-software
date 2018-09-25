@@ -125,6 +125,7 @@ public class SmoothCMPBasedICPPlannerTest
    private final FramePoint3D copPosition = new FramePoint3D();
    private final FrameVector3D copVelocity = new FrameVector3D();
    private final FrameVector3D copAcceleration = new FrameVector3D();
+   private final FramePose3D swingFootPose = new FramePose3D();
 
    private YoVariableRegistry registry;
    private YoDouble yoTime;
@@ -796,7 +797,7 @@ public class SmoothCMPBasedICPPlannerTest
       for (int currentStepCount = 0; currentStepCount < numberOfFootstepsForTest; )
       {
          addFootsteps(currentStepCount, footstepList, timingList);
-         updateContactState(currentStepCount);
+         updateContactState(currentStepCount, 0.0);
          if (inDoubleSupport.getBooleanValue())
          {
             planner.setTransferToSide(footstepList.get(currentStepCount).getRobotSide().getOppositeSide());
@@ -814,12 +815,12 @@ public class SmoothCMPBasedICPPlannerTest
             testForPlanningConsistency(inDoubleSupport.getBooleanValue(), currentStepCount);
          simulateTicks(checkForDiscontinuities, checkIfDyanmicsAreSatisfied, (inDoubleSupport.getBooleanValue() ?
                timingList.get(currentStepCount).getTransferTime() :
-               timingList.get(currentStepCount).getSwingTime()));
+               timingList.get(currentStepCount).getSwingTime()), currentStepCount);
          currentStepCount = updateStateMachine(currentStepCount);
       }
 
       addFootsteps(numberOfFootstepsForTest, footstepList, timingList);
-      updateContactState(-1);
+      updateContactState(-1, 0.0);
       planner.setTransferToSide(footstepList.get(numberOfFootstepsForTest - 1).getRobotSide());
       planner.initializeForStanding(yoTime.getDoubleValue());
 
@@ -827,7 +828,7 @@ public class SmoothCMPBasedICPPlannerTest
          updateVisualization(numberOfFootstepsForTest);
       if (checkForPlanningConsistency)
          testForPlanningConsistency(true, numberOfFootstepsForTest);
-      simulateTicks(checkForDiscontinuities, checkIfDyanmicsAreSatisfied, defaultFinalTransferTime);
+      simulateTicks(checkForDiscontinuities, checkIfDyanmicsAreSatisfied, defaultFinalTransferTime, -1);
 
       if (visualize && keepSCSUp)
          ThreadTools.sleepForever();
@@ -847,15 +848,16 @@ public class SmoothCMPBasedICPPlannerTest
       return currentStepCount;
    }
 
-   private void simulateTicks(boolean checkForDiscontinuities, boolean checkIfDyanmicsAreSatisfied, double totalTime)
+   private void simulateTicks(boolean checkForDiscontinuities, boolean checkIfDyanmicsAreSatisfied, double totalTime, int currentStepCount)
    {
       for (double timeInState = 0.0; timeInState < totalTime; timeInState += dt)
       {
+         updateContactState(currentStepCount, timeInState / totalTime);
          simulateOneTick(checkForDiscontinuities, checkIfDyanmicsAreSatisfied);
       }
    }
 
-   private void updateContactState(int currentStepCount)
+   private void updateContactState(int currentStepCount, double percentageOfPhase)
    {
       if (inDoubleSupport.getBooleanValue())
       {
@@ -867,8 +869,22 @@ public class SmoothCMPBasedICPPlannerTest
          RobotSide swingSide = footstepList.get(currentStepCount).getRobotSide();
          contactStates.get(swingSide).clear();
          contactStates.get(swingSide.getOppositeSide()).setFullyConstrained();
+
+         if(currentStepCount > 0)
+         {
+            swingFootPose.set(footstepList.get(currentStepCount - 1).getFootstepPose());
+         }
+         else
+         {
+            swingFootPose.set(initialPose);
+            swingFootPose.appendTranslation(0.0, swingSide.negateIfRightSide(stepWidth / 2.0), 0.0);
+         }
+
+         FramePose3D endOfSwing = footstepList.get(currentStepCount).getFootstepPose();
+         swingFootPose.interpolate(endOfSwing, percentageOfPhase);
+
          FootSpoof foot = feet.get(swingSide);
-         foot.setSoleFrame(footstepList.get(currentStepCount).getFootstepPose());
+         foot.setSoleFrame(swingFootPose);
       }
       bipedSupportPolygons.updateUsingContactStates(contactStates);
    }
