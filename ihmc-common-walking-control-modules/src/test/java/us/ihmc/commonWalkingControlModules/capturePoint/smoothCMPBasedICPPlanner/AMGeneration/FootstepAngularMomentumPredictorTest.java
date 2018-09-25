@@ -490,7 +490,7 @@ public class FootstepAngularMomentumPredictorTest
       isInitialTransfer.set(false);
       isStanding.set(false);
       isDoubleSupport.set(false);
-      copTrajectoryGenerator.computeReferenceCoPsStartingFromSingleSupport(null);
+      copTrajectoryGenerator.computeReferenceCoPsStartingFromSingleSupport(RobotSide.LEFT);
       icpTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
 
       copTrajectoryGenerator.initializeForSwing(0.0);
