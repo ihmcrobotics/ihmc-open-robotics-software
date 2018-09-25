@@ -252,11 +252,11 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       {
          if (isHoldingPosition.getBooleanValue())
             requestedHoldPosition.set(true);
-         updateTransferPlan(false);
+         updateTransferPlan(true);
       }
       else
       {
-         updateSingleSupportPlan(false);
+         updateSingleSupportPlan(true);
       }
    }
 
