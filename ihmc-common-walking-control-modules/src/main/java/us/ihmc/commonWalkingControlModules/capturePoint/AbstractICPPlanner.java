@@ -169,6 +169,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       singleSupportInitialICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportInitialICP", registry, framesToRegister);
       singleSupportFinalICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalICP", registry, framesToRegister);
 
+      previousTransferToSide.set(null);
 
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
       {
