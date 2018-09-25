@@ -37,6 +37,9 @@ public class CoPPointsInFoot
 
    public CoPPointsInFoot(String namePrefix, int stepNumber, ReferenceFrame[] framesToRegister, YoVariableRegistry registry)
    {
+      if (registry == null)
+         registry = new YoVariableRegistry("localRegistry");
+
       this.name = namePrefix + "Step" + stepNumber;
       for (int i = 0; i < maxNumberOfTrajectoryPoints; i++)
       {
