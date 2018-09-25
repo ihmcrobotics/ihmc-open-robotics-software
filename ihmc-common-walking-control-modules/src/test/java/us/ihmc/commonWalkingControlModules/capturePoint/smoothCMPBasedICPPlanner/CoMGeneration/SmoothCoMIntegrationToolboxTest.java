@@ -9,15 +9,19 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.DenseMatrixVector3D;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -265,6 +269,68 @@ public class SmoothCoMIntegrationToolboxTest
          comVelocityDesiredCurrentDynamicsByHand.scale(omega0);
 
          EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrentByHand, comVelocityDesiredCurrentDynamicsByHand, EPSILON);
+      }
+   }
+
+   @Test
+   public void testCalculateCoMQuantity3DWithDenseMatrixVector3D() throws Exception
+   {
+      Random random = new Random(2432);
+      SmoothCoMIntegrationToolbox toolbox = new SmoothCoMIntegrationToolbox();
+
+      for (int i = 0; i < nTests; i++)
+      {
+         int nPolynomialCoeffs = random.nextInt(9) + 1;
+         DenseMatrix64F alphaBetaCoMPrime = new DenseMatrix64F(3, 3 * nPolynomialCoeffs);
+         DenseMatrixVector3D alphaBetaCoMPrimeVector = new DenseMatrixVector3D(1, nPolynomialCoeffs);
+         DenseMatrix64F alphaPrimeTerminal = new DenseMatrix64F(3, 3 * nPolynomialCoeffs);
+         DenseMatrixVector3D alphaPrimeTerminalVector = new DenseMatrixVector3D(1, nPolynomialCoeffs);
+
+         for (int row = 0; row < 3; row++)
+         {
+            int colOffset = row * nPolynomialCoeffs;
+
+            for (int col = 0; col < nPolynomialCoeffs; col++)
+            {
+               double randomCoeff = RandomNumbers.nextDouble(random, 1.0);
+               alphaBetaCoMPrime.set(row, colOffset + col, randomCoeff);
+               alphaBetaCoMPrimeVector.getMatrix(row).set(col, randomCoeff);
+
+               randomCoeff = RandomNumbers.nextDouble(random, 1.0);
+               alphaPrimeTerminal.set(row, colOffset + col, randomCoeff);
+               alphaPrimeTerminalVector.getMatrix(row).set(col, randomCoeff);
+            }
+         }
+
+         DenseMatrix64F polynomialCoeffs = new DenseMatrix64F(3 * nPolynomialCoeffs, 1);
+         DenseMatrixVector3D polynomialCoeffsVector = new DenseMatrixVector3D(nPolynomialCoeffs, 1);
+
+         for (Axis axis : Axis.values)
+         {
+            int rowOffset = nPolynomialCoeffs * axis.ordinal();
+
+            for (int row = 0; row < nPolynomialCoeffs; row++)
+            {
+               double randomCoeff = RandomNumbers.nextDouble(random, 1.0);
+               polynomialCoeffs.set(row + rowOffset, 0, randomCoeff);
+               polynomialCoeffsVector.getMatrix(axis).set(row, randomCoeff);
+            }
+         }
+
+         double gammaCoMPrime = RandomNumbers.nextDouble(random, 1.0);
+         double deltaCoMPrime = RandomNumbers.nextDouble(random, 1.0);
+         FrameTuple3DReadOnly icpPositionDesiredFinal = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame);
+         FrameTuple3DReadOnly comPositionDesiredInitial = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame);
+
+         FramePoint3D expectedCoMQuantityDesired = new FramePoint3D(worldFrame);
+         FramePoint3D actualCoMQuantityDesired = new FramePoint3D(worldFrame);
+
+         toolbox.calculateCoMQuantity3D(alphaBetaCoMPrime, gammaCoMPrime, deltaCoMPrime, alphaPrimeTerminal, polynomialCoeffs, icpPositionDesiredFinal,
+                                        comPositionDesiredInitial, expectedCoMQuantityDesired);
+         toolbox.calculateCoMQuantity3D(alphaBetaCoMPrimeVector, gammaCoMPrime, deltaCoMPrime, alphaPrimeTerminalVector, polynomialCoeffsVector,
+                                        icpPositionDesiredFinal, comPositionDesiredInitial, actualCoMQuantityDesired);
+
+         EuclidFrameTestTools.assertFrameTuple3DEquals(expectedCoMQuantityDesired, actualCoMQuantityDesired, EPSILON);
       }
    }
 

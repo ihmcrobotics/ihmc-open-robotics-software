@@ -5,6 +5,7 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.DenseMatrixVector3D;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration.SmoothCoMIntegrationToolbox;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.Axis;
@@ -234,6 +235,38 @@ public class SmoothCapturePointToolbox
             MatrixTools.addMatrixBlock(generalizedAlphaPrimeToPack, dir.ordinal(), dir.ordinal() * geometricSequenceDerivative.numCols,
                                        geometricSequenceDerivative, 0, 0, geometricSequenceDerivative.numRows, geometricSequenceDerivative.numCols,
                                        omega0Power);
+         }
+         omega0Power *= omega0Inverse;
+      }
+   }
+
+   /**
+    * Compute the i-th derivative of &alpha;<sub>ICP,&phi;</sub> at time t<sub>&phi;</sub>:
+    * <P>
+    * &alpha;<sup>(i)</sup><sub>ICP,&phi;</sub>(t<sub>&phi;</sub>) =
+    * &Sigma;<sub>j=0</sub><sup>n</sup> &omega;<sub>0</sub><sup>-j</sup> *
+    * t<sup>(j+i)<sup>T</sup></sup> (t<sub>&phi;</sub>)
+    */
+   public static void calculateGeneralizedAlphaPrimeOnCMPSegment3D(double omega0, double time, DenseMatrixVector3D generalizedAlphaPrimeToPack,
+                                                                   int alphaDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
+   {
+      int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
+
+      for (Axis dir : Axis.values)
+         generalizedAlphaPrimeToPack.getMatrix(dir).reshape(1, cmpPolynomial3D.getNumberOfCoefficients(dir));
+
+      generalizedAlphaPrimeToPack.zero();
+      double omega0Inverse = 1.0 / omega0;
+      double omega0Power = 1.0;
+
+      for (int i = 0; i < numberOfCoefficients; i++)
+      {
+         for (Axis dir : Axis.values)
+         {
+            Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
+            DenseMatrix64F matrix = generalizedAlphaPrimeToPack.getMatrix(dir);
+            DenseMatrix64F geometricSequenceDerivative = cmpPolynomial.evaluateGeometricSequenceDerivative(i + alphaDerivativeOrder, time);
+            CommonOps.addEquals(matrix, omega0Power, geometricSequenceDerivative);
          }
          omega0Power *= omega0Inverse;
       }
