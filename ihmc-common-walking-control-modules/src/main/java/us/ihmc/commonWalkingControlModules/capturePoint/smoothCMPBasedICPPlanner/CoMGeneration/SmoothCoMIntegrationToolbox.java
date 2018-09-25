@@ -162,11 +162,9 @@ public class SmoothCoMIntegrationToolbox
       initializeMatrices3D(numberOfCoefficients);
       setPolynomialCoefficientVector3D(polynomialCoefficientCombinedVector, cmpPolynomial3D);
 
-      calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(omega0, time, generalizedAlphaCoMPrimeMatrix, comDerivativeOrder, cmpPolynomial3D);
-      calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(omega0, time, generalizedBetaCoMPrimeMatrix, comDerivativeOrder, cmpPolynomial3D);
+      calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, generalizedAlphaBetaCoMPrimeMatrix, comDerivativeOrder, cmpPolynomial3D);
       double generalizedGammaCoMPrime = calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, comDerivativeOrder, cmpPolynomial3D);
       double generalizedDeltaCoMPrime = calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, comDerivativeOrder, cmpPolynomial3D);
-      CommonOps.subtract(generalizedAlphaCoMPrimeMatrix, generalizedBetaCoMPrimeMatrix, generalizedAlphaBetaCoMPrimeMatrix);
 
       double timeSegmentTotal = cmpPolynomial3D.getFinalTime();
       SmoothCapturePointToolbox.calculateGeneralizedAlphaPrimeOnCMPSegment3D(omega0, timeSegmentTotal, generalizedAlphaPrimeTerminalMatrix, 0, cmpPolynomial3D);
@@ -249,6 +247,66 @@ public class SmoothCoMIntegrationToolbox
       CommonOps.addEquals(M1, generalizedDeltaCoMPrime, M3);
 
       return M1.get(0);
+   }
+
+   /**
+    * Compute the i-th derivative of (&alpha;<sub>CoM,&phi;</sub> - &beta;<sub>CoM,&phi;</sub>) at
+    * time t<sub>&phi;</sub>.
+    * 
+    * @param omega0 the natural frequency of the walking system.
+    * @param time the time t<sub>&phi;</sub>
+    * @param generalizedAlphaBetaCoMPrime matrix used to store the result. Modified.
+    * @param alphaBetaCoMDerivativeOrder the order of the derivative.
+    * @param cmpPolynomial3D the polynomial to compute &alpha;<sub>CoM,&phi;</sub> and
+    *           &beta;<sub>CoM,&phi;</sub> from. Not modified.
+    */
+   public static void calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedAlphaBetaCoMPrime,
+                                                                          int alphaBetaCoMDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
+   {
+      int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
+      double timeSegmentInitial = cmpPolynomial3D.getInitialTime();
+
+      generalizedAlphaBetaCoMPrime.zero();
+
+      double signAlpha = 1.0;
+      double signBeta = alphaBetaCoMDerivativeOrder % 2 == 0 ? 1.0 : -1.0;
+      double omega0Inv = 1.0 / omega0;
+      double omega0PowerInitialAlpha = 1.0;
+      double omega0PowerBeta = power(omega0, alphaBetaCoMDerivativeOrder);
+      double expOmega0Time = Math.exp(omega0 * (timeSegmentInitial - time));
+
+      for (int i = 0; i < numberOfCoefficients; i++)
+      {
+         double omega0PowerAlpha = omega0PowerInitialAlpha;
+
+         for (int j = i; j < numberOfCoefficients; j++)
+         {
+            double scalarAlpha = signAlpha * omega0PowerAlpha; // sign * omega0^(-j)
+            double scalarBeta = signBeta * omega0PowerBeta * omega0PowerAlpha * expOmega0Time; // == sign * omega^(betaCoMDerivativeOrder - j) * exp(omega0 * (timeSegmentInitial - time))
+
+            for (Axis dir : Axis.values)
+            {
+               Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
+               DenseMatrix64F geometricSequenceDerivative = cmpPolynomial.evaluateGeometricSequenceDerivative(j + alphaBetaCoMDerivativeOrder, time);
+
+               MatrixTools.addMatrixBlock(generalizedAlphaBetaCoMPrime, dir.ordinal(), dir.ordinal() * geometricSequenceDerivative.numCols,
+                                          geometricSequenceDerivative, 0, 0, geometricSequenceDerivative.numRows, geometricSequenceDerivative.numCols,
+                                          scalarAlpha);
+
+               geometricSequenceDerivative = cmpPolynomial.evaluateGeometricSequenceDerivative(j, timeSegmentInitial);
+
+               MatrixTools.addMatrixBlock(generalizedAlphaBetaCoMPrime, dir.ordinal(), dir.ordinal() * geometricSequenceDerivative.numCols,
+                                          geometricSequenceDerivative, 0, 0, geometricSequenceDerivative.numRows, geometricSequenceDerivative.numCols,
+                                          -scalarBeta);
+            }
+
+            omega0PowerAlpha *= omega0Inv;
+         }
+
+         signAlpha = -signAlpha;
+         signBeta = -signBeta;
+         omega0PowerInitialAlpha *= omega0Inv;
+      }
    }
 
    /**
