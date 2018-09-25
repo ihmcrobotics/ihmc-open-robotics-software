@@ -123,7 +123,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final YoBoolean planIsAvailable;
 
    // Output variables
-   //   private final List<CoPPointsInFoot> copLocationWaypoints = new ArrayList<>();
    private final RecyclingArrayList<CoPPointsInFoot> copLocationWaypoints;
    private final List<TransferCoPTrajectory> transferCoPTrajectories = new ArrayList<>();
    private final List<SwingCoPTrajectory> swingCoPTrajectories = new ArrayList<>();
@@ -454,7 +453,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
                transferEndIndex--;
          }
          CoPTrajectory transferTrajectory = transferCoPTrajectories.get(transferTrajectoryIndex);
-         int j = 0;
+         int j;
          for (j = 0; j + additionalTransferIndex < transferTrajectory.getNumberOfSegments(); j++)
          {
             transferTrajectory.getSegment(j + additionalTransferIndex).getFramePositionInitial(tempFramePoint1);
@@ -571,7 +570,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    {
       copLocationWaypoints.clear();
       int footstepIndex = 0;
-      boolean transferringToSameSideAsStartingFrom = previousTransferToSide == null ? false : previousTransferToSide.equals(transferToSide);
+      boolean transferringToSameSideAsStartingFrom = previousTransferToSide != null && previousTransferToSide.equals(transferToSide);
       lastTransferToSide = previousTransferToSide == null ? transferToSide.getOppositeSide() : previousTransferToSide;
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
       initializeAllFootPolygons(transferToSide, transferringToSameSideAsStartingFrom);
@@ -606,19 +605,18 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       else if (atAStop)
       { // plan the whole thing, starting from rest
          isDoneWalking.set(false);
-         //         updateFootPolygons(footstepIndex);
 
          // compute initial waypoint
          if (holdDesiredState.getBooleanValue())
          {
             tempPointForCoPCalculation.setIncludingFrame(heldCoPPosition);
+            tempPointForCoPCalculation.changeFrame(worldFrame);
             clearHeldPosition();
          }
          else
          {
             computeMidFeetPointWithChickenSupportForInitialTransfer(tempPointForCoPCalculation);
          }
-         tempPointForCoPCalculation.changeFrame(worldFrame);
          copLocationWaypoint.addAndSetIncludingFrame(CoPPointName.START_COP, 0.0, tempPointForCoPCalculation);
 
          // set swing parameters for angular momentum estimation
@@ -769,6 +767,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       {
          framePointToPack.interpolate(fractionTempMidPoint, fractionTempPoint2, 2.0 * (fraction - 0.5));
       }
+      framePointToPack.changeFrame(worldFrame);
    }
 
    private void computeCoPPointLocationForPreviousPlan(FramePoint3D exitCoPFromLastPlanToPack, CoPPointPlanningParameters copPointParameters,
