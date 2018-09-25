@@ -71,8 +71,8 @@ public class CoPPointsInFootTest
    public void testAddCoPPointToList()
    {
       assertTrue(copPointsInFoot.isEmpty());
-      copPointsInFoot.addWayPoint(CoPPointName.BALL_COP);
-      copPointsInFoot.addWayPoint(CoPPointName.HEEL_COP);
+      copPointsInFoot.addWayPointName(CoPPointName.BALL_COP);
+      copPointsInFoot.addWayPointName(CoPPointName.HEEL_COP);
       assertTrue(copPointsInFoot.getNumberOfCoPPoints() == 2);
       assertTrue(copPointsInFoot.getCoPPointList().get(0).checkCoPPointMatch(CoPPointName.BALL_COP));
       assertTrue(copPointsInFoot.getCoPPointList().get(1).checkCoPPointMatch(CoPPointName.HEEL_COP));
@@ -86,7 +86,7 @@ public class CoPPointsInFootTest
    {
       FramePoint3D testLocation = new FramePoint3D(footSpoof.getSoleFrame(), Math.random(), Math.random(), Math.random());
       assertTrue(copPointsInFoot.isEmpty());
-      copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, 0.2, testLocation);
+      copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.2, testLocation);
       assertTrue(copPointsInFoot.getCoPPointList().size() == 1);
 
       assertTrue(copPointsInFoot.get(0).getPosition().epsilonEquals(testLocation, epsilon));
@@ -101,8 +101,8 @@ public class CoPPointsInFootTest
       YoFramePoint3D testLocation2 = new YoFramePoint3D("TestLocation2", footSpoof.getSoleFrame(), null);
       testLocation1.set(Math.random(), Math.random(), Math.random());
       testLocation2.set(Math.random(), Math.random(), Math.random());
-      copPointsInFoot.addAndSetIncludingFrame(CoPPointName.HEEL_COP, 0.87, testLocation1);
-      copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, 0.12, testLocation2);
+      copPointsInFoot.addWaypoint(CoPPointName.HEEL_COP, 0.87, testLocation1);
+      copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.12, testLocation2);
       assertTrue(copPointsInFoot.getCoPPointList().size() == 2);
 
       assertTrue(copPointsInFoot.get(0).getPosition().epsilonEquals(testLocation1, epsilon));
@@ -121,8 +121,8 @@ public class CoPPointsInFootTest
       testLocation1.setPosition(new FramePoint3D(footSpoof.getSoleFrame(), Math.random(), Math.random(), Math.random()));
       testLocation2.changeFrame(footSpoof.getSoleFrame());
       testLocation2.setPosition(new FramePoint3D(footSpoof.getSoleFrame(), Math.random(), Math.random(), Math.random()));
-      copPointsInFoot.addAndSetIncludingFrame(CoPPointName.HEEL_COP, 0.87, testLocation1);
-      copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, 0.12, testLocation2);
+      copPointsInFoot.addWaypoint(CoPPointName.HEEL_COP, 0.87, testLocation1);
+      copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.12, testLocation2);
       assertTrue(copPointsInFoot.getCoPPointList().size() == 2);
 
       assertTrue(copPointsInFoot.get(0).getPosition().epsilonEquals(testLocation1.getPosition(), epsilon));
@@ -156,8 +156,8 @@ public class CoPPointsInFootTest
    public void testChangeFrame()
    {
       copPointsInFoot.setFeetLocation(new FramePoint3D(worldFrame, 0.2, 0.1, 0.1), new FramePoint3D(worldFrame, 0.2, -0.1, 0.1));
-      copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, 0.2, new FramePoint3D(worldFrame, 0.2, 0.15, 0.1));
-      copPointsInFoot.addAndSetIncludingFrame(CoPPointName.HEEL_COP, 0.8, new FramePoint3D(worldFrame, 0.15, -0.05, 0.11));
+      copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.2, new FramePoint3D(worldFrame, 0.2, 0.15, 0.1));
+      copPointsInFoot.addWaypoint(CoPPointName.HEEL_COP, 0.8, new FramePoint3D(worldFrame, 0.15, -0.05, 0.11));
       copPointsInFoot.changeFrame(footSpoof.getSoleFrame());
       FramePoint3D tempFramePoint = new FramePoint3D();
       copPointsInFoot.getSupportFootLocation(tempFramePoint);
@@ -186,8 +186,8 @@ public class CoPPointsInFootTest
       double newFrameOriginZ = 1;
 
       copPointsInFoot.setFeetLocation(new FramePoint3D(worldFrame, 0.2, 0.1, 0.1), new FramePoint3D(worldFrame, 0.2, -0.1, 0.1));
-      copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, 0.2, new FramePoint3D(worldFrame, 0.2, 0.15, 0.1));
-      copPointsInFoot.addAndSetIncludingFrame(CoPPointName.HEEL_COP, 0.8, new FramePoint3D(worldFrame, 0.15, -0.05, 0.11));
+      copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.2, new FramePoint3D(worldFrame, 0.2, 0.15, 0.1));
+      copPointsInFoot.addWaypoint(CoPPointName.HEEL_COP, 0.8, new FramePoint3D(worldFrame, 0.15, -0.05, 0.11));
       ReferenceFrame newFrameToRegister = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("RandomFrameToRegister", worldFrame,
                                                                                                          new RigidBodyTransform(new Quaternion(),
                                                                                                                                 new FrameVector3D(worldFrame,
@@ -223,7 +223,7 @@ public class CoPPointsInFootTest
       copPointsInFoot.setupVisualizers(dummyGraphicsList, dummyArtifactList, 0.05);
       assertTrue(dummyArtifactList.getArtifacts().size() == 10);
       assertTrue(dummyGraphicsList.getYoGraphics().size() == 10);
-      copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, 1.0, new FramePoint3D(footSpoof.getSoleFrame(), 1.0, 2.1, 3.1));
+      copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 1.0, new FramePoint3D(footSpoof.getSoleFrame(), 1.0, 2.1, 3.1));
       assertTrue(dummyGraphicsList.getYoGraphics().get(0) instanceof YoGraphicPosition);
       assertTrue(((YoGraphicPosition)dummyGraphicsList.getYoGraphics().get(0)).getX() == 1.0 - xToAnkle);
       assertTrue(((YoGraphicPosition)dummyGraphicsList.getYoGraphics().get(0)).getY() == 2.1 - yToAnkle);
