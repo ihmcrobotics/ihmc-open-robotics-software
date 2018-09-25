@@ -1160,7 +1160,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     */
    private boolean setExitCoPUnderSpecialCases(FramePoint3D exitCoPToPack, RobotSide supportSide, int footstepIndex)
    {
-      return setExitCoPUnderSpecialCases(exitCoPToPack, transferringToPolygon.get(footstepIndex), upcomingPolygon.get(footstepIndex), supportSide);
+      return setExitCoPUnderSpecialCases(exitCoPToPack, transferringToPolygon.get(footstepIndex), transferringToPolygon.get(footstepIndex + 1), supportSide);
    }
 
    /**
@@ -1221,15 +1221,15 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          convertToFramePointRetainingZ(tempFramePoint1, tempFramePoint2d, transferringToPolygon.get(footstepIndex).getReferenceFrame());
          return getStepLengthBasedOffset(transferringToPolygon.get(footstepIndex), tempFramePoint1, stepLengthToCoPOffsetFactor);
       case FINAL_SWING_POLYGON:
-         tempFramePoint2d.setIncludingFrame(upcomingPolygon.get(footstepIndex).getVertex(
-               EuclidGeometryPolygonTools.findVertexIndex(upcomingPolygon.get(footstepIndex), true, Bound.MAX, Bound.MAX)));
+         tempFramePoint2d.setIncludingFrame(transferringToPolygon.get(footstepIndex + 1).getVertex(
+               EuclidGeometryPolygonTools.findVertexIndex(transferringToPolygon.get(footstepIndex + 1), true, Bound.MAX, Bound.MAX)));
          convertToFramePointRetainingZ(tempFramePoint1, tempFramePoint2d, transferringToPolygon.get(footstepIndex).getReferenceFrame());
          return getStepLengthBasedOffset(transferringToPolygon.get(footstepIndex), tempFramePoint1, stepLengthToCoPOffsetFactor);
       case INITIAL_DOUBLE_SUPPORT_POLYGON:
          getDoubleSupportPolygonCentroid(tempDoubleSupportPolygonCentroid, transferringToPolygon.get(footstepIndex), transferringFromPolygon.get(footstepIndex), transferringToPolygon.get(footstepIndex).getReferenceFrame());
          return getStepLengthBasedOffset(transferringToPolygon.get(footstepIndex), tempDoubleSupportPolygonCentroid, stepLengthToCoPOffsetFactor);
       case FINAL_DOUBLE_SUPPORT_POLYGON:
-         getDoubleSupportPolygonCentroid(tempDoubleSupportPolygonCentroid, transferringToPolygon.get(footstepIndex), upcomingPolygon.get(footstepIndex),
+         getDoubleSupportPolygonCentroid(tempDoubleSupportPolygonCentroid, transferringToPolygon.get(footstepIndex), transferringToPolygon.get(footstepIndex + 1),
                                          transferringToPolygon.get(footstepIndex).getReferenceFrame());
          return getStepLengthBasedOffset(transferringToPolygon.get(footstepIndex), tempDoubleSupportPolygonCentroid, stepLengthToCoPOffsetFactor);
       default:
@@ -1246,7 +1246,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          convertToFramePointRetainingZ(copPointToPlan, transferringFromPolygon.get(footstepIndex).getCentroid(), transferringToPolygon.get(footstepIndex).getReferenceFrame());
          return;
       case FINAL_SWING_POLYGON:
-         convertToFramePointRetainingZ(copPointToPlan, upcomingPolygon.get(footstepIndex).getCentroid(), transferringToPolygon.get(footstepIndex).getReferenceFrame());
+         convertToFramePointRetainingZ(copPointToPlan, transferringToPolygon.get(footstepIndex + 1).getCentroid(), transferringToPolygon.get(footstepIndex).getReferenceFrame());
          return;
       case INITIAL_DOUBLE_SUPPORT_POLYGON:
          if (copPointName == CoPPointName.MIDFEET_COP && useTransferSplitFractionFor.get(footstepIndex) == UseSplitFractionFor.POSITION)
@@ -1263,12 +1263,12 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       case FINAL_DOUBLE_SUPPORT_POLYGON:
          if (copPointName == CoPPointName.MIDFEET_COP)
          {
-            computeMidFeetPointByPositionFraction(copPointToPlan, transferringToPolygon.get(footstepIndex), upcomingPolygon.get(footstepIndex),
+            computeMidFeetPointByPositionFraction(copPointToPlan, transferringToPolygon.get(footstepIndex), transferringToPolygon.get(footstepIndex + 1),
                                                   transferSplitFractions.get(footstepIndex).getDoubleValue(), transferringToPolygon.get(footstepIndex).getReferenceFrame());
          }
          else
          {
-            getDoubleSupportPolygonCentroid(copPointToPlan, transferringToPolygon.get(footstepIndex), upcomingPolygon.get(footstepIndex), transferringToPolygon.get(footstepIndex).getReferenceFrame());
+            getDoubleSupportPolygonCentroid(copPointToPlan, transferringToPolygon.get(footstepIndex), transferringToPolygon.get(footstepIndex + 1), transferringToPolygon.get(footstepIndex).getReferenceFrame());
          }
          return;
       case NULL:
@@ -1310,7 +1310,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          constrainToPolygon(copPointToConstrain, transferringFromPolygon.get(footstepIndex), safeDistanceFromCoPToSupportEdges.getDoubleValue());
          return;
       case FINAL_SWING_POLYGON:
-         constrainToPolygon(copPointToConstrain, upcomingPolygon.get(footstepIndex), safeDistanceFromCoPToSupportEdges.getDoubleValue());
+         constrainToPolygon(copPointToConstrain, transferringToPolygon.get(footstepIndex + 1), safeDistanceFromCoPToSupportEdges.getDoubleValue());
          return;
       case INITIAL_DOUBLE_SUPPORT_POLYGON:
          //TODO 
