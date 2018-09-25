@@ -211,23 +211,23 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       copWaypointsWereAdjusted.set(false);
    }
 
-   private void getICPInitialConditionsForAdjustment(double localTime, int currentSwingSegment)
+   private void getICPInitialConditionsForAdjustment(double localTime, int currentSegmentIndex)
    {
       calculatedInitialICPConditions.clear();
       FrameTrajectory3D firstCoPTrajectory = copTrajectories.get(0);
 
-      for (int coefficient = 0; coefficient < firstCoPTrajectory.getNumberOfCoefficients() / 2; coefficient++)
+      for (int order = 0; order < firstCoPTrajectory.getNumberOfCoefficients() / 2; order++)
       {
          FrameTuple3DBasics icpQuantityInitialCondition = calculatedInitialICPConditions.add();
 
-         if (currentSwingSegment < 0)
+         if (currentSegmentIndex < 0)
          { // called when in an initial transfer
-            firstCoPTrajectory.getDerivative(coefficient, localTime, icpQuantityInitialCondition);
+            firstCoPTrajectory.getDerivative(order, localTime, icpQuantityInitialCondition);
          }
          else
          { // called when moving
-            icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0.getDoubleValue(), localTime, coefficient, copTrajectories.get(currentSwingSegment),
-                                                                            icpDesiredFinalPositionsFromCoPs.get(currentSwingSegment), icpQuantityInitialCondition);
+            icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0.getDoubleValue(), localTime, order, cmpTrajectories.get(currentSegmentIndex),
+                                                                            icpDesiredFinalPositions.get(currentSegmentIndex), icpQuantityInitialCondition);
          }
       }
    }
