@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,10 +20,10 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.LineSegment2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -194,26 +195,26 @@ public class ReferenceCoPTrajectoryGeneratorTest
       CoPPointsInFoot zeroStep = copList.get(0);
       {
          CoPTrajectoryPoint startCoP = zeroStep.get(0);
-         assertTrue(startCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, 0.0), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.0, 0.0, 0.0), startCoP, EPSILON);
          assertTrue(zeroStep.getCoPPointList().get(0) == CoPPointName.START_COP);
       }
 
       CoPPointsInFoot firstStep = copList.get(1);
       {
          CoPTrajectoryPoint midStanceCoP = firstStep.get(0);
-         assertTrue(midStanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, 0.0), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.0, 0.0, 0.0), midStanceCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = firstStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, -0.205), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.0, -0.205, 0.0), entryCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = firstStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0375, -0.190), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.0375, -0.190, 0.0), ballCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = firstStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.06, -0.180), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.06, -0.180, 0.0), toeCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = firstStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.06, -0.180), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.06, -0.180, 0.0), exitCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -221,19 +222,19 @@ public class ReferenceCoPTrajectoryGeneratorTest
       CoPPointsInFoot secondStep = copList.get(2);
       {
          CoPTrajectoryPoint midstanceCoP = secondStep.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.150, 0.0), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.150, 0.0, 0.0), midstanceCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = secondStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.260, 0.205), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.260, 0.205, 0.0), entryCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = secondStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.3375, 0.190), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.3375, 0.190, 0.0), ballCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = secondStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.360, 0.180), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.360, 0.180, 0.0), toeCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = secondStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.360, 0.180), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.360, 0.180, 0.0), exitCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -241,19 +242,19 @@ public class ReferenceCoPTrajectoryGeneratorTest
       CoPPointsInFoot thirdStep = copList.get(3);
       {
          CoPTrajectoryPoint midstanceCoP = thirdStep.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.450, 0.0), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.450, 0.0, 0.0), midstanceCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = thirdStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.560, -0.205), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.560, -0.205, 0.0), entryCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = thirdStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.6375, -0.190), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.6375, -0.190, 0.0), ballCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = thirdStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.660, -0.180), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.660, -0.180, 0.0), toeCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = thirdStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.660,-0.180), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.660,-0.180, 0.0), exitCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -261,7 +262,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       CoPPointsInFoot finalTransfer = copList.get(4);
       {
          CoPTrajectoryPoint midstanceCoP = finalTransfer.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.750, 0.0), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.750, 0.0, 0.0), midstanceCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
       }
 
@@ -284,7 +285,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       CoPPointsInFoot zeroStep = copList.get(0);
       {
          CoPTrajectoryPoint startCoP = zeroStep.get(0);
-         assertTrue(startCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, 0.180), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.0, 0.180, 0.0), startCoP, EPSILON);
          assertTrue(zeroStep.getCoPPointList().get(0) == exitCoPName);
       }
 
@@ -292,19 +293,19 @@ public class ReferenceCoPTrajectoryGeneratorTest
       CoPPointsInFoot firstStep = copList.get(1);
       {
          CoPTrajectoryPoint midStanceCoP = firstStep.get(0);
-         assertTrue(midStanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, 0.0), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.0, 0.0, 0.0), midStanceCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = firstStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, -0.205), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.0, -0.205), entryCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = firstStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0375, -0.190), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.0375, -0.190), ballCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = firstStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.06, -0.180), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.06, -0.180), toeCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = firstStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.06, -0.180), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.06, -0.180), exitCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -312,19 +313,19 @@ public class ReferenceCoPTrajectoryGeneratorTest
       CoPPointsInFoot secondStep = copList.get(2);
       {
          CoPTrajectoryPoint midstanceCoP = secondStep.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.150, 0.0), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.150, 0.0), midstanceCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = secondStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.260, 0.205), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.260, 0.205), entryCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = secondStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.3375, 0.190), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.3375, 0.190), ballCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = secondStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.360, 0.180), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.360, 0.180), toeCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = secondStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.360, 0.180), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.360, 0.180), exitCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -332,19 +333,19 @@ public class ReferenceCoPTrajectoryGeneratorTest
       CoPPointsInFoot thirdStep = copList.get(3);
       {
          CoPTrajectoryPoint midstanceCoP = thirdStep.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.450, 0.0), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.450, 0.0), midstanceCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = thirdStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.560, -0.205), EPSILON));
+         assertEquals(new FramePoint3D(worldFrame, 0.560, -0.205, 0.0), entryCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = thirdStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.6375, -0.190), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.6375, -0.190), ballCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = thirdStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.660, -0.180), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.660, -0.180), toeCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = thirdStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.660,-0.180), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.660,-0.180), exitCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -352,7 +353,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       CoPPointsInFoot finalTransfer = copList.get(4);
       {
          CoPTrajectoryPoint midstanceCoP = finalTransfer.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.750, 0.0), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.750, 0.0), midstanceCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
       }
    }
@@ -372,7 +373,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       CoPPointsInFoot zeroStep = copList.get(0);
       {
          CoPTrajectoryPoint startCoP = zeroStep.get(0);
-         assertTrue(startCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, 0.180), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.0, 0.180), startCoP, EPSILON);
          assertTrue(zeroStep.getCoPPointList().get(0) == exitCoPName);
       }
 
@@ -380,19 +381,19 @@ public class ReferenceCoPTrajectoryGeneratorTest
       CoPPointsInFoot firstStep = copList.get(1);
       {
          CoPTrajectoryPoint midstanceCoP = firstStep.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, 0.0), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.0, 0.0), midstanceCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = firstStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, -0.205), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.0, -0.205), entryCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = firstStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0375, -0.190), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.0375, -0.190), ballCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = firstStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.06, -0.180), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.06, -0.180), toeCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = firstStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.06, -0.180), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.06, -0.180), exitCoP, EPSILON);
          assertTrue(firstStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -400,19 +401,19 @@ public class ReferenceCoPTrajectoryGeneratorTest
       CoPPointsInFoot secondStep = copList.get(2);
       {
          CoPTrajectoryPoint midstanceCoP = secondStep.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.150, 0.0), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.150, 0.0), midstanceCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = secondStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.260, 0.205), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.260, 0.205), entryCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = secondStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.3375, 0.190), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.3375, 0.190), ballCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = secondStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.360, 0.180), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.360, 0.180), toeCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = secondStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.360, 0.180), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.360, 0.180), exitCoP, EPSILON);
          assertTrue(secondStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -420,19 +421,19 @@ public class ReferenceCoPTrajectoryGeneratorTest
       CoPPointsInFoot thirdStep = copList.get(3);
       {
          CoPTrajectoryPoint midstanceCoP = thirdStep.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.450, 0.0), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.450, 0.0), midstanceCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = thirdStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.560, -0.205), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.560, -0.205), entryCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = thirdStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.6375, -0.190), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.6375, -0.190), ballCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = thirdStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.660, -0.180), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.660, -0.180), toeCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = thirdStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.660,-0.180), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.660,-0.180), exitCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -440,7 +441,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       CoPPointsInFoot finalTransfer = copList.get(4);
       {
          CoPTrajectoryPoint midstanceCoP = finalTransfer.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.750, 0.0), EPSILON));
+         assertEquals(new FramePoint2D(worldFrame, 0.750, 0.0), midstanceCoP, EPSILON);
          assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
       }
    }
@@ -490,5 +491,25 @@ public class ReferenceCoPTrajectoryGeneratorTest
          copOffsetBoundsInFootFrame.put(CoPPointName.BALL_COP, new Vector2D(0.0, 0.055));
          copOffsetBoundsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.08));
       }
+   }
+
+   private static void assertEquals(CoPTrajectoryPoint pointA, CoPTrajectoryPoint pointB, double epsilon)
+   {
+      pointA.checkReferenceFrameMatch(pointB);
+      Assert.assertEquals(pointA.getTime(), pointB.getTime(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(pointA.getPosition(), pointB.getPosition(), epsilon);
+      EuclidCoreTestTools.assertVector3DGeometricallyEquals(pointA.getLinearVelocity(), pointB.getLinearVelocity(), epsilon);
+   }
+
+   private static void assertEquals(FramePoint2DReadOnly pointA, CoPTrajectoryPoint pointB, double epsilon)
+   {
+      assertEquals(new FramePoint3D(pointA.getReferenceFrame(), pointA.getX(), pointA.getY(), 0.0), pointB, epsilon);
+   }
+
+   private static void assertEquals(FramePoint3DReadOnly pointA, CoPTrajectoryPoint pointB, double epsilon)
+   {
+      pointA.checkReferenceFrameMatch(pointB);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(pointA, pointB.getPosition(), epsilon);
+      EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(pointB.getReferenceFrame()), pointB.getLinearVelocity(), epsilon);
    }
 }

@@ -17,7 +17,6 @@ import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -310,7 +309,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
                                            List<? extends FrameVector3DReadOnly> comFinalAccelerations, int numberOfRegisteredFootsteps)
    {
       for (int i = 0; i < copLocations.size(); i++)
-         upcomingCoPsInFootsteps.get(i).setIncludingFrame(copLocations.get(i));
+         upcomingCoPsInFootsteps.get(i).set(copLocations.get(i));
       this.numberOfRegisteredFootsteps.set(numberOfRegisteredFootsteps);
       this.comInitialPositions = comInitialPositions;
       this.comFinalPositions = comFinalPositions;
