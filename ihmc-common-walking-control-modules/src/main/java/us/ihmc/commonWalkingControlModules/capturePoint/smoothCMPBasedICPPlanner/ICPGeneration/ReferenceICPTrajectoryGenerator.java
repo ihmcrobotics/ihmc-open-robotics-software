@@ -97,11 +97,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final List<YoDouble> icpSegmentStartTimes = new ArrayList<>();
    private final List<YoDouble> icpSegmentEndTimes = new ArrayList<>();
 
-
-   public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0,
-                                          YoInteger numberOfFootstepsToConsider,
-                                          YoBoolean isInitialTransfer, boolean debug, YoVariableRegistry registry,
-                                          YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isInitialTransfer, boolean debug,
+                                          YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.omega0 = omega0;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
@@ -133,22 +130,21 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       currentCMPSegmentIndex = new YoInteger(namePrefix + "CurrentCMPSegment", registry);
       currentCoPSegmentIndex = new YoInteger(namePrefix + "CurrentCoPSegment", registry);
-      numberOfCMPSegmentsInCurrentPhase = new YoInteger( "NumberOfCMPSegmentsInCurrentPhase", registry);
-      numberOfCoPSegmentsInCurrentPhase = new YoInteger( "NumberOfCoPSegmentsInCurrentPhase", registry);
-
+      numberOfCMPSegmentsInCurrentPhase = new YoInteger("NumberOfCMPSegmentsInCurrentPhase", registry);
+      numberOfCoPSegmentsInCurrentPhase = new YoInteger("NumberOfCoPSegmentsInCurrentPhase", registry);
 
       for (int i = 0; i < defaultSize; i++)
       {
          cmpDesiredFinalPositions.add(new FramePoint3D());
       }
 
-
       if (visualize)
       {
          ArtifactList icpWaypointList = new ArtifactList("ICP Waypoints");
          YoFramePoint3D waypointStart = new YoFramePoint3D("ICPWaypoint" + 0, ReferenceFrame.getWorldFrame(), registry);
 
-         YoGraphicPosition waypointStartViz = new YoGraphicPosition("ICP Waypoint" + 0, waypointStart, POINT_SIZE, YoAppearance.Blue(), YoGraphicPosition.GraphicType.DIAMOND_WITH_CROSS);
+         YoGraphicPosition waypointStartViz = new YoGraphicPosition("ICP Waypoint" + 0, waypointStart, POINT_SIZE, YoAppearance.Blue(),
+                                                                    YoGraphicPosition.GraphicType.DIAMOND_WITH_CROSS);
 
          icpWaypointList.add(waypointStartViz.createArtifact());
          icpWaypoints.add(waypointStart);
@@ -160,7 +156,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
             YoDouble segmentStartTimes = new YoDouble("ICPSegmentStartTime" + i, registry);
             YoDouble segmentEndTimes = new YoDouble("ICPSegmentEndTime" + i, registry);
 
-            YoGraphicPosition waypointViz = new YoGraphicPosition("ICP Waypoint" + (i + 1), waypoint, POINT_SIZE, YoAppearance.Blue(), YoGraphicPosition.GraphicType.DIAMOND_WITH_CROSS);
+            YoGraphicPosition waypointViz = new YoGraphicPosition("ICP Waypoint" + (i + 1), waypoint, POINT_SIZE, YoAppearance.Blue(),
+                                                                  YoGraphicPosition.GraphicType.DIAMOND_WITH_CROSS);
 
             icpWaypointList.add(waypointViz.createArtifact());
 
@@ -214,35 +211,23 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       copWaypointsWereAdjusted.set(false);
    }
 
-
-   private void getICPInitialConditionsForAdjustment(double time, int currentSwingSegment)
-   {
-      getICPInitialConditionsForAdjustment(time, icpDesiredFinalPositionsFromCoPs, copTrajectories, currentSwingSegment, omega0.getDoubleValue());
-   }
-
-   private void getICPInitialConditionsForAdjustment(double localTime, List<FramePoint3D> exitCornerPointsFromCoPs, List<FrameTrajectory3D> copPolynomials3D,
-                                                    int currentSwingSegment, double omega0)
+   private void getICPInitialConditionsForAdjustment(double localTime, int currentSwingSegment)
    {
       calculatedInitialICPConditions.clear();
-      if (currentSwingSegment < 0)
-      { // called when in transfer
-         FrameTrajectory3D firstCoPTrajectory = copPolynomials3D.get(0);
-         for (int i = 0; i < firstCoPTrajectory.getNumberOfCoefficients() / 2; i++)
-         {
-            FrameTuple3DBasics icpQuantityInitialCondition = calculatedInitialICPConditions.add();
+      FrameTrajectory3D firstCoPTrajectory = copTrajectories.get(0);
 
-            firstCoPTrajectory.getDerivative(i, localTime, icpQuantityInitialCondition);
+      for (int coefficient = 0; coefficient < firstCoPTrajectory.getNumberOfCoefficients() / 2; coefficient++)
+      {
+         FrameTuple3DBasics icpQuantityInitialCondition = calculatedInitialICPConditions.add();
+
+         if (currentSwingSegment < 0)
+         { // called when in an initial transfer
+            firstCoPTrajectory.getDerivative(coefficient, localTime, icpQuantityInitialCondition);
          }
-      }
-      else
-      { // called when in swing
-         FrameTrajectory3D copPolynomial3D = copPolynomials3D.get(currentSwingSegment);
-         for (int i = 0; i < copPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
-         {
-            FrameTuple3DBasics icpQuantityInitialCondition = calculatedInitialICPConditions.add();
-
-            icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, localTime, i, copPolynomial3D,
-                                                                            exitCornerPointsFromCoPs.get(currentSwingSegment), icpQuantityInitialCondition);
+         else
+         { // called when moving
+            icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0.getDoubleValue(), localTime, coefficient, copTrajectories.get(currentSwingSegment),
+                                                                            icpDesiredFinalPositionsFromCoPs.get(currentSwingSegment), icpQuantityInitialCondition);
          }
       }
    }
@@ -287,8 +272,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       if (numberOfSteps == 0)
          numberOfCMPSegmentsInCurrentPhase.set(numberOfCMPSegments);
-
-
 
       initialize();
    }
@@ -375,7 +358,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       icpToolbox.computeDesiredCornerPoints(icpDesiredInitialPositionsFromCoPs, icpDesiredFinalPositionsFromCoPs, copTrajectories, omega0.getDoubleValue());
 
-      if(isInitialTransfer.getBooleanValue())
+      if (isInitialTransfer.getBooleanValue())
       {
          getICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), -1);
          setInitialConditionsForAdjustment();
@@ -429,7 +412,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       endOfPhaseICPPosition.set(icpDesiredFinalPositions.get(cmpTrajectories.size() - 1));
 
-
       if (visualize)
       {
          int waypointIndex = 0;
@@ -455,7 +437,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       }
    }
 
-
    public void setInitialConditionsForAdjustment()
    {
       setInitialICPConditions.clear();
@@ -475,7 +456,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          finalICPConditionForContinuity.set(icpDesiredFinalPositionsFromCoPs.get(1));
          icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing3D(omega0.getDoubleValue(), copTrajectories, setInitialICPConditions,
                                                                              finalICPConditionForContinuity);
-         icpToolbox.computeDesiredCornerPoints3D(icpDesiredInitialPositionsFromCoPs, icpDesiredFinalPositionsFromCoPs, copTrajectories, omega0.getDoubleValue());
+         icpToolbox
+               .computeDesiredCornerPoints3D(icpDesiredInitialPositionsFromCoPs, icpDesiredFinalPositionsFromCoPs, copTrajectories, omega0.getDoubleValue());
          copWaypointsWereAdjusted.set(true);
       }
    }
@@ -487,20 +469,25 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       {
          localTimeInCurrentPhase.set(time - startTimeOfCurrentPhase.getDoubleValue());
 
-         currentCMPSegmentIndex.set(getCurrentSegmentIndex(localTimeInCurrentPhase.getDoubleValue(), numberOfCMPSegmentsInCurrentPhase.getIntegerValue(), cmpTrajectories));
+         currentCMPSegmentIndex
+               .set(getCurrentSegmentIndex(localTimeInCurrentPhase.getDoubleValue(), numberOfCMPSegmentsInCurrentPhase.getIntegerValue(), cmpTrajectories));
          FrameTrajectory3D cmpPolynomial3D = cmpTrajectories.get(currentCMPSegmentIndex.getIntegerValue());
          getICPPositionDesiredFinalFromSegment(endOfSegmentICPPosition, currentCMPSegmentIndex.getIntegerValue());
 
          // ICP
-         icpToolbox.computeDesiredCapturePointPosition(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), endOfSegmentICPPosition,
-                                                       cmpPolynomial3D, icpPositionDesiredCurrent);
-         icpToolbox.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), endOfSegmentICPPosition,
-                                                       cmpPolynomial3D, icpVelocityDesiredCurrent);
-         icpToolbox.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(),
-                                                           endOfSegmentICPPosition, cmpPolynomial3D, icpAccelerationDesiredCurrent);
+         icpToolbox
+               .computeDesiredCapturePointPosition(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), endOfSegmentICPPosition, cmpPolynomial3D,
+                                                   icpPositionDesiredCurrent);
+         icpToolbox
+               .computeDesiredCapturePointVelocity(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), endOfSegmentICPPosition, cmpPolynomial3D,
+                                                   icpVelocityDesiredCurrent);
+         icpToolbox.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), endOfSegmentICPPosition,
+                                                           cmpPolynomial3D, icpAccelerationDesiredCurrent);
 
-         currentCoPSegmentIndex.set(getCurrentSegmentIndex(localTimeInCurrentPhase.getDoubleValue(), numberOfCoPSegmentsInCurrentPhase.getIntegerValue(), copTrajectories));
-         getICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), currentCoPSegmentIndex.getIntegerValue()); // TODO: add controller dt for proper continuation
+         currentCoPSegmentIndex
+               .set(getCurrentSegmentIndex(localTimeInCurrentPhase.getDoubleValue(), numberOfCoPSegmentsInCurrentPhase.getIntegerValue(), copTrajectories));
+         getICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(),
+                                              currentCoPSegmentIndex.getIntegerValue()); // TODO: add controller dt for proper continuation
          if (debug)
             checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
 
@@ -520,8 +507,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       areICPDynamicsSatisfied.set(icpVelocityDesiredCurrent.epsilonEquals(icpVelocityDynamicsCurrent, 10e-5));
    }
 
-
-
    private int getCurrentSegmentIndex(double timeInCurrentPhase, int numberOfSegmentsInCurrentPhase, List<FrameTrajectory3D> trajectories)
    {
       int currentSegmentIndex = numberOfSegmentsInCurrentPhase - 1;
@@ -537,10 +522,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       return currentSegmentIndex;
    }
-
-
-
-
 
    public void getICPPositionDesiredFinalFromSegment(FixedFramePoint3DBasics icpPositionDesiredFinal, int segment)
    {
