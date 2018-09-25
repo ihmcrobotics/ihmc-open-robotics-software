@@ -5,6 +5,8 @@ import static org.junit.Assert.*;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
@@ -15,6 +17,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -262,6 +265,46 @@ public class SmoothCoMIntegrationToolboxTest
          comVelocityDesiredCurrentDynamicsByHand.scale(omega0);
 
          EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrentByHand, comVelocityDesiredCurrentDynamicsByHand, EPSILON);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCalculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D() throws Exception
+   {
+      Random random = new Random(545645);
+
+      for (int i = 0; i < nTests; i++)
+      {
+         double t0 = random.nextDouble();
+         double tf = t0 + RandomNumbers.nextDouble(random, 0.25, 1.0);
+         double time = RandomNumbers.nextDouble(random, t0, tf);
+         int alphaBetaCoMDerivativeOrder = random.nextInt(3);
+
+         FrameTrajectory3D cmpPolynomial3D = new FrameTrajectory3D(10, worldFrame);
+         cmpPolynomial3D.setCubic(t0, tf, EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame),
+                                  EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame));
+
+         DenseMatrix64F generalizedAlphaCoMPrime = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+         DenseMatrix64F generalizedBetaCoMPrime = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+         DenseMatrix64F expectedGeneralizedAlphaBetaCoMPrime = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+
+         SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(omega0, time, generalizedAlphaCoMPrime, alphaBetaCoMDerivativeOrder,
+                                                                                     cmpPolynomial3D);
+         SmoothCoMIntegrationToolbox.calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(omega0, time, generalizedBetaCoMPrime, alphaBetaCoMDerivativeOrder,
+                                                                                    cmpPolynomial3D);
+         CommonOps.subtract(generalizedAlphaCoMPrime, generalizedBetaCoMPrime, expectedGeneralizedAlphaBetaCoMPrime);
+
+         DenseMatrix64F actualGeneralizedAlphaBetaCoMPrime = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+         SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, actualGeneralizedAlphaBetaCoMPrime,
+                                                                                         alphaBetaCoMDerivativeOrder, cmpPolynomial3D);
+
+         DenseMatrix64F error = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+         CommonOps.subtract(expectedGeneralizedAlphaBetaCoMPrime, actualGeneralizedAlphaBetaCoMPrime, error);
+         for (int j = 0; j < error.getNumElements(); j++)
+            error.set(j, Math.abs(error.get(j)));
+         assertTrue("Expected: " + expectedGeneralizedAlphaBetaCoMPrime + "\nwas: " + actualGeneralizedAlphaBetaCoMPrime + "\nerror: " + error,
+                    MatrixFeatures.isEquals(expectedGeneralizedAlphaBetaCoMPrime, actualGeneralizedAlphaBetaCoMPrime, 1.0e-12));
       }
    }
 
