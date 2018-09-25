@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.commons.MathTools;
+import us.ihmc.simulationconstructionset.gui.YoGraph;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
@@ -221,13 +223,14 @@ public class CoPPointsInFootTest
       YoGraphicsList dummyGraphicsList = new YoGraphicsList("DummyGraphics");
       ArtifactList dummyArtifactList = new ArtifactList("DummyArtifacts");
       copPointsInFoot.setupVisualizers(dummyGraphicsList, dummyArtifactList, 0.05);
-      assertTrue(dummyArtifactList.getArtifacts().size() == 10);
-      assertTrue(dummyGraphicsList.getYoGraphics().size() == 10);
+      assertEquals(dummyArtifactList.getArtifacts().size(), 10);
+      assertEquals(dummyGraphicsList.getYoGraphics().size(), 10);
       copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 1.0, new FramePoint3D(footSpoof.getSoleFrame(), 1.0, 2.1, 3.1));
-      assertTrue(dummyGraphicsList.getYoGraphics().get(0) instanceof YoGraphicPosition);
-      assertTrue(((YoGraphicPosition)dummyGraphicsList.getYoGraphics().get(0)).getX() == 1.0 - xToAnkle);
-      assertTrue(((YoGraphicPosition)dummyGraphicsList.getYoGraphics().get(0)).getY() == 2.1 - yToAnkle);
-      assertTrue(((YoGraphicPosition)dummyGraphicsList.getYoGraphics().get(0)).getZ() == 3.1 - zToAnkle);
+
+      YoGraphicPosition graphic = (YoGraphicPosition) dummyGraphicsList.getYoGraphics().get(0);
+      assertEquals(1.0 - xToAnkle, graphic.getX(), 1e-5);
+      assertEquals(2.1 - yToAnkle, graphic.getY(), 1e-5);
+      assertEquals(3.1 - zToAnkle, graphic.getZ(), 1e-5);
    }
 
 }

@@ -121,6 +121,7 @@ public class CoPPointsInFoot
       CoPTrajectoryPoint trajectoryPoint = copLocations.add();
       trajectoryPoint.registerReferenceFrame(location.getReferenceFrame());
       trajectoryPoint.setIncludingFrame(tempVariableForSetting);
+      trajectoryPoint.changeFrame(worldFrame);
 
       addWayPointName(copPointName);
    }
