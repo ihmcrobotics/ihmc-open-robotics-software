@@ -1,4 +1,5 @@
 package us.ihmc.robotics.math.trajectories;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -359,7 +360,9 @@ public class Trajectory3D
    }
 
    /**
-    * Returns the number of coefficients for the trajectory if it is the same for all axes. If not then returns -1
+    * Returns the number of coefficients for the trajectory if it is the same for all axes. If not
+    * then returns -1
+    * 
     * @return
     */
    public int getNumberOfCoefficients()
@@ -422,8 +425,8 @@ public class Trajectory3D
                                                            Vector3DReadOnly zddFinal)
    {
       for (int index = 0; index < 3; index++)
-         getTrajectory(index).setCubicInitialPositionThreeFinalConditions(t0, tFinal, z0.getElement(index), zFinal.getElement(index),
-                                                                            zdFinal.getElement(index), zddFinal.getElement(index));
+         getTrajectory(index).setCubicInitialPositionThreeFinalConditions(t0, tFinal, z0.getElement(index), zFinal.getElement(index), zdFinal.getElement(index),
+                                                                          zddFinal.getElement(index));
    }
 
    public void setCubicThreeInitialConditionsFinalPosition(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0,
@@ -431,7 +434,7 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setCubicThreeInitialConditionsFinalPosition(t0, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index),
-                                                                            zFinal.getElement(index));
+                                                                          zFinal.getElement(index));
    }
 
    public void setCubicUsingFinalAccelerationButNotFinalPosition(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdFinal,
@@ -439,7 +442,7 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setCubicUsingFinalAccelerationButNotFinalPosition(t0, tFinal, z0.getElement(index), zd0.getElement(index),
-                                                                                  zdFinal.getElement(index), zddFinal.getElement(index));
+                                                                                zdFinal.getElement(index), zddFinal.getElement(index));
    }
 
    public void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, Point3DReadOnly z0,
@@ -447,7 +450,7 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setCubicUsingIntermediatePoints(t0, tIntermediate1, tIntermediate2, tFinal, z0.getElement(index),
-                                                                zIntermediate1.getElement(index), zIntermediate2.getElement(index), zFinal.getElement(index));
+                                                              zIntermediate1.getElement(index), zIntermediate2.getElement(index), zFinal.getElement(index));
    }
 
    public void setCubicUsingIntermediatePoint(double t0, double tIntermediate1, double tFinal, Point3DReadOnly z0, Point3DReadOnly zIntermediate1,
@@ -455,7 +458,7 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setCubicUsingIntermediatePoint(t0, tIntermediate1, tFinal, z0.getElement(index), zIntermediate1.getElement(index),
-                                                               zFinal.getElement(index));
+                                                             zFinal.getElement(index));
    }
 
    public void setCubicWithIntermediatePositionAndFinalVelocityConstraint(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0,
@@ -463,8 +466,8 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setCubicWithIntermediatePositionAndFinalVelocityConstraint(t0, tIntermediate, tFinal, z0.getElement(index),
-                                                                                           zIntermediate.getElement(index), zFinal.getElement(index),
-                                                                                           zdFinal.getElement(index));
+                                                                                         zIntermediate.getElement(index), zFinal.getElement(index),
+                                                                                         zdFinal.getElement(index));
    }
 
    public void setCubicWithIntermediatePositionAndInitialVelocityConstraint(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0,
@@ -472,8 +475,8 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setCubicWithIntermediatePositionAndInitialVelocityConstraint(t0, tIntermediate, tFinal, z0.getElement(index),
-                                                                                             zd0.getElement(index), zIntermediate.getElement(index),
-                                                                                             zFinal.getElement(index));
+                                                                                           zd0.getElement(index), zIntermediate.getElement(index),
+                                                                                           zFinal.getElement(index));
    }
 
    public void setCubicBezier(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zR1, Point3DReadOnly zR2, Point3DReadOnly zFinal)
@@ -487,7 +490,7 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setInitialPositionVelocityZeroFinalHighOrderDerivatives(t0, tFinal, z0.getElement(index), zd0.getElement(index),
-                                                                                        zFinal.getElement(index), zdFinal.getElement(index));
+                                                                                      zFinal.getElement(index), zdFinal.getElement(index));
    }
 
    public void setLinear(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zf)
@@ -505,8 +508,8 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setNonic(t0, tIntermediate0, tIntermediate1, tFinal, z0.getElement(index), zd0.getElement(index),
-                                         zIntermediate0.getElement(index), zdIntermediate0.getElement(index), zIntermediate1.getElement(index),
-                                         zdIntermediate1.getElement(index), zf.getElement(index), zdf.getElement(index));
+                                       zIntermediate0.getElement(index), zdIntermediate0.getElement(index), zIntermediate1.getElement(index),
+                                       zdIntermediate1.getElement(index), zf.getElement(index), zdf.getElement(index));
 
    }
 
@@ -527,7 +530,7 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setQuadraticUsingIntermediatePoint(t0, tIntermediate, tFinal, z0.getElement(index), zIntermediate.getElement(index),
-                                                                   zFinal.getElement(index));
+                                                                 zFinal.getElement(index));
    }
 
    public void setQuadraticWithFinalVelocityConstraint(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zFinal, Vector3DReadOnly zdFinal)
@@ -541,7 +544,7 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setQuartic(t0, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index), zFinal.getElement(index),
-                                           zdFinal.getElement(index));
+                                         zdFinal.getElement(index));
 
    }
 
@@ -550,7 +553,7 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setQuarticUsingFinalAcceleration(t0, tFinal, z0.getElement(index), zd0.getElement(index), zFinal.getElement(index),
-                                                                 zdFinal.getElement(index), zddFinal.getElement(index));
+                                                               zdFinal.getElement(index), zddFinal.getElement(index));
    }
 
    public void setQuarticUsingIntermediateVelocity(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0,
@@ -558,7 +561,7 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setQuarticUsingIntermediateVelocity(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index),
-                                                                    zdIntermediate.getElement(index), zFinal.getElement(index), zdFinal.getElement(index));
+                                                                  zdIntermediate.getElement(index), zFinal.getElement(index), zdFinal.getElement(index));
 
    }
 
@@ -566,8 +569,8 @@ public class Trajectory3D
                                        Vector3DReadOnly zdFinal)
    {
       for (int index = 0; index < 3; index++)
-         getTrajectory(index).setQuarticUsingMidPoint(t0, tFinal, z0.getElement(index), zd0.getElement(index), zMid.getElement(index),
-                                                        zFinal.getElement(index), zdFinal.getElement(index));
+         getTrajectory(index).setQuarticUsingMidPoint(t0, tFinal, z0.getElement(index), zd0.getElement(index), zMid.getElement(index), zFinal.getElement(index),
+                                                      zdFinal.getElement(index));
 
    }
 
@@ -577,8 +580,8 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setQuarticUsingOneIntermediateVelocity(t0, tIntermediate0, tIntermediate1, tFinal, z0.getElement(index),
-                                                                       zIntermediate0.getElement(index), zIntermediate1.getElement(index),
-                                                                       zFinal.getElement(index), zdIntermediate1.getElement(index));
+                                                                     zIntermediate0.getElement(index), zIntermediate1.getElement(index),
+                                                                     zFinal.getElement(index), zdIntermediate1.getElement(index));
 
    }
 
@@ -587,7 +590,7 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setQuarticUsingWayPoint(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index), zIntermediate.getElement(index),
-                                                        zf.getElement(index), zdf.getElement(index));
+                                                      zf.getElement(index), zdf.getElement(index));
    }
 
    public void setQuintic(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0, Point3DReadOnly zf, Vector3DReadOnly zdf,
@@ -595,7 +598,7 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setQuintic(t0, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index), zf.getElement(index),
-                                           zdf.getElement(index), zddf.getElement(index));
+                                         zdf.getElement(index), zddf.getElement(index));
    }
 
    public void setQuinticTwoWaypoints(double t0, double tIntermediate0, double tIntermediate1, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0,
@@ -603,8 +606,8 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setQuinticTwoWaypoints(t0, tIntermediate0, tIntermediate1, tFinal, z0.getElement(index), zd0.getElement(index),
-                                                       zIntermediate0.getElement(index), zIntermediate1.getElement(index), zf.getElement(index),
-                                                       zdf.getElement(index));
+                                                     zIntermediate0.getElement(index), zIntermediate1.getElement(index), zf.getElement(index),
+                                                     zdf.getElement(index));
    }
 
    public void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0,
@@ -613,8 +616,8 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setQuinticUsingIntermediateVelocityAndAcceleration(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index),
-                                                                                   zdIntermediate.getElement(index), zddIntermediate.getElement(index),
-                                                                                   zFinal.getElement(index), zdFinal.getElement(index));
+                                                                                 zdIntermediate.getElement(index), zddIntermediate.getElement(index),
+                                                                                 zFinal.getElement(index), zdFinal.getElement(index));
    }
 
    public void setQuinticUsingWayPoint(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0,
@@ -622,7 +625,7 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setQuinticUsingWayPoint(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index),
-                                                        zIntermediate.getElement(index), zf.getElement(index), zdf.getElement(index));
+                                                      zIntermediate.getElement(index), zf.getElement(index), zdf.getElement(index));
    }
 
    public void setQuinticUsingWayPoint2(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0,
@@ -630,7 +633,7 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setQuinticUsingWayPoint2(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index),
-                                                         zIntermediate.getElement(index), zdIntermediate.getElement(index), zf.getElement(index));
+                                                       zIntermediate.getElement(index), zdIntermediate.getElement(index), zf.getElement(index));
    }
 
    public void setSeptic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0,
@@ -639,8 +642,8 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setSeptic(t0, tIntermediate0, tIntermediate1, tFinal, z0.getElement(index), zd0.getElement(index),
-                                          zIntermediate0.getElement(index), zdIntermediate0.getElement(index), zIntermediate1.getElement(index),
-                                          zdIntermediate1.getElement(index), zf.getElement(index), zdf.getElement(index));
+                                        zIntermediate0.getElement(index), zdIntermediate0.getElement(index), zIntermediate1.getElement(index),
+                                        zdIntermediate1.getElement(index), zf.getElement(index), zdf.getElement(index));
 
    }
 
@@ -650,8 +653,8 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setSepticInitialAndFinalAcceleration(t0, tIntermediate0, tIntermediate1, tFinal, z0.getElement(index), zd0.getElement(index),
-                                                                     zdd0.getElement(index), zIntermediate0.getElement(index), zIntermediate1.getElement(index),
-                                                                     zf.getElement(index), zdf.getElement(index), zddf.getElement(index));
+                                                                   zdd0.getElement(index), zIntermediate0.getElement(index), zIntermediate1.getElement(index),
+                                                                   zf.getElement(index), zdf.getElement(index), zddf.getElement(index));
 
    }
 
@@ -662,11 +665,11 @@ public class Trajectory3D
    }
 
    public void setQuinticWithZeroTerminalAcceleration(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Point3DReadOnly zFinal,
-                                                     Vector3DReadOnly zdFinal)
+                                                      Vector3DReadOnly zdFinal)
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setQuinticWithZeroTerminalAcceleration(t0, tFinal, z0.getElement(index), zd0.getElement(index), zFinal.getElement(index),
-                                                                      zdFinal.getElement(index));
+                                                                     zdFinal.getElement(index));
    }
 
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0,
@@ -674,7 +677,7 @@ public class Trajectory3D
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setSexticUsingWaypoint(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index),
-                                                       zIntermediate.getElement(index), zf.getElement(index), zdf.getElement(index), zddf.getElement(index));
+                                                     zIntermediate.getElement(index), zf.getElement(index), zdf.getElement(index), zddf.getElement(index));
 
    }
 
@@ -686,9 +689,9 @@ public class Trajectory3D
       {
          int index = axis.ordinal();
          getTrajectory(index).setSexticUsingWaypointVelocityAndAcceleration(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index),
-                                                                              zdd0.getElement(index), zdIntermediate.getElement(index),
-                                                                              zddIntermediate.getElement(index), zFinal.getElement(index),
-                                                                              zdFinal.getElement(index));
+                                                                            zdd0.getElement(index), zdIntermediate.getElement(index),
+                                                                            zddIntermediate.getElement(index), zFinal.getElement(index),
+                                                                            zdFinal.getElement(index));
       }
    }
 
@@ -725,8 +728,6 @@ public class Trajectory3D
       }
    }
 
-
-
    @Override
    public String toString()
    {
@@ -759,10 +760,10 @@ public class Trajectory3D
       compute(getFinalTime());
       positionToPack.set(getPosition());
    }
-   
+
    public boolean isValidTrajectory()
    {
       return (getTrajectoryX().isValidTrajectory() && getTrajectoryY().isValidTrajectory() && getTrajectoryZ().isValidTrajectory());
    }
-   
+
 }
