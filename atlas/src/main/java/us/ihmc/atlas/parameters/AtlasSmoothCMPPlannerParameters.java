@@ -22,7 +22,7 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
       swingCopPointsToPlan = new CoPPointName[]{CoPPointName.BALL_COP, CoPPointName.TOE_COP};
       transferCoPPointsToPlan = new CoPPointName[]{CoPPointName.MIDFEET_COP, CoPPointName.HEEL_COP};
 
-      copOffsetFrameNames.clear();
+      copSupportPolygons.clear();
       stepLengthOffsetPolygon.clear();
       constrainToMinMax.clear();
       constrainToSupportPolygon.clear();
@@ -30,11 +30,11 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
       copOffsetsInFootFrame.clear();
       copOffsetBoundsInFootFrame.clear();
 
-      copOffsetFrameNames.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copOffsetFrameNames.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copOffsetFrameNames.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copOffsetFrameNames.put(CoPPointName.FLAMINGO_STANCE_FINAL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copOffsetFrameNames.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.INITIAL_DOUBLE_SUPPORT_POLYGON);
+      copSupportPolygons.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
+      copSupportPolygons.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
+      copSupportPolygons.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
+      copSupportPolygons.put(CoPPointName.FLAMINGO_STANCE_FINAL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
+      copSupportPolygons.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.INITIAL_DOUBLE_SUPPORT_POLYGON);
 
       stepLengthOffsetPolygon.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.NULL);
       stepLengthOffsetPolygon.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.INITIAL_SWING_POLYGON);

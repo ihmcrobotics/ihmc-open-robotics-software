@@ -23,7 +23,7 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
     * Bounds of the CoP offsets in the foot frame
     */
    protected final EnumMap<CoPPointName, Vector2D> copOffsetBoundsInFootFrame = new EnumMap<>(CoPPointName.class);
-   protected final EnumMap<CoPPointName, CoPSupportPolygonNames> copOffsetFrameNames = new EnumMap<>(CoPPointName.class);
+   protected final EnumMap<CoPPointName, CoPSupportPolygonNames> copSupportPolygons = new EnumMap<>(CoPPointName.class);
 
    /**
     * Order list of flags indicating whether specified bounding boxes should be used to constrain the CoP point
@@ -67,10 +67,10 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
       this.entryCoPName = CoPPointName.HEEL_COP;
       this.endCoPName = CoPPointName.MIDFEET_COP;
       
-      copOffsetFrameNames.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copOffsetFrameNames.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copOffsetFrameNames.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copOffsetFrameNames.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.INITIAL_DOUBLE_SUPPORT_POLYGON);
+      copSupportPolygons.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
+      copSupportPolygons.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
+      copSupportPolygons.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
+      copSupportPolygons.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.INITIAL_DOUBLE_SUPPORT_POLYGON);
 
       stepLengthOffsetPolygon.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.NULL);
       stepLengthOffsetPolygon.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.INITIAL_SWING_POLYGON);
@@ -183,7 +183,7 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
 
    public EnumMap<CoPPointName, CoPSupportPolygonNames> getSupportPolygonNames()
    {
-      return copOffsetFrameNames;
+      return copSupportPolygons;
    }
 
    @Override
