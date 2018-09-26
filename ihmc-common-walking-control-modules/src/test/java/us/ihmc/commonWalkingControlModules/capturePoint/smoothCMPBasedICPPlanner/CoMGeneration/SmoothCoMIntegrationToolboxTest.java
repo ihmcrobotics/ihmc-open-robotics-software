@@ -19,12 +19,14 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.Trajectory;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SmoothCoMIntegrationToolboxTest
@@ -272,7 +274,8 @@ public class SmoothCoMIntegrationToolboxTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testCalculateCoMQuantity3DWithDenseMatrixVector3D() throws Exception
    {
       Random random = new Random(2432);
@@ -372,6 +375,125 @@ public class SmoothCoMIntegrationToolboxTest
          assertTrue("Expected: " + expectedGeneralizedAlphaBetaCoMPrime + "\nwas: " + actualGeneralizedAlphaBetaCoMPrime + "\nerror: " + error,
                     MatrixFeatures.isEquals(expectedGeneralizedAlphaBetaCoMPrime, actualGeneralizedAlphaBetaCoMPrime, 1.0e-12));
       }
+      for (int i = 0; i < nTests; i++)
+      { // Test calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D with DenseMatrixVector3D
+         double t0 = random.nextDouble();
+         double tf = t0 + RandomNumbers.nextDouble(random, 0.25, 1.0);
+         double time = RandomNumbers.nextDouble(random, t0, tf);
+         int alphaBetaCoMDerivativeOrder = random.nextInt(3);
+
+         FrameTrajectory3D cmpPolynomial3D = new FrameTrajectory3D(10, worldFrame);
+         cmpPolynomial3D.setCubic(t0, tf, EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame),
+                                  EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame));
+
+         DenseMatrix64F expectedGeneralizedAlphaBetaCoMPrime = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+
+         SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, expectedGeneralizedAlphaBetaCoMPrime,
+                                                                                         alphaBetaCoMDerivativeOrder, cmpPolynomial3D);
+
+         DenseMatrixVector3D actualGeneralizedAlphaBetaCoMPrime = new DenseMatrixVector3D(1, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+
+         SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, actualGeneralizedAlphaBetaCoMPrime,
+                                                                                         alphaBetaCoMDerivativeOrder, cmpPolynomial3D);
+
+         DenseMatrix64F error = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+
+         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.X).numCols; k++)
+            error.set(0, k, expectedGeneralizedAlphaBetaCoMPrime.get(0, k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.X).get(0, k));
+
+         int colOffset = actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.X).numCols;
+         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Y).numCols; k++)
+            error.set(1, colOffset + k,
+                      expectedGeneralizedAlphaBetaCoMPrime.get(1, colOffset + k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Y).get(0, k));
+
+         colOffset += actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Y).numCols;
+         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Z).numCols; k++)
+            error.set(2, colOffset + k,
+                      expectedGeneralizedAlphaBetaCoMPrime.get(2, colOffset + k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Z).get(0, k));
+
+         for (int j = 0; j < error.getNumElements(); j++)
+            error.set(j, Math.abs(error.get(j)));
+         assertTrue("Expected: " + expectedGeneralizedAlphaBetaCoMPrime + "\nwas: " + actualGeneralizedAlphaBetaCoMPrime + "\nerror: " + error,
+                    MatrixFeatures.isZeros(error, 1.0e-12));
+      }
+
+      for (int i = 0; i < nTests; i++)
+      { // Test calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D with for 0-th, 1-st, and 3-rd derivatives
+         double t0 = random.nextDouble();
+         double tf = t0 + RandomNumbers.nextDouble(random, 0.25, 1.0);
+         double time = RandomNumbers.nextDouble(random, t0, tf);
+
+         FrameTrajectory3D cmpPolynomial3D = new FrameTrajectory3D(10, worldFrame);
+         cmpPolynomial3D.setCubic(t0, tf, EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame),
+                                  EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame));
+
+         DenseMatrixVector3D expectedAlphaBetaCoMPrime = new DenseMatrixVector3D(1, cmpPolynomial3D.getNumberOfCoefficients());
+         DenseMatrixVector3D expectedAlphaBetaCoMSecond = new DenseMatrixVector3D(1, cmpPolynomial3D.getNumberOfCoefficients());
+         DenseMatrixVector3D expectedAlphaBetaCoMThird = new DenseMatrixVector3D(1, cmpPolynomial3D.getNumberOfCoefficients());
+
+         SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, expectedAlphaBetaCoMPrime, 0, cmpPolynomial3D);
+         SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, expectedAlphaBetaCoMSecond, 1, cmpPolynomial3D);
+         SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, expectedAlphaBetaCoMThird, 2, cmpPolynomial3D);
+
+         DenseMatrixVector3D actualAlphaBetaCoMPrime = new DenseMatrixVector3D(1, cmpPolynomial3D.getNumberOfCoefficients());
+         DenseMatrixVector3D actualAlphaBetaCoMSecond = new DenseMatrixVector3D(1, cmpPolynomial3D.getNumberOfCoefficients());
+         DenseMatrixVector3D actualAlphaBetaCoMThird = new DenseMatrixVector3D(1, cmpPolynomial3D.getNumberOfCoefficients());
+         SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, actualAlphaBetaCoMPrime, actualAlphaBetaCoMSecond,
+                                                                                         actualAlphaBetaCoMThird, cmpPolynomial3D);
+
+         DenseMatrixVector3D errorAlphaBetaCoMPrime = new DenseMatrixVector3D(1, cmpPolynomial3D.getNumberOfCoefficients());
+         DenseMatrixVector3D errorAlphaBetaCoMSecond = new DenseMatrixVector3D(1, cmpPolynomial3D.getNumberOfCoefficients());
+         DenseMatrixVector3D errorAlphaBetaCoMThird = new DenseMatrixVector3D(1, cmpPolynomial3D.getNumberOfCoefficients());
+
+         errorAlphaBetaCoMPrime.sub(expectedAlphaBetaCoMPrime, actualAlphaBetaCoMPrime);
+         errorAlphaBetaCoMSecond.sub(expectedAlphaBetaCoMSecond, actualAlphaBetaCoMSecond);
+         errorAlphaBetaCoMThird.sub(expectedAlphaBetaCoMThird, actualAlphaBetaCoMThird);
+
+         assertTrue("Expected: " + expectedAlphaBetaCoMPrime + "\nwas: " + actualAlphaBetaCoMPrime + "\nerror: " + errorAlphaBetaCoMPrime,
+                    expectedAlphaBetaCoMPrime.epsilonEquals(actualAlphaBetaCoMPrime, EPSILON));
+         assertTrue("Expected: " + expectedAlphaBetaCoMSecond + "\nwas: " + actualAlphaBetaCoMSecond + "\nerror: " + errorAlphaBetaCoMSecond,
+                    expectedAlphaBetaCoMSecond.epsilonEquals(actualAlphaBetaCoMSecond, EPSILON));
+         assertTrue("Expected: " + expectedAlphaBetaCoMThird + "\nwas: " + actualAlphaBetaCoMThird + "\nerror: " + errorAlphaBetaCoMThird,
+                    expectedAlphaBetaCoMThird.epsilonEquals(actualAlphaBetaCoMThird, EPSILON));
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testComputeDesiredCenterOfMassPositionVelocityAcceleration() throws Exception
+   {
+      Random random = new Random(453453);
+      SmoothCoMIntegrationToolbox toolbox = new SmoothCoMIntegrationToolbox();
+
+      for (int i = 0; i < nTests; i++)
+      {
+         double t0 = random.nextDouble();
+         double tf = t0 + RandomNumbers.nextDouble(random, 0.25, 1.0);
+         double time = RandomNumbers.nextDouble(random, t0, tf);
+         FrameTrajectory3D cmpPolynomial3D = new FrameTrajectory3D(16, worldFrame);
+         cmpPolynomial3D.setCubic(t0, tf, EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame),
+                                  EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame));
+
+         FramePoint3DReadOnly finalCapturePoint = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame);
+         FramePoint3DReadOnly initialCenterOfMass = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame);
+
+         FramePoint3D expectedCenterOfMassPosition = new FramePoint3D(worldFrame);
+         FrameVector3D expectedCenterOfMassVelocity = new FrameVector3D(worldFrame);
+         FrameVector3D expectedCenterOfMassAcceleration = new FrameVector3D(worldFrame);
+         toolbox.computeDesiredCenterOfMassPosition(omega0, time, finalCapturePoint, initialCenterOfMass, cmpPolynomial3D, expectedCenterOfMassPosition);
+         toolbox.computeDesiredCenterOfMassVelocity(omega0, time, finalCapturePoint, initialCenterOfMass, cmpPolynomial3D, expectedCenterOfMassVelocity);
+         toolbox.computeDesiredCenterOfMassAcceleration(omega0, time, finalCapturePoint, initialCenterOfMass, cmpPolynomial3D, expectedCenterOfMassAcceleration);
+
+         FramePoint3D actualCenterOfMassPosition = new FramePoint3D(worldFrame);
+         FrameVector3D actualCenterOfMassVelocity = new FrameVector3D(worldFrame);
+         FrameVector3D actualCenterOfMassAcceleration = new FrameVector3D(worldFrame);
+         toolbox.computeDesiredCenterOfMassPositionVelocityAcceleration(omega0, time, finalCapturePoint, initialCenterOfMass, cmpPolynomial3D,
+                                                                        actualCenterOfMassPosition, actualCenterOfMassVelocity, actualCenterOfMassAcceleration);
+
+         EuclidFrameTestTools.assertFrameTuple3DEquals(expectedCenterOfMassPosition, actualCenterOfMassPosition, EPSILON);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(expectedCenterOfMassVelocity, actualCenterOfMassVelocity, EPSILON);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(expectedCenterOfMassAcceleration, actualCenterOfMassAcceleration, EPSILON);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -389,6 +511,60 @@ public class SmoothCoMIntegrationToolboxTest
          double epsilon = Math.min(Math.abs(expected) * 1.0e-15, 1.0e-6);
          assertEquals("Difference: " + Math.abs(expected - actual), expected, actual, epsilon);
       }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testBugWithDataset()
+   {
+      double omega0 = 3.0;
+      double time = 0.012;
+      Trajectory xCMPTrajectory = new Trajectory(0.0, 0.2, new double[] {1.000030572996156, 0.3152786856832297, -0.5121259090354553, 2.115440848323875,
+            7.120997871247123E-16, 1.837333165325549E-14, -1.1985177263371334E-13, 1.4665174726420681E-13, 1.5074587857295702E-16});//, Double.NaN});
+      Trajectory yCMPTrajectory = new Trajectory(0.0, 0.2, new double[] {-13.488553923816662, 0.034554264879721235, -0.056128546318945906, 0.23185044448052147,
+            6.674785404512585E-17, 2.0742558091635797E-15, -1.3485956037477206E-14, 1.6516519718330272E-14, 3.4121533325635544E-17}); //, Double.NaN});
+      Trajectory zCMPTrajectory = new Trajectory(0.0, 0.2, new double[] {0.001261447302717669, 6.757841918973695E-5}); //, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN});
+      FrameTrajectory3D cmpTrajectory = new FrameTrajectory3D(xCMPTrajectory, yCMPTrajectory, zCMPTrajectory, worldFrame);
+      FramePoint3D icpFinal = new FramePoint3D(worldFrame, 0.977, -13.491, 0.001);
+      FramePoint3D comInitial = new FramePoint3D(worldFrame, 1.000, -13.489, 0.001);
+
+      
+      DenseMatrixVector3D expectedAlphaBetaCoMPrime = new DenseMatrixVector3D(10, 10);
+      DenseMatrixVector3D expectedAlphaBetaCoMSecond = new DenseMatrixVector3D(10, 10);
+      DenseMatrixVector3D expectedAlphaBetaCoMThird = new DenseMatrixVector3D(10, 10);
+      SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, expectedAlphaBetaCoMPrime, 0, cmpTrajectory);
+      SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, expectedAlphaBetaCoMSecond, 1, cmpTrajectory);
+      SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, expectedAlphaBetaCoMThird, 2, cmpTrajectory);
+
+      DenseMatrixVector3D actualAlphaBetaCoMPrime = new DenseMatrixVector3D(10, 10);
+      DenseMatrixVector3D actualAlphaBetaCoMSecond = new DenseMatrixVector3D(10, 10);
+      DenseMatrixVector3D actualAlphaBetaCoMThird = new DenseMatrixVector3D(10, 10);
+      SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, actualAlphaBetaCoMPrime, actualAlphaBetaCoMSecond, actualAlphaBetaCoMThird, cmpTrajectory);
+
+      assertTrue(expectedAlphaBetaCoMPrime.epsilonEquals(actualAlphaBetaCoMPrime, EPSILON));
+      assertTrue(expectedAlphaBetaCoMSecond.epsilonEquals(actualAlphaBetaCoMSecond, EPSILON));
+      assertTrue(expectedAlphaBetaCoMThird.epsilonEquals(actualAlphaBetaCoMThird, EPSILON));
+
+      
+      SmoothCoMIntegrationToolbox toolbox = new SmoothCoMIntegrationToolbox();
+
+      FramePoint3D expectedCoMPosition = new FramePoint3D(worldFrame);
+      FrameVector3D expectedCoMVelocity = new FrameVector3D(worldFrame);
+      FrameVector3D expectedCoMAcceleration = new FrameVector3D(worldFrame);
+
+      FramePoint3D actualCoMPosition = new FramePoint3D(worldFrame);
+      FrameVector3D actualCoMVelocity = new FrameVector3D(worldFrame);
+      FrameVector3D actualCoMAcceleration = new FrameVector3D(worldFrame);
+
+      toolbox.computeDesiredCenterOfMassPosition(omega0, time, icpFinal, comInitial, cmpTrajectory, expectedCoMPosition);
+      toolbox.computeDesiredCenterOfMassVelocity(omega0, time, icpFinal, comInitial, cmpTrajectory, expectedCoMVelocity);
+      toolbox.computeDesiredCenterOfMassAcceleration(omega0, time, icpFinal, comInitial, cmpTrajectory, expectedCoMAcceleration);
+      toolbox.computeDesiredCenterOfMassPositionVelocityAcceleration(omega0, time, icpFinal, comInitial, cmpTrajectory, actualCoMPosition, actualCoMVelocity,
+                                                                     actualCoMAcceleration);
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedCoMPosition, actualCoMPosition, EPSILON);
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(expectedCoMVelocity, actualCoMVelocity, EPSILON);
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(expectedCoMAcceleration, actualCoMAcceleration, EPSILON);
    }
 
    public static void calculateCoMPositionByHand3DLinear(double omega0, double time, FrameTrajectory3D linear3D, FramePoint3D icpPositionDesiredFinal,
