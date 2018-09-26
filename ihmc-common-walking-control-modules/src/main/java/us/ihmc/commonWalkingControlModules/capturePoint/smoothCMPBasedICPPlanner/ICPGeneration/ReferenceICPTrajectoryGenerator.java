@@ -211,35 +211,45 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       copWaypointsWereAdjusted.set(false);
    }
 
-   private void getICPInitialConditionsForAdjustment(double localTime, int currentSegmentIndex)
+   private void getICPInitialConditionsForAdjustmentFromCMPs(double time, int currentSwingSegment)
+   {
+      getICPInitialConditionsForAdjustment(time, icpDesiredFinalPositions, cmpTrajectories, currentSwingSegment);
+   }
+
+   private void getICPInitialConditionsForAdjustmentFromCoPs(double time, int currentSwingSegment)
+   {
+      getICPInitialConditionsForAdjustment(time, icpDesiredFinalPositionsFromCoPs, copTrajectories, currentSwingSegment);
+   }
+
+   private void getICPInitialConditionsForAdjustment(double localTime, List<FramePoint3D> exitCornerPoints, List<FrameTrajectory3D> trajectories,
+                                                     int currentTrajectoryIndex)
    {
       calculatedInitialICPConditions.clear();
-      FrameTrajectory3D firstCoPTrajectory = copTrajectories.get(0);
-
-      for (int order = 0; order < firstCoPTrajectory.getNumberOfCoefficients() / 2; order++)
+      FrameTrajectory3D firstTrajectory = trajectories.get(0);
+      for (int order = 0; order < firstTrajectory.getNumberOfCoefficients() / 2; order++)
       {
          FrameTuple3DBasics icpQuantityInitialCondition = calculatedInitialICPConditions.add();
-
-         if (currentSegmentIndex < 0)
-         { // called when in an initial transfer
-            firstCoPTrajectory.getDerivative(order, localTime, icpQuantityInitialCondition);
+         if (currentTrajectoryIndex < 0)
+         { // called when standing
+            firstTrajectory.getDerivative(order, localTime, icpQuantityInitialCondition);
          }
          else
          { // called when moving
             switch (order)
             {
-            case 0:
-               icpQuantityInitialCondition.set(icpPositionDesiredCurrent);
-               break;
-            case 1:
-               icpQuantityInitialCondition.set(icpVelocityDesiredCurrent);
-               break;
-            case 2:
-               icpQuantityInitialCondition.set(icpAccelerationDesiredCurrent);
-               break;
+//            case 0:
+//               icpQuantityInitialCondition.set(icpPositionDesiredCurrent);
+//               break;
+//            case 1:
+//               icpQuantityInitialCondition.set(icpVelocityDesiredCurrent);
+//               break;
+//            case 2:
+//               icpQuantityInitialCondition.set(icpAccelerationDesiredCurrent);
+//               break;
             default:
-               icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0.getDoubleValue(), localTime, order, cmpTrajectories.get(currentSegmentIndex),
-                                                                               icpDesiredFinalPositions.get(currentSegmentIndex), icpQuantityInitialCondition);
+               icpToolbox
+                     .calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0.getDoubleValue(), localTime, order, trajectories.get(currentTrajectoryIndex),
+                                                                           exitCornerPoints.get(currentTrajectoryIndex), icpQuantityInitialCondition);
                break;
             }
          }
@@ -374,7 +384,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       if (isInitialTransfer.getBooleanValue())
       {
-         getICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), -1);
+         getICPInitialConditionsForAdjustmentFromCoPs(localTimeInCurrentPhase.getDoubleValue(), -1);
          setInitialConditionsForAdjustment();
       }
    }
@@ -500,8 +510,10 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
          currentCoPSegmentIndex
                .set(getCurrentSegmentIndex(localTimeInCurrentPhase.getDoubleValue(), numberOfCoPSegmentsInCurrentPhase.getIntegerValue(), copTrajectories));
-         getICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(),
-                                              currentCMPSegmentIndex.getIntegerValue()); // TODO: add controller dt for proper continuation
+         //         getICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(),
+         //                                              currentCMPSegmentIndex.getIntegerValue()); // TODO: add controller dt for proper continuation
+         getICPInitialConditionsForAdjustmentFromCoPs(localTimeInCurrentPhase.getDoubleValue(),
+                                                      currentCoPSegmentIndex.getIntegerValue()); // TODO: add controller dt for proper continuation
          if (debug)
             checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
 
