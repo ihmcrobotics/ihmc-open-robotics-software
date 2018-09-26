@@ -107,6 +107,14 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       super.testPauseWalking();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.SLOW)
+   @Test(timeout = 380000)
+   @Override
+   public void testTwoSteps()throws SimulationExceededMaximumTimeException
+   {
+      super.testTwoSteps();
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 77.3)
    @Test(timeout = 390000)
    @Override
