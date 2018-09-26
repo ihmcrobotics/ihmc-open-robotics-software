@@ -18,6 +18,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -25,16 +26,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.commons.MathTools;
-import us.ihmc.simulationconstructionset.gui.YoGraph;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
-/**
- * Test functionality of CoPPointsInFoot
- * @author ApoorvS
- *
- */
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class CoPPointsInFootTest
 {
@@ -75,24 +69,24 @@ public class CoPPointsInFootTest
       assertTrue(copPointsInFoot.isEmpty());
       copPointsInFoot.addWayPointName(CoPPointName.BALL_COP);
       copPointsInFoot.addWayPointName(CoPPointName.HEEL_COP);
-      assertTrue(copPointsInFoot.getNumberOfCoPPoints() == 2);
-      assertTrue(copPointsInFoot.getCoPPointList().get(0).checkCoPPointMatch(CoPPointName.BALL_COP));
-      assertTrue(copPointsInFoot.getCoPPointList().get(1).checkCoPPointMatch(CoPPointName.HEEL_COP));
+      assertEquals(2, copPointsInFoot.getNumberOfCoPPoints());
+      assertEquals(CoPPointName.BALL_COP, copPointsInFoot.getCoPPointList().get(0));
+      assertEquals(CoPPointName.HEEL_COP, copPointsInFoot.getCoPPointList().get(1));
       copPointsInFoot.reset();
       assertTrue(copPointsInFoot.getCoPPointList().isEmpty());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testAddandSetIncludingFrameWithFramePoint()
+   public void testAddAndSetIncludingFrameWithFramePoint()
    {
       FramePoint3D testLocation = new FramePoint3D(footSpoof.getSoleFrame(), Math.random(), Math.random(), Math.random());
       assertTrue(copPointsInFoot.isEmpty());
       copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.2, testLocation);
-      assertTrue(copPointsInFoot.getCoPPointList().size() == 1);
+      assertEquals(1, copPointsInFoot.getCoPPointList().size());
 
-      assertTrue(copPointsInFoot.get(0).getPosition().epsilonEquals(testLocation, epsilon));
-      assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(0).getTime(), 0.2, epsilon));
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(testLocation, copPointsInFoot.get(0).getPosition(), epsilon);
+      assertEquals(0.2, copPointsInFoot.get(0).getTime(), epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
@@ -105,12 +99,12 @@ public class CoPPointsInFootTest
       testLocation2.set(Math.random(), Math.random(), Math.random());
       copPointsInFoot.addWaypoint(CoPPointName.HEEL_COP, 0.87, testLocation1);
       copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.12, testLocation2);
-      assertTrue(copPointsInFoot.getCoPPointList().size() == 2);
+      assertEquals(2, copPointsInFoot.getCoPPointList().size());
 
-      assertTrue(copPointsInFoot.get(0).getPosition().epsilonEquals(testLocation1, epsilon));
-      assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(0).getTime(), 0.87, epsilon));
-      assertTrue(copPointsInFoot.get(1).getPosition().epsilonEquals(testLocation2, epsilon));
-      assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(1).getTime(), 0.12, epsilon));
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(testLocation1, copPointsInFoot.get(0).getPosition(), epsilon);
+      assertEquals(0.87, copPointsInFoot.get(0).getTime(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(testLocation2, copPointsInFoot.get(2).getPosition(), epsilon);
+      assertEquals(0.12, copPointsInFoot.get(1).getTime(), epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -125,15 +119,15 @@ public class CoPPointsInFootTest
       testLocation2.setPosition(new FramePoint3D(footSpoof.getSoleFrame(), Math.random(), Math.random(), Math.random()));
       copPointsInFoot.addWaypoint(CoPPointName.HEEL_COP, 0.87, testLocation1);
       copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.12, testLocation2);
-      assertTrue(copPointsInFoot.getCoPPointList().size() == 2);
+      assertEquals(2, copPointsInFoot.getCoPPointList().size());
 
-      assertTrue(copPointsInFoot.get(0).getPosition().epsilonEquals(testLocation1.getPosition(), epsilon));
-      assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(0).getTime(), 0.87, epsilon));
-      assertTrue(copPointsInFoot.get(1).getPosition().epsilonEquals(testLocation2.getPosition(), epsilon));
-      assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(1).getTime(), 0.12, epsilon));
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(testLocation1.getPosition(), copPointsInFoot.get(0).getPosition(), epsilon);
+      assertEquals(0.87, copPointsInFoot.get(0).getTime(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(testLocation2.getPosition(), copPointsInFoot.get(1).getPosition(), epsilon);
+      assertEquals(0.12, copPointsInFoot.get(1).getTime(), epsilon);
       FramePoint3D tempFramePointForTesting = new FramePoint3D(footSpoof.getSoleFrame());
       copPointsInFoot.getFinalCoPPosition(tempFramePointForTesting);
-      assertTrue(tempFramePointForTesting.epsilonEquals(testLocation2.getPosition(), epsilon));
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(testLocation2.getPosition(), tempFramePointForTesting, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
@@ -143,14 +137,14 @@ public class CoPPointsInFootTest
       copPointsInFoot.setFeetLocation(new FramePoint3D(worldFrame, 0.2, 1.35, 2.1), new FramePoint3D(worldFrame, 1.3, 2.4, 6.6));
       FramePoint3D framePointForTesting = new FramePoint3D();
       copPointsInFoot.getSwingFootLocation(framePointForTesting);
-      assertTrue(framePointForTesting.getReferenceFrame() == worldFrame);
-      assertTrue(framePointForTesting.getX() == 0.2);
-      assertTrue(framePointForTesting.getY() == 1.35);
-      assertTrue(framePointForTesting.getZ() == 2.1);
+      assertEquals(framePointForTesting.getReferenceFrame(), worldFrame);
+      assertEquals(framePointForTesting.getX(), 0.2, epsilon);
+      assertEquals(framePointForTesting.getY(), 1.35, epsilon);
+      assertEquals(framePointForTesting.getZ(), 2.1, epsilon);
       copPointsInFoot.getSupportFootLocation(framePointForTesting);
-      assertTrue(framePointForTesting.getX() == 1.3);
-      assertTrue(framePointForTesting.getY() == 2.4);
-      assertTrue(framePointForTesting.getZ() == 6.6);
+      assertEquals(framePointForTesting.getX(), 1.3, epsilon);
+      assertEquals(framePointForTesting.getY(), 2.4, epsilon);
+      assertEquals(framePointForTesting.getZ(), 6.6, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -163,20 +157,20 @@ public class CoPPointsInFootTest
       copPointsInFoot.changeFrame(footSpoof.getSoleFrame());
       FramePoint3D tempFramePoint = new FramePoint3D();
       copPointsInFoot.getSupportFootLocation(tempFramePoint);
-      assertTrue(tempFramePoint.getReferenceFrame() == footSpoof.getSoleFrame());
-      assertTrue(tempFramePoint.getX() == 0.2 + xToAnkle);
-      assertTrue(tempFramePoint.getY() == -0.1 + yToAnkle);
-      assertTrue(tempFramePoint.getZ() == 0.1 + zToAnkle);
-      assertTrue(copPointsInFoot.get(0).getReferenceFrame() == footSpoof.getSoleFrame());
+      assertEquals(tempFramePoint.getReferenceFrame(), footSpoof.getSoleFrame());
+      assertEquals(tempFramePoint.getX(), 0.2 + xToAnkle, epsilon);
+      assertEquals(tempFramePoint.getY(), -0.1 + yToAnkle, epsilon);
+      assertEquals(tempFramePoint.getZ(), 0.1 + zToAnkle, epsilon);
+      assertEquals(copPointsInFoot.get(0).getReferenceFrame(), footSpoof.getSoleFrame());
       copPointsInFoot.get(0).getPosition(tempFramePoint);
-      assertTrue(tempFramePoint.getX() == 0.2 + xToAnkle);
-      assertTrue(tempFramePoint.getY() == 0.15 + yToAnkle);
-      assertTrue(tempFramePoint.getZ() == 0.1 + zToAnkle);
-      assertTrue(copPointsInFoot.get(1).getReferenceFrame() == footSpoof.getSoleFrame());
+      assertEquals(tempFramePoint.getX(), 0.2 + xToAnkle, epsilon);
+      assertEquals(tempFramePoint.getY(), 0.15 + yToAnkle, epsilon);
+      assertEquals(tempFramePoint.getZ(), 0.1 + zToAnkle, epsilon);
+      assertEquals(copPointsInFoot.get(1).getReferenceFrame(), footSpoof.getSoleFrame());
       copPointsInFoot.get(1).getPosition(tempFramePoint);
-      assertTrue(tempFramePoint.getX() == 0.15 + xToAnkle);
-      assertTrue(tempFramePoint.getY() == -0.05 + yToAnkle);
-      assertTrue(tempFramePoint.getZ() == 0.11 + zToAnkle);
+      assertEquals(tempFramePoint.getX(), 0.15 + xToAnkle, epsilon);
+      assertEquals(tempFramePoint.getY(), -0.05 + yToAnkle, epsilon);
+      assertEquals(tempFramePoint.getZ(), 0.11 + zToAnkle, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
@@ -200,20 +194,20 @@ public class CoPPointsInFootTest
       copPointsInFoot.changeFrame(newFrameToRegister);
       FramePoint3D tempFramePoint = new FramePoint3D();
       copPointsInFoot.getSupportFootLocation(tempFramePoint);
-      assertTrue(tempFramePoint.getReferenceFrame() == newFrameToRegister);
-      assertTrue(tempFramePoint.getX() == 0.2 + newFrameOriginX);
-      assertTrue(tempFramePoint.getY() == -0.1 + newFrameOriginY);
-      assertTrue(tempFramePoint.getZ() == 0.1 + newFrameOriginZ);
-      assertTrue(copPointsInFoot.get(0).getReferenceFrame() == newFrameToRegister);
+      assertEquals(tempFramePoint.getReferenceFrame(), newFrameToRegister);
+      assertEquals(tempFramePoint.getX(), 0.2 + newFrameOriginX, epsilon);
+      assertEquals(tempFramePoint.getY(), -0.1 + newFrameOriginY, epsilon);
+      assertEquals(tempFramePoint.getZ(), 0.1 + newFrameOriginZ, epsilon);
+      assertEquals(copPointsInFoot.get(0).getReferenceFrame(), newFrameToRegister);
       copPointsInFoot.get(0).getPosition(tempFramePoint);
-      assertTrue(tempFramePoint.getX() == 0.2 + newFrameOriginX);
-      assertTrue(tempFramePoint.getY() == 0.15 + newFrameOriginY);
-      assertTrue(tempFramePoint.getZ() == 0.1 + newFrameOriginZ);
-      assertTrue(copPointsInFoot.get(1).getReferenceFrame() == newFrameToRegister);
+      assertEquals(tempFramePoint.getX(), 0.2 + newFrameOriginX, epsilon);
+      assertEquals(tempFramePoint.getY(), 0.15 + newFrameOriginY, epsilon);
+      assertEquals(tempFramePoint.getZ(), 0.1 + newFrameOriginZ, epsilon);
+      assertEquals(copPointsInFoot.get(1).getReferenceFrame(), newFrameToRegister);
       copPointsInFoot.get(1).getPosition(tempFramePoint);
-      assertTrue(tempFramePoint.getX() == 0.15 + newFrameOriginX);
-      assertTrue(tempFramePoint.getY() == -0.05 + newFrameOriginY);
-      assertTrue(tempFramePoint.getZ() == 0.11 + newFrameOriginZ);
+      assertEquals(tempFramePoint.getX(), 0.15 + newFrameOriginX, epsilon);
+      assertEquals(tempFramePoint.getY(), -0.05 + newFrameOriginY, epsilon);
+      assertEquals(tempFramePoint.getZ(), 0.11 + newFrameOriginZ, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
