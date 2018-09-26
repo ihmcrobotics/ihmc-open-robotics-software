@@ -318,7 +318,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       clearPlan();
 
       previousTransferToSide.set(null);
-      transferToSide.set(null);
 
       this.initialTime.set(initialTime);
       isInitialTransfer.set(isStanding.getBooleanValue());
@@ -338,6 +337,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       this.initialTime.set(initialTime);
       isDoubleSupport.set(true);
       isInitialTransfer.set(isStanding.getBooleanValue());
+
+      if (isInitialTransfer.getBooleanValue())
+         previousTransferToSide.set(null);
+
       isStanding.set(false);
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());

@@ -236,6 +236,10 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
          previousTransferToSide.set(transferToSide.getEnumValue());
          transferToSide.set(robotSide.getOppositeSide());
       }
+      else
+      {
+         transferToSide.set(null);
+      }
    }
 
    /** {@inheritDoc} */
