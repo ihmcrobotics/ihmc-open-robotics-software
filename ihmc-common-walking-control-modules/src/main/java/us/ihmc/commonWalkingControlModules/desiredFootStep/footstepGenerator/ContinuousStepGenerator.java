@@ -212,6 +212,8 @@ public class ContinuousStepGenerator implements Updatable
             {
                if (!footsteps.isEmpty())
                   footsteps.remove(0);
+               if (!footsteps.isEmpty())
+                  firstFootstep.set(footsteps.get(0));
             }
             else if (statusToProcess == FootstepStatus.COMPLETED)
             {
