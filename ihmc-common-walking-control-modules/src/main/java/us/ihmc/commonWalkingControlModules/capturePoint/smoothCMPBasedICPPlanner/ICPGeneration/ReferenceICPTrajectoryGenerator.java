@@ -501,7 +501,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          currentCoPSegmentIndex
                .set(getCurrentSegmentIndex(localTimeInCurrentPhase.getDoubleValue(), numberOfCoPSegmentsInCurrentPhase.getIntegerValue(), copTrajectories));
          getICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(),
-                                              currentCoPSegmentIndex.getIntegerValue()); // TODO: add controller dt for proper continuation
+                                              currentCMPSegmentIndex.getIntegerValue()); // TODO: add controller dt for proper continuation
          if (debug)
             checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
 
