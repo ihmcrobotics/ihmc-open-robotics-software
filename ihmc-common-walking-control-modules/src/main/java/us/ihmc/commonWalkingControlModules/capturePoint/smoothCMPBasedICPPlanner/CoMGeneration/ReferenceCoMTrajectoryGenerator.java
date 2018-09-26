@@ -230,13 +230,10 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       getPositionDesiredFinalFromSegment(comPositionDesiredFinalCurrentSegment, currentSegmentIndex.getIntegerValue());
 
       // CoM
-      comToolbox.computeDesiredCenterOfMassPosition(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalCurrentSegment,
-                                                    comPositionDesiredInitialCurrentSegment, cmpPolynomial3D, comPositionDesiredCurrent);
-      comToolbox.computeDesiredCenterOfMassVelocity(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalCurrentSegment,
-                                                    comPositionDesiredInitialCurrentSegment, cmpPolynomial3D, comVelocityDesiredCurrent);
-      comToolbox.computeDesiredCenterOfMassAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(),
-                                                        icpPositionDesiredFinalCurrentSegment, comPositionDesiredInitialCurrentSegment, cmpPolynomial3D,
-                                                        comAccelerationDesiredCurrent);
+      comToolbox.computeDesiredCenterOfMassPositionVelocityAcceleration(omega0.getValue(), localTimeInCurrentPhase.getValue(),
+                                                                        icpPositionDesiredFinalCurrentSegment, comPositionDesiredInitialCurrentSegment,
+                                                                        cmpPolynomial3D, comPositionDesiredCurrent, comVelocityDesiredCurrent,
+                                                                        comAccelerationDesiredCurrent);
    }
 
    private int getCurrentSegmentIndex(double timeInCurrentPhase, List<FrameTrajectory3D> trajectories)
