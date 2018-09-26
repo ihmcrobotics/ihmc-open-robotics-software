@@ -17,12 +17,14 @@ public class Trajectory3D
    protected final Trajectory xTrajectory;
    protected final Trajectory yTrajectory;
    protected final Trajectory zTrajectory;
+   protected final Trajectory[] trajectories;
 
    public Trajectory3D(int maximumNumberOfCoefficients)
    {
       xTrajectory = new Trajectory(maximumNumberOfCoefficients);
       yTrajectory = new Trajectory(maximumNumberOfCoefficients);
       zTrajectory = new Trajectory(maximumNumberOfCoefficients);
+      trajectories = new Trajectory[] {xTrajectory, yTrajectory, zTrajectory};
    }
 
    public Trajectory3D(Trajectory xTrajectory, Trajectory yTrajectory, Trajectory zTrajectory)
@@ -30,6 +32,7 @@ public class Trajectory3D
       this.xTrajectory = xTrajectory;
       this.yTrajectory = yTrajectory;
       this.zTrajectory = zTrajectory;
+      trajectories = new Trajectory[] {xTrajectory, yTrajectory, zTrajectory};
    }
 
    public Trajectory3D(Trajectory[] trajectory)
@@ -41,6 +44,7 @@ public class Trajectory3D
       this.xTrajectory = trajectory[0];
       this.yTrajectory = trajectory[1];
       this.zTrajectory = trajectory[2];
+      this.trajectories = trajectory;
    }
 
    public Trajectory3D(List<Trajectory> trajectory)
@@ -52,6 +56,7 @@ public class Trajectory3D
       this.xTrajectory = trajectory.get(0);
       this.yTrajectory = trajectory.get(1);
       this.zTrajectory = trajectory.get(2);
+      trajectories = new Trajectory[] {xTrajectory, yTrajectory, zTrajectory};
    }
 
    private final Point3DReadOnly position = new Point3DReadOnly()
@@ -241,17 +246,7 @@ public class Trajectory3D
 
    public Trajectory getTrajectory(int index)
    {
-      switch (index)
-      {
-      case 0:
-         return getTrajectoryX();
-      case 1:
-         return getTrajectoryY();
-      case 2:
-         return getTrajectoryZ();
-      default:
-         throw new IndexOutOfBoundsException(Integer.toString(index));
-      }
+      return trajectories[index];
    }
 
    public Trajectory getTrajectoryX()
