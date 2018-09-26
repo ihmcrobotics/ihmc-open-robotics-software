@@ -2,8 +2,6 @@ package us.ihmc.atlas;
 
 import org.junit.Test;
 
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarPauseWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -110,9 +108,17 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.SLOW)
    @Test(timeout = 380000)
    @Override
-   public void testTwoSteps()throws SimulationExceededMaximumTimeException
+   public void testTwoIndependentSteps()throws SimulationExceededMaximumTimeException
    {
-      super.testTwoSteps();
+      super.testTwoIndependentSteps();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.SLOW)
+   @Test(timeout = 380000)
+   @Override
+   public void testStartSecondStepWhileTransitioningToStand()throws SimulationExceededMaximumTimeException
+   {
+      super.testStartSecondStepWhileTransitioningToStand();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 77.3)
