@@ -64,6 +64,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final YoBoolean adjustPlanForDSContinuity = new YoBoolean("adjustEveryCoPPlanForDSContinuity", registry);
    private final YoBoolean adjustPlanForInitialDSContinuity = new YoBoolean("adjustInitialCoPPlanForDSContinuity", registry);
    private final YoBoolean adjustPlanForStandingContinuity = new YoBoolean("adjustCoPPlanForInitialDSContinuity", registry);
+   private final YoBoolean doContinuousReplanningForStanding = new YoBoolean("doContinuousReplanningForStanding", registry);
+   private final YoBoolean doContinuousReplanningForTransfer = new YoBoolean("doContinuousReplanningForTransfer", registry);
+   private final YoBoolean doContinuousReplanningForSwing = new YoBoolean("doContinuousReplanningForSwing", registry);
 
    final ReferenceCoPTrajectoryGenerator referenceCoPGenerator;
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
@@ -177,6 +180,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          adjustPlanForDSContinuity.set(smoothCMPPlannerParameters.adjustEveryCoPPlanForDoubleSupportContinuity());
          adjustPlanForInitialDSContinuity.set(smoothCMPPlannerParameters.adjustInitialCoPPlanForDoubleSupportContinuity());
          adjustPlanForStandingContinuity.set(smoothCMPPlannerParameters.adjustCoPPlanForStandingContinuity());
+
+         doContinuousReplanningForStanding.set(smoothCMPPlannerParameters.doContinuousReplanningForStanding());
+         doContinuousReplanningForTransfer.set(smoothCMPPlannerParameters.doContinuousReplanningForTransfer());
+         doContinuousReplanningForSwing.set(smoothCMPPlannerParameters.doContinuousReplanningForSwing());
       }
       else
       {
@@ -327,7 +334,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
-      updateTransferPlan(adjustPlanForStandingContinuity.getBooleanValue());
+
+      if(!doContinuousReplanningForTransfer.getBooleanValue())
+         updateTransferPlan(adjustPlanForStandingContinuity.getBooleanValue());
    }
 
    /** {@inheritDoc} */
@@ -346,7 +355,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
-      updateTransferPlan(true);
+
+      if(!doContinuousReplanningForTransfer.getBooleanValue())
+         updateTransferPlan(true);
    }
 
    /** {@inheritDoc} */
@@ -372,7 +383,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
-      updateSingleSupportPlan(true);
+
+      if(!doContinuousReplanningForSwing.getBooleanValue())
+         updateSingleSupportPlan(true);
    }
 
    /** {@inheritDoc} */
@@ -503,10 +516,17 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    @Override
    public void compute(double time)
    {
+      timer.startMeasurement();
+
+      if (isInStanding() && doContinuousReplanningForStanding.getBooleanValue())
+         updateTransferPlan(true);
+      else if (isInDoubleSupport() && !isInStanding() && doContinuousReplanningForTransfer.getBooleanValue())
+         updateTransferPlan(true);
+      else if (!isInDoubleSupport() && doContinuousReplanningForSwing.getBooleanValue())
+         updateSingleSupportPlan(true);
+
       if (referenceCoPGenerator.getIsPlanAvailable())
       {
-         timer.startMeasurement();
-
          timeInCurrentState.set(time - initialTime.getDoubleValue());
          timeInCurrentStateRemaining.set(getCurrentStateDuration() - timeInCurrentState.getDoubleValue());
 
@@ -528,7 +548,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          if (debug)
             checkCoMDynamics(desiredCoMVelocity, desiredICPPosition, desiredCoMPosition);
 
-         timer.stopMeasurement();
          // done to account for the delayed velocity
          //computeDesiredCentroidalMomentumPivot(desiredICPPosition, desiredICPVelocity, omega0.getDoubleValue(), desiredCMPPosition);
          //computeDesiredCentroidalMomentumPivotVelocity(desiredICPVelocity, desiredICPAcceleration, omega0.getDoubleValue(), desiredCMPVelocity);
@@ -547,6 +566,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          desiredCoMVelocity.setToZero();
          desiredCoMAcceleration.setToZero();
       }
+
+      timer.stopMeasurement();
    }
 
    private void updateListeners()
