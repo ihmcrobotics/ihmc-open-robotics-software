@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSupportPolygonNames;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -115,7 +118,7 @@ public class CoPPointPlanningParameters
       return copOffsetBoundsInFootFrame;
    }
 
-   public YoFrameVector2D getCoPOffsets(RobotSide robotSide)
+   public FixedFrameVector2DBasics getCoPOffsets(RobotSide robotSide)
    {
       return copOffsets.get(robotSide);
    }
