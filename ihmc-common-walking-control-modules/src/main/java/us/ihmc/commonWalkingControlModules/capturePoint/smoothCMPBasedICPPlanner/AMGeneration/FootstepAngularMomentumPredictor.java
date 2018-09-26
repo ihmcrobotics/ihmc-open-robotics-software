@@ -337,6 +337,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
                                            List<? extends FrameVector3DReadOnly> comFinalVelocities, List<? extends FrameVector3DReadOnly> comInitialAccelerations,
                                            List<? extends FrameVector3DReadOnly> comFinalAccelerations, int numberOfRegisteredFootsteps)
    {
+      upcomingCoPsInFootsteps.clear();
       for (int i = 0; i < copLocations.size(); i++)
          upcomingCoPsInFootsteps.add().set(copLocations.get(i));
       this.numberOfRegisteredFootsteps.set(numberOfRegisteredFootsteps);
@@ -423,6 +424,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       double phaseTime = 0.0;
       int comIndex = 0;
       int footstepIndex = 0;
+
       // handle the current swing, if in the swing state
       if(initialWalkingPhase == WalkingTrajectoryType.SWING)
       {
@@ -444,8 +446,11 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
          }
          footstepIndex++;
          phaseTime = 0.0;
-
       }
+
+      // Flamingo stance does not have a final transfer phase, only the initial CoP waypoint and the CoP waypoints for the current step
+      if (footstepIndex >= upcomingCoPsInFootsteps.size() - 1)
+         return;
 
       // handle each of the upcoming footsteps
       WalkingTrajectoryType currentWalkingPhase = WalkingTrajectoryType.TRANSFER;
