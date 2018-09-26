@@ -37,7 +37,7 @@ public class Trajectory
       this.constraintMatrix = new DenseMatrix64F(maxNumberOfCoefficients, maxNumberOfCoefficients);
       this.constraintVector = new DenseMatrix64F(maxNumberOfCoefficients, 1);
       this.coefficientVector = new DenseMatrix64F(maxNumberOfCoefficients, 1);
-      this.xPowersDerivativeVector = new DenseMatrix64F(maxNumberOfCoefficients, 1);
+      this.xPowersDerivativeVector = new DenseMatrix64F(1, maxNumberOfCoefficients);
       this.solver = LinearSolverFactory.general(maxNumberOfCoefficients, maxNumberOfCoefficients);
       this.xPowers = new double[maxNumberOfCoefficients];
       reset();
