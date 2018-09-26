@@ -18,6 +18,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -85,7 +86,8 @@ public class CoPPointsInFootTest
       copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.2, testLocation);
       assertEquals(1, copPointsInFoot.getCoPPointList().size());
 
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(testLocation, copPointsInFoot.get(0).getPosition(), epsilon);
+      testLocation.changeFrame(worldFrame);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(testLocation, copPointsInFoot.get(0).getPosition(), epsilon);
       assertEquals(0.2, copPointsInFoot.get(0).getTime(), epsilon);
    }
 
@@ -101,9 +103,13 @@ public class CoPPointsInFootTest
       copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.12, testLocation2);
       assertEquals(2, copPointsInFoot.getCoPPointList().size());
 
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(testLocation1, copPointsInFoot.get(0).getPosition(), epsilon);
+      FramePoint3D pointToTest = new FramePoint3D(testLocation1);
+      pointToTest.changeFrame(worldFrame);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(pointToTest, copPointsInFoot.get(0).getPosition(), epsilon);
       assertEquals(0.87, copPointsInFoot.get(0).getTime(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(testLocation2, copPointsInFoot.get(2).getPosition(), epsilon);
+      pointToTest = new FramePoint3D(testLocation2);
+      pointToTest.changeFrame(worldFrame);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(pointToTest, copPointsInFoot.get(1).getPosition(), epsilon);
       assertEquals(0.12, copPointsInFoot.get(1).getTime(), epsilon);
    }
 
@@ -121,13 +127,13 @@ public class CoPPointsInFootTest
       copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.12, testLocation2);
       assertEquals(2, copPointsInFoot.getCoPPointList().size());
 
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(testLocation1.getPosition(), copPointsInFoot.get(0).getPosition(), epsilon);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(testLocation1.getPosition(), copPointsInFoot.get(0).getPosition(), epsilon);
       assertEquals(0.87, copPointsInFoot.get(0).getTime(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(testLocation2.getPosition(), copPointsInFoot.get(1).getPosition(), epsilon);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(testLocation2.getPosition(), copPointsInFoot.get(1).getPosition(), epsilon);
       assertEquals(0.12, copPointsInFoot.get(1).getTime(), epsilon);
       FramePoint3D tempFramePointForTesting = new FramePoint3D(footSpoof.getSoleFrame());
       copPointsInFoot.getFinalCoPPosition(tempFramePointForTesting);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(testLocation2.getPosition(), tempFramePointForTesting, epsilon);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(testLocation2.getPosition(), tempFramePointForTesting, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
