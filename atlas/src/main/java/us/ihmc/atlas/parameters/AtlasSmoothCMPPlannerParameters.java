@@ -152,4 +152,22 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    {
       return true;
    }
+
+   @Override
+   public boolean doContinuousReplanningForStanding()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean doContinuousReplanningForTransfer()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean doContinuousReplanningForSwing()
+   {
+      return true;
+   }
 }
