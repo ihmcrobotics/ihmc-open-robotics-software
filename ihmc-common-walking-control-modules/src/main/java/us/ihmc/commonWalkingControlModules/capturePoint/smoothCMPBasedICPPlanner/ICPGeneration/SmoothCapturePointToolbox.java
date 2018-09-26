@@ -17,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory;
+import us.ihmc.robotics.math.trajectories.Trajectory3D;
 
 /**
  * @author Tim Seyde
@@ -242,13 +243,12 @@ public class SmoothCapturePointToolbox
 
    /**
     * Compute the i-th derivative of &alpha;<sub>ICP,&phi;</sub> at time t<sub>&phi;</sub>:
-    * <P>
-    * &alpha;<sup>(i)</sup><sub>ICP,&phi;</sub>(t<sub>&phi;</sub>) =
-    * &Sigma;<sub>j=0</sub><sup>n</sup> &omega;<sub>0</sub><sup>-j</sup> *
-    * t<sup>(j+i)<sup>T</sup></sup> (t<sub>&phi;</sub>)
+    * <pre>
+    * &alpha;<sup>(i)</sup><sub>ICP,&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>j=0</sub><sup>n</sup> &omega;<sub>0</sub><sup>-j</sup> * t<sup>(j+i)<sup>T</sup></sup>(t<sub>&phi;</sub>)
+    * </pre>
     */
    public static void calculateGeneralizedAlphaPrimeOnCMPSegment3D(double omega0, double time, DenseMatrixVector3D generalizedAlphaPrimeToPack,
-                                                                   int alphaDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
+                                                                   int alphaDerivativeOrder, Trajectory3D cmpPolynomial3D)
    {
       int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
 
