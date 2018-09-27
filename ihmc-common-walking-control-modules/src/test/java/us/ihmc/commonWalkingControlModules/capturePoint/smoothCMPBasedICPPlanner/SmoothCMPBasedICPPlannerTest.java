@@ -502,11 +502,11 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void testForPlanningConsistency(boolean isDoubleSupport, int stepNumber)
    {
-      List<CoPPointsInFoot> copWaypointsFromPlanner = planner.referenceCoPGenerator.getWaypoints();
-      List<? extends FramePoint3DReadOnly> icpInitialCornerPointsFromPlanner = planner.referenceICPGenerator.getICPPositionDesiredInitialList();
-      List<? extends FramePoint3DReadOnly> icpFinalCornerPointsFromPlanner = planner.referenceICPGenerator.getICPPositionDesiredFinalList();
-      List<? extends FramePoint3DReadOnly> comInitialCornerPointsFromPlanner = planner.referenceCoMGenerator.getCoMPositionDesiredInitialList();
-      List<? extends FramePoint3DReadOnly> comFinalCornerPointsFromPlanner = planner.referenceCoMGenerator.getCoMPositionDesiredFinalList();
+      List<CoPPointsInFoot> copWaypointsFromPlanner = planner.getReferenceCoPGenerator().getWaypoints();
+      List<? extends FramePoint3DReadOnly> icpInitialCornerPointsFromPlanner = planner.getReferenceICPGenerator().getICPPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> icpFinalCornerPointsFromPlanner = planner.getReferenceICPGenerator().getICPPositionDesiredFinalList();
+      List<? extends FramePoint3DReadOnly> comInitialCornerPointsFromPlanner = planner.getReferenceCoMGenerator().getCoMPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> comFinalCornerPointsFromPlanner = planner.getReferenceCoMGenerator().getCoMPositionDesiredFinalList();
 
       if (!newTestStartConsistency)
       {
@@ -758,8 +758,8 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateCoMCornerPoints()
    {
-      List<? extends FramePoint3DReadOnly> comInitialDesiredPositions = planner.referenceCoMGenerator.getCoMPositionDesiredInitialList();
-      List<? extends FramePoint3DReadOnly> comFinalDesiredPositions = planner.referenceCoMGenerator.getCoMPositionDesiredFinalList();
+      List<? extends FramePoint3DReadOnly> comInitialDesiredPositions = planner.getReferenceCoMGenerator().getCoMPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> comFinalDesiredPositions = planner.getReferenceCoMGenerator().getCoMPositionDesiredFinalList();
       comInitialCornerPoints.reset();
       for (int i = 0; i < comInitialDesiredPositions.size(); i++)
       {
@@ -774,8 +774,8 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateICPCornerPoints()
    {
-      List<? extends FramePoint3DReadOnly> icpInitialDesiredPositions = planner.referenceICPGenerator.getICPPositionDesiredInitialList();
-      List<? extends FramePoint3DReadOnly> icpFinalDesiredPositions = planner.referenceICPGenerator.getICPPositionDesiredFinalList();
+      List<? extends FramePoint3DReadOnly> icpInitialDesiredPositions = planner.getReferenceICPGenerator().getICPPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> icpFinalDesiredPositions = planner.getReferenceICPGenerator().getICPPositionDesiredFinalList();
       icpInitialCornerPoints.reset();
       for (int i = 0; i < icpInitialDesiredPositions.size(); i++)
       {
@@ -793,7 +793,7 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateCoPCornerPoints()
    {
-      List<CoPPointsInFoot> copCornerPointPositions = planner.referenceCoPGenerator.getWaypoints();
+      List<CoPPointsInFoot> copCornerPointPositions = planner.getReferenceCoPGenerator().getWaypoints();
       copCornerPoints.reset();
       for (int i = 0; i < copCornerPointPositions.size(); i++)
       {
@@ -989,7 +989,28 @@ public class SmoothCMPBasedICPPlannerTest
       yoTime.add(dt);
       getAllVariablesFromPlanner(planner1, icpPlannerData1);
       getAllVariablesFromPlanner(planner2, icpPlannerData2);
+
+      assertCoPWaypointsAreEqual(planner1, planner2, 1e-10);
       assertPlansAreEqual(icpPlannerData1, icpPlannerData2, 1e-8);
+   }
+
+   private static void assertCoPWaypointsAreEqual(SmoothCMPBasedICPPlanner planner1, SmoothCMPBasedICPPlanner planner2, double epsilon)
+   {
+      List<CoPPointsInFoot> waypoints1 = planner1.getReferenceCoPGenerator().getWaypoints();
+      List<CoPPointsInFoot> waypoints2 = planner2.getReferenceCoPGenerator().getWaypoints();
+
+      for (int i = 0; i < waypoints1.size(); i++)
+      {
+         CoPPointsInFoot pointsInFoot1 = waypoints1.get(i);
+         CoPPointsInFoot pointsInFoot2 = waypoints2.get(i);
+
+         for (int j = 0; j < pointsInFoot1.getNumberOfCoPPoints(); j++)
+         {
+            CoPTrajectoryPoint coPTrajectoryPoint1 = pointsInFoot1.get(j);
+            CoPTrajectoryPoint coPTrajectoryPoint2 = pointsInFoot2.get(j);
+            Assert.assertTrue(coPTrajectoryPoint1.epsilonEquals(coPTrajectoryPoint2, epsilon));
+         }
+      }
    }
 
    private static void assertPlansAreEqual(ICPPlannerData planData1, ICPPlannerData planData2, double epsilon)
