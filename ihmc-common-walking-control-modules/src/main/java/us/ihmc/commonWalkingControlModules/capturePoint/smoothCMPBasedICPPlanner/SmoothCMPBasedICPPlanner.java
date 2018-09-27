@@ -342,7 +342,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       isDoubleSupport.set(true);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
-      referenceICPGenerator.setInitialConditionsForAdjustment();
+      referenceICPGenerator.setInitialConditionsForAdjustment(icpPositionToHold);
       referenceCoMGenerator.initializeForSwingOrTransfer();
       updateTransferPlan(adjustPlanForStandingContinuity.getBooleanValue());
    }
@@ -362,7 +362,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
-      referenceICPGenerator.setInitialConditionsForAdjustment();
+      referenceICPGenerator.setInitialConditionsForAdjustment(icpPositionToHold);
       referenceCoMGenerator.initializeForSwingOrTransfer();
       updateTransferPlan(true);
    }
@@ -389,7 +389,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
-      referenceICPGenerator.setInitialConditionsForAdjustment();
+      referenceICPGenerator.setInitialConditionsForAdjustment(icpPositionToHold);
       referenceCoPGenerator.initializeForSwing();
       referenceCoMGenerator.initializeForSwingOrTransfer();
 
