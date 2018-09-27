@@ -700,7 +700,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       framePointToPack.changeFrame(worldFrame);
    }
 
-
    private void computeCoPPointsForFinalTransfer(boolean isLastTransfer, int footstepIndex)
    {
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
@@ -894,6 +893,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       FrameVector2DReadOnly copOffset = copPointParameters.getCoPOffsets(supportSide);
       double copXOffset = copOffset.getX() + getExitStepLengthToCoPOffset(copPointParameters.getStepLengthToCoPOffsetFactor(), footstepIndex);
+
       copXOffset = MathTools.clamp(copXOffset, copPointParameters.getMinCoPOffset().getDoubleValue(), copPointParameters.getMaxCoPOffset().getDoubleValue());
       copLocationToPack.add(copXOffset, copOffset.getY(), 0.0);
 
@@ -910,6 +910,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       FrameVector2DReadOnly copOffset = copPointParameters.getCoPOffsets(supportSide);
       double copXOffset = MathTools
             .clamp(copOffset.getX(), copPointParameters.getMinCoPOffset().getDoubleValue(), copPointParameters.getMaxCoPOffset().getDoubleValue());
+
       copLocationToPack.add(copXOffset, copOffset.getY(), 0.0);
 
       constrainToPolygon(copLocationToPack, transferringToPolygon.get(footstepIndex), safeDistanceFromCoPToSupportEdges.getDoubleValue());
