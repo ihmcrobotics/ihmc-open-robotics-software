@@ -136,7 +136,7 @@ public class CoPPointsInFoot
       addWayPointName(copPointName);
    }
 
-   void addWayPointName(CoPPointName copPointName)
+   private void addWayPointName(CoPPointName copPointName)
    {
       this.copPointsList.add(copPointName);
    }
