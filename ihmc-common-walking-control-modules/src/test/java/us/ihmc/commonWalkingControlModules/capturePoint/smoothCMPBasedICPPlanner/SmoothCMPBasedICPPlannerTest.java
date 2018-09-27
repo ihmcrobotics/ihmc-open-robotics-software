@@ -10,12 +10,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectoryPoint;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
@@ -52,7 +54,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -67,7 +68,7 @@ public class SmoothCMPBasedICPPlannerTest
    private static final String testClassName = "UltimateSmoothCMPBasedICPPlannerTest";
    private static final double epsilon = Epsilons.ONE_TEN_MILLIONTH;
    private final static double spatialEpsilonForDiscontinuity = 0.003; // m //TODO this should depend on the simulation dt
-   private final static double spatialEpsilonForPlanningConsistency = 0.010; // m 
+   private final static double spatialEpsilonForPlanningConsistency = 0.010; // m
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final boolean visualize = false;
@@ -101,10 +102,9 @@ public class SmoothCMPBasedICPPlannerTest
    private final double defaultFinalSwingTime = defaultSwingTime;
    private final double defaultFinalTransferTime = 0.2;
 
-   private final double stepWidth = 0.25;
+   private static final double stepWidth = 0.25;
    private final double stepLength = 0.5;
    private final int numberOfFootstepsToConsider = 3;
-   private final int numberOfFootstepsForTest = 10;
    private final int numberOfPointsToCheckForConsistencyWhenAddingFootsteps = 3;
    private final int numberOfFootstepsToTestForConsistency = Math.min(numberOfFootstepsToConsider, 3);
    private final List<Point2D> contactPointsInFootFrame = Stream
@@ -166,6 +166,9 @@ public class SmoothCMPBasedICPPlannerTest
    private Color icpPointsColor = Color.RED;
    private Color cmpPointsColor = Color.YELLOW;
    private Color copPointsColor = Color.ORANGE;
+
+
+   private int numberOfFootstepsForTest;
 
    @Before
    public void setupTest()
@@ -352,6 +355,7 @@ public class SmoothCMPBasedICPPlannerTest
    @Test(timeout = 30000)
    public void testForDiscontinuitiesWithoutAngularMomentum()
    {
+      numberOfFootstepsForTest = 10;
       boolean isAMOn = false;
       setupPlanner(isAMOn);
       simulate(true, false, true);
@@ -361,15 +365,17 @@ public class SmoothCMPBasedICPPlannerTest
    @Test(timeout = 30000)
    public void testForDiscontinuitiesWithAngularMomentum()
    {
+      numberOfFootstepsForTest = 10;
       boolean isAMOn = true;
       setupPlanner(isAMOn);
       simulate(true, false, true);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000000)
    public void testForPlanningConsistencyWithoutAngularMomentum()
    {
+      numberOfFootstepsForTest = 10;
       boolean isAMOn = false;
       setupPlanner(isAMOn);
       simulate(false, true, true);
@@ -379,6 +385,8 @@ public class SmoothCMPBasedICPPlannerTest
    @Test(timeout = 30000)
    public void testForPlanningConsistencyWithAngularMomentum()
    {
+      numberOfFootstepsForTest = 10;
+
       boolean isAMOn = true;
       setupPlanner(isAMOn);
       simulate(false, true, true);
@@ -418,7 +426,7 @@ public class SmoothCMPBasedICPPlannerTest
       this.planner.ensureContinuityEnteringEachTransfer(true);
    }
 
-   // Variables for storing values 
+   // Variables for storing values
    private final FramePoint3D comPositionForDiscontinuity = new FramePoint3D();
    private final FramePoint3D icpPositionForDiscontinuity = new FramePoint3D();
    private final FramePoint3D cmpPositionForDiscontinuity = new FramePoint3D();
@@ -572,10 +580,11 @@ public class SmoothCMPBasedICPPlannerTest
 
       int finalCoPIndex = copWaypointsFromPlanner.get(indexDifference).getNumberOfCoPPoints() - 1;
       copWaypointsFromPlanner.get(indexDifference).getFinalCoPPosition(tempFramePoint1);
-      copWaypointsFromPreviousPlan.get(0).addAndSetIncludingFrame(copWaypointsFromPlanner.get(indexDifference).getCoPPointList().get(finalCoPIndex), 0.0,
-                                                                  tempFramePoint1);
-      for (int i = 1; i < numberOfFootstepsToTestForConsistency + 1; i++)
-         copWaypointsFromPreviousPlan.get(i).setIncludingFrame(copWaypointsFromPlanner.get(i + indexDifference));
+      copWaypointsFromPreviousPlan.get(0).addWaypoint(copWaypointsFromPlanner.get(indexDifference).getCoPPointList().get(finalCoPIndex), 0.0,
+                                                      tempFramePoint1);
+      int numberToCheck = Math.min(numberOfFootstepsToTestForConsistency + 1, copWaypointsFromPlanner.size() - indexDifference);
+      for (int i = 1; i < numberToCheck; i++)
+         copWaypointsFromPreviousPlan.get(i).set(copWaypointsFromPlanner.get(i + indexDifference));
    }
 
    private void testCoPConsistency(boolean isDoubleSupport, int stepNumber, int numberOfStepsToCheck, List<CoPPointsInFoot> copWaypointsFromPlanner)
@@ -583,31 +592,30 @@ public class SmoothCMPBasedICPPlannerTest
       // Test CoPs and footsteps
       for (int i = (isDoubleSupport ? 0 : 1); i < numberOfStepsToCheck; i++)
       {
-         CoPPointsInFoot requiredCoPs = copWaypointsFromPreviousPlan.get(i);
-         CoPPointsInFoot gotCoPs = copWaypointsFromPlanner.get(i);
-         assertEquals("Step number: " + (stepNumber + i) + " Required: " + requiredCoPs.getNumberOfCoPPoints() + " Got: " + gotCoPs.getNumberOfCoPPoints(),
-                      requiredCoPs.getNumberOfCoPPoints(), gotCoPs.getNumberOfCoPPoints());
+         CoPPointsInFoot previousPlannedCoPWaypoints = copWaypointsFromPreviousPlan.get(i);
+         CoPPointsInFoot actualPlannedCoPWaypoints = copWaypointsFromPlanner.get(i);
+         assertEquals("Step number: " + (stepNumber + i) + " Required: " + previousPlannedCoPWaypoints.getNumberOfCoPPoints() + " Got: " + actualPlannedCoPWaypoints.getNumberOfCoPPoints(),
+                      previousPlannedCoPWaypoints.getNumberOfCoPPoints(), actualPlannedCoPWaypoints.getNumberOfCoPPoints());
 
-         requiredCoPs.getSwingFootLocation(tempFramePoint1);
-         gotCoPs.getSwingFootLocation(tempFramePoint2);
+         previousPlannedCoPWaypoints.getSwingFootLocation(tempFramePoint1);
+         actualPlannedCoPWaypoints.getSwingFootLocation(tempFramePoint2);
          EuclidCoreTestTools
                .assertPoint3DGeometricallyEquals("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck, tempFramePoint1, tempFramePoint2,
                                                  spatialEpsilonForPlanningConsistency);
-         requiredCoPs.getSupportFootLocation(tempFramePoint1);
-         gotCoPs.getSupportFootLocation(tempFramePoint2);
+         previousPlannedCoPWaypoints.getSupportFootLocation(tempFramePoint1);
+         actualPlannedCoPWaypoints.getSupportFootLocation(tempFramePoint2);
          EuclidCoreTestTools
                .assertPoint3DGeometricallyEquals("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck, tempFramePoint1, tempFramePoint2,
                                                  spatialEpsilonForPlanningConsistency);
 
-         for (int j = 0; j < requiredCoPs.getNumberOfCoPPoints(); j++)
+         for (int j = 0; j < previousPlannedCoPWaypoints.getNumberOfCoPPoints(); j++)
          {
-            assertEquals("Step number: " + (stepNumber + i), requiredCoPs.getCoPPointList().get(j), gotCoPs.getCoPPointList().get(j));
-            assertTrue("Step number: " + (stepNumber + i) + " Required : " + requiredCoPs.get(j).toString() + " Got: " + gotCoPs.get(j).toString(),
-                       requiredCoPs.get(j).epsilonEquals(gotCoPs.get(j), spatialEpsilonForPlanningConsistency));
+            assertEquals("Step number: " + (stepNumber + i) + ", waypoint number: " + j, previousPlannedCoPWaypoints.getCoPPointList().get(j), actualPlannedCoPWaypoints.getCoPPointList().get(j));
+            assertTrajectoryPointEquals("Step number: " + (stepNumber + i) + ", waypoint number: " + j, previousPlannedCoPWaypoints.get(j), actualPlannedCoPWaypoints.get(j), spatialEpsilonForPlanningConsistency);
          }
       }
 
-      // Consistency of plans shorter than consideration needs this 
+      // Consistency of plans shorter than consideration needs this
       if (numberOfStepsToCheck < numberOfFootstepsToConsider)
       {
          CoPPointsInFoot requiredCoPs = copWaypointsFromPreviousPlan.get(numberOfStepsToCheck);
@@ -627,9 +635,7 @@ public class SmoothCMPBasedICPPlannerTest
          for (int j = 0; j < requiredCoPs.getNumberOfCoPPoints(); j++)
          {
             assertEquals("Step number: " + (stepNumber + numberOfStepsToCheck), requiredCoPs.getCoPPointList().get(j), gotCoPs.getCoPPointList().get(j));
-            assertTrue("Step number: " + (stepNumber + numberOfStepsToCheck) + " Required : " + requiredCoPs.get(j).toString() + " Got: " + gotCoPs.get(j)
-                                                                                                                                                   .toString(),
-                       requiredCoPs.get(j).epsilonEquals(gotCoPs.get(j), spatialEpsilonForPlanningConsistency));
+            assertTrajectoryPointEquals("Step number: " + (stepNumber + numberOfStepsToCheck), requiredCoPs.get(j), gotCoPs.get(j), spatialEpsilonForPlanningConsistency );
          }
       }
    }
@@ -763,9 +769,9 @@ public class SmoothCMPBasedICPPlannerTest
       for (int i = 0; i < copCornerPointPositions.size(); i++)
       {
          CoPPointsInFoot copPoints = copCornerPointPositions.get(i);
-         for (int j = 0; j < copPoints.getCoPPointList().size(); j++)
+         for (int j = 0; j < copPoints.getNumberOfCoPPoints(); j++)
          {
-            copCornerPoints.setBall(copPoints.getWaypointInWorldFrameReadOnly(j));
+            copCornerPoints.setBall(copPoints.getWaypointInWorld(j));
          }
       }
    }
@@ -944,4 +950,10 @@ public class SmoothCMPBasedICPPlannerTest
       return comVelocity.epsilonEquals(comVelocityFromDynamics, epsilon);
    }
 
+   private static void assertTrajectoryPointEquals(String prefix, CoPTrajectoryPoint expected, CoPTrajectoryPoint actual, double epsilon)
+   {
+      Assert.assertEquals(prefix, expected.getTime(), actual.getTime(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(prefix, expected.getPosition(), actual.getPosition(), epsilon);
+      EuclidCoreTestTools.assertVector3DGeometricallyEquals(prefix, expected.getLinearVelocity(), actual.getLinearVelocity(), epsilon);
+   }
 }

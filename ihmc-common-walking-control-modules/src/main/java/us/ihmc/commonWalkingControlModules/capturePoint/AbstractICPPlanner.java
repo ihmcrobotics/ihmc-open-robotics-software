@@ -169,6 +169,8 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       singleSupportInitialICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportInitialICP", registry, framesToRegister);
       singleSupportFinalICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalICP", registry, framesToRegister);
 
+      transferToSide.set(null);
+      previousTransferToSide.set(null);
 
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
       {
@@ -233,6 +235,10 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       {
          previousTransferToSide.set(transferToSide.getEnumValue());
          transferToSide.set(robotSide.getOppositeSide());
+      }
+      else
+      {
+         transferToSide.set(null);
       }
    }
 
