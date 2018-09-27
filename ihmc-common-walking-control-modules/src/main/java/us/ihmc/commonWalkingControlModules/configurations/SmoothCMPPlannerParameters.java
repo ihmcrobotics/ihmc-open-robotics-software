@@ -23,17 +23,7 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
     * Bounds of the CoP offsets in the foot frame
     */
    protected final EnumMap<CoPPointName, Vector2D> copOffsetBoundsInFootFrame = new EnumMap<>(CoPPointName.class);
-   protected final EnumMap<CoPPointName, CoPSupportPolygonNames> copSupportPolygons = new EnumMap<>(CoPPointName.class);
 
-   /**
-    * Order list of flags indicating whether specified bounding boxes should be used to constrain the CoP point
-    */
-   protected final EnumMap<CoPPointName, Boolean> constrainToMinMax = new EnumMap<>(CoPPointName.class);
-   /**
-    * Order list of flags indicating whether CoP should reside within the support polygon specified in copOffsetFrames
-    */
-   protected final EnumMap<CoPPointName, Boolean> constrainToSupportPolygon = new EnumMap<>(CoPPointName.class);
-   protected final EnumMap<CoPPointName, CoPSupportPolygonNames> stepLengthOffsetPolygon = new EnumMap<>(CoPPointName.class);
    /**
     * Ordered list of fractions indicating whether CoP offset changes with step length
     */
@@ -66,26 +56,6 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
       this.exitCoPName = CoPPointName.TOE_COP;
       this.entryCoPName = CoPPointName.HEEL_COP;
       this.endCoPName = CoPPointName.MIDFEET_COP;
-      
-      copSupportPolygons.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copSupportPolygons.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copSupportPolygons.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copSupportPolygons.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.INITIAL_DOUBLE_SUPPORT_POLYGON);
-
-      stepLengthOffsetPolygon.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.NULL);
-      stepLengthOffsetPolygon.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.INITIAL_SWING_POLYGON);
-      stepLengthOffsetPolygon.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.FINAL_SWING_POLYGON);
-      stepLengthOffsetPolygon.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.FINAL_SWING_POLYGON);
-
-      constrainToMinMax.put(CoPPointName.MIDFEET_COP, false);
-      constrainToMinMax.put(CoPPointName.HEEL_COP, true);
-      constrainToMinMax.put(CoPPointName.BALL_COP, true);
-      constrainToMinMax.put(CoPPointName.TOE_COP, true);
-
-      constrainToSupportPolygon.put(CoPPointName.MIDFEET_COP, false);
-      constrainToSupportPolygon.put(CoPPointName.HEEL_COP, false);
-      constrainToSupportPolygon.put(CoPPointName.BALL_COP, false);
-      constrainToSupportPolygon.put(CoPPointName.TOE_COP, false);
 
       stepLengthToCoPOffsetFactor.put(CoPPointName.MIDFEET_COP, 0.0);
       stepLengthToCoPOffsetFactor.put(CoPPointName.HEEL_COP, 1.0 / 3.0);
@@ -181,11 +151,6 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
       return copOffsetsInFootFrame;
    }
 
-   public EnumMap<CoPPointName, CoPSupportPolygonNames> getSupportPolygonNames()
-   {
-      return copSupportPolygons;
-   }
-
    @Override
    public CoPPointName getEntryCoPName()
    {
@@ -211,21 +176,6 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
    public CoPPointName[] getTransferCoPPointsToPlan()
    {
       return transferCoPPointsToPlan;
-   }
-
-   public EnumMap<CoPPointName, Boolean> getIsConstrainedToMinMaxFlags()
-   {
-      return constrainToMinMax;
-   }
-
-   public EnumMap<CoPPointName, Boolean> getIsConstrainedToSupportPolygonFlags()
-   {
-      return constrainToSupportPolygon;
-   }
-
-   public EnumMap<CoPPointName, CoPSupportPolygonNames> getStepLengthCoPOffsetPolygons()
-   {
-      return stepLengthOffsetPolygon;
    }
 
    @Override

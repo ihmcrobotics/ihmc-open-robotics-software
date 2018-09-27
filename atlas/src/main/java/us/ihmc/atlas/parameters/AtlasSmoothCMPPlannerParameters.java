@@ -22,37 +22,9 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
       swingCopPointsToPlan = new CoPPointName[]{CoPPointName.BALL_COP, CoPPointName.TOE_COP};
       transferCoPPointsToPlan = new CoPPointName[]{CoPPointName.MIDFEET_COP, CoPPointName.HEEL_COP};
 
-      copSupportPolygons.clear();
-      stepLengthOffsetPolygon.clear();
-      constrainToMinMax.clear();
-      constrainToSupportPolygon.clear();
       stepLengthToCoPOffsetFactor.clear();
       copOffsetsInFootFrame.clear();
       copOffsetBoundsInFootFrame.clear();
-
-      copSupportPolygons.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copSupportPolygons.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copSupportPolygons.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copSupportPolygons.put(CoPPointName.FLAMINGO_STANCE_FINAL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copSupportPolygons.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.INITIAL_DOUBLE_SUPPORT_POLYGON);
-
-      stepLengthOffsetPolygon.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.NULL);
-      stepLengthOffsetPolygon.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.INITIAL_SWING_POLYGON);
-      stepLengthOffsetPolygon.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.FINAL_SWING_POLYGON);
-      stepLengthOffsetPolygon.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.FINAL_SWING_POLYGON);
-      stepLengthOffsetPolygon.put(CoPPointName.FLAMINGO_STANCE_FINAL_COP, CoPSupportPolygonNames.NULL);
-
-      constrainToMinMax.put(CoPPointName.MIDFEET_COP, false);
-      constrainToMinMax.put(CoPPointName.HEEL_COP, true);
-      constrainToMinMax.put(CoPPointName.BALL_COP, true);
-      constrainToMinMax.put(CoPPointName.TOE_COP, true);
-      constrainToMinMax.put(CoPPointName.FLAMINGO_STANCE_FINAL_COP, true);
-
-      constrainToSupportPolygon.put(CoPPointName.MIDFEET_COP, false);
-      constrainToSupportPolygon.put(CoPPointName.HEEL_COP, true);
-      constrainToSupportPolygon.put(CoPPointName.BALL_COP, true);
-      constrainToSupportPolygon.put(CoPPointName.TOE_COP, true);
-      constrainToSupportPolygon.put(CoPPointName.FLAMINGO_STANCE_FINAL_COP, true);
 
       stepLengthToCoPOffsetFactor.put(CoPPointName.MIDFEET_COP, 0.0);
       stepLengthToCoPOffsetFactor.put(CoPPointName.HEEL_COP, 1.0 / 3.0);

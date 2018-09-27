@@ -230,7 +230,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       for (CoPPointName pointName : CoPPointName.values)
       {
-         CoPPointPlanningParameters copParameters = new CoPPointPlanningParameters(pointName);
+         CoPPointPlanningParameters copParameters = new CoPPointPlanningParameters();
 
          YoDouble maxCoPOffset = new YoDouble(fullPrefix + "maxCoPForwardOffset" + pointName.toString(), registry);
          YoDouble minCoPOffset = new YoDouble(fullPrefix + "minCoPForwardOffset" + pointName.toString(), registry);
@@ -310,25 +310,13 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       orderOfSplineInterpolation.set(parameters.getOrderOfCoPInterpolation());
       percentageChickenSupport.set(0.5);
 
-      EnumMap<CoPPointName, CoPSupportPolygonNames> copSupportPolygon = parameters.getSupportPolygonNames();
-      EnumMap<CoPPointName, Boolean> isConstrainedToSupportPolygonFlags = parameters.getIsConstrainedToSupportPolygonFlags();
-      EnumMap<CoPPointName, Boolean> isConstrainedToMinMaxFlags = parameters.getIsConstrainedToMinMaxFlags();
       EnumMap<CoPPointName, Double> stepLengthToCoPOffsetFactors = parameters.getStepLengthToCoPOffsetFactors();
-      EnumMap<CoPPointName, CoPSupportPolygonNames> stepLengthOffsetReferencePolygons = parameters.getStepLengthCoPOffsetPolygons();
 
       for (CoPPointName copPointName : CoPPointName.values)
       {
          CoPPointPlanningParameters copPointParameters = copPointParametersMap.get(copPointName);
-         if (copSupportPolygon.containsKey(copPointName))
-            copPointParameters.setSupportPolygonName(copSupportPolygon.get(copPointName));
-         if (isConstrainedToSupportPolygonFlags.containsKey(copPointName))
-            copPointParameters.setIsConstrainedToSupportPolygon(isConstrainedToSupportPolygonFlags.get(copPointName));
-         if (isConstrainedToMinMaxFlags.containsKey(copPointName))
-            copPointParameters.setIsConstrainedToMinMax(isConstrainedToMinMaxFlags.get(copPointName));
          if (stepLengthToCoPOffsetFactors.containsKey(copPointName))
             copPointParameters.setStepLengthToCoPOffsetFactor(stepLengthToCoPOffsetFactors.get(copPointName));
-         if (stepLengthOffsetReferencePolygons.containsKey(copPointName))
-            copPointParameters.setStepLengthOffsetPolygon(stepLengthOffsetReferencePolygons.get(copPointName));
       }
 
       this.entryCoPName = parameters.getEntryCoPName();
