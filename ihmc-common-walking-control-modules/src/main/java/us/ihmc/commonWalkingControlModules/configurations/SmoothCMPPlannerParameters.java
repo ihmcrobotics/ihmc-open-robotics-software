@@ -163,11 +163,6 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
       return exitCoPName;
    }
 
-   public CoPPointName getEndCoPName()
-   {
-      return endCoPName;
-   }
-
    public CoPPointName[] getSwingCoPPointsToPlan()
    {
       return swingCopPointsToPlan;
