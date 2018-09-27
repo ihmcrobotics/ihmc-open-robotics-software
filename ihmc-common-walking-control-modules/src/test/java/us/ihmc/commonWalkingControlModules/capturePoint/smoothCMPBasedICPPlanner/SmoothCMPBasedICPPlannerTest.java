@@ -976,7 +976,12 @@ public class SmoothCMPBasedICPPlannerTest
          FootSpoof foot = feet.get(swingSide);
          foot.setSoleFrame(swingFootPose);
       }
+
       bipedSupportPolygons.updateUsingContactStates(contactStates);
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         bipedSupportPolygons.getSoleZUpFrames().get(robotSide).update();
+      }
    }
 
    private void simulateOneTickAndAssertSamePlan(SmoothCMPBasedICPPlanner planner1, SmoothCMPBasedICPPlanner planner2)
