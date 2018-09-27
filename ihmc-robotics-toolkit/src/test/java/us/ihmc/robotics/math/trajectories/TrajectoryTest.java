@@ -482,17 +482,17 @@ public class TrajectoryTest
       int numTrials = 9;
       for (int i = 0; i < numTrials; i++)
       {
-         double scaleX0 = 1.0 / Math.random(), scaleXf = 1.0 / Math.random();
-         double scaleY0 = 1.0 / Math.random(), scaleYf = 1.0 / Math.random();
-         double scaleDY0 = 1.0 / Math.random(), scaleDYf = 1.0 / Math.random();
+         double scaleX0 = 1.0 / random.nextDouble(), scaleXf = 1.0 / random.nextDouble();
+         double scaleY0 = 1.0 / random.nextDouble(), scaleYf = 1.0 / random.nextDouble();
+         double scaleDY0 = 1.0 / random.nextDouble(), scaleDYf = 1.0 / random.nextDouble();
 
-         double x0 = Math.signum(Math.random()) * Math.random() * scaleX0, xf = x0 + Math.random() * scaleXf;
-         double y0 = Math.signum(Math.random()) * Math.random() * scaleY0, yf = Math.signum(Math.random()) * Math.random() * scaleYf;
-         double dy0 = Math.signum(Math.random()) * Math.random() * scaleDY0, dyf = Math.signum(Math.random()) * Math.random() * scaleDYf;
+         double x0 = Math.signum(random.nextDouble()) * random.nextDouble() * scaleX0, xf = x0 + random.nextDouble() * scaleXf;
+         double y0 = Math.signum(random.nextDouble()) * random.nextDouble() * scaleY0, yf = Math.signum(random.nextDouble()) * random.nextDouble() * scaleYf;
+         double dy0 = Math.signum(random.nextDouble()) * random.nextDouble() * scaleDY0, dyf = Math.signum(random.nextDouble()) * random.nextDouble() * scaleDYf;
 
          cubic.setCubic(x0, xf, y0, dy0, yf, dyf);
 
-         double x = Math.random() * (xf - x0);
+         double x = random.nextDouble() * (xf - x0);
 
          compareXPowersDerivativesVector(cubic, x);
       }
@@ -588,6 +588,8 @@ public class TrajectoryTest
    @Test(timeout = 30000)
    public void testDerivativeVersionsCubic()
    {
+      Random random = new Random(2358724);
+
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
       int numberOfCoefficients = 4;
       Trajectory cubic = new Trajectory(numberOfCoefficients);
@@ -595,17 +597,17 @@ public class TrajectoryTest
       int numTrials = 9;
       for (int i = 0; i < numTrials; i++)
       {
-         double scaleX0 = 1.0 / Math.random(), scaleXf = 1.0 / Math.random();
-         double scaleY0 = 1.0 / Math.random(), scaleYf = 1.0 / Math.random();
-         double scaleDY0 = 1.0 / Math.random(), scaleDYf = 1.0 / Math.random();
+         double scaleX0 = 1.0 / random.nextDouble(), scaleXf = 1.0 / random.nextDouble();
+         double scaleY0 = 1.0 / random.nextDouble(), scaleYf = 1.0 / random.nextDouble();
+         double scaleDY0 = 1.0 / random.nextDouble(), scaleDYf = 1.0 / random.nextDouble();
 
-         double x0 = Math.signum(Math.random()) * Math.random() * scaleX0, xf = x0 + Math.random() * scaleXf;
-         double y0 = Math.signum(Math.random()) * Math.random() * scaleY0, yf = Math.signum(Math.random()) * Math.random() * scaleYf;
-         double dy0 = Math.signum(Math.random()) * Math.random() * scaleDY0, dyf = Math.signum(Math.random()) * Math.random() * scaleDYf;
+         double x0 = Math.signum(random.nextDouble()) * random.nextDouble() * scaleX0, xf = x0 + random.nextDouble() * scaleXf;
+         double y0 = Math.signum(random.nextDouble()) * random.nextDouble() * scaleY0, yf = Math.signum(random.nextDouble()) * random.nextDouble() * scaleYf;
+         double dy0 = Math.signum(random.nextDouble()) * random.nextDouble() * scaleDY0, dyf = Math.signum(random.nextDouble()) * random.nextDouble() * scaleDYf;
 
          cubic.setCubic(x0, xf, y0, dy0, yf, dyf);
 
-         double x = Math.random() * (xf - x0);
+         double x = random.nextDouble() * (xf - x0);
 
          compareDerivativeVersions(cubic, x);
       }
