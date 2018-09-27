@@ -806,7 +806,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       copLocationWaypoint.addWaypoint(CoPPointName.FLAMINGO_STANCE_FINAL_COP, getSwingSegmentTimes(2, 0), tempPointForCoPCalculation);
    }
 
-
    private void computeExitCoPPointLocationForPreviousPlan(FramePoint3D exitCoPFromLastPlanToPack, CoPPointPlanningParameters copPointParameters,
                                                            RobotSide swingSide, boolean transferringToSameSideAsStartingFrom)
    {
@@ -901,16 +900,13 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       copLocationToPack.changeFrame(worldFrame);
    }
 
-   private void computeFlamingoStanceCoPLocation(FramePoint3D copLocationToPack, CoPPointPlanningParameters copPointParameters, RobotSide supportSide,
-                                                 int footstepIndex)
+   private void computeFlamingoStanceCoPLocation(FramePoint3D copLocationToPack, CoPPointPlanningParameters copPointParameters, RobotSide supportSide, int footstepIndex)
    {
       convertToFramePointRetainingZ(copLocationToPack, transferringToPolygon.get(footstepIndex).getCentroid(),
                                     transferringToPolygon.get(footstepIndex).getReferenceFrame());
 
       FrameVector2DReadOnly copOffset = copPointParameters.getCoPOffsets(supportSide);
-      double copXOffset = MathTools
-            .clamp(copOffset.getX(), copPointParameters.getMinCoPOffset().getDoubleValue(), copPointParameters.getMaxCoPOffset().getDoubleValue());
-
+      double copXOffset = MathTools.clamp(copOffset.getX(), copPointParameters.getMinCoPOffset().getDoubleValue(), copPointParameters.getMaxCoPOffset().getDoubleValue());
       copLocationToPack.add(copXOffset, copOffset.getY(), 0.0);
 
       constrainToPolygon(copLocationToPack, transferringToPolygon.get(footstepIndex), safeDistanceFromCoPToSupportEdges.getDoubleValue());
