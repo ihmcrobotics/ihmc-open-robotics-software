@@ -72,7 +72,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final YoDouble footstepLengthThresholdToPutExitCoPOnToes;
    private final YoDouble exitCoPForwardSafetyMarginOnToes;
    private final YoDouble percentageChickenSupport;
-   private CoPPointName entryCoPName;
    private CoPPointName exitCoPName;
    private final YoDouble additionalTimeForFinalTransfer;
 
@@ -306,7 +305,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             copPointParameters.setStepLengthToCoPOffsetFactor(stepLengthToCoPOffsetFactors.get(copPointName));
       }
 
-      this.entryCoPName = parameters.getEntryCoPName();
       this.exitCoPName = parameters.getExitCoPName();
 
       this.footstepHeightThresholdToPutExitCoPOnToesSteppingDown.set(parameters.getStepHeightThresholdForExitCoPOnToesWhenSteppingDown());
@@ -419,7 +417,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       {
          CoPPointsInFoot copPointsInFoot = copLocationWaypoints.get(i);
          List<CoPPointName> copPointNames = copPointsInFoot.getCoPPointList();
-         int transferEndIndex = CoPPlanningTools.getCoPPointIndex(copPointNames, entryCoPName);
+         int transferEndIndex = CoPPlanningTools.getCoPPointIndex(copPointNames, CoPPointName.HEEL_COP);
          if (transferEndIndex == -1)
          {
             transferEndIndex = copPointNames.size();
@@ -1159,9 +1157,14 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     */
    private void constrainToPolygon(FramePoint3D copPointToConstrain, FrameConvexPolygon2DReadOnly constraintPolygon, double safeDistanceFromSupportPolygonEdges)
    {
+      tempFramePoint2d.setIncludingFrame(copPointToConstrain);
+
+      // don't need to do anything if it's already inside
+      if (constraintPolygon.signedDistance(tempFramePoint2d) <= -safeDistanceFromSupportPolygonEdges)
+         return;
+
       polygonScaler.scaleConvexPolygon(constraintPolygon, safeDistanceFromSupportPolygonEdges, tempPolygon);
       copPointToConstrain.changeFrame(constraintPolygon.getReferenceFrame());
-      tempFramePoint2d.setIncludingFrame(copPointToConstrain);
       tempPolygon.orthogonalProjection(tempFramePoint2d);
       copPointToConstrain.setIncludingFrame(tempFramePoint2d, 0.0);
    }
@@ -1362,7 +1365,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             }
             currentPoint.getPosition(tempFramePoint1);
 
-            if (copList.get(segmentIndex) == entryCoPName)
+            if (copList.get(segmentIndex) == CoPPointName.HEEL_COP)
             {
                trajectoryType = WalkingTrajectoryType.SWING;
                timeInState = 0.0;

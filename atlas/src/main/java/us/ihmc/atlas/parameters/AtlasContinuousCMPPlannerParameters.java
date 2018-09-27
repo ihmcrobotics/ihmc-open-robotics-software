@@ -47,7 +47,7 @@ public class AtlasContinuousCMPPlannerParameters extends ContinuousCMPICPPlanner
       exitOffset.scale(scale);
 
       copOffsets = new EnumMap<>(CoPPointName.class);
-      copOffsets.put(entryCoPName, entryOffset);
+      copOffsets.put(CoPPointName.HEEL_COP, entryOffset);
       copOffsets.put(exitCoPName, exitOffset);
 
       return copOffsets;
@@ -72,13 +72,6 @@ public class AtlasContinuousCMPPlannerParameters extends ContinuousCMPICPPlanner
 
    /** {@inheritDoc} */
    @Override
-   public CoPPointName getEntryCoPName()
-   {
-      return entryCoPName;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public EnumMap<CoPPointName, Vector2D> getCoPForwardOffsetBoundsInFoot()
    {
       if (copForwardOffsetBounds != null)
@@ -91,7 +84,7 @@ public class AtlasContinuousCMPPlannerParameters extends ContinuousCMPICPPlanner
       exitBounds.scale(scale);
 
       copForwardOffsetBounds = new EnumMap<>(CoPPointName.class);
-      copForwardOffsetBounds.put(entryCoPName, entryBounds);
+      copForwardOffsetBounds.put(CoPPointName.HEEL_COP, entryBounds);
       copForwardOffsetBounds.put(exitCoPName,exitBounds);
 
       return copForwardOffsetBounds;

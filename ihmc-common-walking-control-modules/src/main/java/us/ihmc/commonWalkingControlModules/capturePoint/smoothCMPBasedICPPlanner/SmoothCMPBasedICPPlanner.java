@@ -659,7 +659,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    {
       List<CoPPointsInFoot> plannedCoPWaypoints = referenceCoPGenerator.getWaypoints();
       CoPPointsInFoot copPointsInFoot = plannedCoPWaypoints.get(1);
-      copPointsInFoot.get(copPointsInFoot.getCoPPointList().size() - 1).getPosition(exitCMPToPack);
+      copPointsInFoot.get(copPointsInFoot.getNumberOfCoPPoints() - 1).getPosition(exitCMPToPack);
    }
 
    /** {@inheritDoc} */
