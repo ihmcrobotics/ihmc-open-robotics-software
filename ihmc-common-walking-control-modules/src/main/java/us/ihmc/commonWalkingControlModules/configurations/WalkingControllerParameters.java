@@ -50,6 +50,18 @@ public abstract class WalkingControllerParameters
    public abstract double getOmega0();
 
    /**
+    * Specifies if the desired ground reaction force for the force that is about to swing should
+    * smoothly be brought to zero by adding a inequality constraint on the z-force.
+    * 
+    * @return whether to perform smooth unloading before swing or not. Default value is
+    *         {@code false}.
+    */
+   public boolean enforceSmoothFootUnloading()
+   {
+      return false;
+   }
+
+   /**
     * Specifies if the controller should attempt at detecting foot slipping during toe off when
     * walking. If foot slip is detected the swing is started right away.
     *
