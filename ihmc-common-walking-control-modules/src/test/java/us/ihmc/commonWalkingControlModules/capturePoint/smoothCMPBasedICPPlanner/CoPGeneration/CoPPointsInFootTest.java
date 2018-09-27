@@ -20,7 +20,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -70,11 +69,11 @@ public class CoPPointsInFootTest
    public void testAddCoPPointToList()
    {
       assertTrue(copPointsInFoot.isEmpty());
-      copPointsInFoot.addWayPointName(CoPPointName.BALL_COP);
-      copPointsInFoot.addWayPointName(CoPPointName.HEEL_COP);
+      copPointsInFoot.addWayPointName(CoPPointName.MIDFOOT_COP);
+      copPointsInFoot.addWayPointName(CoPPointName.ENTRY_COP);
       assertEquals(2, copPointsInFoot.getNumberOfCoPPoints());
-      assertEquals(CoPPointName.BALL_COP, copPointsInFoot.getCoPPointList().get(0));
-      assertEquals(CoPPointName.HEEL_COP, copPointsInFoot.getCoPPointList().get(1));
+      assertEquals(CoPPointName.MIDFOOT_COP, copPointsInFoot.getCoPPointList().get(0));
+      assertEquals(CoPPointName.ENTRY_COP, copPointsInFoot.getCoPPointList().get(1));
       copPointsInFoot.reset();
       assertTrue(copPointsInFoot.getCoPPointList().isEmpty());
    }
@@ -85,7 +84,7 @@ public class CoPPointsInFootTest
    {
       FramePoint3D testLocation = new FramePoint3D(footSpoof.getSoleFrame(), Math.random(), Math.random(), Math.random());
       assertTrue(copPointsInFoot.isEmpty());
-      copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.2, testLocation);
+      copPointsInFoot.addWaypoint(CoPPointName.MIDFOOT_COP, 0.2, testLocation);
       assertEquals(1, copPointsInFoot.getCoPPointList().size());
 
       testLocation.changeFrame(worldFrame);
@@ -101,8 +100,8 @@ public class CoPPointsInFootTest
       YoFramePoint3D testLocation2 = new YoFramePoint3D("TestLocation2", footSpoof.getSoleFrame(), null);
       testLocation1.set(Math.random(), Math.random(), Math.random());
       testLocation2.set(Math.random(), Math.random(), Math.random());
-      copPointsInFoot.addWaypoint(CoPPointName.HEEL_COP, 0.87, testLocation1);
-      copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.12, testLocation2);
+      copPointsInFoot.addWaypoint(CoPPointName.ENTRY_COP, 0.87, testLocation1);
+      copPointsInFoot.addWaypoint(CoPPointName.MIDFOOT_COP, 0.12, testLocation2);
       assertEquals(2, copPointsInFoot.getCoPPointList().size());
 
       FramePoint3D pointToTest = new FramePoint3D(testLocation1);
@@ -125,8 +124,8 @@ public class CoPPointsInFootTest
       testLocation1.setPosition(new FramePoint3D(footSpoof.getSoleFrame(), Math.random(), Math.random(), Math.random()));
       testLocation2.changeFrame(footSpoof.getSoleFrame());
       testLocation2.setPosition(new FramePoint3D(footSpoof.getSoleFrame(), Math.random(), Math.random(), Math.random()));
-      copPointsInFoot.addWaypoint(CoPPointName.HEEL_COP, 0.87, testLocation1);
-      copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.12, testLocation2);
+      copPointsInFoot.addWaypoint(CoPPointName.ENTRY_COP, 0.87, testLocation1);
+      copPointsInFoot.addWaypoint(CoPPointName.MIDFOOT_COP, 0.12, testLocation2);
       assertEquals(2, copPointsInFoot.getCoPPointList().size());
 
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(testLocation1.getPosition(), copPointsInFoot.get(0).getPosition(), epsilon);
@@ -160,8 +159,8 @@ public class CoPPointsInFootTest
    public void testChangeFrame()
    {
       copPointsInFoot.setFeetLocation(new FramePoint3D(worldFrame, 0.2, 0.1, 0.1), new FramePoint3D(worldFrame, 0.2, -0.1, 0.1));
-      copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.2, new FramePoint3D(worldFrame, 0.2, 0.15, 0.1));
-      copPointsInFoot.addWaypoint(CoPPointName.HEEL_COP, 0.8, new FramePoint3D(worldFrame, 0.15, -0.05, 0.11));
+      copPointsInFoot.addWaypoint(CoPPointName.MIDFOOT_COP, 0.2, new FramePoint3D(worldFrame, 0.2, 0.15, 0.1));
+      copPointsInFoot.addWaypoint(CoPPointName.ENTRY_COP, 0.8, new FramePoint3D(worldFrame, 0.15, -0.05, 0.11));
       copPointsInFoot.changeFrame(footSpoof.getSoleFrame());
       FramePoint3D tempFramePoint = new FramePoint3D();
       copPointsInFoot.getSupportFootLocation(tempFramePoint);
@@ -190,8 +189,8 @@ public class CoPPointsInFootTest
       double newFrameOriginZ = 1;
 
       copPointsInFoot.setFeetLocation(new FramePoint3D(worldFrame, 0.2, 0.1, 0.1), new FramePoint3D(worldFrame, 0.2, -0.1, 0.1));
-      copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 0.2, new FramePoint3D(worldFrame, 0.2, 0.15, 0.1));
-      copPointsInFoot.addWaypoint(CoPPointName.HEEL_COP, 0.8, new FramePoint3D(worldFrame, 0.15, -0.05, 0.11));
+      copPointsInFoot.addWaypoint(CoPPointName.MIDFOOT_COP, 0.2, new FramePoint3D(worldFrame, 0.2, 0.15, 0.1));
+      copPointsInFoot.addWaypoint(CoPPointName.ENTRY_COP, 0.8, new FramePoint3D(worldFrame, 0.15, -0.05, 0.11));
       ReferenceFrame newFrameToRegister = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("RandomFrameToRegister", worldFrame,
                                                                                                          new RigidBodyTransform(new Quaternion(),
                                                                                                                                 new FrameVector3D(worldFrame,
@@ -227,7 +226,7 @@ public class CoPPointsInFootTest
       copPointsInFoot.setupVisualizers(dummyGraphicsList, dummyArtifactList, 0.05);
       assertEquals(dummyArtifactList.getArtifacts().size(), 10);
       assertEquals(dummyGraphicsList.getYoGraphics().size(), 10);
-      copPointsInFoot.addWaypoint(CoPPointName.BALL_COP, 1.0, new FramePoint3D(footSpoof.getSoleFrame(), 1.0, 2.1, 3.1));
+      copPointsInFoot.addWaypoint(CoPPointName.MIDFOOT_COP, 1.0, new FramePoint3D(footSpoof.getSoleFrame(), 1.0, 2.1, 3.1));
 
       YoGraphicPosition graphic = (YoGraphicPosition) dummyGraphicsList.getYoGraphics().get(0);
       assertEquals(1.0 - xToAnkle, graphic.getX(), 1e-5);

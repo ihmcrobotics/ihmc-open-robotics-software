@@ -193,7 +193,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       CoPPointName exitCoPName = icpPlannerParameters.getExitCoPName();
 
       EnumMap<CoPPointName, Vector2D> cmpForwardOffsetBounds = icpPlannerParameters.getCoPForwardOffsetBoundsInFoot();
-      Vector2D entryCMPForwardOffsetBounds = cmpForwardOffsetBounds.get(CoPPointName.HEEL_COP);
+      Vector2D entryCMPForwardOffsetBounds = cmpForwardOffsetBounds.get(CoPPointName.ENTRY_COP);
       Vector2D exitCMPForwardOffsetBounds = cmpForwardOffsetBounds.get(exitCoPName);
 
       minForwardEntryCMPOffset.set(entryCMPForwardOffsetBounds.getX());
@@ -205,7 +205,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       stepLengthToCMPOffsetFactor.set(icpPlannerParameters.getStepLengthToCoPOffsetFactors().get(exitCoPName));
 
       EnumMap<CoPPointName, Vector2D> cmpOffsets = icpPlannerParameters.getCoPOffsetsInFootFrame();
-      Vector2D entryCMPOffsets = cmpOffsets.get(CoPPointName.HEEL_COP);
+      Vector2D entryCMPOffsets = cmpOffsets.get(CoPPointName.ENTRY_COP);
       Vector2D exitCMPOffsets = cmpOffsets.get(exitCoPName);
       double entryCMPForwardOffset = entryCMPOffsets.getX();
       double entryCMPInsideOffset = entryCMPOffsets.getY();

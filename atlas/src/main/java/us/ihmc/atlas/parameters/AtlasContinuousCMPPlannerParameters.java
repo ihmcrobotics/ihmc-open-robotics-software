@@ -4,9 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 
 /** {@inheritDoc} */
 public class AtlasContinuousCMPPlannerParameters extends ContinuousCMPICPPlannerParameters
@@ -47,7 +45,7 @@ public class AtlasContinuousCMPPlannerParameters extends ContinuousCMPICPPlanner
       exitOffset.scale(scale);
 
       copOffsets = new EnumMap<>(CoPPointName.class);
-      copOffsets.put(CoPPointName.HEEL_COP, entryOffset);
+      copOffsets.put(CoPPointName.ENTRY_COP, entryOffset);
       copOffsets.put(exitCoPName, exitOffset);
 
       return copOffsets;
@@ -84,7 +82,7 @@ public class AtlasContinuousCMPPlannerParameters extends ContinuousCMPICPPlanner
       exitBounds.scale(scale);
 
       copForwardOffsetBounds = new EnumMap<>(CoPPointName.class);
-      copForwardOffsetBounds.put(CoPPointName.HEEL_COP, entryBounds);
+      copForwardOffsetBounds.put(CoPPointName.ENTRY_COP, entryBounds);
       copForwardOffsetBounds.put(exitCoPName,exitBounds);
 
       return copForwardOffsetBounds;

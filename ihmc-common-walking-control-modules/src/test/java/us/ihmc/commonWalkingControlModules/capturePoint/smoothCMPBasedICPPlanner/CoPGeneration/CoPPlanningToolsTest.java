@@ -18,15 +18,15 @@ public class CoPPlanningToolsTest
    @Test(timeout = 30000)
    public void testArrayLinearSearch()
    {
-      CoPPointName[] list = new CoPPointName[]{CoPPointName.MIDFEET_COP, CoPPointName.HEEL_COP, CoPPointName.BALL_COP, CoPPointName.TOE_COP, CoPPointName.TOE_COP};
-      assertTrue(CoPPlanningTools.getCoPPointIndex(list, CoPPointName.BALL_COP) == 2);
+      CoPPointName[] list = new CoPPointName[]{CoPPointName.MIDFEET_COP, CoPPointName.ENTRY_COP, CoPPointName.MIDFOOT_COP, CoPPointName.EXIT_COP, CoPPointName.EXIT_COP};
+      assertTrue(CoPPlanningTools.getCoPPointIndex(list, CoPPointName.MIDFOOT_COP) == 2);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testArrayLinearSearchMissingPoint()
    {
-      CoPPointName[] list = new CoPPointName[]{CoPPointName.HEEL_COP, CoPPointName.BALL_COP, CoPPointName.TOE_COP, CoPPointName.TOE_COP};
+      CoPPointName[] list = new CoPPointName[]{CoPPointName.ENTRY_COP, CoPPointName.MIDFOOT_COP, CoPPointName.EXIT_COP, CoPPointName.EXIT_COP};
       assertTrue(CoPPlanningTools.getCoPPointIndex(list, CoPPointName.MIDFEET_COP) == -1);
    }
 
@@ -36,11 +36,11 @@ public class CoPPlanningToolsTest
    {
       ArrayList<CoPPointName> list = new ArrayList<>();
       list.add(CoPPointName.MIDFEET_COP);
-      list.add(CoPPointName.HEEL_COP);
-      list.add(CoPPointName.BALL_COP);
-      list.add(CoPPointName.TOE_COP);
-      list.add(CoPPointName.TOE_COP);
-      assertTrue(CoPPlanningTools.getCoPPointIndex(list, CoPPointName.HEEL_COP) == 1);
+      list.add(CoPPointName.ENTRY_COP);
+      list.add(CoPPointName.MIDFOOT_COP);
+      list.add(CoPPointName.EXIT_COP);
+      list.add(CoPPointName.EXIT_COP);
+      assertTrue(CoPPlanningTools.getCoPPointIndex(list, CoPPointName.ENTRY_COP) == 1);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -49,11 +49,11 @@ public class CoPPlanningToolsTest
    {
       ArrayList<CoPPointName> list = new ArrayList<>();
       list.add(CoPPointName.MIDFEET_COP);
-      list.add(CoPPointName.HEEL_COP);
-      list.add(CoPPointName.BALL_COP);
-      list.add(CoPPointName.BALL_COP);
+      list.add(CoPPointName.ENTRY_COP);
+      list.add(CoPPointName.MIDFOOT_COP);
+      list.add(CoPPointName.MIDFOOT_COP);
       list.add(CoPPointName.MIDFEET_COP);
-      assertTrue(CoPPlanningTools.getCoPPointIndex(list, CoPPointName.TOE_COP) == -1);
+      assertTrue(CoPPlanningTools.getCoPPointIndex(list, CoPPointName.EXIT_COP) == -1);
    }
 
 }

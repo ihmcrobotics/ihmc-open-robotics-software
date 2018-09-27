@@ -149,7 +149,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
          // at the start of swing, for some reason the copLocation corresponding to the upcoming swing is at index 1
          CoPPointsInFoot pointsInFoot = copLocations.get(1);
 
-         double swingPhaseDuration = getPhaseDuration(WalkingTrajectoryType.SWING, pointsInFoot, CoPPointName.HEEL_COP);
+         double swingPhaseDuration = getPhaseDuration(WalkingTrajectoryType.SWING, pointsInFoot, CoPPointName.ENTRY_COP);
          momentumTrajectoryHandler.getAngularMomentumTrajectory(currentTime, currentTime + swingPhaseDuration, waypointsPerWalkingPhase, waypoints);
          setSubTrajectoryFromWaypoints(swingPhaseDuration, swingTrajectories.get(0), startingTrajectoryType);
          accumulatedTime += swingPhaseDuration;
@@ -163,14 +163,14 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       {
          CoPPointsInFoot pointsInFoot = copLocations.get(stepIndex + 1);
 
-         double transferPhaseDuration = getPhaseDuration(WalkingTrajectoryType.TRANSFER, pointsInFoot, CoPPointName.HEEL_COP);
+         double transferPhaseDuration = getPhaseDuration(WalkingTrajectoryType.TRANSFER, pointsInFoot, CoPPointName.ENTRY_COP);
          momentumTrajectoryHandler
                .getAngularMomentumTrajectory(currentTime + accumulatedTime, currentTime + accumulatedTime + transferPhaseDuration, waypointsPerWalkingPhase,
                                              waypoints);
          setSubTrajectoryFromWaypoints(transferPhaseDuration, transferTrajectories.get(stepIndex), WalkingTrajectoryType.TRANSFER);
          accumulatedTime += transferPhaseDuration;
 
-         double swingPhaseDuration = getPhaseDuration(WalkingTrajectoryType.SWING, pointsInFoot, CoPPointName.HEEL_COP);
+         double swingPhaseDuration = getPhaseDuration(WalkingTrajectoryType.SWING, pointsInFoot, CoPPointName.ENTRY_COP);
          momentumTrajectoryHandler
                .getAngularMomentumTrajectory(currentTime + accumulatedTime, currentTime + accumulatedTime + swingPhaseDuration, waypointsPerWalkingPhase,
                                              waypoints);
@@ -180,7 +180,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
       // handle terminal transfer
       CoPPointsInFoot pointsInFoot = copLocations.get(stepIndex + 1);
-      double finalTransferDuration = getPhaseDuration(WalkingTrajectoryType.TRANSFER, pointsInFoot, CoPPointName.HEEL_COP);
+      double finalTransferDuration = getPhaseDuration(WalkingTrajectoryType.TRANSFER, pointsInFoot, CoPPointName.ENTRY_COP);
       momentumTrajectoryHandler
             .getAngularMomentumTrajectory(currentTime + accumulatedTime, currentTime + accumulatedTime + finalTransferDuration, waypointsPerWalkingPhase,
                                           waypoints);

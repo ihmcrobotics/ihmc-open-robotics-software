@@ -51,26 +51,26 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
    {
       super(modelScale);
 
-      this.swingCopPointsToPlan = new CoPPointName[] {CoPPointName.BALL_COP, CoPPointName.TOE_COP};
-      this.transferCoPPointsToPlan = new CoPPointName[] {CoPPointName.MIDFEET_COP, CoPPointName.HEEL_COP};
-      this.exitCoPName = CoPPointName.TOE_COP;
-      this.entryCoPName = CoPPointName.HEEL_COP;
+      this.swingCopPointsToPlan = new CoPPointName[] {CoPPointName.MIDFOOT_COP, CoPPointName.EXIT_COP};
+      this.transferCoPPointsToPlan = new CoPPointName[] {CoPPointName.MIDFEET_COP, CoPPointName.ENTRY_COP};
+      this.exitCoPName = CoPPointName.EXIT_COP;
+      this.entryCoPName = CoPPointName.ENTRY_COP;
       this.endCoPName = CoPPointName.MIDFEET_COP;
 
       stepLengthToCoPOffsetFactor.put(CoPPointName.MIDFEET_COP, 0.0);
-      stepLengthToCoPOffsetFactor.put(CoPPointName.HEEL_COP, 1.0 / 3.0);
-      stepLengthToCoPOffsetFactor.put(CoPPointName.BALL_COP, 1.0 / 8.0);
-      stepLengthToCoPOffsetFactor.put(CoPPointName.TOE_COP, 1.0 / 3.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.ENTRY_COP, 1.0 / 3.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.MIDFOOT_COP, 1.0 / 8.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.EXIT_COP, 1.0 / 3.0);
 
       copOffsetsInFootFrame.put(CoPPointName.MIDFEET_COP, new Vector2D(0.0, 0.0));
-      copOffsetsInFootFrame.put(CoPPointName.HEEL_COP, new Vector2D(0.0, -0.005));
-      copOffsetsInFootFrame.put(CoPPointName.BALL_COP, new Vector2D(0.0, 0.01));
-      copOffsetsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.025));
+      copOffsetsInFootFrame.put(CoPPointName.ENTRY_COP, new Vector2D(0.0, -0.005));
+      copOffsetsInFootFrame.put(CoPPointName.MIDFOOT_COP, new Vector2D(0.0, 0.01));
+      copOffsetsInFootFrame.put(CoPPointName.EXIT_COP, new Vector2D(0.0, 0.025));
 
       copOffsetBoundsInFootFrame.put(CoPPointName.MIDFEET_COP, new Vector2D(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
-      copOffsetBoundsInFootFrame.put(CoPPointName.HEEL_COP, new Vector2D(-0.04, 0.03));
-      copOffsetBoundsInFootFrame.put(CoPPointName.BALL_COP, new Vector2D(0.0, 0.055));
-      copOffsetBoundsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.08));
+      copOffsetBoundsInFootFrame.put(CoPPointName.ENTRY_COP, new Vector2D(-0.04, 0.03));
+      copOffsetBoundsInFootFrame.put(CoPPointName.MIDFOOT_COP, new Vector2D(0.0, 0.055));
+      copOffsetBoundsInFootFrame.put(CoPPointName.EXIT_COP, new Vector2D(0.0, 0.08));
    }
 
    public boolean planSwingAngularMomentum()
