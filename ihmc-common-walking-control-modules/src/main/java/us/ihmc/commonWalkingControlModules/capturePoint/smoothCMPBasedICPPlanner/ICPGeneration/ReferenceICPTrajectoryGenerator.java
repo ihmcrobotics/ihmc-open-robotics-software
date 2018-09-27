@@ -237,15 +237,15 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          { // called when moving
             switch (order)
             {
-//            case 0:
-//               icpQuantityInitialCondition.set(icpPositionDesiredCurrent);
-//               break;
-//            case 1:
-//               icpQuantityInitialCondition.set(icpVelocityDesiredCurrent);
-//               break;
-//            case 2:
-//               icpQuantityInitialCondition.set(icpAccelerationDesiredCurrent);
-//               break;
+            //            case 0:
+            //               icpQuantityInitialCondition.set(icpPositionDesiredCurrent);
+            //               break;
+            //            case 1:
+            //               icpQuantityInitialCondition.set(icpVelocityDesiredCurrent);
+            //               break;
+            //            case 2:
+            //               icpQuantityInitialCondition.set(icpAccelerationDesiredCurrent);
+            //               break;
             default:
                icpToolbox
                      .calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0.getDoubleValue(), localTime, order, trajectories.get(currentTrajectoryIndex),
@@ -462,7 +462,10 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       if (calculatedInitialICPConditions.isEmpty())
       {
          positionToHoldByDefault.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-         setInitialICPConditions.add().set(positionToHoldByDefault);
+         if (positionToHoldByDefault.containsNaN())
+            setInitialICPConditions.add().setToZero();
+         else
+            setInitialICPConditions.add().set(positionToHoldByDefault);
       }
       {
          for (int i = 0; i < calculatedInitialICPConditions.size(); i++)
