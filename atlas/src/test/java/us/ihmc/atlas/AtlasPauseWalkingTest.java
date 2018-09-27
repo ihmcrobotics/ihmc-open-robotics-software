@@ -2,8 +2,6 @@ package us.ihmc.atlas;
 
 import org.junit.Test;
 
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarPauseWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -107,6 +105,22 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       super.testPauseWalking();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.SLOW)
+   @Test(timeout = 380000)
+   @Override
+   public void testTwoIndependentSteps()throws SimulationExceededMaximumTimeException
+   {
+      super.testTwoIndependentSteps();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.SLOW)
+   @Test(timeout = 380000)
+   @Override
+   public void testStartSecondStepWhileTransitioningToStand()throws SimulationExceededMaximumTimeException
+   {
+      super.testStartSecondStepWhileTransitioningToStand();
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 77.3)
    @Test(timeout = 390000)
    @Override
@@ -129,5 +143,12 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    public void testPauseWalkingForwardInitialTransfer() throws SimulationExceededMaximumTimeException
    {
       super.testPauseWalkingForwardInitialTransfer();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 100000)
+   public void testPauseWalkingInitialTransferOneStep() throws SimulationExceededMaximumTimeException
+   {
+      super.testPauseWalkingInitialTransferOneStep();
    }
 }

@@ -317,8 +317,11 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    {
       clearPlan();
 
+      previousTransferToSide.set(null);
+
       this.initialTime.set(initialTime);
       isInitialTransfer.set(isStanding.getBooleanValue());
+
       isStanding.set(true);
       isDoubleSupport.set(true);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
@@ -334,6 +337,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       this.initialTime.set(initialTime);
       isDoubleSupport.set(true);
       isInitialTransfer.set(isStanding.getBooleanValue());
+
+      if (isInitialTransfer.getBooleanValue())
+         previousTransferToSide.set(null);
+
       isStanding.set(false);
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
@@ -389,7 +396,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
             maintainContinuity && (adjustPlanForDSContinuity.getBooleanValue() || (adjustPlanForInitialDSContinuity.getBooleanValue() && (isStanding.getBooleanValue() || isInitialTransfer.getBooleanValue())));
       referenceCoPGenerator.setGoingToPerformDSSmoothingAdjustment(goingToPerformSmoothingAdjustment);
 
-      // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs      
+      // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs
       referenceCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), transferToSide, previousTransferToSide.getEnumValue());
       referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       referenceICPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
@@ -428,8 +435,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceICPGenerator.getICPPhaseEntryCornerPoints(icpPhaseEntryCornerPoints);
       referenceICPGenerator.getICPPhaseExitCornerPoints(icpPhaseExitCornerPoints);
       updateListeners();
-      // TODO implement requested hold position
-      // TODO implement is done walking
    }
 
    /** {@inheritDoc} */
