@@ -601,7 +601,7 @@ public class SphereControlToolbox
             Vector2D exitBounds = new Vector2D(-0.04, 0.08);
 
             copForwardOffsetBounds = new EnumMap<>(CoPPointName.class);
-            copForwardOffsetBounds.put(entryCoPName, entryBounds);
+            copForwardOffsetBounds.put(CoPPointName.ENTRY_COP, entryBounds);
             copForwardOffsetBounds.put(exitCoPName, exitBounds);
 
             return copForwardOffsetBounds;
@@ -614,13 +614,6 @@ public class SphereControlToolbox
             return exitCoPName;
          }
 
-         /**{@inheritDoc} */
-         @Override
-         public CoPPointName getEntryCoPName()
-         {
-            return entryCoPName;
-         }
-
          @Override
          public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
          {
@@ -630,8 +623,8 @@ public class SphereControlToolbox
             Vector2D exitOffset = new Vector2D(0.0, 0.015); //FIXME 0.025);
 
             copOffsets = new EnumMap<CoPPointName, Vector2D>(CoPPointName.class);
-            copOffsets.put(entryCoPName, entryOffset);
-            copOffsets.put(entryCoPName, exitOffset);
+            copOffsets.put(CoPPointName.ENTRY_COP, entryOffset);
+            copOffsets.put(exitCoPName, exitOffset);
 
             return copOffsets;
          }
