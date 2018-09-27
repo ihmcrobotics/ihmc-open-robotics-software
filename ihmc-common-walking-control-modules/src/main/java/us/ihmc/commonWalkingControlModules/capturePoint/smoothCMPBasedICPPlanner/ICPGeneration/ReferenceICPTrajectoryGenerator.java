@@ -455,11 +455,19 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       }
    }
 
-   public void setInitialConditionsForAdjustment()
+   public void setInitialConditionsForAdjustment(FramePoint3DReadOnly positionToHoldByDefault)
    {
       setInitialICPConditions.clear();
-      for (int i = 0; i < calculatedInitialICPConditions.size(); i++)
-         setInitialICPConditions.add().setIncludingFrame(calculatedInitialICPConditions.get(i));
+
+      if (calculatedInitialICPConditions.isEmpty())
+      {
+         positionToHoldByDefault.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+         setInitialICPConditions.add().set(positionToHoldByDefault);
+      }
+      {
+         for (int i = 0; i < calculatedInitialICPConditions.size(); i++)
+            setInitialICPConditions.add().setIncludingFrame(calculatedInitialICPConditions.get(i));
+      }
 
       if (calculatedInitialICPConditions.size() > 0)
          initialICPConditionForContinuity.set(calculatedInitialICPConditions.get(0));
