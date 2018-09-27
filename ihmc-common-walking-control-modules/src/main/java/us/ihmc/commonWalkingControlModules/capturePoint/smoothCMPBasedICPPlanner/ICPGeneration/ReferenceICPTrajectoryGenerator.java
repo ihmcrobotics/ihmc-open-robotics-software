@@ -381,12 +381,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          numberOfCoPSegmentsInCurrentPhase.set(numberOfCoPSegments);
 
       icpToolbox.computeDesiredCornerPoints(icpDesiredInitialPositionsFromCoPs, icpDesiredFinalPositionsFromCoPs, copTrajectories, omega0.getDoubleValue());
-
-      if (isInitialTransfer.getBooleanValue())
-      {
-         getICPInitialConditionsForAdjustmentFromCoPs(localTimeInCurrentPhase.getDoubleValue(), -1);
-         setInitialConditionsForAdjustment();
-      }
    }
 
    public void initializeForSwingFromCoPs(List<? extends SegmentedFrameTrajectory3D> transferCoPTrajectories,
