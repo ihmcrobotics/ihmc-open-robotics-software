@@ -69,8 +69,8 @@ public class CoPPointsInFootTest
    public void testAddCoPPointToList()
    {
       assertTrue(copPointsInFoot.isEmpty());
-      copPointsInFoot.addWayPointName(CoPPointName.MIDFOOT_COP);
-      copPointsInFoot.addWayPointName(CoPPointName.ENTRY_COP);
+      copPointsInFoot.addWaypoint(CoPPointName.MIDFOOT_COP, 0.0, new FramePoint3D());
+      copPointsInFoot.addWaypoint(CoPPointName.ENTRY_COP, 0.1, new FramePoint3D());
       assertEquals(2, copPointsInFoot.getNumberOfCoPPoints());
       assertEquals(CoPPointName.MIDFOOT_COP, copPointsInFoot.getCoPPointList().get(0));
       assertEquals(CoPPointName.ENTRY_COP, copPointsInFoot.getCoPPointList().get(1));
