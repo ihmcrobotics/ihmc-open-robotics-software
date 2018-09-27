@@ -68,10 +68,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final YoBoolean doContinuousReplanningForTransfer = new YoBoolean("doContinuousReplanningForTransfer", registry);
    private final YoBoolean doContinuousReplanningForSwing = new YoBoolean("doContinuousReplanningForSwing", registry);
 
-   final ReferenceCoPTrajectoryGenerator referenceCoPGenerator;
+   private final ReferenceCoPTrajectoryGenerator referenceCoPGenerator;
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
-   final ReferenceICPTrajectoryGenerator referenceICPGenerator;
-   final ReferenceCoMTrajectoryGenerator referenceCoMGenerator;
+   private final ReferenceICPTrajectoryGenerator referenceICPGenerator;
+   private final ReferenceCoMTrajectoryGenerator referenceCoMGenerator;
    private final AngularMomentumTrajectoryMultiplexer angularMomentumTrajectoryGenerator;
 
    private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
@@ -334,9 +334,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
-
-      if(!doContinuousReplanningForTransfer.getBooleanValue())
-         updateTransferPlan(adjustPlanForStandingContinuity.getBooleanValue());
+      updateTransferPlan(adjustPlanForStandingContinuity.getBooleanValue());
    }
 
    /** {@inheritDoc} */
@@ -355,9 +353,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
-
-      if(!doContinuousReplanningForTransfer.getBooleanValue())
-         updateTransferPlan(true);
+      updateTransferPlan(true);
    }
 
    /** {@inheritDoc} */
@@ -383,9 +379,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
-
-      if(!doContinuousReplanningForSwing.getBooleanValue())
-         updateSingleSupportPlan(true);
+      updateSingleSupportPlan(true);
    }
 
    /** {@inheritDoc} */
@@ -715,5 +709,33 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    void ensureContinuityEnteringEachTransfer(boolean ensureContinuity)
    {
       this.adjustPlanForDSContinuity.set(ensureContinuity);
+   }
+
+
+   // package-private getters for tests
+
+   ReferenceCoPTrajectoryGenerator getReferenceCoPGenerator()
+   {
+      return referenceCoPGenerator;
+   }
+
+   ReferenceCMPTrajectoryGenerator getReferenceCMPGenerator()
+   {
+      return referenceCMPGenerator;
+   }
+
+   ReferenceICPTrajectoryGenerator getReferenceICPGenerator()
+   {
+      return referenceICPGenerator;
+   }
+
+   ReferenceCoMTrajectoryGenerator getReferenceCoMGenerator()
+   {
+      return referenceCoMGenerator;
+   }
+
+   AngularMomentumTrajectoryMultiplexer getAngularMomentumTrajectoryGenerator()
+   {
+      return angularMomentumTrajectoryGenerator;
    }
 }
