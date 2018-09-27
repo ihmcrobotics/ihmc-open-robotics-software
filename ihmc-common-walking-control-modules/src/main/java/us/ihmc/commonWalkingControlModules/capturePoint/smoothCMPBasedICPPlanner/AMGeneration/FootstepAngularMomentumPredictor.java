@@ -52,7 +52,6 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private final YoBoolean planSwingAngularMomentum;
    private final YoBoolean planTransferAngularMomentum;
 
-   private CoPPointName entryCoPName;
    private SmoothCMPPlannerParameters smoothCMPPlannerParameters;
 
    private final YoDouble gravityZ;
@@ -292,7 +291,6 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    {
       this.smoothCMPPlannerParameters = smoothCMPPlannerParameters;
       AngularMomentumEstimationParameters angularMomentumParameters = smoothCMPPlannerParameters.getAngularMomentumEstimationParameters();
-      this.entryCoPName = smoothCMPPlannerParameters.getEntryCoPName();
       this.swingLegMass.set(totalMass * angularMomentumParameters.getPercentageSwingLegMass());
       this.supportLegMass.set(totalMass * angularMomentumParameters.getPercentageSupportLegMass());
       this.gravityZ.set(gravityZ);
@@ -431,7 +429,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       {
          copPointsInFoot = upcomingCoPsInFootsteps.get(footstepIndex + 1);
          setFootTrajectoriesForPhase(footstepIndex, initialWalkingPhase);
-         for(int j = CoPPlanningTools.getCoPPointIndex(copPointsInFoot.getCoPPointList(), entryCoPName) + 1; j < copPointsInFoot.getNumberOfCoPPoints(); j++, comIndex++)
+         for(int j = CoPPlanningTools.getCoPPointIndex(copPointsInFoot.getCoPPointList(), CoPPointName.HEEL_COP) + 1; j < copPointsInFoot.getNumberOfCoPPoints(); j++, comIndex++)
          {
             setCoMTrajectory(phaseTime, phaseTime + copPointsInFoot.get(j).getTime(), comIndex);
             setFootTrajectoriesForSegment(phaseTime, phaseTime + copPointsInFoot.get(j).getTime());
@@ -489,7 +487,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
                swingAngularMomentumTrajectories.get(stepIndex).set(estimatedAngularMomentumTrajectory);
             }
             phaseTime += copPointsInFoot.get(j).getTime();
-            if(copPointsInFoot.getCoPPointList().get(j) == entryCoPName)
+            if(copPointsInFoot.getCoPPointList().get(j) == CoPPointName.HEEL_COP)
             {
                currentWalkingPhase = WalkingTrajectoryType.SWING;
                setFootTrajectoriesForPhase(stepIndex, currentWalkingPhase);
@@ -549,13 +547,13 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       double phaseDuration = 0.0;
       if(phase == WalkingTrajectoryType.SWING)
       {
-         for(int j = CoPPlanningTools.getCoPPointIndex(copPointsInFoot.getCoPPointList(), entryCoPName) + 1; j < copPointsInFoot.getNumberOfCoPPoints(); j++)
+         for(int j = CoPPlanningTools.getCoPPointIndex(copPointsInFoot.getCoPPointList(), CoPPointName.HEEL_COP) + 1; j < copPointsInFoot.getNumberOfCoPPoints(); j++)
             phaseDuration += copPointsInFoot.get(j).getTime();
       }
       else
       {
          int j = 0;
-         for(; j < copPointsInFoot.getNumberOfCoPPoints() - 1 && copPointsInFoot.getCoPPointList().get(j) != entryCoPName && copPointsInFoot.getCoPPointList().get(j) != CoPPointName.FINAL_COP; j++)
+         for(; j < copPointsInFoot.getNumberOfCoPPoints() - 1 && copPointsInFoot.getCoPPointList().get(j) != CoPPointName.HEEL_COP && copPointsInFoot.getCoPPointList().get(j) != CoPPointName.FINAL_COP; j++)
             phaseDuration += copPointsInFoot.get(j).getTime();
          phaseDuration += copPointsInFoot.get(j).getTime();
       }

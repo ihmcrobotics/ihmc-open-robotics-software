@@ -152,12 +152,6 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
    }
 
    @Override
-   public CoPPointName getEntryCoPName()
-   {
-      return entryCoPName;
-   }
-
-   @Override
    public CoPPointName getExitCoPName()
    {
       return exitCoPName;
