@@ -98,8 +98,10 @@ public class FeetManager
          explorationParameters = new ExplorationParameters(registry);
       }
 
-      DoubleProvider minWeightFractionPerFoot = new DoubleParameter("minWeightFractionPerFoot", registry, 0.0);
-      DoubleProvider maxWeightFractionPerFoot = new DoubleParameter("maxWeightFractionPerFoot", registry, 2.0);
+      boolean enableSmoothUnloading = walkingControllerParameters.enforceSmoothFootUnloading();
+      DoubleProvider minWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("minWeightFractionPerFoot", registry, 0.0) : null;
+      DoubleProvider maxWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("maxWeightFractionPerFoot", registry, 2.0) : null;
+
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootGains, holdFootGains,
