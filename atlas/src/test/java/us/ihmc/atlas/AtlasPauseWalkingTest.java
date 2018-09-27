@@ -144,4 +144,11 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    {
       super.testPauseWalkingForwardInitialTransfer();
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 100000)
+   public void testPauseWalkingInitialTransferOneStep() throws SimulationExceededMaximumTimeException
+   {
+      super.testPauseWalkingInitialTransferOneStep();
+   }
 }

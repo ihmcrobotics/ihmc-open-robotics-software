@@ -220,7 +220,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 
       drcSimulationTestHelper.publishToController(footstepMessage);
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.85));
 
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
 
