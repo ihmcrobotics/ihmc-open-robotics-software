@@ -429,7 +429,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       {
          copPointsInFoot = upcomingCoPsInFootsteps.get(footstepIndex + 1);
          setFootTrajectoriesForPhase(footstepIndex, initialWalkingPhase);
-         for(int j = CoPPlanningTools.getCoPPointIndex(copPointsInFoot.getCoPPointList(), CoPPointName.HEEL_COP) + 1; j < copPointsInFoot.getNumberOfCoPPoints(); j++, comIndex++)
+         for(int j = CoPPlanningTools.getCoPPointIndex(copPointsInFoot.getCoPPointList(), CoPPointName.ENTRY_COP) + 1; j < copPointsInFoot.getNumberOfCoPPoints(); j++, comIndex++)
          {
             setCoMTrajectory(phaseTime, phaseTime + copPointsInFoot.get(j).getTime(), comIndex);
             setFootTrajectoriesForSegment(phaseTime, phaseTime + copPointsInFoot.get(j).getTime());
@@ -487,7 +487,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
                swingAngularMomentumTrajectories.get(stepIndex).set(estimatedAngularMomentumTrajectory);
             }
             phaseTime += copPointsInFoot.get(j).getTime();
-            if(copPointsInFoot.getCoPPointList().get(j) == CoPPointName.HEEL_COP)
+            if(copPointsInFoot.getCoPPointList().get(j) == CoPPointName.ENTRY_COP)
             {
                currentWalkingPhase = WalkingTrajectoryType.SWING;
                setFootTrajectoriesForPhase(stepIndex, currentWalkingPhase);
@@ -547,13 +547,14 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       double phaseDuration = 0.0;
       if(phase == WalkingTrajectoryType.SWING)
       {
-         for(int j = CoPPlanningTools.getCoPPointIndex(copPointsInFoot.getCoPPointList(), CoPPointName.HEEL_COP) + 1; j < copPointsInFoot.getNumberOfCoPPoints(); j++)
+         for(int j = CoPPlanningTools.getCoPPointIndex(copPointsInFoot.getCoPPointList(), CoPPointName.ENTRY_COP) + 1; j < copPointsInFoot.getNumberOfCoPPoints(); j++)
             phaseDuration += copPointsInFoot.get(j).getTime();
       }
       else
       {
          int j = 0;
-         for(; j < copPointsInFoot.getNumberOfCoPPoints() - 1 && copPointsInFoot.getCoPPointList().get(j) != CoPPointName.HEEL_COP && copPointsInFoot.getCoPPointList().get(j) != CoPPointName.FINAL_COP; j++)
+         for(; j < copPointsInFoot.getNumberOfCoPPoints() - 1 && copPointsInFoot.getCoPPointList().get(j) != CoPPointName.ENTRY_COP
+               && copPointsInFoot.getCoPPointList().get(j) != CoPPointName.FINAL_COP; j++)
             phaseDuration += copPointsInFoot.get(j).getTime();
          phaseDuration += copPointsInFoot.get(j).getTime();
       }
