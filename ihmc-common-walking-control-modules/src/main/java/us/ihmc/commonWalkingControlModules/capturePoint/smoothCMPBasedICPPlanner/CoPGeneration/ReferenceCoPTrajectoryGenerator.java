@@ -134,7 +134,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final FramePoint3D heldCoPPosition = new FramePoint3D();
 
    private CoPTrajectory activeTrajectory;
-   private double initialTime;
    private FramePoint3D tempDoubleSupportPolygonCentroid = new FramePoint3D();
    private final FrameConvexPolygon2D tempPolygonA = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D tempPolygonB = new FrameConvexPolygon2D();
@@ -510,22 +509,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    }
 
    @Override
-   public void initializeForTransfer(double currentTime)
-   {
-      this.initialTime = currentTime;
-      this.activeTrajectory = transferCoPTrajectories.get(0);
-   }
-
-   @Override
-   public void initializeForSwing(double currentTime)
-   {
-      clearHeldPosition();
-      this.initialTime = currentTime;
-      this.activeTrajectory = swingCoPTrajectories.get(0);
-   }
-
-   @Override
-   public void update(double currentTime)
+   public void update(double time)
    {
       if (!planIsAvailable.getBooleanValue())
       {
@@ -539,7 +523,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
       else if (activeTrajectory != null)
       {
-         activeTrajectory.update(currentTime - this.initialTime, desiredCoPPosition, desiredCoPVelocity, desiredCoPAcceleration);
+         activeTrajectory.update(time, desiredCoPPosition, desiredCoPVelocity, desiredCoPAcceleration);
       }
       else
          throw new RuntimeException("CoP Planner: Plan available but no active trajectory initialized");
@@ -630,6 +614,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       // generate the cop trajectory
       generateCoPTrajectoriesFromWayPoints();
       planIsAvailable.set(true);
+
+      // set active trajectory to be first active trajectory
+      this.activeTrajectory = transferCoPTrajectories.get(0);
    }
 
    @Override
@@ -677,6 +664,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       // generate the cop trajectory
       generateCoPTrajectoriesFromWayPoints();
       planIsAvailable.set(true);
+
+      // set active trajectory to be first swing trajectory
+      this.activeTrajectory = swingCoPTrajectories.get(0);
    }
 
    private void computeMidFeetPointWithChickenSupportForInitialTransfer(FramePoint3D framePointToPack)
