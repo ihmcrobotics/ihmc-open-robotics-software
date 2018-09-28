@@ -261,8 +261,8 @@ public class FootstepAngularMomentumPredictorTest
       icpTrajectoryGenerator.adjustDesiredTrajectoriesForInitialSmoothing();
 
       comTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
-      comTrajectoryGenerator.initializeForTransfer(0.0, copTrajectoryGenerator.getTransferCoPTrajectories(), copTrajectoryGenerator.getSwingCoPTrajectories(),
-                                                   icpTrajectoryGenerator.getICPPositonFromCoPDesiredFinalList());
+      comTrajectoryGenerator.computeTrajectoryStartingFromTransfer(copTrajectoryGenerator.getTransferCoPTrajectories(), copTrajectoryGenerator.getSwingCoPTrajectories(),
+                                                                   icpTrajectoryGenerator.getICPPositonFromCoPDesiredFinalList());
 
       List<? extends FramePoint3DReadOnly> comInitialPositionList = comTrajectoryGenerator.getCoMPositionDesiredInitialList();
       List<? extends FramePoint3DReadOnly> comFinalPositionList = comTrajectoryGenerator.getCoMPositionDesiredFinalList();
@@ -345,8 +345,8 @@ public class FootstepAngularMomentumPredictorTest
       icpTrajectoryGenerator.adjustDesiredTrajectoriesForInitialSmoothing();
 
       comTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
-      comTrajectoryGenerator.initializeForTransfer(0.0, copTrajectoryGenerator.getTransferCoPTrajectories(), copTrajectoryGenerator.getSwingCoPTrajectories(),
-                                                   icpTrajectoryGenerator.getICPPositonFromCoPDesiredFinalList());
+      comTrajectoryGenerator.computeTrajectoryStartingFromTransfer(copTrajectoryGenerator.getTransferCoPTrajectories(), copTrajectoryGenerator.getSwingCoPTrajectories(),
+                                                                   icpTrajectoryGenerator.getICPPositonFromCoPDesiredFinalList());
       List<? extends FramePoint3DReadOnly> comInitialPositionList = comTrajectoryGenerator.getCoMPositionDesiredInitialList();
       List<? extends FramePoint3DReadOnly> comFinalPositionList = comTrajectoryGenerator.getCoMPositionDesiredFinalList();
       List<? extends FrameVector3DReadOnly> comInitialVelocityList = comTrajectoryGenerator.getCoMVelocityDesiredInitialList();
@@ -495,8 +495,8 @@ public class FootstepAngularMomentumPredictorTest
       icpTrajectoryGenerator.adjustDesiredTrajectoriesForInitialSmoothing();
 
       comTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
-      comTrajectoryGenerator.initializeForSwing(0.0, copTrajectoryGenerator.getTransferCoPTrajectories(), copTrajectoryGenerator.getSwingCoPTrajectories(),
-                                                icpTrajectoryGenerator.getICPPositonFromCoPDesiredFinalList());
+      comTrajectoryGenerator.computeTrajectoryStartingFromSingleSupport(copTrajectoryGenerator.getTransferCoPTrajectories(), copTrajectoryGenerator.getSwingCoPTrajectories(),
+                                                                        icpTrajectoryGenerator.getICPPositonFromCoPDesiredFinalList());
 
       List<? extends FramePoint3DReadOnly> comInitialPositionList = comTrajectoryGenerator.getCoMPositionDesiredInitialList();
       List<? extends FramePoint3DReadOnly> comFinalPositionList = comTrajectoryGenerator.getCoMPositionDesiredFinalList();
