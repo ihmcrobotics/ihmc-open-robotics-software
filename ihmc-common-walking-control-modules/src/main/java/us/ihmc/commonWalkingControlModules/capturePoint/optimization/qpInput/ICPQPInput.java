@@ -10,6 +10,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
  * The intended use is to store the quadratic cost objective, linear cost objective, and scalar cost
  * of a given objective for minimization. This is then added to the full problem quadratic, linear,
  * and scalar costs.
+ *
+ * The problem is formulated as 0.5 x<sup>T</sup> quadraticTerm x - linearTerm<sup>T</sup> x + residualCost
  */
 public class ICPQPInput
 {
@@ -18,7 +20,7 @@ public class ICPQPInput
    /** Storage matrix for the linear cost of the objective. */
    public DenseMatrix64F linearTerm;
    /** Storage matrix for the scalar cost of the objective. */
-   public DenseMatrix64F residualCost = new DenseMatrix64F(1, 1);
+   public DenseMatrix64F residualCost;
 
    private final DenseMatrix64F tempMatrix;
    private final DenseMatrix64F tempScalar = new DenseMatrix64F(1, 1);
@@ -73,7 +75,7 @@ public class ICPQPInput
 
       CommonOps.mult(quadraticTerm, x, tempMatrix);
       CommonOps.multAddTransA(0.5, x, tempMatrix, tempScalar);
-      CommonOps.multAddTransA(linearTerm, x, tempScalar);
+      CommonOps.multAddTransA(-1.0, linearTerm, x, tempScalar);
       CommonOps.addEquals(tempScalar, residualCost);
 
       return tempScalar.get(0);

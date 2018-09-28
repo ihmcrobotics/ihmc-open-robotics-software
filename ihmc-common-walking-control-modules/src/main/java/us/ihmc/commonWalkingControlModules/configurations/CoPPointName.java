@@ -31,10 +31,5 @@ public enum CoPPointName
          return "StartCoP";
       }
    }
-
-   public boolean checkCoPPointMatch(CoPPointName other)
-   {
-      return this == other;
-   }
 }
 

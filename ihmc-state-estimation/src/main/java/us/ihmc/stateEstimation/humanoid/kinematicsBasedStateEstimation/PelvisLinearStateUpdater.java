@@ -20,6 +20,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoInteger;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -35,8 +36,10 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -140,6 +143,10 @@ public class PelvisLinearStateUpdater
    private final FrameVector3D tempVelocity = new FrameVector3D();
 
    private final double gravitationalAcceleration;
+
+   private final BooleanProvider trustOnlyLowestFoot = new BooleanParameter("TrustOnlyLowestFoot", registry, false);
+   private final IntegerProvider lowestFootWindowSize = new IntegerParameter("LowestFootWindowSize", registry, 0);
+   private final GlitchFilteredYoInteger lowestFootInContactIndex = new GlitchFilteredYoInteger("LowestFootInContact", lowestFootWindowSize, registry);
 
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
          IMUBiasProvider imuBiasProvider, BooleanProvider cancelGravityFromAccelerationMeasurement, Map<RigidBody, FootSwitchInterface> footSwitches,
@@ -402,10 +409,18 @@ public class PelvisLinearStateUpdater
       // Update only if at least one foot hit the ground
       if (numberOfEndEffectorsTrusted > 0)
       {
-         for (int i = 0; i < feet.size(); i++)
+         if (trustOnlyLowestFoot.getValue())
          {
-            RigidBody foot = feet.get(i);
-            areFeetTrusted.get(foot).set(haveFeetHitGroundFiltered.get(foot).getBooleanValue());
+            numberOfEndEffectorsTrusted = filterAndTrustLowestFoot();
+         }
+         else
+         {
+            for (int i = 0; i < feet.size(); i++)
+            {
+               RigidBody foot = feet.get(i);
+               boolean isFootOnGround = haveFeetHitGroundFiltered.get(foot).getBooleanValue();
+               areFeetTrusted.get(foot).set(isFootOnGround);
+            }
          }
       }
 
@@ -457,6 +472,57 @@ public class PelvisLinearStateUpdater
       }
 
       return numberOfEndEffectorsTrusted;
+   }
+
+   private int filterAndTrustLowestFoot()
+   {
+      int lastLowestFootIdx = lowestFootInContactIndex.getValue();
+      int lowestFootIdx = findLowestFootInContact();
+
+      if (haveFeetHitGroundFiltered.get(feet.get(lastLowestFootIdx)).getValue())
+      {
+         // If the previously trusted foot is still in contact glitch filter the trusted foot to avoid
+         // jumping between the feet.
+         lowestFootInContactIndex.update(lowestFootIdx);
+      }
+      else
+      {
+         // In case the previously trusted foot is not in contact anymore we do not need to glitch filter.
+         // Just use the new lowest foot.
+         lowestFootInContactIndex.set(lowestFootIdx);
+      }
+
+      for (int footIdx = 0; footIdx < feet.size(); footIdx++)
+      {
+         areFeetTrusted.get(feet.get(footIdx)).set(footIdx == lowestFootInContactIndex.getValue());
+      }
+
+      return 1;
+   }
+
+   FramePoint3D tmpFramePoint = new FramePoint3D();
+
+   private int findLowestFootInContact()
+   {
+      int lowestFootInContact = -1;
+      double lowestFootZ = Double.MAX_VALUE;
+      for (int footIdx = 0; footIdx < feet.size(); footIdx++)
+      {
+         RigidBody foot = feet.get(footIdx);
+         tmpFramePoint.setToZero(foot.getBodyFixedFrame());
+         tmpFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+         double footZ = tmpFramePoint.getZ();
+
+         if (haveFeetHitGroundFiltered.get(foot).getBooleanValue())
+         {
+            if (footZ < lowestFootZ)
+            {
+               lowestFootZ = footZ;
+               lowestFootInContact = footIdx;
+            }
+         }
+      }
+      return lowestFootInContact;
    }
 
    private int filterTrustedFeetBasedOnContactForces(int numberOfEndEffectorsTrusted)

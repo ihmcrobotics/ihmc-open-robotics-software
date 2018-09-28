@@ -53,6 +53,8 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
        */
       while (segments.size() < maxNumberOfSegments)
          segments.add();
+
+      segments.clear();
    }
 
    public void reset()
@@ -107,9 +109,6 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
 
    public List<FrameTrajectory3D> getSegments()
    {
-      Collection<FrameTrajectory3D> c = new ArrayList<FrameTrajectory3D>();
-      Collections.unmodifiableCollection(null);
-
       return segments;
    }
 
@@ -150,6 +149,11 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
       }
    }
 
+   public double getInitialTime()
+   {
+      return segments.getFirst().getInitialTime();
+   }
+
    public double getFinalTime()
    {
       return segments.getLast().getFinalTime();
@@ -160,9 +164,24 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
       return segments.add();
    }
 
+   public FrameTrajectory3D getFirstSegment()
+   {
+      return segments.getFirst();
+   }
+
+   public FrameTrajectory3D getLastSegment()
+   {
+      return segments.getLast();
+   }
+
    public FrameTrajectory3D getSegment(int segmentIndex)
    {
       return segments.get(segmentIndex);
+   }
+
+   public void removeSegment(int segmentToRemove)
+   {
+      segments.remove(segmentToRemove);
    }
 
    public double[] getNodeTimes()
