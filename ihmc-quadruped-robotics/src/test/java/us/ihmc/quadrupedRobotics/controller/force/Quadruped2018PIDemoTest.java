@@ -2,16 +2,16 @@ package us.ihmc.quadrupedRobotics.controller.force;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.DefaultPointFootSnapperParameters;
-import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.HeightMapFootSnapper;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PlanarGroundPointFootSnapper;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PlanarRegionBasedPointFootSnapper;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
@@ -24,9 +24,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvi
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
@@ -43,8 +41,6 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-
-
    }
 
    private void createTest()
@@ -74,6 +70,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
    {
       quadrupedTestFactory.close();
       conductor.concludeTesting();
+
       quadrupedTestFactory = null;
       conductor = null;
       variables = null;
@@ -81,9 +78,13 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   public void testFlatGroundWalking(double endPhaseShift, double walkingSpeed)
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 5000000)
+   public void testTrottingFast()
    {
+      double endPhaseShift = 180.0;
+      double walkingSpeed = 2.0;
       createTest();
 
       stepTeleopManager.getXGaitSettings().setStanceWidth(0.25);
@@ -129,11 +130,14 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.simulate();
    }
 
-   public void testWalkingWithPush(double endPhaseShift, double walkingSpeed)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 5000000)
+   public void testTrottingWithPush()
    {
+      double endPhaseShift = 180.0;
+      double walkingSpeed = 1.0;
       createTest();
 
-      stepTeleopManager.getXGaitSettings().setStanceWidth(0.25);
       stepTeleopManager.getXGaitSettings().setStanceLength(0.7);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
@@ -187,13 +191,15 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.simulate();
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 5000000)
    public void testMultiGait()
    {
       createTest();
 
       stepTeleopManager.getXGaitSettings().setStanceWidth(0.25);
       stepTeleopManager.getXGaitSettings().setStanceLength(0.7);
-      stepTeleopManager.setDesiredBodyHeight(0.55);
+//      stepTeleopManager.setDesiredBodyHeight(0.55);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -292,6 +298,8 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.simulate();
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 5000000)
    public void testWalkingUpStaircase() throws IOException
    {
       double stepHeight = 0.13;
@@ -302,7 +310,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       double walkingSpeed = 0.3;
       double minimumXPositionAfterWalking  = numberOfSteps * stepLength + 1.2;
 
-      double bodyHeight = 0.58;
+      double bodyHeight = 0.50;
       double stanceLength = 0.7;
 
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
@@ -345,6 +353,8 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.simulate();
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 5000000)
    public void testWalkingDownStaircase() throws IOException
    {
       double stepHeight = 0.13;
@@ -355,7 +365,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       double walkingSpeed = 0.25;
       double minimumXPositionAfterWalking  = 3.4 + numberOfSteps * stepLength + 1.2;
 
-      double bodyHeight = 0.54;
+      double bodyHeight = 0.43;
       double stanceLength = 0.65;
       double stepGroundClearance = 0.06;
       double endDoubleSupportDuration = 0.15;
@@ -410,6 +420,8 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.simulate();
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 5000000)
    public void testWalkingOverCinderBlocks() throws IOException
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
@@ -451,15 +463,17 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       stepTeleopManager.requestStanding();
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
       conductor.simulate();
-   } 
+   }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 5000000)
    public void testTrottingOverAggressiveBumpyTerrain() throws IOException
    {
       double xAmp1 = 0.03, xFreq1 = 0.5, xAmp2 = 0.02, xFreq2 = 0.5;
       double yAmp1 = 0.02, yFreq1 = 0.07, yAmp2 = 0.02, yFreq2 = 0.37;
       BumpyGroundProfile groundProfile = new BumpyGroundProfile(xAmp1, xFreq1, xAmp2, xFreq2, yAmp1, yFreq1, yAmp2, yFreq2, 1.2);
 
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
+      quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setUseNetworking(true);
@@ -472,7 +486,6 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
       conductor.simulate();
-      stepTeleopManager.setDesiredBodyHeight(0.52);
 
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
       stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.07);

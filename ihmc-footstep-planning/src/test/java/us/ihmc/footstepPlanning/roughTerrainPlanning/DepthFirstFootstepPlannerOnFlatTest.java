@@ -31,13 +31,19 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    private static final boolean showPlannerVisualizer = false;
 
    @Override
+   public boolean assertPlannerReturnedResult()
+   {
+      return true;
+   }
+
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testJustStraightLine()
    {
       planner.setMaximumNumberOfNodesToExpand(10000);
       planner.setTimeout(10.0);
-      super.testJustStraightLine(true);
+      super.testJustStraightLine();
    }
 
    @Override
@@ -48,7 +54,7 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testATightTurn(true);
+      super.testATightTurn();
    }
 
    @Override
@@ -59,7 +65,7 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(2.0);
       planner.setExitAfterInitialSolution(false);
-      super.testStraightLineWithInitialTurn(true);
+      super.testStraightLineWithInitialTurn();
    }
 
    @Override
@@ -70,7 +76,7 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(2.0);
       planner.setExitAfterInitialSolution(false);
-      super.testJustTurnInPlace(true);
+      super.testJustTurnInPlace();
    }
 
    @Override
@@ -81,7 +87,7 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(2.0);
       planner.setExitAfterInitialSolution(false);
-      super.testRandomPoses(true);
+      super.testRandomPoses();
    }
 
    @Before

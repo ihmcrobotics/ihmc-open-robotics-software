@@ -164,6 +164,8 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       assertEquals(1.3, points.get(0).getZ(), eps);
    }
 
+
+   /*
    public void testOverridingOriginOld(HeightMapWithPoints simpleMap)
    {
       double x;
@@ -175,6 +177,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       simpleMap.addPoint(x, y, z);
       assertEquals(4, simpleMap.getHeightAtPoint(0, 0), eps);
    }
+   */
 
    public void assertSinglePointGridHandlesPoint(double x, double y, int xIndex, int yIndex, double z)
    {

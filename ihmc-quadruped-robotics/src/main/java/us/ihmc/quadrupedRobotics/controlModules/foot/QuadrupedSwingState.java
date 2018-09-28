@@ -139,7 +139,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
                                                          registry);
 
       isSwingSpeedUpEnabled = new BooleanParameter(namePrefix + "IsSwingSpeedUpEnabled", registry, true);
-      minSwingTimeForDisturbanceRecovery = new DoubleParameter(namePrefix + "MinSwingTimeForDisturbanceRecovery", registry, 0.1);
+      minSwingTimeForDisturbanceRecovery = new DoubleParameter(namePrefix + "MinSwingTimeForDisturbanceRecovery", registry, 0.2);
       minRequiredSpeedUpFactor = new DoubleParameter(namePrefix + "MinRequiredSpeedUpFactor", registry, 1.05);
 
       finalPosition.setToNaN();
