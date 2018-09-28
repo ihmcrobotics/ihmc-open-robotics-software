@@ -35,6 +35,8 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
+   @ContinuousIntegrationTest(estimatedDuration = 18.1)
+   @Test(timeout = 90000)
    public void testSimpleCommands() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

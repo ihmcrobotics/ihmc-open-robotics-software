@@ -10,11 +10,13 @@ import org.junit.AfterClass;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -77,6 +79,8 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
                                                         simulationTestingParameters, getRobotModel());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 32.5)
+   @Test(timeout = 420000)
    public void testSingleRandomChestOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

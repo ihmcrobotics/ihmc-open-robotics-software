@@ -2,12 +2,10 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.tools.lists.PairList;
@@ -26,10 +24,10 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
    private final HighLevelControllerState finalControllerState;
 
    public SmoothTransitionControllerState(String namePrefix, HighLevelControllerName controllerState, HighLevelControllerState initialControllerState,
-                                          HighLevelControllerState finalControllerState, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                          HighLevelControllerState finalControllerState, OneDoFJoint[] controlledJoints,
                                           HighLevelControllerParameters highLevelControllerParameters)
    {
-      super(namePrefix, controllerState, highLevelControllerParameters, controllerToolbox);
+      super(namePrefix, controllerState, highLevelControllerParameters, controlledJoints);
 
       this.initialControllerState = initialControllerState;
       this.finalControllerState = finalControllerState;
@@ -39,7 +37,6 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
       transitionRatioTrajectory = new YoPolynomial(namePrefix + "TransitionRatioTrajectory", 2, registry);
       this.standTransitionDuration.set(highLevelControllerParameters.getTimeInStandTransition());
 
-      OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
       for (OneDoFJoint controlledJoint : controlledJoints)

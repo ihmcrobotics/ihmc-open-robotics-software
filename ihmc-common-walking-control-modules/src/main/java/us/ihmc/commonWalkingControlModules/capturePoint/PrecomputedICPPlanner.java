@@ -16,6 +16,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -68,10 +70,16 @@ public class PrecomputedICPPlanner
 
    private final DoubleParameter filterBreakFrequency = new DoubleParameter("PrecomputedICPVelocityFilterBreakFrequency", registry, 5.0);
    private final DoubleProvider alphaProvider;
-   private final AlphaFilteredTuple2D filteredPrecomputedIcpVelocity;
+   private final Tuple2DBasics filteredPrecomputedIcpVelocity;
 
    private final FramePoint2D tempICPPosition = new FramePoint2D();
    private final FramePoint2D tempCoPPosition = new FramePoint2D();
+
+   public PrecomputedICPPlanner(CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler, MomentumTrajectoryHandler momentumTrajectoryHandler,
+                                YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(Double.NaN, centerOfMassTrajectoryHandler, momentumTrajectoryHandler, parentRegistry, yoGraphicsListRegistry);
+   }
 
    public PrecomputedICPPlanner(double dt, CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler, MomentumTrajectoryHandler momentumTrajectoryHandler,
                                 YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -80,15 +88,23 @@ public class PrecomputedICPPlanner
       this.momentumTrajectoryHandler = momentumTrajectoryHandler;
       blendingDuration.set(0.5);
 
-      alphaProvider = new DoubleProvider()
+      if (!Double.isNaN(dt))
       {
-         @Override
-         public double getValue()
+         alphaProvider = new DoubleProvider()
          {
-            return AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
-         }
-      };
-      filteredPrecomputedIcpVelocity = new AlphaFilteredTuple2D(alphaProvider);
+            @Override
+            public double getValue()
+            {
+               return AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
+            }
+         };
+         filteredPrecomputedIcpVelocity = new AlphaFilteredTuple2D(alphaProvider);
+      }
+      else
+      {
+         alphaProvider = null;
+         filteredPrecomputedIcpVelocity = new Vector2D();
+      }
 
       parentRegistry.addChild(registry);
 

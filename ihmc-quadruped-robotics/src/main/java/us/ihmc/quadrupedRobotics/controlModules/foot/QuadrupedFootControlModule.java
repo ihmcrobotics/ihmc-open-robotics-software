@@ -59,7 +59,7 @@ public class QuadrupedFootControlModule
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
 
       // state machine
-      QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, controllerToolbox.getFootContactState(robotQuadrant));
+      QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, controllerToolbox, registry);
       swingState = new QuadrupedSwingState(robotQuadrant, controllerToolbox, stepCommandIsValid, currentStepCommand, graphicsListRegistry, registry);
       moveViaWaypointsState = new QuadrupedMoveViaWaypointsState(robotQuadrant, controllerToolbox, registry);
 

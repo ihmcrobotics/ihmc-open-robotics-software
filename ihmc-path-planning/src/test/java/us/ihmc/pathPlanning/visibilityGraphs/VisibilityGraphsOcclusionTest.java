@@ -5,16 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TestName;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -66,14 +64,14 @@ public class VisibilityGraphsOcclusionTest
 
    private static final boolean VERBOSE = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private static final boolean visualize = true;//simulationTestingParameters.getKeepSCSUp();
+   private boolean visualize = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int rays = 5000;
    private static final double rayLengthSquared = MathTools.square(5.0);
    private static final int maxPolygonsToVisualize = 10;
    private static final int maxPolygonsVertices = 100;
-   private static final double defaultMaxAllowedSolveTime = 1.0;
+   private static final double defaultMaxAllowedSolveTime = 1.5;
    private static final int bodyPathVisualizationResolution = 500;
    private static final double defaultMarchingSpeedInMetersPerTick = 0.50;
    private static final double maximumFlyingDistance = 0.05;
@@ -81,11 +79,17 @@ public class VisibilityGraphsOcclusionTest
 
    private enum OcclusionMethod {OCCLUSION, OCCLUSION_PLUS_GROUND, NO_OCCLUSION};
 
+   @Before
+   public void setup()
+   {
+      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   }
+
    @Rule
    public TestName name = new TestName();
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
    public void testFlatGround()
    {
       Point3D startPose = new Point3D();
@@ -95,7 +99,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
    public void testFlatGroundWithWall()
    {
       Point3D startPose = new Point3D(-4.805, 0.001, 0.0);
@@ -114,7 +118,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
    public void testSimpleOcclusions()
    {
       Point3D startPose = new Point3D();
@@ -125,7 +129,6 @@ public class VisibilityGraphsOcclusionTest
 
    @Test(timeout = TIMEOUT)
    @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Ignore
    public void testMazeWithOcclusions()
    {
       Point3D startPose = new Point3D();
@@ -135,7 +138,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testCrazyBridgeEnvironment()
    {
       Point3D startPose = new Point3D(0.4, 0.5, 0.001);
@@ -393,7 +396,7 @@ public class VisibilityGraphsOcclusionTest
       }
       else
       {
-         Assert.assertTrue("Planner took too long: " + maxSolveTime + "s.", maxSolveTime < maxAllowedSolveTime);
+         Assert.assertTrue("Planner took too long: " + maxSolveTime + "s, should be less than " + maxAllowedSolveTime + " s.", maxSolveTime < maxAllowedSolveTime);
          Assert.assertFalse("Planner failed at iteration: " + iteration, plannerFailed.getBooleanValue());
       }
    }
@@ -597,10 +600,10 @@ public class VisibilityGraphsOcclusionTest
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.addRectangle(50.0, 5.0);
 
-      startPoseToPack.set(-23.005, -2.001, 0.0);
+      startPoseToPack.set(-18.005, -2.001, 0.0);
       //      RotationMatrixTools.applyRollRotation(Math.toRadians(10.0), startPoseToPack, startPoseToPack);
 
-      goalPoseToPack.set(23.005, 2.001, 0.0);
+      goalPoseToPack.set(18.005, 2.001, 0.0);
       //      RotationMatrixTools.applyRollRotation(Math.toRadians(10.0), goalPoseToPack, goalPoseToPack);
 
       return generator.getPlanarRegionsList();

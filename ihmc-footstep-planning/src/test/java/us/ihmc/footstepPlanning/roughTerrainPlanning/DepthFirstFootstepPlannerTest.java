@@ -32,14 +32,21 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    private static final boolean showPlannerVisualizer = false;
 
+   @Override
+   public boolean assertPlannerReturnedResult()
+   {
+      return true;
+   }
+
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 50000)
-   public void testOnStairCase()
+   public void testOnStaircase()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testOnStaircase(new Vector3D(), true);
+      super.testOnStaircase();
 
       if (showPlannerVisualizer)
          ThreadTools.sleepForever();
@@ -53,7 +60,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testSimpleStepOnBox(true);
+      super.testSimpleStepOnBox();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
@@ -63,7 +70,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testSimpleStepOnBoxTwo(true);
+      super.testSimpleStepOnBoxTwo();
    }
 
    @Override
@@ -74,7 +81,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testRandomEnvironment(true);
+      super.testRandomEnvironment();
    }
 
    @Override
@@ -85,7 +92,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testSimpleGaps(true);
+      super.testSimpleGaps();
    }
 
    @Override
@@ -96,9 +103,10 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testOverCinderBlockField(true);
+      super.testOverCinderBlockField();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 50000)
    public void testStepAfterPitchedUp()
@@ -106,9 +114,10 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testCompareAfterPitchedStep(!visualize, true);
+      super.testStepAfterPitchedUp();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 50000)
    public void testStepAfterPitchedDown()
@@ -116,17 +125,18 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testCompareAfterPitchedStep(!visualize, false);
+      super.testStepAfterPitchedDown();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 50000)
-   public void testStepBeforeGap()
+   public void testCompareStepBeforeGap()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testCompareStepBeforeGap(!visualize);
+      super.testCompareStepBeforeGap();
    }
 
    @Override
@@ -140,12 +150,31 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       super.testWalkingAroundBox();
    }
 
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @Test(timeout = 30000)
    public void testSteppingStones()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setExitAfterInitialSolution(false);
       planner.setTimeout(15.0);
-      super.testSteppingStones(!visualize);
+      super.testSteppingStones();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @Test(timeout = 51000)
+   public void testPartialGaps()
+   {
+      super.testPartialGaps();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @Test(timeout = 51000)
+   public void testSpiralStaircase()
+   {
+      super.testSpiralStaircase();
    }
 
    @Before
