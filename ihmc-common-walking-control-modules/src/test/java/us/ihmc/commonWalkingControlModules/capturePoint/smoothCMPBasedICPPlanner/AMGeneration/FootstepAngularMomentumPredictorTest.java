@@ -256,7 +256,6 @@ public class FootstepAngularMomentumPredictorTest
       copTrajectoryGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), RobotSide.LEFT, null);
       icpTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
 
-      copTrajectoryGenerator.initializeForTransfer(0.0);
       icpTrajectoryGenerator.initializeForTransferFromCoPs(copTrajectoryGenerator.getTransferCoPTrajectories(),
                                                            copTrajectoryGenerator.getSwingCoPTrajectories());
       icpTrajectoryGenerator.adjustDesiredTrajectoriesForInitialSmoothing();
@@ -341,7 +340,6 @@ public class FootstepAngularMomentumPredictorTest
       copTrajectoryGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), RobotSide.LEFT, null);
       icpTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
 
-      copTrajectoryGenerator.initializeForTransfer(0.0);
       icpTrajectoryGenerator.initializeForTransferFromCoPs(copTrajectoryGenerator.getTransferCoPTrajectories(),
                                                            copTrajectoryGenerator.getSwingCoPTrajectories());
       icpTrajectoryGenerator.adjustDesiredTrajectoriesForInitialSmoothing();
@@ -493,7 +491,6 @@ public class FootstepAngularMomentumPredictorTest
       copTrajectoryGenerator.computeReferenceCoPsStartingFromSingleSupport(RobotSide.LEFT);
       icpTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
 
-      copTrajectoryGenerator.initializeForSwing(0.0);
       icpTrajectoryGenerator.initializeForSwingFromCoPs(copTrajectoryGenerator.getTransferCoPTrajectories(), copTrajectoryGenerator.getSwingCoPTrajectories());
       icpTrajectoryGenerator.adjustDesiredTrajectoriesForInitialSmoothing();
 
