@@ -48,9 +48,9 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
    private final FrameVector3D comVelocityDesiredInitialCurrentSegment = new FrameVector3D();
    private final FrameVector3D comAccelerationDesiredInitialCurrentSegment = new FrameVector3D();
 
-   private final FramePoint3D comDesiredPositionAtStartOfSwing = new FramePoint3D();
-   private final FramePoint3D comDesiredVelocityAtStartOfSwing = new FramePoint3D();
-   private final FramePoint3D comDesiredAccelerationAtStartOfSwing = new FramePoint3D();
+   private final FramePoint3D comDesiredPositionAtStartOfPhase = new FramePoint3D();
+   private final FramePoint3D comDesiredVelocityAtStartOfPhase = new FramePoint3D();
+   private final FramePoint3D comDesiredAccelerationAtStartOfPhase = new FramePoint3D();
 
    private final FramePoint3D comPositionDesiredFinalCurrentSegment = new FramePoint3D();
 
@@ -145,7 +145,7 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
 
       numberOfSegmentsTransfer0 = transferCMPTrajectories.get(0).getNumberOfSegments();
 
-      setCoMInitialConditions(false);
+      setCoMInitialConditions();
       initialize();
    }
 
@@ -197,15 +197,15 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
 
       numberOfSegmentsSwing0 = swingCMPTrajectories.get(0).getNumberOfSegments();
 
-      setCoMInitialConditions(true);
+      setCoMInitialConditions();
       initialize();
    }
 
-   public void initializeForSwing()
+   public void initializeForSwingOrTransfer()
    {
-      comDesiredPositionAtStartOfSwing.set(comPositionDesiredCurrent);
-      comDesiredVelocityAtStartOfSwing.set(comVelocityDesiredCurrent);
-      comDesiredAccelerationAtStartOfSwing.set(comAccelerationDesiredCurrent);
+      comDesiredPositionAtStartOfPhase.set(comPositionDesiredCurrent);
+      comDesiredVelocityAtStartOfPhase.set(comVelocityDesiredCurrent);
+      comDesiredAccelerationAtStartOfPhase.set(comAccelerationDesiredCurrent);
    }
 
    @Override
@@ -218,7 +218,7 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
                                                       comAccelerationDesiredInitialCurrentSegment, omega0.getDoubleValue());
    }
 
-   private void setCoMInitialConditions(boolean planningFromSingleSupport)
+   private void setCoMInitialConditions()
    {
       if (isInitialTransfer.getBooleanValue())
       {
@@ -228,17 +228,11 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
          comVelocityDesiredInitialCurrentSegment.setToZero();
          comAccelerationDesiredInitialCurrentSegment.setToZero();
       }
-      else if(planningFromSingleSupport)
-      {
-         comPositionDesiredInitialCurrentSegment.set(comDesiredPositionAtStartOfSwing);
-         comVelocityDesiredInitialCurrentSegment.set(comDesiredVelocityAtStartOfSwing);
-         comAccelerationDesiredInitialCurrentSegment.set(comDesiredAccelerationAtStartOfSwing);
-      }
       else
       {
-         comPositionDesiredInitialCurrentSegment.set(comPositionDesiredCurrent); // TODO; set to 1*dt after comPositionDesiredCurrent
-         comVelocityDesiredInitialCurrentSegment.set(comVelocityDesiredCurrent);
-         comAccelerationDesiredInitialCurrentSegment.set(comAccelerationDesiredCurrent);
+         comPositionDesiredInitialCurrentSegment.set(comDesiredPositionAtStartOfPhase);
+         comVelocityDesiredInitialCurrentSegment.set(comDesiredVelocityAtStartOfPhase);
+         comAccelerationDesiredInitialCurrentSegment.set(comDesiredAccelerationAtStartOfPhase);
       }
    }
 
