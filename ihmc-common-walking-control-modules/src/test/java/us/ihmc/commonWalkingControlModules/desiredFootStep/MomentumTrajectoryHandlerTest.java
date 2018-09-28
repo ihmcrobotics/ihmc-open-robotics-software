@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -18,6 +19,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTraj
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.Random;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class MomentumTrajectoryHandlerTest
@@ -59,6 +62,82 @@ public class MomentumTrajectoryHandlerTest
       assertEquals(1.0, momentumTrajectory.get(2).getTime(), Double.MIN_VALUE);
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.0, 2.0, 0.0), momentumTrajectory.get(2).getEuclideanWaypoint().getPosition(), Double.MIN_VALUE);
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 0.0, 0.0), momentumTrajectory.get(2).getEuclideanWaypoint().getLinearVelocity(), Double.MIN_VALUE);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSamplingDurations()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoDouble yoTime = new YoDouble("time", registry);
+      MomentumTrajectoryCommand command = new MomentumTrajectoryCommand();
+
+      // assume method x(t) = -1/2 * t^3 + 3/2 * t^2 for x and y and 0.0 for z
+      command.getAngularMomentumTrajectory().addTrajectoryPoint(0.0, new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
+      command.getAngularMomentumTrajectory().addTrajectoryPoint(1.0, new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0));
+      command.getAngularMomentumTrajectory().addTrajectoryPoint(2.0, new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
+
+      // offset time by 5.0s
+      double clockTime = 5.0;
+      yoTime.set(clockTime);
+      MomentumTrajectoryHandler handler = new MomentumTrajectoryHandler(yoTime, registry);
+      handler.handleMomentumTrajectory(command);
+
+      // get trajectory for time 6.0 to 7.0 which should be equivalent to 1.0 to 2.0 before time offset
+      RecyclingArrayList<SimpleEuclideanTrajectoryPoint> momentumTrajectory = new RecyclingArrayList<>(SimpleEuclideanTrajectoryPoint.class);
+
+      Random random = new Random(1738L);
+      for (int i = 0; i < 100; i++)
+      {
+         double startTime = RandomNumbers.nextDouble(random, clockTime, clockTime + 2.0);
+         double endTime = RandomNumbers.nextDouble(random, startTime, clockTime + 2.0);
+
+         double duration = endTime - startTime;
+
+         int samples = 11;
+
+
+         handler.getAngularMomentumTrajectory(startTime, endTime, samples, momentumTrajectory);
+
+         // for three samples we expect the following result
+         assertEquals(samples, momentumTrajectory.size());
+
+         assertEquals(0.0, momentumTrajectory.get(0).getTime(), 1e-5);
+         assertEquals(duration, momentumTrajectory.get(samples - 1).getTime(), 1e-5);
+
+         for (int sampleIndex = 1; sampleIndex < samples; sampleIndex++)
+         {
+            double time = 0.1 * sampleIndex * duration;
+            assertEquals("index " + sampleIndex + " of " + samples + " failed.", time, momentumTrajectory.get(sampleIndex).getTime(), 1e-5);
+         }
+      }
+
+
+      for (int i = 0; i < 100; i++)
+      {
+         double startTime = RandomNumbers.nextDouble(random, clockTime, clockTime + 2.0);
+         double endTime = RandomNumbers.nextDouble(random, startTime, clockTime + 2.0);
+
+         double duration = endTime - startTime;
+
+         int samples = RandomNumbers.nextInt(random, 2, 12);
+
+
+         handler.getAngularMomentumTrajectory(startTime, endTime, samples, momentumTrajectory);
+
+         // for three samples we expect the following result
+         assertEquals(samples, momentumTrajectory.size());
+
+         assertEquals(0.0, momentumTrajectory.get(0).getTime(), 1e-5);
+         assertEquals(duration, momentumTrajectory.get(samples - 1).getTime(), 1e-5);
+
+         for (int sampleIndex = 0; sampleIndex < samples; sampleIndex++)
+         {
+            double timeFraction = (double) sampleIndex / ((double) samples - 1.0);
+            double time = timeFraction * duration;
+            assertEquals("index " + sampleIndex + " of " + samples + " failed. time fraction was " + timeFraction, time, momentumTrajectory.get(sampleIndex).getTime(), 1e-5);
+         }
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

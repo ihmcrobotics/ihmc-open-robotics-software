@@ -11,7 +11,7 @@ import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDat
 import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
-import us.ihmc.avatar.networkProcessor.rrtToolboxModule.WholeBodyTrajectoryToolboxModule;
+import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
@@ -37,7 +37,7 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupRosModule(robotModel, params));
       tryToStartModule(() -> setupMocapModule(robotModel, params));
       tryToStartModule(() -> setupZeroPoseRobotConfigurationPublisherModule(robotModel, params));
-      tryToStartModule(() -> setupConstrainedWholebodyPlanningToolboxModule(robotModel, params));
+      tryToStartModule(() -> setupWholebodyTrajectoryToolboxModule(robotModel, params));
       tryToStartModule(() -> setupKinematicsToolboxModule(robotModel, params));
       tryToStartModule(() -> setupFootstepPlanningToolboxModule(robotModel, params));
       tryToStartModule(() -> addTextToSpeechEngine(params));
@@ -56,15 +56,12 @@ public class DRCNetworkProcessor
          new ZeroPoseMockRobotConfigurationDataPublisherModule(robotModel);
    }
 
-   private void setupConstrainedWholebodyPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   private void setupWholebodyTrajectoryToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
-      if (!params.isConstrainedWholeBodyPlanningToolboxEnabled())
+      if (!params.isWholeBodyTrajectoryToolboxEnabled())
          return;
 
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-
-      new WholeBodyTrajectoryToolboxModule(robotModel, fullRobotModel, null, params.isConstrainedWholeBodyToolboxVisualizerEnabled());
-      PrintTools.info("setupConstrainedWholebodyPlanningToolboxModule");
+      new WholeBodyTrajectoryToolboxModule(robotModel, params.isWholeBodyTrajectoryToolboxVisualizerEnabled());
    }
 
    private void setupKinematicsToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException

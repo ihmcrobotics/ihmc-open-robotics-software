@@ -37,12 +37,10 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTestInterface
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private DRCRobotModel robotModel;
    private FullHumanoidRobotModel fullRobotModel;
-   Random random = new Random();
 
    private PushRobotController pushRobotController;
    private static final double GRAVITY = 9.81;
@@ -129,6 +127,11 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
    protected FootstepDataListMessage getFootstepDataListMessage()
    {
       return new FootstepDataListMessage();
+   }
+
+   public double getMaxPlanICPChange()
+   {
+      return 0.08;
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
@@ -243,13 +246,6 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       message.getFootstepDataList().add().set(footstepData);
    }
 
-   private void setupCameraBackView()
-   {
-      Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
-      Point3D cameraPosition = new Point3D(-10.0, 0.0, 1.0);
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
-   }
-
    private void setupCameraSideView()
    {
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
@@ -289,6 +285,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
 
       PrintTools.debug("simulationTestingParameters.getKeepSCSUp " + simulationTestingParameters.getKeepSCSUp());
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setCheckForDesiredICPContinuity(true, getMaxPlanICPChange());
       drcSimulationTestHelper.setTestEnvironment(flatGround);
       drcSimulationTestHelper.createSimulation(className);
       robotModel = getRobotModel();

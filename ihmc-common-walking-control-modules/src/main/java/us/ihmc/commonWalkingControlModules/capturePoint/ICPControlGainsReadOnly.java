@@ -8,6 +8,16 @@ public interface ICPControlGainsReadOnly extends IntegratorGainsReadOnly
 
    double getKpOrthogonalToMotion();
 
+   default double getFeedbackPartMaxValueParallelToMotion()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   default double getFeedbackPartMaxValueOrthogonalToMotion()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
    default double getFeedbackPartMaxRate()
    {
       return Double.POSITIVE_INFINITY;

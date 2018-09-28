@@ -70,7 +70,7 @@ public class PushRecoveryControlModule
    private final FramePoint2D projectedCapturePoint2d = new FramePoint2D();
 
    public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, HighLevelHumanoidControllerToolbox controllerToolbox,
-         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
+                                    WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       controlDT = controllerToolbox.getControlDT();
       this.bipedSupportPolygon = bipedSupportPolygons;
@@ -127,8 +127,8 @@ public class PushRecoveryControlModule
    }
 
    /**
-    * Return null if the robot is not falling.
-    * If the robot is falling, it returns the suggested swingSide to recover.
+    * Return null if the robot is not falling. If the robot is falling, it returns the suggested
+    * swingSide to recover.
     */
    public RobotSide isRobotFallingFromDoubleSupport()
    {
@@ -236,6 +236,15 @@ public class PushRecoveryControlModule
     */
    public boolean checkAndUpdateFootstep(double swingTimeRemaining, Footstep nextFootstep)
    {
+      /*
+       * TODO The swing time remaining is being provided from the ICP planner. When standing the
+       * remaining time is NaN, and since the planner is only updated after this module, well we get
+       * a NaN for one tick which is enough to prevent capture region to be properly estimated. The
+       * actual duration is arbitrary and does not need to be accurate here.
+       */
+      if (Double.isNaN(swingTimeRemaining))
+         swingTimeRemaining = 1.0;
+
       RobotSide swingSide = nextFootstep.getRobotSide();
       RobotSide supportSide = swingSide.getOppositeSide();
       footPolygon.setIncludingFrame(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
