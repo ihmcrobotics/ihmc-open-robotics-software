@@ -663,7 +663,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       if (upcomingFootstepData.getSwingTime() == Double.POSITIVE_INFINITY)
       { // We're in flamingo support, so only do the current one
-         upcomingFootstepData.setSwingTime(defaultSwingTime);
          computeCoPPointsForFlamingoStance();
       }
       else
