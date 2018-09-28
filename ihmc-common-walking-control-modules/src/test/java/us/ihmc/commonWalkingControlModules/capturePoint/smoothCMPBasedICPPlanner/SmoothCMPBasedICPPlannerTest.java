@@ -830,6 +830,11 @@ public class SmoothCMPBasedICPPlannerTest
          addFootsteps(currentStepCount, footstepList, timingList, planner2);
 
          updateContactState(currentStepCount, 0.0);
+         for(RobotSide robotSide : RobotSide.values)
+         {
+            bipedSupportPolygons.getSoleZUpFrames().get(robotSide).update();
+         }
+
          if (inDoubleSupport.getBooleanValue())
          {
             planner1.setTransferToSide(footstepList.get(currentStepCount).getRobotSide().getOppositeSide());
@@ -941,6 +946,11 @@ public class SmoothCMPBasedICPPlannerTest
       for (double timeInState = 0.0; timeInState < totalTime; timeInState += dt)
       {
          updateContactState(currentStepCount, timeInState / totalTime);
+         for(RobotSide robotSide : RobotSide.values)
+         {
+            bipedSupportPolygons.getSoleZUpFrames().get(robotSide).update();
+         }
+
          simulateOneTickAndAssertSamePlan(planner1, planner2);
       }
    }
@@ -985,10 +995,6 @@ public class SmoothCMPBasedICPPlannerTest
       }
 
       bipedSupportPolygons.updateUsingContactStates(contactStates);
-      for(RobotSide robotSide : RobotSide.values)
-      {
-         bipedSupportPolygons.getSoleZUpFrames().get(robotSide).update();
-      }
    }
 
    private void simulateOneTickAndAssertSamePlan(SmoothCMPBasedICPPlanner planner1, SmoothCMPBasedICPPlanner planner2)
