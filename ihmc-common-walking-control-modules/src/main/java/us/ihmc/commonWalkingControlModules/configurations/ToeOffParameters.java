@@ -11,6 +11,15 @@ public abstract class ToeOffParameters
    public abstract boolean doToeOffIfPossibleInSingleSupport();
 
    /**
+    * When doing toe off in double support, look not only at the upcoming support foot, but also the next footstep location
+    * to determine the required ICP polygonal area.
+    */
+   public boolean lookAtTwoStepCapturabilityForToeOff()
+   {
+      return true;
+   }
+
+   /**
     * Whether or not the location of the ECMP must be close enough to the support polygon before allowing toe off.
     *
     * @return whether or not to check the ECMP location.

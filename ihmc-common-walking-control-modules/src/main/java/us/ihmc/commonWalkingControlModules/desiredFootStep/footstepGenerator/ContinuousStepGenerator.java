@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.mutable.MutableObject;
+
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
@@ -13,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepVisualizer;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -29,7 +32,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -142,6 +144,9 @@ public class ContinuousStepGenerator implements Updatable
 
    private final SideDependentList<List<FootstepVisualizer>> footstepSideDependentVisualizers = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
+   private final MutableObject<FootstepStatus> latestStatusReceived = new MutableObject<>(null);
+   private final MutableObject<RobotSide> footstepCompletionSide = new MutableObject<>(null);
+
    /**
     * Creates a new step generator, its {@code YoVariable}s will not be attached to any registry.
     */
@@ -196,6 +201,30 @@ public class ContinuousStepGenerator implements Updatable
       {
          currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue()));
          counter = numberOfTicksBeforeSubmittingFootsteps.getValue(); // To make footsteps being sent right away. 
+      }
+
+      { // Processing footstep status
+         FootstepStatus statusToProcess = latestStatusReceived.getValue();
+
+         if (statusToProcess != null)
+         {
+            if (statusToProcess == FootstepStatus.STARTED)
+            {
+               if (!footsteps.isEmpty())
+                  footsteps.remove(0);
+               if (!footsteps.isEmpty())
+                  firstFootstep.set(footsteps.get(0));
+            }
+            else if (statusToProcess == FootstepStatus.COMPLETED)
+            {
+               updateFirstFootstep = true;
+               currentSupportSide.set(footstepCompletionSide.getValue());
+               currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue()));
+            }
+         }
+
+         latestStatusReceived.setValue(null);
+         footstepCompletionSide.setValue(null);
       }
 
       footstepDataListMessage.setDefaultSwingDuration(swingTime.getValue());
@@ -400,9 +429,8 @@ public class ContinuousStepGenerator implements Updatable
     */
    public void notifyFootstepCompleted(RobotSide robotSide)
    {
-      updateFirstFootstep = true;
-      currentSupportSide.set(robotSide);
-      currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue()));
+      latestStatusReceived.setValue(FootstepStatus.COMPLETED);
+      footstepCompletionSide.setValue(robotSide);
    }
 
    /**
@@ -414,8 +442,8 @@ public class ContinuousStepGenerator implements Updatable
     */
    public void notifyFootstepStarted()
    {
-      if (!footsteps.isEmpty())
-         footsteps.remove(0);
+      latestStatusReceived.setValue(FootstepStatus.STARTED);
+      footstepCompletionSide.setValue(null);
    }
 
    /**

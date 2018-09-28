@@ -255,13 +255,14 @@ public abstract class LinearMomentumRateOfChangeControlModule
    private boolean desiredCoPcontainedNaN = false;
 
    private final FramePoint2D desiredCoPToThrowAway = new FramePoint2D();
-   public void compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
+   public boolean compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
    {
-      compute(desiredCMPPreviousValue, desiredCMPToPack, desiredCoPToThrowAway);
+      return compute(desiredCMPPreviousValue, desiredCMPToPack, desiredCoPToThrowAway);
    }
 
-   public void compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack, FramePoint2D desiredCoPToPack)
+   public boolean compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack, FramePoint2D desiredCoPToPack)
    {
+      boolean inputsAreOk = checkInputs();
       computeCMPInternal(desiredCMPPreviousValue);
 
       capturePoint.changeFrame(worldFrame);
@@ -319,6 +320,42 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
       momentumRateCommand.setWeights(angularMomentumRateWeight.getX(), angularMomentumRateWeight.getY(), angularMomentumRateWeight.getZ(),
                                      linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
+
+      return inputsAreOk;
+   }
+
+   private boolean checkInputs()
+   {
+      boolean inputsAreOk = true;
+      if (desiredCapturePoint.containsNaN())
+      {
+         PrintTools.error("Desired ICP contains NaN, setting it to the current ICP and failing.");
+         desiredCapturePoint.set(capturePoint);
+         inputsAreOk = false;
+      }
+
+      if (desiredCapturePointVelocity.containsNaN())
+      {
+         PrintTools.error("Desired ICP Velocity contains NaN, setting it to zero and failing.");
+         desiredCapturePointVelocity.setToZero();
+         inputsAreOk = false;
+      }
+
+      if (perfectCoP.containsNaN())
+      {
+         PrintTools.error("Perfect CoP contains NaN, setting it to the current ICP and failing.");
+         perfectCoP.set(capturePoint);
+         inputsAreOk = false;
+      }
+
+      if (perfectCMP.containsNaN())
+      {
+         PrintTools.error("Perfect CMP contains NaN, setting it to the current ICP and failing.");
+         perfectCMP.set(capturePoint);
+         inputsAreOk = false;
+      }
+
+      return inputsAreOk;
    }
 
    public void setCMPProjectionArea(FrameConvexPolygon2DReadOnly areaToProjectInto, FrameConvexPolygon2DReadOnly safeArea)
