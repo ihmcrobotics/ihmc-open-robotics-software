@@ -16,8 +16,11 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CMPGeneration.CMPTrajectory;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CMPGeneration.ReferenceCMPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectoryPoint;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.ReferenceICPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
@@ -32,6 +35,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -48,6 +52,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.Trajectory;
+import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -991,7 +998,10 @@ public class SmoothCMPBasedICPPlannerTest
       getAllVariablesFromPlanner(planner2, icpPlannerData2);
 
       assertCoPWaypointsAreEqual(planner1, planner2, 1e-10);
-      assertPlansAreEqual(icpPlannerData1, icpPlannerData2, 1e-8);
+      assertCMPWaypointsAreEqual(planner1, planner2, 1e-10);
+      assertICPWaypointsAreEqual(planner1, planner2, 1e-10);
+      assertCoMPlansAreEqual(planner1, planner2, 1e-10);
+      assertPlansAreEqual(icpPlannerData1, icpPlannerData2, 1e-10);
    }
 
    private static void assertCoPWaypointsAreEqual(SmoothCMPBasedICPPlanner planner1, SmoothCMPBasedICPPlanner planner2, double epsilon)
@@ -1010,6 +1020,78 @@ public class SmoothCMPBasedICPPlannerTest
             CoPTrajectoryPoint coPTrajectoryPoint2 = pointsInFoot2.get(j);
             Assert.assertTrue(coPTrajectoryPoint1.epsilonEquals(coPTrajectoryPoint2, epsilon));
          }
+      }
+   }
+
+   private static void assertCMPWaypointsAreEqual(SmoothCMPBasedICPPlanner planner1, SmoothCMPBasedICPPlanner planner2, double epsilon)
+   {
+      List<CMPTrajectory> swingCMPTrajectories1 = planner1.getReferenceCMPGenerator().getSwingCMPTrajectories();
+      List<CMPTrajectory> swingCMPTrajectories2 = planner2.getReferenceCMPGenerator().getSwingCMPTrajectories();
+      assertCMPTrajectoryListsAreEqual(epsilon, swingCMPTrajectories1, swingCMPTrajectories2);
+
+      List<CMPTrajectory> transferCMPTrajectories1 = planner1.getReferenceCMPGenerator().getTransferCMPTrajectories();
+      List<CMPTrajectory> transferCMPTrajectories2 = planner2.getReferenceCMPGenerator().getTransferCMPTrajectories();
+      assertCMPTrajectoryListsAreEqual(epsilon, transferCMPTrajectories1, transferCMPTrajectories2);
+   }
+
+   private static void assertCMPTrajectoryListsAreEqual(double epsilon, List<CMPTrajectory> cmpTrajectories1, List<CMPTrajectory> cmpTrajectories2)
+   {
+      for (int i = 0; i < cmpTrajectories1.size(); i++)
+      {
+         CMPTrajectory cmpTrajectory1 = cmpTrajectories1.get(i);
+         CMPTrajectory cmpTrajectory2 = cmpTrajectories2.get(i);
+
+         for (int j = 0; j < cmpTrajectory1.getNumberOfSegments(); j++)
+         {
+            Trajectory3D segment1 = cmpTrajectory1.getSegment(j);
+            Trajectory3D segment2 = cmpTrajectory2.getSegment(j);
+            Assert.assertEquals(segment1.getInitialTime(), segment2.getInitialTime(), epsilon);
+            Assert.assertEquals(segment1.getFinalTime(), segment2.getFinalTime(), epsilon);
+
+            for (int k = 0; k < 3; k++)
+            {
+               Trajectory trajectory1 = segment1.getTrajectory(k);
+               Trajectory trajectory2 = segment2.getTrajectory(k);
+
+               for (int l = 0; l < trajectory1.getNumberOfCoefficients(); l++)
+               {
+                  Assert.assertEquals(trajectory1.getCoefficient(l), trajectory2.getCoefficient(l), epsilon);
+               }
+            }
+         }
+      }
+   }
+
+   private static void assertICPWaypointsAreEqual(SmoothCMPBasedICPPlanner planner1, SmoothCMPBasedICPPlanner planner2, double epsilon)
+   {
+      List<? extends FramePoint3DReadOnly> icpPositionDesiredInitialList1 = planner1.getReferenceICPGenerator().getICPPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> icpPositionDesiredInitialList2 = planner2.getReferenceICPGenerator().getICPPositionDesiredInitialList();
+      assertFramePointListsAreEqual(icpPositionDesiredInitialList1, icpPositionDesiredInitialList2, epsilon);
+
+      List<? extends FramePoint3DReadOnly> icpPositionDesiredFinalList1 = planner1.getReferenceICPGenerator().getICPPositionDesiredFinalList();
+      List<? extends FramePoint3DReadOnly> icpPositionDesiredFinalList2 = planner2.getReferenceICPGenerator().getICPPositionDesiredFinalList();
+      assertFramePointListsAreEqual(icpPositionDesiredFinalList1, icpPositionDesiredFinalList2, epsilon);
+   }
+
+   private static void assertCoMPlansAreEqual(SmoothCMPBasedICPPlanner planner1, SmoothCMPBasedICPPlanner planner2, double epsilon)
+   {
+      List<? extends FramePoint3DReadOnly> coMPositionDesiredInitialList1 = planner1.getReferenceCoMGenerator().getCoMPositionDesiredInitialList();
+      List<? extends FramePoint3DReadOnly> coMPositionDesiredInitialList2 = planner2.getReferenceCoMGenerator().getCoMPositionDesiredInitialList();
+      assertFramePointListsAreEqual(coMPositionDesiredInitialList1, coMPositionDesiredInitialList2, epsilon);
+
+      List<? extends FramePoint3DReadOnly> coMPositionDesiredFinalList1 = planner1.getReferenceCoMGenerator().getCoMPositionDesiredFinalList();
+      List<? extends FramePoint3DReadOnly> coMPositionDesiredFinalList2 = planner2.getReferenceCoMGenerator().getCoMPositionDesiredFinalList();
+      assertFramePointListsAreEqual(coMPositionDesiredFinalList1, coMPositionDesiredFinalList2, epsilon);
+   }
+
+   private static void assertFramePointListsAreEqual(List<? extends FramePoint3DReadOnly> waypointList1,
+                                                     List<? extends FramePoint3DReadOnly> waypointList2, double epsilon)
+   {
+      for (int i = 0; i < waypointList1.size(); i++)
+      {
+         FramePoint3DReadOnly icpWaypoint1 = waypointList1.get(i);
+         FramePoint3DReadOnly icpWaypoint2 = waypointList2.get(i);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(icpWaypoint1, icpWaypoint2, epsilon);
       }
    }
 
