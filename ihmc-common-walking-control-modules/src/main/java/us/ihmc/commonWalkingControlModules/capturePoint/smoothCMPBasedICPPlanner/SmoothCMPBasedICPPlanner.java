@@ -379,6 +379,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
+      referenceCoPGenerator.initializeForSwing();
+
       updateSingleSupportPlan(true);
    }
 
