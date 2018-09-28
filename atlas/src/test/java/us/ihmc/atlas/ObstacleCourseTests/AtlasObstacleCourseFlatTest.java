@@ -154,6 +154,14 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    {
       super.testStandingWithOscillatingFeet();
    }
+   
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 43.2)
+   @Test(timeout = 220000)
+   public void testStandingWithStateEstimatorDrift() throws SimulationExceededMaximumTimeException
+   {
+      super.testStandingWithStateEstimatorDrift();
+   }
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 96.1)
@@ -182,12 +190,12 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Override
    protected Vector3D getFootSlipVector()
    {
-      return new Vector3D(0.05, -0.05, 0.0);//(0.06, -0.06, 0.0);
+      return new Vector3D(0.05, -0.07, 0.0);//(0.06, -0.06, 0.0);
    }
 
    @Override
    protected double getFootSlipTimeDeltaAfterTouchdown()
    {
-      return 0.025;
+      return 0.0;
    }
 }

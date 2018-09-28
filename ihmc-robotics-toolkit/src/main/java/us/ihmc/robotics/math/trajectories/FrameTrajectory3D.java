@@ -613,12 +613,6 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
                                   zTrajectory.getDerivative(order, x));
    }
 
-   public void getDerivative(FrameTrajectory3D dervTraj, int order)
-   {
-      checkReferenceFrameMatch(dervTraj);
-      super.getDerivative(dervTraj, order);
-   }
-
    public void getStartPoint(FramePoint3D positionToPack)
    {
       positionToPack.setToZero(referenceFrame);

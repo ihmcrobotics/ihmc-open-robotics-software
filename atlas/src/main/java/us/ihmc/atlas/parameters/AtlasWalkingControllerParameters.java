@@ -367,11 +367,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return new PIDSE3Configuration(GainCoupling.XY, false);
    }
 
-   public double getSwingMaxHeightForPushRecoveryTrajectory()
-   {
-      return 0.15 * jointMap.getModelScale();
-   }
-
    @Override
    public double getDefaultTransferTime()
    {
@@ -481,7 +476,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaxAllowedDistanceCMPSupport()
    {
-      return 0.06 * jointMap.getModelScale();
+      return 0.04 * jointMap.getModelScale();
    }
 
    /** {@inheritDoc} */

@@ -550,7 +550,14 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
          CommonOps.mult(linearInequalityConstraintsCMatrixO, solutionToPack, linearInequalityConstraintsCheck);
          CommonOps.subtractEquals(linearInequalityConstraintsCheck, linearInequalityConstraintsDVectorO);
 
-         maxInequalityViolation = CommonOps.elementMax(linearInequalityConstraintsCheck);
+         for (int i = 0; i < linearInequalityConstraintsCheck.getNumRows(); i++)
+         {
+            if (activeInequalityIndices.contains(i))
+               continue;
+
+            if (linearInequalityConstraintsCheck.get(i, 0) >= maxInequalityViolation)
+               maxInequalityViolation = linearInequalityConstraintsCheck.get(i, 0);
+         }
       }
 
 
@@ -558,14 +565,30 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
       if (numberOfLowerBoundConstraints != 0)
       {
          CommonOps.subtract(variableLowerBounds, solutionToPack, lowerBoundViolations);
-         maxLowerBoundViolation = CommonOps.elementMax(lowerBoundViolations);
+
+         for (int i = 0; i < lowerBoundViolations.getNumRows(); i++)
+         {
+            if (activeLowerBoundIndices.contains(i))
+               continue;
+
+            if (lowerBoundViolations.get(i, 0) >= maxLowerBoundViolation)
+               maxLowerBoundViolation = lowerBoundViolations.get(i, 0);
+         }
       }
 
       upperBoundViolations.reshape(numberOfUpperBoundConstraints, 1);
       if (numberOfUpperBoundConstraints != 0)
       {
          CommonOps.subtract(solutionToPack, variableUpperBounds, upperBoundViolations);
-         maxUpperBoundViolation = CommonOps.elementMax(upperBoundViolations);
+
+         for (int i = 0; i < upperBoundViolations.getNumRows(); i++)
+         {
+            if (activeUpperBoundIndices.contains(i))
+               continue;
+
+            if (upperBoundViolations.get(i, 0) >= maxUpperBoundViolation)
+               maxUpperBoundViolation = upperBoundViolations.get(i, 0);
+         }
       }
 
       double maxConstraintViolation = Math.max(maxInequalityViolation, Math.max(maxLowerBoundViolation, maxUpperBoundViolation));

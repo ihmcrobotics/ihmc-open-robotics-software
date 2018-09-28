@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools.Bound;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -356,7 +357,7 @@ public class ConvexPolygonScaler
     * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
     * polygonQ is a point, a square is returned around the point. polygonQ is not changed. 
     */
-   public void scaleConvexPolygon(FrameConvexPolygon2D polygonQ, double distance, FrameConvexPolygon2D framePolygonToPack)
+   public void scaleConvexPolygon(FrameConvexPolygon2DReadOnly polygonQ, double distance, FrameConvexPolygon2D framePolygonToPack)
    {      
       if (Math.abs(distance) < 1.0e-10)
       {

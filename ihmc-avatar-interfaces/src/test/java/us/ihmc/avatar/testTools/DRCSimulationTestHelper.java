@@ -1,6 +1,7 @@
 package us.ihmc.avatar.testTools;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.InputStream;
@@ -14,6 +15,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import controller_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableDouble;
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
@@ -41,6 +45,7 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -65,7 +70,9 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class DRCSimulationTestHelper
@@ -103,6 +110,8 @@ public class DRCSimulationTestHelper
    private final DRCGuiInitialSetup guiInitialSetup;
 
    private final boolean checkIfDesiredICPHasBeenInvalid = true;
+   private boolean checkForDesiredICPContinuity = false;
+   private double maxICPPlanError = 0.04;
    protected final String robotName;
 
    @SuppressWarnings("rawtypes")
@@ -208,6 +217,9 @@ public class DRCSimulationTestHelper
       {
          nothingChangedVerifier = null;
       }
+
+      if (checkForDesiredICPContinuity)
+         setupPlanContinuityTesters();
    }
 
    public YoVariable<?> getYoVariable(String name)
@@ -569,6 +581,17 @@ public class DRCSimulationTestHelper
       }
    }
 
+   public void setCheckForDesiredICPContinuity(boolean checkForDesiredICPContinuity, double maxICPPlanError)
+   {
+      this.checkForDesiredICPContinuity = checkForDesiredICPContinuity;
+      this.maxICPPlanError = maxICPPlanError;
+   }
+
+   public void setMaxICPPlanError(double maxICPPlanError)
+   {
+      this.maxICPPlanError = maxICPPlanError;
+   }
+
    public void setStartingLocation(DRCStartingLocation startingLocation)
    {
       if (startingLocation != null)
@@ -662,4 +685,53 @@ public class DRCSimulationTestHelper
    {
       ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
    }
+
+   private void setupPlanContinuityTesters()
+   {
+      final YoDouble desiredICPX = (YoDouble) getYoVariable("desiredICPX");
+      final YoDouble desiredICPY = (YoDouble) getYoVariable("desiredICPY");
+
+      final Point2D previousDesiredICP = new Point2D();
+      final Point2D desiredICP = new Point2D();
+
+      final int ticksToInitialize = 100;
+      final MutableInt xTicks = new MutableInt(0);
+      final MutableInt yTicks = new MutableInt(0);
+
+      desiredICPX.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            desiredICP.setX(desiredICPX.getDoubleValue());
+            if (xTicks.getValue() > ticksToInitialize && yTicks.getValue() > ticksToInitialize)
+            {
+               assertTrue("ICP plan desired jumped from " + previousDesiredICP + " to " + desiredICP + " in one control DT.",
+                          previousDesiredICP.distance(desiredICP) < maxICPPlanError);
+            }
+            previousDesiredICP.set(desiredICP);
+
+            xTicks.setValue(xTicks.getValue() + 1);
+         }
+      });
+
+      desiredICPY.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            desiredICP.setY(desiredICPY.getDoubleValue());
+            if (xTicks.getValue() > ticksToInitialize && yTicks.getValue() > ticksToInitialize)
+            {
+               assertTrue("ICP plan desired jumped from " + previousDesiredICP + " to " + desiredICP + " in one control DT.",
+                          previousDesiredICP.distance(desiredICP) < maxICPPlanError);
+            }
+            previousDesiredICP.set(desiredICP);
+
+            yTicks.setValue(yTicks.getValue() + 1);
+         }
+      });
+   }
+
+
 }

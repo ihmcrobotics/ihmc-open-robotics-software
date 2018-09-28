@@ -7,8 +7,6 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
 import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -290,13 +288,23 @@ public class SmoothCoMIntegrationToolbox
       generalizedAlphaCoMPrimeRow.reshape(1, numberOfCoefficients);
       generalizedAlphaCoMPrimeRow.zero();
 
+      double sign = 1.0;
+      double omega0Inv = 1.0 / omega0;
+      double omega0PowerInitial = 1.0;
+
       for (int i = 0; i < numberOfCoefficients; i++)
       {
+         double omega0Power = omega0PowerInitial;
+
          for (int j = i; j < numberOfCoefficients; j++)
          {
-            double scalar = Math.pow(-1.0, i) * Math.pow(omega0, -j);
-            CommonOps.addEquals(generalizedAlphaCoMPrimeRow, scalar, cmpPolynomial.getXPowersDerivativeVector(j + alphaCoMDerivativeOrder, time));
+            double scalar = sign * omega0Power; // sign * omega0^(-j)
+            CommonOps.addEquals(generalizedAlphaCoMPrimeRow, scalar, cmpPolynomial.evaluateGeometricSequenceDerivative(j + alphaCoMDerivativeOrder, time));
+            omega0Power *= omega0Inv;
          }
+
+         sign = -sign;
+         omega0PowerInitial *= omega0Inv;
       }
    }
 
@@ -329,14 +337,53 @@ public class SmoothCoMIntegrationToolbox
       generalizedBetaCoMPrimeRow.reshape(1, numberOfCoefficients);
       generalizedBetaCoMPrimeRow.zero();
 
+      double sign = betaCoMDerivativeOrder %2 == 0 ? 1.0 : -1.0;
+      double omega0Inv = 1.0 / omega0;
+      double omega0PowInitial = power(omega0, betaCoMDerivativeOrder);
+      double expOmega0Time = Math.exp(omega0 * (timeSegmentInitial - time));
+
       for (int i = 0; i < numberOfCoefficients; i++)
       {
+         double omega0Pow = omega0PowInitial;
+
          for (int j = i; j < numberOfCoefficients; j++)
          {
-            double scalar = Math.pow(-1.0, i + betaCoMDerivativeOrder) * Math.pow(omega0, -j + betaCoMDerivativeOrder) * Math.exp(omega0 * (timeSegmentInitial - time));
-            CommonOps.addEquals(generalizedBetaCoMPrimeRow, scalar, cmpPolynomial.getXPowersDerivativeVector(j, timeSegmentInitial));
+            double scalar = sign * omega0Pow * expOmega0Time; // == sign * omega^(betaCoMDerivativeOrder - j) * exp(omega0 * (timeSegmentInitial - time))
+            DenseMatrix64F xPowersDerivativeVector = cmpPolynomial.evaluateGeometricSequenceDerivative(j, timeSegmentInitial);
+            CommonOps.addEquals(generalizedBetaCoMPrimeRow, scalar, xPowersDerivativeVector);
+            omega0Pow *= omega0Inv;
          }
+
+         sign = -sign;
+         omega0PowInitial *= omega0Inv;
       }
+   }
+
+   /**
+    * Raise the scalar {@code a} to the power of {@code exponent}.
+    * <p>
+    * Compared to {@link Math#pow(double, double)}, this algorithm is optimized for integer
+    * exponents.
+    * </p>
+    * 
+    * @param a the base.
+    * @param exponent the exponent.
+    * @return the value {@code a}<sup>{@code exponent}</sup>.
+    */
+   public static double power(double a, int exponent)
+   {
+      if (exponent < 0)
+         return 1.0 / power(a, -exponent);
+      if (exponent == 0)
+         return 1.0;
+      if (exponent == 1)
+         return a;
+
+      double halfPow = power(a, exponent / 2);
+      if ((exponent & 1) == 0) // exponent is even
+         return halfPow * halfPow;
+      else
+         return a * halfPow * halfPow;
    }
 
    /**
@@ -350,7 +397,8 @@ public class SmoothCoMIntegrationToolbox
    public double calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(double omega0, double time, int gammaCoMDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
    {
       double timeSegmentInitial = cmpPolynomial3D.getInitialTime();
-      return Math.pow(-1.0, gammaCoMDerivativeOrder) * Math.pow(omega0, gammaCoMDerivativeOrder) * Math.exp(omega0 * (timeSegmentInitial - time));
+      double sign = gammaCoMDerivativeOrder % 2 == 0 ? 1.0 : -1.0;
+      return sign * power(omega0, gammaCoMDerivativeOrder) * Math.exp(omega0 * (timeSegmentInitial - time));
    }
 
    /**
@@ -363,8 +411,11 @@ public class SmoothCoMIntegrationToolbox
    {                  
       double timeSegmentInitial = cmpPolynomial3D.getInitialTime();
       double timeSegmentTotal = cmpPolynomial3D.getFinalTime();
-      return 0.5 * Math.exp(omega0 * (timeSegmentInitial - timeSegmentTotal)) * (Math.pow(omega0, deltaCoMDerivativeOrder) * Math.exp(omega0 * (time - timeSegmentInitial))
-            - Math.pow(-1.0, deltaCoMDerivativeOrder) * Math.pow(omega0, deltaCoMDerivativeOrder) * Math.exp(omega0 * (timeSegmentInitial - time)));
+      double expOmega0Time = Math.exp(omega0 * (time - timeSegmentInitial));
+      double powOmega0 = power(omega0, deltaCoMDerivativeOrder);
+      double sign = deltaCoMDerivativeOrder % 2 == 0 ? 1.0 : -1.0;
+
+      return 0.5 * Math.exp(omega0 * (timeSegmentInitial - timeSegmentTotal)) * powOmega0 * (expOmega0Time - sign / expOmega0Time);
    }
 
    private void initializeMatrices3D(int numberOfCoefficients)
