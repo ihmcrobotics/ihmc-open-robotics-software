@@ -62,7 +62,7 @@ public class FootControlModule
       }
    }
 
-   private static final double coefficientOfFriction = 0.8;
+   private static final double coefficientOfFriction = 0.5;
 
    private final StateMachine<ConstraintType, AbstractFootControlState> stateMachine;
    private final YoEnum<ConstraintType> requestedState;
