@@ -1,22 +1,24 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+
+import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
-import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.Assertions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-
-import java.util.Random;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 
 public class TrajectoryTest
 {
-   private static double epsilon = 1e-2;
+   private static final int ITERATIONS = 1000;
+   private static final double LARGE_EPSILON = 1.0e-2;
+   private static final double SMALL_EPSILON = 1.0e-12;
 
    String namePrefix = "TrajectoryTest";
    private final Random random = new Random(3294508L);
@@ -28,14 +30,206 @@ public class TrajectoryTest
       Trajectory traj = new Trajectory(2);
       assertEquals(0, traj.getNumberOfCoefficients());
       traj.setLinear(1, 2, 3, 5);
-      assertEquals(1, traj.getInitialTime(), Epsilons.ONE_BILLIONTH);
-      assertEquals(2, traj.getFinalTime(), Epsilons.ONE_BILLIONTH);
+      assertEquals(1, traj.getInitialTime(), SMALL_EPSILON);
+      assertEquals(2, traj.getFinalTime(), SMALL_EPSILON);
       traj.compute(traj.getInitialTime());
-      assertEquals(3.0, traj.getPosition(), Epsilons.ONE_BILLIONTH);
+      assertEquals(3.0, traj.getPosition(), SMALL_EPSILON);
       traj.compute(traj.getFinalTime());
-      assertEquals(5.0, traj.getPosition(), Epsilons.ONE_BILLIONTH);
-      assertEquals(2, traj.getCoefficient(1), Epsilons.ONE_BILLIONTH);
-      assertEquals(1, traj.getCoefficient(0), Epsilons.ONE_BILLIONTH);
+      assertEquals(5.0, traj.getPosition(), SMALL_EPSILON);
+      assertEquals(2, traj.getCoefficient(1), SMALL_EPSILON);
+      assertEquals(1, traj.getCoefficient(0), SMALL_EPSILON);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetConstant() throws Exception
+   {
+      Random random = new Random(3453);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int maxNumberOfCoefficients = random.nextInt(10);
+         Trajectory trajectory = new Trajectory(maxNumberOfCoefficients);
+         double t0 = random.nextDouble();
+         double tf = t0 + random.nextDouble();
+         double z = RandomNumbers.nextDouble(random, 1.0);
+
+         if (maxNumberOfCoefficients < 1)
+         {
+            Assertions.assertExceptionThrown(RuntimeException.class, () -> trajectory.setConstant(t0, tf, z));
+            continue;
+         }
+
+         trajectory.setConstant(t0, tf, z);
+
+         for (double t = t0; t <= tf; t += (tf - t0) / 1000)
+         {
+            trajectory.compute(t);
+            assertEquals(z, trajectory.getPosition(), SMALL_EPSILON);
+            assertEquals(0, trajectory.getVelocity(), SMALL_EPSILON);
+            assertEquals(0, trajectory.getAcceleration(), SMALL_EPSILON);
+         }
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetLinear() throws Exception
+   {
+      Random random = new Random(3453);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int maxNumberOfCoefficients = random.nextInt(10);
+         Trajectory trajectory = new Trajectory(maxNumberOfCoefficients);
+         double t0 = random.nextDouble();
+         double tf = t0 + random.nextDouble();
+         double z0 = RandomNumbers.nextDouble(random, 1.0);
+         double zf = RandomNumbers.nextDouble(random, 1.0);
+
+         if (maxNumberOfCoefficients < 2)
+         {
+            Assertions.assertExceptionThrown(RuntimeException.class, () -> trajectory.setLinear(t0, tf, z0, zf));
+            continue;
+         }
+
+         trajectory.setLinear(t0, tf, z0, zf);
+
+         double zDot = (zf - z0) / (tf - t0);
+         Trajectory derivative = new Trajectory(1);
+         derivative.setConstant(t0, tf, zDot);
+
+         trajectory.compute(t0);
+         assertEquals(z0, trajectory.getPosition(), SMALL_EPSILON);
+         assertEquals(zDot, trajectory.getVelocity(), SMALL_EPSILON);
+         assertEquals(0, trajectory.getAcceleration(), SMALL_EPSILON);
+
+         trajectory.compute(tf);
+         assertEquals(zf, trajectory.getPosition(), SMALL_EPSILON);
+         assertEquals(zDot, trajectory.getVelocity(), SMALL_EPSILON);
+         assertEquals(0, trajectory.getAcceleration(), SMALL_EPSILON);
+
+         for (double t = t0; t <= tf; t += (tf - t0) / 1000)
+         {
+            trajectory.compute(t);
+            assertEquals(EuclidCoreTools.interpolate(z0, zf, (t - t0) / (tf - t0)), trajectory.getPosition(), SMALL_EPSILON);
+            assertEquals(zDot, trajectory.getVelocity(), SMALL_EPSILON);
+            assertEquals(0, trajectory.getAcceleration(), SMALL_EPSILON);
+
+            derivative.compute(t);
+            assertEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
+            assertEquals(derivative.getVelocity(), trajectory.getAcceleration(), SMALL_EPSILON);
+         }
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetQuadratic() throws Exception
+   {
+      Random random = new Random(3453);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int maxNumberOfCoefficients = random.nextInt(10);
+         Trajectory trajectory = new Trajectory(maxNumberOfCoefficients);
+         double t0 = random.nextDouble();
+         double tf = t0 + 0.5;
+         double z0 = RandomNumbers.nextDouble(random, 1.0);
+         double zd0 = RandomNumbers.nextDouble(random, 1.0);
+         double zf = RandomNumbers.nextDouble(random, 1.0);
+
+         if (maxNumberOfCoefficients < 3)
+         {
+            Assertions.assertExceptionThrown(RuntimeException.class, () -> trajectory.setQuadratic(t0, tf, z0, zd0, zf));
+            continue;
+         }
+
+         trajectory.setQuadratic(t0, tf, z0, zd0, zf);
+
+         trajectory.compute(t0);
+         assertEquals(z0, trajectory.getPosition(), SMALL_EPSILON);
+         assertEquals(zd0, trajectory.getVelocity(), SMALL_EPSILON);
+
+         trajectory.compute(tf);
+         assertEquals(zf, trajectory.getPosition(), SMALL_EPSILON);
+
+         Trajectory derivative = new Trajectory(2);
+         derivative.setLinear(t0, tf, zd0, trajectory.getVelocity());
+
+         double dt = 1.0e-8;
+
+         for (double t = t0; t <= tf; t += (tf - t0) / 1000)
+         {
+            trajectory.compute(t);
+            derivative.compute(t);
+
+            assertEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
+            assertEquals(derivative.getVelocity(), trajectory.getAcceleration(), SMALL_EPSILON);
+
+            trajectory.compute(t + dt);
+            double nextPosition = trajectory.getPosition();
+            trajectory.compute(t - dt);
+            double lastPosition = trajectory.getPosition();
+            assertEquals(0.5 * (nextPosition - lastPosition) / dt, trajectory.getVelocity(), 1.0e-6);
+
+         }
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetCubic() throws Exception
+   {
+      Random random = new Random(3453);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int maxNumberOfCoefficients = random.nextInt(10);
+         Trajectory trajectory = new Trajectory(maxNumberOfCoefficients);
+         double t0 = random.nextDouble();
+         double tf = t0 + 0.5;
+         double z0 = RandomNumbers.nextDouble(random, 1.0);
+         double zd0 = RandomNumbers.nextDouble(random, 1.0);
+         double zf = RandomNumbers.nextDouble(random, 1.0);
+         double zdf = RandomNumbers.nextDouble(random, 1.0);
+
+         if (maxNumberOfCoefficients < 4)
+         {
+            Assertions.assertExceptionThrown(RuntimeException.class, () -> trajectory.setCubic(t0, tf, z0, zd0, zf, zdf));
+            continue;
+         }
+
+         trajectory.setCubic(t0, tf, z0, zd0, zf, zdf);
+
+         trajectory.compute(t0);
+         assertEquals(z0, trajectory.getPosition(), SMALL_EPSILON);
+         assertEquals(zd0, trajectory.getVelocity(), SMALL_EPSILON);
+
+         Trajectory derivative = new Trajectory(3);
+         derivative.setQuadratic(t0, tf, zd0, trajectory.getAcceleration(), zdf);
+
+         trajectory.compute(tf);
+         assertEquals(zf, trajectory.getPosition(), SMALL_EPSILON);
+
+         double dt = 1.0e-8;
+
+         for (double t = t0; t <= tf; t += (tf - t0) / 1000)
+         {
+            trajectory.compute(t);
+            derivative.compute(t);
+
+            assertEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
+            assertEquals(derivative.getVelocity(), trajectory.getAcceleration(), SMALL_EPSILON);
+
+            trajectory.compute(t + dt);
+            double nextPosition = trajectory.getPosition();
+            trajectory.compute(t - dt);
+            double lastPosition = trajectory.getPosition();
+            assertEquals(0.5 * (nextPosition - lastPosition) / dt, trajectory.getVelocity(), 5.0e-6);
+
+         }
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -57,15 +251,15 @@ public class TrajectoryTest
 
       double yLinear = linear.getDerivative(0, x);
       double yManual = a0 + a1 * x;
-      assertEquals(yLinear, yManual, epsilon);
+      assertEquals(yLinear, yManual, SMALL_EPSILON);
 
       double dyLinear = linear.getDerivative(1, x);
       double dyManual = a1;
-      assertEquals(dyLinear, dyManual, epsilon);
+      assertEquals(dyLinear, dyManual, SMALL_EPSILON);
 
       double ddyLinear = linear.getDerivative(2, x);
       double ddyManual = 0.0;
-      assertEquals(ddyLinear, ddyManual, epsilon);
+      assertEquals(ddyLinear, ddyManual, SMALL_EPSILON);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -131,25 +325,25 @@ public class TrajectoryTest
          trajectory.setCubic(t0, tf, x0, xd0, xf, xdf);
 
          for (int i = 0; i < initialValues.length; i++)
-            assertEquals(initialValues[i], trajectory.getDerivative(i, t0), epsilon);
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0), LARGE_EPSILON);
          for (int i = 0; i < finalValues.length; i++)
-            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), epsilon);
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), LARGE_EPSILON);
 
          double t0New = RandomNumbers.nextDouble(random, tf - 10.0, tf);
          trajectory.setInitialTimeMaintainingBounds(t0New);
 
          for (int i = 0; i < initialValues.length; i++)
-            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), epsilon);
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), LARGE_EPSILON);
          for (int i = 0; i < finalValues.length; i++)
-            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), epsilon);
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), LARGE_EPSILON);
 
          double tfNew = RandomNumbers.nextDouble(random, t0New, t0New + 10.0);
          trajectory.setFinalTimeMaintainingBounds(tfNew);
 
          for (int i = 0; i < initialValues.length; i++)
-            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), epsilon);
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), LARGE_EPSILON);
          for (int i = 0; i < finalValues.length; i++)
-            assertEquals(finalValues[i], trajectory.getDerivative(i, tfNew), epsilon);
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tfNew), LARGE_EPSILON);
       }
 
       numberOfCoefficients = 5;
@@ -170,26 +364,26 @@ public class TrajectoryTest
          trajectory.setQuartic(t0, tf, x0, xd0, xdd0, xf, xdf);
 
          for (int i = 0; i < initialValues.length; i++)
-            assertEquals(initialValues[i], trajectory.getDerivative(i, t0), epsilon);
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0), LARGE_EPSILON);
          for (int i = 0; i < finalValues.length; i++)
-            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), epsilon);
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), LARGE_EPSILON);
 
 
          double t0New = RandomNumbers.nextDouble(random, tf - 10.0, tf);
          trajectory.setInitialTimeMaintainingBounds(t0New);
 
          for (int i = 0; i < initialValues.length; i++)
-            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), epsilon);
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), LARGE_EPSILON);
          for (int i = 0; i < finalValues.length; i++)
-            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), epsilon);
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), LARGE_EPSILON);
 
          double tfNew = RandomNumbers.nextDouble(random, t0New, t0New + 10.0);
          trajectory.setFinalTimeMaintainingBounds(tfNew);
 
          for (int i = 0; i < initialValues.length; i++)
-            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), epsilon);
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), LARGE_EPSILON);
          for (int i = 0; i < finalValues.length; i++)
-            assertEquals(finalValues[i], trajectory.getDerivative(i, tfNew), epsilon);
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tfNew), LARGE_EPSILON);
       }
 
 
@@ -212,26 +406,26 @@ public class TrajectoryTest
          trajectory.setQuintic(t0, tf, x0, xd0, xdd0, xf, xdf, xddf);
 
          for (int i = 0; i < initialValues.length; i++)
-            assertEquals("Order " + i + " of iter " + iter + " is wrong.", initialValues[i], trajectory.getDerivative(i, t0), epsilon);
+            assertEquals("Order " + i + " of iter " + iter + " is wrong.", initialValues[i], trajectory.getDerivative(i, t0), LARGE_EPSILON);
          for (int i = 0; i < finalValues.length; i++)
-            assertEquals("Order " + i + " of iter " + iter + " is wrong.", finalValues[i], trajectory.getDerivative(i, tf), epsilon);
+            assertEquals("Order " + i + " of iter " + iter + " is wrong.", finalValues[i], trajectory.getDerivative(i, tf), LARGE_EPSILON);
 
 
          double t0New = RandomNumbers.nextDouble(random, tf - 10.0, tf);
          trajectory.setInitialTimeMaintainingBounds(t0New);
 
          for (int i = 0; i < initialValues.length; i++)
-            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), epsilon);
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), LARGE_EPSILON);
          for (int i = 0; i < finalValues.length; i++)
-            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), epsilon);
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tf), LARGE_EPSILON);
 
          double tfNew = RandomNumbers.nextDouble(random, t0New, t0New + 10.0);
          trajectory.setFinalTimeMaintainingBounds(tfNew);
 
          for (int i = 0; i < initialValues.length; i++)
-            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), epsilon);
+            assertEquals(initialValues[i], trajectory.getDerivative(i, t0New), LARGE_EPSILON);
          for (int i = 0; i < finalValues.length; i++)
-            assertEquals(finalValues[i], trajectory.getDerivative(i, tfNew), epsilon);
+            assertEquals(finalValues[i], trajectory.getDerivative(i, tfNew), LARGE_EPSILON);
       }
 
       numberOfCoefficients = 7;
@@ -288,17 +482,17 @@ public class TrajectoryTest
       int numTrials = 9;
       for (int i = 0; i < numTrials; i++)
       {
-         double scaleX0 = 1.0 / Math.random(), scaleXf = 1.0 / Math.random();
-         double scaleY0 = 1.0 / Math.random(), scaleYf = 1.0 / Math.random();
-         double scaleDY0 = 1.0 / Math.random(), scaleDYf = 1.0 / Math.random();
+         double scaleX0 = 1.0 / random.nextDouble(), scaleXf = 1.0 / random.nextDouble();
+         double scaleY0 = 1.0 / random.nextDouble(), scaleYf = 1.0 / random.nextDouble();
+         double scaleDY0 = 1.0 / random.nextDouble(), scaleDYf = 1.0 / random.nextDouble();
 
-         double x0 = Math.signum(Math.random()) * Math.random() * scaleX0, xf = x0 + Math.random() * scaleXf;
-         double y0 = Math.signum(Math.random()) * Math.random() * scaleY0, yf = Math.signum(Math.random()) * Math.random() * scaleYf;
-         double dy0 = Math.signum(Math.random()) * Math.random() * scaleDY0, dyf = Math.signum(Math.random()) * Math.random() * scaleDYf;
+         double x0 = Math.signum(random.nextDouble()) * random.nextDouble() * scaleX0, xf = x0 + random.nextDouble() * scaleXf;
+         double y0 = Math.signum(random.nextDouble()) * random.nextDouble() * scaleY0, yf = Math.signum(random.nextDouble()) * random.nextDouble() * scaleYf;
+         double dy0 = Math.signum(random.nextDouble()) * random.nextDouble() * scaleDY0, dyf = Math.signum(random.nextDouble()) * random.nextDouble() * scaleDYf;
 
          cubic.setCubic(x0, xf, y0, dy0, yf, dyf);
 
-         double x = Math.random() * (xf - x0);
+         double x = random.nextDouble() * (xf - x0);
 
          compareXPowersDerivativesVector(cubic, x);
       }
@@ -322,7 +516,7 @@ public class TrajectoryTest
          DenseMatrix64F derivativeElements = trajectory.evaluateGeometricSequenceDerivative(derivativeOrder, x0);
          for (int j = 0; j < derivativeOrder; j++)
          {
-            Assert.assertEquals(derivativeElements.get(j), 0.0, epsilon);
+            Assert.assertEquals(derivativeElements.get(j), 0.0, SMALL_EPSILON);
          }
 
          for (int j = numberOfCoefficients - 1; j >= derivativeOrder; j--)
@@ -335,7 +529,10 @@ public class TrajectoryTest
             }
 
             double derivativeElement = derivativeElements.get(j);
-            Assert.assertEquals(expectedDerivativeElement, derivativeElement, epsilon);
+            if (Math.abs(expectedDerivativeElement) < 1.0e4)
+               Assert.assertEquals(expectedDerivativeElement, derivativeElement, SMALL_EPSILON);
+            else
+               Assert.assertEquals(0.0, (expectedDerivativeElement - derivativeElement) / expectedDerivativeElement, SMALL_EPSILON);
          }
       }
    }
@@ -356,41 +553,43 @@ public class TrajectoryTest
 
       int order3Exponent1Func = getCoefficientMultiplierForDerivative(3, 1);
       int order3Exponent1Hand = 0;
-      assertEquals(order3Exponent1Func, order3Exponent1Hand, epsilon);
+      assertEquals(order3Exponent1Func, order3Exponent1Hand, SMALL_EPSILON);
 
       int order6Exponent7Func = getCoefficientMultiplierForDerivative(6, 7);
       int order6Exponent7Hand = 5040;
-      assertEquals(order6Exponent7Func, order6Exponent7Hand, epsilon);
+      assertEquals(order6Exponent7Func, order6Exponent7Hand, SMALL_EPSILON);
 
       int order0Exponent5Func = getCoefficientMultiplierForDerivative(0, 5);
       int order0Exponent5Hand = 1;
-      assertEquals(order0Exponent5Func, order0Exponent5Hand, epsilon);
+      assertEquals(order0Exponent5Func, order0Exponent5Hand, SMALL_EPSILON);
 
       int order3Exponent4Func = getCoefficientMultiplierForDerivative(3, 4);
       int order3Exponent4Hand = 24;
-      assertEquals(order3Exponent4Func, order3Exponent4Hand, epsilon);
+      assertEquals(order3Exponent4Func, order3Exponent4Hand, SMALL_EPSILON);
 
       int order5Exponent2Func = getCoefficientMultiplierForDerivative(5, 2);
       int order5Exponent2Hand = 0;
-      assertEquals(order5Exponent2Func, order5Exponent2Hand, epsilon);
+      assertEquals(order5Exponent2Func, order5Exponent2Hand, SMALL_EPSILON);
 
       int order1Exponent5Func = getCoefficientMultiplierForDerivative(1, 5);
       int order1Exponent5Hand = 5;
-      assertEquals(order1Exponent5Func, order1Exponent5Hand, epsilon);
+      assertEquals(order1Exponent5Func, order1Exponent5Hand, SMALL_EPSILON);
 
       int order11Exponent1Func = getCoefficientMultiplierForDerivative(11, 1);
       int order11Exponent1Hand = 0;
-      assertEquals(order11Exponent1Func, order11Exponent1Hand, epsilon);
+      assertEquals(order11Exponent1Func, order11Exponent1Hand, SMALL_EPSILON);
 
       int order13Exponent8Func = getCoefficientMultiplierForDerivative(13, 8);
       int order13Exponent8Hand = 0;
-      assertEquals(order13Exponent8Func, order13Exponent8Hand, epsilon);
+      assertEquals(order13Exponent8Func, order13Exponent8Hand, SMALL_EPSILON);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDerivativeVersionsCubic()
    {
+      Random random = new Random(2358724);
+
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
       int numberOfCoefficients = 4;
       Trajectory cubic = new Trajectory(numberOfCoefficients);
@@ -398,17 +597,17 @@ public class TrajectoryTest
       int numTrials = 9;
       for (int i = 0; i < numTrials; i++)
       {
-         double scaleX0 = 1.0 / Math.random(), scaleXf = 1.0 / Math.random();
-         double scaleY0 = 1.0 / Math.random(), scaleYf = 1.0 / Math.random();
-         double scaleDY0 = 1.0 / Math.random(), scaleDYf = 1.0 / Math.random();
+         double scaleX0 = 1.0 / random.nextDouble(), scaleXf = 1.0 / random.nextDouble();
+         double scaleY0 = 1.0 / random.nextDouble(), scaleYf = 1.0 / random.nextDouble();
+         double scaleDY0 = 1.0 / random.nextDouble(), scaleDYf = 1.0 / random.nextDouble();
 
-         double x0 = Math.signum(Math.random()) * Math.random() * scaleX0, xf = x0 + Math.random() * scaleXf;
-         double y0 = Math.signum(Math.random()) * Math.random() * scaleY0, yf = Math.signum(Math.random()) * Math.random() * scaleYf;
-         double dy0 = Math.signum(Math.random()) * Math.random() * scaleDY0, dyf = Math.signum(Math.random()) * Math.random() * scaleDYf;
+         double x0 = Math.signum(random.nextDouble()) * random.nextDouble() * scaleX0, xf = x0 + random.nextDouble() * scaleXf;
+         double y0 = Math.signum(random.nextDouble()) * random.nextDouble() * scaleY0, yf = Math.signum(random.nextDouble()) * random.nextDouble() * scaleYf;
+         double dy0 = Math.signum(random.nextDouble()) * random.nextDouble() * scaleDY0, dyf = Math.signum(random.nextDouble()) * random.nextDouble() * scaleDYf;
 
          cubic.setCubic(x0, xf, y0, dy0, yf, dyf);
 
-         double x = Math.random() * (xf - x0);
+         double x = random.nextDouble() * (xf - x0);
 
          compareDerivativeVersions(cubic, x);
       }
@@ -434,7 +633,7 @@ public class TrajectoryTest
          {
             generalizedDYHand = 0.0;
          }
-         assertEquals(generalizedDYPoly, generalizedDYHand, epsilon);
+         assertEquals(generalizedDYPoly, generalizedDYHand, SMALL_EPSILON);
       }
    }
 
@@ -455,7 +654,7 @@ public class TrajectoryTest
          }
          for (int k = 0; k < coefficients.length; k++)
          {
-            assertEquals(generalizedDYPoly.get(k), generalizedDYHand.get(k), epsilon);
+            assertEquals(generalizedDYPoly.get(k), generalizedDYHand.get(k), SMALL_EPSILON);
          }
       }
    }
@@ -473,7 +672,36 @@ public class TrajectoryTest
          {
             generalizedDYHandScalar += generalizedDYPolyVector.get(j) * coefficients[j];
          }
-         assertEquals(generalizedDYPolyScalar, generalizedDYHandScalar, epsilon);
+         assertEquals(generalizedDYPolyScalar, generalizedDYHandScalar, SMALL_EPSILON);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetDerivative()
+   {
+      Random random = new Random(23567);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Trajectory trajectory = new Trajectory(10);
+         double t0 = random.nextDouble();
+         double tf = t0 + 0.5;
+         double z0 = RandomNumbers.nextDouble(random, 1.0);
+         double zd0 = RandomNumbers.nextDouble(random, 1.0);
+         double zf = RandomNumbers.nextDouble(random, 1.0);
+         double zdf = RandomNumbers.nextDouble(random, 1.0);
+
+         trajectory.setCubic(t0, tf, z0, zd0, zf, zdf);
+
+         for (double t = t0; t <= tf; t += (tf - t0) / 1000)
+         {
+            trajectory.compute(t);
+
+            assertEquals(trajectory.getPosition(), trajectory.getDerivative(0, t), SMALL_EPSILON);
+            assertEquals(trajectory.getVelocity(), trajectory.getDerivative(1, t), SMALL_EPSILON);
+            assertEquals(trajectory.getAcceleration(), trajectory.getDerivative(2, t), SMALL_EPSILON);
+         }
       }
    }
 

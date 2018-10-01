@@ -37,7 +37,7 @@ public class Trajectory
       this.constraintMatrix = new DenseMatrix64F(maxNumberOfCoefficients, maxNumberOfCoefficients);
       this.constraintVector = new DenseMatrix64F(maxNumberOfCoefficients, 1);
       this.coefficientVector = new DenseMatrix64F(maxNumberOfCoefficients, 1);
-      this.xPowersDerivativeVector = new DenseMatrix64F(maxNumberOfCoefficients, 1);
+      this.xPowersDerivativeVector = new DenseMatrix64F(1, maxNumberOfCoefficients);
       this.solver = LinearSolverFactory.general(maxNumberOfCoefficients, maxNumberOfCoefficients);
       this.xPowers = new double[maxNumberOfCoefficients];
       reset();
@@ -96,11 +96,14 @@ public class Trajectory
 
    public double getDerivative(int derivativeOrder, double x)
    {
-      double val = 0.0;
-      setXPowers(xPowers, x);
+      double derivative = 0.0;
+      double xPower = 1.0;
       for (int i = derivativeOrder; i < numberOfCoefficients; i++)
-         val += coefficients[i] * getCoefficientMultiplierForDerivative(derivativeOrder, i) * xPowers[i - derivativeOrder];
-      return val;
+      {
+         derivative += coefficients[i] * getCoefficientMultiplierForDerivative(derivativeOrder, i) * xPower;
+         xPower *= x;
+      }
+      return derivative;
    }
 
    /**
@@ -115,19 +118,35 @@ public class Trajectory
     */
    public DenseMatrix64F evaluateGeometricSequenceDerivative(int order, double x0)
    {
-      setXPowers(xPowers, x0);
       xPowersDerivativeVector.zero();
+
+      double x0Power = 1.0;
+
       for (int i = order; i < numberOfCoefficients; i++)
       {
-         xPowersDerivativeVector.set(i, getCoefficientMultiplierForDerivative(order, i) * xPowers[i - order]);
+         xPowersDerivativeVector.set(i, getCoefficientMultiplierForDerivative(order, i) * x0Power);
+         x0Power *= x0;
       }
       return xPowersDerivativeVector;
    }
 
+   /**
+    * Computes the coefficient resulting for computing the <tt>n</tt><sup>th</sup> derivative of <tt>x<sup>k</sup></tt>:
+    * <pre>
+    * d<sup>n</sup>x<sup>k</sup>    k!
+    * --- = ------ x<sup>k-n</sup>
+    * dx<sup>n</sup>   (k-n)!
+    * </pre>
+    * The coefficient computed here is: <tt>(k! / (k-n)!)</tt>
+    * 
+    * @param order the order of the derivative, i.e. the variable <tt>n</tt>.
+    * @param exponent the exponent of the power, i.e. the variable <tt>k</tt>.
+    * @return the coefficient <tt>(k! / (k-n)!)</tt>
+    */
    private static int getCoefficientMultiplierForDerivative(int order, int exponent)
    {
       int coeff = 1;
-      for (int i = exponent; i > exponent - order; i--)
+      for (int i = exponent - order + 1; i <= exponent; i++)
       {
          coeff *= i;
       }
@@ -196,9 +215,9 @@ public class Trajectory
    {
       reshape(2);
       setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tFinal, zf);
-      solveForCoefficients();
+      double c1 = (zf - z0) / (tFinal - t0);
+      coefficientVector.set(0, 0, z0 - c1 * t0);
+      coefficientVector.set(1, 0, c1);
       setCoefficientVariables();
    }
 
