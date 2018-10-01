@@ -38,9 +38,9 @@ public class JointPrivilegedConfigurationHandler
    private boolean hasDefaultMaxAccelerationChanged = true;
    private final YoDouble defaultMaxAcceleration = new YoDouble("jointPrivilegedConfigurationDefaultMaxAcceleration", registry);
 
-   private final Map<OneDoFJoint, YoDouble> yoJointPrivilegedConfigurations = new HashMap<>();
-   private final Map<OneDoFJoint, YoDouble> yoJointPrivilegedVelocities = new HashMap<>();
-   private final Map<OneDoFJoint, YoDouble> yoJointPrivilegedAccelerations = new HashMap<>();
+   private final ArrayList<YoDouble> yoJointPrivilegedConfigurations = new ArrayList<>();
+   private final ArrayList<YoDouble> yoJointPrivilegedVelocities = new ArrayList<>();
+   private final ArrayList<YoDouble> yoJointPrivilegedAccelerations = new ArrayList<>();
 
    private final DenseMatrix64F privilegedConfigurations;
    private final DenseMatrix64F privilegedVelocities;
@@ -71,7 +71,7 @@ public class JointPrivilegedConfigurationHandler
                                               YoVariableRegistry parentRegistry)
    {
       this.oneDoFJoints = oneDoFJoints;
-      numberOfDoFs = ScrewTools.computeDegreesOfFreedom(oneDoFJoints);
+      numberOfDoFs = ScrewTools.computeDegreesOfFreedom(oneDoFJoints); // note that this should be equal to oneDoFJoints.length
 
       privilegedConfigurations = new DenseMatrix64F(numberOfDoFs, 1);
       privilegedVelocities = new DenseMatrix64F(numberOfDoFs, 1);
@@ -120,9 +120,9 @@ public class JointPrivilegedConfigurationHandler
          positionsAtMidRangeOfMotion.set(i, 0, 0.5 * (jointLimitUpper + jointLimitLower));
 
          String jointName = joint.getName();
-         yoJointPrivilegedConfigurations.put(joint, new YoDouble("q_priv_" + jointName, registry));
-         yoJointPrivilegedVelocities.put(joint, new YoDouble("qd_priv_" + jointName, registry));
-         yoJointPrivilegedAccelerations.put(joint, new YoDouble("qdd_priv_" + jointName, registry));
+         yoJointPrivilegedConfigurations.add(new YoDouble("q_priv_" + jointName, registry));
+         yoJointPrivilegedVelocities.add(new YoDouble("qd_priv_" + jointName, registry));
+         yoJointPrivilegedAccelerations.add(new YoDouble("qdd_priv_" + jointName, registry));
       }
 
       for (int i = 0; i < numberOfDoFs; i++)
@@ -139,13 +139,13 @@ public class JointPrivilegedConfigurationHandler
    {
       processPrivilegedConfigurationCommands();
 
-      for (int i = 0; i < numberOfDoFs; i++)
+      for (int jointIndex = 0; jointIndex < numberOfDoFs; jointIndex++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
-         double qd = 2.0 * privilegedConfigurationGains.get(i, 0) * (privilegedConfigurations.get(i, 0) - joint.getQ()) / jointSquaredRangeOfMotions.get(i, 0);
-         qd = MathTools.clamp(qd, privilegedMaxVelocities.get(i, 0));
-         privilegedVelocities.set(i, 0, qd);
-         yoJointPrivilegedVelocities.get(joint).set(qd);
+         OneDoFJoint joint = oneDoFJoints[jointIndex];
+         double qd = 2.0 * privilegedConfigurationGains.get(jointIndex, 0) * (privilegedConfigurations.get(jointIndex, 0) - joint.getQ()) / jointSquaredRangeOfMotions.get(jointIndex, 0);
+         qd = MathTools.clamp(qd, privilegedMaxVelocities.get(jointIndex, 0));
+         privilegedVelocities.set(jointIndex, 0, qd);
+         yoJointPrivilegedVelocities.get(jointIndex).set(qd);
       }
 
       processPrivilegedVelocityCommands();
@@ -159,14 +159,14 @@ public class JointPrivilegedConfigurationHandler
    {
       processPrivilegedConfigurationCommands();
 
-      for (int i = 0; i < numberOfDoFs; i++)
+      for (int jointIndex = 0; jointIndex < numberOfDoFs; jointIndex++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
-         double qdd = 2.0 * privilegedConfigurationGains.get(i, 0) * (privilegedConfigurations.get(i, 0) - joint.getQ()) / jointSquaredRangeOfMotions.get(i, 0);
-         qdd -= privilegedVelocityGains.get(i, 0) * joint.getQd();
-         qdd = MathTools.clamp(qdd, privilegedMaxAccelerations.get(i, 0));
-         privilegedAccelerations.set(i, 0, qdd);
-         yoJointPrivilegedAccelerations.get(joint).set(qdd);
+         OneDoFJoint joint = oneDoFJoints[jointIndex];
+         double qdd = 2.0 * privilegedConfigurationGains.get(jointIndex, 0) * (privilegedConfigurations.get(jointIndex, 0) - joint.getQ()) / jointSquaredRangeOfMotions.get(jointIndex, 0);
+         qdd -= privilegedVelocityGains.get(jointIndex, 0) * joint.getQd();
+         qdd = MathTools.clamp(qdd, privilegedMaxAccelerations.get(jointIndex, 0));
+         privilegedAccelerations.set(jointIndex, 0, qdd);
+         yoJointPrivilegedAccelerations.get(jointIndex).set(qdd);
       }
 
       processPrivilegedAccelerationCommands();
@@ -231,7 +231,7 @@ public class JointPrivilegedConfigurationHandler
                qdd = MathTools.clamp(qdd, privilegedMaxAccelerations.get(jointIndex, 0));
 
                privilegedAccelerations.set(jointIndex, 0, qdd);
-               yoJointPrivilegedAccelerations.get(joint).set(qdd);
+               yoJointPrivilegedAccelerations.get(jointIndex).set(qdd);
             }
 
             if (command.hasWeight(jointNumber))
@@ -269,7 +269,7 @@ public class JointPrivilegedConfigurationHandler
                qd = MathTools.clamp(qd, privilegedMaxVelocities.get(jointIndex, 0));
 
                privilegedVelocities.set(jointIndex, 0, qd);
-               yoJointPrivilegedVelocities.get(joint).set(qd);
+               yoJointPrivilegedVelocities.get(jointIndex).set(qd);
             }
 
             if (command.hasWeight(jointNumber))
@@ -368,7 +368,7 @@ public class JointPrivilegedConfigurationHandler
                OneDoFJoint configuredJoint = oneDoFJoints[jointIndex];
                double qPrivileged = command.getPrivilegedConfiguration(jointNumber);
                privilegedConfigurations.set(jointIndex, 0, qPrivileged);
-               yoJointPrivilegedConfigurations.get(oneDoFJoints[jointIndex]).set(qPrivileged);
+               yoJointPrivilegedConfigurations.get(jointIndex).set(qPrivileged);
 
                if (!jointsWithConfiguration.contains(configuredJoint))
                   jointsWithConfiguration.add(configuredJoint);
@@ -427,7 +427,7 @@ public class JointPrivilegedConfigurationHandler
       }
 
       privilegedConfigurations.set(jointIndex, 0, qPrivileged);
-      yoJointPrivilegedConfigurations.get(oneDoFJoints[jointIndex]).set(qPrivileged);
+      yoJointPrivilegedConfigurations.get(jointIndex).set(qPrivileged);
    }
 
    public boolean isEnabled()
