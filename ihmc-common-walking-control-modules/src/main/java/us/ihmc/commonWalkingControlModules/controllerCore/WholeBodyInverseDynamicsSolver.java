@@ -238,13 +238,13 @@ public class WholeBodyInverseDynamicsSolver
 
    public void submitResetIntegratorRequests(JointDesiredOutputListReadOnly jointDesiredOutputList)
    {
-      for (int i = 0; i < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
+      for (int jointIndex = 0; jointIndex < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); jointIndex++)
       {
-         OneDoFJoint joint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(i);
+         OneDoFJoint joint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(jointIndex);
          if (jointDesiredOutputList.hasDataForJoint(joint))
          {
             JointDesiredOutputReadOnly jointDesiredOutputOther = jointDesiredOutputList.getJointDesiredOutput(joint);
-            lowLevelOneDoFJointDesiredDataHolder.setResetJointIntegrators(joint, jointDesiredOutputOther.peekResetIntegratorsRequest());
+            lowLevelOneDoFJointDesiredDataHolder.setResetJointIntegrators(jointIndex, jointDesiredOutputOther.peekResetIntegratorsRequest());
          }
       }
    }

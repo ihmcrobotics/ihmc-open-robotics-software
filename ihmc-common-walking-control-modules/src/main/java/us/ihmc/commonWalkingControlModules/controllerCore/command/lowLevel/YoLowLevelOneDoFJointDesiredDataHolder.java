@@ -87,7 +87,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
-         joint.setTau(lowLevelJointDataMap.get(joint.getNameBasedHashCode()).getDesiredTorque());
+         joint.setTau(getJointDesiredOutput(joint.getNameBasedHashCode()).getDesiredTorque());
       }
    }
 }
