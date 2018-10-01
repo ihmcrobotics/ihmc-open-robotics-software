@@ -53,6 +53,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final YoBoolean copWaypointsWereAdjusted;
    private final YoBoolean isInitialTransfer;
+   private final YoBoolean isStanding;
 
    private final YoBoolean continuouslyAdjustForICPContinuity;
    private final YoBoolean areICPDynamicsSatisfied;
@@ -97,12 +98,13 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final List<YoDouble> icpSegmentStartTimes = new ArrayList<>();
    private final List<YoDouble> icpSegmentEndTimes = new ArrayList<>();
 
-   public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isInitialTransfer, boolean debug,
-                                          YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isInitialTransfer,
+                                          YoBoolean isStanding, boolean debug, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.omega0 = omega0;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
       this.isInitialTransfer = isInitialTransfer;
+      this.isStanding = isStanding;
       this.debug = debug;
       this.visualize = VISUALIZE && yoGraphicsListRegistry != null;
 
@@ -381,6 +383,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          numberOfCoPSegmentsInCurrentPhase.set(numberOfCoPSegments);
 
       icpToolbox.computeDesiredCornerPoints(icpDesiredInitialPositionsFromCoPs, icpDesiredFinalPositionsFromCoPs, copTrajectories, omega0.getDoubleValue());
+
+      if (isStanding.getBooleanValue())
+      {
+         getICPInitialConditionsForAdjustmentFromCoPs(localTimeInCurrentPhase.getDoubleValue(), -1);
+         setInitialConditionsForAdjustment();
+      }
    }
 
    public void initializeForSwingFromCoPs(List<? extends SegmentedFrameTrajectory3D> transferCoPTrajectories,
@@ -455,22 +463,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       }
    }
 
-   public void setInitialConditionsForAdjustment(FramePoint3DReadOnly positionToHoldByDefault)
+   public void setInitialConditionsForAdjustment()
    {
       setInitialICPConditions.clear();
 
-      if (calculatedInitialICPConditions.isEmpty())
-      {
-         positionToHoldByDefault.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-         if (positionToHoldByDefault.containsNaN())
-            setInitialICPConditions.add().setToZero();
-         else
-            setInitialICPConditions.add().set(positionToHoldByDefault);
-      }
-      {
-         for (int i = 0; i < calculatedInitialICPConditions.size(); i++)
-            setInitialICPConditions.add().setIncludingFrame(calculatedInitialICPConditions.get(i));
-      }
+      for (int i = 0; i < calculatedInitialICPConditions.size(); i++)
+         setInitialICPConditions.add().setIncludingFrame(calculatedInitialICPConditions.get(i));
 
       if (calculatedInitialICPConditions.size() > 0)
          initialICPConditionForContinuity.set(calculatedInitialICPConditions.get(0));
