@@ -52,10 +52,6 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
    private final DenseMatrix64F CHat = new DenseMatrix64F(0, 0); // Active variable bounds constraints
    private final DenseMatrix64F DHat = new DenseMatrix64F(0, 0);
 
-   private final DenseMatrix64F ATranspose = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F CBarTranspose = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F CHatTranspose = new DenseMatrix64F(0, 0);
-
    private final DenseMatrix64F QInverse = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F AQInverse = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F QInverseATranspose = new DenseMatrix64F(0, 0);
@@ -74,7 +70,7 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
    private final DenseMatrix64F CBarQInverseCHatTranspose = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F CHatQInverseCBarTranspose = new DenseMatrix64F(0, 0);
 
-   private final DenseMatrix64F ATransposeAndCTranspose = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F AAndC = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F ATransposeMuAndCTransposeLambda = new DenseMatrix64F(0, 0);
 
    private final DenseMatrix64F bigMatrixForLagrangeMultiplierSolution = new DenseMatrix64F(0, 0);
@@ -432,8 +428,6 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
       int numberOfVariables = quadraticCostQMatrix.getNumRows();
       int numberOfEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
 
-      ATranspose.reshape(linearEqualityConstraintsAMatrix.getNumCols(), linearEqualityConstraintsAMatrix.getNumRows());
-      CommonOps.transpose(linearEqualityConstraintsAMatrix, ATranspose);
       QInverse.reshape(numberOfVariables, numberOfVariables);
 
       solver.setA(quadraticCostQMatrix);
@@ -446,8 +440,8 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
       if (numberOfEqualityConstraints > 0)
       {
          CommonOps.mult(linearEqualityConstraintsAMatrix, QInverse, AQInverse);
-         CommonOps.mult(QInverse, ATranspose, QInverseATranspose);
-         CommonOps.mult(AQInverse, ATranspose, AQInverseATranspose);
+         CommonOps.multTransB(QInverse, linearEqualityConstraintsAMatrix, QInverseATranspose);
+         CommonOps.multTransB(AQInverse, linearEqualityConstraintsAMatrix, AQInverseATranspose);
       }
    }
 
@@ -455,11 +449,8 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
    {
       if (CBar.getNumRows() > 0)
       {
-         CBarTranspose.reshape(CBar.getNumCols(), CBar.getNumRows());
-         CommonOps.transpose(CBar, CBarTranspose);
-
-         AQInverseCBarTranspose.reshape(AQInverse.getNumRows(), CBarTranspose.getNumCols());
-         CommonOps.mult(AQInverse, CBarTranspose, AQInverseCBarTranspose);
+         AQInverseCBarTranspose.reshape(AQInverse.getNumRows(), CBar.getNumRows());
+         CommonOps.multTransB(AQInverse, CBar, AQInverseCBarTranspose);
 
          CBarQInverseATranspose.reshape(CBar.getNumRows(), QInverseATranspose.getNumCols());
          CommonOps.mult(CBar, QInverseATranspose, CBarQInverseATranspose);
@@ -467,15 +458,14 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
          CBarQInverse.reshape(CBar.getNumRows(), QInverse.getNumCols());
          CommonOps.mult(CBar, QInverse, CBarQInverse);
 
-         QInverseCBarTranspose.reshape(QInverse.getNumRows(), CBarTranspose.getNumCols());
-         CommonOps.mult(QInverse, CBarTranspose, QInverseCBarTranspose);
+         QInverseCBarTranspose.reshape(QInverse.getNumRows(), CBar.getNumRows());
+         CommonOps.multTransB(QInverse, CBar, QInverseCBarTranspose);
 
          CBarQInverseCBarTranspose.reshape(CBar.getNumRows(), QInverseCBarTranspose.getNumCols());
          CommonOps.mult(CBar, QInverseCBarTranspose, CBarQInverseCBarTranspose);
       }
       else
       {
-         CBarTranspose.reshape(0, 0);
          AQInverseCBarTranspose.reshape(0, 0);
          CBarQInverseATranspose.reshape(0, 0);
          CBarQInverse.reshape(0, 0);
@@ -488,11 +478,8 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
    {
       if (CHat.getNumRows() > 0)
       {
-         CHatTranspose.reshape(CHat.getNumCols(), CHat.getNumRows());
-         CommonOps.transpose(CHat, CHatTranspose);
-
-         AQInverseCHatTranspose.reshape(AQInverse.getNumRows(), CHatTranspose.getNumCols());
-         CommonOps.mult(AQInverse, CHatTranspose, AQInverseCHatTranspose);
+         AQInverseCHatTranspose.reshape(AQInverse.getNumRows(), CHat.getNumRows());
+         CommonOps.multTransB(AQInverse, CHat, AQInverseCHatTranspose);
 
          CHatQInverseATranspose.reshape(CHat.getNumRows(), QInverseATranspose.getNumCols());
          CommonOps.mult(CHat, QInverseATranspose, CHatQInverseATranspose);
@@ -500,8 +487,8 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
          CHatQInverse.reshape(CHat.getNumRows(), QInverse.getNumCols());
          CommonOps.mult(CHat, QInverse, CHatQInverse);
 
-         QInverseCHatTranspose.reshape(QInverse.getNumRows(), CHatTranspose.getNumCols());
-         CommonOps.mult(QInverse, CHatTranspose, QInverseCHatTranspose);
+         QInverseCHatTranspose.reshape(QInverse.getNumRows(), CHat.getNumRows());
+         CommonOps.multTransB(QInverse, CHat, QInverseCHatTranspose);
 
          CHatQInverseCHatTranspose.reshape(CHat.getNumRows(), QInverseCHatTranspose.getNumCols());
          CommonOps.mult(CHat, QInverseCHatTranspose, CHatQInverseCHatTranspose);
@@ -517,7 +504,6 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
       }
       else
       {
-         CHatTranspose.reshape(0, 0);
          AQInverseCHatTranspose.reshape(0, 0);
          CHatQInverseATranspose.reshape(0, 0);
          CHatQInverse.reshape(0, 0);
@@ -927,13 +913,13 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
       solver.setA(bigMatrixForLagrangeMultiplierSolution);
       solver.solve(bigVectorForLagrangeMultiplierSolution, augmentedLagrangeMultipliers);
 
-      ATransposeAndCTranspose.reshape(numberOfVariables, numberOfAugmentedEqualityConstraints);
-      CommonOps.insert(ATranspose, ATransposeAndCTranspose, 0, 0);
-      CommonOps.insert(CBarTranspose, ATransposeAndCTranspose, 0, numberOfOriginalEqualityConstraints);
-      CommonOps.insert(CHatTranspose, ATransposeAndCTranspose, 0, numberOfOriginalEqualityConstraints + numberOfActiveInequalityConstraints);
+      AAndC.reshape(numberOfAugmentedEqualityConstraints, numberOfVariables);
+      CommonOps.insert(linearEqualityConstraintsAMatrix, AAndC, 0, 0);
+      CommonOps.insert(CBar, AAndC, numberOfOriginalEqualityConstraints, 0);
+      CommonOps.insert(CHat, AAndC, numberOfOriginalEqualityConstraints + numberOfActiveInequalityConstraints, 0);
 
       ATransposeMuAndCTransposeLambda.reshape(numberOfVariables, 1);
-      CommonOps.mult(ATransposeAndCTranspose, augmentedLagrangeMultipliers, ATransposeMuAndCTransposeLambda);
+      CommonOps.multTransA(AAndC, augmentedLagrangeMultipliers, ATransposeMuAndCTransposeLambda);
 
       tempVector.set(quadraticCostQVector);
       CommonOps.scale(-1.0, tempVector);
