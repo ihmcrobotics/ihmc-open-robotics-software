@@ -162,11 +162,12 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
          throw new RuntimeException("costQuadraticMatrix.getNumRows() != costQuadraticMatrix.getNumCols()");
 
       symmetricCostQuadraticMatrix.reshape(costQuadraticMatrix.getNumCols(), costQuadraticMatrix.getNumRows());
+      quadraticCostQMatrix.reshape(costQuadraticMatrix.getNumCols(), costQuadraticMatrix.getNumRows());
       CommonOps.transpose(costQuadraticMatrix, symmetricCostQuadraticMatrix);
 
       CommonOps.add(costQuadraticMatrix, symmetricCostQuadraticMatrix, symmetricCostQuadraticMatrix);
-      CommonOps.scale(0.5, symmetricCostQuadraticMatrix);
-      this.quadraticCostQMatrix.set(symmetricCostQuadraticMatrix);
+      CommonOps.scale(0.5, symmetricCostQuadraticMatrix, quadraticCostQMatrix);
+
       this.quadraticCostQVector.set(costLinearVector);
       this.quadraticCostScalar = quadraticCostScalar;
    }
@@ -532,8 +533,8 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
       if (numberOfInequalityConstraints != 0)
       {
          linearInequalityConstraintsCheck.reshape(numberOfInequalityConstraints, 1);
-         CommonOps.mult(linearInequalityConstraintsCMatrixO, solutionToPack, linearInequalityConstraintsCheck);
-         CommonOps.subtractEquals(linearInequalityConstraintsCheck, linearInequalityConstraintsDVectorO);
+         CommonOps.scale(-1.0, linearInequalityConstraintsDVectorO, linearInequalityConstraintsCheck);
+         CommonOps.multAdd(linearInequalityConstraintsCMatrixO, solutionToPack, linearInequalityConstraintsCheck);
 
          for (int i = 0; i < linearInequalityConstraintsCheck.getNumRows(); i++)
          {
@@ -847,7 +848,6 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
       if (numberOfAugmentedEqualityConstraints == 0)
       {
          CommonOps.mult(-1.0, QInverse, quadraticCostQVector, xSolutionToPack);
-         //         CommonOps.solve(quadraticCostQMatrix, negativeQuadraticCostQVector, xSolutionToPack);
          return;
       }
 
@@ -881,7 +881,7 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
          tempVector.set(linearEqualityConstraintsBVector);
          CommonOps.multAdd(AQInverse, quadraticCostQVector, tempVector);
 
-         MatrixTools.setMatrixBlock(bigVectorForLagrangeMultiplierSolution, numberOfOriginalEqualityConstraints, 0, tempVector, 0, 0, numberOfOriginalEqualityConstraints, 1, -1.0);
+         CommonOps.insert(tempVector, bigVectorForLagrangeMultiplierSolution, 0, 0);
       }
 
       if (numberOfActiveInequalityConstraints > 0)
@@ -889,7 +889,7 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
          tempVector.set(DBar);
          CommonOps.multAdd(CBarQInverse, quadraticCostQVector, tempVector);
 
-         MatrixTools.setMatrixBlock(bigVectorForLagrangeMultiplierSolution, numberOfOriginalEqualityConstraints, 0, tempVector, 0, 0, numberOfActiveInequalityConstraints, 1, -1.0);
+         CommonOps.insert(tempVector, bigVectorForLagrangeMultiplierSolution, numberOfOriginalEqualityConstraints, 0);
       }
 
       if (numberOfActiveLowerBoundConstraints + numberOfActiveUpperBoundConstraints > 0)
@@ -897,8 +897,10 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
          tempVector.set(DHat);
          CommonOps.multAdd(CHatQInverse, quadraticCostQVector, tempVector);
 
-         MatrixTools.setMatrixBlock(bigVectorForLagrangeMultiplierSolution, numberOfOriginalEqualityConstraints + numberOfActiveInequalityConstraints, 0, tempVector, 0, 0, numberOfActiveLowerBoundConstraints + numberOfActiveUpperBoundConstraints, 1, -1.0);
+         CommonOps.insert(tempVector, bigVectorForLagrangeMultiplierSolution, numberOfOriginalEqualityConstraints + numberOfActiveInequalityConstraints, 0);
       }
+
+      CommonOps.scale(-1.0, bigVectorForLagrangeMultiplierSolution);
 
       augmentedLagrangeMultipliers.reshape(numberOfAugmentedEqualityConstraints, 1);
       solver.setA(bigMatrixForLagrangeMultiplierSolution);
