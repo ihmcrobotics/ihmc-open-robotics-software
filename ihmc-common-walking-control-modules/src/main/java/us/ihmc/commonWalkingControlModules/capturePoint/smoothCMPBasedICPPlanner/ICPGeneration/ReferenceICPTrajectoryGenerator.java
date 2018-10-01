@@ -384,7 +384,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       icpToolbox.computeDesiredCornerPoints(icpDesiredInitialPositionsFromCoPs, icpDesiredFinalPositionsFromCoPs, copTrajectories, omega0.getDoubleValue());
 
-      if (isStanding.getBooleanValue())
+      if (isInitialTransfer.getBooleanValue() && isStanding.getBooleanValue())
       {
          getICPInitialConditionsForAdjustmentFromCoPs(localTimeInCurrentPhase.getDoubleValue(), -1);
          setInitialConditionsForAdjustment();
