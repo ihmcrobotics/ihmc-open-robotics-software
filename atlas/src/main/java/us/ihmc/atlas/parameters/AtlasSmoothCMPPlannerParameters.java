@@ -107,7 +107,7 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    @Override
    public double getSwingDurationShiftFraction()
    {
-      return 0.8;
+      return 0.9;
    }
 
    @Override
