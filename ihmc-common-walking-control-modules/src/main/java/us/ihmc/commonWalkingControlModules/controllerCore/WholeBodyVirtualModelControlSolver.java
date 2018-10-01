@@ -201,7 +201,6 @@ public class WholeBodyVirtualModelControlSolver
 
          for (int jointIndex : jointIndices)
          {
-
             lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorquesSolution.get(jointIndex));
          }
       }
