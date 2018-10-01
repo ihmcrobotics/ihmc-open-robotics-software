@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListReadOnly
 {
-   private final List<OneDoFJoint> jointsWithDesiredData;
+   private final OneDoFJoint[] jointsWithDesiredData;
    private final Map<String, YoJointDesiredOutput> lowLevelJointDataMap;
 
    public YoLowLevelOneDoFJointDesiredDataHolder(OneDoFJoint[] controlledJoints, YoVariableRegistry parentRegistry)
@@ -30,13 +30,12 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
       parentRegistry.addChild(registry);
 
       int capacity = controlledJoints.length;
-      jointsWithDesiredData = new ArrayList<>(capacity);
+      jointsWithDesiredData = controlledJoints;
       lowLevelJointDataMap = new HashMap<>(capacity);
 
       for (int i = 0; i < controlledJoints.length; i++)
       {
          OneDoFJoint joint = controlledJoints[i];
-         jointsWithDesiredData.add(joint);
          String jointName = joint.getName();
          YoJointDesiredOutput jointData = new YoJointDesiredOutput(jointName, registry, StringTools.getEveryUppercaseLetter(parentRegistry.getName()));
          lowLevelJointDataMap.put(jointName, jointData);
@@ -45,21 +44,14 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
 
    public void clear()
    {
-      for (int i = 0; i < jointsWithDesiredData.size(); i++)
+      for (OneDoFJoint joint : jointsWithDesiredData)
       {
-         OneDoFJoint joint = jointsWithDesiredData.get(i);
          YoJointDesiredOutput jointDataToReset = lowLevelJointDataMap.get(joint.getName());
          jointDataToReset.clear();
       }
    }
 
-   public void retrieveJointsFromName(Map<String, OneDoFJoint> nameToJointMap)
-   {
-      for (int i = 0; i < jointsWithDesiredData.size(); i++)
-      {
-         jointsWithDesiredData.set(i, nameToJointMap.get(jointsWithDesiredData.get(i).getName()));
-      }
-   }
+
 
    public void setJointControlMode(OneDoFJoint joint, JointDesiredControlMode controlMode)
    {
@@ -307,7 +299,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    @Override
    public OneDoFJoint getOneDoFJoint(int index)
    {
-      return jointsWithDesiredData.get(index);
+      return jointsWithDesiredData[index];
    }
 
    @Override
@@ -319,7 +311,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    @Override
    public int getNumberOfJointsWithDesiredOutput()
    {
-      return jointsWithDesiredData.size();
+      return jointsWithDesiredData.length;
    }
 
    @Override
