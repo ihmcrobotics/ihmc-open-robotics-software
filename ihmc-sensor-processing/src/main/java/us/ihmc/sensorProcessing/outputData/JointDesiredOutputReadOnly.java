@@ -5,10 +5,10 @@ package us.ihmc.sensorProcessing.outputData;
  * (setpoints and controller properties) from a whole body controller to joint level
  * controllers.
  */
-public abstract class JointDesiredOutputReadOnly
+public interface JointDesiredOutputReadOnly
 {
-   public abstract boolean hasDesiredTorque();
-   public abstract boolean hasDesiredPosition();
+   public boolean hasDesiredTorque();
+   public boolean hasDesiredPosition();
    public abstract boolean hasDesiredVelocity();
    public abstract boolean hasDesiredAcceleration();
    public abstract double getDesiredTorque();
@@ -162,28 +162,4 @@ public abstract class JointDesiredOutputReadOnly
     */
    public abstract double getMaxVelocityError();
 
-   @Override
-   public String toString()
-   {
-      String ret = "Joint Desired Output:\n";
-      if (hasControlMode())
-         ret += "controlMode = " + getControlMode() + "\n";
-      if (hasDesiredTorque())
-         ret += "desiredTorque = " + getDesiredTorque() + "\n";
-      if (hasDesiredPosition())
-         ret += "desiredPosition = " + getDesiredPosition() + "\n";
-      if (hasDesiredVelocity())
-         ret += "desiredVelocity = " + getDesiredVelocity() + "\n";
-      if (hasDesiredAcceleration())
-         ret += "desiredAcceleration = " + getDesiredAcceleration() + "\n";
-      if (hasMasterGain())
-         ret += "masterGain = " + getMasterGain() + "\n";
-      if (hasVelocityScaling())
-         ret += "velocityScaling = " + getVelocityScaling() + "\n";
-      if (hasVelocityIntegrationBreakFrequency())
-         ret += "velocityIntegrationBreakFrequency = " + getVelocityIntegrationBreakFrequency() + "\n";
-      if (hasPositionIntegrationBreakFrequency())
-         ret += "positionIntegrationBreakFrequency = " + getPositionIntegrationBreakFrequency() + "\n";
-      return ret;
-   }
 }
