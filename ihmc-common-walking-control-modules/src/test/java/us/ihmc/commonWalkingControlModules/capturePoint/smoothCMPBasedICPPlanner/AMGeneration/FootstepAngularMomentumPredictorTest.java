@@ -228,9 +228,6 @@ public class FootstepAngularMomentumPredictorTest
    private void clear()
    {
       testRegistry.clear();
-      contactableFeet.clear();
-      soleFrames.clear();
-      ankleFrames.clear();
       copTrajectoryGenerator.clear();
       icpTrajectoryGenerator.reset();
       comTrajectoryGenerator.reset();
@@ -488,6 +485,7 @@ public class FootstepAngularMomentumPredictorTest
       isInitialTransfer.set(false);
       isStanding.set(false);
       isDoubleSupport.set(false);
+      copTrajectoryGenerator.initializeForSwing();
       copTrajectoryGenerator.computeReferenceCoPsStartingFromSingleSupport(RobotSide.LEFT);
       icpTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
 
