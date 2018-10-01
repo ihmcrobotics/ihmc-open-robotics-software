@@ -55,9 +55,8 @@ public class JointIndexHandler
    {
       fullMatrix.zero();
 
-      for (int index = 0; index < joints.length; index++)
+      for (InverseDynamicsJoint joint : joints)
       {
-         InverseDynamicsJoint joint = joints[index];
          indicesIntoCompactBlock.reset();
          ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
          int[] indicesIntoFullBlock = columnsForJoints.get(joint);
