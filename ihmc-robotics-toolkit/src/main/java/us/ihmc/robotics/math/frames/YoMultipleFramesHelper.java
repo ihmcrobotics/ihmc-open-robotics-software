@@ -58,6 +58,9 @@ public class YoMultipleFramesHelper implements ReferenceFrameHolder
    public ReferenceFrame switchCurrentReferenceFrame(ReferenceFrame newCurrentReferenceFrame)
    {
       ReferenceFrame previousReferenceFrame = getCurrentReferenceFrame();
+      if (newCurrentReferenceFrame == previousReferenceFrame)
+         return previousReferenceFrame;
+
       if(!referenceFrames.contains(newCurrentReferenceFrame.getNameBasedHashCode()))
       {
          throw new RuntimeException("The frame: " + newCurrentReferenceFrame.getName() + " has not been registered.");
