@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.outputData;
 
-public class JointDesiredOutput extends JointDesiredOutputReadOnly
+public class JointDesiredOutput implements JointDesiredOutputBasics
 {
    private JointDesiredControlMode controlMode;
 

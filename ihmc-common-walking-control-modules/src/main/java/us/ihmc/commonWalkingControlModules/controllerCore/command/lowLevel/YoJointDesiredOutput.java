@@ -1,13 +1,14 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
+public class YoJointDesiredOutput implements JointDesiredOutputBasics
 {
    private final YoEnum<JointDesiredControlMode> controlMode;
 
