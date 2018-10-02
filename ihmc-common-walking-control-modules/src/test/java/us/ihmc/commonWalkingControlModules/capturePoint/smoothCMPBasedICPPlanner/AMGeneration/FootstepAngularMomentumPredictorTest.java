@@ -192,7 +192,7 @@ public class FootstepAngularMomentumPredictorTest
       numberOfFootstepsToConsider = new YoInteger(testName + "NumberOfFootstepsToConsider", testRegistry);
       numberOfFootstepsToConsider.set(testParameters.getNumberOfFootstepsToConsider());
       midFeetFrame = new MidFootZUpGroundFrame(testName + "MidFeetFrame", soleFrames.get(RobotSide.RIGHT), soleFrames.get(RobotSide.LEFT));
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(ankleFrames, midFeetFrame, soleFrames, testRegistry, null);
+      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons( midFeetFrame, soleFrames, testRegistry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
       copTrajectoryGenerator = new ReferenceCoPTrajectoryGenerator(testName + "CoPGenerator",
                                                                    testParameters.getNumberOfFootstepsToConsider(), bipedSupportPolygons, contactableFeet,

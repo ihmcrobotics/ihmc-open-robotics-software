@@ -115,12 +115,6 @@ public class PushRecoveryControlModule
       reset();
    }
 
-   public void updateCaptureRegion(double swingTimeRemaining, double omega0, RobotSide swingSide, FramePoint2D capturePoint2d)
-   {
-      footPolygon.setIncludingFrame(bipedSupportPolygon.getFootPolygonInAnkleZUp(swingSide.getOppositeSide()));
-      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
-   }
-
    public FrameConvexPolygon2D getCaptureRegion()
    {
       return captureRegionCalculator.getCaptureRegion();
@@ -204,7 +198,7 @@ public class PushRecoveryControlModule
    {
       RobotSide supportSide = swingSide.getOppositeSide();
       double preferredSwingTime = swingTimeRemaining;
-      footPolygon.setIncludingFrame(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
+      footPolygon.setIncludingFrame(bipedSupportPolygon.getFootPolygonInSoleZUpFrame(supportSide));
       captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTime, capturePoint2d, omega0, footPolygon);
       double captureRegionArea = captureRegionCalculator.getCaptureRegionArea();
 
@@ -247,7 +241,7 @@ public class PushRecoveryControlModule
 
       RobotSide swingSide = nextFootstep.getRobotSide();
       RobotSide supportSide = swingSide.getOppositeSide();
-      footPolygon.setIncludingFrame(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
+      footPolygon.setIncludingFrame(bipedSupportPolygon.getFootPolygonInSoleZUpFrame(supportSide));
 
       double preferredSwingTimeForRecovering = computePreferredSwingTimeForRecovering(swingTimeRemaining, swingSide);
       captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTimeForRecovering, capturePoint2d, omega0, footPolygon);

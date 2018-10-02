@@ -36,10 +36,10 @@ public class OneStepCaptureRegionCalculator
    private final FrameConvexPolygon2D captureRegionPolygon = new FrameConvexPolygon2D(worldFrame);
 
    // necessary variables for the reachable region and capture calculation:
-   private final double midFootAnkleXOffset;
+//   private final double midFootAnkleXOffset;
    private final double footWidth;
    private final double kinematicStepRange;
-   private final SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
    private final SideDependentList<FrameConvexPolygon2D> reachableRegions;
 
    private final RecyclingArrayList<FramePoint2D> visibleVertices = new RecyclingArrayList<>(MAX_CAPTURE_REGION_POLYGON_POINTS, FramePoint2D.class);
@@ -49,51 +49,43 @@ public class OneStepCaptureRegionCalculator
    public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(walkingControllerParameters.getSteppingParameters().getFootForwardOffset()
-            - walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0,
-           walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
-           referenceFrames.getAnkleZUpReferenceFrames(), "", parentRegistry, yoGraphicsListRegistry);
+      this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
+           referenceFrames.getSoleZUpFrames(), "", parentRegistry, yoGraphicsListRegistry);
    }
 
    public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
                                          String suffix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(walkingControllerParameters.getSteppingParameters().getFootForwardOffset()
-                 - walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0,
-           walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
-           referenceFrames.getAnkleZUpReferenceFrames(), suffix, parentRegistry, yoGraphicsListRegistry);
+      this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
+           referenceFrames.getSoleZUpFrames(), suffix, parentRegistry, yoGraphicsListRegistry);
    }
 
    public OneStepCaptureRegionCalculator(BipedSupportPolygons referenceFrames, WalkingControllerParameters walkingControllerParameters,
                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(walkingControllerParameters.getSteppingParameters().getFootForwardOffset()
-                 - walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0,
-           walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
-           referenceFrames.getAnkleZUpFrames(), "", parentRegistry, yoGraphicsListRegistry);
+      this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
+           referenceFrames.getSoleZUpFrames(), "", parentRegistry, yoGraphicsListRegistry);
    }
 
    public OneStepCaptureRegionCalculator(BipedSupportPolygons referenceFrames, WalkingControllerParameters walkingControllerParameters, String suffix,
                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(walkingControllerParameters.getSteppingParameters().getFootForwardOffset()
-                 - walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0,
-           walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
-           referenceFrames.getAnkleZUpFrames(), suffix, parentRegistry, yoGraphicsListRegistry);
+      this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
+           referenceFrames.getSoleZUpFrames(), suffix, parentRegistry, yoGraphicsListRegistry);
    }
 
-   public OneStepCaptureRegionCalculator(double midFootAnkleXOffset, double footWidth, double kinematicStepRange,
-                                         SideDependentList<? extends ReferenceFrame> ankleZUpFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public OneStepCaptureRegionCalculator(double footWidth, double kinematicStepRange,
+                                         SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(midFootAnkleXOffset, footWidth, kinematicStepRange, ankleZUpFrames, "", parentRegistry, yoGraphicsListRegistry);
+      this(footWidth, kinematicStepRange, soleZUpFrames, "", parentRegistry, yoGraphicsListRegistry);
    }
 
-   public OneStepCaptureRegionCalculator(double midFootAnkleXOffset, double footWidth, double kinematicStepRange,
-         SideDependentList<? extends ReferenceFrame> ankleZUpFrames, String suffix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public OneStepCaptureRegionCalculator(double footWidth, double kinematicStepRange,
+         SideDependentList<? extends ReferenceFrame> soleZUpFrames, String suffix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.kinematicStepRange = kinematicStepRange;
-      this.ankleZUpFrames = ankleZUpFrames;
-      this.midFootAnkleXOffset = midFootAnkleXOffset;
+      this.soleZUpFrames = soleZUpFrames;
+//      this.midFootAnkleXOffset = midFootAnkleXOffset;
       this.footWidth = footWidth;
 
       reachableRegions = new SideDependentList<FrameConvexPolygon2D>();
@@ -112,19 +104,19 @@ public class OneStepCaptureRegionCalculator
       for (RobotSide side : RobotSide.values)
       {
          FrameConvexPolygon2D reachableRegion = new FrameConvexPolygon2D();
-         reachableRegion.clear(ankleZUpFrames.get(side));
-         double sign = side == RobotSide.RIGHT ? 1.0 : -1.0;
+         reachableRegion.clear(soleZUpFrames.get(side));
+         double sign = side.negateIfLeftSide(1.0);
 
          for (int i = 0; i < MAX_CAPTURE_REGION_POLYGON_POINTS - 1; i++)
          {
             double angle = sign * reachableRegionCutoffAngle * Math.PI * (i) / (MAX_CAPTURE_REGION_POLYGON_POINTS - 2);
-            double x = kinematicStepRange * Math.cos(angle) + midFootAnkleXOffset;
+            double x = kinematicStepRange * Math.cos(angle);
             double y = kinematicStepRange * Math.sin(angle);
             if (Math.abs(y) < footWidth / 2.0)
                y = sign * footWidth / 2.0;
-            reachableRegion.addVertex(ankleZUpFrames.get(side), x, y);
+            reachableRegion.addVertex(soleZUpFrames.get(side), x, y);
          }
-         reachableRegion.addVertex(ankleZUpFrames.get(side), midFootAnkleXOffset, sign * footWidth / 2.0);
+         reachableRegion.addVertex(soleZUpFrames.get(side), 0, sign * footWidth / 2.0);
          reachableRegion.update();
          reachableRegions.set(side, reachableRegion);
       }
@@ -149,26 +141,26 @@ public class OneStepCaptureRegionCalculator
       globalTimer.startMeasurement();
 
       // 1. Set up all needed variables and reference frames for the calculation:
-      ReferenceFrame supportAnkleZUp = ankleZUpFrames.get(swingSide.getOppositeSide());
+      ReferenceFrame supportSoleZUp = soleZUpFrames.get(swingSide.getOppositeSide());
       if (!swingSide.equals(previousSwingSide))
       {
          // change the support foot polygon only if the swing side changed to avoid garbage every tick.
          this.supportFootPolygon.setIncludingFrame(footPolygon);
-         this.supportFootPolygon.changeFrameAndProjectToXYPlane(supportAnkleZUp);
+         this.supportFootPolygon.changeFrameAndProjectToXYPlane(supportSoleZUp);
          previousSwingSide = swingSide;
       }
       capturePoint.setIncludingFrame(icp);
-      capturePoint.changeFrame(supportAnkleZUp);
-      footCentroid.changeFrame(supportAnkleZUp);
-      firstKinematicExtremeDirection.changeFrame(supportAnkleZUp);
-      lastKinematicExtremeDirection.changeFrame(supportAnkleZUp);
-      predictedICP.changeFrame(supportAnkleZUp);
-      projectedLine.changeFrame(supportAnkleZUp);
+      capturePoint.changeFrame(supportSoleZUp);
+      footCentroid.changeFrame(supportSoleZUp);
+      firstKinematicExtremeDirection.changeFrame(supportSoleZUp);
+      lastKinematicExtremeDirection.changeFrame(supportSoleZUp);
+      predictedICP.changeFrame(supportSoleZUp);
+      projectedLine.changeFrame(supportSoleZUp);
 
       swingTimeRemaining = MathTools.clamp(swingTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
       footCentroid.setIncludingFrame(supportFootPolygon.getCentroid());
-      rawCaptureRegion.clear(supportAnkleZUp);
-      captureRegionPolygon.clear(supportAnkleZUp);
+      rawCaptureRegion.clear(supportSoleZUp);
+      captureRegionPolygon.clear(supportSoleZUp);
 
       // 2. Get extreme CoP positions
       boolean icpOusideSupport = computeVisibleVerticesFromOutsideLeftToRightCopy(supportFootPolygon, capturePoint);
@@ -186,7 +178,7 @@ public class OneStepCaptureRegionCalculator
       for (int i = 0; i < visibleVertices.size(); i++)
       {
          FramePoint2D copExtreme = visibleVertices.get(i);
-         copExtreme.changeFrame(supportAnkleZUp);
+         copExtreme.changeFrame(supportSoleZUp);
          CaptureRegionMathTools.predictCapturePoint(capturePoint, copExtreme, swingTimeRemaining, omega0, predictedICP);
          rawCaptureRegion.addVertexMatchingFrame(predictedICP, false);
 
