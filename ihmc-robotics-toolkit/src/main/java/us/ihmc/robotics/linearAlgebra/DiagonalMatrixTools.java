@@ -198,18 +198,102 @@ public class DiagonalMatrixTools
             c.data[indexC1] = c.data[indexC2] = sum;
          }
       }
+   }
 
-      /*
-              for( int i = 0; i < a.numCols; i++ ) {
-                  for( int j = i; j < a.numCols; j++ ) {
-                      double sum = 0;
-                      for( int k = 0; k < a.numRows; k++ ) {
-                          sum += b.get(k,k) * a.get(k,i)*a.get(k,j);
-                      }
-                      c.set(i,j,sum);
-                      c.set(j,i,sum);
-                  }
-              }
-              */
+   /**
+    * <p>Performs the following operation:<br>
+    * <br>
+    * c = a * b * c
+    * </br>
+    * </p>
+    * <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+    * @param a The left matrix in the multiplication operation. Not modified.
+    * @param b The middle matrix in the multiplication operation. Not modified. Assumed to be diagonal.
+    * @param c The right matrix in the multiplication operation. Not modified.
+    * @param d Where the results of the operation are stored. Modified.
+    */
+   public static void innerDiagonalMult(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d)
+   {
+      if (a == c || b == c || c == d)
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if (a.numCols != b.numRows)
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      else if (b.numCols != c.numRows)
+         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
+      else if (a.numRows != d.numRows || c.numCols != d.numCols)
+         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+
+
+      int aIndexStart = 0;
+      int dIndex = 0;
+
+      for( int i = 0; i < a.numRows; i++ ) {
+         for( int j = 0; j < c.numCols; j++ ) {
+            double total = 0;
+
+            int indexA = aIndexStart;
+            int indexB = j;
+            int indexC = 0;
+            int end = indexA + c.numRows;
+            while( indexA < end )
+            {
+               total += a.get(indexA++) * c.get(indexB) * b.get(indexC);
+               indexB += c.numCols;
+               indexC += b.numCols + 1;
+            }
+
+            d.set( dIndex++ , total );
+         }
+         aIndexStart += a.numCols;
+      }
+   }
+
+   /**
+    * <p>Performs the following operation:<br>
+    * <br>
+    * c = a<sup>T</sup> * b * c
+    * </br>
+    * </p>
+    * <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+    * @param a The left matrix in the multiplication operation. Not modified.
+    * @param b The middle matrix in the multiplication operation. Not modified. Assumed to be diagonal.
+    * @param c The right matrix in the multiplication operation. Not modified.
+    * @param d Where the results of the operation are stored. Modified.
+    */
+   public static void innerDiagonalMultTransA(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d)
+   {
+      if (a == c || b == c || c == d)
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if (a.numRows != b.numRows)
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      else if (b.numCols != c.numRows)
+         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
+      else if (a.numCols != d.numRows || c.numCols != d.numCols)
+         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+
+
+      int dIndex = 0;
+
+      for( int i = 0; i < a.numCols; i++ ) {
+         for( int j = 0; j < c.numCols; j++ ) {
+            int indexA = i;
+            int indexB = j;
+            int indexC = 0;
+
+            int end = indexB + c.numRows*c.numCols;
+
+            double total = 0;
+
+            // loop for k
+            for(; indexB < end; indexB += c.numCols ) {
+               total += a.get(indexA) * c.get(indexB) * b.get(indexC);
+               indexA += a.numCols;
+               indexC += b.numCols + 1;
+            }
+
+            d.set( dIndex++ , total );
+         }
+      }
+
    }
 }
