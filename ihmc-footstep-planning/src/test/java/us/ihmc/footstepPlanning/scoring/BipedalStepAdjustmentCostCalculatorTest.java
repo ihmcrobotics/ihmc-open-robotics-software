@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
@@ -16,6 +17,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.BipedalStepAdjustmentCostCalculator;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
@@ -54,6 +56,12 @@ public class BipedalStepAdjustmentCostCalculatorTest
    private double xMin = -0.8;
    private int numInX = (int) ((xMax - xMin) / incrementX);
    private int numInY = (int) ((xMax - yMin) / incrementY);
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)

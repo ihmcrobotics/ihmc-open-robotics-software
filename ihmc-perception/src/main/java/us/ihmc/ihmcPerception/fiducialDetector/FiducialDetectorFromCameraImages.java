@@ -137,10 +137,10 @@ public class FiducialDetectorFromCameraImages
 
       if (visualize)
       {
-         cameraGraphic = new YoGraphicReferenceFrame(cameraReferenceFrame, registry, 0.5);
-         detectorGraphic = new YoGraphicReferenceFrame(detectorReferenceFrame, registry, 1.0);
-         locatedFiducialGraphic = new YoGraphicReferenceFrame(locatedFiducialReferenceFrame, registry, 0.1);
-         reportedFiducialGraphic = new YoGraphicReferenceFrame(reportedFiducialReferenceFrame, registry, 0.2);
+         cameraGraphic = new YoGraphicReferenceFrame(cameraReferenceFrame, registry, true, 0.5);
+         detectorGraphic = new YoGraphicReferenceFrame(detectorReferenceFrame, registry, true, 1.0);
+         locatedFiducialGraphic = new YoGraphicReferenceFrame(locatedFiducialReferenceFrame, registry, true, 0.1);
+         reportedFiducialGraphic = new YoGraphicReferenceFrame(reportedFiducialReferenceFrame, registry, true, 0.2);
 
          //         yoGraphicsListRegistry.registerYoGraphic("Fiducials", cameraGraphic);
          //         yoGraphicsListRegistry.registerYoGraphic("Fiducials", detectorGraphic);

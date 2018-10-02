@@ -10,25 +10,24 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanningUtils;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 
 public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFootstepPlannerListener
 {
@@ -109,16 +108,16 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       leftRejectedFootstep.set(leftFootInSoleFrame);
       rightRejectedFootstep.set(rightFootInSoleFrame);
 
-      leftFootstepStartViz = new YoGraphicPolygon("leftFootstepStartViz", leftFootstepStart, "leftFootstepStartPose", "", registry, 1.0, YoAppearance.Gold());
-      rightFootstepStartViz = new YoGraphicPolygon("rightFootstepStartViz", rightFootstepStart, "rightFootstepStartPose", "", registry, 1.0, YoAppearance.Gold());
-      leftFootstepGoalViz = new YoGraphicPolygon("leftFootstepGoalViz", leftFootstepGoal, "leftFootstepGoalPose", "", registry, 1.0, YoAppearance.Chocolate());
-      rightFootstepGoalViz = new YoGraphicPolygon("rightFootstepGoalViz", rightFootstepGoal, "rightFootstepGoalPose", "", registry, 1.0, YoAppearance.Chocolate());
-      leftFootstepToExpandViz = new YoGraphicPolygon("leftFootstepToExpandViz", leftFootstepUnderConsideration, "leftFootstepToExpandPose", "", registry, 1.0, YoAppearance.Yellow());
-      rightFootstepToExpandViz = new YoGraphicPolygon("rightFootstepToExpandViz", rightFootstepUnderConsideration, "rightFootstepToExpandPose", "", registry, 1.0, YoAppearance.Yellow());
-      leftAcceptedFootstepViz = new YoGraphicPolygon("leftAcceptedFootstepViz", leftAcceptedFootstep, "leftAcceptedFootstepPose", "", registry, 1.0, YoAppearance.Green());
-      rightAcceptedFootstepViz = new YoGraphicPolygon("rightAcceptedFootstepViz", rightAcceptedFootstep, "rightAcceptedFootstepPose", "", registry, 1.0, YoAppearance.DarkGreen());
-      leftRejectedFootstepViz = new YoGraphicPolygon("leftRejectedFootstepViz", leftRejectedFootstep, "leftRejectedFootstepPose", "", registry, 1.0, YoAppearance.Red());
-      rightRejectedFootstepViz = new YoGraphicPolygon("rightRejectedFootstepViz", rightRejectedFootstep, "rightRejectedFootstepPose", "", registry, 1.0, YoAppearance.DarkRed());
+      leftFootstepStartViz = new YoGraphicPolygon("leftFootstepStartViz", leftFootstepStart, "leftFootstepStartPose", "", registry, true, 1.0, YoAppearance.Gold());
+      rightFootstepStartViz = new YoGraphicPolygon("rightFootstepStartViz", rightFootstepStart, "rightFootstepStartPose", "", registry, true, 1.0, YoAppearance.Gold());
+      leftFootstepGoalViz = new YoGraphicPolygon("leftFootstepGoalViz", leftFootstepGoal, "leftFootstepGoalPose", "", registry, true, 1.0, YoAppearance.Chocolate());
+      rightFootstepGoalViz = new YoGraphicPolygon("rightFootstepGoalViz", rightFootstepGoal, "rightFootstepGoalPose", "", registry, true, 1.0, YoAppearance.Chocolate());
+      leftFootstepToExpandViz = new YoGraphicPolygon("leftFootstepToExpandViz", leftFootstepUnderConsideration, "leftFootstepToExpandPose", "", registry, true, 1.0, YoAppearance.Yellow());
+      rightFootstepToExpandViz = new YoGraphicPolygon("rightFootstepToExpandViz", rightFootstepUnderConsideration, "rightFootstepToExpandPose", "", registry, true, 1.0, YoAppearance.Yellow());
+      leftAcceptedFootstepViz = new YoGraphicPolygon("leftAcceptedFootstepViz", leftAcceptedFootstep, "leftAcceptedFootstepPose", "", registry, true, 1.0, YoAppearance.Green());
+      rightAcceptedFootstepViz = new YoGraphicPolygon("rightAcceptedFootstepViz", rightAcceptedFootstep, "rightAcceptedFootstepPose", "", registry, true, 1.0, YoAppearance.DarkGreen());
+      leftRejectedFootstepViz = new YoGraphicPolygon("leftRejectedFootstepViz", leftRejectedFootstep, "leftRejectedFootstepPose", "", registry, true, 1.0, YoAppearance.Red());
+      rightRejectedFootstepViz = new YoGraphicPolygon("rightRejectedFootstepViz", rightRejectedFootstep, "rightRejectedFootstepPose", "", registry, true, 1.0, YoAppearance.DarkRed());
 
       leftFootstepStartViz.setPoseToNaN();
       rightFootstepStartViz.setPoseToNaN();
@@ -167,13 +166,13 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
          YoFrameConvexPolygon2D leftFootstepSolvedPlan = new YoFrameConvexPolygon2D("leftFootstepSolvedPlan" + i, worldFrame, maxNumberOfVertices, registry);
          leftFootstepSolvedPlan.set(leftFootInSoleFrame);
 
-         YoGraphicPolygon leftFootstepSolvedPlanViz = new YoGraphicPolygon("leftFootstepSolvedPlanViz" + i, leftFootstepSolvedPlan, "leftFootstepSolvedPlan" + i, "", registry, 1.0, YoAppearance.Purple());
+         YoGraphicPolygon leftFootstepSolvedPlanViz = new YoGraphicPolygon("leftFootstepSolvedPlanViz" + i, leftFootstepSolvedPlan, "leftFootstepSolvedPlan" + i, "", registry, true, 1.0, YoAppearance.Purple());
          graphicsListRegistry.registerYoGraphic("FootstepPlanner", leftFootstepSolvedPlanViz);
          
          YoFrameConvexPolygon2D rightFootstepSolvedPlan = new YoFrameConvexPolygon2D("rightFootstepSolvedPlan" + i, worldFrame, maxNumberOfVertices, registry);
          rightFootstepSolvedPlan.set(rightFootInSoleFrame);
 
-         YoGraphicPolygon rightFootstepSolvedPlanViz = new YoGraphicPolygon("rightFootstepSolvedPlanViz" + i, rightFootstepSolvedPlan, "rightFootstepSolvedPlan" + i, "", registry, 1.0, YoAppearance.Purple());
+         YoGraphicPolygon rightFootstepSolvedPlanViz = new YoGraphicPolygon("rightFootstepSolvedPlanViz" + i, rightFootstepSolvedPlan, "rightFootstepSolvedPlan" + i, "", registry, true, 1.0, YoAppearance.Purple());
          graphicsListRegistry.registerYoGraphic("FootstepPlanner", rightFootstepSolvedPlanViz);
 
          solvedPlanFootstepsViz.get(RobotSide.LEFT).add(leftFootstepSolvedPlanViz);

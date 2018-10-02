@@ -68,7 +68,7 @@ public class FootstepNodeVisualization implements GraphVisualization
          graphicsListRegistry.registerYoGraphic("Inactive" + listName, yoGraphic);
       }
 
-      YoGraphicReferenceFrame worldViz = new YoGraphicReferenceFrame(worldFrame, registry, 0.5);
+      YoGraphicReferenceFrame worldViz = new YoGraphicReferenceFrame(worldFrame, registry, false, 0.5);
       graphicsListRegistry.registerYoGraphic(listName, worldViz);
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();

@@ -45,6 +45,7 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
@@ -399,6 +400,7 @@ public class DRCSimulationTestHelper
       simulationStarter = null;
 
       ros2Node.destroy();
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    public boolean simulateAndBlockAndCatchExceptions(double simulationTime) throws SimulationExceededMaximumTimeException

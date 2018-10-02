@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
+public class YoJointDesiredOutput implements JointDesiredOutputBasics
 {
    private final YoEnum<JointDesiredControlMode> controlMode;
 
@@ -51,6 +51,7 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       clear();
    }
 
+   @Override
    public void clear()
    {
       controlMode.set(null);
@@ -69,118 +70,40 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       resetIntegrators.set(false);
    }
 
-   public void set(JointDesiredOutputReadOnly other)
-   {
-      controlMode.set(other.getControlMode());
-      desiredTorque.set(other.getDesiredTorque());
-      desiredPosition.set(other.getDesiredPosition());
-      desiredVelocity.set(other.getDesiredVelocity());
-      desiredAcceleration.set(other.getDesiredAcceleration());
-      resetIntegrators.set(other.peekResetIntegratorsRequest());
-      stiffness.set(other.getStiffness());
-      damping.set(other.getDamping());
-      masterGain.set(other.getMasterGain());
-      velocityScaling.set(other.getVelocityScaling());
-      velocityIntegrationBreakFrequency.set(other.getVelocityIntegrationBreakFrequency());
-      positionIntegrationBreakFrequency.set(other.getPositionIntegrationBreakFrequency());
-      maxPositionError.set(other.getMaxPositionError());
-      maxVelocityError.set(other.getMaxVelocityError());
-   }
-
-   /**
-    * Complete the information held in this using other.
-    * Does not overwrite the data already set in this.
-    */
-   public void completeWith(JointDesiredOutputReadOnly other)
-   {
-      if (!hasControlMode())
-         controlMode.set(other.getControlMode());
-      if (!hasDesiredTorque())
-         desiredTorque.set(other.getDesiredTorque());
-      if (!hasDesiredPosition())
-         desiredPosition.set(other.getDesiredPosition());
-      if (!hasDesiredVelocity())
-         desiredVelocity.set(other.getDesiredVelocity());
-      if (!hasDesiredAcceleration())
-         desiredAcceleration.set(other.getDesiredAcceleration());
-      if (!peekResetIntegratorsRequest())
-         resetIntegrators.set(other.peekResetIntegratorsRequest());
-      if(!hasStiffness())
-         stiffness.set(other.getStiffness());
-      if(!hasDamping())
-         damping.set(other.getDamping());
-      if(!hasMasterGain())
-         masterGain.set(other.getMasterGain());
-      if(!hasVelocityScaling())
-         velocityScaling.set(other.getVelocityScaling());
-      if(!hasVelocityIntegrationBreakFrequency())
-         velocityIntegrationBreakFrequency.set(other.getVelocityIntegrationBreakFrequency());
-      if(!hasPositionIntegrationBreakFrequency())
-         positionIntegrationBreakFrequency.set(other.getPositionIntegrationBreakFrequency());
-      if(!hasMaxPositionError())
-         maxPositionError.set(other.getMaxPositionError());
-      if(!hasMaxVelocityError())
-         maxVelocityError.set(other.getMaxVelocityError());
-   }
-
+   @Override
    public void setControlMode(JointDesiredControlMode controlMode)
    {
       this.controlMode.set(controlMode);
    }
 
+   @Override
    public void setDesiredTorque(double tau)
    {
       desiredTorque.set(tau);
    }
 
+   @Override
    public void setDesiredPosition(double q)
    {
       desiredPosition.set(q);
    }
 
+   @Override
    public void setDesiredVelocity(double qd)
    {
       desiredVelocity.set(qd);
    }
 
+   @Override
    public void setDesiredAcceleration(double qdd)
    {
       desiredAcceleration.set(qdd);
    }
 
+   @Override
    public void setResetIntegrators(boolean reset)
    {
       resetIntegrators.set(reset);
-   }
-
-   @Override
-   public boolean hasControlMode()
-   {
-      return controlMode.getEnumValue() != null;
-   }
-
-   @Override
-   public boolean hasDesiredTorque()
-   {
-      return !desiredTorque.isNaN();
-   }
-
-   @Override
-   public boolean hasDesiredPosition()
-   {
-      return !desiredPosition.isNaN();
-   }
-
-   @Override
-   public boolean hasDesiredVelocity()
-   {
-      return !desiredVelocity.isNaN();
-   }
-
-   @Override
-   public boolean hasDesiredAcceleration()
-   {
-      return !desiredAcceleration.isNaN();
    }
 
    @Override
@@ -228,18 +151,6 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
    }
 
    @Override
-   public boolean hasStiffness()
-   {
-      return !stiffness.isNaN();
-   }
-
-   @Override
-   public boolean hasDamping()
-   {
-      return !damping.isNaN();
-   }
-
-   @Override
    public double getStiffness()
    {
       return stiffness.getValue();
@@ -251,20 +162,16 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       return damping.getValue();
    }
 
+   @Override
    public void setStiffness(double stiffness)
    {
       this.stiffness.set(stiffness);
    }
 
+   @Override
    public void setDamping(double damping)
    {
       this.damping.set(damping);
-   }
-
-   @Override
-   public boolean hasMasterGain()
-   {
-      return !masterGain.isNaN();
    }
 
    @Override
@@ -273,15 +180,10 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       return masterGain.getDoubleValue();
    }
 
+   @Override
    public void setMasterGain(double masterGain)
    {
       this.masterGain.set(masterGain);
-   }
-
-   @Override
-   public boolean hasVelocityScaling()
-   {
-      return !velocityScaling.isNaN();
    }
 
    @Override
@@ -290,15 +192,10 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       return velocityScaling.getDoubleValue();
    }
 
+   @Override
    public void setVelocityScaling(double velocityScaling)
    {
       this.velocityScaling.set(velocityScaling);
-   }
-
-   @Override
-   public boolean hasVelocityIntegrationBreakFrequency()
-   {
-      return !velocityIntegrationBreakFrequency.isNaN();
    }
 
    @Override
@@ -307,15 +204,10 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       return velocityIntegrationBreakFrequency.getDoubleValue();
    }
 
+   @Override
    public void setVelocityIntegrationBreakFrequency(double velocityIntegrationBreakFrequency)
    {
       this.velocityIntegrationBreakFrequency.set(velocityIntegrationBreakFrequency);
-   }
-
-   @Override
-   public boolean hasPositionIntegrationBreakFrequency()
-   {
-      return !positionIntegrationBreakFrequency.isNaN();
    }
 
    @Override
@@ -324,15 +216,10 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       return positionIntegrationBreakFrequency.getDoubleValue();
    }
 
+   @Override
    public void setPositionIntegrationBreakFrequency(double positionIntegrationBreakFrequency)
    {
       this.positionIntegrationBreakFrequency.set(positionIntegrationBreakFrequency);
-   }
-
-   @Override
-   public boolean hasMaxPositionError()
-   {
-      return !maxPositionError.isNaN();
    }
 
    @Override
@@ -341,15 +228,10 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       return maxPositionError.getDoubleValue();
    }
 
+   @Override
    public void setMaxPositionError(double maxPositionError)
    {
       this.maxPositionError.set(maxPositionError);
-   }
-
-   @Override
-   public boolean hasMaxVelocityError()
-   {
-      return !maxVelocityError.isNaN();
    }
 
    @Override
@@ -358,8 +240,15 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       return maxVelocityError.getDoubleValue();
    }
 
+   @Override
    public void setMaxVelocityError(double maxVelocityError)
    {
       this.maxVelocityError.set(maxVelocityError);
+   }
+
+   @Override
+   public String toString()
+   {
+      return getRepresentativeString();
    }
 }

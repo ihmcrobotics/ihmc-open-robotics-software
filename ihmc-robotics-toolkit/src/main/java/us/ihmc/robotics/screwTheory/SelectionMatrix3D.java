@@ -553,7 +553,7 @@ public class SelectionMatrix3D
       {
          return false;
       }
-      else if (selectionFrame != null && selectionFrame.getNameBasedHashCode() != other.selectionFrame.getNameBasedHashCode())
+      else if (selectionFrame != null && selectionFrame.hashCode() != other.selectionFrame.hashCode())
          return false;
       if (xSelected != other.xSelected)
          return false;

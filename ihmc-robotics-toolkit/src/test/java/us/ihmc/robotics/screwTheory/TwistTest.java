@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -28,11 +29,6 @@ import us.ihmc.robotics.testing.JUnitTools;
 
 public class TwistTest extends SpatialMotionVectorTest
 {
-   @After
-   public void tearDown() throws Exception
-   {
-   }
-
    /**
     * Basic test of constructor, getters and setters
     */

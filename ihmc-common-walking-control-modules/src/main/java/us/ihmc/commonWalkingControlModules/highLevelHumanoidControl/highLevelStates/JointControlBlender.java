@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.tools.TupleTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
@@ -83,7 +83,7 @@ public class JointControlBlender
       {
          double desiredPosition0 = hasDesiredPosition(outputData0) ? outputData0.getDesiredPosition() : oneDoFJoint.getQ();
          double desiredPosition1 = hasDesiredPosition(outputData1) ? outputData1.getDesiredPosition() : oneDoFJoint.getQ();
-         double desiredPosition = TupleTools.interpolate(desiredPosition0, desiredPosition1, blendingFactor);
+         double desiredPosition = EuclidCoreTools.interpolate(desiredPosition0, desiredPosition1, blendingFactor);
          positionStepSizeLimiter.updateOutput(currentJointAngle, desiredPosition);
          outputDataToPack.setDesiredPosition(positionStepSizeLimiter.getDoubleValue());
       }
@@ -92,7 +92,7 @@ public class JointControlBlender
       {
          double desiredVelocity0 = hasDesiredVelocity(outputData0) ? outputData0.getDesiredVelocity() : oneDoFJoint.getQd();
          double desiredVelocity1 = hasDesiredVelocity(outputData1) ? outputData1.getDesiredVelocity() : oneDoFJoint.getQd();
-         double desiredVelocity = TupleTools.interpolate(desiredVelocity0, desiredVelocity1, blendingFactor);
+         double desiredVelocity = EuclidCoreTools.interpolate(desiredVelocity0, desiredVelocity1, blendingFactor);
          velocityStepSizeLimiter.updateOutput(currentJointVelocity, desiredVelocity);
          outputDataToPack.setDesiredVelocity(velocityStepSizeLimiter.getDoubleValue());
       }
@@ -101,7 +101,7 @@ public class JointControlBlender
       {
          double desiredAcceleration0 = hasDesiredAcceleration(outputData0) ? outputData0.getDesiredAcceleration() : 0.0;
          double desiredAcceleration1 = hasDesiredAcceleration(outputData1) ? outputData1.getDesiredAcceleration() : 0.0;
-         double desiredAcceleration = TupleTools.interpolate(desiredAcceleration0, desiredAcceleration1, blendingFactor);
+         double desiredAcceleration = EuclidCoreTools.interpolate(desiredAcceleration0, desiredAcceleration1, blendingFactor);
          outputDataToPack.setDesiredAcceleration(desiredAcceleration);
       }
 
@@ -109,7 +109,7 @@ public class JointControlBlender
       {
          double desiredTorque0 = hasDesiredTorque(outputData0) ? outputData0.getDesiredTorque() : 0.0;
          double desiredTorque1 = hasDesiredTorque(outputData1) ? outputData1.getDesiredTorque() : 0.0;
-         double desiredTorque = TupleTools.interpolate(desiredTorque0, desiredTorque1, blendingFactor);
+         double desiredTorque = EuclidCoreTools.interpolate(desiredTorque0, desiredTorque1, blendingFactor);
          outputDataToPack.setDesiredTorque(desiredTorque);
       }
 
@@ -117,7 +117,7 @@ public class JointControlBlender
       {
          double stiffness0 = hasStiffness(outputData0) ? outputData0.getStiffness() : 0.0;
          double stiffness1 = hasStiffness(outputData1) ? outputData1.getStiffness() : 0.0;
-         double stiffness = TupleTools.interpolate(stiffness0, stiffness1, blendingFactor);
+         double stiffness = EuclidCoreTools.interpolate(stiffness0, stiffness1, blendingFactor);
          outputDataToPack.setStiffness(stiffness);
       }
 
@@ -125,7 +125,7 @@ public class JointControlBlender
       {
          double damping0 = hasDamping(outputData0) ? outputData0.getDamping() : 0.0;
          double damping1 = hasDamping(outputData1) ? outputData1.getDamping() : 0.0;
-         double damping = TupleTools.interpolate(damping0, damping1, blendingFactor);
+         double damping = EuclidCoreTools.interpolate(damping0, damping1, blendingFactor);
          outputDataToPack.setDamping(damping);
       }
 
