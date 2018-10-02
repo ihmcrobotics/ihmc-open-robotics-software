@@ -338,6 +338,12 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       {
          return 0.05;
       }
+
+      @Override
+      public double getRhoRateDefaultWeight()
+      {
+         return 5e-7;
+      }
    }
 
    private class TestICPPlannerParameters extends AtlasSmoothCMPPlannerParameters
