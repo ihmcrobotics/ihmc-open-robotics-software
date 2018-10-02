@@ -370,40 +370,30 @@ public class InverseDynamicsQPSolver
 
    private void addTaskInternal(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight, int offset)
    {
-      int taskSize = taskJacobian.getNumRows();
       int variables = taskJacobian.getNumCols();
       if (offset + variables > problemSize)
       {
          throw new RuntimeException("This task does not fit.");
       }
 
-      // J^T W
-      tempJtW.reshape(variables, taskSize);
-      DiagonalMatrixTools.postMultTransA(taskJacobian, taskWeight, tempJtW);
-
       // Compute: H += J^T W J
       tempTask_H.reshape(variables, variables);
-      CommonOps.mult(tempJtW, taskJacobian, tempTask_H);
+      DiagonalMatrixTools.multInner(taskJacobian, taskWeight, tempTask_H);
       MatrixTools.addMatrixBlock(solverInput_H, offset, offset, tempTask_H, 0, 0, variables, variables, 1.0);
 
       // Compute: f += - J^T W Objective
       tempTask_f.reshape(variables, 1);
-      CommonOps.mult(tempJtW, taskObjective, tempTask_f);
+      DiagonalMatrixTools.innerDiagonalMultTransA(taskJacobian, taskWeight, taskObjective, tempTask_f);
       MatrixTools.addMatrixBlock(solverInput_f, offset, 0, tempTask_f, 0, 0, variables, 1, -1.0);
    }
 
    private void addTaskInternal(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double taskWeight, int offset)
    {
-      int taskSize = taskJacobian.getNumRows();
       int variables = taskJacobian.getNumCols();
       if (offset + variables > problemSize)
       {
          throw new RuntimeException("This task does not fit.");
       }
-
-      // J^T W
-      tempJtW.reshape(variables, taskSize);
-      CommonOps.transpose(taskJacobian, tempJtW);
 
       // Compute: H += J^T W J
       tempTask_H.reshape(variables, variables);
@@ -412,7 +402,7 @@ public class InverseDynamicsQPSolver
 
       // Compute: f += - J^T W Objective
       tempTask_f.reshape(variables, 1);
-      CommonOps.mult(tempJtW, taskObjective, tempTask_f);
+      CommonOps.multTransA(taskJacobian, taskObjective, tempTask_f);
       MatrixTools.addMatrixBlock(solverInput_f, offset, 0, tempTask_f, 0, 0, variables, 1, -taskWeight);
    }
 
