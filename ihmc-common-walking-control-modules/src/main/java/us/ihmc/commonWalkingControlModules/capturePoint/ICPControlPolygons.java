@@ -93,8 +93,8 @@ public class ICPControlPolygons
          FrameConvexPolygon2D footPolygonInWorldFrame = footControlPolygonsInWorldFrame.get(robotSide);
          FrameConvexPolygon2D footPolygonInMidFeetZUp = footControlPolygonsInMidFeetZUp.get(robotSide);
 
-         footPolygonInWorldFrame.clearAndUpdate(worldFrame);
-         footPolygonInMidFeetZUp.clearAndUpdate(midFeetZUp);
+         footPolygonInWorldFrame.clear(worldFrame);
+         footPolygonInMidFeetZUp.clear(midFeetZUp);
 
          if (contactState.inContact())
          {
@@ -109,16 +109,15 @@ public class ICPControlPolygons
 
                icpControlPlane.projectPointOntoControlPlane(worldFrame, contactPoint.getPosition(), tempFramePoint);
                footPolygonInWorldFrame.addVertexMatchingFrame(tempFramePoint);
-               footPolygonInMidFeetZUp.addVertexMatchingFrame(tempFramePoint);
             }
-
-            footPolygonInWorldFrame.update();
-            footPolygonInMidFeetZUp.update();
          }
          else
          {
             inDoubleSupport = false;
          }
+
+         footPolygonInWorldFrame.update();
+         footPolygonInMidFeetZUp.setMatchingFrame(footPolygonInWorldFrame, false);
       }
 
       updateSupportPolygon(inDoubleSupport, neitherFootIsSupportingFoot, supportSide);

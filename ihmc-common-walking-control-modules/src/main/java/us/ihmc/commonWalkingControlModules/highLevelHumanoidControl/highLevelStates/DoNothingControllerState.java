@@ -21,11 +21,11 @@ public class DoNothingControllerState extends HighLevelControllerState
    @Override
    public void doAction(double timeInState)
    {
-      for (int i = 0; i < controlledJoints.length; i++)
+      for (int i = 0; i < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
       {
          controlledJoints[i].setTau(0.0);
-         lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(controlledJoints[i]).clear();
-         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(controlledJoints[i], 0.0);
+         lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(i).clear();
+         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(i, 0.0);
       }
 
       lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());

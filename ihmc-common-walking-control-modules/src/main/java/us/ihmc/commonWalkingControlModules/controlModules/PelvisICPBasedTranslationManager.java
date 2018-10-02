@@ -78,7 +78,7 @@ public class PelvisICPBasedTranslationManager
    private ReferenceFrame supportFrame;
    private final ReferenceFrame pelvisZUpFrame;
    private final ReferenceFrame midFeetZUpFrame;
-   private final SideDependentList<MovingReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<MovingReferenceFrame> soleZUpFrames;
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private FrameConvexPolygon2D supportPolygon;
@@ -105,7 +105,7 @@ public class PelvisICPBasedTranslationManager
       controlDT = controllerToolbox.getControlDT();
       pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
       midFeetZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
-      ankleZUpFrames = controllerToolbox.getReferenceFrames().getAnkleZUpReferenceFrames();
+      soleZUpFrames = controllerToolbox.getReferenceFrames().getSoleZUpFrames();
 
       this.bipedSupportPolygons = bipedSupportPolygons;
 
@@ -113,7 +113,7 @@ public class PelvisICPBasedTranslationManager
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisOffset", allowMultipleFrames, worldFrame, registry);
       positionTrajectoryGenerator.registerNewTrajectoryFrame(midFeetZUpFrame);
       for (RobotSide robotSide : RobotSide.values)
-         positionTrajectoryGenerator.registerNewTrajectoryFrame(ankleZUpFrames.get(robotSide));
+         positionTrajectoryGenerator.registerNewTrajectoryFrame(soleZUpFrames.get(robotSide));
 
       proportionalGain.set(0.5);
       integralGain.set(1.5);
@@ -157,8 +157,8 @@ public class PelvisICPBasedTranslationManager
       }
       else
       {
-         supportFrame = ankleZUpFrames.get(supportLeg);
-         supportPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
+         supportFrame = soleZUpFrames.get(supportLeg);
+         supportPolygon = bipedSupportPolygons.getFootPolygonInSoleZUpFrame(supportLeg);
       }
 
       if (!isEnabled.getBooleanValue())
