@@ -533,9 +533,9 @@ public class FeetManager
       return footControlModules.get(swingFoot).isInTouchdown();
    }
 
-   public void unload(RobotSide sideToUnload, double percentInUnloading)
+   public void unload(RobotSide sideToUnload, double percentInUnloading, double rhoMin)
    {
-      footControlModules.get(sideToUnload).unload(percentInUnloading);
+      footControlModules.get(sideToUnload).unload(percentInUnloading, rhoMin);
    }
 
    public void resetLoadConstraints(RobotSide sideToUnload)
