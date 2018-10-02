@@ -44,8 +44,8 @@ public class BipedSupportPolygons
    private final YoFrameConvexPolygon2D supportPolygonViz;
    private final SideDependentList<YoFrameConvexPolygon2D> footPolygonsViz = new SideDependentList<>();
 
-   public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame,
-         SideDependentList<ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public BipedSupportPolygons(ReferenceFrame midFeetZUpFrame, SideDependentList<ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry,
+                               YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.midFeetZUp = midFeetZUpFrame;
       this.soleZUpFrames = soleZUpFrames;
@@ -65,9 +65,11 @@ public class BipedSupportPolygons
          footPolygonsInMidFeetZUp.put(robotSide, new FrameConvexPolygon2D());
          String robotSidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
-         YoFrameConvexPolygon2D footPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix + "FootPolygon", "", worldFrame, maxNumberOfContactPointsPerFoot, registry);
+         YoFrameConvexPolygon2D footPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix + "FootPolygon", "", worldFrame, maxNumberOfContactPointsPerFoot,
+                                                                            registry);
          footPolygonsViz.put(robotSide, footPolygonViz);
-         YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Foot Polygon", footPolygonViz, defaultFeetColors.get(robotSide), false);
+         YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Foot Polygon", footPolygonViz,
+                                                                       defaultFeetColors.get(robotSide), false);
          artifactList.add(footPolygonArtifact);
       }
 
