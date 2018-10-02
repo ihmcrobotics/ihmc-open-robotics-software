@@ -232,17 +232,17 @@ public class DiagonalMatrixTools
             double total = 0;
 
             int indexA = aIndexStart;
-            int indexB = j;
-            int indexC = 0;
+            int indexC = j;
+            int indexB = 0;
             int end = indexA + c.numRows;
             while( indexA < end )
             {
-               total += a.get(indexA++) * c.get(indexB) * b.get(indexC);
-               indexB += c.numCols;
-               indexC += b.numCols + 1;
+               total += a.data[indexA++] * c.data[indexC] * b.data[indexB];
+               indexC += c.numCols;
+               indexB += b.numCols + 1;
             }
 
-            d.set( dIndex++ , total );
+            d.data[dIndex++] = total;
          }
          aIndexStart += a.numCols;
       }
@@ -277,21 +277,21 @@ public class DiagonalMatrixTools
       for( int i = 0; i < a.numCols; i++ ) {
          for( int j = 0; j < c.numCols; j++ ) {
             int indexA = i;
-            int indexB = j;
-            int indexC = 0;
+            int indexB = 0;
+            int indexC = j;
 
-            int end = indexB + c.numRows*c.numCols;
+            int end = indexC + c.numRows*c.numCols;
 
             double total = 0;
 
             // loop for k
-            for(; indexB < end; indexB += c.numCols ) {
-               total += a.get(indexA) * c.get(indexB) * b.get(indexC);
+            for(; indexC < end; indexC += c.numCols ) {
+               total += a.data[indexA] * c.data[indexC] * b.data[indexB];
                indexA += a.numCols;
-               indexC += b.numCols + 1;
+               indexB += b.numCols + 1;
             }
 
-            d.set( dIndex++ , total );
+            d.data[dIndex++] = total;
          }
       }
 
