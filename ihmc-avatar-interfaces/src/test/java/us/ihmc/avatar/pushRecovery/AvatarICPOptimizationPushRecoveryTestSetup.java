@@ -152,7 +152,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       if (simulate)
       {
          double duration = size * (footsteps.getDefaultSwingDuration() + footsteps.getDefaultTransferDuration());
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 3.0));
       }
 
       Point3D lastStep = footstepList.get(size - 1).getLocation();

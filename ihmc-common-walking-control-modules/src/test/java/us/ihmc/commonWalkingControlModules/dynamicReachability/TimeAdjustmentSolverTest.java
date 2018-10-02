@@ -5,14 +5,23 @@ import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityPar
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 import static org.junit.Assert.*;
+
+import org.junit.After;
 
 public class TimeAdjustmentSolverTest
 {
    private static final double epsilon = 0.00001;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)

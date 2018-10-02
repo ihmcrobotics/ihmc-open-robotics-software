@@ -10,17 +10,29 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
-import us.ihmc.robotics.screwTheory.*;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.Momentum;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialMotionVector;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class MotionQPInputCalculator
 {
@@ -33,7 +45,6 @@ public class MotionQPInputCalculator
    private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", worldFrame);
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
-   private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final OneDoFJoint[] oneDoFJoints;
 
    private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
@@ -67,7 +78,6 @@ public class MotionQPInputCalculator
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.jointIndexHandler = jointIndexHandler;
-      this.jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       this.centroidalMomentumHandler = centroidalMomentumHandler;
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
@@ -598,7 +608,7 @@ public class MotionQPInputCalculator
 
    public DenseMatrix64F getCentroidalMomentumMatrix()
    {
-      return centroidalMomentumHandler.getCentroidalMomentumMatrixPart(jointsToOptimizeFor);
+      return centroidalMomentumHandler.getCentroidalMomentumMatrixPart();
    }
 
    public DenseMatrix64F getCentroidalMomentumConvectiveTerm()
@@ -608,13 +618,13 @@ public class MotionQPInputCalculator
 
    public SpatialForceVector computeCentroidalMomentumRateFromSolution(DenseMatrix64F jointAccelerations)
    {
-      centroidalMomentumHandler.computeCentroidalMomentumRate(jointsToOptimizeFor, jointAccelerations);
+      centroidalMomentumHandler.computeCentroidalMomentumRate(jointAccelerations);
       return centroidalMomentumHandler.getCentroidalMomentumRate();
    }
 
    public Momentum computeCentroidalMomentumFromSolution(DenseMatrix64F jointVelocities)
    {
-      centroidalMomentumHandler.computeCentroidalMomentum(jointsToOptimizeFor, jointVelocities);
+      centroidalMomentumHandler.computeCentroidalMomentum(jointVelocities);
       return centroidalMomentumHandler.getCentroidalMomentum();
    }
 }

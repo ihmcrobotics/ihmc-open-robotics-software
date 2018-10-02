@@ -25,10 +25,10 @@ public class OriginAndPointFrame extends ReferenceFrame
 
    public void setOriginAndPositionToPointAt(FramePoint3D origin, FramePoint3D positionToPointAt)
    {
-      origin.changeFrame(parentFrame);
+      origin.changeFrame(getParent());
       this.origin.set(origin);
 
-      positionToPointAt.changeFrame(parentFrame);
+      positionToPointAt.changeFrame(getParent());
       this.positionToPointAt.set(positionToPointAt);
    }
 

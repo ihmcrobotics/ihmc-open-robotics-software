@@ -24,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -159,6 +160,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       contactStates.clear();
       numberOfUpcomingFootsteps.set(0);
       upcomingFootstepsData.clear();
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    public void sendFootStepMessages(int numberOfFootstepsToPlan)

@@ -69,6 +69,7 @@ public class WalkingControllerState extends HighLevelControllerState
                                                                             walkingControllerParameters.getMomentumOptimizationSettings(),
                                                                             controllerToolbox.getYoGraphicsListRegistry(), registry);
       toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
+      toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
       if (setupInverseDynamicsSolver)
          toolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
       if (setupInverseKinematicsSolver)

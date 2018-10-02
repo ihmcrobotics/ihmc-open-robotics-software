@@ -233,7 +233,8 @@ public class WholeBodyInverseDynamicsSolver
       }
 
       planeContactWrenchProcessor.compute(externalWrenchSolution);
-      wrenchVisualizer.visualize(externalWrenchSolution);
+      if (wrenchVisualizer != null)
+         wrenchVisualizer.visualize(externalWrenchSolution);
    }
 
    public void submitResetIntegratorRequests(JointDesiredOutputListReadOnly jointDesiredOutputList)

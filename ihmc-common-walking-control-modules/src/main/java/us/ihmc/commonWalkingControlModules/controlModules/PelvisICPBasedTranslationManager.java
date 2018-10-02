@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
@@ -94,6 +95,7 @@ public class PelvisICPBasedTranslationManager
 
    private final YoBoolean isReadyToHandleQueuedCommands;
    private final YoLong numberOfQueuedCommands;
+   private final PelvisTrajectoryCommand commandBeingProcessed = new PelvisTrajectoryCommand();
    private final RecyclingArrayDeque<PelvisTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisTrajectoryCommand.class, PelvisTrajectoryCommand::set);
 
    public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox, double pelvisTranslationICPSupportPolygonSafeMargin, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
@@ -110,7 +112,7 @@ public class PelvisICPBasedTranslationManager
       this.bipedSupportPolygons = bipedSupportPolygons;
 
       boolean allowMultipleFrames = true;
-      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisOffset", allowMultipleFrames, worldFrame, registry);
+      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisOffset", RigidBodyTaskspaceControlState.maxPointsInGenerator, allowMultipleFrames, worldFrame, registry);
       positionTrajectoryGenerator.registerNewTrajectoryFrame(midFeetZUpFrame);
       for (RobotSide robotSide : RobotSide.values)
          positionTrajectoryGenerator.registerNewTrajectoryFrame(ankleZUpFrames.get(robotSide));
@@ -180,9 +182,9 @@ public class PelvisICPBasedTranslationManager
             if (positionTrajectoryGenerator.isDone() && !commandQueue.isEmpty())
             {
                double firstTrajectoryPointTime = positionTrajectoryGenerator.getLastWaypointTime();
-               PelvisTrajectoryCommand command = commandQueue.poll();
+               commandBeingProcessed.set(commandQueue.poll());
                numberOfQueuedCommands.decrement();
-               initializeTrajectoryGenerator(command, firstTrajectoryPointTime);
+               initializeTrajectoryGenerator(commandBeingProcessed, firstTrajectoryPointTime);
                positionTrajectoryGenerator.compute(deltaTime);
             }
          }
