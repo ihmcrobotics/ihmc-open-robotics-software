@@ -26,8 +26,8 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
    @Test(timeout = 70000)
    public void testForwardStep() throws SimulationExceededMaximumTimeException
    {
-      double stepLength = 1.5;
-      double stepWidth = 0.25;
+      double stepLength = 1.3;
+      double stepWidth = 0.25 ;
 
       setStepLength(stepLength);
       setStepWidth(stepWidth);
@@ -141,6 +141,12 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       }
 
       @Override
+      public double getMaxAllowedDistanceCMPSupport()
+      {
+         return 0.10;
+      }
+
+      @Override
       public boolean controlHeightWithMomentum()
       {
          return false;
@@ -231,8 +237,8 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       @Override
       public boolean doToeOffIfPossibleInSingleSupport()
       {
-         return true;
-      }
+         return false;
+      } // FIXME this is disabled because of a bug in FrameConvexPolygon2D
 
       @Override
       public boolean doToeOffIfPossible()
@@ -343,6 +349,12 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       public double getRhoRateDefaultWeight()
       {
          return 5e-7;
+      }
+
+      @Override
+      public double getJointJerkWeight()
+      {
+         return 1E-6;
       }
    }
 
