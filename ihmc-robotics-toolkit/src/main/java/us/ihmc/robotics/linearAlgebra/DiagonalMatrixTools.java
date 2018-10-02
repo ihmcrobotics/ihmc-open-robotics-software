@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.ejml.data.RowD1Matrix64F;
 import org.ejml.ops.MatrixDimensionException;
+import us.ihmc.commons.PrintTools;
 
 public class DiagonalMatrixTools
 {
@@ -158,5 +159,57 @@ public class DiagonalMatrixTools
          }
          bIndex += b.numCols + 1;
       }
+   }
+
+   /**
+    * <p>Computes the matrix multiplication inner product:<br>
+    * <br>
+    * c = a<sup>T</sup> * b * a <br>
+    * <br>
+    * c<sub>ij</sub> = &sum;<sub>k=1:n</sub> { a<sub>ki</sub> * a<sub>kj</sub> * b<sub>k</sub>}
+    * </p>
+    *  <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+
+    * <p>
+    * Is faster than using a generic matrix multiplication by taking advantage of symmetry.  For
+    * vectors there is an even faster option, see {@link org.ejml.alg.dense.mult.VectorVectorMult#innerProd(org.ejml.data.D1Matrix64F, org.ejml.data.D1Matrix64F)}
+    * </p>
+    *
+    * @param a The matrix being multiplied. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multInner(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
+   {
+      for( int i = 0; i < a.numCols; i++ )
+      {
+         for( int j = i; j < a.numCols; j++ )
+         {
+            int indexC1 = i*c.numCols+j;
+            int indexC2 = j*c.numCols+i;
+            int indexA = i;
+            int indexB = j;
+            int indexC = 0;
+            double sum = 0;
+            int end = indexA + a.numRows*a.numCols;
+            for( ; indexA < end; indexA += a.numCols, indexB += a.numCols, indexC += (b.numCols + 1) )
+            {
+               sum += a.data[indexA]*a.data[indexB] * b.data[indexC];
+            }
+            c.data[indexC1] = c.data[indexC2] = sum;
+         }
+      }
+
+      /*
+              for( int i = 0; i < a.numCols; i++ ) {
+                  for( int j = i; j < a.numCols; j++ ) {
+                      double sum = 0;
+                      for( int k = 0; k < a.numRows; k++ ) {
+                          sum += b.get(k,k) * a.get(k,i)*a.get(k,j);
+                      }
+                      c.set(i,j,sum);
+                      c.set(j,i,sum);
+                  }
+              }
+              */
    }
 }
