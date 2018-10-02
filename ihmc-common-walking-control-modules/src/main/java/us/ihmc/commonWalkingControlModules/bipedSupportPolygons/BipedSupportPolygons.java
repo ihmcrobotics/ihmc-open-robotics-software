@@ -7,6 +7,7 @@ import java.awt.Color;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
@@ -43,8 +44,6 @@ public class BipedSupportPolygons
    private final YoFrameConvexPolygon2D supportPolygonViz;
    private final SideDependentList<YoFrameConvexPolygon2D> footPolygonsViz = new SideDependentList<>();
 
-   private final ExecutionTimer timer = new ExecutionTimer(getClass().getSimpleName() + "Timer", registry);
-
    public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame,
          SideDependentList<ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -80,11 +79,8 @@ public class BipedSupportPolygons
       parentRegistry.addChild(registry);
    }
 
-   private final FramePoint3D tempFramePoint = new FramePoint3D();
-
    public void updateUsingContactStates(SideDependentList<? extends PlaneContactState> contactStates)
    {
-      timer.startMeasurement();
       boolean inDoubleSupport = true;
       boolean neitherFootIsSupportingFoot = true;
       RobotSide supportSide = null;
@@ -98,10 +94,10 @@ public class BipedSupportPolygons
          FrameConvexPolygon2D footPolygonInSoleZUpFrame = footPolygonsInSoleZUpFrame.get(robotSide);
          FrameConvexPolygon2D footPolygonInMidFeetZUp = footPolygonsInMidFeetZUp.get(robotSide);
 
-         footPolygonInWorldFrame.clear(worldFrame);
-         footPolygonInSoleFrame.clear(contactState.getPlaneFrame());
-         footPolygonInSoleZUpFrame.clear(soleZUpFrames.get(robotSide));
-         footPolygonInMidFeetZUp.clear(midFeetZUp);
+         footPolygonInWorldFrame.clearAndUpdate(worldFrame);
+         footPolygonInSoleFrame.clearAndUpdate(contactState.getPlaneFrame());
+         footPolygonInSoleZUpFrame.clearAndUpdate(soleZUpFrames.get(robotSide));
+         footPolygonInMidFeetZUp.clearAndUpdate(midFeetZUp);
 
          if (contactState.inContact())
          {
@@ -114,25 +110,25 @@ public class BipedSupportPolygons
                if (!contactPoint.isInContact())
                   continue;
 
-               contactPoint.getPosition(tempFramePoint);
-               footPolygonInWorldFrame.addVertexMatchingFrame(tempFramePoint);
+               FramePoint3DReadOnly position = contactPoint.getPosition();
+               footPolygonInWorldFrame.addVertexMatchingFrame(position);
+               footPolygonInSoleFrame.addVertexMatchingFrame(position);
+               footPolygonInSoleZUpFrame.addVertexMatchingFrame(position);
+               footPolygonInMidFeetZUp.addVertexMatchingFrame(position);
             }
+
+            footPolygonInWorldFrame.update();
+            footPolygonInSoleFrame.update();
+            footPolygonInSoleZUpFrame.update();
+            footPolygonInMidFeetZUp.update();
          }
          else
          {
             inDoubleSupport = false;
          }
-
-         footPolygonInWorldFrame.update();
-
-         footPolygonInSoleFrame.setMatchingFrame(footPolygonInWorldFrame, false);
-         footPolygonInSoleZUpFrame.setMatchingFrame(footPolygonInWorldFrame, false);
-         footPolygonInMidFeetZUp.setMatchingFrame(footPolygonInWorldFrame, false);
       }
 
       updateSupportPolygon(inDoubleSupport, neitherFootIsSupportingFoot, supportSide);
-
-      timer.stopMeasurement();
 
       if (VISUALIZE)
          visualize();
