@@ -27,7 +27,7 @@ public class DiagonalMatrixToolsTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         int size = random.nextInt(1000);
+         int size = random.nextInt(100);
          DenseMatrix64F matrix = CommonOps.identity(size, size);
          DenseMatrix64F invMatrix = new DenseMatrix64F(size, size);
          DenseMatrix64F otherInvMatrix = new DenseMatrix64F(size, size);
@@ -66,9 +66,9 @@ public class DiagonalMatrixToolsTest
 
       for (int i = 0; i < iters; i++)
       {
-         int diagonalRows = random.nextInt(1000);
-         int interiorCols = random.nextInt(1000);
-         int randomCols = random.nextInt(1000);
+         int diagonalRows = random.nextInt(100);
+         int interiorCols = random.nextInt(100);
+         int randomCols = random.nextInt(100);
 
          DenseMatrix64F diagonal = CommonOps.identity(diagonalRows, interiorCols);
          DenseMatrix64F randomMatrix = new DenseMatrix64F(interiorCols, randomCols);
@@ -105,9 +105,9 @@ public class DiagonalMatrixToolsTest
 
       for (int i = 0; i < iters; i++)
       {
-         int leadingRows = random.nextInt(1000);
-         int interiorCols = random.nextInt(1000);
-         int randomCols = random.nextInt(1000);
+         int leadingRows = random.nextInt(100);
+         int interiorCols = random.nextInt(100);
+         int randomCols = random.nextInt(100);
 
          DenseMatrix64F diagonal = CommonOps.identity(interiorCols, randomCols);
          DenseMatrix64F randomMatrix = new DenseMatrix64F(leadingRows, interiorCols);
@@ -170,9 +170,9 @@ public class DiagonalMatrixToolsTest
 
       for (int i = 0; i < iters; i++)
       {
-         int leadingRows = RandomNumbers.nextInt(random, 1, 1000);
-         int interiorCols = RandomNumbers.nextInt(random, 1, 1000);
-         int randomCols = RandomNumbers.nextInt(random, 1, 1000);
+         int leadingRows = RandomNumbers.nextInt(random, 1, 100);
+         int interiorCols = RandomNumbers.nextInt(random, 1, 100);
+         int randomCols = RandomNumbers.nextInt(random, 1, 100);
 
          DenseMatrix64F diagonal = CommonOps.identity(interiorCols, randomCols);
          DenseMatrix64F randomMatrix = new DenseMatrix64F(interiorCols, leadingRows);
@@ -251,8 +251,8 @@ public class DiagonalMatrixToolsTest
 
       for (int i = 0; i < iters; i++)
       {
-         int variables = RandomNumbers.nextInt(random, 1, 1000);
-         int taskSize = RandomNumbers.nextInt(random, 1, 1000);
+         int variables = RandomNumbers.nextInt(random, 1, 100);
+         int taskSize = RandomNumbers.nextInt(random, 1, 100);
 
 
          DenseMatrix64F diagonal = CommonOps.identity(taskSize, taskSize);
