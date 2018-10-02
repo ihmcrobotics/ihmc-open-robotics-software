@@ -6,6 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
+import org.ejml.ops.RandomMatrices;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -195,6 +196,88 @@ public class DiagonalMatrixToolsTest
          CommonOps.multTransA(randomMatrix, diagonal, expectedSolution);
 
          JUnitTools.assertMatrixEquals(solution, expectedSolution, epsilon);
+      }
+   }
+
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @Test(timeout = 40000)
+   public void testEasyMultInner()
+   {
+      Random random = new Random(124L);
+
+      int iters = 10;
+
+      for (int i = 0; i < iters; i++)
+      {
+         int variables = 4;
+         int taskSize = 3;
+
+
+         DenseMatrix64F diagonal = CommonOps.identity(taskSize, taskSize);
+         DenseMatrix64F randomMatrix = RandomMatrices.createRandom(taskSize, variables, -50.0, 50.0, random);
+         DenseMatrix64F solution = new DenseMatrix64F(variables, variables);
+         DenseMatrix64F expectedSolution = new DenseMatrix64F(variables, variables);
+
+
+
+
+
+         for (int index = 0; index < taskSize; index++)
+         {
+            diagonal.set(index, index, RandomNumbers.nextDouble(random, 50.0));
+         }
+
+         DenseMatrix64F tempJtW = new DenseMatrix64F(variables, taskSize);
+         DiagonalMatrixTools.postMultTransA(randomMatrix, diagonal, tempJtW);
+
+         // Compute: H += J^T W J
+         CommonOps.mult(tempJtW, randomMatrix, expectedSolution);
+
+         DiagonalMatrixTools.multInner(randomMatrix, diagonal, solution);
+
+         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @Test(timeout = 40000)
+   public void testRandomMultInner()
+   {
+      Random random = new Random(124L);
+
+      int iters = 10;
+
+      for (int i = 0; i < iters; i++)
+      {
+         int variables = RandomNumbers.nextInt(random, 1, 1000);
+         int taskSize = RandomNumbers.nextInt(random, 1, 1000);
+
+
+         DenseMatrix64F diagonal = CommonOps.identity(taskSize, taskSize);
+         DenseMatrix64F randomMatrix = RandomMatrices.createRandom(taskSize, variables, -50.0, 50.0, random);
+         DenseMatrix64F solution = new DenseMatrix64F(variables, variables);
+         DenseMatrix64F expectedSolution = new DenseMatrix64F(variables, variables);
+
+
+
+
+
+         for (int index = 0; index < taskSize; index++)
+         {
+            diagonal.set(index, index, RandomNumbers.nextDouble(random, 50.0));
+         }
+
+         DenseMatrix64F tempJtW = new DenseMatrix64F(variables, taskSize);
+         DiagonalMatrixTools.postMultTransA(randomMatrix, diagonal, tempJtW);
+
+         // Compute: H += J^T W J
+         CommonOps.mult(tempJtW, randomMatrix, expectedSolution);
+
+         DiagonalMatrixTools.multInner(randomMatrix, diagonal, solution);
+
+         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
    }
 }
