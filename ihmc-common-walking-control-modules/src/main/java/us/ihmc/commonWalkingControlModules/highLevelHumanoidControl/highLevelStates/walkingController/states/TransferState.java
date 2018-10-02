@@ -55,11 +55,12 @@ public abstract class TransferState extends WalkingState
 
    private final YoBoolean isUnloading;
    private final DoubleProvider unloadFraction;
+   private final DoubleProvider rhoMin;
 
    public TransferState(WalkingStateEnum transferStateEnum, WalkingControllerParameters walkingControllerParameters,
                         WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                         HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
-                        DoubleProvider unloadFraction, YoVariableRegistry parentRegistry)
+                        DoubleProvider unloadFraction, DoubleProvider rhoMin, YoVariableRegistry parentRegistry)
    {
       super(transferStateEnum, parentRegistry);
       this.transferToSide = transferStateEnum.getTransferToSide();
@@ -67,6 +68,7 @@ public abstract class TransferState extends WalkingState
       this.failureDetectionControlModule = failureDetectionControlModule;
       this.controllerToolbox = controllerToolbox;
       this.unloadFraction = unloadFraction;
+      this.rhoMin = rhoMin;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
@@ -134,7 +136,7 @@ public abstract class TransferState extends WalkingState
             double nominalPercentInUnloading = (percentInTransfer - unloadFraction.getValue()) / (1.0 - unloadFraction.getValue());
             double icpBasedPercentInUnloading = 1.0 - MathTools.clamp(balanceManager.getNormalizedEllipticICPError() - 1.0, 0.0, 1.0);
             double percentInUnloading = Math.min(nominalPercentInUnloading, icpBasedPercentInUnloading);
-            feetManager.unload(transferToSide.getOppositeSide(), percentInUnloading);
+            feetManager.unload(transferToSide.getOppositeSide(), percentInUnloading, rhoMin.getValue());
          }
       }
    }
