@@ -468,7 +468,7 @@ public class DiagonalMatrixTools
                sum += a.data[indexA]*a.data[indexB];
             }
             indexC1 = (i+cRowStart)*c.numCols+j+cColStart;
-            int indexC2 = (j+cRowStart)*c.numCols+i+cColStart; // this one is wrong
+            int indexC2 = (j+cRowStart)*c.numCols+i+cColStart;
             sum *= b;
             c.data[indexC1] += sum;
             c.data[indexC2] += sum;
