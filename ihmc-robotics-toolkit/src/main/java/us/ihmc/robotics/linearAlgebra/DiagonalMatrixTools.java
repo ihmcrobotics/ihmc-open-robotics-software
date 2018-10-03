@@ -270,6 +270,59 @@ public class DiagonalMatrixTools
     * @param a The matrix being multiplied. Not modified.
     * @param c Where the results of the operation are stored. Modified.
     */
+   public static void multAddBlockInner(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int cRowStart, int cColStart)
+   {
+      for( int i = 0; i < a.numCols; i++ )
+      {
+         int j = i;
+         int indexA = i;
+         int indexC = 0;
+         double sum = 0;
+         int end = indexA + a.numRows*a.numCols;
+         for( ; indexA < end; indexA += a.numCols,  indexC += (b.numCols + 1) )
+         {
+            sum += a.data[indexA]*a.data[indexA] * b.data[indexC];
+         }
+         int indexC1 = (i+cRowStart)*c.numCols+j+cColStart;
+         c.data[indexC1] += sum;
+         j++;
+
+         for( ; j < a.numCols; j++ )
+         {
+            indexA = i;
+            int indexB = j;
+            indexC = 0;
+            sum = 0;
+            end = indexA + a.numRows*a.numCols;
+            for( ; indexA < end; indexA += a.numCols, indexB += a.numCols, indexC += (b.numCols + 1) )
+            {
+               sum += a.data[indexA]*a.data[indexB] * b.data[indexC];
+            }
+            indexC1 = (i+cRowStart)*c.numCols+j+cColStart;
+            int indexC2 = (j+cRowStart)*c.numCols+i+cColStart; // this one is wrong
+            c.data[indexC1] += sum;
+            c.data[indexC2] += sum;
+         }
+      }
+   }
+
+   /**
+    * <p>Computes the matrix multiplication inner product:<br>
+    * <br>
+    * c = c + a<sup>T</sup> * b * a <br>
+    * <br>
+    * c<sub>ij</sub> = &sum;<sub>k=1:n</sub> { a<sub>ki</sub> * a<sub>kj</sub> * b<sub>k</sub>}
+    * </p>
+    *  <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+
+    * <p>
+    * Is faster than using a generic matrix multiplication by taking advantage of symmetry.  For
+    * vectors there is an even faster option, see {@link org.ejml.alg.dense.mult.VectorVectorMult#innerProd(org.ejml.data.D1Matrix64F, org.ejml.data.D1Matrix64F)}
+    * </p>
+    *
+    * @param a The matrix being multiplied. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
    public static void multAddInner(double scale, RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
    {
       for( int i = 0; i < a.numCols; i++ )
@@ -555,6 +608,102 @@ public class DiagonalMatrixTools
             }
 
             d.data[dIndex++] += total;
+         }
+      }
+   }
+
+
+
+   /**
+    * <p>Performs the following operation:<br>
+    * <br>
+    * d = d + a<sup>T</sup> * b * c
+    * </br>
+    * </p>
+    * <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+    * @param a The left matrix in the multiplication operation. Not modified.
+    * @param b The middle matrix in the multiplication operation. Not modified. Assumed to be diagonal.
+    * @param c The right matrix in the multiplication operation. Not modified.
+    * @param d Where the results of the operation are stored. Modified.
+    */
+   public static void innerDiagonalMultAddBlockTransA(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, int rowStart, int colStart)
+   {
+      if (a == c || b == c || c == d)
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if (a.numRows != b.numRows)
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      else if (b.numCols != c.numRows)
+         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
+
+
+      for( int i = 0; i < a.numCols; i++ )
+      {
+         for( int j = 0; j < c.numCols; j++ )
+         {
+            int indexA = i;
+            int indexB = 0;
+            int indexC = j;
+
+            int end = indexC + c.numRows*c.numCols;
+
+            double total = 0;
+
+            // loop for k
+            for(; indexC < end; indexC += c.numCols ) {
+               total += a.data[indexA] * c.data[indexC] * b.data[indexB];
+               indexA += a.numCols;
+               indexB += b.numCols + 1;
+            }
+
+            int dIndex = (i+rowStart)*d.numCols + j + colStart;
+            d.data[dIndex] += total;
+         }
+      }
+   }
+
+   /**
+    * <p>Performs the following operation:<br>
+    * <br>
+    * d = d + scale * a<sup>T</sup> * b * c
+    * </br>
+    * </p>
+    * <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+    * @param a The left matrix in the multiplication operation. Not modified.
+    * @param b The middle matrix in the multiplication operation. Not modified. Assumed to be diagonal.
+    * @param c The right matrix in the multiplication operation. Not modified.
+    * @param d Where the results of the operation are stored. Modified.
+    */
+   public static void innerDiagonalMultAddBlockTransA(double scale, RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, int rowStart, int colStart)
+   {
+      if (a == c || b == c || c == d)
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if (a.numRows != b.numRows)
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      else if (b.numCols != c.numRows)
+         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
+
+
+      for( int i = 0; i < a.numCols; i++ )
+      {
+         for( int j = 0; j < c.numCols; j++ )
+         {
+            int indexA = i;
+            int indexB = 0;
+            int indexC = j;
+
+            int end = indexC + c.numRows*c.numCols;
+
+            double total = 0;
+
+            // loop for k
+            for(; indexC < end; indexC += c.numCols ) {
+               total += a.data[indexA] * c.data[indexC] * b.data[indexB];
+               indexA += a.numCols;
+               indexB += b.numCols + 1;
+            }
+
+            int dIndex = (i+rowStart)*d.numCols + j + colStart;
+            d.data[dIndex] += scale * total;
          }
       }
    }
