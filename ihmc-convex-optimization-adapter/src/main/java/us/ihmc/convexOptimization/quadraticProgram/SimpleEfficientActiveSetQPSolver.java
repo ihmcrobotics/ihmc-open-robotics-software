@@ -878,26 +878,20 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
 
       if (numberOfOriginalEqualityConstraints > 0)
       {
-         tempVector.set(linearEqualityConstraintsBVector);
-         CommonOps.multAdd(AQInverse, quadraticCostQVector, tempVector);
-
-         CommonOps.insert(tempVector, bigVectorForLagrangeMultiplierSolution, 0, 0);
+         CommonOps.insert(linearEqualityConstraintsBVector, bigVectorForLagrangeMultiplierSolution, 0, 0);
+         MatrixTools.multAddBlock(AQInverse, quadraticCostQVector, bigVectorForLagrangeMultiplierSolution, 0, 0);
       }
 
       if (numberOfActiveInequalityConstraints > 0)
       {
-         tempVector.set(DBar);
-         CommonOps.multAdd(CBarQInverse, quadraticCostQVector, tempVector);
-
-         CommonOps.insert(tempVector, bigVectorForLagrangeMultiplierSolution, numberOfOriginalEqualityConstraints, 0);
+         CommonOps.insert(DBar, bigVectorForLagrangeMultiplierSolution, numberOfOriginalEqualityConstraints, 0);
+         MatrixTools.multAddBlock(CBarQInverse, quadraticCostQVector, bigVectorForLagrangeMultiplierSolution, numberOfOriginalEqualityConstraints, 0);
       }
 
       if (numberOfActiveLowerBoundConstraints + numberOfActiveUpperBoundConstraints > 0)
       {
-         tempVector.set(DHat);
-         CommonOps.multAdd(CHatQInverse, quadraticCostQVector, tempVector);
-
-         CommonOps.insert(tempVector, bigVectorForLagrangeMultiplierSolution, numberOfOriginalEqualityConstraints + numberOfActiveInequalityConstraints, 0);
+         CommonOps.insert(DHat, bigVectorForLagrangeMultiplierSolution, numberOfOriginalEqualityConstraints + numberOfActiveInequalityConstraints, 0);
+         MatrixTools.multAddBlock(CHatQInverse, quadraticCostQVector, bigVectorForLagrangeMultiplierSolution, numberOfOriginalEqualityConstraints + numberOfActiveInequalityConstraints, 0);
       }
 
       CommonOps.scale(-1.0, bigVectorForLagrangeMultiplierSolution);
