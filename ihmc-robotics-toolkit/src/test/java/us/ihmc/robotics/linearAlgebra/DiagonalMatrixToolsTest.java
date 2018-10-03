@@ -96,6 +96,56 @@ public class DiagonalMatrixToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 9.9)
+   @Test(timeout = 50000)
+   public void testPreMultAddBlock()
+   {
+      Random random = new Random();
+
+      int iters = 100;
+
+      for (int i = 0; i < iters; i++)
+      {
+         int rows = random.nextInt(100);
+         int cols = random.nextInt(100);
+         int interiorCols = random.nextInt(100);
+
+         int fullRows = RandomNumbers.nextInt(random, rows, 500);
+         int fullCols = RandomNumbers.nextInt(random, cols, 500);
+
+         int startRow = RandomNumbers.nextInt(random, 0, fullRows - rows);
+         int startCol = RandomNumbers.nextInt(random, 0, fullCols - cols);
+
+         DenseMatrix64F diagonal = CommonOps.identity(rows, interiorCols);
+         DenseMatrix64F randomMatrix = new DenseMatrix64F(interiorCols, cols);
+
+
+         DenseMatrix64F solution = new DenseMatrix64F(fullRows, fullCols);
+         DenseMatrix64F expectedSolution = new DenseMatrix64F(fullRows, fullCols);
+
+         for (int row = 0; row < interiorCols; row++)
+         {
+            for (int col = 0; col < cols; col++)
+            {
+               randomMatrix.set(row, col, 10000.0 * random.nextDouble() - 5000.0);
+            }
+         }
+
+         for (int index = 0; index < Math.min(rows, interiorCols); index++)
+         {
+            diagonal.set(index, index, 10000.0 * random.nextDouble() - 5000.0);
+         }
+
+         DenseMatrix64F temp = new DenseMatrix64F(rows, cols);
+         CommonOps.mult(diagonal, randomMatrix, temp);
+         MatrixTools.addMatrixBlock(expectedSolution, startRow, startCol, temp, 0, 0, rows, cols, 1.0);
+
+         DiagonalMatrixTools.preMultAddBlock(diagonal, randomMatrix, solution, startRow, startCol);
+
+         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+      }
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 10.4)
    @Test(timeout = 52000)
    public void testPostMult()

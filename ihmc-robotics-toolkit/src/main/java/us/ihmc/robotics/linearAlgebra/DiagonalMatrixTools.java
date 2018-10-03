@@ -91,6 +91,72 @@ public class DiagonalMatrixTools
    /**
     * <p>Performs the following operation:<br>
     * <br>
+    * c = c + a * b <br>
+    * <br>
+    * c<sub>ij</sub> = &sum;<sub>k=1:n</sub> { a<sub>ik</sub> * b<sub>kj</sub>}
+    * </p>
+    * <p>  where we assume that matrix 'a' is a diagonal matrix. </p>
+    * the block is added to matrix c starting at startRow, startCol
+    * @param a The left matrix in the multiplication operation. Not modified. Assumed to be diagonal.
+    * @param b The right matrix in the multiplication operation. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void preMultAddBlock(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int startRow, int startCol)
+   {
+      if( a == c || b == c )
+      {
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      }
+      else if( a.numCols != b.numRows )
+      {
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      }
+
+      for (int row = 0; row < Math.min(a.numRows, a.numCols); row++)
+      {
+         for (int col = 0; col < b.numCols; col++)
+         {
+            c.unsafe_set(startRow + row, startCol + col, a.unsafe_get(row, row) * b.unsafe_get(row, col));
+         }
+      }
+   }
+
+   /**
+    * <p>Performs the following operation:<br>
+    * <br>
+    * c = c + scalar * a * b <br>
+    * <br>
+    * c<sub>ij</sub> = &sum;<sub>k=1:n</sub> { a<sub>ik</sub> * b<sub>kj</sub>}
+    * </p>
+    * <p>  where we assume that matrix 'a' is a diagonal matrix. </p>
+    * the block is added to matrix c starting at startRow, startCol
+    * @param a The left matrix in the multiplication operation. Not modified. Assumed to be diagonal.
+    * @param b The right matrix in the multiplication operation. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void preMultAddBlock(double scalar, RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int startRow, int startCol)
+   {
+      if( a == c || b == c )
+      {
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      }
+      else if( a.numCols != b.numRows )
+      {
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      }
+
+      for (int row = 0; row < Math.min(a.numRows, a.numCols); row++)
+      {
+         for (int col = 0; col < b.numCols; col++)
+         {
+            c.unsafe_set(startRow + row, startCol + col, scalar * a.unsafe_get(row, row) * b.unsafe_get(row, col));
+         }
+      }
+   }
+
+   /**
+    * <p>Performs the following operation:<br>
+    * <br>
     * c = a * b
     * </br>
     * c<sub>ij</sub> = &sum;<sub>k=1:n</sub> { a<sub>ik</sub> * b<sub>kj</sub>}
