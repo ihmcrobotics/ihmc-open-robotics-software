@@ -58,7 +58,6 @@ public class MotionQPInputCalculator
    private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, 12);
    private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-   private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
 
    private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
 
@@ -232,9 +231,7 @@ public class MotionQPInputCalculator
          motionQPInputToPack.setUseWeightScalar(false);
          tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
          commandToConvert.getWeightMatrix(controlFrame, tempTaskWeight);
-         tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-         DiagonalMatrixTools.postMult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-         CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
+         DiagonalMatrixTools.multOuter(tempSelectionMatrix, tempTaskWeight, motionQPInputToPack.taskWeightMatrix);
       }
 
       RigidBody base = commandToConvert.getBase();
@@ -351,9 +348,7 @@ public class MotionQPInputCalculator
          motionQPInputToPack.setUseWeightScalar(false);
          tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
          commandToConvert.getWeightMatrix(controlFrame, tempTaskWeight);
-         tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-         DiagonalMatrixTools.postMult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-         CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
+         DiagonalMatrixTools.multOuter(tempSelectionMatrix, tempTaskWeight, motionQPInputToPack.taskWeightMatrix);
       }
 
       RigidBody base = commandToConvert.getBase();
@@ -453,9 +448,7 @@ public class MotionQPInputCalculator
       // Compute the weight: W = S * W * S^T
       tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
-      tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-      DiagonalMatrixTools.postMult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-      CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
+      DiagonalMatrixTools.multOuter(tempSelectionMatrix, tempTaskWeight, motionQPInputToPack.taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * A
       DenseMatrix64F centroidalMomentumMatrix = getCentroidalMomentumMatrix();
@@ -497,9 +490,7 @@ public class MotionQPInputCalculator
       // Compute the weight: W = S * W * S^T
       tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
-      tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-      DiagonalMatrixTools.postMult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-      CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
+      DiagonalMatrixTools.multOuter(tempSelectionMatrix, tempTaskWeight, motionQPInputToPack.taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * A
       DenseMatrix64F centroidalMomentumMatrix = getCentroidalMomentumMatrix();
