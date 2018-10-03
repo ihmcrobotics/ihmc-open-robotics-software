@@ -44,7 +44,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = true;
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
    public static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = false;
-   private static final boolean ENABLE_ESTIMATED_WRENCH_VISUALIZER = true;
+   private static final boolean ENABLE_ESTIMATED_WRENCH_VISUALIZER = false;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
