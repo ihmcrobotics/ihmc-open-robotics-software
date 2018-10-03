@@ -89,7 +89,6 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
    {
       for (int i = 0; i < joints.length; i++)
       {
-
          OneDoFJoint joint = joints[i];
          JointDesiredOutput data = jointsData[i];
 
