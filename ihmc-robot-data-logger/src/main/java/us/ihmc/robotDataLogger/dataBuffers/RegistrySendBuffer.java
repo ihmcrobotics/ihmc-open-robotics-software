@@ -15,8 +15,7 @@ public class RegistrySendBuffer extends RegistryBuffer
    private final ByteBuffer buffer;
    private final LongBuffer data;
    private final YoVariable<?>[] variables;
-
-   private final List<JointHolder> jointHolders;
+   private final JointHolder[] jointHolders;
 
    private double[] jointStates;
    private final double[] allocatedJointStates;
@@ -51,8 +50,8 @@ public class RegistrySendBuffer extends RegistryBuffer
       this.registryID = registeryID;
 
       this.variables = variables.toArray(new YoVariable[variables.size()]);
+      this.jointHolders = jointHolders.toArray(new JointHolder[jointHolders.size()]);
 
-      this.jointHolders = jointHolders;
       this.allocatedJointStates = new double[numberOfJointStates];
       
    }
@@ -71,7 +70,8 @@ public class RegistrySendBuffer extends RegistryBuffer
       this.offset = offset;
       this.numberOfVariables = numberOfVariables;
       this.data.clear();
-      for (int i = offset; i < offset + numberOfVariables; i++)
+      int end = offset + numberOfVariables;
+      for (int i = offset; i < end; i++)
       {
          this.data.put(variables[i].getValueAsLongBits());
       }
@@ -82,9 +82,8 @@ public class RegistrySendBuffer extends RegistryBuffer
       if(segment == 0)
       {
          int jointOffset = 0;
-         for (int i = 0; i < jointHolders.size(); i++)
+         for (JointHolder jointHolder : jointHolders)
          {
-            JointHolder jointHolder = jointHolders.get(i);
             jointHolder.get(allocatedJointStates, jointOffset);
             jointOffset += jointHolder.getNumberOfStateVariables();
          }
