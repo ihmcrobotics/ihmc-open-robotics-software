@@ -174,14 +174,14 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    {
       clear();
 
-      for (int i = 0; i < other.getNumberOfJointsWithDesiredOutput(); i++)
+      for (int otherIndex = 0; otherIndex < other.getNumberOfJointsWithDesiredOutput(); otherIndex++)
       {
-         OneDoFJoint joint = other.getOneDoFJoint(i);
+         OneDoFJoint joint = other.getOneDoFJoint(otherIndex);
          YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getNameBasedHashCode());
          if (lowLevelJointData == null)
             continue;
 
-         lowLevelJointData.set(other.getJointDesiredOutput(joint));
+         lowLevelJointData.set(other.getJointDesiredOutput(otherIndex));
       }
    }
 

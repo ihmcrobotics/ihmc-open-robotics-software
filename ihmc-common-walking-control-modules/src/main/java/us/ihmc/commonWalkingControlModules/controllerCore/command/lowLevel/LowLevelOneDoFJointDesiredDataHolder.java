@@ -17,6 +17,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
    private final List<JointDesiredOutput> unusedData;
    private final List<OneDoFJoint> jointsWithDesiredData;
    private final TLongObjectHashMap<JointDesiredOutput> lowLevelJointDataMap;
+   private final List<JointDesiredOutput> lowLevelJointData;
 
    public LowLevelOneDoFJointDesiredDataHolder()
    {
@@ -26,6 +27,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
    public LowLevelOneDoFJointDesiredDataHolder(int initialCapacity)
    {
       unusedData = new ArrayList<>(initialCapacity);
+      lowLevelJointData = new ArrayList<>(initialCapacity);
 
       while (unusedData.size() < initialCapacity)
          unusedData.add(new JointDesiredOutput());
@@ -44,6 +46,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
    @Override
    public void clear()
    {
+      lowLevelJointData.clear();
       while (!jointsWithDesiredData.isEmpty())
       {
          OneDoFJoint lastJoint = jointsWithDesiredData.remove(jointsWithDesiredData.size() - 1);
@@ -91,6 +94,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
          jointData = unusedData.remove(unusedData.size() - 1);
       lowLevelJointDataMap.put(joint.getNameBasedHashCode(), jointData);
       jointsWithDesiredData.add(joint);
+      lowLevelJointData.add(jointData);
       return jointData;
    }
 
@@ -415,6 +419,6 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
    @Override
    public JointDesiredOutput getJointDesiredOutput(int index)
    {
-      return getJointDesiredOutput(getOneDoFJoint(index));
+      return lowLevelJointData.get(index);
    }
 }
