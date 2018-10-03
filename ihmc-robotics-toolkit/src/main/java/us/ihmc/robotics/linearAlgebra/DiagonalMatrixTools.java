@@ -309,6 +309,77 @@ public class DiagonalMatrixTools
    /**
     * <p>Computes the matrix multiplication inner product:<br>
     * <br>
+    * c = a * b * a<sup>T</sup> <br>
+    * <br>
+    * c<sub>ij</sub> = &sum;<sub>k=1:n</sub> { a<sub>ki</sub> * a<sub>kj</sub> * b<sub>k</sub>}
+    * </p>
+    *  <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+
+    * <p>
+    * Is faster than using a generic matrix multiplication by taking advantage of symmetry.  For
+    * vectors there is an even faster option, see {@link org.ejml.alg.dense.mult.VectorVectorMult#innerProd(org.ejml.data.D1Matrix64F, org.ejml.data.D1Matrix64F)}
+    * </p>
+    *
+    * @param a The matrix being multiplied. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multOuter(RowD1Matrix64F a, double b, RowD1Matrix64F c)
+   {
+      for( int i = 0; i < a.numRows; i++ ) {
+         int indexC1 = i*c.numCols+i;
+         int indexC2 = indexC1;
+         for( int j = i; j < a.numRows; j++ , indexC2 += c.numCols) {
+            int indexA = i*a.numCols;
+            int indexB = j*a.numCols;
+            double sum = 0;
+            int end = indexA + a.numCols;
+            for( ; indexA < end; indexA++,indexB++ ) {
+               sum += a.data[indexA]*a.data[indexB] * b;
+            }
+            c.data[indexC2] = c.data[indexC1++] = sum;
+         }
+      }
+   }
+
+   /**
+    * <p>Computes the matrix multiplication inner product:<br>
+    * <br>
+    * c = a * b * a<sup>T</sup> <br>
+    * <br>
+    * c<sub>ij</sub> = &sum;<sub>k=1:n</sub> { a<sub>ki</sub> * a<sub>kj</sub> * b<sub>k</sub>}
+    * </p>
+    *  <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+
+    * <p>
+    * Is faster than using a generic matrix multiplication by taking advantage of symmetry.  For
+    * vectors there is an even faster option, see {@link org.ejml.alg.dense.mult.VectorVectorMult#innerProd(org.ejml.data.D1Matrix64F, org.ejml.data.D1Matrix64F)}
+    * </p>
+    *
+    * @param a The matrix being multiplied. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multOuter(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
+   {
+      for( int i = 0; i < a.numRows; i++ ) {
+         int indexC1 = i*c.numCols+i;
+         int indexC2 = indexC1;
+         for( int j = i; j < a.numRows; j++ , indexC2 += c.numCols) {
+            int indexA = i*a.numCols;
+            int indexB = j*a.numCols;
+            int indexC = 0;
+            double sum = 0;
+            int end = indexA + a.numCols;
+            for( ; indexA < end; indexA++,indexB++, indexC += (b.numCols + 1) ) {
+               sum += a.data[indexA]*a.data[indexB] * b.data[indexC];
+            }
+            c.data[indexC2] = c.data[indexC1++] = sum;
+         }
+      }
+   }
+
+   /**
+    * <p>Computes the matrix multiplication inner product:<br>
+    * <br>
     * c = a<sup>T</sup> * b * a <br>
     * <br>
     * c<sub>ij</sub> = &sum;<sub>k=1:n</sub> { a<sub>ki</sub> * a<sub>kj</sub> * b<sub>k</sub>}

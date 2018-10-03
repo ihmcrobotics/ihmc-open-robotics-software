@@ -277,6 +277,76 @@ public class DiagonalMatrixToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 8.1)
    @Test(timeout = 40000)
+   public void testEasyMultOuter()
+   {
+      Random random = new Random(124L);
+
+      int iters = 10;
+
+      for (int i = 0; i < iters; i++)
+      {
+         int variables = 4;
+         int taskSize = 3;
+
+
+         DenseMatrix64F diagonal = CommonOps.identity(taskSize, taskSize);
+         DenseMatrix64F randomMatrix = RandomMatrices.createRandom(variables, taskSize, -50.0, 50.0, random);
+         DenseMatrix64F solution = new DenseMatrix64F(variables, variables);
+         DenseMatrix64F expectedSolution = new DenseMatrix64F(variables, variables);
+
+
+         for (int index = 0; index < taskSize; index++)
+         {
+            diagonal.set(index, index, RandomNumbers.nextDouble(random, 50.0));
+         }
+
+         DenseMatrix64F tempWJ = new DenseMatrix64F(variables, taskSize);
+         CommonOps.mult(randomMatrix, diagonal, tempWJ);
+         CommonOps.multTransB(tempWJ, randomMatrix, expectedSolution);
+
+         DiagonalMatrixTools.multOuter(randomMatrix, diagonal, solution);
+
+         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @Test(timeout = 40000)
+   public void testRandomMultOuter()
+   {
+      Random random = new Random(124L);
+
+      int iters = 10;
+
+      for (int i = 0; i < iters; i++)
+      {
+         int variables = RandomNumbers.nextInt(random, 1, 100);
+         int taskSize = RandomNumbers.nextInt(random, 1, 100);
+
+
+         DenseMatrix64F diagonal = CommonOps.identity(taskSize, taskSize);
+         DenseMatrix64F randomMatrix = RandomMatrices.createRandom(variables, taskSize, -50.0, 50.0, random);
+         DenseMatrix64F solution = new DenseMatrix64F(variables, variables);
+         DenseMatrix64F expectedSolution = new DenseMatrix64F(variables, variables);
+
+
+         for (int index = 0; index < taskSize; index++)
+         {
+            diagonal.set(index, index, RandomNumbers.nextDouble(random, 50.0));
+         }
+
+         DenseMatrix64F tempWJ = new DenseMatrix64F(variables, taskSize);
+         CommonOps.mult(randomMatrix, diagonal, tempWJ);
+         CommonOps.multTransB(tempWJ, randomMatrix, expectedSolution);
+
+         DiagonalMatrixTools.multOuter(randomMatrix, diagonal, solution);
+
+         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @Test(timeout = 40000)
    public void testEasyMultAddInner()
    {
       Random random = new Random(124L);
