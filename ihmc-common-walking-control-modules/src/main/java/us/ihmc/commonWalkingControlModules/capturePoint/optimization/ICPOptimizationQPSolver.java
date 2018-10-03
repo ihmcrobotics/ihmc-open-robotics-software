@@ -686,9 +686,8 @@ public class ICPOptimizationQPSolver
     */
    public void setCMPFeedbackConditions(double cmpFeedbackWeight, boolean useAngularMomentum)
    {
-      CommonOps.setIdentity(identity);
+      MatrixTools.setDiagonal(this.cmpFeedbackWeight, cmpFeedbackWeight);
 
-      MatrixTools.setMatrixBlock(this.cmpFeedbackWeight, 0, 0, identity, 0, 0, 2, 2, cmpFeedbackWeight);
       indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.setUseAngularMomentum(useAngularMomentum);
    }
@@ -701,8 +700,7 @@ public class ICPOptimizationQPSolver
     */
    public void setFootstepRateWeight(double rateWeight)
    {
-      CommonOps.setIdentity(footstepRateWeight);
-      CommonOps.scale(rateWeight, footstepRateWeight);
+      MatrixTools.setDiagonal(footstepRateWeight, rateWeight);
 
       hasFootstepRateTerm = true;
    }
@@ -781,8 +779,7 @@ public class ICPOptimizationQPSolver
       this.feedbackGain.set(0, 0, feedbackXGain);
       this.feedbackGain.set(1, 1, feedbackYGain);
 
-      CommonOps.setIdentity(this.dynamicsWeight);
-      CommonOps.scale(dynamicsWeight, this.dynamicsWeight);
+      MatrixTools.setDiagonal(this.dynamicsWeight, dynamicsWeight);
    }
 
    /**
@@ -794,11 +791,8 @@ public class ICPOptimizationQPSolver
     */
    public void setFeedbackRateWeight(double copCMPFeedbackRateWeight, double feedbackRateWeight)
    {
-      CommonOps.setIdentity(this.feedbackRateWeight);
-      CommonOps.setIdentity(this.copCMPFeedbackRateWeight);
-
-      CommonOps.scale(feedbackRateWeight, this.feedbackRateWeight);
-      CommonOps.scale(copCMPFeedbackRateWeight, this.copCMPFeedbackRateWeight);
+      MatrixTools.setDiagonal(this.feedbackRateWeight, feedbackRateWeight);
+      MatrixTools.setDiagonal(this.copCMPFeedbackRateWeight, copCMPFeedbackRateWeight);
 
       hasFeedbackRateTerm = true;
    }
@@ -1207,8 +1201,7 @@ public class ICPOptimizationQPSolver
       costToGo.zero();
 
       CommonOps.mult(solverInput_H, solution, tmpCost);
-      CommonOps.multTransA(solution, tmpCost, costToGo);
-      CommonOps.scale(0.5, costToGo);
+      CommonOps.multTransA(0.5, solution, tmpCost, costToGo);
 
       CommonOps.multAddTransA(solverInput_h, solution, costToGo); // already scaled by -1.0
       CommonOps.addEquals(costToGo, solverInputResidualCost);
@@ -1233,16 +1226,14 @@ public class ICPOptimizationQPSolver
 
       // feedback cost:
       CommonOps.mult(copFeedbackTaskInput.quadraticTerm, copDeltaSolution, tmpFeedbackCost);
-      CommonOps.multTransA(copDeltaSolution, tmpFeedbackCost, copFeedbackCostToGo);
-      CommonOps.scale(0.5, copFeedbackCostToGo);
+      CommonOps.multTransA(0.5, copDeltaSolution, tmpFeedbackCost, copFeedbackCostToGo);
 
       CommonOps.multAddTransA(-1.0, copFeedbackTaskInput.linearTerm, copDeltaSolution, copFeedbackCostToGo);
       CommonOps.addEquals(copFeedbackCostToGo, copFeedbackTaskInput.residualCost);
 
       // dynamics cost:
       CommonOps.mult(dynamicsTaskInput.quadraticTerm, solution, tmpCost);
-      CommonOps.multTransA(solution, tmpCost, dynamicsCostToGo);
-      CommonOps.scale(0.5, dynamicsCostToGo);
+      CommonOps.multTransA(0.5, solution, tmpCost, dynamicsCostToGo);
 
       CommonOps.multAddTransA(-1.0, dynamicsTaskInput.linearTerm, solution, dynamicsCostToGo);
       CommonOps.addEquals(dynamicsCostToGo, dynamicsTaskInput.residualCost);
@@ -1250,8 +1241,7 @@ public class ICPOptimizationQPSolver
       if (indexHandler.useStepAdjustment())
       { // footstep cost:
          CommonOps.mult(footstepTaskInput.quadraticTerm, footstepLocationSolution, tmpFootstepCost);
-         CommonOps.multTransA(footstepLocationSolution, tmpFootstepCost, footstepCostToGo);
-         CommonOps.scale(0.5, footstepCostToGo);
+         CommonOps.multTransA(0.5, footstepLocationSolution, tmpFootstepCost, footstepCostToGo);
 
          CommonOps.multAddTransA(-1.0, footstepTaskInput.linearTerm, footstepLocationSolution, footstepCostToGo);
          CommonOps.addEquals(footstepCostToGo, footstepTaskInput.residualCost);
@@ -1260,8 +1250,7 @@ public class ICPOptimizationQPSolver
       if (indexHandler.hasCMPFeedbackTask())
       { // cmp feedback cost:
          CommonOps.mult(cmpFeedbackTaskInput.quadraticTerm, cmpDeltaSolution, tmpFeedbackCost);
-         CommonOps.multTransA(cmpDeltaSolution, tmpFeedbackCost, cmpFeedbackCostToGo);
-         CommonOps.scale(0.5, cmpFeedbackCostToGo);
+         CommonOps.multTransA(0.5, cmpDeltaSolution, tmpFeedbackCost, cmpFeedbackCostToGo);
 
          CommonOps.multAddTransA(-1.0, cmpFeedbackTaskInput.linearTerm, cmpDeltaSolution, cmpFeedbackCostToGo);
          CommonOps.addEquals(cmpFeedbackCostToGo, cmpFeedbackTaskInput.residualCost);
