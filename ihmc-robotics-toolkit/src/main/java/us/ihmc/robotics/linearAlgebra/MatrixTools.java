@@ -1482,6 +1482,86 @@ public class MatrixTools
    /**
     * <p>Performs the following operation:<br>
     * <br>
+    * c = c + a * b
+    * </br>
+    * </p>
+    * where we are only modifying a block of the c matrix, starting a rowStart, colStart
+    * @param a The left matrix in the multiplication operation. Not modified.
+    * @param b The right matrix in the multiplication operation. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multAddBlock( RowD1Matrix64F a , RowD1Matrix64F b , RowD1Matrix64F c, int rowStart, int colStart )
+   {
+      if( a == c || b == c )
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if( a.numCols != b.numRows ) {
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      }
+
+      int aIndexStart = 0;
+
+      for( int i = 0; i < a.numRows; i++ ) {
+         for( int j = 0; j < b.numCols; j++ ) {
+            double total = 0;
+
+            int indexA = aIndexStart;
+            int indexB = j;
+            int end = indexA + b.numRows;
+            while( indexA < end ) {
+               total += a.data[indexA++] * b.data[indexB];
+               indexB += b.numCols;
+            }
+
+            int cIndex = (i+rowStart)*c.numCols + j + colStart;
+            c.data[ cIndex] +=  total;
+         }
+         aIndexStart += a.numCols;
+      }
+   }
+
+   /**
+    * <p>Performs the following operation:<br>
+    * <br>
+    * c = c + scalar * a * b
+    * </br>
+    * </p>
+    * where we are only modifying a block of the c matrix, starting a rowStart, colStart
+    * @param a The left matrix in the multiplication operation. Not modified.
+    * @param b The right matrix in the multiplication operation. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multAddBlock( double scalar, RowD1Matrix64F a , RowD1Matrix64F b , RowD1Matrix64F c, int rowStart, int colStart )
+   {
+      if( a == c || b == c )
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if( a.numCols != b.numRows ) {
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      }
+
+      int aIndexStart = 0;
+
+      for( int i = 0; i < a.numRows; i++ ) {
+         for( int j = 0; j < b.numCols; j++ ) {
+            double total = 0;
+
+            int indexA = aIndexStart;
+            int indexB = j;
+            int end = indexA + b.numRows;
+            while( indexA < end ) {
+               total += a.data[indexA++] * b.data[indexB];
+               indexB += b.numCols;
+            }
+
+            int cIndex = (i+rowStart)*c.numCols + j + colStart;
+            c.data[ cIndex] += scalar * total;
+         }
+         aIndexStart += a.numCols;
+      }
+   }
+
+   /**
+    * <p>Performs the following operation:<br>
+    * <br>
     * c = c + a<sup>T</sup> * b
     * </br>
     * </p>
