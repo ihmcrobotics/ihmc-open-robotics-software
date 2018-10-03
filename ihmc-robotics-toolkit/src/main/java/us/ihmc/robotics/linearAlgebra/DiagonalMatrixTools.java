@@ -289,7 +289,7 @@ public class DiagonalMatrixTools
    /**
     * <p>Performs the following operation:<br>
     * <br>
-    * c = a<sup>T</sup> * b * c
+    * d = a<sup>T</sup> * b * c
     * </br>
     * </p>
     * <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
@@ -332,6 +332,53 @@ public class DiagonalMatrixTools
             d.data[dIndex++] = total;
          }
       }
+   }
 
+   /**
+    * <p>Performs the following operation:<br>
+    * <br>
+    * d = a<sup>T</sup> * b * c
+    * </br>
+    * </p>
+    * <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+    * @param a The left matrix in the multiplication operation. Not modified.
+    * @param b The middle matrix in the multiplication operation. Not modified. Assumed to be diagonal.
+    * @param c The right matrix in the multiplication operation. Not modified.
+    * @param d Where the results of the operation are stored. Modified.
+    */
+   public static void innerDiagonalMultAddTransA(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d)
+   {
+      if (a == c || b == c || c == d)
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if (a.numRows != b.numRows)
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      else if (b.numCols != c.numRows)
+         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
+      else if (a.numCols != d.numRows || c.numCols != d.numCols)
+         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+
+
+      int dIndex = 0;
+
+      for( int i = 0; i < a.numCols; i++ ) {
+         for( int j = 0; j < c.numCols; j++ ) {
+            int indexA = i;
+            int indexB = 0;
+            int indexC = j;
+
+            int end = indexC + c.numRows*c.numCols;
+
+            double total = 0;
+
+            // loop for k
+            for(; indexC < end; indexC += c.numCols ) {
+               total += a.data[indexA] * c.data[indexC] * b.data[indexB];
+               indexA += a.numCols;
+               indexB += b.numCols + 1;
+            }
+
+            d.data[dIndex++] += total;
+         }
+      }
    }
 }
