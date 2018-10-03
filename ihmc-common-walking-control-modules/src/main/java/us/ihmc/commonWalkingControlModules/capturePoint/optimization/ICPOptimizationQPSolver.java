@@ -183,8 +183,6 @@ public class ICPOptimizationQPSolver
    private final DenseMatrix64F tmpFootstepCost;
    private final DenseMatrix64F tmpFeedbackCost;
 
-   private final DenseMatrix64F identity = CommonOps.identity(2, 2);
-
    private double copSafeDistanceToEdge = 0.0001;
    private double cmpSafeDistanceFromEdge = Double.POSITIVE_INFINITY;
 
