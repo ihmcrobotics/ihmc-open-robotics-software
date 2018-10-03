@@ -1,67 +1,74 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import java.util.HashMap;
-
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.tools.lists.PairList;
 
 public class JointDesiredOutputList implements JointDesiredOutputListBasics
 {
-   private final PairList<OneDoFJoint, JointDesiredOutput> jointsAndData = new PairList<>();
-   private final HashMap<OneDoFJoint, JointDesiredOutput> jointMap = new HashMap<>();
+   private final OneDoFJoint[] joints;
+   private final JointDesiredOutput[] jointsData;
+   private final TLongObjectHashMap<JointDesiredOutput> jointMap;
 
    public JointDesiredOutputList(OneDoFJoint[] joints)
    {
-      for (OneDoFJoint joint : joints)
+      this.joints = joints;
+      this.jointsData = new JointDesiredOutput[joints.length];
+
+      float disableAutoCompaction = 0;
+      jointMap = new TLongObjectHashMap<>(joints.length);
+      jointMap.setAutoCompactionFactor(disableAutoCompaction);
+
+      for (int i = 0; i < joints.length; i++)
       {
          JointDesiredOutput data = new JointDesiredOutput();
-         jointsAndData.add(joint, data);
-         jointMap.put(joint, data);
+         jointsData[i] = data;
+         jointMap.put(joints[i].getNameBasedHashCode(), data);
       }
+
+
    }
 
    @Override
    public boolean hasDataForJoint(OneDoFJoint joint)
    {
-      return jointMap.containsKey(joint);
+      return jointMap.containsKey(joint.getNameBasedHashCode());
    }
 
    @Override
    public OneDoFJoint getOneDoFJoint(int index)
    {
-      return jointsAndData.first(index);
+      return joints[index];
    }
 
    @Override
    public JointDesiredOutput getJointDesiredOutput(OneDoFJoint joint)
    {
-      return jointMap.get(joint);
+      return jointMap.get(joint.getNameBasedHashCode());
    }
 
    @Override
    public int getNumberOfJointsWithDesiredOutput()
    {
-      return jointsAndData.size();
+      return joints.length;
    }
 
    @Override
    public JointDesiredOutput getJointDesiredOutput(int index)
    {
-      return jointsAndData.second(index);
+      return jointsData[index];
    }
 
    public String getJointName(int index)
    {
-      return jointsAndData.first(index).getName();
+      return joints[index].getName();
    }
 
    @Override
    public void clear()
    {
-      for (int jointIdx = 0; jointIdx < jointsAndData.size(); jointIdx++)
-      {
-         jointsAndData.get(jointIdx).getValue().clear();
-      }
+      for (JointDesiredOutput jointData : jointsData)
+         jointData.clear();
    }
 
 //   public void updateFromModel()
@@ -80,11 +87,11 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
    @Override
    public void overwriteWith(JointDesiredOutputListReadOnly other)
    {
-      for (int i = 0; i < jointsAndData.size(); i++)
+      for (int i = 0; i < joints.length; i++)
       {
 
-         OneDoFJoint joint = jointsAndData.first(i);
-         JointDesiredOutput data = jointsAndData.second(i);
+         OneDoFJoint joint = joints[i];
+         JointDesiredOutput data = jointsData[i];
 
          JointDesiredOutputReadOnly otherData = other.getJointDesiredOutput(joint);
          if (otherData != null)
@@ -101,11 +108,10 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
    @Override
    public void completeWith(JointDesiredOutputListReadOnly other)
    {
-      for (int i = 0; i < jointsAndData.size(); i++)
+      for (int i = 0; i < joints.length; i++)
       {
-
-         OneDoFJoint joint = jointsAndData.first(i);
-         JointDesiredOutput data = jointsAndData.second(i);
+         OneDoFJoint joint = joints[i];
+         JointDesiredOutput data = jointsData[i];
 
          JointDesiredOutputReadOnly otherData = other.getJointDesiredOutput(joint);
          if (otherData != null)
@@ -117,9 +123,7 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
 
    public void requestIntegratorReset()
    {
-      for (int jointIdx = 0; jointIdx < jointsAndData.size(); jointIdx++)
-      {
-         jointsAndData.get(jointIdx).getValue().setResetIntegrators(true);
-      }
+      for (JointDesiredOutput jointData : jointsData)
+         jointData.setResetIntegrators(true);
    }
 }
