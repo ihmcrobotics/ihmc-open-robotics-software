@@ -192,4 +192,10 @@ public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
    {
       return false;
    }
+
+   public boolean allowUsePlanarRegionConstraints()
+   {
+      return false;
+   }
+
 }
