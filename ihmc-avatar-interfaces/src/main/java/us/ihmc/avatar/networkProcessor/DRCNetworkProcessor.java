@@ -170,7 +170,7 @@ public class DRCNetworkProcessor
       if (params.isRobotEnvironmentAwerenessModuleEnabled())
          try
          {
-            LIDARBasedREAModule.createRemoteModule(System.getProperty("user.home") + "/valkyrie/Configurations/defaultREAModuleConfiguration.txt").start();
+            LIDARBasedREAModule.createRemoteModule(System.getProperty("user.home") + "/.ihmc/Configurations/defaultREAModuleConfiguration.txt").start();
          }
          catch (Exception e)
          {
