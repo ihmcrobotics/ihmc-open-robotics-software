@@ -195,7 +195,7 @@ if (ihmc.isBuildRoot())
 
                put from: jar.archivePath, into: directory + "/ValkyrieController.jar"
                
-               put from: file("saved-configurations/defaultREAModuleConfiguration.txt"), into: directory + "/Configurations"
+               put from: file("saved-configurations/defaultREAModuleConfiguration.txt"), into: ".ihmc/Configurations"
 
                def scriptDir = new File(projectDir, "launchScripts/")
                def scriptDirCollection = files { scriptDir.listFiles() }
@@ -236,7 +236,7 @@ if (ihmc.isBuildRoot())
 
                put from: jar.archivePath, into: directory + "/ValkyrieController.jar"
                
-               put from: file("saved-configurations/defaultREAModuleConfiguration.txt"), into: directory + "/Configurations"
+               put from: file("saved-configurations/defaultREAModuleConfiguration.txt"), into: ".ihmc/Configurations"
 
                def scriptDir = new File(projectDir, "launchScripts/")
                def scriptDirCollection = files { scriptDir.listFiles() }
