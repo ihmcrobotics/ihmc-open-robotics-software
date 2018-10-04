@@ -549,60 +549,35 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          isDoneWalking.set(false); // start walking
 
       // Put first CoP as per chicken support computations in case starting from rest
-      if (atAStop)
-      { // this guy is starting from standing
-         if (holdDesiredState.getBooleanValue())
-         {
-            previousCoPLocation.setIncludingFrame(heldCoPPosition);
-            previousCoPLocation.changeFrame(worldFrame);
-            clearHeldPosition();
-
-            CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
-            copLocationWaypoint.addWaypoint(CoPPointName.START_COP, 0.0, previousCoPLocation);
-
-            // set swing parameters for angular momentum estimation
-            convertToFramePointRetainingZ(tempFramePoint1, transferringToPolygon.getFirst().getCentroid(), worldFrame);
-            copLocationWaypoint.setSwingFootLocation(tempFramePoint1);
-            convertToFramePointRetainingZ(tempFramePoint1, transferringFromPolygon.getFirst().getCentroid(), worldFrame);
-            copLocationWaypoint.setSupportFootLocation(tempFramePoint1);
-
-            // compute all the upcoming footsteps
-            for (int footstepIndex = 0; footstepIndex < numberOfUpcomingFootsteps; footstepIndex++)
-               computeCoPPointsForFootstep(footstepIndex);
-            computeCoPPointsForFinalTransfer(planIncludesFinalTransfer, numberOfUpcomingFootsteps);
-         }
-         else if (numberOfUpcomingFootsteps == 0)
-         { // just standing there
-            computeCoPPointsForStanding();
-         }
-         else
-         { // starting moving
-            computeMidFeetPointWithChickenSupportForInitialTransfer(previousCoPLocation);
-
-            CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
-            copLocationWaypoint.addWaypoint(CoPPointName.START_COP, 0.0, previousCoPLocation);
-
-            // set swing parameters for angular momentum estimation
-            convertToFramePointRetainingZ(tempFramePoint1, transferringToPolygon.getFirst().getCentroid(), worldFrame);
-            copLocationWaypoint.setSwingFootLocation(tempFramePoint1);
-            convertToFramePointRetainingZ(tempFramePoint1, transferringFromPolygon.getFirst().getCentroid(), worldFrame);
-            copLocationWaypoint.setSupportFootLocation(tempFramePoint1);
-
-            // compute all the upcoming footsteps
-            for (int footstepIndex = 0; footstepIndex < numberOfUpcomingFootsteps; footstepIndex++)
-               computeCoPPointsForFootstep(footstepIndex);
-            computeCoPPointsForFinalTransfer(planIncludesFinalTransfer, numberOfUpcomingFootsteps);
-         }
+      if (atAStop && !holdDesiredState.getBooleanValue() && numberOfUpcomingFootsteps == 0)
+      { // just standing there
+         computeCoPPointsForStanding();
       }
       else
-      { // starting in motion
-         clearHeldPosition();
-
-         // Put first CoP at the exitCoP of the swing foot when starting in motion
-         computeExitCoPPointLocationForPreviousPlan(previousCoPLocation, copPointParametersMap.get(exitCoPName), transferToSide.getOppositeSide(),
-                                                    transferringToSameSideAsStartingFrom);
-
+      {
          CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
+
+         if (atAStop)
+         {  // this guy is starting from standing
+            if (holdDesiredState.getBooleanValue())
+            {
+               previousCoPLocation.setIncludingFrame(heldCoPPosition);
+               previousCoPLocation.changeFrame(worldFrame);
+               clearHeldPosition();
+            }
+            else
+            { // starting a series of steps
+               computeMidFeetPointWithChickenSupportForInitialTransfer(previousCoPLocation);
+            }
+         }
+         else
+         {  // starting while currently executing a step cycle
+            clearHeldPosition();
+
+            // Put first CoP at the exitCoP of the swing foot when starting in motion
+            computeExitCoPPointLocationForPreviousPlan(previousCoPLocation, copPointParametersMap.get(exitCoPName), transferToSide.getOppositeSide(),
+                                                       transferringToSameSideAsStartingFrom);
+         }
          copLocationWaypoint.addWaypoint(exitCoPName, 0.0, previousCoPLocation);
 
          // set swing parameters for angular momentum estimation
