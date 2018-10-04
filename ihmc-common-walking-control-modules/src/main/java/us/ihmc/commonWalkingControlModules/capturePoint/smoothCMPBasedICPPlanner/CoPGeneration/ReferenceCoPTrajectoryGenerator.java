@@ -549,26 +549,24 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          isDoneWalking.set(false); // start walking
 
       // Put first CoP as per chicken support computations in case starting from rest
-      if (atAStop && !holdDesiredState.getBooleanValue() && numberOfUpcomingFootsteps == 0)
-      { // just standing there
-         computeCoPPointsForStanding();
+      if (atAStop && (holdDesiredState.getBooleanValue() || numberOfUpcomingFootsteps == 0))
+      {
+         if (holdDesiredState.getBooleanValue())
+         {
+            computeCoPPointsForHoldingPosition();
+         }
+         else
+         { // just standing there
+            computeCoPPointsForStanding();
+         }
       }
       else
       {
          CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
 
          if (atAStop)
-         {  // this guy is starting from standing
-            if (holdDesiredState.getBooleanValue())
-            {
-               previousCoPLocation.setIncludingFrame(heldCoPPosition);
-               previousCoPLocation.changeFrame(worldFrame);
-               clearHeldPosition();
-            }
-            else
-            { // starting a series of steps
-               computeMidFeetPointWithChickenSupportForInitialTransfer(previousCoPLocation);
-            }
+         {  // this guy is starting a series of steps from standing
+            computeMidFeetPointWithChickenSupportForInitialTransfer(previousCoPLocation);
          }
          else
          {  // starting while currently executing a step cycle
@@ -700,6 +698,44 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       framePointToPack.changeFrame(worldFrame);
    }
 
+   private void computeCoPPointsForHoldingPosition()
+   {
+      previousCoPLocation.setIncludingFrame(heldCoPPosition);
+      previousCoPLocation.changeFrame(worldFrame);
+      clearHeldPosition();
+
+      CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
+      copLocationWaypoint.addWaypoint(exitCoPName, 0.0, previousCoPLocation);
+
+      // set swing parameters for angular momentum estimation
+      /*
+      convertToFramePointRetainingZ(tempFramePoint1, transferringToPolygon.getFirst().getCentroid(), worldFrame);
+      copLocationWaypoint.setSwingFootLocation(tempFramePoint1);
+      convertToFramePointRetainingZ(tempFramePoint1, transferringFromPolygon.getFirst().getCentroid(), worldFrame);
+      copLocationWaypoint.setSupportFootLocation(tempFramePoint1);
+
+*/
+      copLocationWaypoint = copLocationWaypoints.add();
+
+      // this is for angular momentum generation
+      /*
+      convertToFramePointRetainingZ(tempFramePoint1, transferringToPolygon.getLast().getCentroid(), worldFrame);
+      copLocationWaypoint.setSwingFootLocation(tempFramePoint1);
+      convertToFramePointRetainingZ(tempFramePoint1, transferringFromPolygon.getLast().getCentroid(), worldFrame);
+      copLocationWaypoint.setSupportFootLocation(tempFramePoint1);
+      */
+
+      computeMidfeetCoPPointLocation(tempPointForCoPCalculation, 0);
+
+      double segmentDuration = getTransferSegmentTimes(0, 0) + 0.5 * additionalTimeForFinalTransfer.getDoubleValue();
+         copLocationWaypoint.addWaypoint(CoPPointName.MIDFEET_COP, segmentDuration, tempPointForCoPCalculation);
+
+         computeMidFeetPointWithChickenSupportForFinalTransfer(tempPointForCoPCalculation);
+         tempPointForCoPCalculation.changeFrame(worldFrame);
+         segmentDuration = getTransferSegmentTimes(1, 0) + 0.5 * additionalTimeForFinalTransfer.getDoubleValue();
+         copLocationWaypoint.addWaypoint(CoPPointName.FINAL_COP, segmentDuration, tempPointForCoPCalculation);
+   }
+
    private void computeCoPPointsForStanding()
    {
       getDoubleSupportPolygonCentroid(previousCoPLocation, transferringToPolygon.getFirst(), transferringFromPolygon.getFirst(), worldFrame);
@@ -721,18 +757,17 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       convertToFramePointRetainingZ(tempFramePoint1, transferringFromPolygon.getLast().getCentroid(), worldFrame);
       copLocationWaypoint.setSupportFootLocation(tempFramePoint1);
 
-      computeMidFeetPointByPositionFraction(tempPointForCoPCalculation, transferringToPolygon.getFirst(), transferringFromPolygon.getFirst(), percentageWeightDistribution.getDoubleValue(),
-                                            worldFrame);
+      computeMidFeetPointByPositionFraction(tempPointForCoPCalculation, transferringToPolygon.getFirst(), transferringFromPolygon.getFirst(),
+                                            percentageWeightDistribution.getDoubleValue(), worldFrame);
 
       double segmentDuration = getTransferSegmentTimes(0, 0) + 0.5 * additionalTimeForFinalTransfer.getDoubleValue();
       copLocationWaypoint.addWaypoint(CoPPointName.MIDFEET_COP, segmentDuration, tempPointForCoPCalculation);
 
-      computeMidFeetPointByPositionFraction(tempPointForCoPCalculation, transferringToPolygon.getFirst(), transferringFromPolygon.getFirst(), percentageWeightDistribution.getDoubleValue(),
-                                            worldFrame);
+      computeMidFeetPointByPositionFraction(tempPointForCoPCalculation, transferringToPolygon.getFirst(), transferringFromPolygon.getFirst(),
+                                            percentageWeightDistribution.getDoubleValue(), worldFrame);
 
       segmentDuration = getTransferSegmentTimes(1, 0) + 0.5 * additionalTimeForFinalTransfer.getDoubleValue();
       copLocationWaypoint.addWaypoint(CoPPointName.FINAL_COP, segmentDuration, tempPointForCoPCalculation);
-
    }
 
    private void computeCoPPointsForFinalTransfer(boolean isLastTransfer, int footstepIndex)
@@ -757,6 +792,17 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          tempPointForCoPCalculation.changeFrame(worldFrame);
          segmentDuration = getTransferSegmentTimes(1, footstepIndex) + 0.5 * additionalTimeForFinalTransfer.getDoubleValue();
          copLocationWaypoint.addWaypoint(CoPPointName.FINAL_COP, segmentDuration, tempPointForCoPCalculation);
+
+         /*
+         if (upcomingFootstepsData.get(footstepIndex).getSupportSide() == RobotSide.RIGHT)
+         {
+            percentageWeightDistribution.set(1.0 - percentageChickenSupport.getDoubleValue());
+         }
+         else
+         {
+            percentageWeightDistribution.set(percentageChickenSupport.getDoubleValue());
+         }
+         */
       }
       else
       {
