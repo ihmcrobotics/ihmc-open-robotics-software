@@ -231,30 +231,9 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       for (int order = 0; order < firstTrajectory.getNumberOfCoefficients() / 2; order++)
       {
          FrameTuple3DBasics icpQuantityInitialCondition = calculatedInitialICPConditions.add();
-         if (currentTrajectoryIndex < 0)
-         { // called when standing
-            firstTrajectory.getDerivative(order, localTime, icpQuantityInitialCondition);
-         }
-         else
-         { // called when moving
-            switch (order)
-            {
-            //            case 0:
-            //               icpQuantityInitialCondition.set(icpPositionDesiredCurrent);
-            //               break;
-            //            case 1:
-            //               icpQuantityInitialCondition.set(icpVelocityDesiredCurrent);
-            //               break;
-            //            case 2:
-            //               icpQuantityInitialCondition.set(icpAccelerationDesiredCurrent);
-            //               break;
-            default:
-               icpToolbox
-                     .calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0.getDoubleValue(), localTime, order, trajectories.get(currentTrajectoryIndex),
-                                                                           exitCornerPoints.get(currentTrajectoryIndex), icpQuantityInitialCondition);
-               break;
-            }
-         }
+         icpToolbox
+               .calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0.getDoubleValue(), localTime, order, trajectories.get(currentTrajectoryIndex),
+                                                                     exitCornerPoints.get(currentTrajectoryIndex), icpQuantityInitialCondition);
       }
    }
 
@@ -386,7 +365,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       if (isInitialTransfer.getBooleanValue() && isStanding.getBooleanValue())
       {
-         getICPInitialConditionsForAdjustmentFromCoPs(localTimeInCurrentPhase.getDoubleValue(), -1);
+         getICPInitialConditionsForAdjustmentFromCoPs(localTimeInCurrentPhase.getDoubleValue(), 0);
          setInitialConditionsForAdjustment();
       }
    }
