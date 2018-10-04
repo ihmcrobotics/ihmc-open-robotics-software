@@ -148,7 +148,9 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     */
    public void setControlBaseFrame(ReferenceFrame controlBaseFrame)
    {
-      if (controlBaseFrame.isAStationaryFrame() || controlBaseFrame instanceof MovingReferenceFrame)
+      if (controlBaseFrame == getBase().getBodyFixedFrame())
+         this.controlBaseFrame = null;
+      else if (controlBaseFrame.isAStationaryFrame() || controlBaseFrame instanceof MovingReferenceFrame)
          this.controlBaseFrame = controlBaseFrame;
       else
          throw new IllegalArgumentException("The control base frame has to either be a stationary frame or a MovingReferenceFrame.");
@@ -332,6 +334,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public void setWeightMatrix(WeightMatrix3D weightMatrix)
    {
       spatialAccelerationCommand.setLinearPartOfWeightMatrix(weightMatrix);
+      spatialAccelerationCommand.setAngularWeightsToZero();
    }
 
    /**

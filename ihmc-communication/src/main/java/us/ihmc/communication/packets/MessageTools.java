@@ -689,7 +689,7 @@ public class MessageTools
       if (referenceFrame == null)
          return NameBasedHashCodeTools.NULL_HASHCODE;
       else
-         return referenceFrame.getNameBasedHashCode();
+         return referenceFrame.hashCode();
    }
 
    public static Point3D32[] unpackPointCloud32(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)

@@ -112,7 +112,7 @@ public class QuadrupedMessageTools
    {
       QuadrupedBodyHeightMessage message = new QuadrupedBodyHeightMessage();
       message.getEuclideanTrajectory().set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight),
-                                                                                                 trajectoryReferenceFrame.getNameBasedHashCode()));
+                                                                                                 trajectoryReferenceFrame.hashCode()));
       message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(dataReferenceFrame));
       message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
       message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);

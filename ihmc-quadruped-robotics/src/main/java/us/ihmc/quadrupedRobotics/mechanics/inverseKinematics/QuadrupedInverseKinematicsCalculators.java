@@ -53,8 +53,8 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
 
       if (yoGraphicsListRegistry != null)
       {
-         bodyGraphicReferenceFrame = new YoGraphicReferenceFrame(bodyFrame, registry, 0.22);
-         rootJointGraphicReferenceFrame = new YoGraphicReferenceFrame(rootJointFrame, registry, 0.2);
+         bodyGraphicReferenceFrame = new YoGraphicReferenceFrame(bodyFrame, registry, false, 0.22);
+         rootJointGraphicReferenceFrame = new YoGraphicReferenceFrame(rootJointFrame, registry, false, 0.2);
          yoGraphicsListRegistry.registerYoGraphic("bodyGraphicReferenceFrame", bodyGraphicReferenceFrame);
          yoGraphicsListRegistry.registerYoGraphic("rootJointGraphicReferenceFrame", rootJointGraphicReferenceFrame);
       }
@@ -145,11 +145,11 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
 
          if (yoGraphicsListRegistry != null)
          {
-            attachmentGraphicReferenceFrame = new YoGraphicReferenceFrame(legAttachmentFrame, registry, 0.2);
-            hipJointGraphicReferenceFrame = new YoGraphicReferenceFrame(frameAtHip, registry, 0.18);
-            kneeGraphicReferenceFrame = new YoGraphicReferenceFrame(frameAtKnee, registry, 0.16);
-            soleGraphicReferenceFrame = new YoGraphicReferenceFrame(soleFrame, registry, 0.12);
-            desiredGraphicReferenceFrame = new YoGraphicReferenceFrame(desiredFrame, registry, 0.1);
+            attachmentGraphicReferenceFrame = new YoGraphicReferenceFrame(legAttachmentFrame, registry, false, 0.2);
+            hipJointGraphicReferenceFrame = new YoGraphicReferenceFrame(frameAtHip, registry, false, 0.18);
+            kneeGraphicReferenceFrame = new YoGraphicReferenceFrame(frameAtKnee, registry, false, 0.16);
+            soleGraphicReferenceFrame = new YoGraphicReferenceFrame(soleFrame, registry, false, 0.12);
+            desiredGraphicReferenceFrame = new YoGraphicReferenceFrame(desiredFrame, registry, false, 0.1);
 
             yoGraphicsListRegistry.registerYoGraphic("attachmentGraphicReferenceFrame", attachmentGraphicReferenceFrame);
             yoGraphicsListRegistry.registerYoGraphic("hipJointGraphicReferenceFrame", hipJointGraphicReferenceFrame);

@@ -57,6 +57,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final BooleanProvider allowStepAdjustment;
    private final YoBoolean includeFootsteps = new YoBoolean(yoNamePrefix + "IncludeFootsteps", registry);
    private final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
+   private final YoBoolean footstepIsAdjustable = new YoBoolean(yoNamePrefix + "FootstepIsAdjustable", registry);
+
    private final BooleanProvider useCMPFeedback;
    private final BooleanProvider useAngularMomentum;
 
@@ -407,7 +409,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
                swingDuration.set(timing.getSwingTime());
                transferDuration.set(timing.getTransferTime());
 
-               useStepAdjustment.set(allowStepAdjustment.getValue() && footstep.getIsAdjustable());
+               footstepIsAdjustable.set(footstep.getIsAdjustable());
+               useStepAdjustment.set(allowStepAdjustment.getValue() && footstepIsAdjustable.getBooleanValue());
             }
             else if (upcomingFootsteps.size() == 1)
             {

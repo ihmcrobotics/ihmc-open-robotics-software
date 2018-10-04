@@ -17,8 +17,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -290,10 +290,8 @@ public class AvatarSimulationFactory
          Point3D initialCoMPosition = new Point3D();
          humanoidFloatingRootJointRobot.computeCenterOfMass(initialCoMPosition);
 
-         Quaternion initialEstimationLinkOrientation = new Quaternion();
-         humanoidFloatingRootJointRobot.getRootJoint().getJointTransform3D().getRotation(initialEstimationLinkOrientation);
-
-         stateEstimationThread.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
+         RigidBodyTransform rootJointTransform = humanoidFloatingRootJointRobot.getRootJoint().getJointTransform3D();
+         stateEstimationThread.initializeEstimator(rootJointTransform);
       }
    }
 

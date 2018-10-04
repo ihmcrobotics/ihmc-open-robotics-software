@@ -1,12 +1,14 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.DenseMatrixVector3D;
@@ -23,6 +25,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -41,6 +44,12 @@ public class SmoothCoMIntegrationToolboxTest
 
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
    private final SmoothCoMIntegrationToolbox comToolbox = new SmoothCoMIntegrationToolbox();
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -528,7 +537,7 @@ public class SmoothCoMIntegrationToolboxTest
       FramePoint3D icpFinal = new FramePoint3D(worldFrame, 0.977, -13.491, 0.001);
       FramePoint3D comInitial = new FramePoint3D(worldFrame, 1.000, -13.489, 0.001);
 
-      
+
       DenseMatrixVector3D expectedAlphaBetaCoMPrime = new DenseMatrixVector3D(10, 10);
       DenseMatrixVector3D expectedAlphaBetaCoMSecond = new DenseMatrixVector3D(10, 10);
       DenseMatrixVector3D expectedAlphaBetaCoMThird = new DenseMatrixVector3D(10, 10);
@@ -545,7 +554,7 @@ public class SmoothCoMIntegrationToolboxTest
       assertTrue(expectedAlphaBetaCoMSecond.epsilonEquals(actualAlphaBetaCoMSecond, EPSILON));
       assertTrue(expectedAlphaBetaCoMThird.epsilonEquals(actualAlphaBetaCoMThird, EPSILON));
 
-      
+
       SmoothCoMIntegrationToolbox toolbox = new SmoothCoMIntegrationToolbox();
 
       FramePoint3D expectedCoMPosition = new FramePoint3D(worldFrame);

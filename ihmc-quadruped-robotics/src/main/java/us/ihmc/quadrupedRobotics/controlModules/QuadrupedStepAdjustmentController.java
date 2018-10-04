@@ -16,6 +16,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -39,6 +40,7 @@ public class QuadrupedStepAdjustmentController
 
    private final DoubleParameter dcmStepAdjustmentGain = new DoubleParameter("dcmStepAdjustmentGain", registry, 1.0);
    private final DoubleParameter dcmErrorThresholdForStepAdjustment = new DoubleParameter("dcmErrorThresholdForStepAdjustment", registry, 0.0);
+   private final BooleanParameter useStepAdjustment = new BooleanParameter("useStepAdjustment", registry, true);
 
    private final QuadrupedControllerToolbox controllerToolbox;
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -71,7 +73,7 @@ public class QuadrupedStepAdjustmentController
 
          YoDouble dcmStepAdjustmentMultiplier = new YoDouble(prefix + "DcmStepAdjustmentMultiplier", registry);
          instantaneousStepAdjustment.setToNaN();
-         limitedInstantaneousStepAdjustment.setToNaN();
+         limitedInstantaneousStepAdjustment.setToZero();
          dcmStepAdjustmentMultiplier.setToNaN();
 
          instantaneousStepAdjustments.put(robotQuadrant, instantaneousStepAdjustment);
@@ -116,14 +118,21 @@ public class QuadrupedStepAdjustmentController
          QuadrupedStep adjustedStep = adjustedActiveSteps.add();
          adjustedStep.set(activeStep);
 
+
          RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
 
          FixedFrameVector3DBasics instantaneousStepAdjustment = instantaneousStepAdjustments.get(robotQuadrant);
          RateLimitedYoFrameVector limitedInstantaneousStepAdjustment = limitedInstantaneousStepAdjustments.get(robotQuadrant);
 
+         if (instantaneousStepAdjustment.containsNaN())
+         {
+            limitedInstantaneousStepAdjustment.update();
+            limitedInstantaneousStepAdjustment.setToZero();
+         }
+
          YoDouble dcmStepAdjustmentMultiplier = dcmStepAdjustmentMultipliers.get(robotQuadrant);
 
-         if (dcmError.length() > dcmErrorThresholdForStepAdjustment.getValue() || instantaneousStepAdjustment.length() > 0.0)
+         if (useStepAdjustment.getValue() && (dcmError.length() > dcmErrorThresholdForStepAdjustment.getValue() || instantaneousStepAdjustment.length() > 0.0))
          {
             double timeRemainingInStep = Math.max(activeStep.getTimeInterval().getEndTime() - controllerTime.getDoubleValue(), 0.0);
             dcmStepAdjustmentMultiplier.set(dcmStepAdjustmentGain.getValue() * Math.exp(timeRemainingInStep * lipModel.getNaturalFrequency()));

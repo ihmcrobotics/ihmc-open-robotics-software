@@ -316,7 +316,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final YoFramePoint3D feedForwardICP = new YoFramePoint3D("feedForwardICP", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition feedForwardICPViz = new YoGraphicPosition("feedForwardICPViz", feedForwardICP, 0.01, YoAppearance.DarkSlateBlue());
 
-   private final YoGraphicReferenceFrame desiredCoMPoseYoGraphic = new YoGraphicReferenceFrame(desiredCoMPoseReferenceFrame, registry, 0.45);
+   private final YoGraphicReferenceFrame desiredCoMPoseYoGraphic = new YoGraphicReferenceFrame(desiredCoMPoseReferenceFrame, registry, false, 0.45);
    private final YoGraphicReferenceFrame comPoseYoGraphic, feedForwardCoMPoseYoGraphic;
 
    private final YoGraphicReferenceFrame centroidWithNominal;
@@ -425,12 +425,12 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          YoGraphicReferenceFrame desiredAttachmentFrame = new YoGraphicReferenceFrame("ffLegAttachment",
-                                                                                      feedForwardReferenceFrames.getLegAttachmentFrame(robotQuadrant), registry,
+                                                                                      feedForwardReferenceFrames.getLegAttachmentFrame(robotQuadrant), registry, false,
                                                                                       0.25, YoAppearance.Purple());
          desiredAttachmentFrames.set(robotQuadrant, desiredAttachmentFrame);
 
          YoGraphicReferenceFrame actualAttachmentFrame = new YoGraphicReferenceFrame("legAttachment", referenceFrames.getLegAttachmentFrame(robotQuadrant),
-                                                                                     registry, 0.25, YoAppearance.Green());
+                                                                                     registry, false, 0.25, YoAppearance.Green());
          actualAttachmentFrames.set(robotQuadrant, actualAttachmentFrame);
 
          environment.getGraphicsListRegistry().registerYoGraphic("AttachementFrames", desiredAttachmentFrame);
@@ -453,8 +453,8 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       timeToFilterDesiredAtCrawlStart.set(4.0);
 
-      comPoseYoGraphic = new YoGraphicReferenceFrame("rasta_", comFrame, registry, 0.25, YoAppearance.Green());
-      feedForwardCoMPoseYoGraphic = new YoGraphicReferenceFrame("feedForwardRasta_", feedForwardCenterOfMassFrame, registry, 0.25, YoAppearance.Purple());
+      comPoseYoGraphic = new YoGraphicReferenceFrame("rasta_", comFrame, registry, false, 0.25, YoAppearance.Green());
+      feedForwardCoMPoseYoGraphic = new YoGraphicReferenceFrame("feedForwardRasta_", feedForwardCenterOfMassFrame, registry, false, 0.25, YoAppearance.Purple());
 
       feedForwardCenterOfMassOffsetAlpha = new YoDouble("feedForwardCenterOfMassOffsetAlpha", registry);
       feedForwardCenterOfMassOffsetAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, dt));
@@ -462,13 +462,13 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       filteredFeedForwardCenterOfMassOffset = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint("filteredFeedForwardCenterOfMassOffset", "", registry, feedForwardCenterOfMassOffsetAlpha, feedForwardCenterOfMassOffset);
 
 
-      centroidWithNominal = new YoGraphicReferenceFrame(referenceFrames.getCenterOfFeetFrameAveragingLowestZHeightsAcrossEnds(), registry, 0.1);
-      centroidZUpWithNominal = new YoGraphicReferenceFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds(), registry, 0.1);
+      centroidWithNominal = new YoGraphicReferenceFrame(referenceFrames.getCenterOfFeetFrameAveragingLowestZHeightsAcrossEnds(), registry, false, 0.1);
+      centroidZUpWithNominal = new YoGraphicReferenceFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds(), registry, false, 0.1);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          tripleSupportFrames.set(robotQuadrant,
-                                 new YoGraphicReferenceFrame(referenceFrames.getTripleSupportFrameAveragingLowestZHeightsAcrossEnds(robotQuadrant), registry,
+                                 new YoGraphicReferenceFrame(referenceFrames.getTripleSupportFrameAveragingLowestZHeightsAcrossEnds(robotQuadrant), registry, false,
                                                              0.1));
       }
 

@@ -88,6 +88,6 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
    @Override
    protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
    {
-      twistRelativeToParentToPack.setToZero(this, parentFrame, this);
+      twistRelativeToParentToPack.setToZero(this, getParent(), this);
    }
 }

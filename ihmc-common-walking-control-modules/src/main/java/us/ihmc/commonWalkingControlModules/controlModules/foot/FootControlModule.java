@@ -6,15 +6,16 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.command.Constra
 import java.util.Arrays;
 import java.util.EnumMap;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
@@ -100,6 +101,7 @@ public class FootControlModule
    private final double robotWeightFz;
    private final ContactWrenchCommand maxWrenchCommand;
    private final ContactWrenchCommand minWrenchCommand;
+   private final int numberOfBasisVectors;
 
    public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
                             PIDSE3GainsReadOnly swingFootControlGains, PIDSE3GainsReadOnly holdPositionFootControlGains,
@@ -181,6 +183,8 @@ public class FootControlModule
          minZForce = null;
          maxZForce = null;
       }
+
+      numberOfBasisVectors = walkingControllerParameters.getMomentumOptimizationSettings().getNumberOfBasisVectorsPerContactPoint();
    }
 
    private void setupWrenchCommand(ContactWrenchCommand command)
@@ -512,14 +516,33 @@ public class FootControlModule
       controllerToolbox.resetFootSupportPolygon(robotSide);
    }
 
-   public void unload(double percentInUnloading)
+   public void unload(double percentInUnloading, double rhoMin)
    {
       if (minWrenchCommand == null)
          return;
       minZForce.set((1.0 - percentInUnloading) * minWeightFractionPerFoot.getValue() * robotWeightFz);
       maxZForce.set((1.0 - percentInUnloading) * maxWeightFractionPerFoot.getValue() * robotWeightFz);
 
+      // Make sure the max force is always a little larger then the min force required by the rhoMin value. This is to avoid sending conflicting constraints.
+      maxZForce.set(Math.max(maxZForce.getValue(), computeMinZForceBasedOnRhoMin(rhoMin) + 1.0E-5));
+
       updateWrenchCommands();
+   }
+
+   private final FrameVector3D normalVector = new FrameVector3D();
+
+   private double computeMinZForceBasedOnRhoMin(double rhoMin)
+   {
+      YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
+
+      contactState.getContactNormalFrameVector(normalVector);
+      normalVector.changeFrame(ReferenceFrame.getWorldFrame());
+      normalVector.normalize();
+
+      double friction = contactState.getCoefficientOfFriction();
+      int points = contactState.getNumberOfContactPointsInContact();
+
+      return normalVector.getZ() * rhoMin * numberOfBasisVectors * points / Math.sqrt(1.0 + friction * friction);
    }
 
    public void resetLoadConstraints()
