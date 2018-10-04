@@ -338,8 +338,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       previousTransferToSide.set(null);
 
       this.initialTime.set(initialTime);
-      isInitialTransfer.set(isStanding.getBooleanValue());
-
+      isInitialTransfer.set(true);
       isStanding.set(true);
       isDoubleSupport.set(true);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
