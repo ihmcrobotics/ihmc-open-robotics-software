@@ -17,13 +17,16 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
    private final DenseMatrix64F tempMatrix2;
    private final LinearSolver<DenseMatrix64F> linearSolver;
    private final LinearSolver<DenseMatrix64F> linearSolverAlpha0;
+   private int matrixSize;
 
    public DampedLeastSquaresSolver(int matrixSize)
    {
       this(matrixSize, 0);
    }
+
    public DampedLeastSquaresSolver(int matrixSize, double alpha)
    {
+      this.matrixSize = matrixSize;
       this.A = new DenseMatrix64F(matrixSize, matrixSize);
       this.tempMatrix1 = new DenseMatrix64F(matrixSize, matrixSize);
       this.tempMatrix2 = new DenseMatrix64F(matrixSize, 1);
@@ -47,6 +50,7 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
    public boolean setA(DenseMatrix64F A)
    {
       this.A.set(A);
+      matrixSize = A.getNumRows();
 
       return true;
    }
@@ -69,19 +73,20 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
    @Override
    public void solve(DenseMatrix64F b, DenseMatrix64F x)
    {
-      if (alpha == 0)
+      if (alpha == 0.0)
       {
          linearSolverAlpha0.setA(this.A);
          linearSolverAlpha0.solve(b, x);
       }
       else
       {
-         tempMatrix1.reshape(A.getNumRows(), A.getNumRows());
+         tempMatrix1.reshape(matrixSize, matrixSize);
+         tempMatrix2.reshape(matrixSize, b.getNumCols());
+
          CommonOps.multOuter(A, tempMatrix1);
          MatrixTools.addDiagonal(tempMatrix1, alpha * alpha);
 
          linearSolver.setA(tempMatrix1);
-         tempMatrix2.reshape(A.getNumCols(), b.getNumCols());
          linearSolver.solve(b, tempMatrix2);
 
          CommonOps.multTransA(A, tempMatrix2, x);
@@ -99,19 +104,20 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
    @Override
    public void invert(DenseMatrix64F A_inv)
    {
-      if (alpha == 0)
+      if (alpha == 0.0)
       {
          linearSolverAlpha0.setA(this.A);
          linearSolverAlpha0.invert(A_inv);
       }
       else
       {
-         tempMatrix1.reshape(A.getNumRows(), A.getNumRows());
+         tempMatrix1.reshape(matrixSize, matrixSize);
+         tempMatrix2.reshape(matrixSize, matrixSize);
+
          CommonOps.multOuter(A, tempMatrix1);
          MatrixTools.addDiagonal(tempMatrix1, alpha * alpha);
 
          linearSolver.setA(tempMatrix1);
-         tempMatrix2.reshape(tempMatrix1.getNumRows(), tempMatrix1.getNumCols());
          linearSolver.invert(tempMatrix2);
 
          CommonOps.multTransA(A, tempMatrix2, A_inv);
