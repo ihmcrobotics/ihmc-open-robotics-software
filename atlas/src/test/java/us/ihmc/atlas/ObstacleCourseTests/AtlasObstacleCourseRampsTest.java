@@ -31,7 +31,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @ContinuousIntegrationTest(estimatedDuration = 72.0)
    @Test(timeout = 500000)
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
@@ -39,7 +39,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 96.1)
+   @ContinuousIntegrationTest(estimatedDuration = 84.3)
    @Test(timeout = 480000)
    public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
@@ -47,7 +47,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 94.9)
+   @ContinuousIntegrationTest(estimatedDuration = 88.8)
    @Test(timeout = 470000)
    public void testWalkingUpRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
@@ -55,7 +55,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 94.9)
+   @ContinuousIntegrationTest(estimatedDuration = 88.8)
    @Test(timeout = 470000)
    public void testWalkingUpRampWithShortStepsALittleTooHigh() throws SimulationExceededMaximumTimeException
    {
@@ -63,7 +63,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 93.3)
+   @ContinuousIntegrationTest(estimatedDuration = 88.8)
    @Test(timeout = 470000)
    public void testWalkingUpRampWithShortStepsALittleTooLow() throws SimulationExceededMaximumTimeException
    {

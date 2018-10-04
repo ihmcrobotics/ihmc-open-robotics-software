@@ -638,7 +638,8 @@ public class PacketCodeQualityTest
       enumLowerCaseNames.add("QuadrupedControllerRequestedEvent".toLowerCase()); // In quadruped land
       enumLowerCaseNames.add("QuadrupedSteppingStateEnum".toLowerCase()); // In quadruped land
       enumLowerCaseNames.add("QuadrupedSteppingRequestedEvent".toLowerCase()); // In quadruped land
-
+      enumLowerCaseNames.add("ValkyrieFingerMotorName".toLowerCase()); // In valkyrie land
+      
       Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
       Set<Field> fieldsToIngore = new HashSet<>();

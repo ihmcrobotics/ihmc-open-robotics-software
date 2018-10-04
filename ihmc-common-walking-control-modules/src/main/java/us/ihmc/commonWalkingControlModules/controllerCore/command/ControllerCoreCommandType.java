@@ -30,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 
 public enum ControllerCoreCommandType
@@ -155,14 +156,21 @@ public enum ControllerCoreCommandType
     * {@link #EXTERNAL_WRENCH} command in that it will be added to the optimization. E.g. this can be used to request that the
     * inverse dynamics optimization try to put a certain force on one foot or to constrain the foot wrench.
     */
-   CONTACT_WRENCH;
+   CONTACT_WRENCH,
+
+   /**
+    * Represents a command that modifies the optimization settings in the controller core. By default these settings are defined
+    * in the {@link ControllerCoreOptimizationSettings}. This command allows changing some of the optimization settings such as
+    * bounds on rhos online using the command API.
+    */
+   OPTIMIZATION_SETTINGS;
 
    private static final ControllerCoreCommandType[] inverseKinematicsCommands = {TASKSPACE, JOINTSPACE, MOMENTUM, PRIVILEGED_CONFIGURATION,
          PRIVILEGED_JOINTSPACE_COMMAND, LIMIT_REDUCTION, COMMAND_LIST};
 
    private static final ControllerCoreCommandType[] inverseDynamicsCommands = {TASKSPACE, JOINTSPACE, MOMENTUM, PRIVILEGED_CONFIGURATION,
          PRIVILEGED_JOINTSPACE_COMMAND, LIMIT_REDUCTION, JOINT_LIMIT_ENFORCEMENT, EXTERNAL_WRENCH, PLANE_CONTACT_STATE, CENTER_OF_PRESSURE,
-         JOINT_ACCELERATION_INTEGRATION, CONTACT_WRENCH, COMMAND_LIST};
+         JOINT_ACCELERATION_INTEGRATION, CONTACT_WRENCH, COMMAND_LIST, OPTIMIZATION_SETTINGS};
 
    private static final ControllerCoreCommandType[] virtualModelControlCommands = {MOMENTUM, EXTERNAL_WRENCH, PLANE_CONTACT_STATE, VIRTUAL_WRENCH,
          VIRTUAL_FORCE, VIRTUAL_TORQUE, JOINTSPACE, CONTROLLED_BODIES, JOINT_LIMIT_ENFORCEMENT, COMMAND_LIST};

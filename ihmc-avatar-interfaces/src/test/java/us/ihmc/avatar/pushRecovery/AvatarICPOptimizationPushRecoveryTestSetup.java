@@ -1,9 +1,14 @@
 package us.ihmc.avatar.pushRecovery;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -30,10 +35,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarICPOptimizationPushRecoveryTestSetup
 {
@@ -151,7 +152,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       if (simulate)
       {
          double duration = size * (footsteps.getDefaultSwingDuration() + footsteps.getDefaultTransferDuration());
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 3.0));
       }
 
       Point3D lastStep = footstepList.get(size - 1).getLocation();

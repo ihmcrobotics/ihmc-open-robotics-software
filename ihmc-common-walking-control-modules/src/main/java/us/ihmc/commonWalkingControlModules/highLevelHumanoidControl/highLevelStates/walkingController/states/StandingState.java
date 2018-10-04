@@ -96,6 +96,7 @@ public class StandingState extends WalkingState
       balanceManager.clearICPPlan();
       balanceManager.resetPushRecovery();
       balanceManager.enablePelvisXYControl();
+      balanceManager.setICPPlanTransferFromSide(null);
 
       walkingMessageHandler.reportWalkingComplete();
 

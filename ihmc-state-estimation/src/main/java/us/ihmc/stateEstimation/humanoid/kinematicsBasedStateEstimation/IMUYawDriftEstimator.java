@@ -16,6 +16,8 @@ import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -67,6 +69,18 @@ public class IMUYawDriftEstimator implements YawDriftProvider
    private final BooleanProvider enableCompensation;
    private final BooleanProvider integrateDriftRate;
 
+   /**
+    * Affects how this estimator starts trusting the feet for estimating the yaw drift.
+    * <p>
+    * When set to {@code false} (default and recommended behavior), the foot switches are used to
+    * determine whether a foot is firmly on the ground. When set to {@code true}, this estimator
+    * trust that all feet are firmly on the ground as soon as the controller reports
+    * {@link RobotMotionStatus#STANDING}.
+    * </p>
+    */
+   private final BooleanParameter estimateWhenControllerIsStanding = new BooleanParameter("estimateYawDriftWhenControllerIsStanding", registry, false);
+   private final RobotMotionStatusHolder robotMotionStatusFromController;
+
    private final FramePoint3D footPosition = new FramePoint3D();
    private final FramePoint3D averagePosition = new FramePoint3D();
    private final FrameVector3D referenceAverageToFootPosition = new FrameVector3D();
@@ -77,9 +91,10 @@ public class IMUYawDriftEstimator implements YawDriftProvider
    private final double estimatorDT;
 
    public IMUYawDriftEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, Map<RigidBody, FootSwitchInterface> footSwitches,
-                               Map<RigidBody, ? extends ContactablePlaneBody> feet, StateEstimatorParameters stateEstimatorParameters,
-                               YoVariableRegistry parentRegistry)
+                               Map<RigidBody, ? extends ContactablePlaneBody> feet, RobotMotionStatusHolder robotMotionStatusFromController,
+                               StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
    {
+      this.robotMotionStatusFromController = robotMotionStatusFromController;
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.footSwitches = footSwitches;
       allFeet = new ArrayList<>(footSwitches.keySet());
@@ -87,8 +102,10 @@ public class IMUYawDriftEstimator implements YawDriftProvider
 
       enableCompensation = new BooleanParameter("enableIMUDriftYawCompensation", registry, stateEstimatorParameters.enableIMUYawDriftCompensation());
       integrateDriftRate = new BooleanParameter("integrateDriftRate", registry, stateEstimatorParameters.integrateEstimatedIMUYawDriftRate());
-      delayBeforeTrustingFoot = new DoubleParameter("delayBeforeTrustingFootIMUDrift", registry, stateEstimatorParameters.getIMUYawDriftEstimatorDelayBeforeTrustingFoot());
-      footLinearVelocityThreshold = new DoubleParameter("footLinearVelocityThreshold", registry, stateEstimatorParameters.getIMUYawDriftFootLinearVelocityThreshold());
+      delayBeforeTrustingFoot = new DoubleParameter("delayBeforeTrustingFootIMUDrift", registry,
+                                                    stateEstimatorParameters.getIMUYawDriftEstimatorDelayBeforeTrustingFoot());
+      footLinearVelocityThreshold = new DoubleParameter("footLinearVelocityThreshold", registry,
+                                                        stateEstimatorParameters.getIMUYawDriftFootLinearVelocityThreshold());
       yawDriftBreakFrequency = new DoubleParameter("yawDriftBreakFrequency", registry, stateEstimatorParameters.getIMUYawDriftFilterFreqInHertz());
       yawDriftRateBreakFrequency = new DoubleParameter("yawDriftRateBreakFrequency", registry, stateEstimatorParameters.getIMUYawDriftRateFilterFreqInHertz());
 
@@ -185,7 +202,13 @@ public class IMUYawDriftEstimator implements YawDriftProvider
          RigidBody foot = allFeet.get(i);
          GlitchFilteredYoBoolean isFootTrusted = areFeetTrusted.get(foot);
 
-         boolean hasFootHitGround = footSwitches.get(foot).hasFootHitGround();
+         boolean hasFootHitGround;
+
+         if (estimateWhenControllerIsStanding.getValue())
+            hasFootHitGround = robotMotionStatusFromController.getCurrentRobotMotionStatus() == RobotMotionStatus.STANDING;
+         else
+            hasFootHitGround = footSwitches.get(foot).hasFootHitGround();
+
          boolean isFootStatic = currentFootLinearVelocities.get(foot).getDoubleValue() < footLinearVelocityThreshold.getValue();
 
          if (enableCompensation.getValue() && hasFootHitGround && isFootStatic)
@@ -322,7 +345,8 @@ public class IMUYawDriftEstimator implements YawDriftProvider
 
       if (!estimatedYawDriftPrevious.isNaN())
       {
-         double rate = AngleTools.computeAngleDifferenceMinusPiToPi(estimatedYawDrift.getDoubleValue(), estimatedYawDriftPrevious.getDoubleValue()) / estimatorDT;
+         double rate = AngleTools.computeAngleDifferenceMinusPiToPi(estimatedYawDrift.getDoubleValue(), estimatedYawDriftPrevious.getDoubleValue())
+               / estimatorDT;
          estimatedYawDriftRate.update(rate);
       }
       estimatedYawDriftPrevious.set(estimatedYawDrift.getDoubleValue());

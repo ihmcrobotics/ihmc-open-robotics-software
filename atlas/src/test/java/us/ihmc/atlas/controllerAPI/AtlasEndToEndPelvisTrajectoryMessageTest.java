@@ -28,7 +28,7 @@ public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraj
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 60.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 200000)
    public void testSixDoFMovementsOfPelvis() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {

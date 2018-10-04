@@ -23,11 +23,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -48,7 +47,6 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -81,7 +79,6 @@ public abstract class HumanoidControllerWarmup
 
    private final SideDependentList<YoEnum<ConstraintType>> footStates = new SideDependentList<>();
 
-   private SideDependentList<TestFootSwitch> updatableFootSwitches;
    private FullHumanoidRobotModel fullRobotModel;
    private HumanoidReferenceFrames referenceFrames;
    private OneDoFJoint[] oneDoFJoints;
@@ -141,19 +138,13 @@ public abstract class HumanoidControllerWarmup
 
    private void doSingleTimeUpdate()
    {
-      // (1) compute foot switches based on sole height
-      for (RobotSide side : RobotSide.values)
-      {
-         updatableFootSwitches.get(side).update();
-      }
-
-      // (2) do control and compute desired accelerations
+      // (1) do control and compute desired accelerations
       walkingController.doAction();
       ControllerCoreCommand coreCommand = walkingController.getControllerCoreCommand();
       controllerCore.submitControllerCoreCommand(coreCommand);
       controllerCore.compute();
 
-      // (3) integrate accelerations in full robot model
+      // (2) integrate accelerations in full robot model
       integrate();
 
       // update viz and advance time
@@ -178,16 +169,8 @@ public abstract class HumanoidControllerWarmup
    private final FrameVector3D frameAngularVelocity = new FrameVector3D();
    private final Twist rootJointTwist = new Twist();
 
-   private final FramePoint3D solePosition = new FramePoint3D();
-
    private void integrate()
    {
-      // fix one foot to the ground:
-      ReferenceFrame fixedFrame = findFrameToFix(footStates, referenceFrames);
-      solePosition.setToZero(fixedFrame);
-      solePosition.changeFrame(ReferenceFrame.getWorldFrame());
-      double zCorrection = 0.0;
-
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
@@ -236,8 +219,6 @@ public abstract class HumanoidControllerWarmup
       newAngularVelocity.scale(controlDT);
       newAngularVelocity.add(angularVelocity);
 
-      newPosition.addZ(-zCorrection);
-
       rootJoint.setRotation(newOrientation);
       rootJoint.setPosition(newPosition);
       rootJoint.updateFramesRecursively();
@@ -252,32 +233,7 @@ public abstract class HumanoidControllerWarmup
       rootJoint.setJointTwist(rootJointTwist);
    }
 
-   private ReferenceFrame findFrameToFix(SideDependentList<YoEnum<ConstraintType>> footStates, HumanoidReferenceFrames referenceFrames)
-   {
-      int sidesInDoubleSupport = 0;
-      RobotSide sideToFix = null;
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (footStates.get(robotSide).getEnumValue() == ConstraintType.FULL)
-         {
-            sidesInDoubleSupport++;
-            sideToFix = robotSide;
-         }
-      }
-
-      if (sidesInDoubleSupport == 2)
-      {
-         return referenceFrames.getMidFeetZUpFrame();
-      }
-      else if (sidesInDoubleSupport == 1)
-      {
-         return referenceFrames.getSoleZUpFrame(sideToFix);
-      }
-
-      throw new RuntimeException("One foot needs to be in full support at all times for this test.");
-   }
-
-   private void createControllerCore()
+   private void createControllerCore(YoVariableRegistry walkingControllerRegistry)
    {
       InverseDynamicsJoint[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
@@ -289,7 +245,7 @@ public abstract class HumanoidControllerWarmup
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
 
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame,
-                                                                            momentumOptimizationSettings, yoGraphicsListRegistry, registry);
+                                                                            momentumOptimizationSettings, yoGraphicsListRegistry, walkingControllerRegistry);
       toolbox.setupForInverseDynamicsSolver(contactableBodies);
 
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
@@ -297,7 +253,7 @@ public abstract class HumanoidControllerWarmup
 
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
       controllerOutput = new JointDesiredOutputList(fullRobotModel.getControllableOneDoFJoints());
-      controllerCore = new WholeBodyControllerCore(toolbox, template, controllerOutput, registry);
+      controllerCore = new WholeBodyControllerCore(toolbox, template, controllerOutput, walkingControllerRegistry);
    }
 
    private void createWalkingControllerAndSetUpManagerFactory(YoVariableRegistry walkingControllerParent, YoVariableRegistry managerFactoryParent)
@@ -334,13 +290,11 @@ public abstract class HumanoidControllerWarmup
       contactableBodies.addAll(additionalContacts);
 
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityZ;
-      updatableFootSwitches = createFootSwitches(feet, totalRobotWeight, referenceFrames.getSoleZUpFrames());
-      SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>(updatableFootSwitches);
+      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, totalRobotWeight, referenceFrames.getSoleZUpFrames());
 
       HighLevelHumanoidControllerToolbox controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, null,
                                                                                                     yoTime, gravityZ, omega0, feet, controlDT, null,
                                                                                                     contactableBodies, yoGraphicsListRegistry);
-      registry.addChild(controllerToolbox.getYoVariableRegistry());
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
@@ -349,7 +303,7 @@ public abstract class HumanoidControllerWarmup
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultTouchdownTime,
                                                                               defaultInitialTransferTime, defaultFinalTransferTime, feet, statusOutputManager,
-                                                                              yoTime, yoGraphicsListRegistry, registry);
+                                                                              yoTime, yoGraphicsListRegistry, controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory = new HighLevelControlManagerFactory(statusOutputManager, managerFactoryParent);
@@ -360,6 +314,7 @@ public abstract class HumanoidControllerWarmup
       walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
                                                                  controllerToolbox);
       walkingControllerParent.addChild(walkingController.getYoVariableRegistry());
+      walkingControllerParent.getParent().addChild(controllerToolbox.getYoVariableRegistry());
    }
 
    @SuppressWarnings("unchecked")
@@ -382,7 +337,7 @@ public abstract class HumanoidControllerWarmup
       humanoidHighLevelControllerManager.addChild(highLevelHumanoidControllerFactory);
 
       createWalkingControllerAndSetUpManagerFactory(walkingControllerState, highLevelHumanoidControllerFactory);
-      createControllerCore();
+      createControllerCore(walkingControllerState);
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
 
       for (RobotSide robotSide : RobotSide.values)
@@ -410,100 +365,16 @@ public abstract class HumanoidControllerWarmup
       }
    }
 
-   private SideDependentList<TestFootSwitch> createFootSwitches(SideDependentList<ContactableFoot> feet, double totalRobotWeight,
-                                                                SideDependentList<? extends ReferenceFrame> soleZupFrames)
+   private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactableFoot> feet, double totalRobotWeight,
+                                                                     SideDependentList<? extends ReferenceFrame> soleZupFrames)
    {
-      SideDependentList<TestFootSwitch> ret = new SideDependentList<>();
+      SideDependentList<FootSwitchInterface> ret = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         ReferenceFrame opposideSole = soleZupFrames.get(robotSide.getOppositeSide());
-         ret.put(robotSide, this.new TestFootSwitch(feet.get(robotSide), totalRobotWeight, opposideSole));
+         FootSwitchInterface footSwitch = new KinematicsBasedFootSwitch(feet.get(robotSide).getName(), feet, () -> 0.0, totalRobotWeight, robotSide, registry);
+         ret.put(robotSide, footSwitch);
       }
       return ret;
-   }
-
-   private class TestFootSwitch implements FootSwitchInterface
-   {
-      private final ContactableFoot foot;
-      private final ReferenceFrame opposideSoleZUp;
-      private final double totalRobotWeight;
-
-      private boolean hasFootHitGround = false;
-      private final FramePoint3D solePoint = new FramePoint3D();
-
-      public TestFootSwitch(ContactableFoot foot, double totalRobotWeight, ReferenceFrame opposideSole)
-      {
-         this.foot = foot;
-         this.opposideSoleZUp = opposideSole;
-         this.totalRobotWeight = totalRobotWeight;
-      }
-
-      public void update()
-      {
-         solePoint.setToZero(foot.getSoleFrame());
-         solePoint.changeFrame(opposideSoleZUp);
-         hasFootHitGround = solePoint.getZ() < 0.01;
-      }
-
-      @Override
-      public boolean hasFootHitGround()
-      {
-         return hasFootHitGround;
-      }
-
-      @Override
-      public double computeFootLoadPercentage()
-      {
-         return Double.NaN;
-      }
-
-      @Override
-      public void computeAndPackCoP(FramePoint2D copToPack)
-      {
-         copToPack.setToNaN(getMeasurementFrame());
-      }
-
-      @Override
-      public void updateCoP()
-      {
-      }
-
-      @Override
-      public void computeAndPackFootWrench(Wrench footWrenchToPack)
-      {
-         footWrenchToPack.setToZero();
-         if (hasFootHitGround())
-            footWrenchToPack.setLinearPartZ(totalRobotWeight / 2.0);
-      }
-
-      @Override
-      public ReferenceFrame getMeasurementFrame()
-      {
-         return foot.getSoleFrame();
-      }
-
-      @Override
-      public void reset()
-      {
-         hasFootHitGround = false;
-      }
-
-      @Override
-      public boolean getForceMagnitudePastThreshhold()
-      {
-         return false;
-      }
-
-      @Override
-      public void setFootContactState(boolean hasFootHitGround)
-      {
-         this.hasFootHitGround = hasFootHitGround;
-      }
-
-      @Override
-      public void trustFootSwitch(boolean trustFootSwitch)
-      {
-      }
    }
 
    public DoubleProvider getTimeProvider()
@@ -526,4 +397,3 @@ public abstract class HumanoidControllerWarmup
       return registry;
    }
 }
-

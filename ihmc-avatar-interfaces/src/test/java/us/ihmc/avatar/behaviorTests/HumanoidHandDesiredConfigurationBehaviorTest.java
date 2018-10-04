@@ -208,7 +208,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
 
       for (OneDegreeOfFreedomJoint fingerJoint : fingerJoints)
       {
-         double q = fingerJoint.getQYoVariable().getDoubleValue();
+         double q = fingerJoint.getQYoVariable().getDoubleValue() * getFingerClosedJointAngleSign(robotSide);
          ret += q;
          if (DEBUG)
          {
@@ -231,5 +231,10 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       assertTrue(behavior.hasInputBeenSet());
 
       return behavior;
+   }
+   
+   protected double getFingerClosedJointAngleSign(RobotSide robotSide)
+   {
+      return 1.0;
    }
 }
