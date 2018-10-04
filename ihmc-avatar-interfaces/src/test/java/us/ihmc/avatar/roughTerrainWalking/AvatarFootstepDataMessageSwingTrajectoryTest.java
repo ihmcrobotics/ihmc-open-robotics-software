@@ -11,6 +11,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -22,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualize
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -56,13 +58,34 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private PushRobotController pushController;
 
+   private Boolean pushAndAdjust;
+
+   public void setPushAndAdjust(boolean pushAndAdjust)
+   {
+      this.pushAndAdjust = pushAndAdjust;
+   }
+
    /**
     * Method used to scale down trajectories for different robots.
     * @return shinLength + thighLength of the robot
     */
    public abstract double getLegLength();
 
-   public void testTouchdownSpeed(boolean pushAndAdjust) throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration = 33.7)
+   @Test(timeout = 170000)
+   public void testSwingTrajectoryTouchdownSpeed() throws SimulationExceededMaximumTimeException
+   {
+      runTestTouchdownSpeed();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 33.7)
+   @Test(timeout = 170000)
+   public void testSwingTrajectoryTouchdownWithAdjustment() throws SimulationExceededMaximumTimeException
+   {
+      runTestTouchdownSpeed();
+   }
+
+   private void runTestTouchdownSpeed() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = setup(DRCObstacleCourseStartingLocation.DEFAULT);
 
@@ -143,6 +166,8 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       Assert.assertEquals(touchdownVelocity, desiredVelocity.getValueAsDouble(), 1.0e-10);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 33.7)
+   @Test(timeout = 170000)
    public void testSwingTrajectoryInWorld() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = setup(DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI);
@@ -298,6 +323,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
    @Before
    public void showMemoryUsageBeforeTest()
    {
+      pushAndAdjust = null;
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -318,6 +344,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters = null;
+      pushAndAdjust = null;
    }
 
 }

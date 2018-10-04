@@ -34,19 +34,21 @@ import javax.swing.event.ChangeListener;
 
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.robotEnvironmentAwareness.LidarBasedREAStandaloneLauncher;
 import us.ihmc.robotEnvironmentAwareness.RemoteLidarBasedREAModuleLauncher;
 import us.ihmc.robotEnvironmentAwareness.RemoteLidarBasedREAUILauncher;
-import us.ihmc.commons.FormattingTools;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DRCSimulationTools
 {
    private static final String STARTING_LOCATION_PROPERTY_NAME = "startingLocation";
 
-   @SuppressWarnings({ "hiding", "unchecked" })
-   public static <T extends DRCStartingLocation, Enum> void startSimulationWithGraphicSelector(SimulationStarterInterface simulationStarter, Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs, T... possibleStartingLocations)
+   @SuppressWarnings({"hiding", "unchecked"})
+   public static <T extends DRCStartingLocation, Enum> void startSimulationWithGraphicSelector(SimulationStarterInterface simulationStarter,
+                                                                                               Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs,
+                                                                                               T... possibleStartingLocations)
    {
       List<Modules> modulesToStart = new ArrayList<Modules>();
       DRCStartingLocation startingLocation = null;
@@ -75,7 +77,7 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.enableLocalControllerCommunicator(false);
          networkProcessorParameters.enableKinematicsToolbox(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
          networkProcessorParameters.enableFootstepPlanningToolbox(modulesToStart.contains(Modules.FOOTSTEP_PLANNING_TOOLBOX));
-         networkProcessorParameters.enableWholeBodyTrajectoryToolbox(modulesToStart.contains(Modules.MANIPULATION_PLANNING_TOOLBOX));
+         networkProcessorParameters.enableWholeBodyTrajectoryToolbox(modulesToStart.contains(Modules.WHOLE_BODY_TRAJECTORY_TOOLBOX));
          networkProcessorParameters.enableRobotEnvironmentAwerenessModule(modulesToStart.contains(Modules.REA_MODULE));
          networkProcessorParameters.enableMocapModule(modulesToStart.contains(Modules.MOCAP_MODULE));
       }
@@ -114,8 +116,9 @@ public abstract class DRCSimulationTools
       }
    }
 
-   @SuppressWarnings({ "hiding", "unchecked", "rawtypes", "serial" })
-   private static <T extends DRCStartingLocation, Enum> DRCStartingLocation showSelectorWithStartingLocation(List<Modules> modulesToStartListToPack, T... possibleStartingLocations)
+   @SuppressWarnings({"hiding", "unchecked", "rawtypes", "serial"})
+   private static <T extends DRCStartingLocation, Enum> DRCStartingLocation showSelectorWithStartingLocation(List<Modules> modulesToStartListToPack,
+                                                                                                             T... possibleStartingLocations)
    {
       JPanel userPromptPanel = new JPanel(new BorderLayout());
       JPanel checkBoxesPanel = new JPanel(new GridLayout(4, 3));
@@ -143,7 +146,8 @@ public abstract class DRCSimulationTools
             enabled = true;
          else
             enabled = Boolean.parseBoolean(properties.getProperty(module.getPropertyNameForEnable(), Boolean.toString(module.getDefaultValueForEnable())));
-         boolean selected = Boolean.parseBoolean(properties.getProperty(module.getPropertyNameForSelected(), Boolean.toString(module.getDefaultValueForSelected())));
+         boolean selected = Boolean.parseBoolean(properties.getProperty(module.getPropertyNameForSelected(),
+                                                                        Boolean.toString(module.getDefaultValueForSelected())));
          JCheckBox checkBox = new JCheckBox(module.getName());
          checkBox.setSelected(selected);
          checkBox.setEnabled(enabled);
@@ -203,7 +207,8 @@ public abstract class DRCSimulationTools
             possibleStartingLocationMap.put(possibleStartingLocation.toString(), possibleStartingLocation);
          }
 
-         T selectedStartingLocation = possibleStartingLocationMap.get(properties.getProperty(STARTING_LOCATION_PROPERTY_NAME, possibleStartingLocations[0].toString()));
+         T selectedStartingLocation = possibleStartingLocationMap.get(properties.getProperty(STARTING_LOCATION_PROPERTY_NAME,
+                                                                                             possibleStartingLocations[0].toString()));
 
          obstacleCourseStartingLocationComboBox.setSelectedItem(selectedStartingLocation == null ? possibleStartingLocations[0] : selectedStartingLocation);
          comboBoxPanelsMap.put(obstacleCourseLocationPanel, obstacleCourseStartingLocationComboBox);
@@ -341,7 +346,7 @@ public abstract class DRCSimulationTools
       try
       {
          Method mainMethod = operatorInterfaceClass.getDeclaredMethod("main", String[].class);
-         Object args[] = { operatorInterfaceArgs };
+         Object args[] = {operatorInterfaceArgs};
          mainMethod.invoke(null, args);
       }
       catch (NoSuchMethodException | SecurityException e)
@@ -356,7 +361,20 @@ public abstract class DRCSimulationTools
 
    public enum Modules
    {
-      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE, ZERO_POSE_PRODUCER, REA_MODULE, REA_UI, MOCAP_MODULE, KINEMATICS_TOOLBOX, FOOTSTEP_PLANNING_TOOLBOX, MANIPULATION_PLANNING_TOOLBOX;
+      SIMULATION,
+      OPERATOR_INTERFACE,
+      BEHAVIOR_VISUALIZER,
+      NETWORK_PROCESSOR,
+      SENSOR_MODULE,
+      ROS_MODULE,
+      BEHAVIOR_MODULE,
+      ZERO_POSE_PRODUCER,
+      REA_MODULE,
+      REA_UI,
+      MOCAP_MODULE,
+      KINEMATICS_TOOLBOX,
+      FOOTSTEP_PLANNING_TOOLBOX,
+      WHOLE_BODY_TRAJECTORY_TOOLBOX;
 
       public String getPropertyNameForEnable()
       {

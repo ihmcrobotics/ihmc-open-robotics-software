@@ -144,8 +144,11 @@ public class WrenchMatrixCalculator
          bodyRhoOffsets.put(rigidBody, rhoOffset);
          rhoOffset += helper.getRhoSize();
 
-         basisVectorsOrigin.addAll(helper.getBasisVectorsOrigin());
-         basisVectors.addAll(helper.getBasisVectors());
+         for (int rhoIndex = 0; rhoIndex < helper.getRhoSize(); rhoIndex++)
+         {
+            basisVectorsOrigin.add(helper.getBasisVectorsOrigin()[rhoIndex]);
+            basisVectors.add(helper.getBasisVectors()[rhoIndex]);
+         }
 
          ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();
 

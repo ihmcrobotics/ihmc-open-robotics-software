@@ -22,6 +22,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
@@ -87,7 +88,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
    @After
    public void tearDown()
    {
-
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
 

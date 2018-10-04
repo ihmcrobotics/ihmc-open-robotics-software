@@ -1,18 +1,20 @@
 package us.ihmc.avatar.pushRecovery;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import org.opencv.core.Point3;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -34,11 +36,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.awt.*;
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
-
 public abstract class AvatarICPOptimizationPushRecoveryTestSetup
 {
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -46,8 +43,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   protected static double simulationTime = 13.0;
 
    protected PushRobotController pushRobotController;
 
@@ -60,6 +55,10 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
    protected Double percentWeight;
 
    public abstract double getNominalHeight();
+
+   public abstract double getSlowTransferDuration();
+
+   public abstract double getSlowSwingDuration();
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -136,7 +135,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
 
-      setupCamera(scs);
+      setupCamera();
       ThreadTools.sleep(1000);
    }
 
@@ -147,11 +146,15 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
 
    protected void validateTest(FootstepDataListMessage footsteps, boolean simulate) throws SimulationExceededMaximumTimeException
    {
-      if (simulate)
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
-
       List<FootstepDataMessage> footstepList = footsteps.getFootstepDataList();
       int size = footstepList.size();
+
+      if (simulate)
+      {
+         double duration = size * (footsteps.getDefaultSwingDuration() + footsteps.getDefaultTransferDuration());
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 3.0));
+      }
+
       Point3D lastStep = footstepList.get(size - 1).getLocation();
       Point3D secondToLastStep = footstepList.get(size - 2).getLocation();
 
@@ -163,7 +166,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   private void setupCamera(SimulationConstructionSet scs)
+   private void setupCamera()
    {
       Point3D cameraFix = new Point3D(0.0, 0.0, 0.89);
       Point3D cameraPosition = new Point3D(10.0, 2.0, 1.37);
@@ -236,8 +239,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       FootstepDataMessage message5 = createFootstepDataMessage(RobotSide.RIGHT, step5Location);
       FootstepDataMessage message6 = createFootstepDataMessage(RobotSide.LEFT, step6Location);
 
-      swingTime = 1.2;
-      transferTime = 0.8;
+      swingTime = getSlowSwingDuration();
+      transferTime = getSlowTransferDuration();
+
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       message.getFootstepDataList().add().set(message1);
       message.getFootstepDataList().add().set(message2);

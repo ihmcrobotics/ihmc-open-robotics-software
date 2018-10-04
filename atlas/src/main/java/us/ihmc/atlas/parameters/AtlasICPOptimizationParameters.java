@@ -185,5 +185,15 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
       return false;
    }
 
+   @Override
+   public double getTransferSplitFraction()
+   {
+      return 0.2;
+   }
 
+   @Override
+   public double getMinimumFootstepMultiplier()
+   {
+      return 0.25;
+   }
 }

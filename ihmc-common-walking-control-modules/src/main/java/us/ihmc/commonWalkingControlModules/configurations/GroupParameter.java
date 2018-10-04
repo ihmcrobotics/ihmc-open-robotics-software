@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,14 +33,29 @@ public class GroupParameter<T>
       this(groupName, Collections.singletonList(memberName));
    }
 
+   public GroupParameter(String groupName, String... memberNames)
+   {
+      this(groupName, Arrays.asList(memberNames));
+   }
+
    public GroupParameter(String groupName, List<String> memberNames)
    {
       this(groupName, null, memberNames);
    }
 
+   public GroupParameter(String groupAndMemberName, T parameter)
+   {
+      this(groupAndMemberName, parameter, groupAndMemberName);
+   }
+
    public GroupParameter(String groupName, T parameter, String memberName)
    {
       this(groupName, parameter, Collections.singletonList(memberName));
+   }
+
+   public GroupParameter(String groupName, T parameter, String... memberNames)
+   {
+      this(groupName, parameter, Arrays.asList(memberNames));
    }
 
    public GroupParameter(String groupName, T parameter, List<String> memberNames)

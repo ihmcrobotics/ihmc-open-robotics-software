@@ -7,9 +7,10 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.CentroidalMomentumHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
@@ -20,8 +21,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -29,6 +28,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class WholeBodyControlCoreToolbox
 {
@@ -42,6 +43,7 @@ public class WholeBodyControlCoreToolbox
    private final RigidBody rootBody;
    private final ReferenceFrame centerOfMassFrame;
    private final ControllerCoreOptimizationSettings optimizationSettings;
+   private FeedbackControllerSettings feedbackControllerSettings = FeedbackControllerSettings.getDefault();
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final JointIndexHandler jointIndexHandler;
@@ -63,6 +65,11 @@ public class WholeBodyControlCoreToolbox
    private YoFrameVector3D yoAchievedMomentumRateLinear;
    private YoFrameVector3D yoDesiredMomentumRateAngular;
    private YoFrameVector3D yoAchievedMomentumRateAngular;
+
+   private YoFrameVector3D yoDesiredMomentumLinear;
+   private YoFrameVector3D yoDesiredMomentumAngular;
+   private YoFrameVector3D yoAchievedMomentumLinear;
+   private YoFrameVector3D yoAchievedMomentumAngular;
 
    private YoFrameVector3D yoResidualRootJointForce;
    private YoFrameVector3D yoResidualRootJointTorque;
@@ -124,7 +131,7 @@ public class WholeBodyControlCoreToolbox
       rootBody = ScrewTools.getRootBody(controlledJoints[0].getPredecessor());
       jointIndexHandler = new JointIndexHandler(controlledJoints);
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
-      centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
+      centroidalMomentumHandler = new CentroidalMomentumHandler(controlledJoints, centerOfMassFrame);
       inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody, gravityZ);
       spatialAccelerationCalculator = inverseDynamicsCalculator.getSpatialAccelerationCalculator();
 
@@ -147,6 +154,20 @@ public class WholeBodyControlCoreToolbox
    public void setJointPrivilegedConfigurationParameters(JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters)
    {
       this.jointPrivilegedConfigurationParameters = jointPrivilegedConfigurationParameters;
+   }
+
+   /**
+    * Provides the settings to use for configuring the {@code WholeBodyFeedbackController}.
+    * <p>
+    * This has to be provided before creating the controller core.
+    * </p>
+    * 
+    * @param feedbackControllerSettings the settings to use.
+    */
+   public void setFeedbackControllerSettings(FeedbackControllerSettings feedbackControllerSettings)
+   {
+      if (feedbackControllerSettings != null)
+         this.feedbackControllerSettings = feedbackControllerSettings;
    }
 
    /**
@@ -266,6 +287,11 @@ public class WholeBodyControlCoreToolbox
       return optimizationSettings;
    }
 
+   public FeedbackControllerSettings getFeedbackControllerSettings()
+   {
+      return feedbackControllerSettings;
+   }
+
    public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
    {
       return jointPrivilegedConfigurationParameters;
@@ -364,6 +390,8 @@ public class WholeBodyControlCoreToolbox
 
    public WrenchVisualizer getWrenchVisualizer()
    {
+      if (yoGraphicsListRegistry == null)
+         return null;
       if (wrenchVisualizer == null)
          wrenchVisualizer = createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
       return wrenchVisualizer;
@@ -395,6 +423,34 @@ public class WholeBodyControlCoreToolbox
       if (yoAchievedMomentumRateAngular == null)
          yoAchievedMomentumRateAngular = new YoFrameVector3D("achievedMomentumRateAngular", worldFrame, registry);
       return yoAchievedMomentumRateAngular;
+   }
+
+   public YoFrameVector3D getYoDesiredMomentumLinear()
+   {
+      if (yoDesiredMomentumLinear == null)
+         yoDesiredMomentumLinear = new YoFrameVector3D("desiredMomentumLinear", worldFrame, registry);
+      return yoDesiredMomentumLinear;
+   }
+
+   public YoFrameVector3D getYoDesiredMomentumAngular()
+   {
+      if (yoDesiredMomentumAngular == null)
+         yoDesiredMomentumAngular = new YoFrameVector3D("desiredMomentumAngular", worldFrame, registry);
+      return yoDesiredMomentumAngular;
+   }
+
+   public YoFrameVector3D getYoAchievedMomentumLinear()
+   {
+      if (yoAchievedMomentumLinear == null)
+         yoAchievedMomentumLinear = new YoFrameVector3D("achievedMomentumLinear", worldFrame, registry);
+      return yoAchievedMomentumLinear;
+   }
+
+   public YoFrameVector3D getYoAchievedMomentumAngular()
+   {
+      if (yoAchievedMomentumAngular == null)
+         yoAchievedMomentumAngular = new YoFrameVector3D("achievedMomentumAngular", worldFrame, registry);
+      return yoAchievedMomentumAngular;
    }
 
    public YoFrameVector3D getYoResidualRootJointForce()

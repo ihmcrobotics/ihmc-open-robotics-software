@@ -9,12 +9,14 @@ import org.junit.After;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.FootTrajectoryMessage;
+import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -86,6 +88,8 @@ public abstract class DRCPushRecoveryTest
 
    protected abstract DRCRobotModel getRobotModel();
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration =  20.0)
+   @Test(timeout = 250000)
    public void testPushICPOptimiWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScriptFilePath(), true, false);
@@ -103,6 +107,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 53.5)
+   @Test(timeout = 270000)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScriptFilePath(), true, false);
@@ -121,6 +127,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 50.8)
+   @Test(timeout = 250000)
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScriptFilePath(), false, false);
@@ -138,6 +146,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 49.2)
+   @Test(timeout = 250000)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScriptFilePath(), true, false);
@@ -155,6 +165,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 49.1)
+   @Test(timeout = 250000)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, true, false);
@@ -172,6 +184,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 48.8)
+   @Test(timeout = 240000)
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, true);
@@ -189,6 +203,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 32.8)
+   @Test(timeout = 160000)
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, true, false);
@@ -207,6 +223,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 18.8)
+   @Test(timeout = 94000)
    public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, false);
@@ -225,6 +243,8 @@ public abstract class DRCPushRecoveryTest
       assertFalse(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 43.8)
+   @Test(timeout = 220000)
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, true, false);
@@ -242,6 +262,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 34.1)
+   @Test(timeout = 170000)
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, true);
@@ -260,6 +282,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 33.7)
+   @Test(timeout = 170000)
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, true);
@@ -277,6 +301,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 39.1)
+   @Test(timeout = 200000)
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, false);

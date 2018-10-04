@@ -16,6 +16,7 @@ import java.util.Random;
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
+import org.junit.After;
 import org.junit.Test;
 
 import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
@@ -34,6 +35,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -98,6 +100,12 @@ public class KinematicCalibrationHeadLoopResidualTest
       targetToEE = new RigidBodyTransform();
       targetToEE.setTranslation(tran);
       targetToEE.setRotation(rotFull);
+   }
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    /**

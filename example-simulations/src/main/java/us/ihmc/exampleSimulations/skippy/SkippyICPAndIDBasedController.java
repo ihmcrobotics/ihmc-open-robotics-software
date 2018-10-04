@@ -65,16 +65,16 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
       RigidBody[] bodies = ScrewTools.computeRigidBodiesAfterThisJoint(skippy.getTorso().getParentJoint());
       for (RigidBody body : bodies)
       {
-         YoGraphicReferenceFrame referenceFrameBody = new YoGraphicReferenceFrame(body.getBodyFixedFrame(), registry, 0.4);
+         YoGraphicReferenceFrame referenceFrameBody = new YoGraphicReferenceFrame(body.getBodyFixedFrame(), registry, true, 0.4);
          graphicsListRegistry.registerYoGraphic(body.getName() + "BodyFrame", referenceFrameBody);
          referenceFrameGraphics.add(referenceFrameBody);
       }
 
-      YoGraphicReferenceFrame referenceFrameElevator = new YoGraphicReferenceFrame(skippy.getElevator().getBodyFixedFrame(), registry, 0.4);
+      YoGraphicReferenceFrame referenceFrameElevator = new YoGraphicReferenceFrame(skippy.getElevator().getBodyFixedFrame(), registry, true, 0.4);
       graphicsListRegistry.registerYoGraphic(skippy.getElevator().getName() + "BodyFrame", referenceFrameElevator);
       referenceFrameGraphics.add(referenceFrameElevator);
 
-      YoGraphicReferenceFrame referenceFrameEndEffector = new YoGraphicReferenceFrame(skippy.getFootFrame(), registry, 0.4);
+      YoGraphicReferenceFrame referenceFrameEndEffector = new YoGraphicReferenceFrame(skippy.getFootFrame(), registry, true, 0.4);
       graphicsListRegistry.registerYoGraphic("EndEffectorFrame", referenceFrameEndEffector);
       referenceFrameGraphics.add(referenceFrameEndEffector);
    }

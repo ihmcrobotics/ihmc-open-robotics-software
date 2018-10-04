@@ -135,6 +135,7 @@ public class HighLevelHumanoidControllerToolbox
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final InverseDynamicsJoint[] controlledJoints;
+   private final OneDoFJoint[] controlledOneDoFJoints;
 
    private final SideDependentList<Wrench> handWrenches = new SideDependentList<>();
 
@@ -260,6 +261,7 @@ public class HighLevelHumanoidControllerToolbox
       }
 
       controlledJoints = computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+      controlledOneDoFJoints = ScrewTools.filterJoints(controlledJoints, OneDoFJoint.class);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -933,6 +935,11 @@ public class HighLevelHumanoidControllerToolbox
    public InverseDynamicsJoint[] getControlledJoints()
    {
       return controlledJoints;
+   }
+
+   public OneDoFJoint[] getControlledOneDoFJoints()
+   {
+      return controlledOneDoFJoints;
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)

@@ -193,7 +193,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          pointDFMaxViz = new YoGraphicPosition("pointDFMax", "", registry, 0.9 * pointSize, YoAppearance.Azure());
          pointSNextMaxViz = new YoGraphicPosition("pointSNextMax", "", registry, 0.9 * pointSize, YoAppearance.Pink());
 
-         bagOfBalls = new BagOfBalls(registry, yoGraphicsListRegistry);
+         bagOfBalls = new BagOfBalls(15, registry, yoGraphicsListRegistry);
 
          YoGraphicPosition desiredCoMPositionViz = new YoGraphicPosition("desiredCoMPosition", desiredCoMPosition, 1.1 * pointSize, YoAppearance.Gold());
 
@@ -545,7 +545,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          }
 
          bagOfBalls.reset();
-         int numberOfPoints = 30;
+         int numberOfPoints = bagOfBalls.getNumberOfBalls();
 
          for (int i = 0; i < numberOfPoints; i++)
          {

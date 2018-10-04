@@ -276,7 +276,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       virtualLegTangentialFrameHipCentered = new ReferenceFrame(namePrefix + "VirtualLegTangentialFrameHipCentered", pelvisFrame)
       {
          private final AxisAngle hipPitchRotationToParentFrame = new AxisAngle();
-         private final Vector3D hipPitchToParentFrame = new Vector3D();
          private final FramePoint3D tempPoint = new FramePoint3D();
          private final FrameVector3D footToHipAxis = new FrameVector3D();
          private final FramePoint3D hipPitchPosition = new FramePoint3D();
@@ -291,17 +290,15 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis, hipPitchRotationToParentFrame);
             hipPitchPosition.setToZero(frameBeforeHipPitchJoint);
             hipPitchPosition.changeFrame(getParent());
-            hipPitchToParentFrame.set(hipPitchPosition);
 
             transformToParent.setRotationAndZeroTranslation(hipPitchRotationToParentFrame);
-            transformToParent.setTranslation(hipPitchToParentFrame);
+            transformToParent.setTranslation(hipPitchPosition);
          }
       };
 
       virtualLegTangentialFrameAnkleCentered = new ReferenceFrame(namePrefix + "VirtualLegTangentialFrameAnkleCentered", pelvisFrame)
       {
          private final AxisAngle anklePitchRotationToParentFrame = new AxisAngle();
-         private final Vector3D anklePitchToParentFrame = new Vector3D();
          private final FramePoint3D tempPoint = new FramePoint3D();
          private final FrameVector3D footToHipAxis = new FrameVector3D();
          private final FramePoint3D anklePitchPosition = new FramePoint3D();
@@ -316,10 +313,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis, anklePitchRotationToParentFrame);
             anklePitchPosition.setToZero(endEffectorFrame);
             anklePitchPosition.changeFrame(getParent());
-            anklePitchToParentFrame.set(anklePitchPosition);
 
             transformToParent.setRotationAndZeroTranslation(anklePitchRotationToParentFrame);
-            transformToParent.setTranslation(anklePitchToParentFrame);
+            transformToParent.setTranslation(anklePitchPosition);
          }
       };
 
@@ -354,8 +350,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
       if (moreVisualizers)
       {
-         virtualLegTangentialFrameHipCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameHipCentered, registry, 0.1);
-         virtualLegTangentialFrameAnkleCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameAnkleCentered, registry, 0.1);
+         virtualLegTangentialFrameHipCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameHipCentered, registry, false, 0.1);
+         virtualLegTangentialFrameAnkleCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameAnkleCentered, registry, false, 0.1);
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", virtualLegTangentialFrameHipCenteredGraphics);
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", virtualLegTangentialFrameAnkleCenteredGraphics);
 
@@ -381,8 +377,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       virtualLegTangentialFrameAnkleCentered.update();
 
       anklePosition.setToZero(endEffectorFrame);
-      anklePosition.changeFrame(worldFrame);
-      yoCurrentFootPosition.set(anklePosition);
+      yoCurrentFootPosition.setMatchingFrame(anklePosition);
       anklePosition.changeFrame(virtualLegTangentialFrameHipCentered);
       currentLegLength.set(-anklePosition.getZ());
    }

@@ -30,7 +30,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public abstract class LinearMomentumRateOfChangeControlModule
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    protected final YoVariableRegistry registry;
 
@@ -66,22 +66,15 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FramePoint2D desiredCMP = new FramePoint2D();
    protected final FramePoint2D desiredCoP = new FramePoint2D();
 
-   protected final FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
-   protected final FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
-
    private boolean controlHeightWithMomentum;
 
-   private final YoFrameConvexPolygon2D yoSafeAreaPolygon;
-   private final YoFrameConvexPolygon2D yoProjectionPolygon;
-
    protected final YoFramePoint2D yoUnprojectedDesiredCMP;
-   protected final CMPProjector cmpProjector;
 
    private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
    private double desiredCoMHeightAcceleration = 0.0;
 
    public LinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ, double totalMass,
-                                                  YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2dProjection)
+                                                  YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -101,19 +94,12 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
       minimizeAngularMomentumRateZ = new YoBoolean(namePrefix + "MinimizeAngularMomentumRateZ", registry);
 
-      yoSafeAreaPolygon = new YoFrameConvexPolygon2D("yoSafeAreaPolygon", worldFrame, 10, registry);
-      yoProjectionPolygon = new YoFrameConvexPolygon2D("yoProjectionPolygon", worldFrame, 10, registry);
-
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
 
       perfectCoP.setToNaN();
 
       yoUnprojectedDesiredCMP = new YoFramePoint2D("unprojectedDesiredCMP", ReferenceFrame.getWorldFrame(), registry);
 
-      if (use2dProjection)
-         cmpProjector = new SmartCMPProjector(yoGraphicsListRegistry, registry);
-      else
-         cmpProjector = new SmartCMPPlanarProjector(registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -360,11 +346,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
    public void setCMPProjectionArea(FrameConvexPolygon2DReadOnly areaToProjectInto, FrameConvexPolygon2DReadOnly safeArea)
    {
-      this.areaToProjectInto.setIncludingFrame(areaToProjectInto);
-      this.safeArea.setIncludingFrame(safeArea);
-
-      yoSafeAreaPolygon.set(safeArea);
-      yoProjectionPolygon.set(areaToProjectInto);
    }
 
    public void minimizeAngularMomentumRateZ(boolean enable)

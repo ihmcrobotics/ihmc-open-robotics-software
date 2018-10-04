@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.StringTokenizer;
 
+import org.junit.After;
+
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -25,6 +27,7 @@ import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -62,6 +65,12 @@ import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class FootstepSnapperSimulationTest
 {
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
    public void testFootstepAndPointsFromDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
       QuadTreeFootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();

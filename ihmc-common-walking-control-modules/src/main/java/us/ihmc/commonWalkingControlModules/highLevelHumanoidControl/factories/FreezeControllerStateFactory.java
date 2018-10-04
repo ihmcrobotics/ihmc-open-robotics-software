@@ -13,8 +13,11 @@ public class FreezeControllerStateFactory implements HighLevelControllerStateFac
    public HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
       if (freezeControllerState == null)
-         freezeControllerState = new FreezeControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
-                                                           controllerFactoryHelper.getHighLevelControllerParameters(), controllerFactoryHelper.getLowLevelControllerOutput());
+      {
+         freezeControllerState = new FreezeControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledOneDoFJoints(),
+                                                           controllerFactoryHelper.getHighLevelControllerParameters(),
+                                                           controllerFactoryHelper.getLowLevelControllerOutput());
+      }
 
       return freezeControllerState;
    }

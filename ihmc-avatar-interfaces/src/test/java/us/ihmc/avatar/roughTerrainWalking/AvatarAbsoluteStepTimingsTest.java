@@ -10,6 +10,7 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -29,6 +30,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -58,6 +60,8 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
    private static final double swingStartTimeEpsilon = 0.005;
 
+   @ContinuousIntegrationTest(estimatedDuration = 142.2)
+   @Test(timeout = 900000)
    public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
    {
       String className = getClass().getSimpleName();
@@ -253,6 +257,8 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 22.0)
+   @Test(timeout = 110000)
    public void testMinimumTransferTimeIsRespected() throws SimulationExceededMaximumTimeException
    {
       String className = getClass().getSimpleName();

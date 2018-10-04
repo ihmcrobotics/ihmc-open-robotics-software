@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.DisableOnDebug;
@@ -51,6 +52,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -67,14 +69,20 @@ public class PacketCodeQualityTest
    @Rule
    public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
 
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
    @Test(timeout = 30000)
    public void testFrameInformationDefaultValues()
    {
       FrameInformation frameInformation = new FrameInformation();
       assertEquals(NameBasedHashCodeTools.DEFAULT_HASHCODE, frameInformation.getDataReferenceFrameId());
-      assertEquals(ReferenceFrame.getWorldFrame().getNameBasedHashCode(), frameInformation.getTrajectoryReferenceFrameId());
-      assertEquals(ReferenceFrame.getWorldFrame().getNameBasedHashCode(), FrameInformation.WORLD_FRAME);
+      assertEquals(ReferenceFrame.getWorldFrame().hashCode(), frameInformation.getTrajectoryReferenceFrameId());
+      assertEquals(ReferenceFrame.getWorldFrame().hashCode(), FrameInformation.WORLD_FRAME);
    }
 
    @SuppressWarnings("rawtypes")
@@ -630,7 +638,8 @@ public class PacketCodeQualityTest
       enumLowerCaseNames.add("QuadrupedControllerRequestedEvent".toLowerCase()); // In quadruped land
       enumLowerCaseNames.add("QuadrupedSteppingStateEnum".toLowerCase()); // In quadruped land
       enumLowerCaseNames.add("QuadrupedSteppingRequestedEvent".toLowerCase()); // In quadruped land
-
+      enumLowerCaseNames.add("ValkyrieFingerMotorName".toLowerCase()); // In valkyrie land
+      
       Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
       Set<Field> fieldsToIngore = new HashSet<>();
