@@ -664,7 +664,18 @@ public class BalanceManager
       }
    }
 
-   public void initializeICPPlanForStanding(double finalTransferTime)
+   public void initializeICPPlanForStanding()
+   {
+      if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
+      {
+         requestICPPlannerToHoldCurrentCoM();
+         holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
+      }
+      icpPlanner.initializeForStanding(yoTime.getDoubleValue());
+      linearMomentumRateOfChangeControlModule.initializeForStanding();
+   }
+
+   public void initializeICPPlanForTransferToStanding(double finalTransferTime)
    {
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
@@ -672,7 +683,7 @@ public class BalanceManager
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
       setFinalTransferTime(finalTransferTime);
-      icpPlanner.initializeForStanding(yoTime.getDoubleValue());
+      icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForStanding();
    }
 
