@@ -53,6 +53,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private static final boolean debug = false;
    private static final int maxNumberOfFootstepsToConsider = 4;
 
+   private static final RobotSide defaultTransferToSide = RobotSide.LEFT;
+
    private static final double ZERO_TIME = 0.0;
 
    /** Desired velocity for the Center of Mass (CoM) */
@@ -411,7 +413,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       clearPlanWithoutClearingPlannedFootsteps();
       RobotSide transferToSide = this.transferToSide.getEnumValue();
       if (transferToSide == null)
-         transferToSide = RobotSide.LEFT;
+         transferToSide = defaultTransferToSide;
 
       boolean goingToPerformSmoothingAdjustment =
             maintainContinuity && (adjustPlanForDSContinuity.getBooleanValue() || (adjustPlanForInitialDSContinuity.getBooleanValue() && (isStanding.getBooleanValue() || isInitialTransfer.getBooleanValue())));
