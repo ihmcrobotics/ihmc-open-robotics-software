@@ -543,14 +543,14 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       int numberOfUpcomingFootsteps = Math.min(numberFootstepsToConsider.getIntegerValue(), this.numberOfUpcomingFootsteps.getValue());
       boolean planIncludesFinalTransfer = numberOfUpcomingFootsteps < numberFootstepsToConsider.getIntegerValue();
 
+      if (numberOfUpcomingFootsteps == 0)
+         isDoneWalking.set(true); // not walking
+      else
+         isDoneWalking.set(false); // start walking
+
       // Put first CoP as per chicken support computations in case starting from rest
       if (atAStop)
       { // this guy is starting from standing
-         if (numberOfUpcomingFootsteps == 0)
-            isDoneWalking.set(true); // not walking
-         else
-            isDoneWalking.set(false); // start walking
-
          if (holdDesiredState.getBooleanValue())
          {
             previousCoPLocation.setIncludingFrame(heldCoPPosition);
@@ -597,10 +597,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       else
       { // starting in motion
          clearHeldPosition();
-         if (numberOfUpcomingFootsteps == 0)
-            isDoneWalking.set(true); // last step
-         else
-            isDoneWalking.set(false);
 
          // Put first CoP at the exitCoP of the swing foot when starting in motion
          computeExitCoPPointLocationForPreviousPlan(previousCoPLocation, copPointParametersMap.get(exitCoPName), transferToSide.getOppositeSide(),
