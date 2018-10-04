@@ -189,7 +189,7 @@ public interface JointDesiredOutputReadOnly
     */
    default boolean hasMaxPositionError()
    {
-      return !Double.isNaN(getPositionIntegrationBreakFrequency());
+      return !Double.isNaN(getMaxPositionError());
    }
 
    /**
