@@ -694,8 +694,8 @@ public class BalanceManager
    public void computeNormalizedEllipticICPError(RobotSide transferToSide)
    {
       getICPError(icpError2d);
-      ReferenceFrame leadingAnkleZUpFrame = bipedSupportPolygons.getAnkleZUpFrames().get(transferToSide);
-      icpError2d.changeFrame(leadingAnkleZUpFrame);
+      ReferenceFrame leadingSoleZUpFrame = bipedSupportPolygons.getSoleZUpFrames().get(transferToSide);
+      icpError2d.changeFrame(leadingSoleZUpFrame);
       normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX.getValue())
             + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY.getValue()));
    }
