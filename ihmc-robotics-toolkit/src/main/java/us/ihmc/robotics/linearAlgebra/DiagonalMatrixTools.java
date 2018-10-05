@@ -718,7 +718,7 @@ public class DiagonalMatrixTools
    public static void innerDiagonalMult(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d)
    {
       if (a == c || b == c || c == d)
-         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+         throw new IllegalArgumentException("Neither 'a', 'b', or 'c' can be the same matrix as 'd'");
       else if (a.numCols != b.numRows)
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       else if (b.numCols != c.numRows)
@@ -767,7 +767,7 @@ public class DiagonalMatrixTools
    public static void innerDiagonalMultTransA(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d)
    {
       if (a == c || b == c || c == d)
-         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+         throw new IllegalArgumentException("Neither 'a', 'b', or 'c' can be the same matrix as 'd'");
       else if (a.numRows != b.numRows)
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       else if (b.numCols != c.numRows)
@@ -817,7 +817,7 @@ public class DiagonalMatrixTools
    public static void innerDiagonalMultAddTransA(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d)
    {
       if (a == c || b == c || c == d)
-         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+         throw new IllegalArgumentException("Neither 'a', 'b', or 'c' can be the same matrix as 'd'");
       else if (a.numRows != b.numRows)
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       else if (b.numCols != c.numRows)
@@ -869,11 +869,13 @@ public class DiagonalMatrixTools
    public static void innerDiagonalMultAddBlockTransA(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, int rowStart, int colStart)
    {
       if (a == c || b == c || c == d)
-         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+         throw new IllegalArgumentException("Neither 'a', 'b', or 'c' can be the same matrix as 'd'");
       else if (a.numRows != b.numRows)
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       else if (b.numCols != c.numRows)
          throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
+      else if (a.numCols != d.numRows || c.numCols != d.numCols)
+         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
 
       for (int i = 0; i < a.numCols; i++)
       {
@@ -920,11 +922,13 @@ public class DiagonalMatrixTools
                                                       int colStart)
    {
       if (b == d || c == d || d == e)
-         throw new IllegalArgumentException("Neither 'b' or 'c' can be the same matrix as 'd'");
+         throw new IllegalArgumentException("Neither 'b', 'c', or 'd' can be the same matrix as 'e'");
       else if (b.numRows != c.numRows)
          throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
       else if (c.numCols != d.numRows)
          throw new MatrixDimensionException("The 'c' and 'd' matrices do not have compatible dimensions");
+      else if (b.numCols != e.numRows || d.numCols != e.numCols)
+         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
 
       for (int i = 0; i < b.numCols; i++)
       {
