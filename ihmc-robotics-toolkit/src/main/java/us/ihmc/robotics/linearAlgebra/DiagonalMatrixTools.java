@@ -297,8 +297,6 @@ public class DiagonalMatrixTools
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
       else if (a.numRows != b.numRows)
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
-      else if (a.numCols != c.numRows || b.numCols != c.numCols)
-         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
 
       if (b.numCols > 1)
          postMultTransA_matrix(a, b, c);
@@ -308,6 +306,9 @@ public class DiagonalMatrixTools
 
    private static void postMultTransA_matrix(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
    {
+      if (a.numCols != c.numRows || b.numCols != c.numCols)
+         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+
       int index = 0;
       int bIndex = 0;
       int maxValue = Math.min(b.numRows, b.numCols);
@@ -327,9 +328,12 @@ public class DiagonalMatrixTools
 
    private static void postMultTransA_vector(RowD1Matrix64F a, D1Matrix64F b, RowD1Matrix64F c)
    {
+      if (a.numCols != c.numRows)
+         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+
       int index = 0;
       int bIndex = 0;
-      int maxValue = Math.min(b.numRows, b.numCols);
+      int maxValue = Math.min(c.numCols, b.numRows); // fix this
       for (int i = 0; i < maxValue; i++)
       {
          int index2 = i;
@@ -340,7 +344,7 @@ public class DiagonalMatrixTools
             c.data[index2] = b.data[bIndex] * a.data[index++];
             index2 += c.numCols;
          }
-         bIndex++;
+         bIndex ++;
       }
    }
 
@@ -413,7 +417,7 @@ public class DiagonalMatrixTools
             int indexC = 0;
             double sum = 0;
             int end = indexA + a.numRows * a.numCols;
-            for (; indexA < end; indexA += a.numCols, indexB += a.numCols, indexC ++)
+            for (; indexA < end; indexA += a.numCols, indexB += a.numCols, indexC++)
             {
                sum += a.data[indexA] * a.data[indexB] * b.data[indexC];
             }
@@ -502,7 +506,7 @@ public class DiagonalMatrixTools
          int indexC = 0;
          double sum = 0;
          int end = indexA + a.numRows * a.numCols;
-         for (; indexA < end; indexA += a.numCols, indexC ++)
+         for (; indexA < end; indexA += a.numCols, indexC++)
          {
             sum += a.data[indexA] * a.data[indexA] * b.data[indexC];
          }
@@ -518,7 +522,7 @@ public class DiagonalMatrixTools
             indexC = 0;
             sum = 0;
             end = indexA + a.numRows * a.numCols;
-            for (; indexA < end; indexA += a.numCols, indexB += a.numCols, indexC ++)
+            for (; indexA < end; indexA += a.numCols, indexB += a.numCols, indexC++)
             {
                sum += a.data[indexA] * a.data[indexB] * b.data[indexC];
             }
@@ -618,7 +622,7 @@ public class DiagonalMatrixTools
 
    private static void multAddBlockInner_matrix(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int cRowStart, int cColStart)
    {
-      if ( a.numRows != b.numCols)
+      if (a.numRows != b.numCols)
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
 
       for (int i = 0; i < a.numCols; i++)
@@ -664,7 +668,7 @@ public class DiagonalMatrixTools
          int indexC = 0;
          double sum = 0;
          int end = indexA + a.numRows * a.numCols;
-         for (; indexA < end; indexA += a.numCols, indexC ++)
+         for (; indexA < end; indexA += a.numCols, indexC++)
          {
             sum += a.data[indexA] * a.data[indexA] * b.data[indexC];
          }
@@ -679,7 +683,7 @@ public class DiagonalMatrixTools
             indexC = 0;
             sum = 0;
             end = indexA + a.numRows * a.numCols;
-            for (; indexA < end; indexA += a.numCols, indexB += a.numCols, indexC ++)
+            for (; indexA < end; indexA += a.numCols, indexB += a.numCols, indexC++)
             {
                sum += a.data[indexA] * a.data[indexB] * b.data[indexC];
             }
@@ -829,7 +833,7 @@ public class DiagonalMatrixTools
          int indexC = 0;
          double sum = 0;
          int end = indexA + b.numRows * b.numCols;
-         for (; indexA < end; indexA += b.numCols, indexC ++)
+         for (; indexA < end; indexA += b.numCols, indexC++)
          {
             sum += b.data[indexA] * b.data[indexA] * c.data[indexC];
          }
@@ -845,7 +849,7 @@ public class DiagonalMatrixTools
             indexC = 0;
             sum = 0;
             end = indexA + b.numRows * b.numCols;
-            for (; indexA < end; indexA += b.numCols, indexB += b.numCols, indexC ++)
+            for (; indexA < end; indexA += b.numCols, indexB += b.numCols, indexC++)
             {
                sum += b.data[indexA] * b.data[indexB] * c.data[indexC];
             }
@@ -964,7 +968,7 @@ public class DiagonalMatrixTools
             int indexC = 0;
             double sum = 0;
             int end = indexA + a.numCols;
-            for (; indexA < end; indexA++, indexB++, indexC ++)
+            for (; indexA < end; indexA++, indexB++, indexC++)
             {
                sum += a.data[indexA] * a.data[indexB] * b.data[indexC];
             }
@@ -1094,7 +1098,7 @@ public class DiagonalMatrixTools
             {
                total += a.data[indexA++] * c.data[indexC] * b.data[indexB];
                indexC += c.numCols;
-               indexB ++;
+               indexB++;
             }
 
             d.data[dIndex++] = total;
@@ -1187,7 +1191,7 @@ public class DiagonalMatrixTools
             {
                total += a.data[indexA] * c.data[indexC] * b.data[indexB];
                indexA += a.numCols;
-               indexB ++;
+               indexB++;
             }
 
             d.data[dIndex++] = total;
@@ -1279,7 +1283,7 @@ public class DiagonalMatrixTools
             {
                total += a.data[indexA] * c.data[indexC] * b.data[indexB];
                indexA += a.numCols;
-               indexB ++;
+               indexB++;
             }
 
             d.data[dIndex++] += total;
@@ -1370,7 +1374,7 @@ public class DiagonalMatrixTools
             {
                total += a.data[indexA] * c.data[indexC] * b.data[indexB];
                indexA += a.numCols;
-               indexB ++;
+               indexB++;
             }
 
             int dIndex = (i + rowStart) * d.numCols + j + colStart;
@@ -1412,7 +1416,7 @@ public class DiagonalMatrixTools
    }
 
    public static void innerDiagonalMultAddBlockTransA_matrix(double a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, RowD1Matrix64F e, int rowStart,
-                                                      int colStart)
+                                                             int colStart)
    {
       if (c.numCols != d.numRows)
          throw new MatrixDimensionException("The 'c' and 'd' matrices do not have compatible dimensions");
@@ -1444,7 +1448,7 @@ public class DiagonalMatrixTools
    }
 
    private static void innerDiagonalMultAddBlockTransA_vector(double a, RowD1Matrix64F b, D1Matrix64F c, RowD1Matrix64F d, RowD1Matrix64F e, int rowStart,
-                                                      int colStart)
+                                                              int colStart)
    {
       if (b.numRows != d.numRows)
          throw new MatrixDimensionException("The 'c' and 'd' matrices do not have compatible dimensions");
@@ -1466,7 +1470,7 @@ public class DiagonalMatrixTools
             {
                total += b.data[indexA] * d.data[indexC] * c.data[indexB];
                indexA += b.numCols;
-               indexB ++;
+               indexB++;
             }
 
             int dIndex = (i + rowStart) * e.numCols + j + colStart;
