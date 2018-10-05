@@ -2,6 +2,7 @@ package us.ihmc.robotics.linearAlgebra;
 
 import java.util.Arrays;
 
+import org.ejml.data.D1Matrix64F;
 import org.ejml.data.RowD1Matrix64F;
 import org.ejml.ops.MatrixDimensionException;
 
@@ -66,7 +67,8 @@ public class DiagonalMatrixTools
     * <br>
     * c<sub>ij</sub> = &sum;<sub>k=1:n</sub> { a<sub>ik</sub> * b<sub>kj</sub>}
     * </p>
-    * <p>  where we assume that matrix 'a' is a diagonal matrix. </p>
+    * <p> where we assume that matrix 'a' is a diagonal matrix. </p>
+    * <p> 'a' can also be passed in as a vector, where each element represents the off-diagonal value of the 'a' matrix. </p>
     * @param a The left matrix in the multiplication operation. Not modified. Assumed to be diagonal.
     * @param b The right matrix in the multiplication operation. Not modified.
     * @param c Where the results of the operation are stored. Modified.
@@ -77,13 +79,22 @@ public class DiagonalMatrixTools
       {
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
       }
-      else if (a.numCols != b.numRows)
-      {
-         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
-      }
       else if (a.numRows != c.numRows || b.numCols != c.numCols)
       {
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+      }
+
+      if (a.numCols > 1)
+         preMult_matrix(a, b, c);
+      else
+         preMult_vector(a, b, c);
+   }
+
+   private static void preMult_matrix(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
+   {
+      if (a.numCols != b.numRows)
+      {
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       }
 
       for (int row = 0; row < Math.min(a.numRows, a.numCols); row++)
@@ -91,6 +102,17 @@ public class DiagonalMatrixTools
          for (int col = 0; col < b.numCols; col++)
          {
             c.unsafe_set(row, col, a.unsafe_get(row, row) * b.unsafe_get(row, col));
+         }
+      }
+   }
+
+   private static void preMult_vector(D1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
+   {
+      for (int row = 0; row < Math.min(a.numRows, b.numRows); row++)
+      {
+         for (int col = 0; col < b.numCols; col++)
+         {
+            c.unsafe_set(row, col, a.data[row] * b.unsafe_get(row, col));
          }
       }
    }
@@ -103,6 +125,7 @@ public class DiagonalMatrixTools
     * c<sub>(startRow + i) (startCol + j)</sub> = c<sub>(startRow + i) (startCol + j)</sub> + &sum;<sub>k=1:n</sub> { a<sub>ik</sub> * b<sub>kj</sub>}
     * </p>
     * <p> where we assume that matrix 'a' is a diagonal matrix. </p>
+    * <p> The 'a' matrix can also be passed in as a vector of the diagonal elements </p>
     * <p> The block is added to matrix c starting at startRow, startCol </p>
     * @param a The left matrix in the multiplication operation. Not modified. Assumed to be diagonal.
     * @param b The right matrix in the multiplication operation. Not modified.
@@ -116,13 +139,22 @@ public class DiagonalMatrixTools
       {
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
       }
-      else if (a.numCols != b.numRows)
-      {
-         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
-      }
       else if (a.numRows + startRow > c.numRows || b.numCols + startCol > c.numCols)
       {
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+      }
+
+      if (a.numCols > 1)
+         preMultAddBlock_matrix(a, b, c, startRow, startCol);
+      else
+         preMultAddBlock_vector(a, b, c, startRow, startCol);
+   }
+
+   private static void preMultAddBlock_matrix(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int startRow, int startCol)
+   {
+      if (a.numCols != b.numRows)
+      {
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       }
 
       for (int row = 0; row < Math.min(a.numRows, a.numCols); row++)
@@ -130,6 +162,17 @@ public class DiagonalMatrixTools
          for (int col = 0; col < b.numCols; col++)
          {
             c.unsafe_set(startRow + row, startCol + col, c.unsafe_get(startRow + row, startCol + col) + a.unsafe_get(row, row) * b.unsafe_get(row, col));
+         }
+      }
+   }
+
+   private static void preMultAddBlock_vector(D1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int startRow, int startCol)
+   {
+      for (int row = 0; row < Math.min(a.numRows, b.numRows); row++)
+      {
+         for (int col = 0; col < b.numCols; col++)
+         {
+            c.unsafe_set(startRow + row, startCol + col, c.unsafe_get(startRow + row, startCol + col) + a.data[row] * b.unsafe_get(row, col));
          }
       }
    }
@@ -142,6 +185,7 @@ public class DiagonalMatrixTools
     * c<sub>(startRow + i) (startCol + j)</sub> = c<sub>(startRow + i) (startCol + j)</sub> + d * &sum;<sub>k=1:n</sub> { a<sub>ik</sub> * b<sub>kj</sub>}
     * </p>
     * <p> where we assume that matrix 'a' is a diagonal matrix. </p>
+    * <p> The 'a' matrix can also be passed in as a vector of the diagonal elements </p>
     * <p> The block is added to matrix c starting at startRow, startCol </p>
     * @param a The left matrix in the multiplication operation. Not modified. Assumed to be diagonal.
     * @param b The right matrix in the multiplication operation. Not modified.
@@ -155,13 +199,22 @@ public class DiagonalMatrixTools
       {
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
       }
-      else if (a.numCols != b.numRows)
-      {
-         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
-      }
       else if (a.numRows + startRow > c.numRows || b.numCols + startCol > c.numCols)
       {
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+      }
+
+      if (a.numCols > 1)
+         preMultAddBlock_matrix(d, a, b, c, startRow, startCol);
+      else
+         preMultAddBlock_vector(d, a, b, c, startRow, startCol);
+   }
+
+   private static void preMultAddBlock_matrix(double d, RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int startRow, int startCol)
+   {
+      if (a.numCols != b.numRows)
+      {
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       }
 
       for (int row = 0; row < Math.min(a.numRows, a.numCols); row++)
@@ -172,6 +225,19 @@ public class DiagonalMatrixTools
          }
       }
    }
+
+   private static void preMultAddBlock_vector(double d, D1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int startRow, int startCol)
+   {
+      for (int row = 0; row < Math.min(a.numRows, b.numRows); row++)
+      {
+         for (int col = 0; col < b.numCols; col++)
+         {
+            c.unsafe_set(startRow + row, startCol + col, c.unsafe_get(startRow + row, startCol + col) + d * a.data[row] * b.unsafe_get(row, col));
+         }
+      }
+   }
+
+
 
    /**
     * <p>Performs the following operation:<br>
