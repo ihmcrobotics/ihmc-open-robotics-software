@@ -681,7 +681,7 @@ public class DiagonalMatrixTools
    {
       if (a == c)
          throw new IllegalArgumentException("'a' cannot be the same matrix as 'c'");
-      else if (a.numRows != c.numRows || a.numRows != c.numCols)
+      else if (a.numCols != c.numRows || a.numCols != c.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
 
       for (int i = 0; i < a.numCols; i++)
