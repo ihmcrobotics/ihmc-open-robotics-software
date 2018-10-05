@@ -15,23 +15,25 @@ public class DiagonalMatrixTools
     */
    public static void invertDiagonalMatrix(RowD1Matrix64F matrixToInvert, RowD1Matrix64F invertedMatrixToPack)
    {
-      if(matrixToInvert.numRows != matrixToInvert.numCols)
+      if (matrixToInvert.numRows != matrixToInvert.numCols)
       {
-         throw new MatrixDimensionException( "Diagonal matrix to invert is not square. Number of rows in matrix: " + matrixToInvert.getNumRows() + ", number of"
-               + " cols in matrix: " + matrixToInvert.getNumCols() + ".");
+         throw new MatrixDimensionException(
+               "Diagonal matrix to invert is not square. Number of rows in matrix: " + matrixToInvert.getNumRows() + ", number of" + " cols in matrix: "
+                     + matrixToInvert.getNumCols() + ".");
       }
 
-      if(invertedMatrixToPack.numRows != matrixToInvert.numRows && invertedMatrixToPack.numCols != matrixToInvert.numCols)
+      if (invertedMatrixToPack.numRows != matrixToInvert.numRows && invertedMatrixToPack.numCols != matrixToInvert.numCols)
       {
-         throw new MatrixDimensionException( "Matrix destination is the wrong size. Number of rows in matrix: " + matrixToInvert.getNumRows() + ", number of"
-               + " cols in matrix: " + matrixToInvert.getNumCols() + ".");
+         throw new MatrixDimensionException(
+               "Matrix destination is the wrong size. Number of rows in matrix: " + matrixToInvert.getNumRows() + ", number of" + " cols in matrix: "
+                     + matrixToInvert.getNumCols() + ".");
       }
 
       int size = matrixToInvert.getNumRows();
       Arrays.fill(invertedMatrixToPack.data, 0, invertedMatrixToPack.getNumElements(), 0.0);
 
       for (int index = 0; index < size; index++)
-         invertedMatrixToPack.unsafe_set(index, index,  1.0 / matrixToInvert.unsafe_get(index, index));
+         invertedMatrixToPack.unsafe_set(index, index, 1.0 / matrixToInvert.unsafe_get(index, index));
    }
 
    /**
@@ -40,16 +42,17 @@ public class DiagonalMatrixTools
     */
    public static void invertDiagonalMatrix(RowD1Matrix64F matrixToInvertAndPack)
    {
-      if(matrixToInvertAndPack.numRows != matrixToInvertAndPack.numCols)
+      if (matrixToInvertAndPack.numRows != matrixToInvertAndPack.numCols)
       {
-         throw new MatrixDimensionException( "Diagonal matrix to invert is not square. Number of rows in matrix: " + matrixToInvertAndPack.getNumRows() + ", number of"
-               + " cols in matrix: " + matrixToInvertAndPack.getNumCols() + ".");
+         throw new MatrixDimensionException(
+               "Diagonal matrix to invert is not square. Number of rows in matrix: " + matrixToInvertAndPack.getNumRows() + ", number of" + " cols in matrix: "
+                     + matrixToInvertAndPack.getNumCols() + ".");
       }
 
       int size = matrixToInvertAndPack.getNumRows();
 
       for (int index = 0; index < size; index++)
-         matrixToInvertAndPack.unsafe_set(index, index,  1.0 / matrixToInvertAndPack.unsafe_get(index, index));
+         matrixToInvertAndPack.unsafe_set(index, index, 1.0 / matrixToInvertAndPack.unsafe_get(index, index));
    }
 
    /**
@@ -66,15 +69,15 @@ public class DiagonalMatrixTools
     */
    public static void preMult(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
    {
-      if( a == c || b == c )
+      if (a == c || b == c)
       {
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
       }
-      else if( a.numCols != b.numRows )
+      else if (a.numCols != b.numRows)
       {
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       }
-      else if( a.numRows != c.numRows || b.numCols != c.numCols )
+      else if (a.numRows != c.numRows || b.numCols != c.numCols)
       {
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
       }
@@ -105,15 +108,14 @@ public class DiagonalMatrixTools
     */
    public static void preMultAddBlock(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int startRow, int startCol)
    {
-      if( a == c || b == c )
+      if (a == c || b == c)
       {
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
       }
-      else if( a.numCols != b.numRows )
+      else if (a.numCols != b.numRows)
       {
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       }
-
 
       for (int row = 0; row < Math.min(a.numRows, a.numCols); row++)
       {
@@ -141,11 +143,11 @@ public class DiagonalMatrixTools
     */
    public static void preMultAddBlock(double d, RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int startRow, int startCol)
    {
-      if( a == c || b == c )
+      if (a == c || b == c)
       {
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
       }
-      else if( a.numCols != b.numRows )
+      else if (a.numCols != b.numRows)
       {
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       }
@@ -173,15 +175,15 @@ public class DiagonalMatrixTools
     */
    public static void postMult(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
    {
-      if( a == c || b == c )
+      if (a == c || b == c)
       {
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
       }
-      else if( a.numCols != b.numRows )
+      else if (a.numCols != b.numRows)
       {
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       }
-      else if( a.numRows != c.numRows || b.numCols != c.numCols )
+      else if (a.numRows != c.numRows || b.numCols != c.numCols)
       {
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
       }
@@ -218,12 +220,12 @@ public class DiagonalMatrixTools
       int index = 0;
       int bIndex = 0;
       int maxValue = Math.min(b.numRows, b.numCols);
-      for( int i = 0; i < maxValue; i++ )
+      for (int i = 0; i < maxValue; i++)
       {
          int index2 = i;
 
          int end = index + a.numCols;
-         while( index < end )
+         while (index < end)
          {
             c.data[index2] = b.data[bIndex] * a.data[index++];
             index2 += c.numCols;
@@ -249,20 +251,20 @@ public class DiagonalMatrixTools
     */
    public static void multInner(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
    {
-      for( int i = 0; i < a.numCols; i++ )
+      for (int i = 0; i < a.numCols; i++)
       {
-         for( int j = i; j < a.numCols; j++ )
+         for (int j = i; j < a.numCols; j++)
          {
-            int indexC1 = i*c.numCols+j;
-            int indexC2 = j*c.numCols+i;
+            int indexC1 = i * c.numCols + j;
+            int indexC2 = j * c.numCols + i;
             int indexA = i;
             int indexB = j;
             int indexC = 0;
             double sum = 0;
-            int end = indexA + a.numRows*a.numCols;
-            for( ; indexA < end; indexA += a.numCols, indexB += a.numCols, indexC += (b.numCols + 1) )
+            int end = indexA + a.numRows * a.numCols;
+            for (; indexA < end; indexA += a.numCols, indexB += a.numCols, indexC += (b.numCols + 1))
             {
-               sum += a.data[indexA]*a.data[indexB] * b.data[indexC];
+               sum += a.data[indexA] * a.data[indexB] * b.data[indexC];
             }
             c.data[indexC1] = c.data[indexC2] = sum;
          }
@@ -286,33 +288,33 @@ public class DiagonalMatrixTools
     */
    public static void multAddInner(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
    {
-      for( int i = 0; i < a.numCols; i++ )
+      for (int i = 0; i < a.numCols; i++)
       {
          int j = i;
-         int indexC1 = i*c.numCols+j;
+         int indexC1 = i * c.numCols + j;
          int indexA = i;
          int indexC = 0;
          double sum = 0;
-         int end = indexA + a.numRows*a.numCols;
-         for( ; indexA < end; indexA += a.numCols,  indexC += (b.numCols + 1) )
+         int end = indexA + a.numRows * a.numCols;
+         for (; indexA < end; indexA += a.numCols, indexC += (b.numCols + 1))
          {
-            sum += a.data[indexA]*a.data[indexA] * b.data[indexC];
+            sum += a.data[indexA] * a.data[indexA] * b.data[indexC];
          }
          c.data[indexC1] += sum;
          j++;
 
-         for( ; j < a.numCols; j++ )
+         for (; j < a.numCols; j++)
          {
-            indexC1 = i*c.numCols+j;
-            int indexC2 = j*c.numCols+i;
+            indexC1 = i * c.numCols + j;
+            int indexC2 = j * c.numCols + i;
             indexA = i;
             int indexB = j;
             indexC = 0;
             sum = 0;
-            end = indexA + a.numRows*a.numCols;
-            for( ; indexA < end; indexA += a.numCols, indexB += a.numCols, indexC += (b.numCols + 1) )
+            end = indexA + a.numRows * a.numCols;
+            for (; indexA < end; indexA += a.numCols, indexB += a.numCols, indexC += (b.numCols + 1))
             {
-               sum += a.data[indexA]*a.data[indexB] * b.data[indexC];
+               sum += a.data[indexA] * a.data[indexB] * b.data[indexC];
             }
             c.data[indexC1] += sum;
             c.data[indexC2] += sum;
@@ -336,31 +338,31 @@ public class DiagonalMatrixTools
     */
    public static void multAddInner(RowD1Matrix64F a, double b, RowD1Matrix64F c)
    {
-      for( int i = 0; i < a.numCols; i++ )
+      for (int i = 0; i < a.numCols; i++)
       {
          int j = i;
-         int indexC1 = i*c.numCols+j;
+         int indexC1 = i * c.numCols + j;
          int indexA = i;
          double sum = 0;
-         int end = indexA + a.numRows*a.numCols;
-         for( ; indexA < end; indexA += a.numCols)
+         int end = indexA + a.numRows * a.numCols;
+         for (; indexA < end; indexA += a.numCols)
          {
-            sum += a.data[indexA]*a.data[indexA];
+            sum += a.data[indexA] * a.data[indexA];
          }
-         c.data[indexC1] += b*sum;
+         c.data[indexC1] += b * sum;
          j++;
 
-         for( ; j < a.numCols; j++ )
+         for (; j < a.numCols; j++)
          {
-            indexC1 = i*c.numCols+j;
-            int indexC2 = j*c.numCols+i;
+            indexC1 = i * c.numCols + j;
+            int indexC2 = j * c.numCols + i;
             indexA = i;
             int indexB = j;
             sum = 0;
-            end = indexA + a.numRows*a.numCols;
-            for( ; indexA < end; indexA += a.numCols, indexB += a.numCols)
+            end = indexA + a.numRows * a.numCols;
+            for (; indexA < end; indexA += a.numCols, indexB += a.numCols)
             {
-               sum += a.data[indexA]*a.data[indexB];
+               sum += a.data[indexA] * a.data[indexB];
             }
             sum *= b;
             c.data[indexC1] += sum;
@@ -389,34 +391,34 @@ public class DiagonalMatrixTools
     */
    public static void multAddBlockInner(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int cRowStart, int cColStart)
    {
-      for( int i = 0; i < a.numCols; i++ )
+      for (int i = 0; i < a.numCols; i++)
       {
          int j = i;
          int indexA = i;
          int indexC = 0;
          double sum = 0;
-         int end = indexA + a.numRows*a.numCols;
-         for( ; indexA < end; indexA += a.numCols,  indexC += (b.numCols + 1) )
+         int end = indexA + a.numRows * a.numCols;
+         for (; indexA < end; indexA += a.numCols, indexC += (b.numCols + 1))
          {
-            sum += a.data[indexA]*a.data[indexA] * b.data[indexC];
+            sum += a.data[indexA] * a.data[indexA] * b.data[indexC];
          }
-         int indexC1 = (i+cRowStart)*c.numCols+j+cColStart;
+         int indexC1 = (i + cRowStart) * c.numCols + j + cColStart;
          c.data[indexC1] += sum;
          j++;
 
-         for( ; j < a.numCols; j++ )
+         for (; j < a.numCols; j++)
          {
             indexA = i;
             int indexB = j;
             indexC = 0;
             sum = 0;
-            end = indexA + a.numRows*a.numCols;
-            for( ; indexA < end; indexA += a.numCols, indexB += a.numCols, indexC += (b.numCols + 1) )
+            end = indexA + a.numRows * a.numCols;
+            for (; indexA < end; indexA += a.numCols, indexB += a.numCols, indexC += (b.numCols + 1))
             {
-               sum += a.data[indexA]*a.data[indexB] * b.data[indexC];
+               sum += a.data[indexA] * a.data[indexB] * b.data[indexC];
             }
-            indexC1 = (i+cRowStart)*c.numCols+j+cColStart;
-            int indexC2 = (j+cRowStart)*c.numCols+i+cColStart; // this one is wrong
+            indexC1 = (i + cRowStart) * c.numCols + j + cColStart;
+            int indexC2 = (j + cRowStart) * c.numCols + i + cColStart; // this one is wrong
             c.data[indexC1] += sum;
             c.data[indexC2] += sum;
          }
@@ -442,32 +444,32 @@ public class DiagonalMatrixTools
     */
    public static void multAddBlockInner(RowD1Matrix64F a, double b, RowD1Matrix64F c, int cRowStart, int cColStart)
    {
-      for( int i = 0; i < a.numCols; i++ )
+      for (int i = 0; i < a.numCols; i++)
       {
          int j = i;
          int indexA = i;
          double sum = 0;
-         int end = indexA + a.numRows*a.numCols;
-         for( ; indexA < end; indexA += a.numCols )
+         int end = indexA + a.numRows * a.numCols;
+         for (; indexA < end; indexA += a.numCols)
          {
-            sum += a.data[indexA]*a.data[indexA];
+            sum += a.data[indexA] * a.data[indexA];
          }
-         int indexC1 = (i+cRowStart)*c.numCols+j+cColStart;
-         c.data[indexC1] += b*sum;
+         int indexC1 = (i + cRowStart) * c.numCols + j + cColStart;
+         c.data[indexC1] += b * sum;
          j++;
 
-         for( ; j < a.numCols; j++ )
+         for (; j < a.numCols; j++)
          {
             indexA = i;
             int indexB = j;
             sum = 0;
-            end = indexA + a.numRows*a.numCols;
-            for( ; indexA < end; indexA += a.numCols, indexB += a.numCols )
+            end = indexA + a.numRows * a.numCols;
+            for (; indexA < end; indexA += a.numCols, indexB += a.numCols)
             {
-               sum += a.data[indexA]*a.data[indexB];
+               sum += a.data[indexA] * a.data[indexB];
             }
-            indexC1 = (i+cRowStart)*c.numCols+j+cColStart;
-            int indexC2 = (j+cRowStart)*c.numCols+i+cColStart;
+            indexC1 = (i + cRowStart) * c.numCols + j + cColStart;
+            int indexC2 = (j + cRowStart) * c.numCols + i + cColStart;
             sum *= b;
             c.data[indexC1] += sum;
             c.data[indexC2] += sum;
@@ -493,33 +495,33 @@ public class DiagonalMatrixTools
     */
    public static void multAddInner(double a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d)
    {
-      for( int i = 0; i < b.numCols; i++ )
+      for (int i = 0; i < b.numCols; i++)
       {
          int j = i;
-         int indexC1 = i*d.numCols+j;
+         int indexC1 = i * d.numCols + j;
          int indexA = i;
          int indexC = 0;
          double sum = 0;
-         int end = indexA + b.numRows*b.numCols;
-         for( ; indexA < end; indexA += b.numCols,  indexC += (c.numCols + 1) )
+         int end = indexA + b.numRows * b.numCols;
+         for (; indexA < end; indexA += b.numCols, indexC += (c.numCols + 1))
          {
-            sum += b.data[indexA]*b.data[indexA] * c.data[indexC];
+            sum += b.data[indexA] * b.data[indexA] * c.data[indexC];
          }
          d.data[indexC1] += a * sum;
          j++;
 
-         for( ; j < b.numCols; j++ )
+         for (; j < b.numCols; j++)
          {
-            indexC1 = i*d.numCols+j;
-            int indexC2 = j*d.numCols+i;
+            indexC1 = i * d.numCols + j;
+            int indexC2 = j * d.numCols + i;
             indexA = i;
             int indexB = j;
             indexC = 0;
             sum = 0;
-            end = indexA + b.numRows*b.numCols;
-            for( ; indexA < end; indexA += b.numCols, indexB += b.numCols, indexC += (c.numCols + 1) )
+            end = indexA + b.numRows * b.numCols;
+            for (; indexA < end; indexA += b.numCols, indexB += b.numCols, indexC += (c.numCols + 1))
             {
-               sum += b.data[indexA]*b.data[indexB] * c.data[indexC];
+               sum += b.data[indexA] * b.data[indexB] * c.data[indexC];
             }
             d.data[indexC1] += a * sum;
             d.data[indexC2] += a * sum;
@@ -543,16 +545,19 @@ public class DiagonalMatrixTools
     */
    public static void multOuter(RowD1Matrix64F a, double b, RowD1Matrix64F c)
    {
-      for( int i = 0; i < a.numRows; i++ ) {
-         int indexC1 = i*c.numCols+i;
+      for (int i = 0; i < a.numRows; i++)
+      {
+         int indexC1 = i * c.numCols + i;
          int indexC2 = indexC1;
-         for( int j = i; j < a.numRows; j++ , indexC2 += c.numCols) {
-            int indexA = i*a.numCols;
-            int indexB = j*a.numCols;
+         for (int j = i; j < a.numRows; j++, indexC2 += c.numCols)
+         {
+            int indexA = i * a.numCols;
+            int indexB = j * a.numCols;
             double sum = 0;
             int end = indexA + a.numCols;
-            for( ; indexA < end; indexA++,indexB++ ) {
-               sum += a.data[indexA]*a.data[indexB] * b;
+            for (; indexA < end; indexA++, indexB++)
+            {
+               sum += a.data[indexA] * a.data[indexB] * b;
             }
             c.data[indexC2] = c.data[indexC1++] = sum;
          }
@@ -576,17 +581,20 @@ public class DiagonalMatrixTools
     */
    public static void multOuter(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
    {
-      for( int i = 0; i < a.numRows; i++ ) {
-         int indexC1 = i*c.numCols+i;
+      for (int i = 0; i < a.numRows; i++)
+      {
+         int indexC1 = i * c.numCols + i;
          int indexC2 = indexC1;
-         for( int j = i; j < a.numRows; j++ , indexC2 += c.numCols) {
-            int indexA = i*a.numCols;
-            int indexB = j*a.numCols;
+         for (int j = i; j < a.numRows; j++, indexC2 += c.numCols)
+         {
+            int indexA = i * a.numCols;
+            int indexB = j * a.numCols;
             int indexC = 0;
             double sum = 0;
             int end = indexA + a.numCols;
-            for( ; indexA < end; indexA++,indexB++, indexC += (b.numCols + 1) ) {
-               sum += a.data[indexA]*a.data[indexB] * b.data[indexC];
+            for (; indexA < end; indexA++, indexB++, indexC += (b.numCols + 1))
+            {
+               sum += a.data[indexA] * a.data[indexB] * b.data[indexC];
             }
             c.data[indexC2] = c.data[indexC1++] = sum;
          }
@@ -609,21 +617,21 @@ public class DiagonalMatrixTools
     */
    public static void multInner(RowD1Matrix64F a, double b, RowD1Matrix64F c)
    {
-      for( int i = 0; i < a.numCols; i++ )
+      for (int i = 0; i < a.numCols; i++)
       {
-         for( int j = i; j < a.numCols; j++ )
+         for (int j = i; j < a.numCols; j++)
          {
-            int indexC1 = i*c.numCols+j;
-            int indexC2 = j*c.numCols+i;
+            int indexC1 = i * c.numCols + j;
+            int indexC2 = j * c.numCols + i;
             int indexA = i;
             int indexB = j;
             double sum = 0;
-            int end = indexA + a.numRows*a.numCols;
-            for( ; indexA < end; indexA += a.numCols, indexB += a.numCols )
+            int end = indexA + a.numRows * a.numCols;
+            for (; indexA < end; indexA += a.numCols, indexB += a.numCols)
             {
-               sum += a.data[indexA]*a.data[indexB];
+               sum += a.data[indexA] * a.data[indexB];
             }
-            c.data[indexC1] = c.data[indexC2] = b*sum;
+            c.data[indexC1] = c.data[indexC2] = b * sum;
          }
       }
    }
@@ -651,19 +659,20 @@ public class DiagonalMatrixTools
       else if (a.numRows != d.numRows || c.numCols != d.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
 
-
       int aIndexStart = 0;
       int dIndex = 0;
 
-      for( int i = 0; i < a.numRows; i++ ) {
-         for( int j = 0; j < c.numCols; j++ ) {
+      for (int i = 0; i < a.numRows; i++)
+      {
+         for (int j = 0; j < c.numCols; j++)
+         {
             double total = 0;
 
             int indexA = aIndexStart;
             int indexC = j;
             int indexB = 0;
             int end = indexA + c.numRows;
-            while( indexA < end )
+            while (indexA < end)
             {
                total += a.data[indexA++] * c.data[indexC] * b.data[indexB];
                indexC += c.numCols;
@@ -699,21 +708,23 @@ public class DiagonalMatrixTools
       else if (a.numCols != d.numRows || c.numCols != d.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
 
-
       int dIndex = 0;
 
-      for( int i = 0; i < a.numCols; i++ ) {
-         for( int j = 0; j < c.numCols; j++ ) {
+      for (int i = 0; i < a.numCols; i++)
+      {
+         for (int j = 0; j < c.numCols; j++)
+         {
             int indexA = i;
             int indexB = 0;
             int indexC = j;
 
-            int end = indexC + c.numRows*c.numCols;
+            int end = indexC + c.numRows * c.numCols;
 
             double total = 0;
 
             // loop for k
-            for(; indexC < end; indexC += c.numCols ) {
+            for (; indexC < end; indexC += c.numCols)
+            {
                total += a.data[indexA] * c.data[indexC] * b.data[indexB];
                indexA += a.numCols;
                indexB += b.numCols + 1;
@@ -747,21 +758,23 @@ public class DiagonalMatrixTools
       else if (a.numCols != d.numRows || c.numCols != d.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
 
-
       int dIndex = 0;
 
-      for( int i = 0; i < a.numCols; i++ ) {
-         for( int j = 0; j < c.numCols; j++ ) {
+      for (int i = 0; i < a.numCols; i++)
+      {
+         for (int j = 0; j < c.numCols; j++)
+         {
             int indexA = i;
             int indexB = 0;
             int indexC = j;
 
-            int end = indexC + c.numRows*c.numCols;
+            int end = indexC + c.numRows * c.numCols;
 
             double total = 0;
 
             // loop for k
-            for(; indexC < end; indexC += c.numCols ) {
+            for (; indexC < end; indexC += c.numCols)
+            {
                total += a.data[indexA] * c.data[indexC] * b.data[indexB];
                indexA += a.numCols;
                indexB += b.numCols + 1;
@@ -771,8 +784,6 @@ public class DiagonalMatrixTools
          }
       }
    }
-
-
 
    /**
     * <p>Performs the following operation:<br>
@@ -797,27 +808,27 @@ public class DiagonalMatrixTools
       else if (b.numCols != c.numRows)
          throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
 
-
-      for( int i = 0; i < a.numCols; i++ )
+      for (int i = 0; i < a.numCols; i++)
       {
-         for( int j = 0; j < c.numCols; j++ )
+         for (int j = 0; j < c.numCols; j++)
          {
             int indexA = i;
             int indexB = 0;
             int indexC = j;
 
-            int end = indexC + c.numRows*c.numCols;
+            int end = indexC + c.numRows * c.numCols;
 
             double total = 0;
 
             // loop for k
-            for(; indexC < end; indexC += c.numCols ) {
+            for (; indexC < end; indexC += c.numCols)
+            {
                total += a.data[indexA] * c.data[indexC] * b.data[indexB];
                indexA += a.numCols;
                indexB += b.numCols + 1;
             }
 
-            int dIndex = (i+rowStart)*d.numCols + j + colStart;
+            int dIndex = (i + rowStart) * d.numCols + j + colStart;
             d.data[dIndex] += total;
          }
       }
@@ -838,7 +849,8 @@ public class DiagonalMatrixTools
     * @param rowStart The start row of matrix 'e' to write to.
     * @param colStart The start col of matrix 'e' to write to.
     */
-   public static void innerDiagonalMultAddBlockTransA(double a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, RowD1Matrix64F e, int rowStart, int colStart)
+   public static void innerDiagonalMultAddBlockTransA(double a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, RowD1Matrix64F e, int rowStart,
+                                                      int colStart)
    {
       if (b == d || c == d || d == e)
          throw new IllegalArgumentException("Neither 'b' or 'c' can be the same matrix as 'd'");
@@ -847,27 +859,27 @@ public class DiagonalMatrixTools
       else if (c.numCols != d.numRows)
          throw new MatrixDimensionException("The 'c' and 'd' matrices do not have compatible dimensions");
 
-
-      for( int i = 0; i < b.numCols; i++ )
+      for (int i = 0; i < b.numCols; i++)
       {
-         for( int j = 0; j < d.numCols; j++ )
+         for (int j = 0; j < d.numCols; j++)
          {
             int indexA = i;
             int indexB = 0;
             int indexC = j;
 
-            int end = indexC + d.numRows*d.numCols;
+            int end = indexC + d.numRows * d.numCols;
 
             double total = 0;
 
             // loop for k
-            for(; indexC < end; indexC += d.numCols ) {
+            for (; indexC < end; indexC += d.numCols)
+            {
                total += b.data[indexA] * d.data[indexC] * c.data[indexB];
                indexA += b.numCols;
                indexB += c.numCols + 1;
             }
 
-            int dIndex = (i+rowStart)*e.numCols + j + colStart;
+            int dIndex = (i + rowStart) * e.numCols + j + colStart;
             e.data[dIndex] += a * total;
          }
       }
