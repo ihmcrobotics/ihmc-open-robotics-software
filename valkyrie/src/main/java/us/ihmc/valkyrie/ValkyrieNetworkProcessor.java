@@ -25,7 +25,7 @@ public class ValkyrieNetworkProcessor
       networkModuleParams.enableUiModule(true);
       networkModuleParams.enableBehaviorModule(true);
       networkModuleParams.enableBehaviorVisualizer(true);
-      networkModuleParams.enableRobotEnvironmentAwerenessModule(true);
+      networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
       networkModuleParams.enableKinematicsToolbox(true);
       networkModuleParams.enableFootstepPlanningToolbox(true);
       networkModuleParams.enableFootstepPlanningToolboxVisualizer(true);
