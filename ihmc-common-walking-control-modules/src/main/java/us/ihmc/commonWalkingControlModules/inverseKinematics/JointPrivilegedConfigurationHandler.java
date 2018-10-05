@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.inverseKinematics;
 
+import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -84,7 +85,7 @@ public class JointPrivilegedConfigurationHandler
 
       jointSquaredRangeOfMotions = new DenseMatrix64F(numberOfDoFs, 1);
       positionsAtMidRangeOfMotion = new DenseMatrix64F(numberOfDoFs, 1);
-      jointIndices = new TObjectIntHashMap<>(numberOfDoFs);
+      jointIndices = new TObjectIntHashMap<>(numberOfDoFs, Constants.DEFAULT_LOAD_FACTOR, -1);
 
       // FIXME: at 40.0 the robot sometimes get stuck at the end of transfer when taking one step at a time.
       // The nullspace computed during toe-off is wrong because it does not consider the jacobian nor the proper selection matrix.
@@ -224,10 +225,11 @@ public class JointPrivilegedConfigurationHandler
          for (int jointNumber = 0; jointNumber < command.getNumberOfJoints(); jointNumber++)
          {
             OneDoFJoint joint = command.getJoint(jointNumber);
-            if (!jointIndices.containsKey(joint))
+            int jointIndex = jointIndices.get(joint);
+
+            if (jointIndex == jointIndices.getNoEntryValue())
                continue;
 
-            int jointIndex = jointIndices.get(joint);
             OneDoFJoint configuredJoint = oneDoFJoints[jointIndex];
 
             if (command.hasNewPrivilegedCommand(jointNumber))
@@ -261,10 +263,11 @@ public class JointPrivilegedConfigurationHandler
          for (int jointNumber = 0; jointNumber < command.getNumberOfJoints(); jointNumber++)
          {
             OneDoFJoint joint = command.getJoint(jointNumber);
-            if (!jointIndices.containsKey(joint))
+            int jointIndex = jointIndices.get(joint);
+
+            if (jointIndex == jointIndices.getNoEntryValue())
                continue;
 
-            int jointIndex = jointIndices.get(joint);
             OneDoFJoint configuredJoint = oneDoFJoints[jointIndex];
 
             if (command.hasNewPrivilegedCommand(jointNumber))
@@ -361,10 +364,10 @@ public class JointPrivilegedConfigurationHandler
          for (int jointNumber = 0; jointNumber < command.getNumberOfJoints(); jointNumber++)
          {
             OneDoFJoint joint = command.getJoint(jointNumber);
-            if (!jointIndices.containsKey(joint))
-               continue;
-
             int jointIndex = jointIndices.get(joint);
+
+            if (jointIndex == jointIndices.getNoEntryValue())
+               continue;
 
             if (command.hasNewPrivilegedConfiguration(jointNumber))
             {
