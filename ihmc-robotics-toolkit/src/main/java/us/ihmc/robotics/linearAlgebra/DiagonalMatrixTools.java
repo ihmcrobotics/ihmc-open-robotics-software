@@ -957,7 +957,7 @@ public class DiagonalMatrixTools
       {
          int indexC1 = i * c.numCols + i;
          int indexC2 = indexC1;
-         for (int j = i; j < a.numRows; j++, indexC2 ++)
+         for (int j = i; j < a.numRows; j++, indexC2 += c.numCols)
          {
             int indexA = i * a.numCols;
             int indexB = j * a.numCols;
