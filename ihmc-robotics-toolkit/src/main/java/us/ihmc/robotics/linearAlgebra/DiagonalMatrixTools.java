@@ -129,7 +129,7 @@ public class DiagonalMatrixTools
       {
          for (int col = 0; col < b.numCols; col++)
          {
-            c.unsafe_set(startRow + row, startCol + col, a.unsafe_get(row, row) * b.unsafe_get(row, col));
+            c.unsafe_set(startRow + row, startCol + col, c.unsafe_get(startRow + row, startCol + col) + a.unsafe_get(row, row) * b.unsafe_get(row, col));
          }
       }
    }
@@ -168,7 +168,7 @@ public class DiagonalMatrixTools
       {
          for (int col = 0; col < b.numCols; col++)
          {
-            c.unsafe_set(startRow + row, startCol + col, d * a.unsafe_get(row, row) * b.unsafe_get(row, col));
+            c.unsafe_set(startRow + row, startCol + col, c.unsafe_get(startRow + row, startCol + col) + d * a.unsafe_get(row, row) * b.unsafe_get(row, col));
          }
       }
    }
