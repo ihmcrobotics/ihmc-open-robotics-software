@@ -18,12 +18,12 @@ public class DiagonalMatrixToolsTest
 {
    private final double epsilon = 1e-6;
 
-   @ContinuousIntegrationTest(estimatedDuration = 14.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 72000)
    public void testSquareInvert()
    {
       Random random = new Random(1738L);
-      int iters = 50;
+      int iters = 1000;
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -64,13 +64,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 9.9)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 50000)
    public void testPreMult()
    {
       Random random = new Random(1738L);
 
-      int iters = 100;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -102,13 +102,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 9.9)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 50000)
    public void testPreMultVector()
    {
       Random random = new Random(1738L);
 
-      int iters = 100;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -136,7 +136,7 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 9.9)
+   @ContinuousIntegrationTest(estimatedDuration = 1.7)
    @Test(timeout = 50000)
    public void testPreMultAddBlock()
    {
@@ -196,13 +196,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 52000)
    public void testPostMult()
    {
       Random random = new Random(1738L);
 
-      int iters = 100;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -234,13 +234,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 52000)
    public void testPostMultVector()
    {
       Random random = new Random(1738L);
 
-      int iters = 100;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -294,13 +294,13 @@ public class DiagonalMatrixToolsTest
       JUnitTools.assertMatrixEquals(solution, expectedSolution, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
-   @Test(timeout = 4000000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @Test(timeout = 40000)
    public void testRandomPostMultTransA()
    {
       Random random = new Random(124L);
 
-      int iters = 100;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -332,13 +332,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 40000)
    public void testEasyMultInner()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -367,13 +367,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 1.56)
    @Test(timeout = 40000)
    public void testRandomMultInner()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -415,13 +415,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 40000)
    public void testEasyMultOuter()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -448,13 +448,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 1.4)
    @Test(timeout = 40000)
    public void testRandomMultOuter()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -494,13 +494,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 40000)
    public void testEasyMultAddInner()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -539,13 +539,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 40000)
    public void testRandomMultAddInner()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 100;
 
       for (int i = 0; i < iters; i++)
       {
@@ -595,7 +595,7 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 1.2)
    @Test(timeout = 40000)
    public void testRandomMultAddBlockInner()
    {
@@ -643,13 +643,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 5.3)
    @Test(timeout = 40000)
    public void testRandomMultAddBlockInnerWithScalar()
    {
       Random random = new Random(124L);
 
-      int iters = 100;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -685,13 +685,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 40000)
    public void testEasyMultAddBlockInner()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 1000;
 
       // top left
       for (int i = 0; i < iters; i++)
@@ -992,13 +992,13 @@ public class DiagonalMatrixToolsTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 40000)
    public void testEasyInnerDiagonalMult()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -1027,13 +1027,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 40000)
    public void testRandomInnerDiagonalMult()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -1069,13 +1069,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 40000)
    public void testRandomInnerDiagonalMultVector()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -1107,13 +1107,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 40000)
    public void testEasyInnerDiagonalMultTransA()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -1142,13 +1142,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 40000)
    public void testRandomInnerDiagonalMultTransA()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -1184,13 +1184,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 40000)
    public void testRandomInnerDiagonalMultTransAVector()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -1222,13 +1222,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 40000)
    public void testRandomInnerDiagonalMultAddTransA()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -1264,13 +1264,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test(timeout = 40000)
    public void testRandomInnerDiagonalMultAddTransAVector()
    {
       Random random = new Random(124L);
 
-      int iters = 10;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
@@ -1302,7 +1302,7 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 2.4)
    @Test(timeout = 40000)
    public void testRandomInnerDiagonalMultAddBlockTransA()
    {
@@ -1363,13 +1363,13 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @ContinuousIntegrationTest(estimatedDuration = 8.5)
    @Test(timeout = 40000)
    public void testRandomInnerDiagonalMultAddBlockTransAVector()
    {
       Random random = new Random(124L);
 
-      int iters = 100;
+      int iters = 1000;
 
       for (int i = 0; i < iters; i++)
       {
