@@ -236,6 +236,8 @@ public class DiagonalMatrixTools
    {
       if (a == c || b == c)
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if (a.numRows != c.numRows)
+         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
 
       if (b.numCols > 1)
          postMult_matrix(a, b, c);
@@ -246,13 +248,9 @@ public class DiagonalMatrixTools
    private static void postMult_matrix(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
    {
       if (a.numCols != b.numRows)
-      {
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
-      }
-      else if (a.numRows != c.numRows || b.numCols != c.numCols)
-      {
+      else if (b.numCols != c.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
-      }
 
       for (int row = 0; row < a.numRows; row++)
       {
@@ -265,14 +263,9 @@ public class DiagonalMatrixTools
 
    private static void postMult_vector(RowD1Matrix64F a, D1Matrix64F b, RowD1Matrix64F c)
    {
-      if (a.numRows != c.numRows || a.numCols != c.numCols)
-      {
-         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
-      }
-
       for (int row = 0; row < a.numRows; row++)
       {
-         for (int col = 0; col < Math.min(b.numRows, b.numCols); col++)
+         for (int col = 0; col < Math.min(b.numRows, c.numCols); col++)
          {
             c.unsafe_set(row, col, b.data[col] * a.unsafe_get(row, col));
          }
