@@ -6,31 +6,20 @@ import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationToolkit.controllers.PushRobotController;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 import static org.junit.Assert.assertTrue;
@@ -84,6 +73,7 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    @Test(timeout = 30000)
    public void testForwardWalk() throws SimulationExceededMaximumTimeException
    {
+      Random random = new Random(1738L);
       setupTest();
       setupCameraSideView();
 
@@ -100,8 +90,8 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       planSwingAngularMomentum.set(true);
       planTransferAngularMomentum.set(true);
 
-      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps));
-      drcSimulationTestHelper.publishToController(createMomentumTrajectoryMessage(initialTransfer, transfer, swing, numberOfSteps + 1));
+      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, random));
+      drcSimulationTestHelper.publishToController(createMomentumTrajectoryMessage(initialTransfer, transfer, swing, numberOfSteps + 1, random));
 
       double simulationTime = initialTransfer + (transfer + swing) * (numberOfSteps + 1) + 1.0;
 
@@ -112,6 +102,7 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    @Test(timeout = 30000)
    public void testForwardWalkWithCorruptedMomentum() throws SimulationExceededMaximumTimeException
    {
+      Random random = new Random(1738L);
       setupTest();
       setupCameraSideView();
 
@@ -128,8 +119,8 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       planSwingAngularMomentum.set(true);
       planTransferAngularMomentum.set(true);
 
-      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps));
-      drcSimulationTestHelper.publishToController(createCorruptedMomentumTrajectoryMessage(initialTransfer, transfer, swing, numberOfSteps + 1));
+      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, random));
+      drcSimulationTestHelper.publishToController(createMomentumTrajectoryMessage(initialTransfer, transfer, swing, numberOfSteps + 1, random));
 
       double simulationTime = initialTransfer + (transfer + swing) * (numberOfSteps + 1) + 1.0;
 
@@ -140,6 +131,8 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    @Test(timeout = 30000)
    public void testForwardWalkTransferDelayedMomentum() throws SimulationExceededMaximumTimeException
    {
+      Random random = new Random(1738L);
+
       setupTest();
       setupCameraSideView();
 
@@ -156,10 +149,10 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       planSwingAngularMomentum.set(true);
       planTransferAngularMomentum.set(true);
 
-      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps));
+      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, random));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
-      drcSimulationTestHelper.publishToController(createMomentumTrajectoryMessage(initialTransfer, transfer, swing, numberOfSteps + 1));
+      drcSimulationTestHelper.publishToController(createMomentumTrajectoryMessage(initialTransfer, transfer, swing, numberOfSteps + 1, random));
 
       double simulationTime = initialTransfer + (transfer + swing) * (numberOfSteps + 1) + 1.0;
 
@@ -170,6 +163,8 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    @Test(timeout = 30000)
    public void testForwardWalkTransferBigDelayedMomentum() throws SimulationExceededMaximumTimeException
    {
+      Random random = new Random(1738L);
+
       setupTest();
       setupCameraSideView();
 
@@ -186,10 +181,10 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       planSwingAngularMomentum.set(true);
       planTransferAngularMomentum.set(true);
 
-      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps));
+      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, random));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-      drcSimulationTestHelper.publishToController(createMomentumTrajectoryMessage(initialTransfer, transfer, swing, numberOfSteps + 1));
+      drcSimulationTestHelper.publishToController(createMomentumTrajectoryMessage(initialTransfer, transfer, swing, numberOfSteps + 1 ,random));
 
       double simulationTime = initialTransfer + (transfer + swing) * (numberOfSteps + 1) + 1.0;
 
@@ -200,6 +195,8 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    @Test(timeout = 30000)
    public void testForwardWalkSwingDelayedMomentum() throws SimulationExceededMaximumTimeException
    {
+      Random random = new Random(1738L);
+
       setupTest();
       setupCameraSideView();
 
@@ -216,10 +213,10 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       planSwingAngularMomentum.set(true);
       planTransferAngularMomentum.set(true);
 
-      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps));
+      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, random));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(initialTransfer);
-      drcSimulationTestHelper.publishToController(createMomentumTrajectoryMessage(initialTransfer, transfer, swing, numberOfSteps + 1));
+      drcSimulationTestHelper.publishToController(createMomentumTrajectoryMessage(initialTransfer, transfer, swing, numberOfSteps + 1, random));
 
       double simulationTime = initialTransfer + (transfer + swing) * (numberOfSteps + 1) + 1.0;
 
@@ -231,6 +228,8 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    @Test(timeout = 30000)
    public void testForwardWalkZeroMomentumFirstStep() throws SimulationExceededMaximumTimeException
    {
+      Random random = new Random(1738L);
+
       setupTest();
       setupCameraSideView();
 
@@ -247,7 +246,7 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       planSwingAngularMomentum.set(true);
       planTransferAngularMomentum.set(true);
 
-      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps));
+      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, random));
       drcSimulationTestHelper.publishToController(createMomentumTrajectoryMessageZeroMomentumFirstStep(initialTransfer, transfer, swing, numberOfSteps + 1));
 
       double simulationTime = initialTransfer + (transfer + swing) * (numberOfSteps + 1) + 1.0;
@@ -259,6 +258,8 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    @Test(timeout = 30000)
    public void testForwardWalkNoMomentumFirstStep() throws SimulationExceededMaximumTimeException
    {
+      Random random = new Random(1738L);
+
       setupTest();
       setupCameraSideView();
 
@@ -275,15 +276,15 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       planSwingAngularMomentum.set(true);
       planTransferAngularMomentum.set(true);
 
-      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps));
-      drcSimulationTestHelper.publishToController(createMomentumTrajectoryMessageNoMomentumFirstStep(initialTransfer, transfer, swing, numberOfSteps + 1));
+      drcSimulationTestHelper.publishToController(createFootstepMessage(numberOfSteps, random));
+      drcSimulationTestHelper.publishToController(createMomentumTrajectoryMessageNoMomentumFirstStep(initialTransfer, transfer, swing, numberOfSteps + 1, random));
 
       double simulationTime = initialTransfer + (transfer + swing) * (numberOfSteps + 1) + 1.0;
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   private FootstepDataListMessage createFootstepMessage(int numberOfSteps)
+   private FootstepDataListMessage createFootstepMessage(int numberOfSteps, Random random)
    {
       RobotSide side = RobotSide.LEFT;
       double stepLength = 0.4;
@@ -302,11 +303,32 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, footLocation, footOrientation));
 
+      addCorruptionToFootstepTimings(message, random);
+
       return message;
    }
 
+   private void addCorruptionToFootstepTimings(FootstepDataListMessage message, Random random)
+   {
+      for (int i = 0; i < message.getFootstepDataList().size(); i++)
+      {
+         double transferCorruption = RandomNumbers.nextDouble(random, 0.02);
+         double swingCorruption = RandomNumbers.nextDouble(random, 0.02);
+
+         double transferDuration = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+         double swingDuration = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
+
+         transferDuration += transferCorruption;
+         swingDuration += swingCorruption;
+
+         message.getFootstepDataList().get(i).setTransferDuration(transferDuration);
+         message.getFootstepDataList().get(i).setSwingDuration(swingDuration);
+      }
+   }
+
+
    private MomentumTrajectoryMessage createMomentumTrajectoryMessage(double initialTransferDuration, double transferDuration, double swingDuration,
-                                                                     int numberOfSteps)
+                                                                     int numberOfSteps, Random random)
    {
       MomentumTrajectoryMessage momentumTrajectoryMessage = new MomentumTrajectoryMessage();
       EuclideanTrajectoryMessage angularMomentum = momentumTrajectoryMessage.getAngularMomentumTrajectory();
@@ -314,22 +336,26 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       double dt = 0.001;
       for (double time = 0; time <= initialTransferDuration; time += dt)
       {
+         double timeCorruption = RandomNumbers.nextDouble(random, 0.5 * dt);
          EuclideanTrajectoryPointMessage point = angularMomentum.getTaskspaceTrajectoryPoints().add();
-         point.setTime(time);
+         point.setTime(time + timeCorruption);
          point.getPosition().setToZero();
          point.getLinearVelocity().setToZero();
       }
 
       RobotSide robotSide = RobotSide.LEFT;
-      double currentTime = initialTransferDuration;
+      double timeCorruption = RandomNumbers.nextDouble(random, 0.01);
+      double currentTime = initialTransferDuration + timeCorruption;
       double angularMomentumXMagnitude = -3.0;
       double angularMomentumYMagnitude = -10.0;
       double angularMomentumXFrequency = 2.0 * Math.PI / swingDuration;
       double angularMomentumYFrequency = 2.0 * Math.PI / (2.0 * swingDuration);
       for (double time = 0; time <= swingDuration; time += dt)
       {
+         double dtCorruption = RandomNumbers.nextDouble(random, 0.5 * dt);
+
          EuclideanTrajectoryPointMessage point = angularMomentum.getTaskspaceTrajectoryPoints().add();
-         point.setTime(currentTime + time);
+         point.setTime(currentTime + time + dtCorruption);
 
          double xMomentum = angularMomentumXMagnitude * Math.sin(angularMomentumXFrequency * time);
          double yMomentum = angularMomentumYMagnitude * Math.sin(angularMomentumYFrequency * time);
@@ -339,24 +365,30 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
          point.getLinearVelocity().setToZero();
       }
 
-      currentTime += swingDuration;
+      timeCorruption = RandomNumbers.nextDouble(random, 0.01);
+      currentTime += swingDuration + timeCorruption;
 
       for (int stepNumber = 1; stepNumber < numberOfSteps; stepNumber++)
       {
          for (double time = 0; time < transferDuration; time += dt)
          {
+            double dtCorruption = RandomNumbers.nextDouble(random, 0.5 * dt);
+
             EuclideanTrajectoryPointMessage point = angularMomentum.getTaskspaceTrajectoryPoints().add();
-            point.setTime(currentTime + time);
+            point.setTime(currentTime + time + dtCorruption);
             point.getPosition().setToZero();
             point.getLinearVelocity().setToZero();
          }
 
-         currentTime += transferDuration;
+         timeCorruption = RandomNumbers.nextDouble(random, 0.01);
+         currentTime += transferDuration + timeCorruption;
 
          for (double time = 0; time < swingDuration; time += dt)
          {
+            double dtCorruption = RandomNumbers.nextDouble(random, 0.5 * dt);
+
             EuclideanTrajectoryPointMessage point = angularMomentum.getTaskspaceTrajectoryPoints().add();
-            point.setTime(currentTime + time);
+            point.setTime(currentTime + time + dtCorruption);
 
             double xMomentum = angularMomentumXMagnitude * Math.sin(angularMomentumXFrequency * time);
             double yMomentum = angularMomentumYMagnitude * Math.sin(angularMomentumYFrequency * time);
@@ -366,82 +398,13 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
             point.getLinearVelocity().setToZero();
          }
 
-         currentTime += swingDuration;
+         timeCorruption = RandomNumbers.nextDouble(random, 0.01);
+         currentTime += swingDuration + timeCorruption;
       }
 
       return momentumTrajectoryMessage;
    }
 
-   private MomentumTrajectoryMessage createCorruptedMomentumTrajectoryMessage(double initialTransferDuration, double transferDuration, double swingDuration,
-                                                                     int numberOfSteps)
-   {
-      MomentumTrajectoryMessage momentumTrajectoryMessage = new MomentumTrajectoryMessage();
-      EuclideanTrajectoryMessage angularMomentum = momentumTrajectoryMessage.getAngularMomentumTrajectory();
-
-      double dt = 0.001;
-      for (double time = 0; time <= initialTransferDuration; time += dt)
-      {
-         EuclideanTrajectoryPointMessage point = angularMomentum.getTaskspaceTrajectoryPoints().add();
-         point.setTime(time);
-         point.getPosition().setToZero();
-         point.getLinearVelocity().setToZero();
-      }
-
-
-      RobotSide robotSide = RobotSide.LEFT;
-      double currentTime = initialTransferDuration;
-      double angularMomentumXMagnitude = -3.0;
-      double angularMomentumYMagnitude = -10.0;
-      double angularMomentumXFrequency = 2.0 * Math.PI / swingDuration;
-      double angularMomentumYFrequency = 2.0 * Math.PI / (2.0 * swingDuration);
-      for (double time = 0; time <= swingDuration; time += dt)
-      {
-         EuclideanTrajectoryPointMessage point = angularMomentum.getTaskspaceTrajectoryPoints().add();
-         point.setTime(currentTime + time);
-
-         double xMomentum = angularMomentumXMagnitude * Math.sin(angularMomentumXFrequency * time);
-         double yMomentum = angularMomentumYMagnitude * Math.sin(angularMomentumYFrequency * time);
-         yMomentum = robotSide.negateIfRightSide(yMomentum);
-
-         point.getPosition().set(xMomentum, yMomentum, 0.0);
-         point.getLinearVelocity().setToZero();
-      }
-
-      angularMomentum.getTaskspaceTrajectoryPoints().getLast().getPosition().setToNaN();
-      angularMomentum.getTaskspaceTrajectoryPoints().getLast().getLinearVelocity().setToNaN();
-
-      currentTime += swingDuration;
-
-      for (int stepNumber = 1; stepNumber < numberOfSteps; stepNumber++)
-      {
-         for (double time = 0; time < transferDuration; time += dt)
-         {
-            EuclideanTrajectoryPointMessage point = angularMomentum.getTaskspaceTrajectoryPoints().add();
-            point.setTime(currentTime + time);
-            point.getPosition().setToZero();
-            point.getLinearVelocity().setToZero();
-         }
-
-         currentTime += transferDuration;
-
-         for (double time = 0; time < swingDuration; time += dt)
-         {
-            EuclideanTrajectoryPointMessage point = angularMomentum.getTaskspaceTrajectoryPoints().add();
-            point.setTime(currentTime + time);
-
-            double xMomentum = angularMomentumXMagnitude * Math.sin(angularMomentumXFrequency * time);
-            double yMomentum = angularMomentumYMagnitude * Math.sin(angularMomentumYFrequency * time);
-            yMomentum = robotSide.negateIfRightSide(yMomentum);
-
-            point.getPosition().set(xMomentum, yMomentum, 0.0);
-            point.getLinearVelocity().setToZero();
-         }
-
-         currentTime += swingDuration;
-      }
-
-      return momentumTrajectoryMessage;
-   }
 
    private MomentumTrajectoryMessage createMomentumTrajectoryMessageZeroMomentumFirstStep(double initialTransferDuration, double transferDuration, double swingDuration,
                                                                      int numberOfSteps)
@@ -507,7 +470,7 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    }
 
    private MomentumTrajectoryMessage createMomentumTrajectoryMessageNoMomentumFirstStep(double initialTransferDuration, double transferDuration, double swingDuration,
-                                                                                          int numberOfSteps)
+                                                                                          int numberOfSteps, Random random)
    {
       MomentumTrajectoryMessage momentumTrajectoryMessage = new MomentumTrajectoryMessage();
       EuclideanTrajectoryMessage angularMomentum = momentumTrajectoryMessage.getAngularMomentumTrajectory();
@@ -521,24 +484,27 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
       double angularMomentumXFrequency = 2.0 * Math.PI / swingDuration;
       double angularMomentumYFrequency = 2.0 * Math.PI / (2.0 * swingDuration);
 
-      double currentTime = initialTransferDuration + swingDuration;
+      double currentTime = initialTransferDuration + swingDuration + RandomNumbers.nextDouble(random, 0.01);
 
       for (int stepNumber = 1; stepNumber < numberOfSteps; stepNumber++)
       {
          for (double time = 0; time < transferDuration; time += dt)
          {
+            double dtCorruption = RandomNumbers.nextDouble(random, 0.5 * dt);
             EuclideanTrajectoryPointMessage point = angularMomentum.getTaskspaceTrajectoryPoints().add();
-            point.setTime(currentTime + time);
+            point.setTime(currentTime + time + dtCorruption);
             point.getPosition().setToZero();
             point.getLinearVelocity().setToZero();
          }
 
-         currentTime += transferDuration;
+         currentTime += transferDuration + RandomNumbers.nextDouble(random, 0.01);
 
          for (double time = 0; time < swingDuration; time += dt)
          {
+            double dtCorruption = RandomNumbers.nextDouble(random, 0.5 * dt);
+
             EuclideanTrajectoryPointMessage point = angularMomentum.getTaskspaceTrajectoryPoints().add();
-            point.setTime(currentTime + time);
+            point.setTime(currentTime + time + dtCorruption);
 
             double xMomentum = angularMomentumXMagnitude * Math.sin(angularMomentumXFrequency * time);
             double yMomentum = angularMomentumYMagnitude * Math.sin(angularMomentumYFrequency * time);
@@ -548,7 +514,7 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
             point.getLinearVelocity().setToZero();
          }
 
-         currentTime += swingDuration;
+         currentTime += swingDuration + RandomNumbers.nextDouble(random, 0.01);
       }
 
       return momentumTrajectoryMessage;
