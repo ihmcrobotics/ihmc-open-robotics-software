@@ -636,9 +636,9 @@ public class DiagonalMatrixTools
     */
    public static void multOuter(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
    {
-      if (a == c || b == c)
+      if (a == c )
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
-      else if (a.numCols != b.numRows || a.numCols != b.numCols)
+      if (a.numCols != b.numRows || a.numCols != b.numCols)
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       else if (a.numRows != c.numRows || a.numRows != c.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
