@@ -903,6 +903,7 @@ public class DiagonalMatrixTools
     * c<sub>ij</sub> = &sum;<sub>k=1:n</sub> { a<sub>ki</sub> * a<sub>kj</sub> * b<sub>k</sub>}
     * </p>
     * <p> where we assume that matrix 'b' is a diagonal matrix. </p>
+    * <p> The 'b' matrix can also be passed in as a vector of the diagonal elements </p>
     * <p>
     * Is faster than using a generic matrix multiplication by taking advantage of symmetry.
     * </p>
@@ -1019,6 +1020,7 @@ public class DiagonalMatrixTools
     * </br>
     * </p>
     * <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+    * <p> The 'b' matrix can also be passed in as a vector of the diagonal elements </p>
     * @param a The left matrix in the multiplication operation. Not modified.
     * @param b The middle matrix in the multiplication operation. Not modified. Assumed to be diagonal.
     * @param c The right matrix in the multiplication operation. Not modified.
@@ -1030,10 +1032,19 @@ public class DiagonalMatrixTools
          throw new IllegalArgumentException("Neither 'a', 'b', or 'c' can be the same matrix as 'd'");
       else if (a.numCols != b.numRows)
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
-      else if (b.numCols != c.numRows)
-         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
       else if (a.numRows != d.numRows || c.numCols != d.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+
+      if (b.numCols > 1)
+         innerDiagonalMult_matrix(a, b, c, d);
+      else
+         innerDiagonalMult_vector(a, b, c, d);
+   }
+
+   private static void innerDiagonalMult_matrix(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d)
+   {
+      if (b.numCols != c.numRows)
+         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
 
       int aIndexStart = 0;
       int dIndex = 0;
@@ -1061,6 +1072,37 @@ public class DiagonalMatrixTools
       }
    }
 
+   private static void innerDiagonalMult_vector(RowD1Matrix64F a, D1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d)
+   {
+      if (a.numCols != c.numRows)
+         throw new MatrixDimensionException("The 'a' and 'c' matrices do not have compatible dimensions");
+
+      int aIndexStart = 0;
+      int dIndex = 0;
+
+      for (int i = 0; i < a.numRows; i++)
+      {
+         for (int j = 0; j < c.numCols; j++)
+         {
+            double total = 0;
+
+            int indexA = aIndexStart;
+            int indexC = j;
+            int indexB = 0;
+            int end = indexA + c.numRows;
+            while (indexA < end)
+            {
+               total += a.data[indexA++] * c.data[indexC] * b.data[indexB];
+               indexC += c.numCols;
+               indexB ++;
+            }
+
+            d.data[dIndex++] = total;
+         }
+         aIndexStart += a.numCols;
+      }
+   }
+
    /**
     * <p>Performs the following operation:<br>
     * <br>
@@ -1068,6 +1110,7 @@ public class DiagonalMatrixTools
     * </br>
     * </p>
     * <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+    * <p> The 'b' matrix can also be passed in as a vector of the diagonal elements </p>
     * @param a The left matrix in the multiplication operation. Not modified.
     * @param b The middle matrix in the multiplication operation. Not modified. Assumed to be diagonal.
     * @param c The right matrix in the multiplication operation. Not modified.
@@ -1079,10 +1122,19 @@ public class DiagonalMatrixTools
          throw new IllegalArgumentException("Neither 'a', 'b', or 'c' can be the same matrix as 'd'");
       else if (a.numRows != b.numRows)
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
-      else if (b.numCols != c.numRows)
-         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
       else if (a.numCols != d.numRows || c.numCols != d.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+
+      if (b.numCols > 1)
+         innerDiagonalMultTransA_matrix(a, b, c, d);
+      else
+         innerDiagonalMultTransA_vector(a, b, c, d);
+   }
+
+   private static void innerDiagonalMultTransA_matrix(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d)
+   {
+      if (b.numCols != c.numRows)
+         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
 
       int dIndex = 0;
 
@@ -1111,6 +1163,38 @@ public class DiagonalMatrixTools
       }
    }
 
+   private static void innerDiagonalMultTransA_vector(RowD1Matrix64F a, D1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d)
+   {
+      if (a.numRows != c.numRows)
+         throw new MatrixDimensionException("The 'a' and 'c' matrices do not have compatible dimensions");
+
+      int dIndex = 0;
+
+      for (int i = 0; i < a.numCols; i++)
+      {
+         for (int j = 0; j < c.numCols; j++)
+         {
+            int indexA = i;
+            int indexB = 0;
+            int indexC = j;
+
+            int end = indexC + c.numRows * c.numCols;
+
+            double total = 0;
+
+            // loop for k
+            for (; indexC < end; indexC += c.numCols)
+            {
+               total += a.data[indexA] * c.data[indexC] * b.data[indexB];
+               indexA += a.numCols;
+               indexB ++;
+            }
+
+            d.data[dIndex++] = total;
+         }
+      }
+   }
+
    /**
     * <p>Performs the following operation:<br>
     * <br>
@@ -1118,6 +1202,7 @@ public class DiagonalMatrixTools
     * </br>
     * </p>
     * <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+    * <p> The 'b' matrix can also be passed in as a vector of the diagonal elements </p>
     * @param a The left matrix in the multiplication operation. Not modified.
     * @param b The middle matrix in the multiplication operation. Not modified. Assumed to be diagonal.
     * @param c The right matrix in the multiplication operation. Not modified.
@@ -1129,10 +1214,19 @@ public class DiagonalMatrixTools
          throw new IllegalArgumentException("Neither 'a', 'b', or 'c' can be the same matrix as 'd'");
       else if (a.numRows != b.numRows)
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
-      else if (b.numCols != c.numRows)
-         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
       else if (a.numCols != d.numRows || c.numCols != d.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+
+      if (b.numCols > 1)
+         innerDiagonalMultAddTransA_matrix(a, b, c, d);
+      else
+         innerDiagonalMultAddTransA_vector(a, b, c, d);
+   }
+
+   private static void innerDiagonalMultAddTransA_matrix(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d)
+   {
+      if (b.numCols != c.numRows)
+         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
 
       int dIndex = 0;
 
@@ -1161,6 +1255,38 @@ public class DiagonalMatrixTools
       }
    }
 
+   private static void innerDiagonalMultAddTransA_vector(RowD1Matrix64F a, D1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d)
+   {
+      if (a.numRows != c.numRows)
+         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
+
+      int dIndex = 0;
+
+      for (int i = 0; i < a.numCols; i++)
+      {
+         for (int j = 0; j < c.numCols; j++)
+         {
+            int indexA = i;
+            int indexB = 0;
+            int indexC = j;
+
+            int end = indexC + c.numRows * c.numCols;
+
+            double total = 0;
+
+            // loop for k
+            for (; indexC < end; indexC += c.numCols)
+            {
+               total += a.data[indexA] * c.data[indexC] * b.data[indexB];
+               indexA += a.numCols;
+               indexB ++;
+            }
+
+            d.data[dIndex++] += total;
+         }
+      }
+   }
+
    /**
     * <p>Performs the following operation:<br>
     * <br>
@@ -1168,6 +1294,7 @@ public class DiagonalMatrixTools
     * </br>
     * </p>
     * <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+    * <p> The 'b' matrix can also be passed in as a vector of the diagonal elements </p>
     * @param a The left matrix in the multiplication operation. Not modified.
     * @param b The middle matrix in the multiplication operation. Not modified. Assumed to be diagonal.
     * @param c The right matrix in the multiplication operation. Not modified.
@@ -1181,10 +1308,19 @@ public class DiagonalMatrixTools
          throw new IllegalArgumentException("Neither 'a', 'b', or 'c' can be the same matrix as 'd'");
       else if (a.numRows != b.numRows)
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
-      else if (b.numCols != c.numRows)
-         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
       else if (a.numCols + rowStart > d.numRows || c.numCols + colStart > d.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+
+      if (b.numCols > 1)
+         innerDiagonalMultAddBlockTransA_matrix(a, b, c, d, rowStart, colStart);
+      else
+         innerDiagonalMultAddBlockTransA_vector(a, b, c, d, rowStart, colStart);
+   }
+
+   public static void innerDiagonalMultAddBlockTransA_matrix(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, int rowStart, int colStart)
+   {
+      if (b.numCols != c.numRows)
+         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
 
       for (int i = 0; i < a.numCols; i++)
       {
@@ -1212,6 +1348,37 @@ public class DiagonalMatrixTools
       }
    }
 
+   public static void innerDiagonalMultAddBlockTransA_vector(RowD1Matrix64F a, D1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, int rowStart, int colStart)
+   {
+      if (a.numRows != c.numRows)
+         throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
+
+      for (int i = 0; i < a.numCols; i++)
+      {
+         for (int j = 0; j < c.numCols; j++)
+         {
+            int indexA = i;
+            int indexB = 0;
+            int indexC = j;
+
+            int end = indexC + c.numRows * c.numCols;
+
+            double total = 0;
+
+            // loop for k
+            for (; indexC < end; indexC += c.numCols)
+            {
+               total += a.data[indexA] * c.data[indexC] * b.data[indexB];
+               indexA += a.numCols;
+               indexB ++;
+            }
+
+            int dIndex = (i + rowStart) * d.numCols + j + colStart;
+            d.data[dIndex] += total;
+         }
+      }
+   }
+
    /**
     * <p>Performs the following operation:<br>
     * <br>
@@ -1219,6 +1386,7 @@ public class DiagonalMatrixTools
     * </br>
     * </p>
     * <p>  where we assume that matrix 'c' is a diagonal matrix. </p>
+    * <p> The 'b' matrix can also be passed in as a vector of the diagonal elements </p>
     * @param a The scalar multiplier of the matrix operation.
     * @param b The left matrix in the multiplication operation. Not modified.
     * @param c The middle matrix in the multiplication operation. Not modified. Assumed to be diagonal.
@@ -1234,10 +1402,20 @@ public class DiagonalMatrixTools
          throw new IllegalArgumentException("Neither 'b', 'c', or 'd' can be the same matrix as 'e'");
       else if (b.numRows != c.numRows)
          throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
-      else if (c.numCols != d.numRows)
-         throw new MatrixDimensionException("The 'c' and 'd' matrices do not have compatible dimensions");
       else if (b.numCols + rowStart > e.numRows || d.numCols + colStart > e.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+
+      if (c.numCols > 1)
+         innerDiagonalMultAddBlockTransA_matrix(a, b, c, d, e, rowStart, colStart);
+      else
+         innerDiagonalMultAddBlockTransA_vector(a, b, c, d, e, rowStart, colStart);
+   }
+
+   public static void innerDiagonalMultAddBlockTransA_matrix(double a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, RowD1Matrix64F e, int rowStart,
+                                                      int colStart)
+   {
+      if (c.numCols != d.numRows)
+         throw new MatrixDimensionException("The 'c' and 'd' matrices do not have compatible dimensions");
 
       for (int i = 0; i < b.numCols; i++)
       {
@@ -1257,6 +1435,38 @@ public class DiagonalMatrixTools
                total += b.data[indexA] * d.data[indexC] * c.data[indexB];
                indexA += b.numCols;
                indexB += c.numCols + 1;
+            }
+
+            int dIndex = (i + rowStart) * e.numCols + j + colStart;
+            e.data[dIndex] += a * total;
+         }
+      }
+   }
+
+   private static void innerDiagonalMultAddBlockTransA_vector(double a, RowD1Matrix64F b, D1Matrix64F c, RowD1Matrix64F d, RowD1Matrix64F e, int rowStart,
+                                                      int colStart)
+   {
+      if (b.numRows != d.numRows)
+         throw new MatrixDimensionException("The 'c' and 'd' matrices do not have compatible dimensions");
+
+      for (int i = 0; i < b.numCols; i++)
+      {
+         for (int j = 0; j < d.numCols; j++)
+         {
+            int indexA = i;
+            int indexB = 0;
+            int indexC = j;
+
+            int end = indexC + d.numRows * d.numCols;
+
+            double total = 0;
+
+            // loop for k
+            for (; indexC < end; indexC += d.numCols)
+            {
+               total += b.data[indexA] * d.data[indexC] * c.data[indexB];
+               indexA += b.numCols;
+               indexB ++;
             }
 
             int dIndex = (i + rowStart) * e.numCols + j + colStart;
