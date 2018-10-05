@@ -430,8 +430,7 @@ public class ICPQPInputCalculator
    {
       MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, startIndex, startIndex, weight, 0, 0, 2, 2, 1.0);
 
-      MatrixTools.multAddBlock(weight, objective, icpQPInputToPack.linearTerm, startIndex, 0);
-
+      DiagonalMatrixTools.preMultAddBlock(weight, objective, icpQPInputToPack.linearTerm, startIndex, 0);
 
       if (includeResidual)
       {
