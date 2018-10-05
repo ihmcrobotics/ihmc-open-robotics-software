@@ -289,10 +289,13 @@ public class DiagonalMatrixToolsTest
          int taskSize = 3;
 
 
+         double scale = RandomNumbers.nextDouble(random, 100.0);
          DenseMatrix64F diagonal = CommonOps.identity(taskSize, taskSize);
          DenseMatrix64F randomMatrix = RandomMatrices.createRandom(taskSize, variables, -50.0, 50.0, random);
          DenseMatrix64F solution = RandomMatrices.createRandom(variables, variables, -50.0, 50.0, random);
+         DenseMatrix64F solutionB = new DenseMatrix64F(solution);
          DenseMatrix64F expectedSolution = new DenseMatrix64F(solution);
+         DenseMatrix64F expectedSolutionB = new DenseMatrix64F(solution);
 
 
          for (int index = 0; index < taskSize; index++)
@@ -303,10 +306,14 @@ public class DiagonalMatrixToolsTest
          DenseMatrix64F tempJtW = new DenseMatrix64F(variables, taskSize);
          DiagonalMatrixTools.postMultTransA(randomMatrix, diagonal, tempJtW);
          CommonOps.multAdd(tempJtW, randomMatrix, expectedSolution);
+         CommonOps.multAdd(scale, tempJtW, randomMatrix, expectedSolutionB);
 
          DiagonalMatrixTools.multAddInner(randomMatrix, diagonal, solution);
+         DiagonalMatrixTools.multAddInner(scale, randomMatrix, diagonal, solutionB);
+
 
          JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
       }
    }
 
