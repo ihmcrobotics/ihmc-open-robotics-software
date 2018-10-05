@@ -256,6 +256,58 @@ public class DiagonalMatrixTools
    /**
     * <p>Computes the matrix multiplication inner product:<br>
     * <br>
+    * c = c + b* a<sup>T</sup> * a <br>
+    * <br>
+    * c<sub>ij</sub> = &sum;<sub>k=1:n</sub> { a<sub>ki</sub> * a<sub>kj</sub> * b<sub>k</sub>}
+    * </p>
+    *  <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+
+    * <p>
+    * Is faster than using a generic matrix multiplication by taking advantage of symmetry.  For
+    * vectors there is an even faster option, see {@link org.ejml.alg.dense.mult.VectorVectorMult#innerProd(org.ejml.data.D1Matrix64F, org.ejml.data.D1Matrix64F)}
+    * </p>
+    *
+    * @param a The matrix being multiplied. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multAddInner(RowD1Matrix64F a, double b, RowD1Matrix64F c)
+   {
+      for( int i = 0; i < a.numCols; i++ )
+      {
+         int j = i;
+         int indexC1 = i*c.numCols+j;
+         int indexA = i;
+         double sum = 0;
+         int end = indexA + a.numRows*a.numCols;
+         for( ; indexA < end; indexA += a.numCols)
+         {
+            sum += a.data[indexA]*a.data[indexA];
+         }
+         c.data[indexC1] += b*sum;
+         j++;
+
+         for( ; j < a.numCols; j++ )
+         {
+            indexC1 = i*c.numCols+j;
+            int indexC2 = j*c.numCols+i;
+            indexA = i;
+            int indexB = j;
+            sum = 0;
+            end = indexA + a.numRows*a.numCols;
+            for( ; indexA < end; indexA += a.numCols, indexB += a.numCols)
+            {
+               sum += a.data[indexA]*a.data[indexB];
+            }
+            sum *= b;
+            c.data[indexC1] += sum;
+            c.data[indexC2] += sum;
+         }
+      }
+   }
+
+   /**
+    * <p>Computes the matrix multiplication inner product:<br>
+    * <br>
     * c = c + a<sup>T</sup> * b * a <br>
     * <br>
     * c<sub>ij</sub> = &sum;<sub>k=1:n</sub> { a<sub>ki</sub> * a<sub>kj</sub> * b<sub>k</sub>}
@@ -300,6 +352,58 @@ public class DiagonalMatrixTools
             }
             indexC1 = (i+cRowStart)*c.numCols+j+cColStart;
             int indexC2 = (j+cRowStart)*c.numCols+i+cColStart; // this one is wrong
+            c.data[indexC1] += sum;
+            c.data[indexC2] += sum;
+         }
+      }
+   }
+
+   /**
+    * <p>Computes the matrix multiplication inner product:<br>
+    * <br>
+    * c = c + a<sup>T</sup> * b * a <br>
+    * <br>
+    * c<sub>ij</sub> = &sum;<sub>k=1:n</sub> { a<sub>ki</sub> * a<sub>kj</sub> * b<sub>k</sub>}
+    * </p>
+    *  <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+
+    * <p>
+    * Is faster than using a generic matrix multiplication by taking advantage of symmetry.  For
+    * vectors there is an even faster option, see {@link org.ejml.alg.dense.mult.VectorVectorMult#innerProd(org.ejml.data.D1Matrix64F, org.ejml.data.D1Matrix64F)}
+    * </p>
+    *
+    * @param a The matrix being multiplied. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multAddBlockInner(RowD1Matrix64F a, double b, RowD1Matrix64F c, int cRowStart, int cColStart)
+   {
+      for( int i = 0; i < a.numCols; i++ )
+      {
+         int j = i;
+         int indexA = i;
+         double sum = 0;
+         int end = indexA + a.numRows*a.numCols;
+         for( ; indexA < end; indexA += a.numCols )
+         {
+            sum += a.data[indexA]*a.data[indexA];
+         }
+         int indexC1 = (i+cRowStart)*c.numCols+j+cColStart;
+         c.data[indexC1] += b*sum;
+         j++;
+
+         for( ; j < a.numCols; j++ )
+         {
+            indexA = i;
+            int indexB = j;
+            sum = 0;
+            end = indexA + a.numRows*a.numCols;
+            for( ; indexA < end; indexA += a.numCols, indexB += a.numCols )
+            {
+               sum += a.data[indexA]*a.data[indexB];
+            }
+            indexC1 = (i+cRowStart)*c.numCols+j+cColStart;
+            int indexC2 = (j+cRowStart)*c.numCols+i+cColStart; // this one is wrong
+            sum *= b;
             c.data[indexC1] += sum;
             c.data[indexC2] += sum;
          }
@@ -461,9 +565,9 @@ public class DiagonalMatrixTools
             int end = indexA + a.numRows*a.numCols;
             for( ; indexA < end; indexA += a.numCols, indexB += a.numCols )
             {
-               sum += a.data[indexA]*a.data[indexB] * b;
+               sum += a.data[indexA]*a.data[indexB];
             }
-            c.data[indexC1] = c.data[indexC2] = sum;
+            c.data[indexC1] = c.data[indexC2] = b*sum;
          }
       }
    }
