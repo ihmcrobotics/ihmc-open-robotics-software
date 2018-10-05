@@ -1,7 +1,8 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingIterator;
+import us.ihmc.commons.lists.RecyclingLinkedList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -26,8 +27,14 @@ public class EuclideanTrajectoryHandler
 
    private final YoVariableRegistry registry;
 
-   private final RecyclingArrayList<SimpleEuclideanTrajectoryPoint> trajectoryPoints = new RecyclingArrayList<>(defaultMaxNumberOfPoints,
-                                                                                                                SimpleEuclideanTrajectoryPoint.class);
+   private final SimpleEuclideanTrajectoryPoint lastPoint = new SimpleEuclideanTrajectoryPoint();
+   private final SimpleEuclideanTrajectoryPoint firstPoint = new SimpleEuclideanTrajectoryPoint();
+   private final SimpleEuclideanTrajectoryPoint secondPoint = new SimpleEuclideanTrajectoryPoint();
+
+   private final RecyclingLinkedList<SimpleEuclideanTrajectoryPoint> trajectoryPoints = new RecyclingLinkedList<>(defaultMaxNumberOfPoints,
+                                                                                                                  SimpleEuclideanTrajectoryPoint.class,
+                                                                                                                  SimpleEuclideanTrajectoryPoint::set);
+   private final RecyclingIterator<SimpleEuclideanTrajectoryPoint> trajectoryIterator = trajectoryPoints.createForwardIterator();
 
    private final DoubleProvider yoTime;
    private final YoPolynomial polynomial;
@@ -55,8 +62,6 @@ public class EuclideanTrajectoryHandler
       velocity = new YoFrameVector3D(name + "Velocity", ReferenceFrame.getWorldFrame(), registry);
       acceleration = new YoFrameVector3D(name + "Acceleration", ReferenceFrame.getWorldFrame(), registry);
       numberOfPoints = new YoInteger(name + "NumberOfPoints", registry);
-
-      trajectoryPoints.clear();
 
       parentRegistry.addChild(registry);
    }
@@ -87,7 +92,10 @@ public class EuclideanTrajectoryHandler
       {
       case OVERRIDE:
          command.addTimeOffset(yoTime.getValue());
-         trajectoryPoints.clear();
+         while (!trajectoryPoints.isEmpty())
+         {
+            trajectoryPoints.removeFirst();
+         }
          break;
       case QUEUE:
          if (trajectoryPoints.isEmpty())
@@ -105,7 +113,8 @@ public class EuclideanTrajectoryHandler
             PrintTools.warn("Invalid message ID.");
             return;
          }
-         double lastTime = trajectoryPoints.getLast().getTime();
+         trajectoryPoints.peekLast(lastPoint);
+         double lastTime = lastPoint.getTime();
          command.addTimeOffset(lastTime);
          break;
       default:
@@ -116,7 +125,7 @@ public class EuclideanTrajectoryHandler
 
       for (int idx = 0; idx < command.getNumberOfTrajectoryPoints(); idx++)
       {
-         trajectoryPoints.add().set(command.getTrajectoryPoint(idx));
+         trajectoryPoints.addLast(command.getTrajectoryPoint(idx).getGeometryObject());
       }
 
       numberOfPoints.set(trajectoryPoints.size());
@@ -135,11 +144,13 @@ public class EuclideanTrajectoryHandler
       {
          return false;
       }
-      if (time < trajectoryPoints.get(0).getTime())
+      trajectoryPoints.peekFirst(firstPoint);
+      if (time < firstPoint.getTime())
       {
          return false;
       }
-      if (time > trajectoryPoints.getLast().getTime())
+      trajectoryPoints.peekLast(lastPoint);
+      if (time > lastPoint.getTime())
       {
          return false;
       }
@@ -161,46 +172,58 @@ public class EuclideanTrajectoryHandler
     */
    public void clearPointsInPast()
    {
+      // Remove points until we find one that is in the future but always remember the last removed one.
       double currentTime = yoTime.getValue();
-      if (trajectoryPoints.size() != 0 && trajectoryPoints.getLast().getTime() < currentTime)
+      boolean removedPoints = false;
+      while (!trajectoryPoints.isEmpty())
       {
-         trajectoryPoints.clear();
-         numberOfPoints.set(0);
-         return;
+         trajectoryPoints.peekFirst(firstPoint);
+         if (firstPoint.getTime() < currentTime)
+         {
+            trajectoryPoints.removeFirst();
+            removedPoints = true;
+         }
+         else
+         {
+            break;
+         }
       }
 
-      while (trajectoryPoints.size() > 1 && trajectoryPoints.get(1).getTime() < currentTime)
+      // If we removed points and still have at least one point in the list of points that is in the future we
+      // need to add the last removed point back so we can interpolate the current time.
+      if (removedPoints && !trajectoryPoints.isEmpty())
       {
-         trajectoryPoints.remove(0);
+         trajectoryPoints.addFirst(firstPoint);
       }
+
       numberOfPoints.set(trajectoryPoints.size());
    }
 
    protected void packDesiredsAtTime(double time)
    {
-      int endIndex = 0;
-      while (trajectoryPoints.get(endIndex).getTime() < time)
+      trajectoryIterator.reset();
+
+      // This should not be called with a time outside the range of the trajectory so no need for safety.
+      trajectoryIterator.next(firstPoint);
+      while (trajectoryIterator.hasNext())
       {
-         endIndex++;
+         trajectoryIterator.next(secondPoint);
+         if (secondPoint.getTime() >= time)
+         {
+            break;
+         }
+         firstPoint.set(secondPoint);
       }
 
-      if (endIndex == 0)
-      {
-         endIndex++;
-      }
-
-      SimpleEuclideanTrajectoryPoint startPoint = trajectoryPoints.get(endIndex - 1);
-      SimpleEuclideanTrajectoryPoint endPoint = trajectoryPoints.get(endIndex);
-
-      double t0 = startPoint.getTime();
-      double t1 = endPoint.getTime();
+      double t0 = firstPoint.getTime();
+      double t1 = secondPoint.getTime();
 
       for (int i = 0; i < 3; i++)
       {
-         double p0 = startPoint.getEuclideanWaypoint().getPosition().getElement(i);
-         double v0 = startPoint.getEuclideanWaypoint().getLinearVelocity().getElement(i);
-         double p1 = endPoint.getEuclideanWaypoint().getPosition().getElement(i);
-         double v1 = endPoint.getEuclideanWaypoint().getLinearVelocity().getElement(i);
+         double p0 = firstPoint.getEuclideanWaypoint().getPosition().getElement(i);
+         double v0 = firstPoint.getEuclideanWaypoint().getLinearVelocity().getElement(i);
+         double p1 = secondPoint.getEuclideanWaypoint().getPosition().getElement(i);
+         double v1 = secondPoint.getEuclideanWaypoint().getLinearVelocity().getElement(i);
 
          polynomial.setCubic(t0, t1, p0, v0, p1, v1);
          polynomial.compute(time);
