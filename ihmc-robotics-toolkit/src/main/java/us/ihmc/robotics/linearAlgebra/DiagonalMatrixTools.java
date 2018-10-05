@@ -120,7 +120,7 @@ public class DiagonalMatrixTools
       {
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       }
-      else if (a.numRows != c.numRows || b.numCols != c.numCols)
+      else if (a.numRows + startRow > c.numRows || b.numCols + startCol > c.numCols)
       {
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
       }
@@ -159,7 +159,7 @@ public class DiagonalMatrixTools
       {
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       }
-      else if (a.numRows != c.numRows || b.numCols != c.numCols)
+      else if (a.numRows + startRow > c.numRows || b.numCols + startCol > c.numCols)
       {
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
       }
@@ -265,7 +265,7 @@ public class DiagonalMatrixTools
    {
       if (a == c || b == c)
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
-      else if (a.numCols != b.numRows || a.numRows != b.numCols)
+      else if (a.numRows != b.numRows || a.numRows != b.numCols)
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       else if (a.numCols != c.numRows || a.numCols != c.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
@@ -426,7 +426,7 @@ public class DiagonalMatrixTools
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
       else if (a.numRows != b.numRows || a.numRows != b.numCols)
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
-      else if (a.numCols != c.numRows || a.numCols != c.numCols)
+      else if (a.numCols + cRowStart > c.numRows || a.numCols + cColStart > c.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
 
       for (int i = 0; i < a.numCols; i++)
@@ -484,7 +484,7 @@ public class DiagonalMatrixTools
    {
       if (a == c)
          throw new IllegalArgumentException("'a' cannot be the same matrix as 'c'");
-      else if (a.numCols != c.numRows || a.numCols != c.numCols)
+      else if (a.numCols + cRowStart > c.numRows || a.numCols + cColStart > c.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
 
       for (int i = 0; i < a.numCols; i++)
@@ -874,7 +874,7 @@ public class DiagonalMatrixTools
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       else if (b.numCols != c.numRows)
          throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
-      else if (a.numCols != d.numRows || c.numCols != d.numCols)
+      else if (a.numCols + rowStart > d.numRows || c.numCols + colStart > d.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
 
       for (int i = 0; i < a.numCols; i++)
@@ -927,7 +927,7 @@ public class DiagonalMatrixTools
          throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
       else if (c.numCols != d.numRows)
          throw new MatrixDimensionException("The 'c' and 'd' matrices do not have compatible dimensions");
-      else if (b.numCols != e.numRows || d.numCols != e.numCols)
+      else if (b.numCols + rowStart > e.numRows || d.numCols + colStart > e.numCols)
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
 
       for (int i = 0; i < b.numCols; i++)
