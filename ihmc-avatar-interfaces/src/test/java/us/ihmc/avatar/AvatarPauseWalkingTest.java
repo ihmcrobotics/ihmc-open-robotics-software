@@ -1,11 +1,14 @@
 package us.ihmc.avatar;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
+import static org.junit.Assert.*;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -28,9 +31,6 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 {
@@ -240,21 +240,21 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    {
       setupTest();
       walkPaused.set(false);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       sendFootstepCommand(getStepLength(), getNumberOfFootsteps());
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
       drcSimulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(true);
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
 
       pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
       drcSimulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(false);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime()));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
    private void sendFootstepCommand(double stepLength, int numberOfFootsteps)

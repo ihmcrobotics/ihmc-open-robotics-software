@@ -1,8 +1,6 @@
 package us.ihmc.avatar.testTools;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -12,12 +10,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+
 import controller_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.apache.commons.lang3.mutable.MutableDouble;
-import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
@@ -705,6 +702,9 @@ public class DRCSimulationTestHelper
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
+            if (scs == null || !scs.isSimulating())
+               return; // Do not perform this check if the sim is not running, so the user can scrub the data when sim is done.
+
             desiredICP.setX(desiredICPX.getDoubleValue());
             if (xTicks.getValue() > ticksToInitialize && yTicks.getValue() > ticksToInitialize)
             {
@@ -722,6 +722,9 @@ public class DRCSimulationTestHelper
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
+            if (scs == null || !scs.isSimulating())
+               return; // Do not perform this check if the sim is not running, so the user can scrub the data when sim is done.
+
             desiredICP.setY(desiredICPY.getDoubleValue());
             if (xTicks.getValue() > ticksToInitialize && yTicks.getValue() > ticksToInitialize)
             {
