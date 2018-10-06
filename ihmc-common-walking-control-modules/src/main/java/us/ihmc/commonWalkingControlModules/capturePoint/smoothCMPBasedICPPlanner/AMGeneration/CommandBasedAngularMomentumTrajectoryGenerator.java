@@ -1,14 +1,16 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.WalkingTrajectoryType;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPlanningTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.WalkingTrajectoryType;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,9 +24,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMomentumTrajectoryGeneratorInterface
 {
@@ -139,12 +138,6 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
    private void computeTrajectories(WalkingTrajectoryType startingTrajectoryType)
    {
-      // don't recompute if you're already in this phase
-      if (isInPhase(startingTrajectoryType))
-      {
-         return;
-      }
-
       momentumTrajectoryHandler.clearPointsInPast();
 
       int stepIndex = 0;
@@ -291,16 +284,25 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       }
    }
 
+   boolean atAStop = true;
+
    @Override
    public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop)
    {
-      computeTrajectories(WalkingTrajectoryType.TRANSFER);
+      if (!isInPhase(WalkingTrajectoryType.TRANSFER) || (this.atAStop != atAStop))
+      {
+         computeTrajectories(WalkingTrajectoryType.TRANSFER);
+         this.atAStop = atAStop;
+      }
    }
 
    @Override
    public void computeReferenceAngularMomentumStartingFromSingleSupport()
    {
-      computeTrajectories(WalkingTrajectoryType.SWING);
+      if (!isInPhase(WalkingTrajectoryType.SWING))
+      {
+         computeTrajectories(WalkingTrajectoryType.SWING);
+      }
    }
 
    @Override
