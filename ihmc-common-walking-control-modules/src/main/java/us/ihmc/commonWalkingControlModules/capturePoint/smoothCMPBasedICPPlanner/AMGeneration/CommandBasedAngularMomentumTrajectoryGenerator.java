@@ -291,26 +291,6 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       {
          computeTrajectories(WalkingTrajectoryType.TRANSFER);
       }
-
-      if (initialTransfer && standing)
-      {
-         for (int i = 0; i < transferTrajectories.size(); i++)
-         {
-            transferTrajectories.get(i).reset();
-            for (int j = 0; j < waypoints.size() - 1; j++)
-            {
-               transferTrajectories.get(i).add().setConstant(0.0, Double.POSITIVE_INFINITY, zeroPoint);
-            }
-         }
-         for (int i = 0; i < swingTrajectories.size(); i++)
-         {
-            swingTrajectories.get(i).reset();
-            for (int j = 0; j < waypoints.size() - 1; j++)
-            {
-               swingTrajectories.get(i).add().setConstant(0.0, Double.POSITIVE_INFINITY, zeroPoint);
-            }
-         }
-      }
    }
 
    @Override
