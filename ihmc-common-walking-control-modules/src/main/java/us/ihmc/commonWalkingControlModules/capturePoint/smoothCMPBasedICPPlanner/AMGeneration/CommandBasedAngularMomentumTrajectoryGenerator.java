@@ -284,12 +284,16 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       }
    }
 
+   boolean atStop = true;
+
    @Override
    public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean initialTransfer, boolean standing)
    {
-      if (!isInPhase(WalkingTrajectoryType.TRANSFER) || (initialTransfer != standing))
+      boolean atStop = initialTransfer && standing;
+      if (!isInPhase(WalkingTrajectoryType.TRANSFER) || atStop != this.atStop)
       {
          computeTrajectories(WalkingTrajectoryType.TRANSFER);
+         this.atStop = atStop;
       }
    }
 
