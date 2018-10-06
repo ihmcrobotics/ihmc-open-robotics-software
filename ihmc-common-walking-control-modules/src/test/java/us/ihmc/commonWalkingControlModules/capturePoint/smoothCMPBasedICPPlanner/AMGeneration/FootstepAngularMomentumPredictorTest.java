@@ -11,17 +11,17 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.FootstepData;
-import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration.ReferenceCoMTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.FootstepData;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.ReferenceCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.ReferenceICPTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -50,7 +50,7 @@ public class FootstepAngularMomentumPredictorTest
 {
    // Physical parameters used for testing
    private final double omega0 = 3.4; // s^-1
-   private final double stepLength = 0.5; // m 
+   private final double stepLength = 0.5; // m
    private final double stepWidth = 0.25; // m
    private final double swingTime = 1.0; // s
    private final double transferTime = 0.2; //s
@@ -65,11 +65,13 @@ public class FootstepAngularMomentumPredictorTest
 
    private final SmoothCMPPlannerParameters testParameters = new SmoothCMPPlannerParameters()
    {
+      @Override
       public boolean planSwingAngularMomentum()
       {
          return true;
       }
 
+      @Override
       public boolean planTransferAngularMomentum()
       {
          return true;
@@ -272,7 +274,7 @@ public class FootstepAngularMomentumPredictorTest
       angularMomentumGenerator.addCopAndComSetpointsToPlan(copTrajectoryGenerator.getWaypoints(), comInitialPositionList, comFinalPositionList,
                                                            comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList,
                                                            copTrajectoryGenerator.getNumberOfFootstepsRegistered());
-      angularMomentumGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(isInitialTransfer.getBooleanValue());
+      angularMomentumGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), isStanding.getValue());
 
       List<? extends AngularMomentumTrajectory> swingAngularMomentumTrajectories = angularMomentumGenerator.getSwingAngularMomentumTrajectories();
       List<? extends AngularMomentumTrajectory> transferAngularMomentumTrajectories = angularMomentumGenerator.getTransferAngularMomentumTrajectories();
@@ -355,7 +357,7 @@ public class FootstepAngularMomentumPredictorTest
       angularMomentumGenerator.addCopAndComSetpointsToPlan(copTrajectoryGenerator.getWaypoints(), comInitialPositionList, comFinalPositionList,
                                                            comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList,
                                                            copTrajectoryGenerator.getNumberOfFootstepsRegistered());
-      angularMomentumGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(isInitialTransfer.getBooleanValue());
+      angularMomentumGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), isStanding.getValue());
       angularMomentumGenerator.initializeForDoubleSupport(0.0, isStanding.getBooleanValue());
 
       List<? extends AngularMomentumTrajectory> swingAngularMomentumTrajectories = angularMomentumGenerator.getSwingAngularMomentumTrajectories();
