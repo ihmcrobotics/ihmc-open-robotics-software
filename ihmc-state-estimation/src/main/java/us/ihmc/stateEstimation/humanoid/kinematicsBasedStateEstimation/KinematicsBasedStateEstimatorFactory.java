@@ -201,10 +201,9 @@ public class KinematicsBasedStateEstimatorFactory
       // Create the sensor readers and state estimator here:
 
       return new DRCKinematicsBasedStateEstimator(fullInverseDynamicsStructure, stateEstimatorParameters, sensorOutputMapReadOnlyField.get(),
-                                                  estimatorForceSensorDataHolderToUpdate, estimatorCenterOfMassDataHolderToUpdateField.get(),
-                                                  imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
-                                                  centerOfPressureDataHolderFromControllerField.get(), robotMotionStatusFromControllerField.get(), bipedFeetMap,
-                                                  stateEstimatorYoGraphicsListRegistry);
+                                                  estimatorCenterOfMassDataHolderToUpdateField.get(), imuSensorsToUseInStateEstimator, gravityMagnitude,
+                                                  footSwitchMap, centerOfPressureDataHolderFromControllerField.get(),
+                                                  robotMotionStatusFromControllerField.get(), bipedFeetMap, stateEstimatorYoGraphicsListRegistry);
    }
 
    private FullInverseDynamicsStructure createFullInverseDynamicsStructure(FullHumanoidRobotModel fullRobotModel)

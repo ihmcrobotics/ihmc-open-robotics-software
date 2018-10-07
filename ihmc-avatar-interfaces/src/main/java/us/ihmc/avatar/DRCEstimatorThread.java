@@ -56,6 +56,7 @@ import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobot
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -107,6 +108,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final JointDesiredOutputWriter outputWriter;
 
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
+
+   private final ForceSensorStateUpdater forceSensorStateUpdater;
 
    public DRCEstimatorThread(String robotName, DRCRobotSensorInformation sensorInformation, RobotContactPointParameters<RobotSide> contactPointParameters,
                              WholeBodyControllerParameters<RobotSide> wholeBodyControllerParameters, StateEstimatorParameters stateEstimatorParameters,
@@ -172,6 +175,16 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
          drcStateEstimator = estimatorFactory.createStateEstimator(estimatorRegistry, yoGraphicsListRegistry);
 
+         if (forceSensorDataHolderForEstimator != null)
+         {
+            forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly, forceSensorDataHolderForEstimator, stateEstimatorParameters, gravity,
+                                                                  yoGraphicsListRegistry, estimatorRegistry);
+         }
+         else
+         {
+            forceSensorStateUpdater = null;
+         }
+
          if (realtimeRos2Node != null)
          {
             StateEstimatorModeSubscriber stateEstimatorModeSubscriber = new StateEstimatorModeSubscriber();
@@ -184,7 +197,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
 
             drcStateEstimator.setOperatingModeSubscriber(stateEstimatorModeSubscriber);
-            drcStateEstimator.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
+            forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }
 
          estimatorController.addRobotController(drcStateEstimator);
@@ -192,6 +205,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       else
       {
          drcStateEstimator = null;
+         forceSensorStateUpdater = null;
       }
 
       RobotJointLimitWatcher robotJointLimitWatcher = new RobotJointLimitWatcher(estimatorFullRobotModel.getOneDoFJoints(), sensorRawOutputMapReadOnly);
@@ -212,8 +226,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       if (realtimeRos2Node != null)
       {
          ForceSensorDataHolderReadOnly forceSensorDataHolderToSend;
-         if (drcStateEstimator != null && drcStateEstimator.getForceSensorOutputWithGravityCancelled() != null)
-            forceSensorDataHolderToSend = drcStateEstimator.getForceSensorOutputWithGravityCancelled();
+         if (drcStateEstimator != null && forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled() != null)
+            forceSensorDataHolderToSend = forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled();
          else
             forceSensorDataHolderToSend = forceSensorDataHolderForEstimator;
 
@@ -322,11 +336,19 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          if (firstTick.getBooleanValue())
          {
             estimatorController.initialize();
+            if (forceSensorStateUpdater != null)
+            {
+               forceSensorStateUpdater.initialize();
+            }
             firstTick.set(false);
          }
 
          estimatorTimer.startMeasurement();
          estimatorController.doControl();
+         if (forceSensorStateUpdater != null)
+         {
+            forceSensorStateUpdater.updateForceSensorState();
+         }
          estimatorTimer.stopMeasurement();
       }
       catch (Throwable e)
@@ -381,7 +403,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    public ForceSensorCalibrationModule getForceSensorCalibrationModule()
    {
-      return drcStateEstimator.getForceSensorCalibrationModule();
+      return forceSensorStateUpdater;
    }
 
    @Override
