@@ -42,6 +42,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private final YoInteger numberOfRegisteredFootsteps;
    private final YoFrameVector3D commandedAngularMomentum = new YoFrameVector3D("commandedAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D commandedCoMTorque = new YoFrameVector3D("commandedCoMTorque", ReferenceFrame.getWorldFrame(), registry);
+   private final YoBoolean atAStop = new YoBoolean("atAStop", registry);
+   private final YoBoolean updateTrajectories = new YoBoolean("updateTrajectories", registry);
 
    private final RecyclingArrayList<SimpleEuclideanTrajectoryPoint> waypoints = new RecyclingArrayList<>(waypointsPerWalkingPhase,
                                                                                                          SimpleEuclideanTrajectoryPoint::new);
@@ -69,6 +71,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       this.numberOfRegisteredFootsteps = new YoInteger(namePrefix + "NumberOfRegisteredFootsteps", registry);
       this.planSwingAngularMomentum = new YoBoolean("PlanSwingAngularMomentumWithCommand", registry);
       this.planTransferAngularMomentum = new YoBoolean("PlanTransferAngularMomentumWithCommand", registry);
+      this.atAStop.set(true);
+      this.updateTrajectories.set(false);
 
       transferTrajectories = new ArrayList<>(maxNumberOfStepsToConsider + 1);
       swingTrajectories = new ArrayList<>(maxNumberOfStepsToConsider);
@@ -284,26 +288,27 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       }
    }
 
-   boolean atStop = true;
-
    @Override
    public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean initialTransfer, boolean standing)
    {
       boolean atStop = initialTransfer && standing;
-      if (!isInPhase(WalkingTrajectoryType.TRANSFER) || atStop != this.atStop)
+      this.updateTrajectories.set(!isInPhase(WalkingTrajectoryType.TRANSFER) || atStop != this.atAStop.getBooleanValue());
+      if (updateTrajectories.getBooleanValue())
       {
          computeTrajectories(WalkingTrajectoryType.TRANSFER);
-         this.atStop = atStop;
       }
+      this.atAStop.set(atStop);
    }
 
    @Override
    public void computeReferenceAngularMomentumStartingFromSingleSupport()
    {
-      if (!isInPhase(WalkingTrajectoryType.SWING))
+      this.updateTrajectories.set(!isInPhase(WalkingTrajectoryType.SWING));
+      if (updateTrajectories.getBooleanValue())
       {
          computeTrajectories(WalkingTrajectoryType.SWING);
       }
+      atAStop.set(false);
    }
 
    @Override
