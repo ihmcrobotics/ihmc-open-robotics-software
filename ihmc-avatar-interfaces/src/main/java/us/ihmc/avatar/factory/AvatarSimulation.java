@@ -4,7 +4,6 @@ import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
-import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationConstructionSetTools.robotController.AbstractThreadedRobotController;
@@ -58,11 +57,6 @@ public class AvatarSimulation
 
       closeableAndDisposableRegistry.closeAndDispose();
       closeableAndDisposableRegistry = null;
-   }
-
-   public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
-   {
-      stateEstimationThread.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
    }
 
    public void updateEnvironment(CommonAvatarEnvironmentInterface commonAvatarEnvironment)
