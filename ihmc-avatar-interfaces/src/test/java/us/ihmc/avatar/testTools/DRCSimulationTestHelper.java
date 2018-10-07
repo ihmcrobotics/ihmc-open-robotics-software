@@ -1,6 +1,8 @@
 package us.ihmc.avatar.testTools;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -47,6 +49,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -105,6 +108,7 @@ public class DRCSimulationTestHelper
    private ControllerStateTransitionFactory<HighLevelControllerName> controllerStateTransitionFactory = null;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = null;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = null;
+   private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber = null;
    private final DRCGuiInitialSetup guiInitialSetup;
 
    private final boolean checkIfDesiredICPHasBeenInvalid = true;
@@ -188,6 +192,8 @@ public class DRCSimulationTestHelper
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
       simulationStarter.setInitializeEstimatorToActual(true);
       simulationStarter.setFlatGroundWalkingScriptParameters(walkingScriptParameters);
+      if (externalPelvisCorrectorSubscriber != null)
+         simulationStarter.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
 
       if (addFootstepMessageGenerator)
          simulationStarter.addFootstepMessageGenerator(useHeadingAndVelocityScript, cheatWithGroundHeightAtFootstep);
@@ -637,6 +643,11 @@ public class DRCSimulationTestHelper
    public void setNetworkProcessorParameters(DRCNetworkModuleParameters networkProcessorParameters)
    {
       this.networkProcessorParameters = networkProcessorParameters;
+   }
+
+   public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
+   {
+      this.externalPelvisCorrectorSubscriber = externalPelvisCorrectorSubscriber;
    }
 
    public String getRobotName()

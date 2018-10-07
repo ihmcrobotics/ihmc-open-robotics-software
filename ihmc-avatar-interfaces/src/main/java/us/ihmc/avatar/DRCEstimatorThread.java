@@ -18,7 +18,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
@@ -54,7 +53,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
@@ -79,7 +78,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final ContactSensorHolder contactSensorHolder;
    private final ModularRobotController estimatorController;
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   private final DRCKinematicsBasedStateEstimator drcStateEstimator;
+   private final StateEstimatorController stateEstimator;
 
    private final ThreadDataSynchronizerInterface threadDataSynchronizer;
    private final SensorReader sensorReader;
@@ -114,7 +113,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    public DRCEstimatorThread(String robotName, DRCRobotSensorInformation sensorInformation, RobotContactPointParameters<RobotSide> contactPointParameters,
                              WholeBodyControllerParameters<RobotSide> wholeBodyControllerParameters, StateEstimatorParameters stateEstimatorParameters,
                              SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, RealtimeRos2Node realtimeRos2Node,
-                             JointDesiredOutputWriter outputWriter, RobotVisualizer robotVisualizer, double gravity)
+                             PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, JointDesiredOutputWriter outputWriter,
+                             RobotVisualizer robotVisualizer, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.robotVisualizer = robotVisualizer;
@@ -173,7 +173,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
                          .setCenterOfPressureDataHolderFromController(centerOfPressureDataHolderFromController)
                          .setRobotMotionStatusFromController(robotMotionStatusFromController);
 
-         drcStateEstimator = estimatorFactory.createStateEstimator(estimatorRegistry, yoGraphicsListRegistry);
+         if (externalPelvisPoseSubscriber != null)
+         {
+            estimatorFactory.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+         }
 
          if (forceSensorDataHolderForEstimator != null)
          {
@@ -196,15 +199,16 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
             ROS2Tools.createCallbackSubscription(realtimeRos2Node, RequestWristForceSensorCalibrationPacket.class, subscriberTopicNameGenerator,
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
 
-            drcStateEstimator.setOperatingModeSubscriber(stateEstimatorModeSubscriber);
+            estimatorFactory.setOperatingModeSubscriber(stateEstimatorModeSubscriber);
             forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }
 
-         estimatorController.addRobotController(drcStateEstimator);
+         stateEstimator = estimatorFactory.createStateEstimator(estimatorRegistry, yoGraphicsListRegistry);
+         estimatorController.addRobotController(stateEstimator);
       }
       else
       {
-         drcStateEstimator = null;
+         stateEstimator = null;
          forceSensorStateUpdater = null;
       }
 
@@ -226,7 +230,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       if (realtimeRos2Node != null)
       {
          ForceSensorDataHolderReadOnly forceSensorDataHolderToSend;
-         if (drcStateEstimator != null && forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled() != null)
+         if (stateEstimator != null && forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled() != null)
             forceSensorDataHolderToSend = forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled();
          else
             forceSensorDataHolderToSend = forceSensorDataHolderForEstimator;
@@ -414,20 +418,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    public void initializeEstimator(RigidBodyTransform rootJointTransform)
    {
-      if (drcStateEstimator != null)
-         drcStateEstimator.initializeEstimator(rootJointTransform);
-   }
-
-   public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
-   {
-      if (drcStateEstimator != null)
-         drcStateEstimator.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
-   }
-
-   public void requestStateEstimatorMode(StateEstimatorMode stateEstimatorMode)
-   {
-      if (drcStateEstimator != null)
-         drcStateEstimator.requestStateEstimatorMode(stateEstimatorMode);
+      if (stateEstimator != null)
+         stateEstimator.initializeEstimator(rootJointTransform);
    }
 
    public List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()

@@ -229,10 +229,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
    {
-      if (avatarSimulation != null)
-         avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
-      else
-         this.externalPelvisCorrectorSubscriber = externalPelvisCorrectorSubscriber;
+      this.externalPelvisCorrectorSubscriber = externalPelvisCorrectorSubscriber;
    }
 
    /**
@@ -447,14 +444,13 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       avatarSimulationFactory.setShapeCollision(robotModel.useShapeCollision());
+      if (externalPelvisCorrectorSubscriber != null)
+         avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
       HighLevelHumanoidControllerToolbox highLevelHumanoidControllerToolbox = controllerFactory.getHighLevelHumanoidControllerToolbox();
       FullHumanoidRobotModel fullRobotModel = highLevelHumanoidControllerToolbox.getFullRobotModel();
       scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands, fullRobotModel);
-
-      if (externalPelvisCorrectorSubscriber != null)
-         avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
 
       simulationConstructionSet = avatarSimulation.getSimulationConstructionSet();
       sdfRobot = avatarSimulation.getHumanoidFloatingRootJointRobot();
