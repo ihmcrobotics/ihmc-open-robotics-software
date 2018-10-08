@@ -40,7 +40,6 @@ public class RemoteFootstepPlannerUI extends Application
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager);
 //      module = FootstepPathCalculatorModule.createMessagerModule(messager);
 
-
 //      module.start();
       if (visualize)
          ui.show();
@@ -55,6 +54,11 @@ public class RemoteFootstepPlannerUI extends Application
 //      module.stop();
 
       messageConverter.destroy();
+   }
+
+   public boolean isRunning()
+   {
+      return ui != null && messager != null && messageConverter != null;
    }
 
    public JavaFXMessager getMessager()
