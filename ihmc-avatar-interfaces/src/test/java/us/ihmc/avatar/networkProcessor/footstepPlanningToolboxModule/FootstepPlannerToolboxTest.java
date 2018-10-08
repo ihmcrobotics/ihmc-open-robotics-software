@@ -15,10 +15,10 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.footstepPlanning.frameworkTests.DataSetFrameworkTest;
+import us.ihmc.footstepPlanning.sharedMemoryDataSet.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.footstepPlanning.ui.FootstepPlannerUIRosNode;
+import us.ihmc.footstepPlanning.ui.RemoteFootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
@@ -30,10 +30,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
 
-public abstract class NetworkedFootstepPlannerFrameworkTest extends DataSetFrameworkTest
+public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetTest
 {
 
-   protected FootstepPlannerUIRosNode uiNode;
+   protected RemoteFootstepPlannerUI uiNode;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
    private RealtimeRos2Node ros2Node;
    private final AtomicReference<FootstepPlan> footstepPlanReference = new AtomicReference<>(null);
@@ -44,7 +44,7 @@ public abstract class NetworkedFootstepPlannerFrameworkTest extends DataSetFrame
    public void setup()
    {
       tryToStartModule(() -> setupFootstepPlanningToolboxModule());
-      uiNode = new FootstepPlannerUIRosNode("");
+      uiNode = new RemoteFootstepPlannerUI("");
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_test");
 
@@ -58,7 +58,7 @@ public abstract class NetworkedFootstepPlannerFrameworkTest extends DataSetFrame
    public void tearDown() throws Exception
    {
       ros2Node.destroy();
-      uiNode.destroy();
+      uiNode.stop();
 
       ros2Node = null;
       footstepPlanningRequestPublisher = null;
@@ -119,7 +119,7 @@ public abstract class NetworkedFootstepPlannerFrameworkTest extends DataSetFrame
 
 
 
-      JavaFXMessager messager = uiNode.getUI().getMessager();
+      JavaFXMessager messager = uiNode.getMessager();
 
       AtomicReference<Boolean> receivedPlan = new AtomicReference<>(false);
       AtomicReference<Boolean> receivedResult = new AtomicReference<>(false);

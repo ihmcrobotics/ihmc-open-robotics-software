@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
+import javafx.application.Application;
 import javafx.stage.Stage;
 import org.junit.After;
 import org.junit.Before;
@@ -13,7 +14,10 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
+import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
@@ -21,6 +25,8 @@ public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
    private final PlanThenSnapPlanner planner = new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), PlannerTools.createDefaultFootPolygons());
 
    private static boolean visualize = true;
+   private static boolean keepUp = false;
+   private FootstepPlannerUI ui;
 
    @Before
    public void setup()
@@ -29,40 +35,25 @@ public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
 
       if (visualize)
       {
-         // Did not find a better solution for starting JavaFX and still be able to move on.
-         new Thread(() -> launch()).start();
+         ApplicationRunner.runApplication(new Application()
+         {
+            @Override
+            public void start(Stage stage) throws Exception
+            {
+               messager = new SharedMemoryJavaFXMessager(FootstepPlannerUserInterfaceAPI.API);
+               ui = FootstepPlannerUI.createMessagerUI(stage, messager);
+               ui.show();
+            }
+
+            @Override
+            public void stop()
+            {
+               ui.stop();
+            }
+         });
 
          while (ui == null)
-            ThreadTools.sleep(200);
-      }
-   }
-
-   @After
-   public void tearDown()
-   {
-      if (visualize())
-      {
-         stop();
-      }
-      ui = null;
-   }
-
-   @Override
-   public void start(Stage primaryStage) throws Exception
-   {
-      if (visualize())
-      {
-         ui = new FootstepPlannerUI(primaryStage);
-         ui.show();
-      }
-   }
-
-   @Override
-   public void stop()
-   {
-      if (visualize())
-      {
-         ui.stop();
+            ThreadTools.sleep(100);
       }
    }
 
@@ -82,6 +73,12 @@ public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
    public boolean visualize()
    {
       return visualize;
+   }
+
+   @Override
+   public boolean keepUp()
+   {
+      return keepUp;
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.2, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})

@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
+import javafx.application.Application;
 import javafx.stage.Stage;
 import org.junit.After;
 import org.junit.Before;
@@ -16,7 +17,10 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.aStar.FootstepNodeVisualization;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
+import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -26,8 +30,10 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    private static final boolean visualizePlanner = false;
    private AStarFootstepPlanner planner;
    private FootstepNodeVisualization visualization = null;
+   private FootstepPlannerUI ui;
 
    private static boolean visualize = true;
+   private static boolean keepUp = false;
 
    @Before
    public void setup()
@@ -36,41 +42,35 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
 
       if (visualize)
       {
-         // Did not find a better solution for starting JavaFX and still be able to move on.
-         new Thread(() -> launch()).start();
+         ApplicationRunner.runApplication(new Application()
+         {
+            @Override
+            public void start(Stage stage) throws Exception
+            {
+               messager = new SharedMemoryJavaFXMessager(FootstepPlannerUserInterfaceAPI.API);
+               messager.startMessager();
+
+               ui = FootstepPlannerUI.createMessagerUI(stage, messager);
+               ui.show();
+            }
+
+            @Override
+            public void stop()
+            {
+               ui.stop();
+            }
+         });
 
          while (ui == null)
-            ThreadTools.sleep(200);
+            ThreadTools.sleep(100);
       }
    }
 
    @After
    public void tearDown()
    {
-      if (visualize())
-      {
-         stop();
-      }
-      ui = null;
-   }
-
-   @Override
-   public void start(Stage primaryStage) throws Exception
-   {
-      if (visualize())
-      {
-         ui = new FootstepPlannerUI(primaryStage);
-         ui.show();
-      }
-   }
-
-   @Override
-   public void stop()
-   {
-      if (visualize())
-      {
+      if (ui != null)
          ui.stop();
-      }
    }
 
    @Override
@@ -78,7 +78,6 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    {
       return true;
    }
-
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
@@ -96,7 +95,6 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
       super.testSpiralStaircase();
    }
 
-
    @Before
    public void createPlanner()
    {
@@ -104,7 +102,8 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
          visualization = new FootstepNodeVisualization(1000, 1.0, null);
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(getPlannerParameters());
-      planner = AStarFootstepPlanner.createRoughTerrainPlanner(getPlannerParameters(), visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
+      planner = AStarFootstepPlanner
+            .createRoughTerrainPlanner(getPlannerParameters(), visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
    }
 
    @After
@@ -132,5 +131,11 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
       if (visualizePlanner)
          return false;
       return visualize;
+   }
+
+   @Override
+   public boolean keepUp()
+   {
+      return keepUp;
    }
 }

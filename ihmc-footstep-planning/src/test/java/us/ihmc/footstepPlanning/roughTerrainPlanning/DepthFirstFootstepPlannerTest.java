@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
+import javafx.application.Application;
 import javafx.stage.Stage;
 import org.junit.After;
 import org.junit.Before;
@@ -19,7 +20,10 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipe
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
+import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -27,13 +31,14 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrainTest
 {
-   private YoVariableRegistry registry;
    private YoFootstepPlannerParameters parameters;
    private DepthFirstFootstepPlanner planner;
+   private FootstepPlannerUI ui;
 
    private static final boolean showPlannerVisualizer = false;
 
    private static boolean visualize = true;
+   private static boolean keepUp = false;
 
    @Before
    public void setup()
@@ -42,40 +47,25 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
 
       if (visualize)
       {
-         // Did not find a better solution for starting JavaFX and still be able to move on.
-         new Thread(() -> launch()).start();
+         ApplicationRunner.runApplication(new Application()
+         {
+            @Override
+            public void start(Stage stage) throws Exception
+            {
+               messager = new SharedMemoryJavaFXMessager(FootstepPlannerUserInterfaceAPI.API);
+               ui = FootstepPlannerUI.createMessagerUI(stage, messager);
+               ui.show();
+            }
+
+            @Override
+            public void stop()
+            {
+               ui.stop();
+            }
+         });
 
          while (ui == null)
-            ThreadTools.sleep(200);
-      }
-   }
-
-   @After
-   public void tearDown()
-   {
-      if (visualize())
-      {
-         stop();
-      }
-      ui = null;
-   }
-
-   @Override
-   public void start(Stage primaryStage) throws Exception
-   {
-      if (visualize())
-      {
-         ui = new FootstepPlannerUI(primaryStage);
-         ui.show();
-      }
-   }
-
-   @Override
-   public void stop()
-   {
-      if (visualize())
-      {
-         ui.stop();
+            ThreadTools.sleep(100);
       }
    }
 
@@ -227,7 +217,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
    @Before
    public void setupPlanner()
    {
-      registry = new YoVariableRegistry("test");
+      YoVariableRegistry registry = new YoVariableRegistry("test");
       parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters());
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlannerTools.createDefaultFootPolygons();
 
@@ -261,5 +251,11 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
    public boolean visualize()
    {
       return visualize;
+   }
+
+   @Override
+   public boolean keepUp()
+   {
+      return keepUp;
    }
 }

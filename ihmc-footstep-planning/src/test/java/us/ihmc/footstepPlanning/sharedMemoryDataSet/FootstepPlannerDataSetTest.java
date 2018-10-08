@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.frameworkTests;
+package us.ihmc.footstepPlanning.sharedMemoryDataSet;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,17 +8,14 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisibilityGraphsDataExporter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.tools.ArrayTools;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public abstract class DataSetFrameworkTest
+public abstract class FootstepPlannerDataSetTest
 {
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = false;

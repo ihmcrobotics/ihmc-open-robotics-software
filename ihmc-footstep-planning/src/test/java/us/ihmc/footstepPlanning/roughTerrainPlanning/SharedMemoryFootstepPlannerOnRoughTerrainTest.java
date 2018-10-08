@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
-import javafx.application.Application;
 import org.junit.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -12,9 +11,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
-import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.Messager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +21,11 @@ import static org.junit.Assert.assertTrue;
 import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
 import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
 
-public abstract class StandaloneUIFootstepPlannerOnRoughTerrainTest extends Application
+public abstract class SharedMemoryFootstepPlannerOnRoughTerrainTest
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   protected static StandaloneFootstepPlannerUI ui;
+   protected JavaFXMessager messager;
    protected boolean keepUIUp = false;
 
    public abstract FootstepPlannerType getPlannerType();
@@ -52,8 +49,6 @@ public abstract class StandaloneUIFootstepPlannerOnRoughTerrainTest extends Appl
 
    private void runTestAndAssert(PlannerTestEnvironments.PlannerTestData testData)
    {
-      Messager messager = ui.getMessager();
-
       submitInfoToUI(testData);
 
       ThreadTools.sleep(10);
@@ -82,8 +77,6 @@ public abstract class StandaloneUIFootstepPlannerOnRoughTerrainTest extends Appl
 
    private void submitInfoToUI(PlannerTestEnvironments.PlannerTestData testData)
    {
-      JavaFXMessager messager = ui.getMessager();
-
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, testData.getGoalPosition());
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic, testData.getGoalOrientation());

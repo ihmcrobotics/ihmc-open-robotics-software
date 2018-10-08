@@ -19,7 +19,7 @@ public class FootstepPlannerUI
 {
    private static final boolean VERBOSE = true;
 
-   private final JavaFXMessager messager = new SharedMemoryJavaFXMessager(FootstepPlannerUserInterfaceAPI.API);
+   private final JavaFXMessager messager;
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
@@ -46,14 +46,20 @@ public class FootstepPlannerUI
 
    public FootstepPlannerUI(Stage primaryStage) throws Exception
    {
+      this(primaryStage, new SharedMemoryJavaFXMessager(FootstepPlannerUserInterfaceAPI.API));
+      messager.startMessager();
+   }
+
+   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
+   {
       this.primaryStage = primaryStage;
+      this.messager = messager;
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
       loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
 
       mainPane = loader.load();
-      messager.startMessager();
 
       footstepPlannerMenuUIController.attachMessager(messager);
       startGoalTabController.attachMessager(messager);
@@ -119,5 +125,10 @@ public class FootstepPlannerUI
    {
       planarRegionViewer.stop();
       pathRenderer.stop();
+   }
+
+   public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
+   {
+      return new FootstepPlannerUI(primaryStage, messager);
    }
 }
