@@ -379,8 +379,8 @@ public class ICPOptimizationQPSolver
    public void setMaximumFeedbackMagnitude(FrameVector2DReadOnly maximumFeedbackMagnitude)
    {
       maximumFeedbackMagnitude.checkReferenceFrameMatch(worldFrame);
-      this.maxFeedbackXMagnitude = maximumFeedbackMagnitude.getX();
-      this.maxFeedbackYMagnitude = maximumFeedbackMagnitude.getY();
+      this.maxFeedbackXMagnitude = Math.abs(maximumFeedbackMagnitude.getX());
+      this.maxFeedbackYMagnitude = Math.abs(maximumFeedbackMagnitude.getY());
    }
 
 

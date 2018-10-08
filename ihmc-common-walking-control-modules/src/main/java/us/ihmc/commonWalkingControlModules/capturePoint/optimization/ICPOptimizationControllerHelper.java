@@ -32,12 +32,6 @@ public class ICPOptimizationControllerHelper
       transformFromDynamicsFrame(feedbackGainsToPack, desiredICPVelocity, parallelGain + 1.0, orthogonalGain + 1.0);
    }
 
-   public void transformGainsFromDynamicsFrame(FrameVector2DBasics feedbackGainsToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelGain,
-                                               double orthogonalGain)
-   {
-      transformFromDynamicsFrame(feedbackGainsToPack, desiredICPVelocity, parallelGain + 1.0, orthogonalGain + 1.0);
-   }
-
    public void transformFromDynamicsFrame(RowD1Matrix64F valuesToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelValue,
                                           double orthogonalValue)
    {
@@ -83,13 +77,6 @@ public class ICPOptimizationControllerHelper
    public void transformToWorldFrame(D1Matrix64F weightsToPack, double xValue, double yValue, ReferenceFrame frame)
    {
       transformValues(weightsToPack, xValue, yValue, frame, worldFrame);
-   }
-
-   public void transformToWorldFrame(FixedFrameVector2DBasics weightsToPack, double xValue, double yValue, ReferenceFrame frame)
-   {
-      tempVector.setIncludingFrame(frame, xValue, yValue);
-      tempVector.changeFrame(weightsToPack.getReferenceFrame());
-      weightsToPack.set(tempVector);
    }
 
    private void transformValues(D1Matrix64F valuesToPack, double xValue, double yValue, ReferenceFrame currentFrame, ReferenceFrame desiredFrame)
