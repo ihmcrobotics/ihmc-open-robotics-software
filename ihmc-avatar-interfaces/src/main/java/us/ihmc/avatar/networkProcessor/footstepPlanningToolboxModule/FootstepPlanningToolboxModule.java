@@ -19,7 +19,6 @@ import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 public class FootstepPlanningToolboxModule extends ToolboxModule
@@ -27,10 +26,10 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    private final FootstepPlanningToolboxController footstepPlanningToolboxController;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
-   public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel, LogModelProvider modelProvider,
+   public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider,
                                         boolean startYoVariableServer) throws IOException
    {
-      super(drcRobotModel.getSimpleRobotName(), fullHumanoidRobotModel, modelProvider, startYoVariableServer);
+      super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), modelProvider, startYoVariableServer);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
       footstepPlanningToolboxController = new FootstepPlanningToolboxController(drcRobotModel.getContactPointParameters(),
                                                                                 drcRobotModel.getFootstepPlannerParameters(), statusOutputManager, registry,

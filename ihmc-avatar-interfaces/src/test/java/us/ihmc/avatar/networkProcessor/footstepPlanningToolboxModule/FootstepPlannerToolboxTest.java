@@ -1,31 +1,69 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
+import com.jme3.math.Transform;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import org.junit.After;
 import org.junit.Before;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.sharedMemoryDataSet.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.RemoteFootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.partNames.*;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.sensors.ContactSensorDefinition;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
@@ -40,11 +78,16 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
    private final AtomicReference<FootstepPlanningResult> footstepResultReference = new AtomicReference<>(null);
 
 
+
    @Before
    public void setup()
    {
       tryToStartModule(() -> setupFootstepPlanningToolboxModule());
       uiNode = new RemoteFootstepPlannerUI("");
+      ApplicationRunner.runApplication(uiNode);
+
+      while (!uiNode.isRunning())
+         ThreadTools.sleep(100);
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_test");
 
@@ -85,7 +128,7 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
 
    private void setupFootstepPlanningToolboxModule() throws IOException
    {
-      new FootstepPlanningToolboxModule(null, null, null, true);
+      new FootstepPlanningToolboxModule(new TestRobotModel(), null, true);
    }
 
 
@@ -248,4 +291,403 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
       return errorMessage;
    }
 
+   private class TestRobotModel implements DRCRobotModel
+   {
+      @Override
+      public DRCRobotJointMap getJointMap()
+      {
+         return null;
+      }
+
+      @Override
+      public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
+      {
+         return null;
+      }
+
+      @Override
+      public HandModel getHandModel()
+      {
+         return null;
+      }
+
+      @Override
+      public Transform getJmeTransformWristToHand(RobotSide side)
+      {
+         return null;
+      }
+
+      @Override
+      public double getSimulateDT()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getEstimatorDT()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getStandPrepAngle(String jointName)
+      {
+         return 0;
+      }
+
+      @Override
+      public DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
+      {
+         return null;
+      }
+
+      @Override
+      public DRCSensorSuiteManager getSensorSuiteManager()
+      {
+         return null;
+      }
+
+      @Override
+      public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
+                                                                            ThreadDataSynchronizerInterface threadDataSynchronizer,
+                                                                            RealtimeRos2Node realtimeRos2Node,
+                                                                            CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+      {
+         return null;
+      }
+
+      @Override
+      public LogSettings getLogSettings()
+      {
+         return null;
+      }
+
+      @Override
+      public LogModelProvider getLogModelProvider()
+      {
+         return null;
+      }
+
+      @Override
+      public String getSimpleRobotName()
+      {
+         return "TestBot";
+      }
+
+      @Override
+      public CollisionBoxProvider getCollisionBoxProvider()
+      {
+         return null;
+      }
+
+      @Override
+      public HighLevelControllerParameters getHighLevelControllerParameters()
+      {
+         return null;
+      }
+
+      @Override
+      public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
+      {
+         return null;
+      }
+
+      @Override
+      public RobotDescription getRobotDescription()
+      {
+         return null;
+      }
+
+      @Override
+      public FullHumanoidRobotModel createFullRobotModel()
+      {
+         return new TestFullRobotModel();
+      }
+
+      @Override
+      public double getControllerDT()
+      {
+         return 0;
+      }
+
+      @Override
+      public StateEstimatorParameters getStateEstimatorParameters()
+      {
+         return null;
+      }
+
+      @Override
+      public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
+      {
+         return null;
+      }
+
+      @Override
+      public WalkingControllerParameters getWalkingControllerParameters()
+      {
+         return null;
+      }
+
+      @Override
+      public RobotContactPointParameters<RobotSide> getContactPointParameters()
+      {
+         return null;
+      }
+
+      @Override
+      public DRCRobotSensorInformation getSensorInformation()
+      {
+         return null;
+      }
+
+      @Override
+      public InputStream getWholeBodyControllerParametersFile()
+      {
+         return null;
+      }
+
+      @Override
+      public FootstepPlannerParameters getFootstepPlannerParameters()
+      {
+         return new DefaultFootstepPlanningParameters();
+      }
+   }
+
+   public class TestFullRobotModel implements FullHumanoidRobotModel
+   {
+
+      @Override
+      public RobotSpecificJointNames getRobotSpecificJointNames()
+      {
+         return null;
+      }
+
+      @Override
+      public void updateFrames()
+      {
+
+      }
+
+      @Override
+      public MovingReferenceFrame getElevatorFrame()
+      {
+         return null;
+      }
+
+      @Override
+      public FloatingInverseDynamicsJoint getRootJoint()
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getElevator()
+      {
+         return null;
+      }
+
+      @Override
+      public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      {
+         return null;
+      }
+
+      @Override
+      public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
+      {
+         return null;
+      }
+
+      @Override
+      public InverseDynamicsJoint getLidarJoint(String lidarName)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getLidarBaseFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getCameraFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getRootBody()
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getHead()
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getHeadBaseFrame()
+      {
+         return null;
+      }
+
+      @Override
+      public OneDoFJoint[] getOneDoFJoints()
+      {
+         return new OneDoFJoint[0];
+      }
+
+      @Override
+      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      {
+         return null;
+      }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
+      {
+
+      }
+
+      @Override
+      public OneDoFJoint[] getControllableOneDoFJoints()
+      {
+         return new OneDoFJoint[0];
+      }
+
+      @Override
+      public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      {
+
+      }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      {
+
+      }
+
+      @Override
+      public IMUDefinition[] getIMUDefinitions()
+      {
+         return new IMUDefinition[0];
+      }
+
+      @Override
+      public ForceSensorDefinition[] getForceSensorDefinitions()
+      {
+         return new ForceSensorDefinition[0];
+      }
+
+      @Override
+      public ContactSensorDefinition[] getContactSensorDefinitions()
+      {
+         return new ContactSensorDefinition[0];
+      }
+
+      @Override
+      public double getTotalMass()
+      {
+         return 0;
+      }
+
+      @Override
+      public RigidBody getChest()
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getPelvis()
+      {
+         return null;
+      }
+
+      @Override
+      public OneDoFJoint getArmJoint(RobotSide robotSide, ArmJointName armJointName)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getHand(RobotSide robotSide)
+      {
+         return null;
+      }
+
+      @Override
+      public MovingReferenceFrame getHandControlFrame(RobotSide robotSide)
+      {
+         return null;
+      }
+
+      @Override
+      public void setJointAngles(RobotSide side, LimbName limb, double[] q)
+      {
+
+      }
+
+      @Override
+      public MovingReferenceFrame getFrameAfterLegJoint(RobotSide robotSegment, LegJointName legJointName)
+      {
+         return null;
+      }
+
+      @Override
+      public OneDoFJoint getLegJoint(RobotSide robotSegment, LegJointName legJointName)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getFoot(RobotSide robotSegment)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getEndEffector(RobotSide robotSegment, LimbName limbName)
+      {
+         return null;
+      }
+
+      @Override
+      public MovingReferenceFrame getEndEffectorFrame(RobotSide robotSegment, LimbName limbName)
+      {
+         return null;
+      }
+
+      @Override
+      public MovingReferenceFrame getSoleFrame(RobotSide robotSegment)
+      {
+         return null;
+      }
+
+      @Override
+      public SegmentDependentList<RobotSide, MovingReferenceFrame> getSoleFrames()
+      {
+         return null;
+      }
+   }
 }
