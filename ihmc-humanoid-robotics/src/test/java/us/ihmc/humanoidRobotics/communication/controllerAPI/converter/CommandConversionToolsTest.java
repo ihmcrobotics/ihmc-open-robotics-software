@@ -5,14 +5,15 @@ import java.util.Random;
 import org.junit.Assert;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandConversionTools;
 
 public class CommandConversionToolsTest
 {
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSO3()
    {
       Random random = new Random(4219L);
@@ -30,7 +31,8 @@ public class CommandConversionToolsTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testEuclidean()
    {
       Random random = new Random(5204L);
