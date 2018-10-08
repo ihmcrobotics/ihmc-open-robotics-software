@@ -156,11 +156,13 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void registerHighLevelControllerState(HighLevelControllerStateFactory controllerFactory)
    {
+      checkIfSimulationIsAlreadyCreated();
       this.highLevelControllerFactories.add(controllerFactory);
    }
 
    public void registerControllerStateTransition(ControllerStateTransitionFactory<HighLevelControllerName> controllerStateTransitionFactory)
    {
+      checkIfSimulationIsAlreadyCreated();
       this.controllerTransitionFactories.add(controllerStateTransitionFactory);
    }
 
@@ -196,11 +198,13 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setRunMultiThreaded(boolean runMultiThreaded)
    {
+      checkIfSimulationIsAlreadyCreated();
       scsInitialSetup.setRunMultiThreaded(runMultiThreaded);
    }
 
    public void setupControllerNetworkSubscriber(boolean setup)
    {
+      checkIfSimulationIsAlreadyCreated();
       setupControllerNetworkSubscriber = setup;
    }
 
@@ -211,6 +215,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setUsePerfectSensors(boolean usePerfectSensors)
    {
+      checkIfSimulationIsAlreadyCreated();
       scsInitialSetup.setUsePerfectSensors(usePerfectSensors);
    }
 
@@ -220,6 +225,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setInitializeEstimatorToActual(boolean initializeEstimatorToActual)
    {
+      checkIfSimulationIsAlreadyCreated();
       scsInitialSetup.setInitializeEstimatorToActual(initializeEstimatorToActual);
    }
 
@@ -229,6 +235,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
    {
+      checkIfSimulationIsAlreadyCreated();
       this.externalPelvisCorrectorSubscriber = externalPelvisCorrectorSubscriber;
    }
 
@@ -237,6 +244,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setGuiInitialSetup(DRCGuiInitialSetup guiInitialSetup)
    {
+      checkIfSimulationIsAlreadyCreated();
       this.guiInitialSetup = guiInitialSetup;
    }
 
@@ -245,6 +253,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setCreateYoVariableServer(boolean createYoVariableServer)
    {
+      checkIfSimulationIsAlreadyCreated();
       this.createYoVariableServer = createYoVariableServer;
    }
 
@@ -254,6 +263,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
+      checkIfSimulationIsAlreadyCreated();
       this.robotInitialSetup = robotInitialSetup;
    }
 
@@ -263,6 +273,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    @Override
    public void setStartingLocation(DRCStartingLocation startingLocation)
    {
+      checkIfSimulationIsAlreadyCreated();
       setStartingLocationOffset(startingLocation.getStartingLocationOffset());
    }
 
@@ -271,6 +282,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setStartingLocationOffset(OffsetAndYawRobotInitialSetup startingLocationOffset)
    {
+      checkIfSimulationIsAlreadyCreated();
       robotInitialSetup.setInitialYaw(startingLocationOffset.getYaw());
       robotInitialSetup.setInitialGroundHeight(startingLocationOffset.getGroundHeight());
       robotInitialSetup.setOffset(startingLocationOffset.getAdditionalOffset());
@@ -281,6 +293,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setStartingLocationOffset(Vector3D robotInitialPosition, double yaw)
    {
+      checkIfSimulationIsAlreadyCreated();
       setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(robotInitialPosition, yaw));
    }
 
@@ -292,6 +305,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setSCSCameraPosition(double positionX, double positionY, double positionZ)
    {
+      checkIfSimulationIsAlreadyCreated();
       scsCameraPosition.set(positionX, positionY, positionZ);
    }
 
@@ -303,6 +317,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    public void setSCSCameraFix(double fixX, double fixY, double fixZ)
    {
+      checkIfSimulationIsAlreadyCreated();
       scsCameraFix.set(fixX, fixY, fixZ);
    }
 
@@ -390,6 +405,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    public void setFlatGroundWalkingScriptParameters(HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
+      checkIfSimulationIsAlreadyCreated();
       this.walkingScriptParameters = walkingScriptParameters;
    }
 
@@ -459,6 +475,14 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       simulationConstructionSet.setCameraFix(scsCameraFix.getX(), scsCameraFix.getY(), scsCameraFix.getZ());
 
       return avatarSimulation;
+   }
+
+   private void checkIfSimulationIsAlreadyCreated()
+   {
+      if (avatarSimulation != null)
+      {
+         throw new RuntimeException("Too bad - you are late. Try again.");
+      }
    }
 
    public void setupHighLevelStates(HighLevelHumanoidControllerFactory controllerFactory)
