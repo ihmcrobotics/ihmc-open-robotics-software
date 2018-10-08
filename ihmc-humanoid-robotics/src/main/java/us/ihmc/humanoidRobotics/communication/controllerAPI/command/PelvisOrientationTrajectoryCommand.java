@@ -5,6 +5,7 @@ import java.util.Random;
 import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandConversionTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
@@ -58,7 +59,7 @@ public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrienta
    public void set(PelvisTrajectoryCommand command)
    {
       setEnableUserPelvisControlDuringWalking(command.isEnableUserPelvisControlDuringWalking());
-      so3Trajectory.set(command.getSE3Trajectory());
+      CommandConversionTools.convertToSO3(command.getSE3Trajectory(), so3Trajectory);
    }
 
    public boolean isEnableUserPelvisControlDuringWalking()

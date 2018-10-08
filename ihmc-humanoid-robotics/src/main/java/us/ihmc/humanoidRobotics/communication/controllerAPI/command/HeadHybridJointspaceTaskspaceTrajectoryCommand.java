@@ -4,6 +4,7 @@ import java.util.Random;
 
 import controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandConversionTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
@@ -13,6 +14,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
 {
    private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
    private final SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SE3TrajectoryControllerCommand();
+   private final SO3TrajectoryControllerCommand tempOrientationCommand = new SO3TrajectoryControllerCommand();
 
    public HeadHybridJointspaceTaskspaceTrajectoryCommand()
    {
@@ -22,7 +24,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
                                                          JointspaceTrajectoryCommand jointspaceTrajectoryCommand)
    {
       this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
-      this.taskspaceTrajectoryCommand.setToOrientationTrajectory(taskspaceTrajectoryCommand);
+      CommandConversionTools.convertToSE3(taskspaceTrajectoryCommand, this.taskspaceTrajectoryCommand);
    }
 
    public HeadHybridJointspaceTaskspaceTrajectoryCommand(Random random)
@@ -47,14 +49,16 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    public void setFromMessage(HeadHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.setToOrientationTrajectory(message.getTaskspaceTrajectoryMessage());
+      tempOrientationCommand.setFromMessage(message.getTaskspaceTrajectoryMessage());
+      CommandConversionTools.convertToSE3(tempOrientationCommand, taskspaceTrajectoryCommand);
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HeadHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.setToOrientationTrajectory(resolver, message.getTaskspaceTrajectoryMessage());
+      tempOrientationCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
+      CommandConversionTools.convertToSE3(tempOrientationCommand, taskspaceTrajectoryCommand);
    }
 
    @Override
