@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
-import javafx.application.Application;
 import org.junit.After;
 import org.junit.Test;
 import us.ihmc.commons.PrintTools;
@@ -10,14 +9,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
-import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.Messager;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -26,7 +23,7 @@ import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
 import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.ComputePathTopic;
 import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.PlannerParametersTopic;
 
-public abstract class FootstepPlannerOnRoughTerrainTest extends Application implements PlanningTest
+public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -36,7 +33,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   protected static FootstepPlannerUI ui;
+   protected JavaFXMessager messager;
    protected AtomicReference<FootstepPlannerParameters> parametersReference;
 
    public abstract boolean assertPlannerReturnedResult();
@@ -66,7 +63,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000000)
    public void testSteppingStones()
    {
       // run the test
@@ -160,7 +157,6 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
       runTestAndAssert(getTestData(hole));
    }
 
-
    protected FootstepPlannerParameters getDefaultPlannerParameters()
    {
       return new DefaultFootstepPlanningParameters();
@@ -177,14 +173,14 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
    private void runTestAndAssert(PlannerTestEnvironments.PlannerTestData testData)
    {
       FootstepPlan footstepPlan = PlannerTools
-            .runPlanner(getPlanner(), testData.getStartPose(), testData.getStartSide(), testData.getGoalPose(), testData.getPlanarRegionsList(), assertPlannerReturnedResult());
+            .runPlanner(getPlanner(), testData.getStartPose(), testData.getStartSide(), testData.getGoalPose(), testData.getPlanarRegionsList(),
+                        assertPlannerReturnedResult());
 
       if (assertPlannerReturnedResult())
          assertTrue(PlannerTools.isGoalNextToLastStep(testData.getGoalPose(), footstepPlan));
 
-      if (ui != null && visualize())
+      if (messager != null && visualize())
       {
-         Messager messager = ui.getMessager();
          parametersReference = messager.createInput(PlannerParametersTopic, getDefaultPlannerParameters());
 
          submitInfoToUI(testData, footstepPlan);
@@ -193,7 +189,8 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
 
          messager.registerTopicListener(ComputePathTopic, request -> iterateOnPlan(testData));
 
-         ThreadTools.sleepForever();
+         if (keepUp())
+            ThreadTools.sleepForever();
       }
    }
 
@@ -201,15 +198,14 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
    {
       PrintTools.info("Iterating");
       FootstepPlan footstepPlan = PlannerTools
-            .runPlanner(getPlanner(), testData.getStartPose(), testData.getStartSide(), testData.getGoalPose(), testData.getPlanarRegionsList(), assertPlannerReturnedResult());
+            .runPlanner(getPlanner(), testData.getStartPose(), testData.getStartSide(), testData.getGoalPose(), testData.getPlanarRegionsList(),
+                        assertPlannerReturnedResult());
 
       submitInfoToUI(testData, footstepPlan);
    }
 
    private void submitInfoToUI(PlannerTestEnvironments.PlannerTestData testData, FootstepPlan footstepPlan)
    {
-      JavaFXMessager messager = ui.getMessager();
-
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, testData.getGoalPosition());
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic, testData.getGoalOrientation());

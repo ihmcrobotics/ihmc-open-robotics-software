@@ -21,6 +21,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
 {
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   private static final boolean keepUp = false;
    private static final boolean visualizePlanner = false;
    private AStarFootstepPlanner planner;
    private FootstepNodeVisualization visualization = null;
@@ -67,4 +68,9 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
       return visualize;
    }
 
+   @Override
+   public boolean keepUp()
+   {
+      return keepUp;
+   }
 }

@@ -1,10 +1,6 @@
 package us.ihmc.footstepPlanning.ui;
 
-import com.sun.javafx.application.PlatformImpl;
 import controller_msgs.msg.dds.*;
-import javafx.application.Platform;
-import javafx.stage.Stage;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -20,17 +16,16 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.Ros2Node;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class FootstepPlannerUIRosNode
+public class FootstepPlannerMessageConverter
 {
    // TODO make a local thing of planar regions
 
-   private final RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_ui");
+   private final RealtimeRos2Node ros2Node;
 
-   private final FootstepPlannerUILauncher launcher;
-   private final FootstepPlannerUI ui;
    private final JavaFXMessager messager;
 
    private final String robotName;
@@ -51,42 +46,23 @@ public class FootstepPlannerUIRosNode
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
 
-   public FootstepPlannerUIRosNode(String robotName)
+   public static FootstepPlannerMessageConverter createRemoteConverter(JavaFXMessager messager, String robotName)
    {
-      this(robotName, false);
+      RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_ui");
+      return new FootstepPlannerMessageConverter(ros2Node, messager, robotName);
    }
 
-   public FootstepPlannerUIRosNode(String robotName, boolean visualize)
+   public static FootstepPlannerMessageConverter createIntraprocessConverter(JavaFXMessager messager, String robotName)
    {
+      RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "ihmc_footstep_planner_ui");
+      return new FootstepPlannerMessageConverter(ros2Node, messager, robotName);
+   }
+
+   public FootstepPlannerMessageConverter(RealtimeRos2Node ros2Node, JavaFXMessager messager, String robotName)
+   {
+      this.messager = messager;
       this.robotName = robotName;
-
-      launcher = new FootstepPlannerUILauncher(visualize);
-
-      PlatformImpl.startup(() -> {
-         Platform.runLater(new Runnable()
-         {
-            @Override
-            public void run()
-            {
-               try
-               {
-                  launcher.start(new Stage());
-               }
-               catch (Exception e)
-               {
-                  e.printStackTrace();
-               }
-            }
-         });
-      });
-      PlatformImpl.setImplicitExit(false);
-
-      while (launcher.getUI() == null)
-         ThreadTools.sleep(100);
-
-      ui = launcher.getUI();
-
-      messager = ui.getMessager();
+      this.ros2Node = ros2Node;
 
       plannerParametersReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerParametersTopic, null);
       plannerStartPositionReference = messager.createInput(FootstepPlannerUserInterfaceAPI.StartPositionTopic);
@@ -106,9 +82,8 @@ public class FootstepPlannerUIRosNode
       ros2Node.spin();
    }
 
-   public void destroy() throws Exception
+   public void destroy()
    {
-      launcher.stop();
       ros2Node.destroy();
    }
 
@@ -299,10 +274,5 @@ public class FootstepPlannerUIRosNode
       }
 
       return footstepPlan;
-   }
-
-   public FootstepPlannerUI getUI()
-   {
-      return ui;
    }
 }

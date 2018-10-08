@@ -47,32 +47,65 @@ public class PlannerTestEnvironments
    public static final String spiralStaircase = "spiralStaircase";
    public static final String hole = "hole";
 
+   public static final PlannerTestData staircaseData = new StaircaseTestData();
+   public static final PlannerTestData wallData = new WallTestData();
+   public static final PlannerTestData overCinderBlockFieldData = new OverCinderBlockFieldTestData();
+   public static final PlannerTestData steppingStonesData = new SteppingStonesTestData();
+   public static final PlannerTestData stepUpsAndDownsScoringDifficultData = new StepUpsAndDownsScoringDifficultTestData();
+   public static final PlannerTestData stepAfterPitchDownData = new StepAfterPitchDownTestData();
+   public static final PlannerTestData stepAfterPitchUpData = new StepAfterPitchUpTestData();
+   public static final PlannerTestData compareStepBeforeGapData = new CompareStepBeforeGapTestData();
+   public static final PlannerTestData simpleStepOnBoxData = new SimpleStepOnBoxTestData();
+   public static final PlannerTestData simpleStepOnBoxTwoData = new SimpleStepOnBoxTwoTestData();
+   public static final PlannerTestData randomData = new RandomTestData();
+   public static final PlannerTestData simpleGapsData = new SimpleGapsTestData();
+   public static final PlannerTestData partialGapsData = new PartialGapsTestData();
+   public static final PlannerTestData boxData = new BoxTestData();
+   public static final PlannerTestData spiralStaircaseData = new SpiralStaircaseTestData();
+   public static final PlannerTestData holeData = new HoleTestData();
+
+
    public static PlannerTestData getTestData(String test)
    {
-      return testDataSets.get(test);
+      switch (test)
+      {
+      case staircase:
+         return staircaseData;
+      case wall:
+         return wallData;
+      case overCinderBlockField:
+         return overCinderBlockFieldData;
+      case steppingStones:
+         return steppingStonesData;
+      case stepUpsAndDownsScoringDifficult:
+         return stepUpsAndDownsScoringDifficultData;
+      case stepAfterPitchDown:
+         return stepAfterPitchDownData;
+      case stepAfterPitchUp:
+         return stepAfterPitchUpData;
+      case compareStepBeforeGap:
+         return compareStepBeforeGapData;
+      case simpleStepOnBox:
+         return simpleStepOnBoxData;
+      case simpleStepOnBoxTwo:
+         return simpleStepOnBoxTwoData;
+      case random:
+         return randomData;
+      case simpleGaps:
+         return simpleGapsData;
+      case partialGaps:
+         return partialGapsData;
+      case box:
+         return boxData;
+      case spiralStaircase:
+         return spiralStaircaseData;
+      default:
+         return holeData;
+      }
    }
 
-   private static HashMap<String, PlannerTestData> testDataSets = new HashMap<>();
-   {
-      testDataSets.put(staircase, new StaircaseTestData());
-      testDataSets.put(wall, new WallTestData());
-      testDataSets.put(overCinderBlockField, new OverCinderBlockFieldTestData());
-      testDataSets.put(steppingStones, new SteppingStonesTestData());
-      testDataSets.put(stepUpsAndDownsScoringDifficult, new StepUpsAndDownsScoringDifficultTestData());
-      testDataSets.put(stepAfterPitchUp, new StepAfterPitchUpTestData());
-      testDataSets.put(stepAfterPitchDown, new StepAfterPitchDownTestData());
-      testDataSets.put(compareStepBeforeGap, new CompareStepBeforeGapTestData());
-      testDataSets.put(simpleStepOnBox, new SimpleStepOnBoxTestData());
-      testDataSets.put(simpleStepOnBoxTwo, new SimpleStepOnBoxTwoTestData());
-      testDataSets.put(random, new RandomTestData());
-      testDataSets.put(simpleGaps, new SimpleGapsTestData());
-      testDataSets.put(partialGaps, new PartialGapsTestData());
-      testDataSets.put(box, new BoxTestData());
-      testDataSets.put(spiralStaircase, new SpiralStaircaseTestData());
-      testDataSets.put(hole, new HoleTestData());
-   }
 
-   private class StaircaseTestData extends PlannerTestData
+   private static class StaircaseTestData extends PlannerTestData
    {
       public StaircaseTestData()
       {
@@ -95,7 +128,7 @@ public class PlannerTestEnvironments
       }
    }
 
-   private class WallTestData extends PlannerTestData
+   private static class WallTestData extends PlannerTestData
    {
       public WallTestData()
       {
@@ -122,7 +155,6 @@ public class PlannerTestEnvironments
          FramePose3D goalPose = new FramePose3D(worldFrame);
          goalPose.setPosition(2.0, 0.0, 0.0);
 
-
          setStartPose(initialStanceFootPose);
          setGoalPose(goalPose);
          setPlanarRegions(regions);
@@ -130,7 +162,7 @@ public class PlannerTestEnvironments
       }
    }
 
-   private class OverCinderBlockFieldTestData extends PlannerTestData
+   private static class OverCinderBlockFieldTestData extends PlannerTestData
    {
       public OverCinderBlockFieldTestData()
       {
@@ -164,7 +196,7 @@ public class PlannerTestEnvironments
       }
    }
 
-   private class SteppingStonesTestData extends PlannerTestData
+   private static class SteppingStonesTestData extends PlannerTestData
    {
       public SteppingStonesTestData()
       {
@@ -188,7 +220,7 @@ public class PlannerTestEnvironments
       }
    }
 
-   private class StepUpsAndDownsScoringDifficultTestData extends PlannerTestData
+   private static class StepUpsAndDownsScoringDifficultTestData extends PlannerTestData
    {
       public StepUpsAndDownsScoringDifficultTestData()
       {
@@ -232,7 +264,7 @@ public class PlannerTestEnvironments
 
    }
 
-   private class StepAfterPitchUpTestData extends CompareAfterPitchedStep
+   private static class StepAfterPitchUpTestData extends CompareAfterPitchedStep
    {
       public StepAfterPitchUpTestData()
       {
@@ -240,7 +272,7 @@ public class PlannerTestEnvironments
       }
    }
 
-   private class StepAfterPitchDownTestData extends CompareAfterPitchedStep
+   private static class StepAfterPitchDownTestData extends CompareAfterPitchedStep
    {
       public StepAfterPitchDownTestData()
       {
@@ -248,7 +280,7 @@ public class PlannerTestEnvironments
       }
    }
 
-   private class CompareAfterPitchedStep extends PlannerTestData
+   private static class CompareAfterPitchedStep extends PlannerTestData
    {
       public CompareAfterPitchedStep(String name, boolean pitchCinderBack)
       {
@@ -320,7 +352,7 @@ public class PlannerTestEnvironments
       }
    }
 
-   private class CompareStepBeforeGapTestData extends PlannerTestData
+   private static class CompareStepBeforeGapTestData extends PlannerTestData
    {
       public CompareStepBeforeGapTestData()
       {
@@ -364,7 +396,7 @@ public class PlannerTestEnvironments
       }
    }
 
-   private class SimpleStepOnBoxTestData extends PlannerTestData
+   private static class SimpleStepOnBoxTestData extends PlannerTestData
    {
       public SimpleStepOnBoxTestData()
       {
@@ -395,7 +427,7 @@ public class PlannerTestEnvironments
       }
    }
 
-   private class SimpleStepOnBoxTwoTestData extends PlannerTestData
+   private static class SimpleStepOnBoxTwoTestData extends PlannerTestData
    {
       public SimpleStepOnBoxTwoTestData()
       {
@@ -440,7 +472,7 @@ public class PlannerTestEnvironments
       }
    }
 
-   private class RandomTestData extends PlannerTestData
+   private static class RandomTestData extends PlannerTestData
    {
       public RandomTestData()
       {
@@ -491,7 +523,7 @@ public class PlannerTestEnvironments
       return planarRegionsList;
    }
 
-   private class SimpleGapsTestData extends PlannerTestData
+   private static class SimpleGapsTestData extends PlannerTestData
    {
       public SimpleGapsTestData()
       {
@@ -534,7 +566,7 @@ public class PlannerTestEnvironments
       }
    }
 
-   private class PartialGapsTestData extends PlannerTestData
+   private static class PartialGapsTestData extends PlannerTestData
    {
       public PartialGapsTestData()
       {
@@ -567,7 +599,6 @@ public class PlannerTestEnvironments
 
          PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-
          setStartPose(initialStanceFootPose);
          setGoalPose(goalPose);
          setPlanarRegions(planarRegionsList);
@@ -576,7 +607,7 @@ public class PlannerTestEnvironments
 
    }
 
-   private class BoxTestData extends PlannerTestData
+   private static class BoxTestData extends PlannerTestData
    {
       public BoxTestData()
       {
@@ -602,7 +633,7 @@ public class PlannerTestEnvironments
       }
    }
 
-   private class SpiralStaircaseTestData extends PlannerTestData
+   private static class SpiralStaircaseTestData extends PlannerTestData
    {
       public SpiralStaircaseTestData()
       {
@@ -672,7 +703,7 @@ public class PlannerTestEnvironments
 
    }
 
-   private class HoleTestData extends PlannerTestData
+   private static class HoleTestData extends PlannerTestData
    {
       public HoleTestData()
       {
@@ -702,7 +733,6 @@ public class PlannerTestEnvironments
          FramePose3D goalPose = new FramePose3D(worldFrame);
          goalPose.setPosition(1.3, 0.0, 0.0);
 
-
          setStartPose(initialStanceFootPose);
          setGoalPose(goalPose);
          setPlanarRegions(planarRegionsList);
@@ -710,7 +740,7 @@ public class PlannerTestEnvironments
       }
    }
 
-   public class PlannerTestData
+   public static class PlannerTestData
    {
       private final String name;
 
@@ -744,7 +774,6 @@ public class PlannerTestEnvironments
       {
          this.startSide = startSide;
       }
-
 
       public Point3D getStartPosition()
       {

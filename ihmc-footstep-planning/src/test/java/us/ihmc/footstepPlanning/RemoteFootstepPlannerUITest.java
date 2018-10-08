@@ -23,7 +23,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.ui.FootstepPlannerUIRosNode;
+import us.ihmc.footstepPlanning.ui.ApplicationRunner;
+import us.ihmc.footstepPlanning.ui.RemoteFootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
@@ -43,7 +44,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
 
-public class FootstepPlannerUIRosNodeTest
+public class RemoteFootstepPlannerUITest
 {
    private static final int iters = 1;
    private static final double epsilon = 1e-5;
@@ -52,7 +53,8 @@ public class FootstepPlannerUIRosNodeTest
    private static final String robotName = "testBot";
 
    private RealtimeRos2Node localNode;
-   private FootstepPlannerUIRosNode uiNode;
+   private RemoteFootstepPlannerUI uiNode;
+   private JavaFXMessager messager;
 
    private final AtomicReference<FootstepPlanningRequestPacket> planningRequestReference = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlannerParametersPacket> footstepPlannerParametersReference = new AtomicReference<>(null);
@@ -61,7 +63,10 @@ public class FootstepPlannerUIRosNodeTest
    public void setup()
    {
       localNode = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_test");
-      uiNode = new FootstepPlannerUIRosNode(robotName, VISUALIZE);
+      uiNode = new RemoteFootstepPlannerUI(robotName, VISUALIZE);
+      ApplicationRunner.runApplication(uiNode);
+
+      messager = uiNode.getMessager();
    }
 
    @After
@@ -71,7 +76,7 @@ public class FootstepPlannerUIRosNodeTest
          ThreadTools.sleep(10);
 
       localNode.destroy();
-      uiNode.destroy();
+      uiNode.stop();
 
       uiNode = null;
       localNode = null;
@@ -88,8 +93,6 @@ public class FootstepPlannerUIRosNodeTest
                                            ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       localNode.spin();
-
-      JavaFXMessager messager = uiNode.getUI().getMessager();
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -171,8 +174,6 @@ public class FootstepPlannerUIRosNodeTest
             .createPublisher(localNode, FootstepPlanningRequestPacket.class,
                              ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
       localNode.spin();
-
-      JavaFXMessager messager = uiNode.getUI().getMessager();
 
       AtomicReference<Point3D> goalPositionReference = messager.createInput(FootstepPlannerUserInterfaceAPI.GoalPositionTopic);
       AtomicReference<Point3D> startPositionReference = messager.createInput(FootstepPlannerUserInterfaceAPI.StartPositionTopic);
@@ -260,8 +261,6 @@ public class FootstepPlannerUIRosNodeTest
                                            s -> processFootstepPlannerParametersPacket(s.takeNextData()));
       localNode.spin();
 
-      JavaFXMessager messager = uiNode.getUI().getMessager();
-
       for (int iter = 0; iter < iters; iter++)
       {
          FootstepPlannerParameters randomParameters = createRandomParameters(random);
@@ -322,8 +321,6 @@ public class FootstepPlannerUIRosNodeTest
                              ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT));
 
       localNode.spin();
-      JavaFXMessager messager = uiNode.getUI().getMessager();
-
       AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic);
       AtomicReference<FootstepPlan> footstepPlanReference = messager.createInput(FootstepPlannerUserInterfaceAPI.FootstepPlanTopic);
       AtomicReference<Integer> sequenceIdReference = messager.createInput(FootstepPlannerUserInterfaceAPI.SequenceIdTopic);

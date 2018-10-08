@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.frameworkTests;
+package us.ihmc.footstepPlanning.sharedMemoryDataSet;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -7,25 +7,20 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
-import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUI;
-import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUILauncher;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
 
-public abstract class FootstepPlannerFrameworkTest extends DataSetFrameworkTest
+public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
 
-   protected StandaloneFootstepPlannerUI ui;
-   protected StandaloneFootstepPlannerUILauncher launcher;
+   protected JavaFXMessager messager;
 
    @Override
    public void submitDataSet(FootstepPlannerUnitTestDataset dataset)
    {
-      JavaFXMessager messager = ui.getMessager();
-
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartPositionTopic, dataset.getStart());
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, dataset.getGoal());
@@ -39,8 +34,6 @@ public abstract class FootstepPlannerFrameworkTest extends DataSetFrameworkTest
    @Override
    public String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset)
    {
-      JavaFXMessager messager = ui.getMessager();
-
       AtomicReference<Boolean> receivedPlan = new AtomicReference<>(false);
       AtomicReference<Boolean> receivedResult = new AtomicReference<>(false);
       messager.registerTopicListener(FootstepPlanTopic, request -> receivedPlan.set(true));

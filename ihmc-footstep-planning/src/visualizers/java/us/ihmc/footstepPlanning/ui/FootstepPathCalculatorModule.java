@@ -22,6 +22,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,7 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
 
-public class FootstepPathCalculator
+public class FootstepPathCalculatorModule
 {
    private static final boolean VERBOSE = true;
 
@@ -55,7 +56,7 @@ public class FootstepPathCalculator
 
    private final Messager messager;
 
-   public FootstepPathCalculator(Messager messager)
+   public FootstepPathCalculatorModule(Messager messager)
    {
       this.messager = messager;
 
@@ -201,5 +202,10 @@ public class FootstepPathCalculator
       footstepPlanner.setExitAfterInitialSolution(false);
 
       return footstepPlanner;
+   }
+
+   public static FootstepPathCalculatorModule createMessagerModule(JavaFXMessager messager)
+   {
+      return new FootstepPathCalculatorModule(messager);
    }
 }

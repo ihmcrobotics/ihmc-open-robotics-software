@@ -1,26 +1,24 @@
-package us.ihmc.footstepPlanning.frameworkTests;
+package us.ihmc.footstepPlanning.sharedMemoryDataSet;
 
-import com.sun.javafx.application.PlatformImpl;
-import javafx.application.Platform;
-import javafx.stage.Stage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUILauncher;
+import us.ihmc.footstepPlanning.ui.ApplicationRunner;
+import us.ihmc.footstepPlanning.ui.SharedMemoryFootstepPlannerUI;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
-public class PlanThenSnapFrameworkTest extends FootstepPlannerFrameworkTest
+public class SharedMemoryPlanarRegionBipedalDataSetTest extends SharedMemoryPlannerDataSetTest
 {
+   private SharedMemoryFootstepPlannerUI launcher;
    @Override
    public FootstepPlannerType getPlannerType()
    {
-      return FootstepPlannerType.PLAN_THEN_SNAP;
+      return FootstepPlannerType.PLANAR_REGION_BIPEDAL;
    }
 
    @Test(timeout = 500000)
@@ -36,47 +34,26 @@ public class PlanThenSnapFrameworkTest extends FootstepPlannerFrameworkTest
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
-
-      StandaloneFootstepPlannerUILauncher launcher = new StandaloneFootstepPlannerUILauncher(VISUALIZE);
-      PlatformImpl.startup(() -> {
-         Platform.runLater(new Runnable()
-         {
-            @Override
-            public void run()
-            {
-               try
-               {
-                  launcher.start(new Stage());
-               }
-               catch (Exception e)
-               {
-                  e.printStackTrace();
-               }
-            }
-         });
-      });
-
-      while (launcher.getUI() == null)
-         ThreadTools.sleep(100);
-
-      ui = launcher.getUI();
+      launcher = new SharedMemoryFootstepPlannerUI(VISUALIZE);
+      ApplicationRunner.runApplication(launcher);
+      messager = launcher.getMessager();
    }
 
    @After
    public void tearDown() throws Exception
    {
-      ui.stop();
       launcher.stop();
+      messager = null;
       launcher = null;
    }
 
-
    public static void main(String[] args) throws Exception
    {
-      PlanThenSnapFrameworkTest test = new PlanThenSnapFrameworkTest();
+      VISUALIZE = true;
+      SharedMemoryPlanarRegionBipedalDataSetTest test = new SharedMemoryPlanarRegionBipedalDataSetTest();
       String prefix = "unitTestData/testable/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171218_205040_SimpleMaze");
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
       test.tearDown();
 
    }

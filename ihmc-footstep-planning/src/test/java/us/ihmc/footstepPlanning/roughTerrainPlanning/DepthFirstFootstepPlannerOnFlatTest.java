@@ -28,6 +28,7 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    private DepthFirstFootstepPlanner planner;
 
    private static final boolean visualize = false; // !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   private static final boolean keepUp = false;
    private static final boolean showPlannerVisualizer = false;
 
    @Override
@@ -122,5 +123,11 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    public boolean visualize()
    {
       return visualize;
+   }
+
+   @Override
+   public boolean keepUp()
+   {
+      return keepUp;
    }
 }
