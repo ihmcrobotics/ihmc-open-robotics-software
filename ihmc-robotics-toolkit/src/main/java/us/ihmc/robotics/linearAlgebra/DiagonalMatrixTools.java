@@ -1314,7 +1314,7 @@ public class DiagonalMatrixTools
          innerDiagonalMultAddBlockTransA_vector(a, b, c, d, rowStart, colStart);
    }
 
-   public static void innerDiagonalMultAddBlockTransA_matrix(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, int rowStart, int colStart)
+   private static void innerDiagonalMultAddBlockTransA_matrix(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, int rowStart, int colStart)
    {
       if (b.numCols != c.numRows)
          throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
@@ -1345,7 +1345,7 @@ public class DiagonalMatrixTools
       }
    }
 
-   public static void innerDiagonalMultAddBlockTransA_vector(RowD1Matrix64F a, D1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, int rowStart, int colStart)
+   private static void innerDiagonalMultAddBlockTransA_vector(RowD1Matrix64F a, D1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, int rowStart, int colStart)
    {
       if (a.numRows != c.numRows)
          throw new MatrixDimensionException("The 'b' and 'c' matrices do not have compatible dimensions");
@@ -1408,7 +1408,7 @@ public class DiagonalMatrixTools
          innerDiagonalMultAddBlockTransA_vector(a, b, c, d, e, rowStart, colStart);
    }
 
-   public static void innerDiagonalMultAddBlockTransA_matrix(double a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, RowD1Matrix64F e, int rowStart,
+   private static void innerDiagonalMultAddBlockTransA_matrix(double a, RowD1Matrix64F b, RowD1Matrix64F c, RowD1Matrix64F d, RowD1Matrix64F e, int rowStart,
                                                              int colStart)
    {
       if (c.numCols != d.numRows)
