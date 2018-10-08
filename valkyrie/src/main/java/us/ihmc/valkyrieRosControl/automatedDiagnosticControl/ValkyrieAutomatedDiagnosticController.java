@@ -228,7 +228,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       }
 
       stateEstimator.doControl();
-      forceSensorStateUpdater.initialize();
+      forceSensorStateUpdater.updateForceSensorState();
 
       if (!startController.getBooleanValue())
       {
