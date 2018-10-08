@@ -422,6 +422,13 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          stateEstimator.initializeEstimator(rootJointTransform);
    }
 
+   // Used by the Atlas stand prep state.
+   @Deprecated
+   public StateEstimatorController getStateEstimator()
+   {
+      return stateEstimator;
+   }
+
    public List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()
    {
       return sensorOutputMapReadOnly.getIMUProcessedOutputs();
