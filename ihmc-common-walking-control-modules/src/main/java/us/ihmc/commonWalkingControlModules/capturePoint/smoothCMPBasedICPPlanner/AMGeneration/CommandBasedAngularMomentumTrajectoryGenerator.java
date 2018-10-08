@@ -30,12 +30,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private static final int waypointsPerWalkingPhase = 12;
    private static final int numberOfTrajectoryCoefficients = 4;
    private static final FramePoint3D zeroPoint = new FramePoint3D();
-
-   static
-   {
-      zeroPoint.setToZero();
-   }
-
+   
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final YoDouble time;
