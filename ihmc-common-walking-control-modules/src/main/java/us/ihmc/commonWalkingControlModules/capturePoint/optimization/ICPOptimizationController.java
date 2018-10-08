@@ -196,8 +196,6 @@ private final DenseMatrix64F footstepWeights = new DenseMatrix64F(2, 2);
 
    private boolean initialized = false;
 
-   private final DoubleProvider minimumFeedbackWeight;
-   private final DoubleProvider minimumFootstepWeight;
    private final BooleanProvider considerAngularMomentumInAdjustment;
    private final BooleanProvider considerFeedbackInAdjustment;
 
@@ -302,8 +300,6 @@ private final DenseMatrix64F footstepWeights = new DenseMatrix64F(2, 2);
       boolean updateRateAutomatically = true;
       solver = new ICPOptimizationQPSolver(totalVertices, COMPUTE_COST_TO_GO, updateRateAutomatically);
 
-      minimumFeedbackWeight = new DoubleParameter(yoNamePrefix + "MinimumFeedbackWeight", registry, icpOptimizationParameters.getMinimumFeedbackWeight());
-      minimumFootstepWeight = new DoubleParameter(yoNamePrefix + "MinimumFootstepWeight", registry, icpOptimizationParameters.getMinimumFootstepWeight());
       considerAngularMomentumInAdjustment = new BooleanParameter(yoNamePrefix + "ConsiderAngularMomentumInAdjustment", registry,
                                                                  icpOptimizationParameters.considerAngularMomentumInAdjustment());
       considerFeedbackInAdjustment = new BooleanParameter(yoNamePrefix + "ConsiderFeedbackInAdjustment", registry,
@@ -637,8 +633,6 @@ private final DenseMatrix64F footstepWeights = new DenseMatrix64F(2, 2);
          initialized = true;
       }
 
-      solver.setMinimumFeedbackWeight(minimumFeedbackWeight.getValue());
-      solver.setMinimumFootstepWeight(minimumFootstepWeight.getValue());
       solver.setConsiderAngularMomentumInAdjustment(considerAngularMomentumInAdjustment.getValue());
       solver.setConsiderFeedbackInAdjustment(considerFeedbackInAdjustment.getValue());
 

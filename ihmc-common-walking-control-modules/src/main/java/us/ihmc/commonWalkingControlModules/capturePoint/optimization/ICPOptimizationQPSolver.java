@@ -169,11 +169,6 @@ public class ICPOptimizationQPSolver
    /** boolean indicating whether or not the feedback rate term has been added and can be used. */
    private boolean hasFeedbackRateTerm = false;
 
-   /** Minimum allowable weight on the step adjustment task. */
-   private double minimumFootstepWeight;
-   /** Minimum allowable weight on the feedback task. */
-   private double minimumFeedbackWeight;
-
    private double maxFeedbackXMagnitude = Double.POSITIVE_INFINITY;
    private double maxFeedbackYMagnitude = Double.POSITIVE_INFINITY;
    private double maximumFeedbackRate = Double.POSITIVE_INFINITY;
@@ -208,9 +203,6 @@ public class ICPOptimizationQPSolver
       indexHandler = new ICPQPIndexHandler();
       inputCalculator = new ICPQPInputCalculator(indexHandler);
       constraintCalculator = new ICPQPConstraintCalculator(indexHandler);
-
-      this.minimumFootstepWeight = 0.0;
-      this.minimumFeedbackWeight = 0.0;
 
       int maximumNumberOfFreeVariables = 6;
       int maximumNumberOfLagrangeMultipliers = 8;
@@ -286,32 +278,6 @@ public class ICPOptimizationQPSolver
       boolean ret = resetActiveSet;
       resetActiveSet = false;
       return ret;
-   }
-
-   /**
-    * Sets a lower limit for the optimization weight for the feedback objective. When calling
-    * {@link #setFeedbackConditions(double, double, double, double, double)} the user can provide
-    * weights for the feedback conditions. If they are lower then the value specified here they will
-    * be increased to {@link #minimumFeedbackWeight}.
-    *
-    * @param minimumFeedbackWeight the new value {@link #minimumFeedbackWeight}.
-    */
-   public void setMinimumFeedbackWeight(double minimumFeedbackWeight)
-   {
-      this.minimumFeedbackWeight = minimumFeedbackWeight;
-   }
-
-   /**
-    * Sets a lower limit for the optimization weight for the feedback objective. When calling
-    * {@link #setFootstepAdjustmentConditions(double, double, double, double, double)} the user can provide
-    * weights for the feedback conditions. If they are lower then the value specified here they will
-    * be increased to {@link #minimumFootstepWeight}.
-    *
-    * @param minimumFootstepWeight the new value {@link #minimumFootstepWeight}.
-    */
-   public void setMinimumFootstepWeight(double minimumFootstepWeight)
-   {
-      this.minimumFootstepWeight = minimumFootstepWeight;
    }
 
    /**
