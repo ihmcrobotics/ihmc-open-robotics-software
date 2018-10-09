@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning;
 
 import controller_msgs.msg.dds.*;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -52,22 +51,14 @@ public class RemoteFootstepPlannerUITest
    private static final boolean VISUALIZE = false;
    private static final String robotName = "testBot";
 
-   private RealtimeRos2Node localNode;
-   private RemoteFootstepPlannerUI uiNode;
-   private JavaFXMessager messager;
+   private RealtimeRos2Node localNode = null;
+   private RemoteFootstepPlannerUI uiNode = null;
+   private JavaFXMessager messager = null;
+   private DomainFactory.PubSubImplementation pubSubImplementation = null;
 
    private final AtomicReference<FootstepPlanningRequestPacket> planningRequestReference = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlannerParametersPacket> footstepPlannerParametersReference = new AtomicReference<>(null);
 
-   @Before
-   public void setup()
-   {
-      localNode = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_test");
-      uiNode = new RemoteFootstepPlannerUI(robotName, VISUALIZE);
-      ApplicationRunner.runApplication(uiNode);
-
-      messager = uiNode.getMessager();
-   }
 
    @After
    public void tearDown() throws Exception
@@ -80,13 +71,93 @@ public class RemoteFootstepPlannerUITest
 
       uiNode = null;
       localNode = null;
+      pubSubImplementation = null;
 
       planningRequestReference.set(null);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 6.0)
+
+   public void setup()
+   {
+      localNode = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
+      uiNode = RemoteFootstepPlannerUI.createUI(robotName, pubSubImplementation, VISUALIZE);
+      ApplicationRunner.runApplication(uiNode);
+
+      messager = uiNode.getMessager();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 2.2)
    @Test(timeout = 30000)
-   public void testSendingFootstepPlanningRequestPacketFromUI()
+   public void testSendingFootstepPlanningRequestPacketFromUIIntraprocess()
+   {
+      pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
+      setup();
+      runPlanningRequestTestFromUI();
+   }
+   @ContinuousIntegrationTest(estimatedDuration = 2.2)
+   @Test(timeout = 30000)
+   public void testSendingFootstepPlanningRequestPacketFromUIFastRTPS()
+   {
+      pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
+      setup();
+      runPlanningRequestTestFromUI();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 2.5)
+   @Test(timeout = 30000)
+   public void testSendingFootstepPlannerRequestPacketToUIIntraprocess()
+   {
+      pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
+      setup();
+      runPlannerRequestToUI();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 2.4)
+   @Test(timeout = 30000)
+   public void testSendingFootstepPlannerRequestPacketToUIFastRTPS()
+   {
+      pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
+      setup();
+      runPlannerRequestToUI();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 4.5)
+   @Test(timeout = 30000)
+   public void testSendingFootstepPlannerParametersPacketIntraprocess()
+   {
+      pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
+      setup();
+      runPlannerParametersPacket();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 2.3)
+   @Test(timeout = 30000)
+   public void testSendingFootstepPlannerParametersPacketFastRTPS()
+   {
+      pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
+      setup();
+      runPlannerParametersPacket();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 2.3)
+   @Test(timeout = 30000)
+   public void testSendingFootstepPlannerOutputStatusToUIIntraprocess()
+   {
+      pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
+      setup();
+      runOutputStatusToUI();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 4.0)
+   @Test(timeout = 30000)
+   public void testSendingFootstepPlannerOutputStatusToUIFastRTPS()
+   {
+      pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
+      setup();
+      runOutputStatusToUI();
+   }
+
+   private void runPlanningRequestTestFromUI()
    {
       Random random = new Random(1738L);
       ROS2Tools.createCallbackSubscription(localNode, FootstepPlanningRequestPacket.class,
@@ -155,19 +226,8 @@ public class RemoteFootstepPlannerUITest
       }
    }
 
-   private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
-   {
-      planningRequestReference.set(packet);
-   }
 
-   private void processFootstepPlannerParametersPacket(FootstepPlannerParametersPacket packet)
-   {
-      footstepPlannerParametersReference.set(packet);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 6.0)
-   @Test(timeout = 30000)
-   public void testSendingFootstepPlannerRequestPacketToUI()
+   private void runPlannerRequestToUI()
    {
       Random random = new Random(1738L);
       IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = ROS2Tools
@@ -252,8 +312,8 @@ public class RemoteFootstepPlannerUITest
 
    }
 
-   @Test
-   public void testSendingFootstepPlannerParametersPacket()
+
+   private void runPlannerParametersPacket()
    {
       Random random = new Random(1738L);
       ROS2Tools.createCallbackSubscription(localNode, FootstepPlannerParametersPacket.class,
@@ -312,8 +372,8 @@ public class RemoteFootstepPlannerUITest
       }
    }
 
-   @Test
-   public void testSendingFootstepPlannerOutputStatusToUI()
+
+   private void runOutputStatusToUI()
    {
       Random random = new Random(1738L);
       IHMCRealtimeROS2Publisher<FootstepPlanningToolboxOutputStatus> footstepOutputStatusPublisher = ROS2Tools
@@ -366,6 +426,16 @@ public class RemoteFootstepPlannerUITest
          for (int i = 0; i < 100; i++)
             ThreadTools.sleep(10);
       }
+   }
+
+   private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
+   {
+      planningRequestReference.set(packet);
+   }
+
+   private void processFootstepPlannerParametersPacket(FootstepPlannerParametersPacket packet)
+   {
+      footstepPlannerParametersReference.set(packet);
    }
 
    private static PlanarRegionsList createRandomPlanarRegionList(Random random)

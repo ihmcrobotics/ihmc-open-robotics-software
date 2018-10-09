@@ -57,7 +57,6 @@ public abstract class FootstepPlannerDataSetTest
 
       while (dataset != null)
       {
-
          if (DEBUG)
          {
             PrintTools.info("Processing file: " + dataset.getDatasetName());

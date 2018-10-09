@@ -19,7 +19,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class FootstepPlannerMessageConverter
+public class FootstepPlannerUIMessageConverter
 {
    // TODO make a local thing of planar regions
 
@@ -45,19 +45,23 @@ public class FootstepPlannerMessageConverter
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
 
-   public static FootstepPlannerMessageConverter createRemoteConverter(JavaFXMessager messager, String robotName)
+   public static FootstepPlannerUIMessageConverter createRemoteConverter(JavaFXMessager messager, String robotName)
    {
-      RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_ui");
-      return new FootstepPlannerMessageConverter(ros2Node, messager, robotName);
+      return createConverter(messager, robotName, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
-   public static FootstepPlannerMessageConverter createIntraprocessConverter(JavaFXMessager messager, String robotName)
+   public static FootstepPlannerUIMessageConverter createIntraprocessConverter(JavaFXMessager messager, String robotName)
    {
-      RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "ihmc_footstep_planner_ui");
-      return new FootstepPlannerMessageConverter(ros2Node, messager, robotName);
+      return createConverter(messager, robotName, DomainFactory.PubSubImplementation.INTRAPROCESS);
    }
 
-   public FootstepPlannerMessageConverter(RealtimeRos2Node ros2Node, JavaFXMessager messager, String robotName)
+   public static FootstepPlannerUIMessageConverter createConverter(JavaFXMessager messager, String robotName, DomainFactory.PubSubImplementation implementation)
+   {
+      RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "ihmc_footstep_planner_ui");
+      return new FootstepPlannerUIMessageConverter(ros2Node, messager, robotName);
+   }
+
+   public FootstepPlannerUIMessageConverter(RealtimeRos2Node ros2Node, JavaFXMessager messager, String robotName)
    {
       this.messager = messager;
       this.robotName = robotName;
@@ -88,26 +92,17 @@ public class FootstepPlannerMessageConverter
 
    private void registerPubSubs(RealtimeRos2Node ros2Node)
    {
-      registerSubscribers(ros2Node);
-      registerPublishers(ros2Node);
-   }
-
-   private void registerSubscribers(RealtimeRos2Node ros2Node)
-   {
+      /* subscribers */
+      // we want to listen to the incoming request to the planning toolbox
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningRequestPacket.class, getPlanningToolboxSubscriberNameGenerator(),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
+      // we want to listen to the resulting plan from the toolbox
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class, getPlanningToolboxPublisherNameGenerator(),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
-      // TODO visualize node status
 
-   }
-
-   private void registerPublishers(RealtimeRos2Node ros2Node)
-   {
-      plannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerParametersPacket.class, ROS2Tools
-            .getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
-      footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class, ROS2Tools
-            .getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
+      // publishers
+      plannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerParametersPacket.class, getPlanningToolboxSubscriberNameGenerator());
+      footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class, getPlanningToolboxSubscriberNameGenerator());
 
       messager.registerTopicListener(FootstepPlannerUserInterfaceAPI.ComputePathTopic, request -> requestNewPlan());
    }
@@ -244,7 +239,6 @@ public class FootstepPlannerMessageConverter
    {
       return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
    }
-
 
    private ROS2Tools.MessageTopicNameGenerator getPlanningToolboxPublisherNameGenerator()
    {
