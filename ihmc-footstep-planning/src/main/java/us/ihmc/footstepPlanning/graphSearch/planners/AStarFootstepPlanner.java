@@ -40,6 +40,7 @@ import java.util.PriorityQueue;
 public class AStarFootstepPlanner implements FootstepPlanner
 {
    private static final boolean debug = false;
+   private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -107,6 +108,11 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
    {
+      if (side == null)
+      {
+         PrintTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
+         side = defaultStartNodeSide;
+      }
       startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), side);
       RigidBodyTransform startNodeSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, stanceFootPose);
       snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransform));
@@ -223,6 +229,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
 //      RigidBodyTransform snapTransform = snapper.snapFootstepNode(startNode).getSnapTransform();
 //      FootstepNodeSnappingTools.constructGroundPlaneAroundFeet(planarRegionsList, startNode, snapTransform, parameters.getIdealFootstepWidth(), 0.5, 0.2,  0.5);
+
 
       stack.add(startNode);
       expandedNodes = new HashSet<>();
