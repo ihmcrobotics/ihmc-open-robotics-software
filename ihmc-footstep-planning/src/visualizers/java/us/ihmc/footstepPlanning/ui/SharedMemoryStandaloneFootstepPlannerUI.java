@@ -27,6 +27,11 @@ public class SharedMemoryStandaloneFootstepPlannerUI extends Application
       this.visualize = visualize;
    }
 
+   public SharedMemoryStandaloneFootstepPlannerUI()
+   {
+      this(true);
+   }
+
    @Override
    public void start(Stage primaryStage) throws Exception
    {
