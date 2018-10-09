@@ -214,7 +214,7 @@ public class WholeBodyTrajectoryToolboxData
 
                Pose3D currentSpatial = rigidBodyDataMap.get(rigidBody).getPoseToWorldFrame(node.getSpatialData(i));
 
-               Pose3D closestPose = manifold.computeClosestPoseOnManifold(currentSpatial);
+               Pose3D closestPose = null;//manifold.computeClosestPoseOnManifold(currentSpatial);
 
                distance = currentSpatial.getPositionDistance(closestPose);
             }
@@ -237,7 +237,7 @@ public class WholeBodyTrajectoryToolboxData
 
                Pose3D currentSpatial = rigidBodyDataMap.get(rigidBody).getPoseToWorldFrame(node.getSpatialData(i));
 
-               Pose3D closestPose = manifold.computeClosestPoseOnManifold(currentSpatial);
+               Pose3D closestPose = null;//manifold.computeClosestPoseOnManifold(currentSpatial);
 
                return closestPose;
                // TODO get closest pose from manifold
