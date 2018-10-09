@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
@@ -961,12 +960,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          orientationTrajectoryGenerator.getOrientation(desiredOrientationToPack);
       else
          desiredOrientationToPack.setToNaN(positionTrajectoryGenerator.getCurrentTrajectoryFrame());
-   }
-
-   @Override
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
-   {
-      return null;
    }
 
    @Override
