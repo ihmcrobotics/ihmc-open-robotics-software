@@ -17,7 +17,7 @@ public class RemoteFootstepPlannerUI extends Application
    private final boolean visualize;
 
    private final JavaFXMessager messager;
-   private final FootstepPlannerUIMessageConverter messageConverter;
+   private final RemoteUIMessageConverter messageConverter;
 
    private FootstepPlannerUI ui;
 
@@ -40,16 +40,16 @@ public class RemoteFootstepPlannerUI extends Application
    public static RemoteFootstepPlannerUI createUI(String robotName, DomainFactory.PubSubImplementation pubSubImplementation, boolean visualize)
    {
       JavaFXMessager messager = new SharedMemoryJavaFXMessager(FootstepPlannerUserInterfaceAPI.API);
-      FootstepPlannerUIMessageConverter messageConverter = FootstepPlannerUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
+      RemoteUIMessageConverter messageConverter = RemoteUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
       return new RemoteFootstepPlannerUI(messager, messageConverter, visualize);
    }
 
-   public RemoteFootstepPlannerUI(JavaFXMessager messager, FootstepPlannerUIMessageConverter messageConverter)
+   public RemoteFootstepPlannerUI(JavaFXMessager messager, RemoteUIMessageConverter messageConverter)
    {
       this(messager, messageConverter, true);
    }
 
-   public RemoteFootstepPlannerUI(JavaFXMessager messager, FootstepPlannerUIMessageConverter messageConverter, boolean visualize)
+   public RemoteFootstepPlannerUI(JavaFXMessager messager, RemoteUIMessageConverter messageConverter, boolean visualize)
    {
       this.messager = messager;
       this.messageConverter = messageConverter;
