@@ -13,10 +13,12 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -30,10 +32,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * new plan using the local version of the edit footstep planning parameters and a footstep request, requiring
  * conversion from the Java FX messages to the RTPS messages.
  */
-public class FootstepPlannerUIMessageConverter
+public class RemoteUIMessageConverter
 {
-   // TODO make a local thing of planar regions
-
    private final RealtimeRos2Node ros2Node;
 
    private final JavaFXMessager messager;
@@ -56,23 +56,23 @@ public class FootstepPlannerUIMessageConverter
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
 
-   public static FootstepPlannerUIMessageConverter createRemoteConverter(JavaFXMessager messager, String robotName)
+   public static RemoteUIMessageConverter createRemoteConverter(JavaFXMessager messager, String robotName)
    {
       return createConverter(messager, robotName, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
-   public static FootstepPlannerUIMessageConverter createIntraprocessConverter(JavaFXMessager messager, String robotName)
+   public static RemoteUIMessageConverter createIntraprocessConverter(JavaFXMessager messager, String robotName)
    {
       return createConverter(messager, robotName, DomainFactory.PubSubImplementation.INTRAPROCESS);
    }
 
-   public static FootstepPlannerUIMessageConverter createConverter(JavaFXMessager messager, String robotName, DomainFactory.PubSubImplementation implementation)
+   public static RemoteUIMessageConverter createConverter(JavaFXMessager messager, String robotName, DomainFactory.PubSubImplementation implementation)
    {
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "ihmc_footstep_planner_ui");
-      return new FootstepPlannerUIMessageConverter(ros2Node, messager, robotName);
+      return new RemoteUIMessageConverter(ros2Node, messager, robotName);
    }
 
-   public FootstepPlannerUIMessageConverter(RealtimeRos2Node ros2Node, JavaFXMessager messager, String robotName)
+   public RemoteUIMessageConverter(RealtimeRos2Node ros2Node, JavaFXMessager messager, String robotName)
    {
       this.messager = messager;
       this.robotName = robotName;
@@ -110,6 +110,9 @@ public class FootstepPlannerUIMessageConverter
       // we want to listen to the resulting plan from the toolbox
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class, getPlanningToolboxPublisherNameGenerator(),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
+      // we want to also listen to incoming REA planar region data.
+      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
+                                           s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
       // publishers
       plannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerParametersPacket.class, getPlanningToolboxSubscriberNameGenerator());
@@ -170,6 +173,12 @@ public class FootstepPlannerUIMessageConverter
 
       // Goal pose
       // TODO visualize body path
+   }
+
+   private void processIncomingPlanarRegionMessage(PlanarRegionsListMessage packet)
+   {
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic,
+                             PlanarRegionMessageConverter.convertToPlanarRegionsList(packet));
    }
 
    private void requestNewPlan()

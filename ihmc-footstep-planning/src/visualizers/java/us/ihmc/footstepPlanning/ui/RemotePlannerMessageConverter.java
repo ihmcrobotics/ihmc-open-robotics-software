@@ -15,6 +15,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -38,9 +39,7 @@ public class RemotePlannerMessageConverter
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Integer> sequenceIdReference;
 
-   private final AtomicReference<Boolean> hasResult= new AtomicReference<>(false);
-
-
+   private final AtomicReference<Boolean> hasResult = new AtomicReference<>(false);
 
    public static RemotePlannerMessageConverter createRemoteConverter(JavaFXMessager messager, String robotName)
    {
@@ -85,6 +84,9 @@ public class RemotePlannerMessageConverter
       // we want to listen to the incoming request
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningRequestPacket.class, getPlanningToolboxSubscriberNameGenerator(),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
+      // we want to also listen to incoming REA planar region data.
+      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
+                                           s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
       // publishers
       outputStatusPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningToolboxOutputStatus.class, getPlanningToolboxPublisherNameGenerator());
@@ -118,8 +120,7 @@ public class RemotePlannerMessageConverter
       double timeout = packet.getTimeout();
       double horizonLength = packet.getHorizonLength();
 
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic,
-                             PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+      this.planarRegionsList.ifPresent(regions -> messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, regions));
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartPositionTopic, startPosition);
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, goalPosition);
 
@@ -137,6 +138,14 @@ public class RemotePlannerMessageConverter
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerHorizonLengthTopic, horizonLength);
 
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.ComputePathTopic, true);
+   }
+
+   private void processIncomingPlanarRegionMessage(PlanarRegionsListMessage packet)
+   {
+      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(packet);
+      this.planarRegionsList = Optional.of(planarRegionsList);
+
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, planarRegionsList);
    }
 
    private void publishResultingPlan()
@@ -200,7 +209,6 @@ public class RemotePlannerMessageConverter
       }
    }
 
-
    private ROS2Tools.MessageTopicNameGenerator getPlanningToolboxSubscriberNameGenerator()
    {
       return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
@@ -210,6 +218,5 @@ public class RemotePlannerMessageConverter
    {
       return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
    }
-
 
 }
