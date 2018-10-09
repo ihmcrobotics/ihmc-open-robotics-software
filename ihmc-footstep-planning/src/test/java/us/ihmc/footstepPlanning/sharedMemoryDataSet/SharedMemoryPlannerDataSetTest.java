@@ -1,13 +1,18 @@
 package us.ihmc.footstepPlanning.sharedMemoryDataSet;
 
+import org.junit.After;
+import org.junit.Before;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
+import us.ihmc.footstepPlanning.ui.SharedMemoryFootstepPlannerUI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -16,8 +21,29 @@ import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
 
 public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
-
+   private SharedMemoryFootstepPlannerUI launcher;
    protected JavaFXMessager messager;
+
+
+   @Before
+   public void setup()
+   {
+      VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
+      launcher = new SharedMemoryFootstepPlannerUI(VISUALIZE);
+      ApplicationRunner.runApplication(launcher);
+
+      messager = launcher.getMessager();
+   }
+
+   @After
+   public void tearDown() throws Exception
+   {
+      launcher.stop();
+      messager = null;
+      launcher = null;
+   }
+
 
    @Override
    public void submitDataSet(FootstepPlannerUnitTestDataset dataset)

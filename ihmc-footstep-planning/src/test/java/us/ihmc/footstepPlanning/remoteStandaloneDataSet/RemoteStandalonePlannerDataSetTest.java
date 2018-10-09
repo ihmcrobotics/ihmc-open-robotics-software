@@ -2,12 +2,16 @@ package us.ihmc.footstepPlanning.remoteStandaloneDataSet;
 
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import org.junit.After;
+import org.junit.Test;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
@@ -15,6 +19,8 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.footstepPlanning.ui.ApplicationRunner;
+import us.ihmc.footstepPlanning.ui.RemoteStandaloneFootstepPlannerUI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -26,12 +32,13 @@ import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.Planni
 
 public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlannerDataSetTest
 {
+   private static final boolean visualize = false;
    private static final String robotName = "testBot";
+
+   protected RemoteStandaloneFootstepPlannerUI uiNode;
    private RealtimeRos2Node ros2Node;
 
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
-
-   protected JavaFXMessager messager;
 
    private final AtomicReference<FootstepPlan> publishedPlanReference = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlanningResult> publishedResultReference = new AtomicReference<>(null);
@@ -52,10 +59,16 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
    public void setup()
    {
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
+      uiNode = RemoteStandaloneFootstepPlannerUI.createUI(robotName, pubSubImplementation, visualize);
+      ApplicationRunner.runApplication(uiNode);
 
-      footstepPlanningRequestPublisher = ROS2Tools
-            .createPublisher(ros2Node, FootstepPlanningRequestPacket.class, ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
+      while (!uiNode.isRunning())
+         ThreadTools.sleep(100);
 
+      JavaFXMessager messager = uiNode.getMessager();
+
+      footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class, ROS2Tools
+            .getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
 
       uiReceivedPlan = new AtomicReference<>(false);
       uiReceivedResult = new AtomicReference<>(false);
@@ -67,6 +80,27 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
 
       uiFootstepPlanReference = messager.createInput(FootstepPlanTopic);
       uiPlanningResultReference = messager.createInput(PlanningResultTopic);
+   }
+
+
+   @After
+   public void tearDown() throws Exception
+   {
+      ros2Node.destroy();
+      uiNode.stop();
+
+      uiReceivedPlan = null;
+      uiReceivedResult = null;
+
+      publishedReceivedPlan = null;
+      pubSubImplementation = null;
+
+      uiFootstepPlanReference = null;
+      uiPlanningResultReference = null;
+
+      ros2Node = null;
+      footstepPlanningRequestPublisher = null;
+      uiNode = null;
    }
 
    @Override
