@@ -17,8 +17,8 @@ public class RemoteFootstepPlannerUI extends Application
 {
    private final boolean visualize;
 
-   private final JavaFXMessager messager;
-   private final RemoteUIMessageConverter messageConverter;
+   private JavaFXMessager messager;
+   private RemoteUIMessageConverter messageConverter;
 
    private FootstepPlannerUI ui;
 
@@ -57,10 +57,20 @@ public class RemoteFootstepPlannerUI extends Application
       this.visualize = visualize;
    }
 
+   public RemoteFootstepPlannerUI()
+   {
+      this.visualize = true;
+   }
+
 
    @Override
    public void start(Stage primaryStage) throws Exception
    {
+      if (messager == null)
+         messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      if (messageConverter == null)
+         messageConverter = RemoteUIMessageConverter.createConverter(messager, "", DomainFactory.PubSubImplementation.INTRAPROCESS);
+
       messager.startMessager();
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager);
@@ -93,4 +103,8 @@ public class RemoteFootstepPlannerUI extends Application
       return messager;
    }
 
+   public static void main(String[] args)
+   {
+      launch(args);
+   }
 }

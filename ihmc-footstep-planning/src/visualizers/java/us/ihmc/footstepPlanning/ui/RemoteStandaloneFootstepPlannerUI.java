@@ -18,11 +18,10 @@ public class RemoteStandaloneFootstepPlannerUI extends Application
    private final boolean visualize;
 
    private FootstepPathCalculatorModule module;
-   private final JavaFXMessager messager;
-   private final RemotePlannerMessageConverter messageConverter;
+   private JavaFXMessager messager;
+   private RemotePlannerMessageConverter messageConverter;
 
    private FootstepPlannerUI ui;
-
 
    public static RemoteStandaloneFootstepPlannerUI createIntraprocessUI(String robotName)
    {
@@ -59,10 +58,22 @@ public class RemoteStandaloneFootstepPlannerUI extends Application
       this.visualize = visualize;
    }
 
+   public RemoteStandaloneFootstepPlannerUI()
+   {
+      this.visualize = true;
+   }
 
    @Override
    public void start(Stage primaryStage) throws Exception
    {
+
+      if (messager == null)
+         messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      if (messageConverter == null)
+         messageConverter = RemotePlannerMessageConverter.createConverter(messager, "", DomainFactory.PubSubImplementation.INTRAPROCESS);
+      if (module == null)
+         module = new FootstepPathCalculatorModule(messager);
+
       messager.startMessager();
 
       module.start();
@@ -96,5 +107,10 @@ public class RemoteStandaloneFootstepPlannerUI extends Application
          ThreadTools.sleep(100);
 
       return messager;
+   }
+
+   public static void main(String[] args)
+   {
+      launch(args);
    }
 }
