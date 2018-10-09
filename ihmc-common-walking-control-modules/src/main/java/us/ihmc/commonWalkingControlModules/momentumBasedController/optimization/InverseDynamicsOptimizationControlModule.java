@@ -7,6 +7,7 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.OptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
@@ -68,7 +69,7 @@ public class InverseDynamicsOptimizationControlModule
    private final YoDouble absoluteMaximumJointAcceleration = new YoDouble("absoluteMaximumJointAcceleration", registry);
    private final Map<OneDoFJoint, YoDouble> jointMaximumAccelerations = new HashMap<>();
    private final Map<OneDoFJoint, YoDouble> jointMinimumAccelerations = new HashMap<>();
-   private final YoDouble rhoMin = new YoDouble("rhoMin", registry);
+   private final YoDouble rhoMin = new YoDouble("ControllerCoreRhoMin", registry);
    private final MomentumModuleSolution momentumModuleSolution;
 
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
@@ -360,5 +361,10 @@ public class InverseDynamicsOptimizationControlModule
    public void submitContactWrenchCommand(ContactWrenchCommand command)
    {
       wrenchMatrixCalculator.submitContactWrenchCommand(command);
+   }
+
+   public void submitOptimizationSettingsCommand(OptimizationSettingsCommand command)
+   {
+      rhoMin.set(command.getRhoMin());
    }
 }

@@ -78,7 +78,7 @@ public class FootStepPlanner
 
       bodyFrameProjectedInFuture = new PoseReferenceFrame("bodyProjectedInFuture", bodyZUpFrame);
       bodyFrameEndRotationProjectedInFuture = new PoseReferenceFrame("bodyFrameEndRotationProjectedInFuture", bodyFrameProjectedInFuture);
-      bodyFrameProjectedInFutureViz = new YoGraphicReferenceFrame(bodyFrameEndRotationProjectedInFuture, registry, 0.3);
+      bodyFrameProjectedInFutureViz = new YoGraphicReferenceFrame(bodyFrameEndRotationProjectedInFuture, registry, true, 0.3);
       
       yoGraphicsListRegistry.registerYoGraphic("bodyFrameProjectedInFutureViz", bodyFrameProjectedInFutureViz);
 

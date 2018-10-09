@@ -1,0 +1,40 @@
+
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.leftHipYawLowLevelDesiredPositionHHLCM,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.leftHipYawLowLevelDesiredVelocityHHLCM,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.leftHipYawLowLevelDesiredAccelerationHHLCM</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.rightHipYawLowLevelDesiredPositionHHLCM,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.rightHipYawLowLevelDesiredVelocityHHLCM,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.rightHipYawLowLevelDesiredAccelerationHHLCM</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.torsoYawLowLevelDesiredPositionHHLCM,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.torsoYawLowLevelDesiredVelocityHHLCM,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.torsoYawLowLevelDesiredAccelerationHHLCM</Variables>
+		<GraphConfiguration>
+			<Name>config3</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>

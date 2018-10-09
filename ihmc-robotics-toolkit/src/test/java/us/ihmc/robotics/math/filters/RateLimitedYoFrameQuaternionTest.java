@@ -7,11 +7,13 @@ import static org.junit.Assert.assertTrue;
 import java.util.Random;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -22,6 +24,12 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class RateLimitedYoFrameQuaternionTest
 {
    private static final double EPSILON = 1.0e-12;
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 2.0)
    @Test(timeout = 30000)

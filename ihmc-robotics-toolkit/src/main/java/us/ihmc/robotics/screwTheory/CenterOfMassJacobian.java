@@ -2,9 +2,11 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
@@ -20,7 +22,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 public class CenterOfMassJacobian
 {
    private final ReferenceFrame rootFrame;
-   private final List<RigidBody> rigidBodyList = new ArrayList<RigidBody>();
+   private final List<RigidBody> rigidBodyList = new ArrayList<>();
+   private final Set<RigidBody> rigidBodySet = new HashSet<>();
    private final InverseDynamicsJoint[] joints;
 
    private final DenseMatrix64F jacobianMatrix;
@@ -31,9 +34,9 @@ public class CenterOfMassJacobian
    private final DenseMatrix64F tempJointVelocitiesMatrix;
    private final DenseMatrix64F centerOfMassVelocityMatrix;
 
-   private final Map<RigidBody, MutableDouble> subTreeMassMap = new LinkedHashMap<RigidBody, MutableDouble>();
-   private final Map<RigidBody, FramePoint3D> comScaledByMassMap = new LinkedHashMap<RigidBody, FramePoint3D>();
-   private final Map<RigidBody, MutableBoolean> comScaledByMassMapIsUpdated = new LinkedHashMap<RigidBody, MutableBoolean>();
+   private final Map<RigidBody, MutableDouble> subTreeMassMap = new LinkedHashMap<>();
+   private final Map<RigidBody, FramePoint3D> comScaledByMassMap = new LinkedHashMap<>();
+   private final Map<RigidBody, MutableBoolean> comScaledByMassMapIsUpdated = new LinkedHashMap<>();
 
    private double inverseTotalMass;
 
@@ -50,6 +53,7 @@ public class CenterOfMassJacobian
    public CenterOfMassJacobian(RigidBody[] rigidBodies, InverseDynamicsJoint[] joints, ReferenceFrame rootFrame)
    {
       this.rigidBodyList.addAll(Arrays.asList(rigidBodies));
+      rigidBodySet.addAll(rigidBodyList);
       this.rootFrame = rootFrame;
       this.joints = joints;
 
@@ -120,7 +124,7 @@ public class CenterOfMassJacobian
       }
       else
       {
-         double curSubTreeMass = (rigidBodyList.contains(rigidBody) ? rigidBody.getInertia().getMass() : 0.0);
+         double curSubTreeMass = (rigidBodySet.contains(rigidBody) ? rigidBody.getInertia().getMass() : 0.0);
          List<InverseDynamicsJoint> childrenJoints = rigidBody.getChildrenJoints();
          for (int i = 0; i < childrenJoints.size(); i++)
          {
@@ -157,7 +161,7 @@ public class CenterOfMassJacobian
          curChildCoMScaledByMass.setToZero(rootFrame);
          rigidBody.getCoMOffset(curChildCoMScaledByMass);
          curChildCoMScaledByMass.changeFrame(rootFrame);
-         double massToScale = (rigidBodyList.contains(rigidBody) ? rigidBody.getInertia().getMass() : 0.0);
+         double massToScale = (rigidBodySet.contains(rigidBody) ? rigidBody.getInertia().getMass() : 0.0);
          curChildCoMScaledByMass.scale(massToScale);
 
          final List<InverseDynamicsJoint> childrenJoints = rigidBody.getChildrenJoints();

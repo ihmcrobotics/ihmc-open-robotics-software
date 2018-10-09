@@ -107,10 +107,16 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
-            int currentIndex = requestControlModeComboBox.getSelectedIndex();
-            int newIndex = fromEnumOrdinalToComboBoxIndexMap.get(requestHighLevelControlMode.getOrdinal());
-            if (currentIndex != newIndex)
-               requestControlModeComboBox.setSelectedIndex(newIndex);
+            try
+            {
+               int currentIndex = requestControlModeComboBox.getSelectedIndex();
+               int newIndex = fromEnumOrdinalToComboBoxIndexMap.get(requestHighLevelControlMode.getOrdinal());
+               if (currentIndex != newIndex)
+                  requestControlModeComboBox.setSelectedIndex(newIndex);
+            }
+            catch (NullPointerException e)
+            {
+            }
          }
       });
 

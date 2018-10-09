@@ -507,13 +507,19 @@ public class SpatialForceVector
       // essentially using the transpose of the Adjoint operator, Ad_H = [R, 0; tilde(p) * R, R] (Matlab notation), but without creating a 6x6 matrix
       // compute the relevant rotations and translations
       expressedInFrame.getTransformToDesiredFrame(temporaryTransformHToDesiredFrame, newReferenceFrame);
-      temporaryTransformHToDesiredFrame.getTranslation(tempVector); // p
 
       // transform the torques and forces so that they are expressed in newReferenceFrame
-      temporaryTransformHToDesiredFrame.transform(linearPart);
-      temporaryTransformHToDesiredFrame.transform(angularPart);
-      tempVector.cross(tempVector, linearPart); // p x R * f
-      angularPart.add(tempVector);
+      if (temporaryTransformHToDesiredFrame.hasRotation())
+      {
+         temporaryTransformHToDesiredFrame.transform(linearPart);
+         temporaryTransformHToDesiredFrame.transform(angularPart);
+      }
+
+      if (temporaryTransformHToDesiredFrame.hasTranslation())
+      {
+         tempVector.cross(temporaryTransformHToDesiredFrame.getTranslationVector(), linearPart); // p x R * f
+         angularPart.add(tempVector);
+      }
 
       // change this spatial force vector's expressedInFrame to newReferenceFrame
       expressedInFrame = newReferenceFrame;

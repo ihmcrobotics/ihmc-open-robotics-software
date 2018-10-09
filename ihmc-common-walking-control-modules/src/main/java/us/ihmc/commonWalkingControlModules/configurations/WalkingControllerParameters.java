@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetect
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -48,6 +49,18 @@ public abstract class WalkingControllerParameters
     * @return the value for omega0 that is used in the controller for ICP related computations.
     */
    public abstract double getOmega0();
+
+   /**
+    * Specifies if the desired ground reaction force for the force that is about to swing should
+    * smoothly be brought to zero by adding a inequality constraint on the z-force.
+    * 
+    * @return whether to perform smooth unloading before swing or not. Default value is
+    *         {@code false}.
+    */
+   public boolean enforceSmoothFootUnloading()
+   {
+      return false;
+   }
 
    /**
     * Specifies if the controller should attempt at detecting foot slipping during toe off when
@@ -458,6 +471,17 @@ public abstract class WalkingControllerParameters
     * given to the objectives of the walking controller in the QP.
     */
    public abstract MomentumOptimizationSettings getMomentumOptimizationSettings();
+
+   /**
+    * Returns the {@link FeedbackControllerSettings} for this robot. These parameters additional
+    * configuration options for the the {@code WholeBodyFeedbackController}.
+    * 
+    * @return the feedback controller settings.
+    */
+   public FeedbackControllerSettings getFeedbackControllerSettings()
+   {
+      return null;
+   }
 
    /**
     * Returns the {@link ICPAngularMomentumModifierParameters} for this robot. The parameters are used when

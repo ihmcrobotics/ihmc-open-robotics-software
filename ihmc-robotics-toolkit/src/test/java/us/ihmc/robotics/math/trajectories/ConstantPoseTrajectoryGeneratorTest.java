@@ -6,6 +6,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -51,6 +53,12 @@ public class ConstantPoseTrajectoryGeneratorTest
       positionMultipleFrames = new YoFramePointInMultipleFrames("positionMultipleFrames", registry, rootFrame1, frame2);
       orientationMultipleFrames = new YoFrameQuaternionInMultipleFrames("orientationMultipleFrames", registry, rootFrame1, frame2);
       generator = new ConstantPoseTrajectoryGenerator(positionYoFramePoint, orientationQuaternion);
+   }
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePose3D;
@@ -20,6 +22,12 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 
 public class YoGraphicPolynomial3DTest
 {
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 30000)
    public void testRemoteYoGraphicVariableOrdering()

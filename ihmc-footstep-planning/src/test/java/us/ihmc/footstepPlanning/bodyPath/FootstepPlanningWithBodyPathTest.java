@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.bodyPath;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -12,6 +13,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -51,6 +53,12 @@ public class FootstepPlanningWithBodyPathTest
 
    @Rule
    public TestName name = new TestName();
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 7.0)
    @Test(timeout = 30000)

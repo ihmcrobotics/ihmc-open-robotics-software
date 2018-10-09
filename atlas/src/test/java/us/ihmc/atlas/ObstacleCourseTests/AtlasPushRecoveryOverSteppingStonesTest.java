@@ -8,6 +8,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarPushRecoveryOverSteppingStonesTest;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
@@ -62,6 +63,19 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
                }
 
                @Override
+               public SteppingParameters getSteppingParameters()
+               {
+                  return new AtlasSteppingParameters(getJointMap())
+                  {
+                     @Override
+                     public double getMaxStepLength()
+                     {
+                        return 1.0;
+                     }
+                  };
+               }
+
+               @Override
                public ToeOffParameters getToeOffParameters()
                {
                   return new AtlasToeOffParameters(getJointMap())
@@ -94,7 +108,7 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 70.9)
+   @ContinuousIntegrationTest(estimatedDuration = 52.5)
    @Test(timeout = 350000)
    public void testWalkingOverSteppingStonesForwardPush() throws SimulationExceededMaximumTimeException
    {

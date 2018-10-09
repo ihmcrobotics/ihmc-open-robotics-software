@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.outputData;
 
-public class JointDesiredOutput extends JointDesiredOutputReadOnly
+public class JointDesiredOutput implements JointDesiredOutputBasics
 {
    private JointDesiredControlMode controlMode;
 
@@ -25,6 +25,7 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
       clear();
    }
 
+   @Override
    public void clear()
    {
       controlMode = null;
@@ -45,118 +46,40 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
       maxVelocityError = Double.NaN;
    }
 
-   public void set(JointDesiredOutputReadOnly other)
-   {
-      controlMode = other.getControlMode();
-      desiredTorque = other.getDesiredTorque();
-      desiredPosition = other.getDesiredPosition();
-      desiredVelocity = other.getDesiredVelocity();
-      desiredAcceleration = other.getDesiredAcceleration();
-      resetIntegrators = other.peekResetIntegratorsRequest();
-      stiffness = other.getStiffness();
-      damping = other.getDamping();
-      masterGain = other.getMasterGain();
-      velocityScaling = other.getVelocityScaling();
-      velocityIntegrationBreakFrequency = other.getVelocityIntegrationBreakFrequency();
-      positionIntegrationBreakFrequency = other.getPositionIntegrationBreakFrequency();
-      maxPositionError = other.getMaxPositionError();
-      maxVelocityError = other.getMaxVelocityError();
-   }
-
-   /**
-    * Complete the information held in this using other.
-    * Does not overwrite the data already set in this.
-    */
-   public void completeWith(JointDesiredOutputReadOnly other)
-   {
-      if (!hasControlMode())
-         controlMode = other.getControlMode();
-      if (!hasDesiredTorque())
-         desiredTorque = other.getDesiredTorque();
-      if (!hasDesiredPosition())
-         desiredPosition = other.getDesiredPosition();
-      if (!hasDesiredVelocity())
-         desiredVelocity = other.getDesiredVelocity();
-      if (!hasDesiredAcceleration())
-         desiredAcceleration = other.getDesiredAcceleration();
-      if (!peekResetIntegratorsRequest())
-         resetIntegrators = other.peekResetIntegratorsRequest();
-      if(!hasStiffness())
-         stiffness = other.getStiffness();
-      if(!hasDamping())
-         damping = other.getDamping();
-      if (!hasMasterGain())
-         masterGain = other.getMasterGain();
-      if (!hasVelocityScaling())
-         velocityScaling = other.getVelocityScaling();
-      if (!hasVelocityIntegrationBreakFrequency())
-         velocityIntegrationBreakFrequency = other.getVelocityIntegrationBreakFrequency();
-      if (!hasPositionIntegrationBreakFrequency())
-         positionIntegrationBreakFrequency = other.getPositionIntegrationBreakFrequency();
-      if (!hasMaxPositionError())
-         maxPositionError = other.getMaxPositionError();
-      if (!hasMaxVelocityError())
-         maxVelocityError = other.getMaxVelocityError();
-   }
-
+   @Override
    public void setControlMode(JointDesiredControlMode controlMode)
    {
       this.controlMode = controlMode;
    }
 
+   @Override
    public void setDesiredTorque(double tau)
    {
       desiredTorque = tau;
    }
 
+   @Override
    public void setDesiredPosition(double q)
    {
       desiredPosition = q;
    }
 
+   @Override
    public void setDesiredVelocity(double qd)
    {
       desiredVelocity = qd;
    }
 
+   @Override
    public void setDesiredAcceleration(double qdd)
    {
       desiredAcceleration = qdd;
    }
 
+   @Override
    public void setResetIntegrators(boolean reset)
    {
       resetIntegrators = reset;
-   }
-
-   @Override
-   public boolean hasControlMode()
-   {
-      return controlMode != null;
-   }
-
-   @Override
-   public boolean hasDesiredTorque()
-   {
-      return !Double.isNaN(desiredTorque);
-   }
-
-   @Override
-   public boolean hasDesiredPosition()
-   {
-      return !Double.isNaN(desiredPosition);
-   }
-
-   @Override
-   public boolean hasDesiredVelocity()
-   {
-      return !Double.isNaN(desiredVelocity);
-   }
-
-   @Override
-   public boolean hasDesiredAcceleration()
-   {
-      return !Double.isNaN(desiredAcceleration);
    }
 
    @Override
@@ -205,18 +128,6 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
    }
 
    @Override
-   public boolean hasStiffness()
-   {
-      return !Double.isNaN(stiffness);
-   }
-
-   @Override
-   public boolean hasDamping()
-   {
-      return !Double.isNaN(damping);
-   }
-
-   @Override
    public double getStiffness()
    {
       return stiffness;
@@ -228,20 +139,16 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
       return damping;
    }
 
+   @Override
    public void setStiffness(double stiffness)
    {
       this.stiffness = stiffness;
    }
 
+   @Override
    public void setDamping(double damping)
    {
       this.damping = damping;
-   }
-
-   @Override
-   public boolean hasMasterGain()
-   {
-      return !Double.isNaN(masterGain);
    }
 
    @Override
@@ -250,15 +157,10 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
       return masterGain;
    }
 
+   @Override
    public void setMasterGain(double masterGain)
    {
       this.masterGain = masterGain;
-   }
-
-   @Override
-   public boolean hasVelocityScaling()
-   {
-      return !Double.isNaN(velocityScaling);
    }
 
    @Override
@@ -267,15 +169,10 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
       return velocityScaling;
    }
 
+   @Override
    public void setVelocityScaling(double velocityScaling)
    {
       this.velocityScaling = velocityScaling;
-   }
-
-   @Override
-   public boolean hasVelocityIntegrationBreakFrequency()
-   {
-      return !Double.isNaN(velocityIntegrationBreakFrequency);
    }
 
    @Override
@@ -284,15 +181,10 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
       return velocityIntegrationBreakFrequency;
    }
 
+   @Override
    public void setVelocityIntegrationBreakFrequency(double velocityIntegrationBreakFrequency)
    {
       this.velocityIntegrationBreakFrequency = velocityIntegrationBreakFrequency;
-   }
-
-   @Override
-   public boolean hasPositionIntegrationBreakFrequency()
-   {
-      return !Double.isNaN(positionIntegrationBreakFrequency);
    }
 
    @Override
@@ -301,15 +193,10 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
       return positionIntegrationBreakFrequency;
    }
 
+   @Override
    public void setPositionIntegrationBreakFrequency(double positionIntegrationBreakFrequency)
    {
       this.positionIntegrationBreakFrequency = positionIntegrationBreakFrequency;
-   }
-
-   @Override
-   public boolean hasMaxPositionError()
-   {
-      return !Double.isNaN(maxPositionError);
    }
 
    @Override
@@ -318,15 +205,10 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
       return maxPositionError;
    }
 
+   @Override
    public void setMaxPositionError(double maxPositionError)
    {
       this.maxPositionError = maxPositionError;
-   }
-
-   @Override
-   public boolean hasMaxVelocityError()
-   {
-      return !Double.isNaN(maxVelocityError);
    }
 
    @Override
@@ -335,8 +217,15 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
       return maxVelocityError;
    }
 
+   @Override
    public void setMaxVelocityError(double maxVelocityError)
    {
       this.maxVelocityError = maxVelocityError;
+   }
+
+   @Override
+   public String toString()
+   {
+      return getRepresentativeString();
    }
 }

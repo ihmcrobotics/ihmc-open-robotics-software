@@ -30,7 +30,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public abstract class LinearMomentumRateOfChangeControlModule
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    protected final YoVariableRegistry registry;
 
@@ -64,23 +64,17 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FramePoint2D perfectCMP = new FramePoint2D();
    protected final FramePoint2D perfectCoP = new FramePoint2D();
    protected final FramePoint2D desiredCMP = new FramePoint2D();
-
-   protected final FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
-   protected final FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
+   protected final FramePoint2D desiredCoP = new FramePoint2D();
 
    private boolean controlHeightWithMomentum;
 
-   private final YoFrameConvexPolygon2D yoSafeAreaPolygon;
-   private final YoFrameConvexPolygon2D yoProjectionPolygon;
-
    protected final YoFramePoint2D yoUnprojectedDesiredCMP;
-   protected final CMPProjector cmpProjector;
 
    private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
    private double desiredCoMHeightAcceleration = 0.0;
 
    public LinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ, double totalMass,
-                                                  YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2dProjection)
+                                                  YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -100,19 +94,12 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
       minimizeAngularMomentumRateZ = new YoBoolean(namePrefix + "MinimizeAngularMomentumRateZ", registry);
 
-      yoSafeAreaPolygon = new YoFrameConvexPolygon2D("yoSafeAreaPolygon", worldFrame, 10, registry);
-      yoProjectionPolygon = new YoFrameConvexPolygon2D("yoProjectionPolygon", worldFrame, 10, registry);
-
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
 
       perfectCoP.setToNaN();
 
       yoUnprojectedDesiredCMP = new YoFramePoint2D("unprojectedDesiredCMP", ReferenceFrame.getWorldFrame(), registry);
 
-      if (use2dProjection)
-         cmpProjector = new SmartCMPProjector(yoGraphicsListRegistry, registry);
-      else
-         cmpProjector = new SmartCMPPlanarProjector(registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -251,17 +238,27 @@ public abstract class LinearMomentumRateOfChangeControlModule
    }
 
    private boolean desiredCMPcontainedNaN = false;
+   private boolean desiredCoPcontainedNaN = false;
 
-   public void compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
+   private final FramePoint2D desiredCoPToThrowAway = new FramePoint2D();
+   public boolean compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
    {
+      return compute(desiredCMPPreviousValue, desiredCMPToPack, desiredCoPToThrowAway);
+   }
+
+   public boolean compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack, FramePoint2D desiredCoPToPack)
+   {
+      boolean inputsAreOk = checkInputs();
       computeCMPInternal(desiredCMPPreviousValue);
 
       capturePoint.changeFrame(worldFrame);
       desiredCMP.changeFrame(worldFrame);
+      desiredCoP.changeFrame(worldFrame);
+
       if (desiredCMP.containsNaN())
       {
          if (!desiredCMPcontainedNaN)
-            PrintTools.error("Desired CMP containes NaN, setting it to the ICP - only showing this error once");
+            PrintTools.error("Desired CMP contains NaN, setting it to the ICP - only showing this error once");
          desiredCMP.set(capturePoint);
          desiredCMPcontainedNaN = true;
       }
@@ -270,8 +267,23 @@ public abstract class LinearMomentumRateOfChangeControlModule
          desiredCMPcontainedNaN = false;
       }
 
+      if (desiredCoP.containsNaN())
+      {
+         if (!desiredCoPcontainedNaN)
+            PrintTools.error("Desired CoP contains NaN, setting it to the desiredCMP - only showing this error once");
+         desiredCoP.set(desiredCMP);
+         desiredCoPcontainedNaN = true;
+      }
+      else
+      {
+         desiredCoPcontainedNaN = false;
+      }
+
       desiredCMPToPack.setIncludingFrame(desiredCMP);
       desiredCMPToPack.changeFrame(worldFrame);
+
+      desiredCoPToPack.setIncludingFrame(desiredCoP);
+      desiredCoPToPack.changeFrame(worldFrame);
 
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
       FrameVector3D linearMomentumRateOfChange = computeGroundReactionForce(desiredCMP, fZ);
@@ -294,15 +306,46 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
       momentumRateCommand.setWeights(angularMomentumRateWeight.getX(), angularMomentumRateWeight.getY(), angularMomentumRateWeight.getZ(),
                                      linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
+
+      return inputsAreOk;
+   }
+
+   private boolean checkInputs()
+   {
+      boolean inputsAreOk = true;
+      if (desiredCapturePoint.containsNaN())
+      {
+         PrintTools.error("Desired ICP contains NaN, setting it to the current ICP and failing.");
+         desiredCapturePoint.set(capturePoint);
+         inputsAreOk = false;
+      }
+
+      if (desiredCapturePointVelocity.containsNaN())
+      {
+         PrintTools.error("Desired ICP Velocity contains NaN, setting it to zero and failing.");
+         desiredCapturePointVelocity.setToZero();
+         inputsAreOk = false;
+      }
+
+      if (perfectCoP.containsNaN())
+      {
+         PrintTools.error("Perfect CoP contains NaN, setting it to the current ICP and failing.");
+         perfectCoP.set(capturePoint);
+         inputsAreOk = false;
+      }
+
+      if (perfectCMP.containsNaN())
+      {
+         PrintTools.error("Perfect CMP contains NaN, setting it to the current ICP and failing.");
+         perfectCMP.set(capturePoint);
+         inputsAreOk = false;
+      }
+
+      return inputsAreOk;
    }
 
    public void setCMPProjectionArea(FrameConvexPolygon2DReadOnly areaToProjectInto, FrameConvexPolygon2DReadOnly safeArea)
    {
-      this.areaToProjectInto.setIncludingFrame(areaToProjectInto);
-      this.safeArea.setIncludingFrame(safeArea);
-
-      yoSafeAreaPolygon.set(safeArea);
-      yoProjectionPolygon.set(areaToProjectInto);
    }
 
    public void minimizeAngularMomentumRateZ(boolean enable)

@@ -892,7 +892,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
    @Override
    public void getDesiredCenterOfPressurePosition(FramePoint2D desiredCenterOfPressurePositionToPack)
    {
-      desiredCenterOfPressurePositionToPack.setToNaN();
+      getDesiredCentroidalMomentumPivotPosition(desiredCenterOfPressurePositionToPack);
    }
 
    /**

@@ -17,6 +17,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -45,6 +46,7 @@ public class MocapToPelvisFrameConverterTest
          ThreadTools.sleepForever();
       }
 
+      ReferenceFrameTools.clearWorldFrameTree();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 

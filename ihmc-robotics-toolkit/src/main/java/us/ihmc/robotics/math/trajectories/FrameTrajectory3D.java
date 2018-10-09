@@ -125,7 +125,7 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
    public void setConstant(double t0, double tFinal, FramePoint3DReadOnly z0)
    {
       checkReferenceFrameMatch(z0);
-      setConstant(t0, tFinal, z0);
+      super.setConstant(t0, tFinal, z0);
    }
 
    public void setCubic(double t0, double tFinal, FramePoint3DReadOnly z0, FramePoint3DReadOnly zFinal)
@@ -611,12 +611,6 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
    {
       dQuantity.setIncludingFrame(referenceFrame, xTrajectory.getDerivative(order, x), yTrajectory.getDerivative(order, x),
                                   zTrajectory.getDerivative(order, x));
-   }
-
-   public void getDerivative(FrameTrajectory3D dervTraj, int order)
-   {
-      checkReferenceFrameMatch(dervTraj);
-      super.getDerivative(dervTraj, order);
    }
 
    public void getStartPoint(FramePoint3D positionToPack)

@@ -251,13 +251,19 @@ public class Twist extends SpatialMotionVector
       // essentially using the Adjoint operator, Ad_H = [R, 0; tilde(p) * R, R] (Matlab notation), but without creating a 6x6 matrix
       // compute the relevant rotations and translations
       expressedInFrame.getTransformToDesiredFrame(freeTransform, newReferenceFrame);
-      freeTransform.getTranslation(freeVector);    // p
 
       // transform the velocities so that they are expressed in newReferenceFrame
-      freeTransform.transform(angularPart);    // only rotates, since we're passing in a vector
-      freeTransform.transform(linearPart);
-      freeVector.cross(freeVector, angularPart);    // p x omega
-      linearPart.add(freeVector);
+      if (freeTransform.hasRotation())
+      {
+         freeTransform.transform(angularPart);    // only rotates, since we're passing in a vector
+         freeTransform.transform(linearPart);
+      }
+
+      if (freeTransform.hasTranslation())
+      {
+         freeVector.cross(freeTransform.getTranslationVector(), angularPart);    // p x omega
+         linearPart.add(freeVector);
+      }
 
       // change this spatial motion vector's expressedInFrame to newReferenceFrame
       this.expressedInFrame = newReferenceFrame;

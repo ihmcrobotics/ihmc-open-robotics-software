@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
@@ -17,12 +18,19 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ConvexPolygonShrinkerTest
 {
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)

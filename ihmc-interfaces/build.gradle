@@ -37,20 +37,20 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid-core', version: '0.5.1'
-   compile group: 'us.ihmc', name: 'euclid', version: '0.8.2'
-   compile group: 'us.ihmc', name: 'ihmc-pub-sub', version: '0.8.3'
-   compile group: 'us.ihmc', name: 'ros2-common-interfaces', version: '0.10.0'
-   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.20.1'
+   compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
+   compile group: "us.ihmc", name: "euclid", version: "0.9.3"
+   compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.8.3"
+   compile group: "us.ihmc", name: "ros2-common-interfaces", version: "0.10.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
 }
 
 testDependencies {
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
-   compile group: 'us.ihmc', name: 'ihmc-ros2-library', version: '0.10.0'
+   compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.10.0"
 }
 
 generatorDependencies {
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.1"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
    compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.10.0"
 }
 

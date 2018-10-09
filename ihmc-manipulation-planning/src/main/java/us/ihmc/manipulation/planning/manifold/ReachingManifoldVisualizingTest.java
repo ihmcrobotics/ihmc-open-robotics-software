@@ -23,6 +23,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 /**
  * This test tests whether manifold is well constructed by visualizing.
@@ -108,9 +110,10 @@ public class ReachingManifoldVisualizingTest
       YoDouble yoYawHand = new YoDouble("yoYawHand", registry);
       YoDouble yoPitchHand = new YoDouble("yoPitchHand", registry);
       YoDouble yoRollHand = new YoDouble("yoRollHand", registry);
+      YoFramePoint3D yoFramePointHand = new YoFramePoint3D(yoPXHand, yoPYHand, yoPZHand, worldFrame);
+      YoFrameYawPitchRoll yoFrameYawPitchRollHand = new YoFrameYawPitchRoll(yoYawHand, yoPitchHand, yoRollHand, worldFrame);
 
-      yoGraphicsListRegistry.registerYoGraphic("handViz",
-                                               new YoGraphicCoordinateSystem("handViz", yoPXHand, yoPYHand, yoPZHand, yoYawHand, yoPitchHand, yoRollHand, 0.2));
+      yoGraphicsListRegistry.registerYoGraphic("handViz", new YoGraphicCoordinateSystem("handViz", yoFramePointHand, yoFrameYawPitchRollHand, 0.2));
 
       // graphics for closest frame
       YoDouble yoPX = new YoDouble("yoPX", registry);
@@ -119,8 +122,10 @@ public class ReachingManifoldVisualizingTest
       YoDouble yoYaw = new YoDouble("yoYaw", registry);
       YoDouble yoPitch = new YoDouble("yoPitch", registry);
       YoDouble yoRoll = new YoDouble("yoRoll", registry);
+      YoFramePoint3D yoFramePoint = new YoFramePoint3D(yoPX, yoPY, yoPZ, worldFrame);
+      YoFrameYawPitchRoll yoFrameYawPitchRoll = new YoFrameYawPitchRoll(yoYaw, yoPitch, yoRoll, worldFrame);
 
-      yoGraphicsListRegistry.registerYoGraphic("handViz", new YoGraphicCoordinateSystem("closestPointViz", yoPX, yoPY, yoPZ, yoYaw, yoPitch, yoRoll, 0.2));
+      yoGraphicsListRegistry.registerYoGraphic("pointViz", new YoGraphicCoordinateSystem("closestPointViz", yoFramePoint, yoFrameYawPitchRoll, 0.2));
 
       // run scs
       scs.addYoVariableRegistry(registry);

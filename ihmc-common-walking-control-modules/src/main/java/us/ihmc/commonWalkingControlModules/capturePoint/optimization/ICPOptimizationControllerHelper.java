@@ -24,7 +24,14 @@ public class ICPOptimizationControllerHelper
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   public void transformFromDynamicsFrame(FixedFrameVector2DBasics feedbackGainsToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelGain, double orthogonalGain)
+   public void transformGainsFromDynamicsFrame(FixedFrameVector2DBasics feedbackGainsToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelGain,
+                                          double orthogonalGain)
+   {
+      transformFromDynamicsFrame(feedbackGainsToPack, desiredICPVelocity, parallelGain + 1.0, orthogonalGain + 1.0);
+   }
+
+   public void transformFromDynamicsFrame(FixedFrameVector2DBasics valuesToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelValue,
+                                               double orthogonalValue)
    {
       double epsilonZeroICPVelocity = 1e-5;
 
@@ -33,12 +40,12 @@ public class ICPOptimizationControllerHelper
          icpVelocityDirectionFrame.setXAxis(desiredICPVelocity);
          icpVelocityDirectionFrame.getTransformToDesiredFrame(tempTransform, worldFrame);
 
-         transformValues(feedbackGainsToPack, 1.0 + parallelGain, 1.0 + orthogonalGain, tempTransform);
+         transformValues(valuesToPack, parallelValue, orthogonalValue, tempTransform);
       }
       else
       {
-         feedbackGainsToPack.setToZero();
-         feedbackGainsToPack.set(1.0 + orthogonalGain, 1.0 + orthogonalGain);
+         valuesToPack.setToZero();
+         valuesToPack.set(orthogonalValue, orthogonalValue);
       }
    }
 
@@ -85,7 +92,7 @@ public class ICPOptimizationControllerHelper
       public void setXAxis(FixedFrameTuple2DBasics xAxis)
       {
          this.xAxis.setIncludingFrame(xAxis);
-         this.xAxis.changeFrame(parentFrame);
+         this.xAxis.changeFrame(getParent());
          this.xAxis.normalize();
          update();
       }

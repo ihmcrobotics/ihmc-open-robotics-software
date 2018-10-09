@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.messageHandlers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
+
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.TextToSpeechPacket;
@@ -42,6 +44,8 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -59,6 +63,11 @@ public class WalkingMessageHandler
    private static final int maxNumberOfFootsteps = 100;
    private final RecyclingArrayList<Footstep> upcomingFootsteps = new RecyclingArrayList<>(maxNumberOfFootsteps, Footstep.class);
    private final RecyclingArrayList<FootstepTiming> upcomingFootstepTimings = new RecyclingArrayList<>(maxNumberOfFootsteps, FootstepTiming.class);
+   private final RecyclingArrayList<MutableDouble> pauseDurationAfterStep = new RecyclingArrayList<>(maxNumberOfFootsteps, MutableDouble.class);
+
+   private final YoBoolean isPausedWithSteps = new YoBoolean("IsPausedWithSteps", registry);
+   private final YoDouble timeToContinueWalking = new YoDouble("TimeToContinueWalking", registry);
+   private final DoubleProvider minimumPauseTime = new DoubleParameter("MinimumPauseTime", registry, 0.0);
 
    private final YoBoolean hasNewFootstepAdjustment = new YoBoolean("hasNewFootstepAdjustement", registry);
    private final AdjustFootstepCommand requestedFootstepAdjustment = new AdjustFootstepCommand();
@@ -121,9 +130,6 @@ public class WalkingMessageHandler
    {
       this.statusOutputManager = statusOutputManager;
 
-      upcomingFootsteps.clear();
-      upcomingFootstepTimings.clear();
-
       this.yoTime = yoTime;
       footstepDataListReceivedTime.setToNaN();
 
@@ -147,7 +153,10 @@ public class WalkingMessageHandler
       for (int i = 0; i < numberOfFootstepsToVisualize; i++)
          upcomingFoostepSide[i] = new YoEnum<>("upcomingFoostepSide" + i, registry, RobotSide.class, true);
 
-      footstepListVisualizer = new FootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
+      if (yoGraphicsListRegistry != null)
+         footstepListVisualizer = new FootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
+      else
+         footstepListVisualizer = null;
       updateVisualization();
 
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
@@ -159,21 +168,21 @@ public class WalkingMessageHandler
 
    public void handleFootstepDataListCommand(FootstepDataListCommand command)
    {
-      offsettingPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
-      if (!offsettingPlanWithFootstepError.getBooleanValue())
-      {
-         planOffsetInWorld.setToZero();
-      }
-
       if (command.getNumberOfFootsteps() > 0)
       {
          switch (command.getExecutionMode())
          {
          case OVERRIDE:
+            offsettingPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
+            planOffsetInWorld.setToZero();
             clearFootsteps();
             clearFootTrajectory();
             break;
          case QUEUE:
+            if (offsettingPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
+            {
+               PrintTools.warn("Recieved a queued message that has a different setting for offsetting footsteps with exectuion error!");
+            }
             if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue())
             {
                if (command.getExecutionTiming() == ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS)
@@ -230,14 +239,15 @@ public class WalkingMessageHandler
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
-         setFootstepTiming(command.getFootstep(i), command.getExecutionTiming(), upcomingFootstepTimings.add(), command.getExecutionMode());
+         setFootstepTiming(command.getFootstep(i), command.getExecutionTiming(), upcomingFootstepTimings.add(), pauseDurationAfterStep.add(),
+                           command.getExecutionMode());
          setFootstep(command.getFootstep(i), trustHeightOfFootsteps, areFootstepsAdjustable, upcomingFootsteps.add());
          currentNumberOfFootsteps.increment();
       }
 
       if (!checkTimings(upcomingFootstepTimings))
          clearFootsteps();
-      updateTransferTimes(upcomingFootstepTimings);
+      checkForPause();
 
       updateVisualization();
    }
@@ -366,7 +376,7 @@ public class WalkingMessageHandler
     */
    public void poll(Footstep footstepToPack, FootstepTiming timingToPack)
    {
-      if (upcomingFootsteps.isEmpty())
+      if (getStepsBeforePause() == 0)
       {
          throw new RuntimeException("Can not poll footstep since there are no upcoming steps.");
       }
@@ -380,26 +390,24 @@ public class WalkingMessageHandler
       currentFootstepIndex.increment();
 
       upcomingFootstepTimings.remove(0);
+      pauseDurationAfterStep.remove(0);
       upcomingFootsteps.remove(0);
    }
 
    /**
-    * This method can be used if the timing of a upcoming footstep needs to be adjusted. It
-    * will throw a {@link RuntimeException} if there is less upcoming footstep timings then
-    * {@code stepIndex}.
+    * This method can be used to adjust the timing of the upcoming footstep. It will throw a {@link RuntimeException} if
+    * there are no footsteps in the queue.
     *
-    * @param stepIndex is the index of the timing that will be adjusted in the list of upcoming steps.
     * @param newSwingDuration is the new swing duration for the adjusted timing
     * @param newTransferDuration is the new transfer duration for the adjusted timing.
     */
-   public void adjustTimings(int stepIndex, double newSwingDuration, double newTouchdownDuration, double newTransferDuration)
+   public void adjustTiming(double newSwingDuration, double newTouchdownDuration, double newTransferDuration)
    {
-      if (upcomingFootstepTimings.size() <= stepIndex)
+      if (upcomingFootstepTimings.isEmpty())
       {
-         throw new RuntimeException("Can not adjust timing of upciming step " + stepIndex + ", only have " + upcomingFootstepTimings.size()
-               + " upcoming steps.");
+         throw new RuntimeException("Can not adjust timing of upciming step - have no steps.");
       }
-      upcomingFootstepTimings.get(stepIndex).setTimings(newSwingDuration, newTouchdownDuration, newTransferDuration);
+      upcomingFootstepTimings.get(0).setTimings(newSwingDuration, newTouchdownDuration, newTransferDuration);
    }
 
    public FootTrajectoryCommand pollFootTrajectoryForFlamingoStance(RobotSide swingSide)
@@ -439,15 +447,46 @@ public class WalkingMessageHandler
       return true;
    }
 
-   public void insertNextFootstep(Footstep newNextFootstep)
-   {
-      if (newNextFootstep != null)
-         upcomingFootsteps.add(0, newNextFootstep);
-   }
-
    public boolean hasUpcomingFootsteps()
    {
-      return !upcomingFootsteps.isEmpty() && !isWalkingPaused.getBooleanValue();
+      return getStepsBeforePause() > 0 && !isWalkingPaused.getBooleanValue();
+   }
+
+   private void checkForPause()
+   {
+      if (!pauseDurationAfterStep.isEmpty() && Double.isFinite(pauseDurationAfterStep.get(0).doubleValue()))
+      {
+         double pause = pauseDurationAfterStep.get(0).doubleValue();
+         timeToContinueWalking.set(yoTime.getValue() + pause);
+         isPausedWithSteps.set(true);
+         pauseDurationAfterStep.get(0).setValue(Double.NaN);
+      }
+   }
+
+   private int getStepsBeforePause()
+   {
+      // Check if we can continue walking if we are paused.
+      if (isPausedWithSteps.getValue() && yoTime.getValue() >= timeToContinueWalking.getValue())
+      {
+         isPausedWithSteps.set(false);
+      }
+
+      if (isPausedWithSteps.getValue())
+      {
+         return 0;
+      }
+
+      int stepIndex = 0;
+      while (stepIndex < upcomingFootsteps.size())
+      {
+         if (Double.isFinite(pauseDurationAfterStep.get(stepIndex).doubleValue()))
+         {
+            return stepIndex;
+         }
+         stepIndex++;
+      }
+
+      return stepIndex;
    }
 
    public boolean hasRequestedFootstepAdjustment()
@@ -458,16 +497,6 @@ public class WalkingMessageHandler
          requestedFootstepAdjustment.clear();
       }
       return hasNewFootstepAdjustment.getBooleanValue();
-   }
-
-   public boolean isNextFootstepUsingAbsoluteTiming()
-   {
-      if (!hasUpcomingFootsteps())
-      {
-         return false;
-      }
-
-      return upcomingFootstepTimings.get(0).hasAbsoluteTime();
    }
 
    public boolean isNextFootstepFor(RobotSide swingSide)
@@ -495,11 +524,6 @@ public class WalkingMessageHandler
       return !upcomingFootTrajectoryCommandListForFlamingoStance.get(swingSide).isEmpty();
    }
 
-   public boolean isWalkingPaused()
-   {
-      return isWalkingPaused.getBooleanValue();
-   }
-
    public void clearFootTrajectory(RobotSide robotSide)
    {
       upcomingFootTrajectoryCommandListForFlamingoStance.get(robotSide).clear();
@@ -515,6 +539,7 @@ public class WalkingMessageHandler
    {
       upcomingFootsteps.clear();
       upcomingFootstepTimings.clear();
+      pauseDurationAfterStep.clear();
       currentNumberOfFootsteps.set(0);
       currentFootstepIndex.set(0);
       updateVisualization();
@@ -563,8 +588,6 @@ public class WalkingMessageHandler
       footstepStatus.getDesiredFootPositionInWorld().set(desiredFootPositionInWorld);
       statusOutputManager.reportStatusMessage(footstepStatus);
 
-      //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FOOTSTEP_COMPLETED);
-      //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
       executingFootstep.set(false);
    }
 
@@ -581,11 +604,17 @@ public class WalkingMessageHandler
 
    public void reportWalkingComplete()
    {
+      // If we have transitioned to standing this will be called. However, we might just be taking a break because of a long
+      // transfer. In that case do not report walking complete. Instead compute when to continue walking.
+      if (!upcomingFootsteps.isEmpty())
+      {
+         checkForPause();
+         return;
+      }
+
       walkingStatusMessage.setWalkingStatus(WalkingStatus.COMPLETED.toByte());
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
       isWalking.set(false);
-      //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FINISHED_WALKING);
-      //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
    }
 
    public void reportWalkingAbortRequested()
@@ -593,8 +622,6 @@ public class WalkingMessageHandler
       WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
       walkingStatusMessage.setWalkingStatus(WalkingStatus.ABORT_REQUESTED.toByte());
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
-      //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.WALKING_ABORTED);
-      //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
    }
 
    public void reportControllerFailure(FrameVector3D fallingDirection)
@@ -700,7 +727,7 @@ public class WalkingMessageHandler
 
    public int getCurrentNumberOfFootsteps()
    {
-      return currentNumberOfFootsteps.getIntegerValue();
+      return getStepsBeforePause();
    }
 
    private void updateVisualization()
@@ -716,12 +743,14 @@ public class WalkingMessageHandler
          upcomingFoostepSide[i].set(null);
       }
 
-      footstepListVisualizer.update(upcomingFootsteps);
+      if (footstepListVisualizer != null)
+         footstepListVisualizer.update(upcomingFootsteps);
    }
 
    public void updateVisualizationAfterFootstepAdjustement(Footstep adjustedFootstep)
    {
-      footstepListVisualizer.updateFirstFootstep(adjustedFootstep);
+      if (footstepListVisualizer != null)
+         footstepListVisualizer.updateFirstFootstep(adjustedFootstep);
    }
 
    private final TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
@@ -779,9 +808,10 @@ public class WalkingMessageHandler
       }
    }
 
-   private void setFootstepTiming(FootstepDataCommand footstep, ExecutionTiming executionTiming, FootstepTiming timingToSet, ExecutionMode executionMode)
+   private void setFootstepTiming(FootstepDataCommand footstep, ExecutionTiming executionTiming, FootstepTiming timingToSet, MutableDouble pauseDurationToSet,
+                                  ExecutionMode executionMode)
    {
-      int stepsInQueue = getCurrentNumberOfFootsteps();
+      int stepsInQueue = upcomingFootsteps.size();
 
       double swingDuration = footstep.getSwingDuration();
       if (Double.isNaN(swingDuration) || swingDuration <= 0.0)
@@ -842,33 +872,18 @@ public class WalkingMessageHandler
       default:
          throw new RuntimeException("Timing mode not implemented.");
       }
-   }
 
-   private void updateTransferTimes(List<FootstepTiming> upcomingFootstepTimings)
-   {
-      if (upcomingFootstepTimings.isEmpty())
-         return;
-
-      FootstepTiming firstTiming = upcomingFootstepTimings.get(0);
-      if (!firstTiming.hasAbsoluteTime())
-         return;
-
-      double lastSwingStart = firstTiming.getSwingStartTime();
-      double lastSwingTime = firstTiming.getSwingTime();
-      double touchdownDuration = firstTiming.getTouchdownDuration();
-      firstTiming.setTimings(lastSwingTime, touchdownDuration, lastSwingStart);
-
-      for (int footstepIdx = 1; footstepIdx < upcomingFootstepTimings.size(); footstepIdx++)
+      // The transfer is long enough that we can go to standing, pause, and then keep walking:
+      double timeToGoToStanding = stepsInQueue == 0 ? 0.0 : finalTransferTime.getValue();
+      double pauseTime = timingToSet.getTransferTime() - timeToGoToStanding - defaultInitialTransferTime.getValue();
+      if (pauseTime >= minimumPauseTime.getValue())
       {
-         FootstepTiming timing = upcomingFootstepTimings.get(footstepIdx);
-         double swingStart = timing.getSwingStartTime();
-         double swingTime = timing.getSwingTime();
-         double transferTime = swingStart - (lastSwingStart + lastSwingTime);
-         touchdownDuration = timing.getTouchdownDuration();
-         timing.setTimings(swingTime, touchdownDuration, transferTime);
-
-         lastSwingStart = swingStart;
-         lastSwingTime = swingTime;
+         timingToSet.setTransferTime(defaultInitialTransferTime.getValue());
+         pauseDurationToSet.setValue(pauseTime);
+      }
+      else
+      {
+         pauseDurationToSet.setValue(Double.NaN);
       }
    }
 

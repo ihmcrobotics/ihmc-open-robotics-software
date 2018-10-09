@@ -99,7 +99,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             transformToParent.setIdentity();
-            rotationPlane.changeFrame(parentFrame);
+            rotationPlane.changeFrame(getParent());
             transformToParent.setRotation(rotationPlane);
          }
       };

@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
@@ -22,6 +23,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -45,6 +47,12 @@ public class PolygonWigglingTest
    private final ArtifactList artifacts = new ArtifactList(getClass().getSimpleName());
 
    private final static double epsilon = 0.00001;
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)

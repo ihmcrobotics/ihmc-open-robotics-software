@@ -22,6 +22,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -42,6 +43,7 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupFootstepPlanningToolboxModule(robotModel, params));
       tryToStartModule(() -> addTextToSpeechEngine(params));
       tryToStartModule(() -> setupHeightQuadTreeToolboxModule(robotModel, params));
+      tryToStartModule(() -> setupRobotEnvironmentAwerenessModule(params));
    }
 
    private void addTextToSpeechEngine(DRCNetworkModuleParameters params)
@@ -160,6 +162,20 @@ public class DRCNetworkProcessor
    {
       if (params.isHeightQuadTreeToolboxEnabled())
          new HeightQuadTreeToolboxModule(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider());
+   }
+   
+
+   private void setupRobotEnvironmentAwerenessModule(DRCNetworkModuleParameters params) throws IOException
+   {
+      if (params.isRobotEnvironmentAwerenessModuleEnabled())
+         try
+         {
+            LIDARBasedREAModule.createRemoteModule(System.getProperty("user.home") + "/.ihmc/Configurations/defaultREAModuleConfiguration.txt").start();
+         }
+         catch (Exception e)
+         {
+            throw new RuntimeException(e);
+         };
    }
 
    protected void connect(PacketCommunicator communicator)

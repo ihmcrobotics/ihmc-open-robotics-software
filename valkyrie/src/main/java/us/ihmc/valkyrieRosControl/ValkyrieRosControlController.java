@@ -63,8 +63,9 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
-   public static final boolean HAS_FOREARMS_ON = false;
+   public static final boolean HAS_FOREARMS_ON = true;
    public static final boolean ENABLE_FINGER_JOINTS = true && HAS_FOREARMS_ON;
+   public static final boolean HAS_LIGHTER_BACKPACK = true;
 
    private static final String[] torqueControlledJoints;
    static
@@ -370,12 +371,15 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSimpleRobotName(), sensorInformation, contactPointParameters, robotModel,
                                                                   stateEstimatorParameters, sensorReaderFactory, threadDataSynchronizer,
-                                                                  estimatorRealtimeRos2Node, valkyrieLowLevelOutputWriter, yoVariableServer, gravity);
-      estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+                                                                  estimatorRealtimeRos2Node, externalPelvisPoseSubscriber, valkyrieLowLevelOutputWriter,
+                                                                  yoVariableServer, gravity);
 
-      ValkyrieHandStateCommunicator handStateCommunicator = new ValkyrieHandStateCommunicator(robotName, threadDataSynchronizer.getEstimatorFullRobotModel(),
-                                                                                              robotModel.getHandModel(), estimatorRealtimeRos2Node);
-      estimatorThread.addRobotController(handStateCommunicator);
+      if (ENABLE_FINGER_JOINTS)
+      {
+         ValkyrieHandStateCommunicator handStateCommunicator = new ValkyrieHandStateCommunicator(robotName, threadDataSynchronizer.getEstimatorFullRobotModel(),
+                                                                                                 robotModel.getHandModel(), estimatorRealtimeRos2Node);
+         estimatorThread.addRobotController(handStateCommunicator);
+      }
 
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel.getSimpleRobotName(), robotModel, sensorInformation, controllerFactory,
                                                                      threadDataSynchronizer, drcOutputWriter, controllerRealtimeRos2Node, yoVariableServer,

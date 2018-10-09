@@ -1,127 +1,145 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class AlphaFilteredYoFrameVector extends YoFrameVector3D implements ProcessingYoVariable
 {
-   private final AlphaFilteredYoVariable x, y, z;
+   private final DoubleProvider alphaProvider;
 
-   private AlphaFilteredYoFrameVector(AlphaFilteredYoVariable x, AlphaFilteredYoVariable y, AlphaFilteredYoVariable z, ReferenceFrame referenceFrame)
-   {
-      super(x, y, z, referenceFrame);
+   private final FrameTuple3DReadOnly position;
+   private final YoBoolean hasBeenCalled;
 
-      this.x = x;
-      this.y = y;
-      this.z = z;
-   }
-
+   /**
+    * @deprecated Use
+    *             {@link #AlphaFilteredYoFrameVector(String, String, YoVariableRegistry, double, ReferenceFrame)}
+    *             instead.
+    */
+   @Deprecated
    public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha,
-           ReferenceFrame referenceFrame)
+                                                                             ReferenceFrame referenceFrame)
    {
-      // alpha is a double
-      AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha);
-      AlphaFilteredYoVariable y = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, alpha);
-      AlphaFilteredYoVariable z = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry, alpha);
-
-      AlphaFilteredYoFrameVector ret = new AlphaFilteredYoFrameVector(x, y, z, referenceFrame);
-
-      return ret;
+      return new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alpha, referenceFrame);
    }
 
+   /**
+    * @deprecated Use
+    *             {@link #AlphaFilteredYoFrameVector(String, String, YoVariableRegistry, DoubleProvider, ReferenceFrame)}
+    *             instead.
+    */
+   @Deprecated
    public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-           DoubleProvider alpha, ReferenceFrame referenceFrame)
+                                                                             DoubleProvider alpha, ReferenceFrame referenceFrame)
    {
-      // alpha is a double
-      AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha);
-      AlphaFilteredYoVariable y = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, alpha);
-      AlphaFilteredYoVariable z = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry, alpha);
-
-      AlphaFilteredYoFrameVector ret = new AlphaFilteredYoFrameVector(x, y, z, referenceFrame);
-
-      return ret;
+      return new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alpha, referenceFrame);
    }
 
-
+   /**
+    * @deprecated Use
+    *             {@link #AlphaFilteredYoFrameVector(String, String, YoVariableRegistry, double, FrameTuple3DReadOnly)}
+    *             instead.
+    */
+   @Deprecated
    public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha,
-           YoFrameVector3D unfilteredVector)
+                                                                             FrameTuple3DReadOnly unfilteredFrameTuple3D)
    {
-      // alpha is a double
-      AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredVector.getYoX());
-      AlphaFilteredYoVariable y = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, alpha, unfilteredVector.getYoY());
-      AlphaFilteredYoVariable z = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry, alpha, unfilteredVector.getYoZ());
-
-      AlphaFilteredYoFrameVector ret = new AlphaFilteredYoFrameVector(x, y, z, unfilteredVector.getReferenceFrame());
-
-      return ret;
+      return new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alpha, unfilteredFrameTuple3D);
    }
 
-
+   /**
+    * @deprecated Use
+    *             {@link #AlphaFilteredYoFrameVector(String, String, YoVariableRegistry, DoubleProvider, FrameTuple3DReadOnly)}
+    *             instead.
+    */
+   @Deprecated
    public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-                                                                             DoubleProvider alpha, YoFrameVector3D unfilteredVector)
+                                                                             DoubleProvider alpha, FrameTuple3DReadOnly unfilteredFrameTuple3D)
    {
-      // alpha is a YoVariable
-      AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredVector.getYoX());
-      AlphaFilteredYoVariable y = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, alpha, unfilteredVector.getYoY());
-      AlphaFilteredYoVariable z = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry, alpha, unfilteredVector.getYoZ());
-
-      AlphaFilteredYoFrameVector ret = new AlphaFilteredYoFrameVector(x, y, z, unfilteredVector.getReferenceFrame());
-
-      return ret;
+      return new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alpha, unfilteredFrameTuple3D);
    }
 
-   public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-                                                                             DoubleProvider alpha, YoFramePoint3D unfilteredPosition)
+   public AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha, ReferenceFrame referenceFrame)
    {
-      // alpha is a YoVariable
-      AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredPosition.getYoX());
-      AlphaFilteredYoVariable y = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, alpha, unfilteredPosition.getYoY());
-      AlphaFilteredYoVariable z = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry, alpha, unfilteredPosition.getYoZ());
-
-      AlphaFilteredYoFrameVector ret = new AlphaFilteredYoFrameVector(x, y, z, unfilteredPosition.getReferenceFrame());
-
-      return ret;
+      this(namePrefix, nameSuffix, registry, AlphaFilteredYoVariable.createAlphaYoDouble(namePrefix + nameSuffix, alpha, registry), referenceFrame);
    }
 
-   public void update()
+   public AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame)
    {
-      x.update();
-      y.update();
-      z.update();
+      this(namePrefix, nameSuffix, registry, alpha, referenceFrame, null);
    }
 
-   public void update(double xUnfiltered, double yUnfiltered, double zUnfiltered)
+   public AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha,
+                                     FrameTuple3DReadOnly unfilteredFrameTuple3D)
    {
-      x.update(xUnfiltered);
-      y.update(yUnfiltered);
-      z.update(zUnfiltered);
+      this(namePrefix, nameSuffix, registry, AlphaFilteredYoVariable.createAlphaYoDouble(namePrefix + nameSuffix, alpha, registry),
+           unfilteredFrameTuple3D.getReferenceFrame(), unfilteredFrameTuple3D);
    }
 
-   public void update(Vector3D vectorUnfiltered)
+   public AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha,
+                                     FrameTuple3DReadOnly unfilteredFrameTuple3D)
    {
-      x.update(vectorUnfiltered.getX());
-      y.update(vectorUnfiltered.getY());
-      z.update(vectorUnfiltered.getZ());
+      this(namePrefix, nameSuffix, registry, alpha, unfilteredFrameTuple3D.getReferenceFrame(), unfilteredFrameTuple3D);
    }
 
-   public void update(FrameVector3D vectorUnfiltered)
+   private AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame,
+                                      FrameTuple3DReadOnly unfilteredFrameTuple3D)
    {
-      checkReferenceFrameMatch(vectorUnfiltered);
-      x.update(vectorUnfiltered.getX());
-      y.update(vectorUnfiltered.getY());
-      z.update(vectorUnfiltered.getZ());
+      super(namePrefix, nameSuffix, referenceFrame, registry);
+
+      alphaProvider = alpha;
+
+      position = unfilteredFrameTuple3D;
+      hasBeenCalled = new YoBoolean(namePrefix + nameSuffix + "HasBeenCalled", registry);
+      reset();
    }
 
    public void reset()
    {
-      x.reset();
-      y.reset();
-      z.reset();
+      hasBeenCalled.set(false);
+   }
+
+   @Override
+   public void update()
+   {
+      if (position == null)
+      {
+         throw new NullPointerException(getClass().getSimpleName() + " must be constructed with a non null "
+               + "position variable to call update(), otherwise use update(double)");
+      }
+
+      update(position);
+   }
+
+   public void update(FrameTuple3DReadOnly unfilteredFrameTuple3D)
+   {
+      checkReferenceFrameMatch(unfilteredFrameTuple3D);
+      update((Tuple3DReadOnly) unfilteredFrameTuple3D);
+   }
+
+   public void update(Tuple3DReadOnly unfilteredTuple3D)
+   {
+      update(unfilteredTuple3D.getX(), unfilteredTuple3D.getY(), unfilteredTuple3D.getZ());
+   }
+
+   private final Vector3D unfilteredVector3D = new Vector3D();
+
+   public void update(double xUnfiltered, double yUnfiltered, double zUnfiltered)
+   {
+      if (!hasBeenCalled.getValue())
+      {
+         hasBeenCalled.set(true);
+         set(xUnfiltered, yUnfiltered, zUnfiltered);
+      }
+      else
+      {
+         unfilteredVector3D.set(xUnfiltered, yUnfiltered, zUnfiltered);
+         interpolate(unfilteredVector3D, this, alphaProvider.getValue());
+      }
    }
 }

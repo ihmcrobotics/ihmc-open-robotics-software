@@ -105,7 +105,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void setPositionAndUpdate(FramePoint3DReadOnly framePoint)
    {
-      framePoint.checkReferenceFrameMatch(parentFrame);
+      framePoint.checkReferenceFrameMatch(getParent());
       originPose.setPosition(framePoint);
       this.update();
    }
@@ -130,14 +130,14 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void setOrientationAndUpdate(FrameQuaternionReadOnly frameOrientation)
    {
-      frameOrientation.checkReferenceFrameMatch(parentFrame);
+      frameOrientation.checkReferenceFrameMatch(getParent());
       originPose.setOrientation(frameOrientation);
       this.update();
    }
    
    public void setXYFromPosition2dAndUpdate(FramePoint2DReadOnly position2d)
    {
-      position2d.checkReferenceFrameMatch(parentFrame);
+      position2d.checkReferenceFrameMatch(getParent());
       originPose.setPosition(position2d);
       this.update();
    }
@@ -265,7 +265,7 @@ public class PoseReferenceFrame extends ReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      originPose.checkReferenceFrameMatch(parentFrame);
+      originPose.checkReferenceFrameMatch(getParent());
       originPose.get(transformToParent);
    }
 
