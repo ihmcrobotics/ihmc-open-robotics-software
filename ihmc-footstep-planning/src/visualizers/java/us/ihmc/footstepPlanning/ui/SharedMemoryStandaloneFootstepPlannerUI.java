@@ -4,10 +4,11 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 
-public class SharedMemoryFootstepPlannerUI extends Application
+public class SharedMemoryStandaloneFootstepPlannerUI extends Application
 {
    private final boolean visualize;
 
@@ -16,7 +17,7 @@ public class SharedMemoryFootstepPlannerUI extends Application
 
    private FootstepPlannerUI ui;
 
-   public SharedMemoryFootstepPlannerUI(boolean visualize)
+   public SharedMemoryStandaloneFootstepPlannerUI(boolean visualize)
    {
       this.visualize = visualize;
    }

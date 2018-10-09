@@ -1,9 +1,9 @@
-package us.ihmc.footstepPlanning.ui;
+package us.ihmc.footstepPlanning.ui.components;
 
 import javafx.scene.Group;
 import javafx.scene.Node;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.ui.components.FootstepPathMeshViewer;
 import us.ihmc.javaFXToolkit.messager.Messager;
 
 import java.util.concurrent.atomic.AtomicReference;

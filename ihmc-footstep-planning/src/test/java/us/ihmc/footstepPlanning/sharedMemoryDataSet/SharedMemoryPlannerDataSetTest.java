@@ -12,7 +12,7 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnit
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
-import us.ihmc.footstepPlanning.ui.SharedMemoryFootstepPlannerUI;
+import us.ihmc.footstepPlanning.ui.SharedMemoryStandaloneFootstepPlannerUI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -21,7 +21,7 @@ import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
 
 public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
-   private SharedMemoryFootstepPlannerUI launcher;
+   private SharedMemoryStandaloneFootstepPlannerUI launcher;
    protected JavaFXMessager messager;
 
 
@@ -30,7 +30,7 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
-      launcher = new SharedMemoryFootstepPlannerUI(VISUALIZE);
+      launcher = new SharedMemoryStandaloneFootstepPlannerUI(VISUALIZE);
       ApplicationRunner.runApplication(launcher);
 
       messager = launcher.getMessager();

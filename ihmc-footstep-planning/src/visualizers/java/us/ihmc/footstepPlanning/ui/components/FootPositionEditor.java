@@ -1,18 +1,17 @@
-package us.ihmc.footstepPlanning.ui;
+package us.ihmc.footstepPlanning.ui.components;
 
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.SubScene;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class FootPositionEditor extends AnimationTimer
@@ -22,8 +21,6 @@ public class FootPositionEditor extends AnimationTimer
    private final EventHandler<MouseEvent> rayCastInterceptor;
    private boolean isRayCastInterceptorAttached = false;
    private final AtomicReference<Point3D> latestInterception = new AtomicReference<>(null);
-
-   private final AtomicBoolean positionValidated = new AtomicBoolean(false);
 
    private final Messager messager;
    private final Node sceneNode;

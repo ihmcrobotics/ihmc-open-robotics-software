@@ -4,30 +4,25 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
 
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class StandaloneFootstepPlannerUIMessageConverter
+public class RemotePlannerMessageConverter
 {
    private final RealtimeRos2Node ros2Node;
 
@@ -47,23 +42,23 @@ public class StandaloneFootstepPlannerUIMessageConverter
 
 
 
-   public static StandaloneFootstepPlannerUIMessageConverter createRemoteConverter(JavaFXMessager messager, String robotName)
+   public static RemotePlannerMessageConverter createRemoteConverter(JavaFXMessager messager, String robotName)
    {
       return createConverter(messager, robotName, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
-   public static StandaloneFootstepPlannerUIMessageConverter createIntraprocessConverter(JavaFXMessager messager, String robotName)
+   public static RemotePlannerMessageConverter createIntraprocessConverter(JavaFXMessager messager, String robotName)
    {
       return createConverter(messager, robotName, DomainFactory.PubSubImplementation.INTRAPROCESS);
    }
 
-   public static StandaloneFootstepPlannerUIMessageConverter createConverter(JavaFXMessager messager, String robotName, DomainFactory.PubSubImplementation implementation)
+   public static RemotePlannerMessageConverter createConverter(JavaFXMessager messager, String robotName, DomainFactory.PubSubImplementation implementation)
    {
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "ihmc_footstep_planner_ui");
-      return new StandaloneFootstepPlannerUIMessageConverter(ros2Node, messager, robotName);
+      return new RemotePlannerMessageConverter(ros2Node, messager, robotName);
    }
 
-   public StandaloneFootstepPlannerUIMessageConverter(RealtimeRos2Node ros2Node, JavaFXMessager messager, String robotName)
+   public RemotePlannerMessageConverter(RealtimeRos2Node ros2Node, JavaFXMessager messager, String robotName)
    {
       this.messager = messager;
       this.robotName = robotName;
