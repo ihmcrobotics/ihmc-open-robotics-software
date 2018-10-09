@@ -157,6 +157,16 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    }
 
    /**
+    * Resets the control base frame to its default value.
+    *
+    * @see #setControlBaseFrame(ReferenceFrame)
+    */
+   public void resetControlBaseFrame()
+   {
+      controlBaseFrame = null;
+   }
+
+   /**
     * Sets the gains to use during the next control tick.
     *
     * @param gains the new set of gains to use. Not modified.

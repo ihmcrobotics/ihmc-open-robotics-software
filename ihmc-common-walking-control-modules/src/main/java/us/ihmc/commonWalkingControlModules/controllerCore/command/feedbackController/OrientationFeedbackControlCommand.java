@@ -166,6 +166,16 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    }
 
    /**
+    * Resets the control base frame to its default value.
+    *
+    * @see #setControlBaseFrame(ReferenceFrame)
+    */
+   public void resetControlBaseFrame()
+   {
+      controlBaseFrame = null;
+   }
+
+   /**
     * Sets the reference frame in which the gains should be applied.
     * <p>
     * If the reference frame is {@code null}, the gains will be applied in the control frame.
