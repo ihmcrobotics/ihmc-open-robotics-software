@@ -7,6 +7,11 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 
+/**
+ * This class provides a visualizer for the remote footstep planner found in the footstep planner toolbox.
+ * It allows users to view the resulting plans calculated by the toolbox. It also allows the user to tune
+ * the planner parameters, and request a new plan from the planning toolbox.
+ */
 public class RemoteFootstepPlannerUI extends Application
 {
    private final boolean visualize;

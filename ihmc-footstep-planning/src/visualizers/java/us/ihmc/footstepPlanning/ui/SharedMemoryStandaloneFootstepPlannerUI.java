@@ -8,6 +8,10 @@ import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 
+/**
+ * This class provides a fully remote footstep planner. It includes the UI and the footstep planning modules, which are
+ * available using JavaFX shared memory messages.
+ */
 public class SharedMemoryStandaloneFootstepPlannerUI extends Application
 {
    private final boolean visualize;

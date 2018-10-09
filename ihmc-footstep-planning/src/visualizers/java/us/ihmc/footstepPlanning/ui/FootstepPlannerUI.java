@@ -16,6 +16,10 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer;
 
 import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
 
+/**
+ * This class is the visualization element of the footstep planner. It also contains a graphical interface for
+ * setting planner parameters to be used by the footstep planner itself.
+ */
 public class FootstepPlannerUI
 {
    private static final boolean VERBOSE = true;
