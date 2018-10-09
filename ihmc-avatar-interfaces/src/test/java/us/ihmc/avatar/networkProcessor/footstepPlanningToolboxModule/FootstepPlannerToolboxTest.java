@@ -23,6 +23,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -146,7 +147,7 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
    }
 
    @Test(timeout = 500000)
-   @ContinuousIntegrationTest(estimatedDuration = 13.0)
+   @ContinuousIntegrationTest(estimatedDuration = 13.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    public void testDatasetsWithoutOcclusionRTPS()
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;

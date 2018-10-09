@@ -110,7 +110,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
    {
       if (side == null)
       {
-         PrintTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
+         if (debug)
+            PrintTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
+
          side = defaultStartNodeSide;
       }
       startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), side);

@@ -1,9 +1,10 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pubsub.DomainFactory;
 
-public class AStarFootstepPlannerToolboxTest extends FootstepPlannerToolboxTest
+public class AStarPlannerToolboxTest extends FootstepPlannerToolboxTest
 {
    @Override
    public FootstepPlannerType getPlannerType()
@@ -13,13 +14,13 @@ public class AStarFootstepPlannerToolboxTest extends FootstepPlannerToolboxTest
 
    public static void main(String[] args) throws Exception
    {
-      AStarFootstepPlannerToolboxTest test = new AStarFootstepPlannerToolboxTest();
+      AStarPlannerToolboxTest test = new AStarPlannerToolboxTest();
       String prefix = "unitTestData/testable/";
-      test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
+      test.pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
       test.setup();
 //      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171215_214730_CinderBlockField");
       test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171215_220523_SteppingStones");
+      PrintTools.info("Test passed.");
       test.tearDown();
-
    }
 }
