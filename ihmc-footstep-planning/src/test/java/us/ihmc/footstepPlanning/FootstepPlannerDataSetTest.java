@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.sharedMemoryDataSet;
+package us.ihmc.footstepPlanning;
 
 import org.junit.Assert;
 import org.junit.Test;

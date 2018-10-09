@@ -43,7 +43,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
 
-public class RemoteFootstepPlannerUITest
+public class RemoteFootstepPlannerUIMessagingTest
 {
    private static final int iters = 1;
    private static final double epsilon = 1e-5;
