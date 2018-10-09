@@ -44,7 +44,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public abstract class ToolboxModule
 {
-   protected static final boolean DEBUG = true;
+   protected static final boolean DEBUG = false;
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
    protected static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 1;
 
