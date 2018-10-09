@@ -18,6 +18,7 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -86,7 +87,7 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
 
    public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      return FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName);
    }
 
    @Override
@@ -97,6 +98,6 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
 
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.INPUT);
+      return FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName);
    }
 }

@@ -15,7 +15,7 @@ import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.*;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.*;
 
 public class StartGoalOrientationViewer extends AnimationTimer

@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -29,7 +30,7 @@ public class SharedMemoryStandaloneFootstepPlannerUI extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      messager = new SharedMemoryJavaFXMessager(FootstepPlannerUserInterfaceAPI.API);
+      messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
       messager.startMessager();
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager);

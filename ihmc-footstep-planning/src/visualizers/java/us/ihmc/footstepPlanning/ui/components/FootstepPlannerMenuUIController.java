@@ -1,10 +1,9 @@
 package us.ihmc.footstepPlanning.ui.components;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.MenuItem;
 import javafx.stage.Window;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -37,8 +36,8 @@ public class FootstepPlannerMenuUIController
       {
          if (VERBOSE)
             PrintTools.info(this, "Loaded planar regions, broadcasting data.");
-         messager.submitMessage(FootstepPlannerUserInterfaceAPI.GlobalResetTopic, true);
-         messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, loadedPlanarRegions);
+         messager.submitMessage(FootstepPlannerSharedMemoryAPI.GlobalResetTopic, true);
+         messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic, loadedPlanarRegions);
       }
       else
       {

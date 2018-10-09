@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.ui;
+package us.ihmc.footstepPlanning.communication;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -13,7 +13,7 @@ import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.*;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class FootstepPlannerUserInterfaceAPI
+public class FootstepPlannerSharedMemoryAPI
 {
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
 

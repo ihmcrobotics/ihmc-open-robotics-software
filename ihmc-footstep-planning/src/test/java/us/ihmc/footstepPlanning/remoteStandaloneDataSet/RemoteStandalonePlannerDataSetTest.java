@@ -25,8 +25,8 @@ import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.FootstepPlanTopic;
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.PlanningResultTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.FootstepPlanTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.PlanningResultTopic;
 
 public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlannerDataSetTest
 {

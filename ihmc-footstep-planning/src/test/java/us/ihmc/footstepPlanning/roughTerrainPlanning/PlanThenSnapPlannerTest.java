@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commons.thread.ThreadTools;
@@ -16,7 +15,7 @@ import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
-import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -40,7 +39,7 @@ public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
             @Override
             public void start(Stage stage) throws Exception
             {
-               messager = new SharedMemoryJavaFXMessager(FootstepPlannerUserInterfaceAPI.API);
+               messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
                ui = FootstepPlannerUI.createMessagerUI(stage, messager);
                ui.show();
             }

@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,7 +21,7 @@ import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
-import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.commons.thread.ThreadTools;
@@ -52,7 +51,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
             @Override
             public void start(Stage stage) throws Exception
             {
-               messager = new SharedMemoryJavaFXMessager(FootstepPlannerUserInterfaceAPI.API);
+               messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
                ui = FootstepPlannerUI.createMessagerUI(stage, messager);
                ui.show();
             }

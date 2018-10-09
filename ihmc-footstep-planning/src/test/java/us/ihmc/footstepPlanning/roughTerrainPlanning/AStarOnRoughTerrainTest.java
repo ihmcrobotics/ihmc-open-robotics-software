@@ -19,7 +19,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpa
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
-import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -47,7 +47,7 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
             @Override
             public void start(Stage stage) throws Exception
             {
-               messager = new SharedMemoryJavaFXMessager(FootstepPlannerUserInterfaceAPI.API);
+               messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
                messager.startMessager();
 
                ui = FootstepPlannerUI.createMessagerUI(stage, messager);
