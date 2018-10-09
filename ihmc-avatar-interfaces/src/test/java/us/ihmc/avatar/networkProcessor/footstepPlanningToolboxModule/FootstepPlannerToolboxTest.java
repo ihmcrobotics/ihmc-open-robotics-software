@@ -1,10 +1,7 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
 import com.jme3.math.Transform;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.*;
 import org.junit.After;
 import org.junit.Before;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -19,7 +16,9 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -72,7 +71,10 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
 {
 
    protected RemoteFootstepPlannerUI uiNode;
+   private FootstepPlanningToolboxModule toolboxModule;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
+   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
+
    private RealtimeRos2Node ros2Node;
    private final AtomicReference<FootstepPlan> footstepPlanReference = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlanningResult> footstepResultReference = new AtomicReference<>(null);
@@ -91,8 +93,12 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_test");
 
+      String robotName = getRobotModel().getSimpleRobotName();
       footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class, ROS2Tools
-            .getTopicNameGenerator("", ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
+            .getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
+
+      toolboxStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, ROS2Tools
+            .getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
 
       ros2Node.spin();
    }
@@ -102,10 +108,12 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
    {
       ros2Node.destroy();
       uiNode.stop();
+      toolboxModule.destroy();
 
       ros2Node = null;
       footstepPlanningRequestPublisher = null;
       uiNode = null;
+      toolboxModule = null;
    }
 
    private void tryToStartModule(ModuleStarter runnable)
@@ -128,26 +136,27 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
 
    private void setupFootstepPlanningToolboxModule() throws IOException
    {
-      new FootstepPlanningToolboxModule(new TestRobotModel(), null, true);
+      toolboxModule = new FootstepPlanningToolboxModule(getRobotModel(), null, true);
    }
 
+   private DRCRobotModel getRobotModel()
+   {
+      return new TestRobotModel();
+   }
 
    @Override
    public void submitDataSet(FootstepPlannerUnitTestDataset dataset)
    {
+      toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
+
       FootstepPlanningRequestPacket planningRequestPacket = new FootstepPlanningRequestPacket();
       planningRequestPacket.getStanceFootPositionInWorld().set(dataset.getStart());
       planningRequestPacket.getGoalPositionInWorld().set(dataset.getGoal());
       planningRequestPacket.setRequestedFootstepPlannerType(getPlannerType().toByte());
       planningRequestPacket.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(dataset.getPlanarRegionsList()));
+      planningRequestPacket.setTimeout(dataset.getTimeout(getPlannerType()));
 
       footstepPlanningRequestPublisher.publish(planningRequestPacket);
-
-
-
-      //      JavaFXMessager messager = uiNode.getMessager();
-      //      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerTimeoutTopic, dataset.getTimeout(getPlannerType()));
-//      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
    }
 
    @Override
