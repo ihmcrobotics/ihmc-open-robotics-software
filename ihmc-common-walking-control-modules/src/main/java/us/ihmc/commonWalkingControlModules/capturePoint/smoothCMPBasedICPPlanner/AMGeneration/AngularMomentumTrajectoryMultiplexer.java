@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration;
 
-import controller_msgs.msg.dds.MomentumTrajectoryMessage;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
@@ -10,8 +11,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.List;
 
 /**
  * This class is a wrapper around the predicted and commanded angular momentum trajectory generators.
@@ -100,10 +99,10 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
    }
 
    @Override
-   public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop)
+   public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean initialTransfer, boolean standing)
    {
       updateCurrentAngularMomentumTrajectoryGenerator();
-      currentAngularMomentumTrajectoryGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(atAStop);
+      currentAngularMomentumTrajectoryGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(initialTransfer, standing);
    }
 
    @Override

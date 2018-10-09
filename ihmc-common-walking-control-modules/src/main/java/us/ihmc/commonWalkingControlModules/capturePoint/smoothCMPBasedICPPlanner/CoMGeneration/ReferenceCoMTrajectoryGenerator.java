@@ -48,6 +48,10 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
    private final FrameVector3D comVelocityDesiredInitialCurrentSegment = new FrameVector3D();
    private final FrameVector3D comAccelerationDesiredInitialCurrentSegment = new FrameVector3D();
 
+   private final FramePoint3D comDesiredPositionAtStartOfPhase = new FramePoint3D();
+   private final FramePoint3D comDesiredVelocityAtStartOfPhase = new FramePoint3D();
+   private final FramePoint3D comDesiredAccelerationAtStartOfPhase = new FramePoint3D();
+
    private final FramePoint3D comPositionDesiredFinalCurrentSegment = new FramePoint3D();
 
    private final YoInteger currentSegmentIndex;
@@ -103,11 +107,11 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       this.numberOfFootstepsRegistered = numberOfFootstepsRegistered;
    }
 
-   public void initializeForTransfer(double initialTime, List<? extends SegmentedFrameTrajectory3D> transferCMPTrajectories,
-                                     List<? extends SegmentedFrameTrajectory3D> swingCMPTrajectories, List<? extends FramePoint3DReadOnly> icpDesiredFinalPositions)
+   public void computeTrajectoryStartingFromTransfer(List<? extends SegmentedFrameTrajectory3D> transferCMPTrajectories,
+                                                     List<? extends SegmentedFrameTrajectory3D> swingCMPTrajectories, List<? extends FramePoint3DReadOnly> icpDesiredFinalPositions)
    {
       reset();
-      startTimeOfCurrentPhase.set(initialTime);
+      startTimeOfCurrentPhase.set(0.0);
 
       this.icpDesiredFinalPositions = icpDesiredFinalPositions;
 
@@ -140,6 +144,8 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
          numberOfSegmentsInCurrentPhase.set(numberOfCMPSegments);
 
       numberOfSegmentsTransfer0 = transferCMPTrajectories.get(0).getNumberOfSegments();
+
+      setCoMInitialConditions();
       initialize();
    }
 
@@ -151,11 +157,11 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       localTimeInCurrentPhase.set(0.0);
    }
 
-   public void initializeForSwing(double initialTime, List<? extends SegmentedFrameTrajectory3D> transferCMPTrajectories,
-                                  List<? extends SegmentedFrameTrajectory3D> swingCMPTrajectories, List<? extends FramePoint3DReadOnly> icpDesiredFinalPositions)
+   public void computeTrajectoryStartingFromSingleSupport(List<? extends SegmentedFrameTrajectory3D> transferCMPTrajectories,
+                                                          List<? extends SegmentedFrameTrajectory3D> swingCMPTrajectories, List<? extends FramePoint3DReadOnly> icpDesiredFinalPositions)
    {
       reset();
-      startTimeOfCurrentPhase.set(initialTime);
+      startTimeOfCurrentPhase.set(0.0);
 
       this.icpDesiredFinalPositions = icpDesiredFinalPositions;
 
@@ -190,11 +196,29 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       totalNumberOfCMPSegments.add(numberOfCMPSegments);
 
       numberOfSegmentsSwing0 = swingCMPTrajectories.get(0).getNumberOfSegments();
+
+      setCoMInitialConditions();
       initialize();
+   }
+
+   public void initializeForSwingOrTransfer()
+   {
+      comDesiredPositionAtStartOfPhase.set(comPositionDesiredCurrent);
+      comDesiredVelocityAtStartOfPhase.set(comVelocityDesiredCurrent);
+      comDesiredAccelerationAtStartOfPhase.set(comAccelerationDesiredCurrent);
    }
 
    @Override
    public void initialize()
+   {
+      comToolbox.computeDesiredCenterOfMassCornerData(icpDesiredFinalPositions, comDesiredInitialPositions,
+                                                      comDesiredFinalPositions, comDesiredInitialVelocities, comDesiredFinalVelocities,
+                                                      comDesiredInitialAccelerations, comDesiredFinalAccelerations, cmpTrajectories,
+                                                      comPositionDesiredInitialCurrentSegment, comVelocityDesiredInitialCurrentSegment,
+                                                      comAccelerationDesiredInitialCurrentSegment, omega0.getDoubleValue());
+   }
+
+   private void setCoMInitialConditions()
    {
       if (isInitialTransfer.getBooleanValue())
       {
@@ -206,16 +230,10 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       }
       else
       {
-         comPositionDesiredInitialCurrentSegment.set(comPositionDesiredCurrent); // TODO; set to 1*dt after comPositionDesiredCurrent
-         comVelocityDesiredInitialCurrentSegment.set(comVelocityDesiredCurrent);
-         comAccelerationDesiredInitialCurrentSegment.set(comAccelerationDesiredCurrent);
+         comPositionDesiredInitialCurrentSegment.set(comDesiredPositionAtStartOfPhase);
+         comVelocityDesiredInitialCurrentSegment.set(comDesiredVelocityAtStartOfPhase);
+         comAccelerationDesiredInitialCurrentSegment.set(comDesiredAccelerationAtStartOfPhase);
       }
-
-      comToolbox.computeDesiredCenterOfMassCornerData(icpDesiredFinalPositions, comDesiredInitialPositions,
-                                                      comDesiredFinalPositions, comDesiredInitialVelocities, comDesiredFinalVelocities,
-                                                      comDesiredInitialAccelerations, comDesiredFinalAccelerations, cmpTrajectories,
-                                                      comPositionDesiredInitialCurrentSegment, comVelocityDesiredInitialCurrentSegment,
-                                                      comAccelerationDesiredInitialCurrentSegment, omega0.getDoubleValue());
    }
 
    @Override
