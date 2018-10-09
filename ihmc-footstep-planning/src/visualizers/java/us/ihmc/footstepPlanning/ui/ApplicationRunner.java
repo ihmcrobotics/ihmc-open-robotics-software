@@ -8,25 +8,29 @@ import javafx.stage.Stage;
 public class ApplicationRunner
 {
 
-   public static void runApplication(Application launcher)
+   public static Runnable runApplication(Application launcher)
    {
-      PlatformImpl.startup(() -> {
-         Platform.runLater(new Runnable()
+      Runnable runnable = new Runnable()
+      {
+         @Override
+         public void run()
          {
-            @Override
-            public void run()
+            try
             {
-               try
-               {
-                  launcher.start(new Stage());
-               }
-               catch (Exception e)
-               {
-                  e.printStackTrace();
-               }
+               launcher.start(new Stage());
             }
-         });
+            catch (Exception e)
+            {
+               e.printStackTrace();
+            }
+         }
+      };
+
+      PlatformImpl.startup(() -> {
+         Platform.runLater(runnable);
       });
       PlatformImpl.setImplicitExit(false);
+
+      return runnable;
    }
 }
