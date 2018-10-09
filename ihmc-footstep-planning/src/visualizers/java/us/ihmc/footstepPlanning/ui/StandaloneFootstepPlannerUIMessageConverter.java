@@ -187,21 +187,14 @@ public class StandaloneFootstepPlannerUIMessageConverter
 
             if (footstep.hasFoothold())
             {
+               footstepData.getPredictedContactPoints2d().clear();
+
                ConvexPolygon2D foothold = new ConvexPolygon2D();
                footstep.getFoothold(foothold);
 
-               if (foothold.getNumberOfVertices() != 4)
-                  ConvexPolygonTools.limitVerticesConservative(foothold, 4);
-
-               ArrayList<Point2D> contactPoints = new ArrayList<>();
-               for (int contactPointIdx = 0; contactPointIdx < 4; contactPointIdx++)
-                  contactPoints.add(new Point2D(foothold.getVertex(contactPointIdx)));
-
-               footstepData.getPredictedContactPoints2d().clear();
-
-               for (int j = 0; j < contactPoints.size(); j++)
+               for (int j = 0; j < foothold.getNumberOfVertices(); j++)
                {
-                  footstepData.getPredictedContactPoints2d().add().set(contactPoints.get(j), 0.0);
+                  footstepData.getPredictedContactPoints2d().add().set(foothold.getVertex(j), 0.0);
                }
             }
 
