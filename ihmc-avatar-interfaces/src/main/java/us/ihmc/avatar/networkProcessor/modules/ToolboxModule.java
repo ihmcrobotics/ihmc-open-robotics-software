@@ -44,7 +44,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public abstract class ToolboxModule
 {
-   protected static final boolean DEBUG = false;
+   protected static final boolean DEBUG = true;
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
    protected static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 1;
 
@@ -307,7 +307,7 @@ public abstract class ToolboxModule
          yoVariableServer.close();
          yoVariableServer = null;
       }
-      realtimeRos2Node.stopSpinning();
+      realtimeRos2Node.destroy();
 
       if (DEBUG)
          PrintTools.debug(this, "Destroyed");
