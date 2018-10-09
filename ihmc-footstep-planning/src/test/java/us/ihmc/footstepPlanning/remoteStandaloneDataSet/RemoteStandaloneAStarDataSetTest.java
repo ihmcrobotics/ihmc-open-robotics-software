@@ -40,8 +40,9 @@ public class RemoteStandaloneAStarDataSetTest extends RemoteStandalonePlannerDat
    {
       RemoteStandaloneAStarDataSetTest test = new RemoteStandaloneAStarDataSetTest();
       String prefix = "unitTestData/testable/";
+      test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171218_205040_SimpleMaze");
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171026_131304_PlanarRegion_Ramp_2Story_UnitTest");
       test.tearDown();
 
    }

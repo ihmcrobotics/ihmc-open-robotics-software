@@ -63,7 +63,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    private final YoDouble timeout;
    private final YoDouble planningTime = new YoDouble("PlanningTime", registry);
-   private final YoLong numberOfExpandedNodes = new YoLong("NumberOfExpandedNodex", registry);
+   private final YoLong numberOfExpandedNodes = new YoLong("NumberOfExpandedNodes", registry);
    private final YoDouble percentRejectedNodes = new YoDouble("PercentRejectedNodes", registry);
    private final YoLong itarationCount = new YoLong("ItarationCount", registry);
 

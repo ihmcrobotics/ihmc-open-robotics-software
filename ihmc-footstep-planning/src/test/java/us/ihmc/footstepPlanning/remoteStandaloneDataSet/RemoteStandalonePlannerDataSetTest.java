@@ -2,15 +2,13 @@ package us.ihmc.footstepPlanning.remoteStandaloneDataSet;
 
 import controller_msgs.msg.dds.*;
 import org.junit.After;
-import org.junit.Test;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
@@ -214,7 +212,13 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
          FramePose3D stepPose = new FramePose3D();
          stepPose.setPosition(footstepMessage.getLocation());
          stepPose.setOrientation(footstepMessage.getOrientation());
-         footstepPlan.addFootstep(RobotSide.fromByte(footstepMessage.getRobotSide()), stepPose);
+         SimpleFootstep footstep = footstepPlan.addFootstep(RobotSide.fromByte(footstepMessage.getRobotSide()), stepPose);
+
+         ConvexPolygon2D foothold = new ConvexPolygon2D();
+         for (int i = 0; i < footstepMessage.getPredictedContactPoints2d().size(); i++)
+            foothold.addVertex(footstepMessage.getPredictedContactPoints2d().get(i));
+         foothold.update();
+         footstep.setFoothold(foothold);
       }
 
       return footstepPlan;
@@ -269,7 +273,6 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
       }
 
       if (!footstepA.epsilonEquals(footstepB, 1e-5))
-
       {
          errorMessage += "Footsteps " + footstepNumber + " are not equal: \n \t" + footstepA.toString() + "\n and \n\t " + footstepB.toString() + ".\n";
       }
