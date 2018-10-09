@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.ui;
+package us.ihmc.footstepPlanning.ui.components;
 
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
@@ -13,6 +13,7 @@ import us.ihmc.euclid.tools.AxisAngleTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
 import us.ihmc.javaFXToolkit.messager.Messager;
 
 import java.util.concurrent.atomic.AtomicBoolean;

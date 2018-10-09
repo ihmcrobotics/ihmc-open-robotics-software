@@ -7,13 +7,13 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
-import us.ihmc.footstepPlanning.ui.SharedMemoryFootstepPlannerUI;
+import us.ihmc.footstepPlanning.ui.SharedMemoryStandaloneFootstepPlannerUI;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class SharedMemoryAStarOnRoughTerrainTest extends SharedMemoryFootstepPlannerOnRoughTerrainTest
 {
    private static boolean visualize = false;
-   private SharedMemoryFootstepPlannerUI launcher;
+   private SharedMemoryStandaloneFootstepPlannerUI launcher;
 
 
    @Before
@@ -21,7 +21,7 @@ public class SharedMemoryAStarOnRoughTerrainTest extends SharedMemoryFootstepPla
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
-      launcher = new SharedMemoryFootstepPlannerUI(visualize);
+      launcher = new SharedMemoryStandaloneFootstepPlannerUI(visualize);
       ApplicationRunner.runApplication(launcher);
 
       messager = launcher.getMessager();

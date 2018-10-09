@@ -1,7 +1,8 @@
-package us.ihmc.footstepPlanning.ui;
+package us.ihmc.footstepPlanning.ui.components;
 
 import javafx.beans.property.Property;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.ui.components.SettableFootstepPlannerParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
 
 public class FootstepPlannerParametersProperty extends ParametersProperty<SettableFootstepPlannerParameters>

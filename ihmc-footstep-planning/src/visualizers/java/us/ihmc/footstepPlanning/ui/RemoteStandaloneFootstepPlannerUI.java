@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.ui;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
@@ -13,7 +14,7 @@ public class RemoteStandaloneFootstepPlannerUI extends Application
 
    private FootstepPathCalculatorModule module;
    private final JavaFXMessager messager;
-   private final StandaloneFootstepPlannerUIMessageConverter messageConverter;
+   private final RemotePlannerMessageConverter messageConverter;
 
    private FootstepPlannerUI ui;
 
@@ -36,16 +37,16 @@ public class RemoteStandaloneFootstepPlannerUI extends Application
    public static RemoteStandaloneFootstepPlannerUI createUI(String robotName, DomainFactory.PubSubImplementation pubSubImplementation, boolean visualize)
    {
       JavaFXMessager messager = new SharedMemoryJavaFXMessager(FootstepPlannerUserInterfaceAPI.API);
-      StandaloneFootstepPlannerUIMessageConverter messageConverter = StandaloneFootstepPlannerUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
+      RemotePlannerMessageConverter messageConverter = RemotePlannerMessageConverter.createConverter(messager, robotName, pubSubImplementation);
       return new RemoteStandaloneFootstepPlannerUI(messager, messageConverter, visualize);
    }
 
-   public RemoteStandaloneFootstepPlannerUI(JavaFXMessager messager, StandaloneFootstepPlannerUIMessageConverter messageConverter)
+   public RemoteStandaloneFootstepPlannerUI(JavaFXMessager messager, RemotePlannerMessageConverter messageConverter)
    {
       this(messager, messageConverter, true);
    }
 
-   public RemoteStandaloneFootstepPlannerUI(JavaFXMessager messager, StandaloneFootstepPlannerUIMessageConverter messageConverter, boolean visualize)
+   public RemoteStandaloneFootstepPlannerUI(JavaFXMessager messager, RemotePlannerMessageConverter messageConverter, boolean visualize)
    {
       this.messager = messager;
       this.messageConverter = messageConverter;
