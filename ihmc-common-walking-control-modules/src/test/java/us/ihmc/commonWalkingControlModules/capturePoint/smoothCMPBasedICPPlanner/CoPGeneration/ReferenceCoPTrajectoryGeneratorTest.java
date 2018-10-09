@@ -368,6 +368,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       sendFootStepMessages(numberOfFootsteps);
       assertTrue("Footstep registration error", testCoPGenerator.getNumberOfFootstepsRegistered() == numberOfFootsteps);
       //testCoPGenerator.setInitialCoPPosition(initialCoPPosition);
+      testCoPGenerator.initializeForSwing();
       testCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(RobotSide.RIGHT);
       List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
       CoPPointName exitCoPName = plannerParameters.getExitCoPName();
