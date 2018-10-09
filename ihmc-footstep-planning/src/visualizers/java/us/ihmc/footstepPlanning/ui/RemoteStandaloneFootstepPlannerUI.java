@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.ui;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -40,7 +41,7 @@ public class RemoteStandaloneFootstepPlannerUI extends Application
 
    public static RemoteStandaloneFootstepPlannerUI createUI(String robotName, DomainFactory.PubSubImplementation pubSubImplementation, boolean visualize)
    {
-      JavaFXMessager messager = new SharedMemoryJavaFXMessager(FootstepPlannerUserInterfaceAPI.API);
+      JavaFXMessager messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
       RemotePlannerMessageConverter messageConverter = RemotePlannerMessageConverter.createConverter(messager, robotName, pubSubImplementation);
       return new RemoteStandaloneFootstepPlannerUI(messager, messageConverter, visualize);
    }
@@ -96,5 +97,4 @@ public class RemoteStandaloneFootstepPlannerUI extends Application
 
       return messager;
    }
-
 }

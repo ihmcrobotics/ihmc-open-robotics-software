@@ -13,6 +13,8 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
@@ -63,10 +65,10 @@ public class RemotePlannerMessageConverter
       this.robotName = robotName;
       this.ros2Node = ros2Node;
 
-      resultReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlanningResultTopic);
-      footstepPlanReference = messager.createInput(FootstepPlannerUserInterfaceAPI.FootstepPlanTopic);
-      plannerRequestIdReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerRequestIdTopic);
-      sequenceIdReference = messager.createInput(FootstepPlannerUserInterfaceAPI.SequenceIdTopic);
+      resultReference = messager.createInput(FootstepPlannerSharedMemoryAPI.PlanningResultTopic);
+      footstepPlanReference = messager.createInput(FootstepPlannerSharedMemoryAPI.FootstepPlanTopic);
+      plannerRequestIdReference = messager.createInput(FootstepPlannerSharedMemoryAPI.PlannerRequestIdTopic);
+      sequenceIdReference = messager.createInput(FootstepPlannerSharedMemoryAPI.SequenceIdTopic);
 
       registerPubSubs(ros2Node);
 
@@ -82,17 +84,19 @@ public class RemotePlannerMessageConverter
    {
       /* subscribers */
       // we want to listen to the incoming request
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningRequestPacket.class, getPlanningToolboxSubscriberNameGenerator(),
+      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningRequestPacket.class,
+                                           FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
       ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
                                            s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
       // publishers
-      outputStatusPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningToolboxOutputStatus.class, getPlanningToolboxPublisherNameGenerator());
+      outputStatusPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningToolboxOutputStatus.class,
+                                                        FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName));
 
-      messager.registerTopicListener(FootstepPlannerUserInterfaceAPI.PlanningResultTopic, request -> hasResult.set(true));
-      messager.registerTopicListener(FootstepPlannerUserInterfaceAPI.FootstepPlanTopic, request -> publishResultingPlan());
+      messager.registerTopicListener(FootstepPlannerSharedMemoryAPI.PlanningResultTopic, request -> hasResult.set(true));
+      messager.registerTopicListener(FootstepPlannerSharedMemoryAPI.FootstepPlanTopic, request -> publishResultingPlan());
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
@@ -120,24 +124,24 @@ public class RemotePlannerMessageConverter
       double timeout = packet.getTimeout();
       double horizonLength = packet.getHorizonLength();
 
-      this.planarRegionsList.ifPresent(regions -> messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, regions));
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartPositionTopic, startPosition);
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, goalPosition);
+      this.planarRegionsList.ifPresent(regions -> messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic, regions));
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartPositionTopic, startPosition);
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalPositionTopic, goalPosition);
 
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartOrientationTopic, startOrientation);
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic, goalOrientation);
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartOrientationTopic, startOrientation);
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalOrientationTopic, goalOrientation);
 
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerTypeTopic, plannerType);
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerTypeTopic, plannerType);
 
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerTimeoutTopic, timeout);
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.InitialSupportSideTopic, initialSupportSide);
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerTimeoutTopic, timeout);
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.InitialSupportSideTopic, initialSupportSide);
 
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerRequestIdTopic, plannerRequestId);
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.SequenceIdTopic, sequenceId);
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerRequestIdTopic, plannerRequestId);
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.SequenceIdTopic, sequenceId);
 
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerHorizonLengthTopic, horizonLength);
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerHorizonLengthTopic, horizonLength);
 
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.ComputePathTopic, true);
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.ComputePathTopic, true);
    }
 
    private void processIncomingPlanarRegionMessage(PlanarRegionsListMessage packet)
@@ -145,7 +149,7 @@ public class RemotePlannerMessageConverter
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(packet);
       this.planarRegionsList = Optional.of(planarRegionsList);
 
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, planarRegionsList);
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic, planarRegionsList);
    }
 
    private void publishResultingPlan()
@@ -208,15 +212,4 @@ public class RemotePlannerMessageConverter
          return footstepDataListMessage;
       }
    }
-
-   private ROS2Tools.MessageTopicNameGenerator getPlanningToolboxSubscriberNameGenerator()
-   {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
-   }
-
-   private ROS2Tools.MessageTopicNameGenerator getPlanningToolboxPublisherNameGenerator()
-   {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
-   }
-
 }

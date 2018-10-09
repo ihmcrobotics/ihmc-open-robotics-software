@@ -10,7 +10,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments;
-import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertTrue;
 import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.*;
 
 public abstract class SharedMemoryFootstepPlannerOnRoughTerrainTest
 {
@@ -77,11 +77,11 @@ public abstract class SharedMemoryFootstepPlannerOnRoughTerrainTest
 
    private void submitInfoToUI(PlannerTestEnvironments.PlannerTestData testData)
    {
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, testData.getGoalPosition());
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic, testData.getGoalOrientation());
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartPositionTopic, testData.getStartPosition());
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartOrientationTopic, testData.getStartOrientation());
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalPositionTopic, testData.getGoalPosition());
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalOrientationTopic, testData.getGoalOrientation());
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartPositionTopic, testData.getStartPosition());
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartOrientationTopic, testData.getStartOrientation());
 
       messager.submitMessage(PlannerTypeTopic, getPlannerType());
    }

@@ -11,13 +11,13 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
-import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.footstepPlanning.ui.SharedMemoryStandaloneFootstepPlannerUI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.*;
 
 public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
@@ -48,14 +48,14 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
    @Override
    public void submitDataSet(FootstepPlannerUnitTestDataset dataset)
    {
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartPositionTopic, dataset.getStart());
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, dataset.getGoal());
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartPositionTopic, dataset.getStart());
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalPositionTopic, dataset.getGoal());
 
       messager.submitMessage(PlannerTypeTopic, getPlannerType());
 
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerTimeoutTopic, dataset.getTimeout(getPlannerType()));
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerTimeoutTopic, dataset.getTimeout(getPlannerType()));
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
    }
 
    @Override
@@ -69,7 +69,7 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
       AtomicReference<FootstepPlan> footstepPlanReference = messager.createInput(FootstepPlanTopic);
       AtomicReference<FootstepPlanningResult> footstepPlanningResult = messager.createInput(PlanningResultTopic);
 
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.ComputePathTopic, true);
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.ComputePathTopic, true);
 
       while (!receivedPlan.get() && !receivedResult.get())
       {
