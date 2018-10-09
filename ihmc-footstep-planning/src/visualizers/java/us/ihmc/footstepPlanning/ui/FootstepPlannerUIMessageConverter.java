@@ -16,7 +16,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.ros2.Ros2Node;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -95,9 +94,9 @@ public class FootstepPlannerMessageConverter
 
    private void registerSubscribers(RealtimeRos2Node ros2Node)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningRequestPacket.class, getInputSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningRequestPacket.class, getPlanningToolboxSubscriberNameGenerator(),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class, getOutputSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class, getPlanningToolboxPublisherNameGenerator(),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
       // TODO visualize node status
 
@@ -241,22 +240,13 @@ public class FootstepPlannerMessageConverter
       footstepPlanningRequestPublisher.publish(packet);
    }
 
-   private ROS2Tools.MessageTopicNameGenerator getInputSubscriberTopicNameGenerator()
-   {
-      return getInputSubscriberTopicNameGenerator(robotName);
-   }
-
-   private static ROS2Tools.MessageTopicNameGenerator getInputSubscriberTopicNameGenerator(String robotName)
+   private ROS2Tools.MessageTopicNameGenerator getPlanningToolboxSubscriberNameGenerator()
    {
       return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
    }
 
-   private ROS2Tools.MessageTopicNameGenerator getOutputSubscriberTopicNameGenerator()
-   {
-      return getOutputSubscriberTopicNameGenerator(robotName);
-   }
 
-   private static ROS2Tools.MessageTopicNameGenerator getOutputSubscriberTopicNameGenerator(String robotName)
+   private ROS2Tools.MessageTopicNameGenerator getPlanningToolboxPublisherNameGenerator()
    {
       return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
    }
