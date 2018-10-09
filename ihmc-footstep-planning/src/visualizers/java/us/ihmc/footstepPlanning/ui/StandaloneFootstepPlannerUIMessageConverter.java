@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.ui;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -41,6 +42,8 @@ public class StandaloneFootstepPlannerUIMessageConverter
    private final AtomicReference<FootstepPlan> footstepPlanReference;
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Integer> sequenceIdReference;
+
+   private final AtomicReference<Boolean> hasResult= new AtomicReference<>(false);
 
 
 
@@ -91,6 +94,7 @@ public class StandaloneFootstepPlannerUIMessageConverter
       // publishers
       outputStatusPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningToolboxOutputStatus.class, getPlanningToolboxPublisherNameGenerator());
 
+      messager.registerTopicListener(FootstepPlannerUserInterfaceAPI.PlanningResultTopic, request -> hasResult.set(true));
       messager.registerTopicListener(FootstepPlannerUserInterfaceAPI.FootstepPlanTopic, request -> publishResultingPlan());
    }
 
@@ -136,10 +140,15 @@ public class StandaloneFootstepPlannerUIMessageConverter
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.SequenceIdTopic, sequenceId);
 
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerHorizonLengthTopic, horizonLength);
+
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.ComputePathTopic, true);
    }
 
    private void publishResultingPlan()
    {
+      while (!hasResult.get())
+         ThreadTools.sleep(10);
+
       FootstepPlanningToolboxOutputStatus result = new FootstepPlanningToolboxOutputStatus();
 
       planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
@@ -148,6 +157,8 @@ public class StandaloneFootstepPlannerUIMessageConverter
       result.setPlanId(plannerRequestIdReference.get());
 
       result.getFootstepDataList().set(convertToFootstepDataListMessage(footstepPlanReference.get()));
+
+      outputStatusPublisher.publish(result);
    }
 
    private static FootstepDataListMessage convertToFootstepDataListMessage(FootstepPlan footstepPlan)
