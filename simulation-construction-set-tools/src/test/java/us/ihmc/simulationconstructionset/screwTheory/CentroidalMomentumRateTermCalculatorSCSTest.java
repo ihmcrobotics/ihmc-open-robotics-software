@@ -5,11 +5,12 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -43,6 +44,12 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
 
    private final DenseMatrix64F aDotVNumerical = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
@@ -121,7 +128,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       
-      CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator = new CentroidalMomentumRateTermCalculator(elevator, centerOfMassFrame, v, totalMass);
+      CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator = new CentroidalMomentumRateTermCalculator(elevator, centerOfMassFrame);
 
       for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
       {
@@ -148,8 +155,8 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
          robot.packIdJoints(idJoints);
          ScrewTools.getJointVelocitiesMatrix(idJoints, v);
 
-         centroidalMomentumRateTermCalculator.compute();
-         aDotVAnalytical.set(centroidalMomentumRateTermCalculator.getADotVTerm());
+         centroidalMomentumRateTermCalculator.reset();
+         aDotVAnalytical.set(centroidalMomentumRateTermCalculator.getBiasSpatialForceMatrix());
 
          aTermCalculator.set(centroidalMomentumRateTermCalculator.getCentroidalMomentumMatrix());
          // Compute aDotV numerically

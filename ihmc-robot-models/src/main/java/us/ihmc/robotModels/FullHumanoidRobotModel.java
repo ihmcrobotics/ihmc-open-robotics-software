@@ -3,6 +3,7 @@ package us.ihmc.robotModels;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -44,10 +45,14 @@ public interface FullHumanoidRobotModel extends FullLeggedRobotModel<RobotSide>
     */
    MovingReferenceFrame getHandControlFrame(RobotSide robotSide);
 
+   @Override
    default RobotSide[] getRobotSegments()
    {
       return RobotSide.values;
    }
+
+   @Override
+   SideDependentList<MovingReferenceFrame> getSoleFrames();
 
    void setJointAngles(RobotSide side, LimbName limb, double[] q);
 }

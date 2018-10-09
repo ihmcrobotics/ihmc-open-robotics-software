@@ -89,7 +89,7 @@ public class HexapodSimulationController implements RobotController
 
       for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {
-         YoGraphicReferenceFrame frame = new YoGraphicReferenceFrame(joint.getFrameBeforeJoint(), registry, 0.1);
+         YoGraphicReferenceFrame frame = new YoGraphicReferenceFrame(joint.getFrameBeforeJoint(), registry, true, 0.1);
          referenceFrameGraphics.add(frame);
          yoGraphicsListRegistry.registerYoGraphic("frames", frame);
       }

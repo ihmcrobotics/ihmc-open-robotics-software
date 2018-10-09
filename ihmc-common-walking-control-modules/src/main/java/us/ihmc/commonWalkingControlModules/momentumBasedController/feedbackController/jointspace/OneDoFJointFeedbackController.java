@@ -1,13 +1,17 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -33,6 +37,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
    private final YoDouble qError;
    private final YoDouble qDError;
+   private final AlphaFilteredYoVariable qDFilteredError;
 
    private final YoDouble maxFeedback;
    private final YoDouble maxFeedbackRate;
@@ -54,18 +59,17 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
    private final YoDouble weightForSolver;
 
-   public OneDoFJointFeedbackController(OneDoFJoint joint, double dt, boolean inverseDynamicsEnabled, boolean inverseKinematicsEnabled,
-                                        boolean virtualModelControlEnabled, YoVariableRegistry parentRegistry)
+   public OneDoFJointFeedbackController(OneDoFJoint joint, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
+                                        YoVariableRegistry parentRegistry)
    {
-      if (!inverseDynamicsEnabled && !inverseKinematicsEnabled && !virtualModelControlEnabled)
-         throw new RuntimeException("Controller core is not properly setup, none of the control modes is enabled.");
-
       String jointName = joint.getName();
       YoVariableRegistry registry = new YoVariableRegistry(jointName + "PDController");
 
       this.joint = joint;
       isEnabled = new YoBoolean("control_enabled_" + jointName, registry);
       isEnabled.set(false);
+
+      double dt = toolbox.getControlDT();
 
       qCurrent = new YoDouble("q_" + jointName, registry);
       qDesired = new YoDouble("q_d_" + jointName, registry);
@@ -78,10 +82,21 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
       kp = new YoDouble("kp_" + jointName, registry);
 
-      if (inverseDynamicsEnabled || virtualModelControlEnabled)
+      if (toolbox.isEnableInverseDynamicsModule() || toolbox.isEnableVirtualModelControlModule())
       {
          qDCurrent = new YoDouble("qd_" + jointName, registry);
          qDError = new YoDouble("qd_err_" + jointName, registry);
+
+         DoubleProvider breakFrequency = feedbackControllerToolbox.getErrorVelocityFilterBreakFrequency(jointName);
+         if (breakFrequency != null)
+         {
+            DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt);
+            qDFilteredError = new AlphaFilteredYoVariable(jointName, registry, alpha, qDError);
+         }
+         else
+         {
+            qDFilteredError = null;
+         }
 
          kd = new YoDouble("kd_" + jointName, registry);
 
@@ -96,6 +111,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       {
          qDCurrent = null;
          qDError = null;
+         qDFilteredError = null;
 
          kd = null;
 
@@ -106,7 +122,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          qDDAchieved = null;
       }
 
-      if (inverseKinematicsEnabled)
+      if (toolbox.isEnableInverseKinematicsModule())
       {
          qDFeedforward = new YoDouble("qd_ff_" + jointName, registry);
 
@@ -121,7 +137,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          qDFeedbackRateLimited = null;
       }
 
-      if (virtualModelControlEnabled)
+      if (toolbox.isEnableVirtualModelControlModule())
       {
          tauFeedback = new YoDouble("tau_fb_" + jointName, registry);
          tauFeedbackRateLimited = new RateLimitedYoVariable("tau_fb_rl_" + jointName, registry, maxFeedbackRate, tauFeedback, dt);
@@ -149,7 +165,10 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    @Override
    public void initialize()
    {
-      qDDFeedbackRateLimited.reset();
+      if (qDDFeedbackRateLimited != null)
+         qDDFeedbackRateLimited.reset();
+      if (qDFilteredError != null)
+         qDFilteredError.reset();
    }
 
    @Override
@@ -192,8 +211,14 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
       qError.set(qDesired.getDoubleValue() - qCurrent.getDoubleValue());
       qDError.set(qDDesired.getDoubleValue() - qDCurrent.getDoubleValue());
+      double qDErrorToUse = qDError.getDoubleValue();
+      if (qDFilteredError != null)
+      {
+         qDFilteredError.update();
+         qDErrorToUse = qDFilteredError.getValue();
+      }
 
-      double qdd_fb = kp.getDoubleValue() * qError.getDoubleValue() + kd.getDoubleValue() * qDError.getDoubleValue();
+      double qdd_fb = kp.getDoubleValue() * qError.getDoubleValue() + kd.getDoubleValue() * qDErrorToUse;
       qdd_fb = MathTools.clamp(qdd_fb, maxFeedback.getDoubleValue());
       qDDFeedback.set(qdd_fb);
       qDDFeedbackRateLimited.update();
@@ -234,8 +259,14 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
       qError.set(qDesired.getDoubleValue() - qCurrent.getDoubleValue());
       qDError.set(qDDesired.getDoubleValue() - qDCurrent.getDoubleValue());
+      double qDErrorToUse = qDError.getDoubleValue();
+      if (qDFilteredError != null)
+      {
+         qDFilteredError.update();
+         qDErrorToUse = qDFilteredError.getValue();
+      }
 
-      double tau_fb = kp.getDoubleValue() * qError.getDoubleValue() + kd.getDoubleValue() * qDError.getDoubleValue();
+      double tau_fb = kp.getDoubleValue() * qError.getDoubleValue() + kd.getDoubleValue() * qDErrorToUse;
       tau_fb = MathTools.clamp(tau_fb, maxFeedback.getDoubleValue());
       tauFeedback.set(tau_fb);
       tauFeedbackRateLimited.update();

@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.FootstepData;
 import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration.ReferenceCoMTrajectoryGenerator;
@@ -28,6 +29,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -64,10 +66,15 @@ public class FootstepAngularMomentumPredictorTest
 
    private final SmoothCMPPlannerParameters testParameters = new SmoothCMPPlannerParameters()
    {
-      public boolean planWithAngularMomentum()
+      public boolean planSwingAngularMomentum()
       {
          return true;
-      };
+      }
+
+      public boolean planTransferAngularMomentum()
+      {
+         return true;
+      }
    };
    AngularMomentumEstimationParameters angularMomentumEstimationParameters = testParameters.getAngularMomentumEstimationParameters();
    private final double swingLegMass = angularMomentumEstimationParameters.getPercentageSwingLegMass() * robotMass;
@@ -76,6 +83,7 @@ public class FootstepAngularMomentumPredictorTest
    // Variables for testing
    private final YoVariableRegistry testRegistry = new YoVariableRegistry("AngularMomentumTestRegistry");
    private final YoDouble omega = new YoDouble("AngularMomentumTestOmega", testRegistry); // Taking the for Atlas
+   private final YoInteger numberOfUpcomingFootsteps = new YoInteger("NumberOfUpcomingFootsteps", testRegistry);
    private final FramePoint3D currentLocation = new FramePoint3D();
    private final FrameVector3D walkingDirectionUnitVector = new FrameVector3D();
    private final FrameQuaternion robotOrientation = new FrameQuaternion();
@@ -91,6 +99,7 @@ public class FootstepAngularMomentumPredictorTest
    private final List<YoDouble> swingSplitFractions = new ArrayList<YoDouble>();
    private final List<YoDouble> transferSplitFractions = new ArrayList<YoDouble>();
    private final List<YoDouble> swingShiftFractions = new ArrayList<YoDouble>();
+   private final List<FootstepData> upcomingFootstepsData = new ArrayList<>();
 
    // Some variables for setters, getters and intermediate computations
    private final FramePoint3D tempFramePoint1 = new FramePoint3D(), tempFramePoint2 = new FramePoint3D();
@@ -183,16 +192,17 @@ public class FootstepAngularMomentumPredictorTest
       numberOfFootstepsToConsider = new YoInteger(testName + "NumberOfFootstepsToConsider", testRegistry);
       numberOfFootstepsToConsider.set(testParameters.getNumberOfFootstepsToConsider());
       midFeetFrame = new MidFootZUpGroundFrame(testName + "MidFeetFrame", soleFrames.get(RobotSide.RIGHT), soleFrames.get(RobotSide.LEFT));
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(ankleFrames, midFeetFrame, soleFrames, testRegistry, null);
+      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons( midFeetFrame, soleFrames, testRegistry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
       copTrajectoryGenerator = new ReferenceCoPTrajectoryGenerator(testName + "CoPGenerator",
                                                                    testParameters.getNumberOfFootstepsToConsider(), bipedSupportPolygons, contactableFeet,
                                                                    numberOfFootstepsToConsider, swingDurations, transferDurations, touchdownDurations, swingSplitFractions,
-                                                                   swingShiftFractions, transferSplitFractions, testRegistry);
-      icpTrajectoryGenerator = new ReferenceICPTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, false, testRegistry);
+                                                                   swingShiftFractions, transferSplitFractions, numberOfUpcomingFootsteps, upcomingFootstepsData, testRegistry);
+      icpTrajectoryGenerator = new ReferenceICPTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, false, testRegistry, null);
       comTrajectoryGenerator = new ReferenceCoMTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isDoubleSupport,
                                                                    testRegistry);
-      angularMomentumGenerator = new FootstepAngularMomentumPredictor(testName, omega, true, testRegistry);
+      int maxNumberOfStepsToConsider = 4;
+      angularMomentumGenerator = new FootstepAngularMomentumPredictor(testName, omega, true, maxNumberOfStepsToConsider, testRegistry);
       copTrajectoryGenerator.initializeParameters(testParameters);
       angularMomentumGenerator.initializeParameters(testParameters, robotMass, gravityZ);
    }
@@ -226,6 +236,8 @@ public class FootstepAngularMomentumPredictorTest
       icpTrajectoryGenerator.reset();
       comTrajectoryGenerator.reset();
       angularMomentumGenerator.clear();
+      upcomingFootstepsData.clear();
+      numberOfUpcomingFootsteps.set(0);
    }
 
    @After
@@ -242,7 +254,7 @@ public class FootstepAngularMomentumPredictorTest
       isInitialTransfer.set(true);
       isStanding.set(true);
       isDoubleSupport.set(true);
-      copTrajectoryGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), null);
+      copTrajectoryGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), RobotSide.LEFT, null);
       icpTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
 
       copTrajectoryGenerator.initializeForTransfer(0.0);
@@ -262,9 +274,9 @@ public class FootstepAngularMomentumPredictorTest
       List<? extends FrameVector3DReadOnly> comFinalAccelerationList = comTrajectoryGenerator.getCoMAccelerationDesiredFinalList();
       List<CoPPointsInFoot> copWaypointList = copTrajectoryGenerator.getWaypoints();
 
-      angularMomentumGenerator.addFootstepCoPsToPlan(copTrajectoryGenerator.getWaypoints(), comInitialPositionList, comFinalPositionList,
-                                                     comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList,
-                                                     copTrajectoryGenerator.getNumberOfFootstepsRegistered());
+      angularMomentumGenerator.addCopAndComSetpointsToPlan(copTrajectoryGenerator.getWaypoints(), comInitialPositionList, comFinalPositionList,
+                                                           comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList,
+                                                           copTrajectoryGenerator.getNumberOfFootstepsRegistered());
       angularMomentumGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(isInitialTransfer.getBooleanValue());
 
       List<? extends AngularMomentumTrajectory> swingAngularMomentumTrajectories = angularMomentumGenerator.getSwingAngularMomentumTrajectories();
@@ -327,7 +339,7 @@ public class FootstepAngularMomentumPredictorTest
       isInitialTransfer.set(false);
       isStanding.set(false);
       isDoubleSupport.set(true);
-      copTrajectoryGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), null);
+      copTrajectoryGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), RobotSide.LEFT, null);
       icpTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
 
       copTrajectoryGenerator.initializeForTransfer(0.0);
@@ -346,9 +358,9 @@ public class FootstepAngularMomentumPredictorTest
       List<? extends FrameVector3DReadOnly> comFinalAccelerationList = comTrajectoryGenerator.getCoMAccelerationDesiredFinalList();
       List<CoPPointsInFoot> copWaypointList = copTrajectoryGenerator.getWaypoints();
 
-      angularMomentumGenerator.addFootstepCoPsToPlan(copTrajectoryGenerator.getWaypoints(), comInitialPositionList, comFinalPositionList,
-                                                     comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList,
-                                                     copTrajectoryGenerator.getNumberOfFootstepsRegistered());
+      angularMomentumGenerator.addCopAndComSetpointsToPlan(copTrajectoryGenerator.getWaypoints(), comInitialPositionList, comFinalPositionList,
+                                                           comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList,
+                                                           copTrajectoryGenerator.getNumberOfFootstepsRegistered());
       angularMomentumGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(isInitialTransfer.getBooleanValue());
       angularMomentumGenerator.initializeForDoubleSupport(0.0, isStanding.getBooleanValue());
 
@@ -479,7 +491,7 @@ public class FootstepAngularMomentumPredictorTest
       isInitialTransfer.set(false);
       isStanding.set(false);
       isDoubleSupport.set(false);
-      copTrajectoryGenerator.computeReferenceCoPsStartingFromSingleSupport(null);
+      copTrajectoryGenerator.computeReferenceCoPsStartingFromSingleSupport(RobotSide.LEFT);
       icpTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
 
       copTrajectoryGenerator.initializeForSwing(0.0);
@@ -498,9 +510,9 @@ public class FootstepAngularMomentumPredictorTest
       List<? extends FrameVector3DReadOnly> comFinalAccelerationList = comTrajectoryGenerator.getCoMAccelerationDesiredFinalList();
       List<CoPPointsInFoot> copWaypointList = copTrajectoryGenerator.getWaypoints();
 
-      angularMomentumGenerator.addFootstepCoPsToPlan(copTrajectoryGenerator.getWaypoints(), comInitialPositionList, comFinalPositionList,
-                                                     comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList,
-                                                     copTrajectoryGenerator.getNumberOfFootstepsRegistered());
+      angularMomentumGenerator.addCopAndComSetpointsToPlan(copTrajectoryGenerator.getWaypoints(), comInitialPositionList, comFinalPositionList,
+                                                           comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList,
+                                                           copTrajectoryGenerator.getNumberOfFootstepsRegistered());
       angularMomentumGenerator.computeReferenceAngularMomentumStartingFromSingleSupport();
       angularMomentumGenerator.initializeForSingleSupport(0.0);
 
@@ -534,9 +546,11 @@ public class FootstepAngularMomentumPredictorTest
 
          // Set calculated pose to footstep
          newFootstep.setPose(tempFramePoint1, robotOrientation);
-         copTrajectoryGenerator.addFootstepToPlan(newFootstep, new FootstepTiming(swingTime, transferTime));
+         upcomingFootstepsData.add(new FootstepData(newFootstep, new FootstepTiming(swingTime, transferTime)));
          side = side.getOppositeSide();
       }
+
+      numberOfUpcomingFootsteps.set(upcomingFootstepsData.size());
    }
    
    public static void main(String args)

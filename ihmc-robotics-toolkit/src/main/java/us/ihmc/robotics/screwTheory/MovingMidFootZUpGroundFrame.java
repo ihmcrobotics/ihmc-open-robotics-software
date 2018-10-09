@@ -33,10 +33,10 @@ public class MovingMidFootZUpGroundFrame extends MovingReferenceFrame
       poseOne.setToZero(frameOne);
       poseTwo.setToZero(frameTwo);
 
-      poseOne.changeFrame(parentFrame);
-      poseTwo.changeFrame(parentFrame);
+      poseOne.changeFrame(getParent());
+      poseTwo.changeFrame(getParent());
 
-      pose.setToZero(parentFrame);
+      pose.setToZero(getParent());
       pose.interpolate(poseOne, poseTwo, 0.5);
       pose.setZ(Math.min(poseOne.getZ(), poseTwo.getZ()));
       pose.get(transformToParent);
@@ -55,7 +55,7 @@ public class MovingMidFootZUpGroundFrame extends MovingReferenceFrame
       linearVelocityTwo.changeFrame(this);
       linearVelocity.setToZero(this);
       linearVelocity.interpolate(linearVelocityOne, linearVelocityTwo, 0.5);
-      twistRelativeToParentToPack.setToZero(this, parentFrame, this);
+      twistRelativeToParentToPack.setToZero(this, getParent(), this);
       twistRelativeToParentToPack.setLinearPart(linearVelocity);
 
       if (poseOne.getZ() < poseTwo.getZ())

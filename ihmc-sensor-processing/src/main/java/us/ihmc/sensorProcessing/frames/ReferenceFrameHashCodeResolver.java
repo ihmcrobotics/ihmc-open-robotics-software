@@ -89,7 +89,7 @@ public class ReferenceFrameHashCodeResolver
       {
          if (referenceFrame != null)
          {
-            nameBasedHashCodeToReferenceFrameMap.put(referenceFrame.getNameBasedHashCode(), referenceFrame);
+            nameBasedHashCodeToReferenceFrameMap.put(referenceFrame.hashCode(), referenceFrame);
          }
       }
    }
@@ -163,7 +163,7 @@ public class ReferenceFrameHashCodeResolver
     */
    private void checkAndAddReferenceFrame(ReferenceFrame referenceFrame)
    {
-      checkAndAddReferenceFrame(referenceFrame, referenceFrame.getNameBasedHashCode());
+      checkAndAddReferenceFrame(referenceFrame, referenceFrame.hashCode());
    }
 
    private void checkAndAddReferenceFrame(ReferenceFrame referenceFrame, long nameBasedHashCode)
@@ -171,7 +171,7 @@ public class ReferenceFrameHashCodeResolver
       if (nameBasedHashCodeToReferenceFrameMap.containsKey(nameBasedHashCode))
       {
          ReferenceFrame existingFrame = nameBasedHashCodeToReferenceFrameMap.get(nameBasedHashCode);
-         if (!referenceFrame.equals(existingFrame))
+         if (referenceFrame != existingFrame)
          {
             throw new IllegalArgumentException("ReferenceFrameHashCodeResolver: Tried to put in a reference frame with the same name");
          }

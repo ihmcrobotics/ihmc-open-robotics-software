@@ -24,7 +24,7 @@ public class AtlasLegConfigurationParameters extends LegConfigurationParameters
    public LegConfigurationGains getBentLegGains()
    {
       LegConfigurationGains gains = new LegConfigurationGains();
-      gains.setJointSpaceKp(runningOnRealRobot ? 40.0 : 100.0);
+      gains.setJointSpaceKp(runningOnRealRobot ? 40.0 : 150.0);
       gains.setJointSpaceKd(6.0);
 
       return gains;

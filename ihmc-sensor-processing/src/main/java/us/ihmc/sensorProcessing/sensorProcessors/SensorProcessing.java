@@ -1981,4 +1981,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    {
       this.auxiliaryRobotData = auxiliaryRobotData;
    }
+
+   public List<OneDoFJoint> getJointSensorDefinitions()
+   {
+      return jointSensorDefinitions;
+   }
 }

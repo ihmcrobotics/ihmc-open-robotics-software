@@ -70,7 +70,7 @@ public class PushRecoveryControlModule
    private final FramePoint2D projectedCapturePoint2d = new FramePoint2D();
 
    public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, HighLevelHumanoidControllerToolbox controllerToolbox,
-         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
+                                    WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       controlDT = controllerToolbox.getControlDT();
       this.bipedSupportPolygon = bipedSupportPolygons;
@@ -115,20 +115,14 @@ public class PushRecoveryControlModule
       reset();
    }
 
-   public void updateCaptureRegion(double swingTimeRemaining, double omega0, RobotSide swingSide, FramePoint2D capturePoint2d)
-   {
-      footPolygon.setIncludingFrame(bipedSupportPolygon.getFootPolygonInAnkleZUp(swingSide.getOppositeSide()));
-      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
-   }
-
    public FrameConvexPolygon2D getCaptureRegion()
    {
       return captureRegionCalculator.getCaptureRegion();
    }
 
    /**
-    * Return null if the robot is not falling.
-    * If the robot is falling, it returns the suggested swingSide to recover.
+    * Return null if the robot is not falling. If the robot is falling, it returns the suggested
+    * swingSide to recover.
     */
    public RobotSide isRobotFallingFromDoubleSupport()
    {
@@ -204,7 +198,7 @@ public class PushRecoveryControlModule
    {
       RobotSide supportSide = swingSide.getOppositeSide();
       double preferredSwingTime = swingTimeRemaining;
-      footPolygon.setIncludingFrame(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
+      footPolygon.setIncludingFrame(bipedSupportPolygon.getFootPolygonInSoleZUpFrame(supportSide));
       captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTime, capturePoint2d, omega0, footPolygon);
       double captureRegionArea = captureRegionCalculator.getCaptureRegionArea();
 
@@ -236,9 +230,18 @@ public class PushRecoveryControlModule
     */
    public boolean checkAndUpdateFootstep(double swingTimeRemaining, Footstep nextFootstep)
    {
+      /*
+       * TODO The swing time remaining is being provided from the ICP planner. When standing the
+       * remaining time is NaN, and since the planner is only updated after this module, well we get
+       * a NaN for one tick which is enough to prevent capture region to be properly estimated. The
+       * actual duration is arbitrary and does not need to be accurate here.
+       */
+      if (Double.isNaN(swingTimeRemaining))
+         swingTimeRemaining = 1.0;
+
       RobotSide swingSide = nextFootstep.getRobotSide();
       RobotSide supportSide = swingSide.getOppositeSide();
-      footPolygon.setIncludingFrame(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
+      footPolygon.setIncludingFrame(bipedSupportPolygon.getFootPolygonInSoleZUpFrame(supportSide));
 
       double preferredSwingTimeForRecovering = computePreferredSwingTimeForRecovering(swingTimeRemaining, swingSide);
       captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTimeForRecovering, capturePoint2d, omega0, footPolygon);

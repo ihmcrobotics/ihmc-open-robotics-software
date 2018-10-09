@@ -253,7 +253,25 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
-   public List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParameters()
+   public List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParameters(HighLevelControllerName state)
+   {
+      switch (state)
+      {
+      case WALKING:
+         return getJointAccelerationIntegrationParametersForWalking();
+      case DO_NOTHING_BEHAVIOR:
+      case STAND_PREP_STATE:
+      case STAND_READY:
+      case STAND_TRANSITION_STATE:
+      case EXIT_WALKING:
+      case CALIBRATION:
+         return getJointAccelerationIntegrationParametersForHangingAround();
+      default:
+         throw new RuntimeException("Implement a desired joint behavior for the high level state " + state);
+      }
+   }
+
+   private List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForWalking()
    {
       List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> ret = new ArrayList<>();
 
@@ -324,5 +342,11 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       }
 
       return ret;
+   }
+
+   private List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForHangingAround()
+   {
+      // Possible ass a single parameter that is shared between all joints here.
+      return null;
    }
 }

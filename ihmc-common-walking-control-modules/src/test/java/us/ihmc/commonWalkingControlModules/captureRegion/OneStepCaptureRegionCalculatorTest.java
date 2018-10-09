@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
@@ -19,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -58,27 +60,31 @@ public class OneStepCaptureRegionCalculatorTest
 
    private final YoVariableRegistry registry = new YoVariableRegistry("CaptureRegionCalculatorTest");
 
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
    @SuppressWarnings("unused")
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructor()
    {
-      double midFootAnkleXOffset = 0.0;
       double footWidth = 0.5;
       double kineamaticStepRange = 3.0;
 
-      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(midFootAnkleXOffset, footWidth, kineamaticStepRange,
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kineamaticStepRange,
             ankleZUpFrames, registry, null);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 30000000)
    public void testPointsInsideCaptureRegion()
    {
       // do not change parameters
       // expected results are pre-calculated
-      double midFootAnkleXOffset = 0.1;
       double footWidth = 0.5;
       double footLength = 1.0;
       double kineamaticStepRange = 3.0;
@@ -87,7 +93,7 @@ public class OneStepCaptureRegionCalculatorTest
       double swingTimeRemaining = 0.2;
       double omega0 = 3.0;
 
-      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(midFootAnkleXOffset, footWidth, kineamaticStepRange,
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kineamaticStepRange,
             ankleZUpFrames, registry, null);
 
       ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
@@ -112,7 +118,7 @@ public class OneStepCaptureRegionCalculatorTest
       expectedPointsOnBorder.add(new FramePoint2D(supportAnkleFrame, 2.085382, -2.156660));
       expectedPointsOnBorder.add(new FramePoint2D(supportAnkleFrame, 1.564096, -2.559988));
 
-      double movePointsFactor = 0.01;
+      double movePointsFactor = 0.02;
       FrameConvexPolygon2D expectedPolygonInside = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(expectedPointsOnBorder));
 
       ConvexPolygonScaler shrinker = new ConvexPolygonScaler();
@@ -173,7 +179,7 @@ public class OneStepCaptureRegionCalculatorTest
       double swingTimeRemaining = 0.2;
       double omega0 = 3.0;
 
-      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(midFootAnkleXOffset, footWidth, kineamaticStepRange,
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kineamaticStepRange,
             ankleZUpFrames, registry, null);
 
       ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
@@ -238,7 +244,6 @@ public class OneStepCaptureRegionCalculatorTest
    @Test(timeout = 30000)
    public void testCalculationWithICPInFootPolygon()
    {
-      double midFootAnkleXOffset = 0.2;
       double footWidth = 0.5;
       double footLength = 1.0;
       double kineamaticStepRange = 3.0;
@@ -247,7 +252,7 @@ public class OneStepCaptureRegionCalculatorTest
       double swingTimeRemaining = 0.2;
       double omega0 = 3.0;
 
-      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(midFootAnkleXOffset, footWidth, kineamaticStepRange,
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kineamaticStepRange,
             ankleZUpFrames, registry, null);
       // set the cutoff angle such that the reachable region should be a half circle
       captureRegionCalculator.setReachableRegionCutoffAngle(1.0);
@@ -270,14 +275,14 @@ public class OneStepCaptureRegionCalculatorTest
       ReferenceFrame supportAnkleFrame = ankleZUpFrames.get(swingSide.getOppositeSide());
       double sign = swingSide == RobotSide.LEFT ? 1.0 : -1.0;
 
-      testPointsInside.add(new FramePoint2D(supportAnkleFrame, kineamaticStepRange * 0.95 + midFootAnkleXOffset, sign * (0.1 + footWidth / 2.0)));
-      testPointsInside.add(new FramePoint2D(supportAnkleFrame, -kineamaticStepRange * 0.95 + midFootAnkleXOffset, sign * (0.1 + footWidth / 2.0)));
-      testPointsInside.add(new FramePoint2D(supportAnkleFrame, midFootAnkleXOffset, sign * kineamaticStepRange * 0.95));
+      testPointsInside.add(new FramePoint2D(supportAnkleFrame, kineamaticStepRange * 0.95, sign * (0.1 + footWidth / 2.0)));
+      testPointsInside.add(new FramePoint2D(supportAnkleFrame, -kineamaticStepRange * 0.95, sign * (0.1 + footWidth / 2.0)));
+      testPointsInside.add(new FramePoint2D(supportAnkleFrame, 0, sign * kineamaticStepRange * 0.95));
 
-      testPointsOutside.add(new FramePoint2D(supportAnkleFrame, kineamaticStepRange * 1.05 + midFootAnkleXOffset, sign * (0.1 + footWidth / 2.0)));
-      testPointsOutside.add(new FramePoint2D(supportAnkleFrame, -kineamaticStepRange * 1.05 + midFootAnkleXOffset, sign * (0.1 + footWidth / 2.0)));
-      testPointsOutside.add(new FramePoint2D(supportAnkleFrame, midFootAnkleXOffset, -sign * (0.1 - footWidth / 2.0)));
-      testPointsOutside.add(new FramePoint2D(supportAnkleFrame, midFootAnkleXOffset, sign * kineamaticStepRange * 1.05));
+      testPointsOutside.add(new FramePoint2D(supportAnkleFrame, kineamaticStepRange * 1.05, sign * (0.1 + footWidth / 2.0)));
+      testPointsOutside.add(new FramePoint2D(supportAnkleFrame, -kineamaticStepRange * 1.05, sign * (0.1 + footWidth / 2.0)));
+      testPointsOutside.add(new FramePoint2D(supportAnkleFrame, 0, -sign * (0.1 - footWidth / 2.0)));
+      testPointsOutside.add(new FramePoint2D(supportAnkleFrame, 0, sign * kineamaticStepRange * 1.05));
 
       for (int i = 0; i < testPointsInside.size(); i++)
       {
@@ -323,7 +328,7 @@ public class OneStepCaptureRegionCalculatorTest
       double swingTimeRemaining = 0.6;
       double omega0 = 3.0;
 
-      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(midFootAnkleXOffset, footWidth, kineamaticStepRange,
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kineamaticStepRange,
             ankleZUpFrames, registry, null);
 
       ArrayList<FramePoint2D> listOfPoints = new ArrayList<FramePoint2D>();
@@ -461,7 +466,7 @@ public class OneStepCaptureRegionCalculatorTest
          yoGraphicsListRegistry.registerArtifact("Feet", footArtifact);
          footArtifacts.put(robotSide, footArtifact);
       }
-      final OneStepCaptureRegionCalculator oneStepCaptureRegionCalculator = new OneStepCaptureRegionCalculator(midFootAnkleXOffset, footWidth,
+      final OneStepCaptureRegionCalculator oneStepCaptureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth,
             kinematicStepRange, ankleZUpFrames, registry, null);
 
       final YoFrameConvexPolygon2D yoCaptureRegion = new YoFrameConvexPolygon2D("captureRegion", "", worldFrame, 50, registry);

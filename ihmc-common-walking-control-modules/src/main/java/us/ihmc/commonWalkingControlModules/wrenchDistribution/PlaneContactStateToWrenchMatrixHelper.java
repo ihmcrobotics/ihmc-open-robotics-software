@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
@@ -22,7 +20,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
@@ -39,7 +36,7 @@ public class PlaneContactStateToWrenchMatrixHelper
     * one of them will rotate it's friction cone approximation to get better coverage of the cone through the
     * basis vectors.
     */
-   private static final double distanceThresholdBetweenTwoContactPoint = 0.01;
+   private static final double distanceThresholdBetweenTwoContactPoint = 0.005;
 
    /**
     * If the size of the foothold is below this threshold CoP objectives for this plane will be ignored.
@@ -74,8 +71,6 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final YoBoolean hasReset;
    private final YoBoolean resetRequested;
 
-   private final YoMatrix yoRho;
-
    private final FrameVector3D contactNormalVector = new FrameVector3D();
    private final AxisAngle normalContactVectorRotation = new AxisAngle();
 
@@ -87,11 +82,11 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final YoBoolean deactivateRhoWhenNotInContact;
 
-   private final List<YoBoolean> rhoEnabled = new ArrayList<>();
-   private final List<FramePoint3D> basisVectorsOrigin = new ArrayList<>();
-   private final List<FrameVector3D> basisVectors = new ArrayList<>();
-   private final HashMap<YoContactPoint, YoDouble> maxContactForces = new HashMap<>();
-   private final HashMap<YoContactPoint, YoDouble> rhoWeights = new HashMap<>();
+   private final YoBoolean[] rhoEnabled;
+   private final FramePoint3D[] basisVectorsOrigin;
+   private final FrameVector3D[] basisVectors;
+   private final YoDouble[] maxContactForces;
+   private final YoDouble[] rhoWeights;
 
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
@@ -145,23 +140,28 @@ public class PlaneContactStateToWrenchMatrixHelper
       resetRequested = new YoBoolean(namePrefix + "ResetRequested", registry);
       deactivateRhoWhenNotInContact = new YoBoolean(namePrefix + "DeactivateRhoWhenNotInContact", registry);
 
+      rhoWeights = new YoDouble[contactPoints2d.size()];
+      maxContactForces = new YoDouble[contactPoints2d.size()];
+
       for (int i = 0; i < contactPoints2d.size(); i++)
       {
          YoDouble rhoWeight = new YoDouble(namePrefix + "RhoWeight" + i, registry);
          YoDouble maxContactForce = new YoDouble(namePrefix + "MaxContactForce" + i, registry);
          maxContactForce.set(Double.POSITIVE_INFINITY);
 
-         rhoWeights.put(yoPlaneContactState.getContactPoints().get(i), rhoWeight);
-         maxContactForces.put(yoPlaneContactState.getContactPoints().get(i), maxContactForce);
+         rhoWeights[i] = rhoWeight;
+         maxContactForces[i] = maxContactForce;
       }
 
-      yoRho = new YoMatrix(namePrefix + "Rho", rhoSize, 1, registry);
+      rhoEnabled = new YoBoolean[rhoSize];
+      basisVectors = new FrameVector3D[rhoSize];
+      basisVectorsOrigin = new FramePoint3D[rhoSize];
 
       for (int i = 0; i < rhoSize; i++)
       {
-         rhoEnabled.add(new YoBoolean("Rho" + i + "Enabled", registry));
-         basisVectors.add(new FrameVector3D(centerOfMassFrame));
-         basisVectorsOrigin.add(new FramePoint3D(centerOfMassFrame));
+         rhoEnabled[i] = new YoBoolean("Rho" + i + "Enabled", registry);
+         basisVectors[i] = new FrameVector3D(centerOfMassFrame);
+         basisVectorsOrigin[i] = new FramePoint3D(centerOfMassFrame);
       }
 
       previousCoP = new YoFramePoint2D(namePrefix + "PreviousCoP", planeFrame, registry);
@@ -184,20 +184,27 @@ public class PlaneContactStateToWrenchMatrixHelper
       if (!contactFramePose.containsNaN())
          planeFrame.setPoseAndUpdate(contactFramePose);
 
+      int previousNumberOfContacts = yoPlaneContactState.getNumberOfContactPointsInContact();
+
       yoPlaneContactState.updateFromPlaneContactStateCommand(command);
       yoPlaneContactState.computeSupportPolygon();
 
+      int newNumberOfContacts = yoPlaneContactState.getNumberOfContactPointsInContact();
+      boolean touchedDown = previousNumberOfContacts == 0 && newNumberOfContacts > 0;
+      boolean liftedOff = previousNumberOfContacts > 0 && newNumberOfContacts == 0;
+
       if (yoPlaneContactState.pollContactHasChangedNotification())
       {
-         resetRequested.set(true);
+         resetRequested.set(touchedDown || liftedOff);
       }
 
       for (int i = 0; i < command.getNumberOfContactPoints(); i++)
       {
-         rhoWeights.get(yoPlaneContactState.getContactPoints().get(i)).set(command.getRhoWeight(i));
+         rhoWeights[i].set(command.getRhoWeight(i));
+
          if (command.hasMaxContactPointNormalForce())
          {
-            maxContactForces.get(yoPlaneContactState.getContactPoints().get(i)).set(command.getMaxContactPointNormalForce(i));
+            maxContactForces[i].set(command.getMaxContactPointNormalForce(i));
          }
       }
    }
@@ -223,7 +230,7 @@ public class PlaneContactStateToWrenchMatrixHelper
          // rotate each friction cone approximation to point one vector towards the center of the foot
          double angleOffset = coneRotationCalculator.computeConeRotation(yoPlaneContactState, contactPointIndex);
 
-         // in case the contact point is close to another point rotate it
+         // If this contact point is in contact check if there is more points in contact close to it.
          if (inContact)
          {
             int matches = 0;
@@ -236,25 +243,30 @@ public class PlaneContactStateToWrenchMatrixHelper
                   matches++;
                }
             }
-            // TODO: If there are more then two contacts in the same spot we should probably disable them.
-            if (matches > 0)
+            if (matches > 1)
             {
+               // If there is at least two more contact points in this location disable this one.
+               inContact = false;
+            }
+            else if (matches == 1)
+            {
+               // If there is one more contact point for this location coming up then rotate this one to get a better friction cone representation.
                angleOffset += basisVectorAngleIncrement / 2.0;
             }
          }
 
          for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
          {
-            FramePoint3D basisVectorOrigin = basisVectorsOrigin.get(rhoIndex);
-            FrameVector3D basisVector = basisVectors.get(rhoIndex);
-            rhoEnabled.get(rhoIndex).set(inContact);
+            FramePoint3D basisVectorOrigin = basisVectorsOrigin[rhoIndex];
+            FrameVector3D basisVector = basisVectors[rhoIndex];
+            rhoEnabled[rhoIndex].set(inContact);
 
             if (inContact)
             {
                contactPoint.getPosition(basisVectorOrigin);
                computeBasisVector(basisVectorIndex, angleOffset, normalContactVectorRotationMatrix, basisVector);
 
-               double rhoWeight = rhoWeights.get(yoPlaneContactState.getContactPoints().get(contactPointIndex)).getDoubleValue();
+               double rhoWeight = rhoWeights[contactPointIndex].getDoubleValue();
                if(Double.isNaN(rhoWeight))
                {
                   rhoWeight = defaultRhoWeight;
@@ -278,7 +290,7 @@ public class PlaneContactStateToWrenchMatrixHelper
             }
 
             //// TODO: 6/5/17 scale this by the vertical magnitude
-            rhoMaxMatrix.set(rhoIndex, 0, maxContactForces.get(yoPlaneContactState.getContactPoints().get(contactPointIndex)).getDoubleValue() / numberOfBasisVectorsPerContactPoint);
+            rhoMaxMatrix.set(rhoIndex, 0, maxContactForces[contactPointIndex].getDoubleValue() / numberOfBasisVectorsPerContactPoint);
 
             rhoIndex++;
          }
@@ -339,8 +351,8 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private void clear(int rhoIndex)
    {
-      FramePoint3D basisVectorOrigin = basisVectorsOrigin.get(rhoIndex);
-      FrameVector3D basisVector = basisVectors.get(rhoIndex);
+      FramePoint3D basisVectorOrigin = basisVectorsOrigin[rhoIndex];
+      FrameVector3D basisVector = basisVectors[rhoIndex];
 
       basisVectorOrigin.setToZero(centerOfMassFrame);
       basisVector.setToZero(centerOfMassFrame);
@@ -356,7 +368,6 @@ public class PlaneContactStateToWrenchMatrixHelper
    public void computeWrenchFromRho(int startIndex, DenseMatrix64F allRobotRho)
    {
       CommonOps.extract(allRobotRho, startIndex, startIndex + rhoSize, 0, 1, rhoMatrix, 0, 0);
-      yoRho.set(rhoMatrix);
 
       ReferenceFrame bodyFixedFrame = getRigidBody().getBodyFixedFrame();
       if (yoPlaneContactState.inContact())
@@ -386,10 +397,10 @@ public class PlaneContactStateToWrenchMatrixHelper
       matrixToPack.reshape(Wrench.SIZE, rhoSize);
       for (int rhoIndex = 0; rhoIndex < rhoSize; rhoIndex++)
       {
-         if (rhoEnabled.get(rhoIndex).getValue())
+         if (rhoEnabled[rhoIndex].getValue())
          {
-            FramePoint3D basisVectorOrigin = basisVectorsOrigin.get(rhoIndex);
-            FrameVector3D basisVector = basisVectors.get(rhoIndex);
+            FramePoint3D basisVectorOrigin = basisVectorsOrigin[rhoIndex];
+            FrameVector3D basisVector = basisVectors[rhoIndex];
             basisVectorOrigin.changeFrame(frame);
             basisVector.changeFrame(frame);
             unitSpatialForceVector.setIncludingFrame(basisVector, basisVectorOrigin);
@@ -489,12 +500,12 @@ public class PlaneContactStateToWrenchMatrixHelper
       return copRateRegularizationWeightMatrix;
    }
 
-   public List<FramePoint3D> getBasisVectorsOrigin()
+   public FramePoint3D[] getBasisVectorsOrigin()
    {
       return basisVectorsOrigin;
    }
 
-   public List<FrameVector3D> getBasisVectors()
+   public FrameVector3D[] getBasisVectors()
    {
       return basisVectors;
    }

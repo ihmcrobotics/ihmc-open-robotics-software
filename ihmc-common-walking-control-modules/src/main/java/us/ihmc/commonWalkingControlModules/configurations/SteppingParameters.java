@@ -7,6 +7,11 @@ public interface SteppingParameters extends FootstepParameters
 {
    public abstract double getMaxStepLength();
 
+   default double getMaxBackwardStepLength()
+   {
+      return getMaxStepLength();
+   }
+
    public abstract double getDefaultStepLength();
 
    public abstract double getMaxStepWidth();

@@ -37,7 +37,7 @@ public class Trajectory
       this.constraintMatrix = new DenseMatrix64F(maxNumberOfCoefficients, maxNumberOfCoefficients);
       this.constraintVector = new DenseMatrix64F(maxNumberOfCoefficients, 1);
       this.coefficientVector = new DenseMatrix64F(maxNumberOfCoefficients, 1);
-      this.xPowersDerivativeVector = new DenseMatrix64F(maxNumberOfCoefficients, 1);
+      this.xPowersDerivativeVector = new DenseMatrix64F(1, maxNumberOfCoefficients);
       this.solver = LinearSolverFactory.general(maxNumberOfCoefficients, maxNumberOfCoefficients);
       this.xPowers = new double[maxNumberOfCoefficients];
       reset();
@@ -77,49 +77,79 @@ public class Trajectory
          ddf += coefficients[i] * (i - 1) * (i) * xPowers[i - 2];
    }
 
-   public void setXPowers(double[] xPowers, double x)
+   /**
+    * Sets the given array to be:
+    * <br> [1, x, x<sup>2</sup>, ..., x<sup>N</sup>]
+    * <br> where N+1 is the length of the given array
+    *
+    * @param xPowers vector to set
+    * @param x base of the power series
+    */
+   private static void setXPowers(double[] xPowers, double x)
    {
       xPowers[0] = 1.0;
       for (int i = 1; i < xPowers.length; i++)
+      {
          xPowers[i] = xPowers[i - 1] * x;
+      }
    }
 
    public double getDerivative(int derivativeOrder, double x)
    {
-      double val = 0.0;
-      setXPowers(xPowers, x);
+      double derivative = 0.0;
+      double xPower = 1.0;
       for (int i = derivativeOrder; i < numberOfCoefficients; i++)
-         val += coefficients[i] * getCoefficientMultiplierForDerivative(derivativeOrder, i) * xPowers[i - derivativeOrder];
-      return val;
+      {
+         derivative += coefficients[i] * getCoefficientMultiplierForDerivative(derivativeOrder, i) * xPower;
+         xPower *= x;
+      }
+      return derivative;
    }
 
    /**
-    * Returns the order-th derivative of the xPowers vector at value x (Note: does NOT return the Trajectories order-th derivative at x)
-    * @param order
-    * @param x
-    * @return
+    * Given the following vector and it's n-th derivative:
+    * <br> v(x) = [ 1, x, ... , x<sup>N-1</sup>, x<sup>N</sup> ]
+    * <br> d<sup>n</sup>v(x)/dx<sup>n</sup> = [ a<sub>0</sub>, a<sub>1</sub>x , ... , a<sub>N-n-1</sub>x<sup>N-n-1</sup> , a<sub>N-n</sub>x<sup>N-n</sup>, ... , 0, 0 ]
+    *
+    * <br> This method returns a matrix such that matrixToPack.get(i) returns the i-th element of d<sup>n</sup>v(x)/dx<sup>n</sup> evaluated at x0
+    *
+    * @param order highest order exponent, the value N in the above equation
+    * @param x0 value at which the derivative is evaluated
     */
-   public DenseMatrix64F getXPowersDerivativeVector(int order, double x)
+   public DenseMatrix64F evaluateGeometricSequenceDerivative(int order, double x0)
    {
-      setXPowers(xPowers, x);
       xPowersDerivativeVector.zero();
+
+      double x0Power = 1.0;
+
       for (int i = order; i < numberOfCoefficients; i++)
-         xPowersDerivativeVector.set(i, getCoefficientMultiplierForDerivative(order, i) * xPowers[i - order]);
+      {
+         xPowersDerivativeVector.set(i, getCoefficientMultiplierForDerivative(order, i) * x0Power);
+         x0Power *= x0;
+      }
       return xPowersDerivativeVector;
    }
 
-   public void getDerivative(Trajectory trajectory, int order)
-   {
-      trajectory.reshape(numberOfCoefficients - 1);
-      for (int i = 1; i < numberOfCoefficients; i++)
-         trajectory.setDirectlyFast(i - 1, getCoefficient(i) * (i));
-   }
-
-   public int getCoefficientMultiplierForDerivative(int order, int exponent)
+   /**
+    * Computes the coefficient resulting for computing the <tt>n</tt><sup>th</sup> derivative of <tt>x<sup>k</sup></tt>:
+    * <pre>
+    * d<sup>n</sup>x<sup>k</sup>    k!
+    * --- = ------ x<sup>k-n</sup>
+    * dx<sup>n</sup>   (k-n)!
+    * </pre>
+    * The coefficient computed here is: <tt>(k! / (k-n)!)</tt>
+    * 
+    * @param order the order of the derivative, i.e. the variable <tt>n</tt>.
+    * @param exponent the exponent of the power, i.e. the variable <tt>k</tt>.
+    * @return the coefficient <tt>(k! / (k-n)!)</tt>
+    */
+   private static int getCoefficientMultiplierForDerivative(int order, int exponent)
    {
       int coeff = 1;
-      for (int i = exponent; i > exponent - order; i--)
+      for (int i = exponent - order + 1; i <= exponent; i++)
+      {
          coeff *= i;
+      }
       return coeff;
    }
 
@@ -185,9 +215,9 @@ public class Trajectory
    {
       reshape(2);
       setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tFinal, zf);
-      solveForCoefficients();
+      double c1 = (zf - z0) / (tFinal - t0);
+      coefficientVector.set(0, 0, z0 - c1 * t0);
+      coefficientVector.set(1, 0, c1);
       setCoefficientVariables();
    }
 
@@ -627,7 +657,7 @@ public class Trajectory
       setCoefficientVariables();
    }
 
-   private void solveForCoefficients()
+   public void solveForCoefficients()
    {
       solver.setA(constraintMatrix);
       solver.solve(constraintVector, coefficientVector);
@@ -688,6 +718,53 @@ public class Trajectory
       this.tInitial = t0;
    }
 
+   public void setInitialTimeMaintainingBounds(double tInitial)
+   {
+      int numStartingConstraints = (int) Math.ceil(getNumberOfCoefficients() / 2.0);
+      int numEndingConstraints = getNumberOfCoefficients() - numStartingConstraints;
+
+      int constraintNumber = 0;
+      for (int order = 0; order < numStartingConstraints; order++, constraintNumber++)
+      {
+         double value = getDerivative(order, this.tInitial);
+         setConstraintRow(constraintNumber, tInitial, value, order);
+      }
+      for (int order = 0; order < numEndingConstraints; order++, constraintNumber++)
+      {
+         double value = getDerivative(order, tFinal);
+         setConstraintRow(constraintNumber, tFinal, value, order);
+      }
+
+      solveForCoefficients();
+      setCoefficientVariables();
+
+      this.tInitial = tInitial;
+   }
+
+   public void setFinalTimeMaintainingBounds(double tFinal)
+   {
+      int numStartingConstraints = (int) Math.ceil(getNumberOfCoefficients() / 2.0);
+      int numEndingConstraints = getNumberOfCoefficients() - numStartingConstraints;
+
+      int constraintNumber = 0;
+      for (int order = 0; order < numStartingConstraints; order++, constraintNumber++)
+      {
+         double value = getDerivative(order, tInitial);
+         setConstraintRow(constraintNumber, tInitial, value, order);
+      }
+      for (int order = 0; order < numEndingConstraints; order++, constraintNumber++)
+      {
+         double value = getDerivative(order, this.tFinal);
+         setConstraintRow(constraintNumber, tFinal, value, order);
+      }
+
+      solveForCoefficients();
+      setCoefficientVariables();
+
+      this.tFinal = tFinal;
+   }
+
+
    public double getFinalTime()
    {
       return this.tFinal;
@@ -696,6 +773,11 @@ public class Trajectory
    public double getInitialTime()
    {
       return this.tInitial;
+   }
+
+   public double getDuration()
+   {
+      return tFinal - tInitial;
    }
 
    public boolean timeIntervalContains(double timeToCheck, double EPSILON)
@@ -758,7 +840,7 @@ public class Trajectory
       return maximumNumberOfCoefficients;
    }
 
-   private void setConstraintRow(int row, double x, double desiredZDerivative, int derivativeOrderWithPositionBeingZero)
+   public void setConstraintRow(int row, double x, double desiredZDerivative, int derivativeOrderWithPositionBeingZero)
    {
       double xPower = 1.0;
 
@@ -791,7 +873,7 @@ public class Trajectory
       setConstraintRow(row, x, zAcceleration, 2);
    }
 
-   private void setCoefficientVariables()
+   public void setCoefficientVariables()
    {
       int row = 0;
       for (; row < numberOfCoefficients; row++)

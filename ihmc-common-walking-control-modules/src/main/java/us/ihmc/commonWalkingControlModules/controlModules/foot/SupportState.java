@@ -175,9 +175,15 @@ public class SupportState extends AbstractFootControlState
       }
 
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
-      frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
       if (graphicsListRegistry != null)
+      {
+         frameViz = new YoGraphicReferenceFrame(controlFrame, registry, false, 0.2);
          graphicsListRegistry.registerYoGraphic(prefix + getClass().getSimpleName(), frameViz);
+      }
+      else
+      {
+         frameViz = null;
+      }
    }
 
    @Override
@@ -201,7 +207,8 @@ public class SupportState extends AbstractFootControlState
       super.onExit();
       footBarelyLoaded.set(false);
       copOnEdge.set(false);
-      frameViz.hide();
+      if (frameViz != null)
+         frameViz.hide();
       explorationHelper.stopExploring();
    }
 
@@ -339,7 +346,8 @@ public class SupportState extends AbstractFootControlState
       spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
 
       // update visualization
-      frameViz.setToReferenceFrame(controlFrame);
+      if (frameViz != null)
+         frameViz.setToReferenceFrame(controlFrame);
    }
 
 

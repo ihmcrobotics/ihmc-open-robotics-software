@@ -3,12 +3,14 @@ package us.ihmc.robotics.math.trajectories.providers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
@@ -30,6 +32,12 @@ public class YoOrientationProviderTest
       registry = new YoVariableRegistry("yoVariableRegistry");
       yoFrameOrientation = new YoFrameYawPitchRoll(namePrefix, referenceFrame, registry);
       frameOrientationToPack = new FrameQuaternion();
+   }
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

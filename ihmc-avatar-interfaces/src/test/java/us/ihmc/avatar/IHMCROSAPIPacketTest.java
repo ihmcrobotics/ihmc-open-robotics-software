@@ -338,7 +338,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSimpleRobotName(), robotModel.getSensorInformation(),
                                                                   robotModel.getContactPointParameters(), robotModel, robotModel.getStateEstimatorParameters(),
-                                                                  sensorReaderFactory, threadDataSynchronizer, realtimeRos2Node, null, robotVisualizer,
+                                                                  sensorReaderFactory, threadDataSynchronizer, realtimeRos2Node, null, null, robotVisualizer,
                                                                   gravity);
 
 //      DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,

@@ -120,6 +120,7 @@ public class BalanceManager
    private final YoFramePoint2D yoAdjustedDesiredCapturePoint = new YoFramePoint2D("adjustedDesiredICP", worldFrame, registry);
 
    private final FramePoint2D desiredCMP = new FramePoint2D();
+   private final FramePoint2D desiredCoP = new FramePoint2D();
    private final FramePoint2D achievedCMP = new FramePoint2D();
 
    private final FrameVector2D icpError2d = new FrameVector2D();
@@ -202,6 +203,7 @@ public class BalanceManager
       }
       ICPOptimizationControllerInterface icpOptimizationController = linearMomentumRateOfChangeControlModule.getICPOptimizationController();
 
+      WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       ICPPlannerInterface icpPlanner;
       //icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, icpPlannerParameters, registry, yoGraphicsListRegistry);
       if (!icpPlannerParameters.useSmoothCMPPlanner())
@@ -211,8 +213,9 @@ public class BalanceManager
       }
       else
       {
+         MomentumTrajectoryHandler momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
          SmoothCMPBasedICPPlanner smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
-                                                                                  registry, yoGraphicsListRegistry, controllerToolbox.getGravityZ());
+                                                                                  momentumTrajectoryHandler, yoTime, registry, yoGraphicsListRegistry, controllerToolbox.getGravityZ());
          smoothCMPPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
          icpPlanner = smoothCMPPlanner;
       }
@@ -225,7 +228,6 @@ public class BalanceManager
       this.icpPlanner.setOmega0(controllerToolbox.getOmega0());
       this.icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
-      WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       if (walkingMessageHandler != null)
       {
          CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
@@ -412,6 +414,7 @@ public class BalanceManager
    }
 
    private final FramePoint3D copEstimate = new FramePoint3D();
+   private final FrameVector2D emptyVector = new FrameVector2D();
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       controllerToolbox.getCapturePointVelocity(capturePointVelocity2d);
@@ -494,14 +497,18 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setPerfectCoP(yoPerfectCoP);
       linearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
       desiredCMP.set(yoDesiredCMP);
-      linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP);
+      boolean success = linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP, desiredCoP);
       yoDesiredCMP.set(desiredCMP);
 
-      tempPoint2D.setIncludingFrame(perfectCoP2d);
-      tempPoint2D.changeFrame(midFootZUpFrame);
+      desiredCoP.changeFrame(midFootZUpFrame);
       tempVector2D.setIncludingFrame(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
-      centerOfPressureCommand.setDesiredCoP(tempPoint2D);
+      centerOfPressureCommand.setDesiredCoP(desiredCoP);
       centerOfPressureCommand.setWeight(tempVector2D);
+
+      if (!success)
+      {
+         controllerToolbox.reportControllerFailureToListeners(emptyVector);
+      }
    }
 
    public void computeICPPlan(RobotSide supportLeg)
@@ -687,8 +694,8 @@ public class BalanceManager
    public void computeNormalizedEllipticICPError(RobotSide transferToSide)
    {
       getICPError(icpError2d);
-      ReferenceFrame leadingAnkleZUpFrame = bipedSupportPolygons.getAnkleZUpFrames().get(transferToSide);
-      icpError2d.changeFrame(leadingAnkleZUpFrame);
+      ReferenceFrame leadingSoleZUpFrame = bipedSupportPolygons.getSoleZUpFrames().get(transferToSide);
+      icpError2d.changeFrame(leadingSoleZUpFrame);
       normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX.getValue())
             + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY.getValue()));
    }

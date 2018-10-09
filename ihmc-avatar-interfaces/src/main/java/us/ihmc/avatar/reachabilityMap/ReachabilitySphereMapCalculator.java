@@ -40,8 +40,8 @@ public class ReachabilitySphereMapCalculator
    private ReachabilityMapFileWriter reachabilityMapFileWriter;
 
    private final PoseReferenceFrame gridFrame = new PoseReferenceFrame("gridFrame", ReferenceFrame.getWorldFrame());
-   private final YoGraphicReferenceFrame gridFrameViz = new YoGraphicReferenceFrame(gridFrame, registry, 0.5, YoAppearance.Blue());
-   private final YoGraphicCoordinateSystem currentEvaluationPose = new YoGraphicCoordinateSystem("currentEvaluationPose", "", registry, 0.15,
+   private final YoGraphicReferenceFrame gridFrameViz = new YoGraphicReferenceFrame(gridFrame, registry, true, 0.5, YoAppearance.Blue());
+   private final YoGraphicCoordinateSystem currentEvaluationPose = new YoGraphicCoordinateSystem("currentEvaluationPose", "", registry, true, 0.15,
                                                                                                  YoAppearance.HotPink());
    private final YoGraphicPosition currentEvaluationPosition = new YoGraphicPosition("currentEvaluationPosition", "", registry, 0.0125,
                                                                                      YoAppearance.DeepPink());

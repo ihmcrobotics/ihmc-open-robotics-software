@@ -13,7 +13,6 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -48,7 +47,6 @@ public class QuadrupedStateEstimatorFactory
 
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
       robotMotionStatusFromController.setCurrentRobotMotionStatus(RobotMotionStatus.IN_MOTION);
-      ForceSensorDataHolder forceSensorDataHolderToUpdate = null;
       CenterOfPressureDataHolder centerOfPressureDataHolder = null;
 
       Map<RigidBody, ContactablePlaneBody> feetMap = new HashMap<RigidBody, ContactablePlaneBody>();
@@ -66,10 +64,9 @@ public class QuadrupedStateEstimatorFactory
       double gravityMagnitude = Math.abs(gravity.get());
 
       StateEstimatorController stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters.get(),
-                                                                                     sensorOutputMapReadOnly.get(), forceSensorDataHolderToUpdate,
-                                                                                     centerOfMassDataHolder.get(), imuSensorsToUseInStateEstimator,
-                                                                                     gravityMagnitude, footSwitchMap, centerOfPressureDataHolder,
-                                                                                     robotMotionStatusFromController, feetMap, yoGraphicsListRegistry.get());
+                                                                                     sensorOutputMapReadOnly.get(), centerOfMassDataHolder.get(),
+                                                                                     imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
+                                                                                     centerOfPressureDataHolder, robotMotionStatusFromController, feetMap, yoGraphicsListRegistry.get());
 
       FactoryTools.disposeFactory(this);
 

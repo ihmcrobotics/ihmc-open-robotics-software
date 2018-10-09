@@ -16,6 +16,10 @@ public interface ICPControlGainsProvider extends ICPControlGainsReadOnly
 
    DoubleProvider getYoFeedbackPartMaxRate();
 
+   DoubleProvider getYoFeedbackPartMaxValueParallelToMotion();
+
+   DoubleProvider getYoFeedbackPartMaxValueOrthogonalToMotion();
+
    @Override
    default double getKpParallelToMotion()
    {
@@ -50,5 +54,17 @@ public interface ICPControlGainsProvider extends ICPControlGainsReadOnly
    default double getFeedbackPartMaxRate()
    {
       return getYoFeedbackPartMaxRate().getValue();
+   }
+
+   @Override
+   default double getFeedbackPartMaxValueParallelToMotion()
+   {
+      return getYoFeedbackPartMaxValueParallelToMotion().getValue();
+   }
+
+   @Override
+   default double getFeedbackPartMaxValueOrthogonalToMotion()
+   {
+      return getYoFeedbackPartMaxValueOrthogonalToMotion().getValue();
    }
 }

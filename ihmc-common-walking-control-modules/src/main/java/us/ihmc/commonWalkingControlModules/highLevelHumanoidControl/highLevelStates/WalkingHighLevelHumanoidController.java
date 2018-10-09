@@ -49,6 +49,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -130,7 +131,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
-   private final DoubleProvider unloadFraction = new DoubleParameter("unloadFraction", registry, 0.5);
+   private final DoubleProvider unloadFraction;
+
+   private final ParameterizedControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
@@ -145,7 +148,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       feet = controllerToolbox.getContactableFeet();
 
-      allOneDoFjoints = fullRobotModel.getOneDoFJoints();
+      allOneDoFjoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
@@ -155,6 +158,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       RigidBody chest = fullRobotModel.getChest();
       RigidBody pelvis = fullRobotModel.getPelvis();
 
+      unloadFraction = walkingControllerParameters.enforceSmoothFootUnloading() ? new DoubleParameter("unloadFraction", registry, 0.5) : null;
+
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
 
@@ -162,14 +167,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (chest != null)
       {
          chestBodyFrame = chest.getBodyFixedFrame();
-         RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, trajectoryFrames);
+         RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, false, true, trajectoryFrames);
          bodyManagers.add(chestManager);
       }
 
       if (head != null)
       {
          ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
-         RigidBodyControlManager headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, trajectoryFrames);
+         RigidBodyControlManager headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, false, true, trajectoryFrames);
          bodyManagers.add(headManager);
       }
 
@@ -177,7 +182,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          RigidBody hand = fullRobotModel.getHand(robotSide);
          ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, trajectoryFrames);
+         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, true, true, trajectoryFrames);
          bodyManagers.add(handManager);
       }
 
@@ -235,6 +240,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          }
          jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
       }
+
+      ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
+      controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
    }
 
    private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
@@ -252,13 +260,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       SideDependentList<TransferToWalkingSingleSupportState> walkingTransferStates = new SideDependentList<>();
 
       DoubleProvider minimumTransferTime = new DoubleParameter("MinimumTransferTime", registry, walkingControllerParameters.getMinimumTransferTime());
+      DoubleProvider rhoMin = () -> controllerCoreOptimizationSettings.getRhoMin();
       for (RobotSide transferToSide : RobotSide.values)
       {
          WalkingStateEnum stateEnum = WalkingStateEnum.getWalkingTransferState(transferToSide);
          TransferToWalkingSingleSupportState transferState = new TransferToWalkingSingleSupportState(stateEnum, walkingMessageHandler, controllerToolbox,
                                                                                                      managerFactory, walkingControllerParameters,
                                                                                                      failureDetectionControlModule, minimumTransferTime,
-                                                                                                     unloadFraction, registry);
+                                                                                                     unloadFraction, rhoMin, registry);
          walkingTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
       }
@@ -281,7 +290,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          WalkingStateEnum stateEnum = WalkingStateEnum.getFlamingoTransferState(transferToSide);
          TransferToFlamingoStanceState transferState = new TransferToFlamingoStanceState(stateEnum, walkingControllerParameters, walkingMessageHandler,
                                                                                          controllerToolbox, managerFactory, failureDetectionControlModule,
-                                                                                         null, registry);
+                                                                                         null, rhoMin, registry);
          flamingoTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
       }
@@ -505,8 +514,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    public void doAction()
    {
-      controllerToolbox.update();
-
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
       balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
 
@@ -683,6 +690,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
+
+      controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
 
       /*
        * FIXME: This is mainly used for resetting the integrators at touchdown. It is done in

@@ -84,6 +84,7 @@ public class AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> addActualCMPVisualization = new OptionalFactoryField<>("addActualCMPVisualization");
    private final OptionalFactoryField<Boolean> createCollisionMeshes = new OptionalFactoryField<>("createCollisionMeshes");
    private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer");
+   private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
 
    // TO CONSTRUCT
    private HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot;
@@ -211,18 +212,26 @@ public class AvatarSimulationFactory
    private void setupStateEstimationThread()
    {
       String robotName = robotModel.get().getSimpleRobotName();
-      stateEstimationThread = new DRCEstimatorThread(robotName, robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(),
-                                                     robotModel.get(), robotModel.get().getStateEstimatorParameters(), sensorReaderFactory,
-                                                     threadDataSynchronizer, realtimeRos2Node.get(), simulationOutputWriter, yoVariableServer, gravity.get());
 
       MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
-      PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeRos2Node.get(),
-                                                                                                                        publisherTopicNameGenerator);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node.get(), StampedPosePacket.class, subscriberTopicNameGenerator,
-                                           s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
-      stateEstimationThread.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
+      PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
+      if (externalPelvisCorrectorSubscriber.hasValue())
+      {
+         pelvisPoseCorrectionCommunicator = externalPelvisCorrectorSubscriber.get();
+      }
+      else
+      {
+         pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeRos2Node.get(), publisherTopicNameGenerator);
+         ROS2Tools.createCallbackSubscription(realtimeRos2Node.get(), StampedPosePacket.class, subscriberTopicNameGenerator,
+                                              s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
+      }
+
+      stateEstimationThread = new DRCEstimatorThread(robotName, robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(),
+                                                     robotModel.get(), robotModel.get().getStateEstimatorParameters(), sensorReaderFactory,
+                                                     threadDataSynchronizer, realtimeRos2Node.get(), pelvisPoseCorrectionCommunicator, simulationOutputWriter,
+                                                     yoVariableServer, gravity.get());
    }
 
    private void setupControllerThread()
@@ -531,4 +540,10 @@ public class AvatarSimulationFactory
    {
       this.useShapeCollision = useShapeCollision;
    }
+
+   public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
+   {
+      this.externalPelvisCorrectorSubscriber.set(externalPelvisCorrectorSubscriber);
+   }
+
 }
