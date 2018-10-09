@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -55,7 +56,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class FootstepPlanningToolboxController extends ToolboxController
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
 
    private final YoEnum<FootstepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry, FootstepPlannerType.class);
    private final EnumMap<FootstepPlannerType, FootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
@@ -67,6 +68,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
    private final YoBoolean requestedPlanarRegions = new YoBoolean("RequestedPlanarRegions", registry);
    private final YoDouble toolboxTime = new YoDouble("ToolboxTime", registry);
+   private final YoDouble timeout = new YoDouble("ToolboxTimeout", registry);
    private final YoInteger planId = new YoInteger("planId", registry);
 
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
@@ -133,6 +135,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
       toolboxTime.add(dt);
       if (toolboxTime.getDoubleValue() > 20.0)
       {
+         if (debug)
+            PrintTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
          reportMessage(packResult(null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
          isDone.set(true);
          return;
@@ -222,6 +226,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       if (timeout > 0.0 && Double.isFinite(timeout))
       {
          planner.setTimeout(timeout);
+         this.timeout.set(timeout);
 
          if (debug)
          {
