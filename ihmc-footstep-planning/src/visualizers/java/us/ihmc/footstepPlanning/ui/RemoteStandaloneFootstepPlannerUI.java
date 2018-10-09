@@ -7,47 +7,49 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 
-public class RemoteFootstepPlannerUI extends Application
+public class RemoteStandaloneFootstepPlannerUI extends Application
 {
    private final boolean visualize;
 
+   private FootstepPathCalculatorModule module;
    private final JavaFXMessager messager;
-   private final FootstepPlannerUIMessageConverter messageConverter;
+   private final StandaloneFootstepPlannerUIMessageConverter messageConverter;
 
    private FootstepPlannerUI ui;
 
 
-   public static RemoteFootstepPlannerUI createIntraprocessUI(String robotName)
+   public static RemoteStandaloneFootstepPlannerUI createIntraprocessUI(String robotName)
    {
       return createUI(robotName, DomainFactory.PubSubImplementation.INTRAPROCESS);
    }
 
-   public static RemoteFootstepPlannerUI createFastRTPSUI(String robotName)
+   public static RemoteStandaloneFootstepPlannerUI createFastRTPSUI(String robotName)
    {
       return createUI(robotName, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
-   public static RemoteFootstepPlannerUI createUI(String robotName, DomainFactory.PubSubImplementation pubSubImplementation)
+   public static RemoteStandaloneFootstepPlannerUI createUI(String robotName, DomainFactory.PubSubImplementation pubSubImplementation)
    {
       return createUI(robotName, pubSubImplementation, true);
    }
 
-   public static RemoteFootstepPlannerUI createUI(String robotName, DomainFactory.PubSubImplementation pubSubImplementation, boolean visualize)
+   public static RemoteStandaloneFootstepPlannerUI createUI(String robotName, DomainFactory.PubSubImplementation pubSubImplementation, boolean visualize)
    {
       JavaFXMessager messager = new SharedMemoryJavaFXMessager(FootstepPlannerUserInterfaceAPI.API);
-      FootstepPlannerUIMessageConverter messageConverter = FootstepPlannerUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
-      return new RemoteFootstepPlannerUI(messager, messageConverter, visualize);
+      StandaloneFootstepPlannerUIMessageConverter messageConverter = StandaloneFootstepPlannerUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
+      return new RemoteStandaloneFootstepPlannerUI(messager, messageConverter, visualize);
    }
 
-   public RemoteFootstepPlannerUI(JavaFXMessager messager, FootstepPlannerUIMessageConverter messageConverter)
+   public RemoteStandaloneFootstepPlannerUI(JavaFXMessager messager, StandaloneFootstepPlannerUIMessageConverter messageConverter)
    {
       this(messager, messageConverter, true);
    }
 
-   public RemoteFootstepPlannerUI(JavaFXMessager messager, FootstepPlannerUIMessageConverter messageConverter, boolean visualize)
+   public RemoteStandaloneFootstepPlannerUI(JavaFXMessager messager, StandaloneFootstepPlannerUIMessageConverter messageConverter, boolean visualize)
    {
       this.messager = messager;
       this.messageConverter = messageConverter;
+      this.module = new FootstepPathCalculatorModule(messager);
       this.visualize = visualize;
    }
 
@@ -56,6 +58,8 @@ public class RemoteFootstepPlannerUI extends Application
    public void start(Stage primaryStage) throws Exception
    {
       messager.startMessager();
+
+      module.start();
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager);
 
@@ -69,6 +73,7 @@ public class RemoteFootstepPlannerUI extends Application
       super.stop();
 
       ui.stop();
+      module.stop();
       messager.closeMessager();
 
       messageConverter.destroy();
