@@ -51,7 +51,9 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -97,7 +99,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
 
    private JointDesiredOutputList estimatorDesiredJointDataHolder;
    private ValkyrieRosControlSensorReader sensorReader;
-   private DRCKinematicsBasedStateEstimator stateEstimator;
+   private StateEstimatorController stateEstimator;
+   private ForceSensorStateUpdater forceSensorStateUpdater;
    private AutomatedDiagnosticAnalysisController diagnosticController;
 
    public ValkyrieAutomatedDiagnosticController()
@@ -220,10 +223,12 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       {
          startTime.set(time);
          stateEstimator.initialize();
+         forceSensorStateUpdater.initialize();
          firstEstimatorTick = false;
       }
 
       stateEstimator.doControl();
+      forceSensorStateUpdater.updateForceSensorState();
 
       if (!startController.getBooleanValue())
       {
@@ -247,7 +252,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       diagnosticControllerTimer.stopMeasurement();
    }
 
-   private DRCKinematicsBasedStateEstimator createStateEstimator(DRCRobotModel robotModel, double gravity, SensorOutputMapReadOnly sensorOutputMapReadOnly,
+   private StateEstimatorController createStateEstimator(DRCRobotModel robotModel, double gravity, SensorOutputMapReadOnly sensorOutputMapReadOnly,
                                                                  FullHumanoidRobotModel fullRobotModel)
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(fullRobotModel);
@@ -297,14 +302,15 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
 
       // Create the sensor readers and state estimator here:
-      DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-                                                                                             sensorOutputMapReadOnly, forceSensorDataHolderToUpdate,
-                                                                                             centerOfMassDataHolderToUpdate, imuSensorsToUseInStateEstimator,
-                                                                                             gravityMagnitude, footSwitchMap, null,
-                                                                                             new RobotMotionStatusHolder(), bipedFeetMap,
-                                                                                             yoGraphicsListRegistry);
+      StateEstimatorController stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
+                                                                                     sensorOutputMapReadOnly, centerOfMassDataHolderToUpdate,
+                                                                                     imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap, null,
+                                                                                     new RobotMotionStatusHolder(), bipedFeetMap, yoGraphicsListRegistry);
 
       registry.addChild(stateEstimator.getYoVariableRegistry());
+
+      forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, stateEstimatorParameters, gravityMagnitude,
+                                                            yoGraphicsListRegistry, registry);
 
       return stateEstimator;
    }

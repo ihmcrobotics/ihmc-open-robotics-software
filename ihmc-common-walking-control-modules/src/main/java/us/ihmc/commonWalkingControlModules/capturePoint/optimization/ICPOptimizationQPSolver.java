@@ -267,7 +267,7 @@ public class ICPOptimizationQPSolver
       cmpFeedbackCostToGo = new DenseMatrix64F(1, 1);
       dynamicsCostToGo = new DenseMatrix64F(1, 1);
 
-      //      solver.setConvergenceThreshold(convergenceThreshold);
+//      solver.setConvergenceThreshold(convergenceThreshold);
       solver.setMaxNumberOfIterations(maxNumberOfIterations);
       solver.setUseWarmStart(useWarmStart);
    }

@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoSE3ConfigurationProviderTest
@@ -35,6 +36,7 @@ public class YoSE3ConfigurationProviderTest
    {
       referenceFrame = null;
       registry = null;
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

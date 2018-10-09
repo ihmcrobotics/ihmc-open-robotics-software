@@ -241,6 +241,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
 
    //picks up a foot, moves it around in a ribbon shape, then puts the foot down, Done using both sides
+   @ContinuousIntegrationTest(estimatedDuration = 85.4)
+   @Test(timeout = 430000)
    public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -321,6 +323,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    }
 
    //moves each foot to a single position using a custom control point
+   @ContinuousIntegrationTest(estimatedDuration = 24.4)
+   @Test(timeout = 120000)
    public void testCustomControlPoint() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -378,6 +382,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    }
 
    //picks up the left foot, moves the foot around a sphere (ribbons yawed around the circle center)
+   @ContinuousIntegrationTest(estimatedDuration = 72.6)
+   @Test(timeout = 360000)
    public void testQueuedMessages() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -641,6 +647,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    }
 
    //Picks a foot up, Sends queued messages, then sends a single point to test overriding the queue. Done for both feet
+   @ContinuousIntegrationTest(estimatedDuration = 72.6)
+   @Test(timeout = 360000)
    public void testQueueStoppedWithOverrideMessage() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(564574L);

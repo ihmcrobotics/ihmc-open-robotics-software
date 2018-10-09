@@ -127,8 +127,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
                                                                             derivativeGain, () -> 0.0, registry);
       yoControlFrame = new YoSE3OffsetFrame(pelvis.getName() + "HeightBodyFixedControlFrame", pelvis.getBodyFixedFrame(), registry);
 
-      taskspaceControlState = new RigidBodyTaskspaceControlState("Height", pelvis, elevator, elevator, trajectoryFrames, pelvisFrame, baseFrame, yoTime, null,
-                                                                 graphicsListRegistry, registry);
+      taskspaceControlState = new RigidBodyTaskspaceControlState("Height", pelvis, elevator, elevator, trajectoryFrames, pelvisFrame, baseFrame, true, false, yoTime, null, graphicsListRegistry, registry);
 
       defaultHeight = new DoubleParameter(getClass().getSimpleName() + "DefaultHeight", registry);
       minHeight = new DoubleParameter(getClass().getSimpleName() + "MinHeight", registry, 0.0);

@@ -10,6 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
@@ -37,8 +38,7 @@ public class GraphicsExample
       YoDouble pitch = new YoDouble("pitch", registry);
       YoDouble roll = new YoDouble("roll", registry);
 
-      YoGraphicCoordinateSystem worldCoordinateSystem = new YoGraphicCoordinateSystem("Example", worldOrigin.getYoX(), worldOrigin.getYoY(),
-                                                                worldOrigin.getYoZ(), yaw, pitch, roll, 2.0);
+      YoGraphicCoordinateSystem worldCoordinateSystem = new YoGraphicCoordinateSystem("Example", worldOrigin, new YoFrameYawPitchRoll(yaw, pitch, roll, ReferenceFrame.getWorldFrame()), 2.0);
 
       // setup slider board
       setupEvolution(scs, testPoint);

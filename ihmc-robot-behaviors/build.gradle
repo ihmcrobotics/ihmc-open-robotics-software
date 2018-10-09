@@ -4,10 +4,12 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.14.0"
+      classpath "us.ihmc:ihmc-build:0.15.1"
+      classpath "us.ihmc:ihmc-ci-plugin:0.18.0"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
+apply plugin: "us.ihmc.ihmc-ci-plugin"
 
 ihmc {
    loadProductProperties("../product.properties")
@@ -22,10 +24,11 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'com.ibm.watson.developer_cloud', name: 'java-sdk', version: '2.10.0'
-   compile group: 'us.ihmc.thirdparty.org.kc7bfi', name: 'jflac', version: '1.4.0'
+   compile group: "com.ibm.watson.developer_cloud", name: "java-sdk", version: "2.10.0"
+   compile group: "us.ihmc.thirdparty.org.kc7bfi", name: "jflac", version: "1.4.0"
    compile group: "commons-io", name: "commons-io", version: "2.6"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.1"
+
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
@@ -33,7 +36,8 @@ mainDependencies {
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.20.1"
+
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.23.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

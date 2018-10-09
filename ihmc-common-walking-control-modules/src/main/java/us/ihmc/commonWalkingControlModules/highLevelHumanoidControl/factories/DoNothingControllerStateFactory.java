@@ -13,8 +13,10 @@ public class DoNothingControllerStateFactory implements HighLevelControllerState
    public HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
       if (doNothingControllerState == null)
-         doNothingControllerState = new DoNothingControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
+      {
+         doNothingControllerState = new DoNothingControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledOneDoFJoints(),
                                                                  controllerFactoryHelper.getHighLevelControllerParameters());
+      }
 
       return doNothingControllerState;
    }

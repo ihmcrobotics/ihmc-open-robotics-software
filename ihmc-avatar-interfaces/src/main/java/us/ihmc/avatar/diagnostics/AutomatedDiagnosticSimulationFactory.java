@@ -47,7 +47,9 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
@@ -78,7 +80,8 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration;
    private HumanoidFloatingRootJointRobot simulatedRobot;
    private HumanoidReferenceFrames humanoidReferenceFrames;
-   private DRCKinematicsBasedStateEstimator stateEstimator;
+   private StateEstimatorController stateEstimator;
+   private ForceSensorStateUpdater forceSensorStateUpdater;
 
    public AutomatedDiagnosticSimulationFactory(DRCRobotModel robotModel)
    {
@@ -126,7 +129,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       automatedDiagnosticAnalysisController.setRobotIsAlive(startWithRobotAlive);
       automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(diagnosticControllerToolbox, automatedDiagnosticAnalysisController);
 
-      lowLevelOutputWriter = new SimulatedLowLevelOutputWriter(simulatedRobot, false); 
+      lowLevelOutputWriter = new SimulatedLowLevelOutputWriter(simulatedRobot, false);
       lowLevelOutputWriter.setJointDesiredOutputList(lowLevelOutput);
 
       int simulationTicksPerControlTick = (int) (robotModel.getEstimatorDT() / robotModel.getSimulateDT());
@@ -194,10 +197,12 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       }
 
       stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters, sensorOutputMapReadOnly,
-            forceSensorDataHolderToUpdate, centerOfMassDataHolderToUpdate,
-            imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitchMap, null, new RobotMotionStatusHolder(),
-            bipedFeetMap, null);
+                                                            centerOfMassDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravitationalAcceleration,
+                                                            footSwitchMap, null, new RobotMotionStatusHolder(), bipedFeetMap, null);
       simulationRegistry.addChild(stateEstimator.getYoVariableRegistry());
+
+      forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, stateEstimatorParameters,
+                                                            gravitationalAcceleration, null, simulationRegistry);
 
       return sensorReader.getSensorOutputMapReadOnly();
    }
@@ -260,7 +265,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    public void doControl()
    {
       long startTime = System.nanoTime();
-      
+
       lowLevelOutputWriter.writeBefore(startTime);
       sensorReader.read();
       humanoidReferenceFrames.updateFrames();
@@ -268,12 +273,14 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       if (firstControlTick)
       {
          stateEstimator.initialize();
+         forceSensorStateUpdater.initialize();
          automatedDiagnosticAnalysisController.initialize();
          firstControlTick = false;
       }
       else
       {
          stateEstimator.doControl();
+         forceSensorStateUpdater.updateForceSensorState();
          automatedDiagnosticAnalysisController.doControl();
       }
 

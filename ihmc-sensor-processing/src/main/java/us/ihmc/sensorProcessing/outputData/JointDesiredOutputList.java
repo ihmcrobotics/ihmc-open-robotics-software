@@ -5,7 +5,7 @@ import java.util.HashMap;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.tools.lists.PairList;
 
-public class JointDesiredOutputList implements JointDesiredOutputListReadOnly
+public class JointDesiredOutputList implements JointDesiredOutputListBasics
 {
    private final PairList<OneDoFJoint, JointDesiredOutput> jointsAndData = new PairList<>();
    private final HashMap<OneDoFJoint, JointDesiredOutput> jointMap = new HashMap<>();
@@ -55,6 +55,7 @@ public class JointDesiredOutputList implements JointDesiredOutputListReadOnly
       return jointsAndData.first(index).getName();
    }
 
+   @Override
    public void clear()
    {
       for (int jointIdx = 0; jointIdx < jointsAndData.size(); jointIdx++)
@@ -76,6 +77,7 @@ public class JointDesiredOutputList implements JointDesiredOutputListReadOnly
 //      }
 //   }
 
+   @Override
    public void overwriteWith(JointDesiredOutputListReadOnly other)
    {
       for (int i = 0; i < jointsAndData.size(); i++)
@@ -89,7 +91,27 @@ public class JointDesiredOutputList implements JointDesiredOutputListReadOnly
          {
             data.set(otherData);
          }
+      }
+   }
 
+   /**
+    * Complete the information held in this using other.
+    * Does not overwrite the data already set in this.
+    */
+   @Override
+   public void completeWith(JointDesiredOutputListReadOnly other)
+   {
+      for (int i = 0; i < jointsAndData.size(); i++)
+      {
+
+         OneDoFJoint joint = jointsAndData.first(i);
+         JointDesiredOutput data = jointsAndData.second(i);
+
+         JointDesiredOutputReadOnly otherData = other.getJointDesiredOutput(joint);
+         if (otherData != null)
+         {
+            data.completeWith(otherData);
+         }
       }
    }
 

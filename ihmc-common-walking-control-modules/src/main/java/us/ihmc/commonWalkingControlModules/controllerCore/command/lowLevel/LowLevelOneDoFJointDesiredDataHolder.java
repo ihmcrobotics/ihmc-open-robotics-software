@@ -8,10 +8,11 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 
-public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListReadOnly
+public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListBasics
 {
    private final List<JointDesiredOutput> unusedData;
    private final List<OneDoFJoint> jointsWithDesiredData;
@@ -40,6 +41,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
       lowLevelJointDataMap.setAutoCompactionFactor(disableAutoCompaction);
    }
 
+   @Override
    public void clear()
    {
       while (!jointsWithDesiredData.isEmpty())
@@ -233,6 +235,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
     * Complete the information held in this using other.
     * Does not overwrite the data already set in this.
     */
+   @Override
    public void completeWith(JointDesiredOutputListReadOnly other)
    {
       if (other == null)
@@ -259,6 +262,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
    /**
     * Clear this and copy the data held in other.
     */
+   @Override
    public void overwriteWith(JointDesiredOutputListReadOnly other)
    {
       clear();

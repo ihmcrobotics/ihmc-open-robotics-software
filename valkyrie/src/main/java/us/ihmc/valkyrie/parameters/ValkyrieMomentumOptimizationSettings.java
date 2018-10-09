@@ -36,7 +36,7 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    private final double jointJerkWeight = 1.6E-6;
    private final double rhoWeight = 0.00001;
    private final double rhoMin = 4.0;
-   private final double rhoRateDefaultWeight = 3.2E-8;
+   private final double rhoRateDefaultWeight = 5E-8;
    private final double rhoRateHighWeight = 8.0E-7;
    private final Vector2D copWeight = new Vector2D(0.001, 0.002);
    private final Vector2D copRateDefaultWeight = new Vector2D(0.0000032, 0.0000032);
@@ -256,5 +256,12 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    public List<GroupParameter<Vector3DReadOnly>> getTaskspaceLinearWeights()
    {
       return taskspaceLinearWeights;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useWarmStartInSolver()
+   {
+      return true;
    }
 }

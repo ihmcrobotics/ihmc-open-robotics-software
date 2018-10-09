@@ -2,10 +2,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -19,15 +17,13 @@ public class HoldPositionControllerState extends HighLevelControllerState
 
    private final PairList<OneDoFJoint, YoDouble> jointSetpoints = new PairList<>();
 
-   public HoldPositionControllerState(HighLevelControllerName stateEnum, HighLevelHumanoidControllerToolbox controllerToolbox,
+   public HoldPositionControllerState(HighLevelControllerName stateEnum, OneDoFJoint[] controlledJoints,
                                       HighLevelControllerParameters highLevelControllerParameters, JointDesiredOutputListReadOnly highLevelControllerOutput)
    {
-      super(stateEnum, highLevelControllerParameters, controllerToolbox);
+      super(stateEnum, highLevelControllerParameters, controlledJoints);
 
       this.highLevelControllerOutput = highLevelControllerOutput;
       String nameSuffix = "_" + stateEnum.name();
-
-      OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
 
       for (OneDoFJoint controlledJoint : controlledJoints)
       {

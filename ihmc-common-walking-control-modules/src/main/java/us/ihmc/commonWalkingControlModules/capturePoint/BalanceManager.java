@@ -419,11 +419,10 @@ public class BalanceManager
    private final FrameVector2D emptyVector = new FrameVector2D();
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
-      controllerToolbox.getCapturePoint(capturePoint2d);
       controllerToolbox.getCapturePointVelocity(capturePointVelocity2d);
       controllerToolbox.getCoP(copEstimate);
 
-      icpPlanner.compute(capturePoint2d, yoTime.getDoubleValue());
+      computeICPPlan(supportLeg);
 
       if (icpPlanner instanceof ICPPlannerWithAngularMomentumOffsetInterface)
          icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate, supportLeg);
@@ -519,6 +518,17 @@ public class BalanceManager
          momentumTrajectoryHandler.packDesiredAngularMomentumAtTime(yoTime.getValue(), null, null);
       }
    }
+
+   public void computeICPPlan(RobotSide supportLeg)
+   {
+      controllerToolbox.getCapturePoint(capturePoint2d);
+      controllerToolbox.getCoP(copEstimate);
+      icpPlanner.compute(capturePoint2d, yoTime.getDoubleValue());
+
+      if (icpPlanner instanceof ICPPlannerWithAngularMomentumOffsetInterface)
+         icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate, supportLeg);
+   }
+
 
    public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
    {
@@ -692,8 +702,8 @@ public class BalanceManager
    public void computeNormalizedEllipticICPError(RobotSide transferToSide)
    {
       getICPError(icpError2d);
-      ReferenceFrame leadingAnkleZUpFrame = bipedSupportPolygons.getAnkleZUpFrames().get(transferToSide);
-      icpError2d.changeFrame(leadingAnkleZUpFrame);
+      ReferenceFrame leadingSoleZUpFrame = bipedSupportPolygons.getSoleZUpFrames().get(transferToSide);
+      icpError2d.changeFrame(leadingSoleZUpFrame);
       normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX.getValue())
             + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY.getValue()));
    }

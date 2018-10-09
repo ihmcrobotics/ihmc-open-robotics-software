@@ -4,14 +4,24 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public interface JointDesiredOutputListReadOnly
 {
-   public abstract boolean hasDataForJoint(OneDoFJoint joint);
+   boolean hasDataForJoint(OneDoFJoint joint);
 
-   public abstract OneDoFJoint getOneDoFJoint(int index);
+   OneDoFJoint getOneDoFJoint(int index);
 
-   public abstract JointDesiredOutputReadOnly getJointDesiredOutput(OneDoFJoint joint);
+   JointDesiredOutputReadOnly getJointDesiredOutput(OneDoFJoint joint);
 
-   public abstract JointDesiredOutputReadOnly getJointDesiredOutput(int index);
+   JointDesiredOutputReadOnly getJointDesiredOutput(int index);
 
-   public abstract int getNumberOfJointsWithDesiredOutput();
+   int getNumberOfJointsWithDesiredOutput();
 
+   default void insertDesiredTorquesIntoOneDoFJoints(OneDoFJoint[] oneDoFJoints)
+   {
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         OneDoFJoint joint = oneDoFJoints[i];
+         JointDesiredOutputReadOnly jointDesiredOutput = getJointDesiredOutput(joint);
+         if (jointDesiredOutput != null)
+            joint.setTau(jointDesiredOutput.getDesiredTorque());
+      }
+   }
 }

@@ -31,11 +31,11 @@ public class VehicleModelObjectVisualizer
          ReferenceFrame objectFrame = new PoseReferenceFrame(objectName, framePose);
          objectFrame.update();
 
-         YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(objectFrame, registry, objectFrameScale);
+         YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(objectFrame, registry, true, objectFrameScale);
          yoGraphicsList.add(yoGraphicReferenceFrame);
       }
 
-      YoGraphicReferenceFrame vehicleFrameViz = new YoGraphicReferenceFrame(vehicleFrame, registry, vehicleFrameScale);
+      YoGraphicReferenceFrame vehicleFrameViz = new YoGraphicReferenceFrame(vehicleFrame, registry, true, vehicleFrameScale);
       yoGraphicsList.add(vehicleFrameViz);
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);

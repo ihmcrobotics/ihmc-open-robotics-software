@@ -36,6 +36,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -215,7 +216,7 @@ public class SmoothCMPBasedICPPlannerTest
          this.contactStates.put(side, contactState);
       }
       this.midFeetZUpFrame = new MidFootZUpGroundFrame("MidFeetFrame", soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
-      this.bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, registry, graphicsListRegistry);
+      this.bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, registry, graphicsListRegistry);
       this.bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       updatables.add(new Updatable()
@@ -363,6 +364,7 @@ public class SmoothCMPBasedICPPlannerTest
 
       if (scs != null && !keepSCSUp)
          scs.closeAndDispose();
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.9)

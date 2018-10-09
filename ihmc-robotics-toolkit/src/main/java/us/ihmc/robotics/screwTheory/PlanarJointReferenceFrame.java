@@ -32,14 +32,14 @@ public class PlanarJointReferenceFrame extends ReferenceFrame
 
    public void setOrientationAndUpdate(FrameOrientation2D orientation)
    {
-      orientation.checkReferenceFrameMatch(parentFrame);
+      orientation.checkReferenceFrameMatch(getParent());
       this.rotation = orientation.getYaw();
       this.update();
    }
 
    public void setTranslationAndUpdate(FrameVector2D translation)
    {
-      translation.checkReferenceFrameMatch(parentFrame);
+      translation.checkReferenceFrameMatch(getParent());
       this.translation.setX(translation.getX());
       this.translation.setY(translation.getY());
       this.update();
@@ -47,7 +47,7 @@ public class PlanarJointReferenceFrame extends ReferenceFrame
 
    public void setFramePose2DAndUpdate(FramePose2D framePose2d)
    {
-      framePose2d.checkReferenceFrameMatch(parentFrame);
+      framePose2d.checkReferenceFrameMatch(getParent());
       this.rotation = framePose2d.getYaw();
       this.translation.setX(framePose2d.getX());
       this.translation.setY(framePose2d.getY());

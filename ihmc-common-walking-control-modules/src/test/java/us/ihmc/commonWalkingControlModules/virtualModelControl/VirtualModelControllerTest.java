@@ -16,6 +16,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -776,6 +777,7 @@ public class VirtualModelControllerTest
       {
          ThreadTools.sleepForever();
       }
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    private void submitAndCheckVMC(RigidBody base, RigidBody endEffector, ReferenceFrame centerOfMassFrame, Wrench desiredWrench, DenseMatrix64F selectionMatrix)

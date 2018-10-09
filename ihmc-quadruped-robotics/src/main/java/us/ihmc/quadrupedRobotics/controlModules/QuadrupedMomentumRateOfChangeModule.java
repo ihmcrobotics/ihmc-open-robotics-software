@@ -95,9 +95,8 @@ public class QuadrupedMomentumRateOfChangeModule
    {
       dcmPositionController.compute(vrpPositionSetpointToPack, dcmPositionEstimate, dcmPositionSetpoint, dcmVelocitySetpoint);
 
-      double vrpHeightOffsetFromHeightManagement =
-            comPositionGravityCompensationParameter.getValue() * desiredCoMHeightAcceleration * linearInvertedPendulumModel.getComHeight() / gravity;
-      vrpPositionSetpointToPack.subZ(vrpHeightOffsetFromHeightManagement);
+      double vrpHeightOffsetFromHeightManagement = desiredCoMHeightAcceleration * linearInvertedPendulumModel.getComHeight() / gravity;
+      vrpPositionSetpointToPack.subZ(comPositionGravityCompensationParameter.getValue() * vrpHeightOffsetFromHeightManagement);
       cmpPositionSetpoint.set(vrpPositionSetpointToPack);
       cmpPositionSetpoint.subZ(linearInvertedPendulumModel.getComHeight());
 

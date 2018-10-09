@@ -309,8 +309,8 @@ public interface ControllerCoreOptimizationSettings
 
    /**
     * Returns whether or not the optimization should consider the rho variable when its associated
-    * contact point is not in contact. This reduces the optimization size for the whole body controller,
-    * potentially leading to higher speeds.
+    * contact point is not in contact. This reduces the optimization size for the whole body
+    * controller, potentially leading to higher speeds.
     */
    default boolean getDeactivateRhoWhenNotInContact()
    {
@@ -332,7 +332,8 @@ public interface ControllerCoreOptimizationSettings
    }
 
    /**
-    * Sets whether or not to use a warm start in the active set solver where the previous active set is retained between control ticks.
+    * Sets whether or not to use a warm start in the active set solver where the previous active set
+    * is retained between control ticks.
     */
    default boolean useWarmStartInSolver()
    {
@@ -340,7 +341,8 @@ public interface ControllerCoreOptimizationSettings
    }
 
    /**
-    * Sets the maximum number of iterations allowed in the solver before throwing a no convergence exception.
+    * Sets the maximum number of iterations allowed in the solver before throwing a no convergence
+    * exception.
     */
    default int getMaxNumberOfSolverIterations()
    {
@@ -369,8 +371,8 @@ public interface ControllerCoreOptimizationSettings
 
    /**
     * Adds the ability to define a robot specific friction cone rotation. This can be useful when
-    * using friction cone representations with a low number of basis vectors and for feet with
-    * a lot of contact points. By default this will return a zero offset provider.
+    * using friction cone representations with a low number of basis vectors and for feet with a lot
+    * of contact points. By default this will return a zero offset provider.
     */
    default public FrictionConeRotationCalculator getFrictionConeRotation()
    {

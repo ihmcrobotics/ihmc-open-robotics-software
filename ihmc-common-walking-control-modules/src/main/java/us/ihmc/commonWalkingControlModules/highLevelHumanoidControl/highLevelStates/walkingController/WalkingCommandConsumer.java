@@ -103,7 +103,7 @@ public class WalkingCommandConsumer
       if(chest != null)
       {
          chestBodyFrame = chest.getBodyFixedFrame();
-         this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, trajectoryFrames);
+         this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, false, true, trajectoryFrames);
       }
       else
       {
@@ -113,7 +113,7 @@ public class WalkingCommandConsumer
       if (head != null)
       {
          ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
-         this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, trajectoryFrames);
+         this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, false, true, trajectoryFrames);
       }
       else
       {
@@ -126,7 +126,7 @@ public class WalkingCommandConsumer
          if(hand != null)
          {
             ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
-            RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, trajectoryFrames);
+            RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, true, true, trajectoryFrames);
             handManagers.put(robotSide, handManager);
          }
       }

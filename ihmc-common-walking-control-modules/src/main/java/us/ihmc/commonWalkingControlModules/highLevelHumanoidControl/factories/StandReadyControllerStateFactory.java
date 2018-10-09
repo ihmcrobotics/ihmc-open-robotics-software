@@ -13,9 +13,11 @@ public class StandReadyControllerStateFactory implements HighLevelControllerStat
    public HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
       if (standReadyControllerState == null)
-         standReadyControllerState = new StandReadyControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
+      {
+         standReadyControllerState = new StandReadyControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledOneDoFJoints(),
                                                                    controllerFactoryHelper.getHighLevelControllerParameters(),
                                                                    controllerFactoryHelper.getLowLevelControllerOutput());
+      }
 
       return standReadyControllerState;
    }
