@@ -8,6 +8,10 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 
+/**
+ * This class provides a fully remote footstep planner. It includes the UI and the footstep planning modules, which are
+ * published out using RTPS messages. They are converted from JavaFX messages internally and then broadcast out.
+ */
 public class RemoteStandaloneFootstepPlannerUI extends Application
 {
    private final boolean visualize;

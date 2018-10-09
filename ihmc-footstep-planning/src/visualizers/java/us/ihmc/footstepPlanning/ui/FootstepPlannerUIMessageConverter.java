@@ -19,6 +19,17 @@ import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * This class is required when using a local version of the Footstep Planner UI and the footstep planning algorithms
+ * located in the Footstep Planner Toolbox. It allows users to view the resulting plans calculated by the toolbox. It
+ * also allows the user to tune the planner parameters, and request a new plan from the planning toolbox.
+ *
+ * This class is used to convert the shared memory messages from Java FX used by the Footstep Planner UI
+ * to RTPS messages, and vice-versa. It specifically listens to the planning request messages and the output
+ * status messages sent to and from the toolbox, and visualizes those. It also allows the user to request a
+ * new plan using the local version of the edit footstep planning parameters and a footstep request, requiring
+ * conversion from the Java FX messages to the RTPS messages.
+ */
 public class FootstepPlannerUIMessageConverter
 {
    // TODO make a local thing of planar regions
