@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -674,6 +675,23 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       pose.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
       pose.get(controlFrameOriginInEndEffectorFrame, controlFrameOrientationInEndEffectorFrame);
+   }
+
+   /**
+    * Sets the pose of the {@code controlFrame} with respect to the
+    * {@code endEffector.getBodyFixedFrame()}.
+    * <p>
+    * The {@code controlFrame} describes on what the feedback control is applied, such that the
+    * feedback controller for this end-effector will do its best to bring the {@code controlFrame}
+    * to the given desired position and orientation.
+    * </p>
+    *
+    * @param poseInBodyFrame the pose of the {@code controlFrame}. Not modified.
+    */
+   public void setControlFrameFixedInEndEffector(RigidBodyTransform poseInBodyFrame)
+   {
+      poseInBodyFrame.getTranslation(controlFrameOriginInEndEffectorFrame);
+      poseInBodyFrame.getRotation(controlFrameOrientationInEndEffectorFrame);
    }
 
    /**
