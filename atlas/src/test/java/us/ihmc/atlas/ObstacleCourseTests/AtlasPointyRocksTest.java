@@ -51,7 +51,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
     * The robot walks continuously for a few steps with unknown half foot contacts.
     */
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 113.7)
+   @ContinuousIntegrationTest(estimatedDuration = 113.7, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 570000)
    public void testWalkingForwardWithHalfFootContactChangesContinuousSteps() throws SimulationExceededMaximumTimeException
    {

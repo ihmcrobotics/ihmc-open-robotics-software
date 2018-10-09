@@ -62,15 +62,18 @@ public class ICPControlPolygons
          footControlPolygonsInMidFeetZUp.put(robotSide, new FrameConvexPolygon2D());
          String robotSidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
-         YoFrameConvexPolygon2D controlFootPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix + "controlFootPolygon", "", worldFrame, maxNumberOfContactPointsPerFoot, registry);
-         controlFootPolygonsViz.put(robotSide, controlFootPolygonViz);
-         YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Control Foot Polygon", controlFootPolygonViz, feetColors.get(robotSide), false);
-         artifactList.add(footPolygonArtifact);
+         if (VISUALIZE)
+         {
+            YoFrameConvexPolygon2D controlFootPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix + "controlFootPolygon", "", worldFrame,
+                                                                                      maxNumberOfContactPointsPerFoot, registry);
+            controlFootPolygonsViz.put(robotSide, controlFootPolygonViz);
+            YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Control Foot Polygon",
+                                                                          controlFootPolygonViz, feetColors.get(robotSide), false);
+            artifactList.add(footPolygonArtifact);
+         }
       }
 
-      artifactList.setVisible(VISUALIZE);
-
-      if (yoGraphicsListRegistry != null)
+      if (VISUALIZE && yoGraphicsListRegistry != null)
       {
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
@@ -151,14 +154,17 @@ public class ICPControlPolygons
    {
       controlPolygonViz.set(controlPolygonInWorld);
 
-      for (RobotSide robotSide : RobotSide.values)
+      if (VISUALIZE)
       {
-         YoFrameConvexPolygon2D footPolygonViz = controlFootPolygonsViz.get(robotSide);
-         FrameConvexPolygon2D footPolygon = footControlPolygonsInWorldFrame.get(robotSide);
-         if (footPolygon.isEmpty())
-            footPolygonViz.clear();
-         else
-            footPolygonViz.set(footPolygon);
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            YoFrameConvexPolygon2D footPolygonViz = controlFootPolygonsViz.get(robotSide);
+            FrameConvexPolygon2D footPolygon = footControlPolygonsInWorldFrame.get(robotSide);
+            if (footPolygon.isEmpty())
+               footPolygonViz.clear();
+            else
+               footPolygonViz.set(footPolygon);
+         }
       }
    }
 

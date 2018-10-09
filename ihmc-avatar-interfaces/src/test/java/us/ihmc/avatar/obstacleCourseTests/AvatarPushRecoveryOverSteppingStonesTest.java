@@ -124,10 +124,15 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
 
 
       swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
+      double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
       totalMass = fullRobotModel.getTotalMass();
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
 
+      FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
+      footstepDataList.setAreFootstepsAdjustable(true);
+      drcSimulationTestHelper.publishToController(footstepDataList);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
 

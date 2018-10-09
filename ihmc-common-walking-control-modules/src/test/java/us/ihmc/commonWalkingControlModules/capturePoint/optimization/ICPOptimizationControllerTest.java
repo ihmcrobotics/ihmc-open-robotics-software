@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
@@ -46,6 +48,12 @@ public class ICPOptimizationControllerTest
 
    private final SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
@@ -406,7 +414,7 @@ public class ICPOptimizationControllerTest
       ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
 
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, ankleZUpFrames, registry, null);
+      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       return bipedSupportPolygons;

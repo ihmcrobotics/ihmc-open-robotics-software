@@ -1,6 +1,8 @@
 package us.ihmc.avatar.testTools;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -8,10 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import controller_msgs.msg.dds.MessageCollection;
+import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -40,10 +44,12 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -102,6 +108,7 @@ public class DRCSimulationTestHelper
    private ControllerStateTransitionFactory<HighLevelControllerName> controllerStateTransitionFactory = null;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = null;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = null;
+   private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber = null;
    private final DRCGuiInitialSetup guiInitialSetup;
 
    private final boolean checkIfDesiredICPHasBeenInvalid = true;
@@ -150,6 +157,8 @@ public class DRCSimulationTestHelper
 
       defaultControllerPublishers.put(WholeBodyTrajectoryMessage.class, createPublisherForController(WholeBodyTrajectoryMessage.class));
       defaultControllerPublishers.put(MessageCollection.class, createPublisherForController(MessageCollection.class));
+      
+      defaultControllerPublishers.put(ValkyrieHandFingerTrajectoryMessage.class, createPublisherForController(ValkyrieHandFingerTrajectoryMessage.class));
    }
 
    /**
@@ -183,6 +192,8 @@ public class DRCSimulationTestHelper
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
       simulationStarter.setInitializeEstimatorToActual(true);
       simulationStarter.setFlatGroundWalkingScriptParameters(walkingScriptParameters);
+      if (externalPelvisCorrectorSubscriber != null)
+         simulationStarter.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
 
       if (addFootstepMessageGenerator)
          simulationStarter.addFootstepMessageGenerator(useHeadingAndVelocityScript, cheatWithGroundHeightAtFootstep);
@@ -197,6 +208,7 @@ public class DRCSimulationTestHelper
       {
          blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
          simulationStarter.attachControllerFailureListener(direction -> blockingSimulationRunner.notifyControllerHasFailed());
+         simulationStarter.attachControllerFailureListener(direction -> notifyControllerHasFailed());
          blockingSimulationRunner.createValidDesiredICPListener();
          blockingSimulationRunner.setCheckDesiredICPPosition(checkIfDesiredICPHasBeenInvalid);
       }
@@ -337,6 +349,34 @@ public class DRCSimulationTestHelper
       }
    }
 
+   // TODO: move this into the blocking simulation runner.
+   public void simulateAndBlock(int simulationTicks) throws SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      double startTime = scs.getTime();
+      scs.simulate(simulationTicks);
+
+      BlockingSimulationRunner.waitForSimulationToFinish(scs, 600, true);
+      if (hasControllerFailed.get())
+      {
+         throw new ControllerFailureException("Controller failure has been detected.");
+      }
+
+      double endTime = scs.getTime();
+      double elapsedTime = endTime - startTime;
+
+      if (Math.abs(elapsedTime - scs.getDT() * simulationTicks) > 0.01)
+      {
+         throw new SimulationExceededMaximumTimeException("Elapsed time didn't equal requested. Sim probably crashed");
+      }
+   }
+
+   private final AtomicBoolean hasControllerFailed = new AtomicBoolean(false);
+   public void notifyControllerHasFailed()
+   {
+      hasControllerFailed.set(true);
+      scs.stop();
+   }
+
    public void destroySimulation()
    {
       if (blockingSimulationRunner != null)
@@ -363,6 +403,7 @@ public class DRCSimulationTestHelper
       simulationStarter = null;
 
       ros2Node.destroy();
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    public boolean simulateAndBlockAndCatchExceptions(double simulationTime) throws SimulationExceededMaximumTimeException
@@ -370,6 +411,21 @@ public class DRCSimulationTestHelper
       try
       {
          simulateAndBlock(simulationTime);
+         return true;
+      }
+      catch (Exception e)
+      {
+         this.caughtException = e;
+         PrintTools.error(this, e.getMessage());
+         return false;
+      }
+   }
+
+   public boolean simulateAndBlockAndCatchExceptions(int simulationTicks) throws SimulationExceededMaximumTimeException
+   {
+      try
+      {
+         simulateAndBlock(simulationTicks);
          return true;
       }
       catch (Exception e)
@@ -587,6 +643,11 @@ public class DRCSimulationTestHelper
    public void setNetworkProcessorParameters(DRCNetworkModuleParameters networkProcessorParameters)
    {
       this.networkProcessorParameters = networkProcessorParameters;
+   }
+
+   public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
+   {
+      this.externalPelvisCorrectorSubscriber = externalPelvisCorrectorSubscriber;
    }
 
    public String getRobotName()

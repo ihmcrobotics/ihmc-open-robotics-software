@@ -448,6 +448,14 @@ public class RigidBodyJointControlHelper
       return jointTrajectoryGenerators.get(jointIdx).getValue();
    }
 
+   public void queueInitialPointsAtCurrentDesired()
+   {
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
+         queueInitialPoint(getJointDesiredPosition(jointIdx), jointIdx);
+      }
+   }
+
    public double getJointDesiredVelocity(int jointIdx)
    {
       return jointTrajectoryGenerators.get(jointIdx).getVelocity();

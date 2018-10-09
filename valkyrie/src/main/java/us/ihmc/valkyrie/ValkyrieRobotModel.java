@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
@@ -55,6 +56,7 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.configuration.YamlWithIncludesLoader;
+import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerController;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 import us.ihmc.valkyrie.parameters.ValkyrieCapturePointPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
@@ -69,6 +71,7 @@ import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.UIParameters;
@@ -426,8 +429,9 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
                                                                          RealtimeRos2Node realtimeRos2Node,
                                                                          CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
-      return null;
-      //return new ValkyrieFingerController(this, simulatedRobot, threadDataSynchronizer, globalDataProducer, null);
+      return new SimulatedValkyrieFingerController(simulatedRobot, threadDataSynchronizer, realtimeRos2Node, closeableAndDisposableRegistry, this,
+                                                   ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
+                                                   ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
    }
 
    @Override
@@ -523,11 +527,19 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
          case "hokuyo_link":
             modifyHokuyoInertia(linkHolder);
             break;
+         case "torso":
+            modifyChestMass(linkHolder);
+            break;
          default:
             break;
          }
-
       }
+   }
+
+   private void modifyChestMass(SDFLinkHolder chestSDFLink)
+   {
+      if (ValkyrieRosControlController.HAS_LIGHTER_BACKPACK)
+         chestSDFLink.setMass(chestSDFLink.getMass() - 8.6);
    }
 
    @Override

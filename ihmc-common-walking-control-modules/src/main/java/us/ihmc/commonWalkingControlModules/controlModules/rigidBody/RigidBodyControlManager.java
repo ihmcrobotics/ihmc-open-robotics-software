@@ -65,8 +65,9 @@ public class RigidBodyControlManager
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
                                   Pose3D homePose, Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
-                                  ContactablePlaneBody contactableBody, RigidBodyControlMode defaultControlMode, YoDouble yoTime,
-                                  YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+                                  boolean enablePositionTracking, boolean enableOrientationTracking, ContactablePlaneBody contactableBody,
+                                  RigidBodyControlMode defaultControlMode, YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry,
+                                  YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
@@ -82,8 +83,9 @@ public class RigidBodyControlManager
       RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, parentRegistry);
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
-      taskspaceControlState = new RigidBodyTaskspaceControlState("", bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame, yoTime,
-                                                                 jointControlHelper, graphicsListRegistry, registry);
+      taskspaceControlState = new RigidBodyTaskspaceControlState("", bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
+                                                                 enablePositionTracking, enableOrientationTracking, yoTime, jointControlHelper,
+                                                                 graphicsListRegistry, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
 
       if (contactableBody != null)
@@ -190,7 +192,9 @@ public class RigidBodyControlManager
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
       if (command.isStopAllTrajectory())
-         hold();
+      {
+         holdCurrentDesired();
+      }
    }
 
    public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand command)
@@ -305,10 +309,40 @@ public class RigidBodyControlManager
       requestState(jointspaceControlState.getControlMode());
    }
 
+   public void holdCurrentDesiredInJointspace()
+   {
+      // It is only safe to hold the current desired if the body was controlled in the control mode. Otherwise the
+      // desired values might be out of date or they might have never been set. In that case hold the current.
+      if (getActiveControlMode() == jointspaceControlState.getControlMode())
+      {
+         jointspaceControlState.holdCurrentDesired();
+         requestState(jointspaceControlState.getControlMode());
+      }
+      else
+      {
+         holdInJointspace();
+      }
+   }
+
    public void holdInTaskspace()
    {
       taskspaceControlState.holdCurrent();
       requestState(taskspaceControlState.getControlMode());
+   }
+
+   public void holdCurrentDesiredInTaskspace()
+   {
+      // It is only safe to hold the current desired if the body was controlled in the control mode. Otherwise the
+      // desired values might be out of date or they might have never been set. In that case hold the current.
+      if (getActiveControlMode() == taskspaceControlState.getControlMode())
+      {
+         taskspaceControlState.holdCurrentDesired();
+         requestState(taskspaceControlState.getControlMode());
+      }
+      else
+      {
+         holdInTaskspace();
+      }
    }
 
    public void hold()
@@ -320,6 +354,21 @@ public class RigidBodyControlManager
          break;
       case TASKSPACE:
          holdInTaskspace();
+         break;
+      default:
+         throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
+      }
+   }
+
+   public void holdCurrentDesired()
+   {
+      switch (defaultControlMode.getValue())
+      {
+      case JOINTSPACE:
+         holdCurrentDesiredInJointspace();
+         break;
+      case TASKSPACE:
+         holdCurrentDesiredInTaskspace();
          break;
       default:
          throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");

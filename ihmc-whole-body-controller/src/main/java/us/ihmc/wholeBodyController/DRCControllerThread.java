@@ -82,6 +82,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private final ModularRobotController robotController;
 
+   private final ExecutionTimer robotVisualizerUpdateTimer;
    private final ExecutionTimer controllerTimer = new ExecutionTimer("controllerTimer", 10.0, registry);
    private final YoLong lastEstimatorStartTime = new YoLong("nextExecutionTime", registry);
    private final YoLong totalDelay = new YoLong("totalDelay", registry);
@@ -178,7 +179,12 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       if (robotVisualizer != null)
       {
+         robotVisualizerUpdateTimer = new ExecutionTimer("robotVisualizerUpdateTimer", 10.0, registry);
          robotVisualizer.addRegistry(registry, yoGraphicsListRegistry);
+      }
+      else
+      {
+         robotVisualizerUpdateTimer = null;
       }
    }
 
@@ -407,7 +413,9 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
             threadDataSynchronizer.publishControllerData();
             if (robotVisualizer != null)
             {
+               robotVisualizerUpdateTimer.startMeasurement();
                robotVisualizer.update(controllerTimestamp.getLongValue(), registry);
+               robotVisualizerUpdateTimer.stopMeasurement();
             }
 
             rootFrame.getTransformToDesiredFrame(rootToWorldTransform, ReferenceFrame.getWorldFrame());

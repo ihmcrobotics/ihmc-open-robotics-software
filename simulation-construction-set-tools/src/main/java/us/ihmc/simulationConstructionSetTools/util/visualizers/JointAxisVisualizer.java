@@ -34,7 +34,7 @@ public class JointAxisVisualizer implements RobotController
          {
             FrameVector3D jAxis=((OneDoFJoint)joint).getJointAxis();
             ReferenceFrame referenceFrame = GeometryTools.constructReferenceFrameFromPointAndZAxis(joint.getName()+"JointAxis", new FramePoint3D(jAxis.getReferenceFrame()), new FrameVector3D(jAxis.getReferenceFrame(),jAxis));
-            YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(referenceFrame , registry, length, YoAppearance.Gold());
+            YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(referenceFrame , registry, false, length, YoAppearance.Gold());
             yoGraphicsList.add(yoGraphicReferenceFrame);
             yoGraphicReferenceFrames.add(yoGraphicReferenceFrame);
          }

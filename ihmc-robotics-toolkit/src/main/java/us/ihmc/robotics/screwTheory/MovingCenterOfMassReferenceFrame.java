@@ -43,7 +43,7 @@ public class MovingCenterOfMassReferenceFrame extends MovingReferenceFrame
       centerOfMassJacobian.compute();
       centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
       centerOfMassVelocity.changeFrame(this);
-      twistRelativeToParentToPack.setToZero(this, parentFrame, this);
+      twistRelativeToParentToPack.setToZero(this, getParent(), this);
       twistRelativeToParentToPack.setLinearPart(centerOfMassVelocity);
 
    }

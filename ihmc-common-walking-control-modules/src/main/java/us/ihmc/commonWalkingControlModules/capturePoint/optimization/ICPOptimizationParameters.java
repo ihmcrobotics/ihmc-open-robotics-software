@@ -280,7 +280,7 @@ public abstract class ICPOptimizationParameters
 
    /**
     * Specifies the transfer split fraction to use for the ICP value recursion multiplier. This value is added to the time remaining
-    * to compute the recursion multiplier. This effectively causes more step adjustment to occur.
+    * to compute the recursion multiplier. Increasing this value effectively causes more step adjustment to occur.
     */
    public double getTransferSplitFraction()
    {
@@ -318,6 +318,11 @@ public abstract class ICPOptimizationParameters
    public boolean usePlanarRegionConstraints()
    {
       return false;
+   }
+
+   public boolean allowUsePlanarRegionConstraints()
+   {
+      return true;
    }
 
    /**

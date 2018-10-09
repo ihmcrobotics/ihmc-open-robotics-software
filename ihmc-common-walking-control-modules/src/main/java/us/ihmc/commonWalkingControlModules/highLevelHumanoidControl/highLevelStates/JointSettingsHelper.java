@@ -91,7 +91,6 @@ public class JointSettingsHelper
          OneDoFJoint joint = joints[jointIdx];
          String jointName = joint.getName();
          jointNames[jointIdx] = jointName;
-         jointsLoaded[jointIdx] = new YoBoolean(jointName + "_isUnderLoad", registry);
          jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(joint);
 
          JointAccelerationIntegrationParametersReadOnly integrationParametersNoLoad = parameterJointNameMapNoLoad.get(jointName);
@@ -110,6 +109,15 @@ public class JointSettingsHelper
          if (desiredBehaviorNoLoad == null)
          {
             jointsWithoutBehaviors.add(jointName);
+         }
+
+         if ((integrationParametersNoLoad == null && desiredBehaviorNoLoad == null) || (integrationParametersLoaded == null && desiredBehaviorLoaded == null))
+         {
+            jointsLoaded[jointIdx] = null;
+         }
+         else if (integrationParametersLoaded == null && desiredBehaviorLoaded == null)
+         {
+            jointsLoaded[jointIdx] = new YoBoolean(jointName + "_isUnderLoad", registry);
          }
       }
 
@@ -132,9 +140,16 @@ public class JointSettingsHelper
       {
          JointDesiredOutput jointDesiredOutput = stateSpecificJointSettings.getJointDesiredOutput(jointIdx);
          boolean isLoaded = jointLoadStatusProvider.isJointLoadBearing(jointNames[jointIdx]);
-         boolean wasLoaded = jointsLoaded[jointIdx].getValue();
-         jointDesiredOutput.setResetIntegrators(isLoaded != wasLoaded);
-         jointsLoaded[jointIdx].set(isLoaded);
+         if (jointsLoaded[jointIdx] != null)
+         {
+            boolean wasLoaded = jointsLoaded[jointIdx].getValue();
+            jointDesiredOutput.setResetIntegrators(isLoaded != wasLoaded);
+            jointsLoaded[jointIdx].set(isLoaded);
+         }
+         else
+         {
+            jointDesiredOutput.setResetIntegrators(false);
+         }
 
          JointAccelerationIntegrationParametersReadOnly integrationParametersNoLoad = accelerationIntegrationSettingsNoLoad[jointIdx];
          JointAccelerationIntegrationParametersReadOnly integrationParametersLoaded = accelerationIntegrationSettingsLoaded[jointIdx];
