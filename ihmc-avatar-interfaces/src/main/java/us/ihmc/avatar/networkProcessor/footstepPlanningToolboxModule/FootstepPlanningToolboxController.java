@@ -222,6 +222,10 @@ public class FootstepPlanningToolboxController extends ToolboxController
       goal.setGoalPoseBetweenFeet(goalPose);
       planner.setGoal(goal);
 
+      double horizonLength = request.getHorizonLength();
+      if (horizonLength > 0 && Double.isFinite(horizonLength))
+         planner.setPlanningHorizonLength(horizonLength);
+
       double timeout = request.getTimeout();
       if (timeout > 0.0 && Double.isFinite(timeout))
       {
