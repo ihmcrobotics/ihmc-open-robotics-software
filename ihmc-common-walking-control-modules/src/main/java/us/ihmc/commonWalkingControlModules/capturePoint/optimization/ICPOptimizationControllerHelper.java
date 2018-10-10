@@ -26,13 +26,14 @@ public class ICPOptimizationControllerHelper
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   public void transformGainsFromDynamicsFrame(RowD1Matrix64F feedbackGainsToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelGain,
+
+   public double transformGainsFromDynamicsFrame(RowD1Matrix64F feedbackGainsToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelGain,
                                                double orthogonalGain)
    {
-      transformFromDynamicsFrame(feedbackGainsToPack, desiredICPVelocity, parallelGain + 1.0, orthogonalGain + 1.0);
+      return transformFromDynamicsFrame(feedbackGainsToPack, desiredICPVelocity, parallelGain + 1.0, orthogonalGain + 1.0);
    }
 
-   public void transformFromDynamicsFrame(RowD1Matrix64F valuesToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelValue,
+   public double transformFromDynamicsFrame(RowD1Matrix64F valuesToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelValue,
                                           double orthogonalValue)
    {
       double epsilonZeroICPVelocity = 1e-5;
@@ -42,6 +43,8 @@ public class ICPOptimizationControllerHelper
          icpVelocityDirectionFrame.setXAxis(desiredICPVelocity);
 
          transformValues(valuesToPack, parallelValue, orthogonalValue, icpVelocityDirectionFrame, worldFrame);
+
+         return Math.sqrt(parallelValue * parallelValue + orthogonalValue * orthogonalValue);
       }
       else
       {
@@ -49,6 +52,8 @@ public class ICPOptimizationControllerHelper
          valuesToPack.set(0, 1, 0.0);
          valuesToPack.set(1, 0, 0.0);
          valuesToPack.set(1, 1, orthogonalValue);
+
+         return Math.sqrt(2.0 * orthogonalValue * orthogonalValue);
       }
    }
 
