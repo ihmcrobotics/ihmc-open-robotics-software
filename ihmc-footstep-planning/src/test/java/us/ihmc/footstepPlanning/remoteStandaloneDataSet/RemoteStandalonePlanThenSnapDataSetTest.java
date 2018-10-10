@@ -7,7 +7,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pubsub.DomainFactory;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.SLOW)
 public class RemoteStandalonePlanThenSnapDataSetTest extends RemoteStandalonePlannerDataSetTest
 {
    @Override

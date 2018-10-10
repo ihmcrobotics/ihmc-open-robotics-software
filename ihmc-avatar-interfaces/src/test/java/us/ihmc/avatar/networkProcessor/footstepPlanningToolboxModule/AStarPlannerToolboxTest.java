@@ -1,9 +1,12 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pubsub.DomainFactory;
 
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarPlannerToolboxTest extends FootstepPlannerToolboxTest
 {
    @Override
