@@ -13,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -148,10 +147,15 @@ public class RigidBodyPositionControlHelper
       feedbackControlCommand.setBodyFixedPointToControl(controlFramePosition);
    }
 
-   public void setControlFramePosition(Tuple3DReadOnly positionInBodyFrame)
+   public void setControlFramePosition(FramePoint3DReadOnly controlFramePosition)
    {
-      controlFramePosition.set(positionInBodyFrame);
+      this.controlFramePosition.set(controlFramePosition);
       feedbackControlCommand.setBodyFixedPointToControl(controlFramePosition);
+   }
+
+   public FramePoint3DReadOnly getControlFramePosition()
+   {
+      return controlFramePosition;
    }
 
    public void holdCurrent()
@@ -198,6 +202,19 @@ public class RigidBodyPositionControlHelper
       desiredPosition.setIncludingFrame(position);
       desiredPosition.changeFrame(baseFrame);
       trajectoryPoint.setPosition(desiredPosition);
+   }
+
+   public void getDesiredPosition(FixedFramePoint3DBasics positionToPack)
+   {
+      if (trajectoryGenerator.isEmpty())
+      {
+         positionToPack.setMatchingFrame(controlFramePosition);
+      }
+      else
+      {
+         trajectoryGenerator.getPosition(desiredPosition);
+         positionToPack.setMatchingFrame(desiredPosition);
+      }
    }
 
    public boolean doAction(double timeInTrajectory)
@@ -277,7 +294,7 @@ public class RigidBodyPositionControlHelper
       return false;
    }
 
-   public boolean handleEuclideanTrajectoryCommand(EuclideanTrajectoryControllerCommand command, FramePoint3D initialPosition)
+   public boolean handleEuclideanTrajectoryCommand(EuclideanTrajectoryControllerCommand command, FramePoint3DReadOnly initialPosition)
    {
       if (command.getExecutionMode() == ExecutionMode.OVERRIDE || isEmpty())
       {
@@ -287,7 +304,8 @@ public class RigidBodyPositionControlHelper
 
          if (command.getTrajectoryPoint(0).getTime() > RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint)
          {
-            queueInitialPoint(initialPosition);
+            desiredPosition.setIncludingFrame(initialPosition);
+            queueInitialPoint(desiredPosition);
          }
 
          messageWeightMatrix.set(command.getWeightMatrix());
