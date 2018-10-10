@@ -25,6 +25,7 @@ public class FootstepPlannerSharedMemoryAPI
    private static final CategoryTheme EditMode = apiFactory.createCategoryTheme("EditMode");
    private static final CategoryTheme FootstepPlan = apiFactory.createCategoryTheme("FootstepPlan");
    private static final CategoryTheme NodeChecking = apiFactory.createCategoryTheme("NodeChecking");
+   private static final CategoryTheme UnitTest = apiFactory.createCategoryTheme("UnitTest");
 
    private static final CategoryTheme Parameters = apiFactory.createCategoryTheme("Parameters");
 
@@ -42,7 +43,8 @@ public class FootstepPlannerSharedMemoryAPI
    private static final TypedTopicTheme<FootstepPlannerType> FootstepPlannerType = apiFactory.createTypedTopicTheme("FootstepPlannerType");
    private static final TypedTopicTheme<FootstepPlanningResult> FootstepPlannerResult = apiFactory.createTypedTopicTheme("FootstepPlannerResult");
    private static final TypedTopicTheme<FootstepPlannerParameters> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
-
+   private static final TypedTopicTheme<Boolean> Export = apiFactory.createTypedTopicTheme("Export");
+   private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
 
 
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
@@ -81,6 +83,9 @@ public class FootstepPlannerSharedMemoryAPI
    public static final Topic<Boolean> EnableNodeChecking = Root.child(NodeChecking).topic(Enable);
    public static final Topic<Point3D> NodeCheckingPosition = Root.child(NodeChecking).topic(Position);
    public static final Topic<Quaternion> NodeCheckingOrientation = Root.child(NodeChecking).topic(Orientation);
+
+   public static final Topic<Boolean> exportUnitTestDataFile = Root.child(UnitTest).topic(Export);
+   public static final Topic<String> exportUnitTestPath = Root.child(UnitTest).topic(Path);
 
    private static final TypedTopicTheme<Boolean> ValidNode = apiFactory.createTypedTopicTheme("ValidNode");
    private static final TypedTopicTheme<Pose3D> FootstepPose = apiFactory.createTypedTopicTheme("FootstepPose");

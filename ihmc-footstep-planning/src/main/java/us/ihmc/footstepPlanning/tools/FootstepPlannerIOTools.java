@@ -3,6 +3,8 @@ package us.ihmc.footstepPlanning.tools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
@@ -17,17 +19,24 @@ import java.util.List;
 
 public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
 {
-
    private static final String TYPE_FIELD_OPEN = "<Type,";
    private static final String TYPE_FIELD_CLOSE = ",Type>";
 
    private static final String TIMEOUT_FIELD_OPEN = "<Timeout,";
    private static final String TIMEOUT_FIELD_CLOSE = ",Timeout>";
 
+   protected static final String START_ORIENTATION_FIELD_OPEN = "<StartOrientation,";
+   protected static final String START_ORIENTATION_FIELD_CLOSE = ",StartOrientation>";
+
+   protected static final String GOAL_ORIENTATION_FIELD_OPEN = "<GoalOrientation,";
+   protected static final String GOAL_ORIENTATION_FIELD_CLOSE = ",GoalOrientation>";
+
    public static class FootstepPlannerUnitTestDataset extends VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset
    {
       private List<FootstepPlannerType> plannerTypes;
       private Double[] timeouts;
+      private Quaternion startOrientation;
+      private Quaternion goalOrientation;
 
       private FootstepPlannerUnitTestDataset(Class<?> clazz, String datasetResourceName)
       {
@@ -35,6 +44,8 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
 
          if (plannerTypes == null)
             throw new RuntimeException("Could not load the planner types. Data folder: " + datasetResourceName);
+         if (timeouts == null)
+            throw new RuntimeException("Could not load the timeouts. Data folder:" + datasetResourceName);
       }
 
       public List<FootstepPlannerType> getTypes()
@@ -50,6 +61,26 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
          return Double.NaN;
       }
 
+      public boolean hasStartOrientation()
+      {
+         return startOrientation != null;
+      }
+
+      public Quaternion getStartOrientation()
+      {
+         return startOrientation;
+      }
+
+      public Quaternion getGoalOrientation()
+      {
+         return goalOrientation;
+      }
+
+      public boolean hasGoalOrientation()
+      {
+         return goalOrientation != null;
+      }
+
       @Override
       protected void loadFields(BufferedReader bufferedReader)
       {
@@ -57,11 +88,13 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
 
          plannerTypes = parseField(bufferedReader, TYPE_FIELD_OPEN, TYPE_FIELD_CLOSE, FootstepPlannerIOTools::parsePlannerTypes);
          timeouts = parseField(bufferedReader, TIMEOUT_FIELD_OPEN, TIMEOUT_FIELD_CLOSE, FootstepPlannerIOTools::parsePlannerTimeouts);
+         startOrientation = parseField(bufferedReader, START_ORIENTATION_FIELD_OPEN, START_ORIENTATION_FIELD_CLOSE, FootstepPlannerIOTools::parseQuaternion);
+         goalOrientation = parseField(bufferedReader, GOAL_ORIENTATION_FIELD_OPEN, GOAL_ORIENTATION_FIELD_CLOSE, FootstepPlannerIOTools::parseQuaternion);
       }
    }
 
-   public static boolean exportDataset(Path containingFolder, String datasetName, PlanarRegionsList planarRegionsList, Point3DReadOnly start,
-                                       Point3DReadOnly goal, FootstepPlannerType type)
+   public static boolean exportDataset(Path containingFolder, String datasetName, PlanarRegionsList planarRegionsList, Point3DReadOnly startPosition,
+                                       QuaternionReadOnly startOrientation, Point3DReadOnly goalPosition, QuaternionReadOnly goalOrientation, FootstepPlannerType type, double timeout)
    {
       File datasetFolder = new File(containingFolder + File.separator + datasetName);
       if (datasetFolder.exists())
@@ -75,14 +108,15 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
       if (!success)
          return false;
 
-      success = exportParameters(datasetFolder, start, goal, type);
+      success = exportParameters(datasetFolder, startPosition, startOrientation, goalPosition, goalOrientation, type, timeout);
       if (!success)
          return false;
 
       return true;
    }
 
-   private static boolean exportParameters(File containingFolder, Point3DReadOnly start, Point3DReadOnly goal, FootstepPlannerType type)
+   private static boolean exportParameters(File containingFolder, Point3DReadOnly startPosition, QuaternionReadOnly startOrientation,
+                                           Point3DReadOnly goalPosition, QuaternionReadOnly goalOrientation, FootstepPlannerType type, double timeout)
    {
 
       if (containingFolder == null || !containingFolder.exists())
@@ -91,17 +125,22 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
          return false;
       }
 
-      if (start == null || goal == null || type == null)
+      if (startPosition == null || goalPosition == null || type == null || !Double.isFinite(timeout) || timeout < 0 )
       {
-         PrintTools.error("Must export start, goal AND planner type.");
+         PrintTools.error("Must export start, goal, planner type, AND timeout.");
          return false;
       }
 
       File parametersFile = new File(containingFolder.getAbsolutePath() + File.separator + INPUTS_PARAMETERS_FILENAME);
-      writeField(parametersFile, START_FIELD_OPEN, START_FIELD_CLOSE, () -> getPoint3DString(start));
-      writeField(parametersFile, GOAL_FIELD_OPEN, GOAL_FIELD_END, () -> getPoint3DString(goal));
+      writeField(parametersFile, START_FIELD_OPEN, START_FIELD_CLOSE, () -> getPoint3DString(startPosition));
+      writeField(parametersFile, GOAL_FIELD_OPEN, GOAL_FIELD_END, () -> getPoint3DString(goalPosition));
       writeField(parametersFile, TYPE_FIELD_OPEN, TYPE_FIELD_CLOSE, () -> type.name());
-//      writeField(parametersFile, TYPE_FIELD_OPEN, TYPE_FIELD_CLOSE, () -> getFootstepPlannerTypeString(type));
+      writeField(parametersFile, TIMEOUT_FIELD_OPEN, TIMEOUT_FIELD_CLOSE, () -> "" + timeout);
+
+      if (startOrientation != null)
+         writeField(parametersFile, START_ORIENTATION_FIELD_OPEN, START_ORIENTATION_FIELD_CLOSE, () -> getQuaternionString(startOrientation));
+      if (goalOrientation != null)
+         writeField(parametersFile, GOAL_ORIENTATION_FIELD_OPEN, GOAL_ORIENTATION_FIELD_CLOSE, () -> getQuaternionString(goalOrientation));
 
       return true;
    }
@@ -126,7 +165,6 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
    {
       return new FootstepPlannerUnitTestDataset(clazz, datasetResourceName);
    }
-
 
    private static List<FootstepPlannerType> parsePlannerTypes(String stringPlannerTypes)
    {
@@ -195,6 +233,39 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
       }
 
       return null;
+   }
+
+   private static Quaternion parseQuaternion(String stringQuaternion)
+   {
+      if (stringQuaternion.length() == 0)
+         return null;
+
+      double x = Double.parseDouble(stringQuaternion.substring(0, stringQuaternion.indexOf(",")));
+      stringQuaternion = stringQuaternion.substring(stringQuaternion.indexOf(",") + 1);
+
+      if (stringQuaternion.length() == 0)
+         return null;
+
+      double y = Double.parseDouble(stringQuaternion.substring(0, stringQuaternion.indexOf(",")));
+      stringQuaternion = stringQuaternion.substring(stringQuaternion.indexOf(",") + 1);
+
+      if (stringQuaternion.length() == 0)
+         return null;
+
+      double z = Double.parseDouble(stringQuaternion.substring(0, stringQuaternion.indexOf(",")));
+      stringQuaternion = stringQuaternion.substring(stringQuaternion.indexOf(",") + 1);
+
+      if (stringQuaternion.length() == 0)
+         return null;
+
+      double s = Double.parseDouble(stringQuaternion.substring(0));
+
+      return new Quaternion(x, y, z, s);
+   }
+
+   protected static String getQuaternionString(QuaternionReadOnly quaternion)
+   {
+      return EuclidCoreIOTools.getStringOf("", "", ",", quaternion.getX(), quaternion.getY(), quaternion.getZ(), quaternion.getS());
    }
 
 }

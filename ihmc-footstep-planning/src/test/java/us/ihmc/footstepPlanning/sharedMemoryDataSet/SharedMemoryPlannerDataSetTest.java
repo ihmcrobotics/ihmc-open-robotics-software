@@ -52,6 +52,11 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartPositionTopic, dataset.getStart());
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalPositionTopic, dataset.getGoal());
 
+      if (dataset.hasGoalOrientation())
+         messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalOrientationTopic, dataset.getGoalOrientation());
+      if (dataset.hasStartOrientation())
+         messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartOrientationTopic, dataset.getStartOrientation());
+
       messager.submitMessage(PlannerTypeTopic, getPlannerType());
 
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerTimeoutTopic, dataset.getTimeout(getPlannerType()));
