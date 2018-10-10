@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
@@ -46,7 +45,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
  */
 public class PointFeedbackControlCommand implements FeedbackControlCommand<PointFeedbackControlCommand>
 {
-   private final Point3D bodyFixedPointInEndEffectorFrame = new Point3D();
+   private final FramePoint3D bodyFixedPointInEndEffectorFrame = new FramePoint3D();
 
    private final FixedFramePoint3DBasics desiredPositionInWorld = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final FixedFrameVector3DBasics desiredLinearVelocityInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
@@ -96,6 +95,9 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
 
+      resetBodyFixedPoint();
+      setBodyFixedPointToControl(other.getBodyFixedPointToControl());
+
       controlBaseFrame = other.controlBaseFrame;
    }
 
@@ -113,6 +115,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public void set(RigidBody base, RigidBody endEffector)
    {
       spatialAccelerationCommand.set(base, endEffector);
+      resetBodyFixedPoint();
    }
 
    /**
@@ -258,7 +261,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     */
    public void resetBodyFixedPoint()
    {
-      bodyFixedPointInEndEffectorFrame.setToZero();
+      bodyFixedPointInEndEffectorFrame.setToZero(getEndEffector().getBodyFixedFrame());
    }
 
    /**
@@ -375,7 +378,12 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 
    public void getBodyFixedPointIncludingFrame(FramePoint3D bodyFixedPointToControlToPack)
    {
-      bodyFixedPointToControlToPack.setIncludingFrame(getEndEffector().getBodyFixedFrame(), this.bodyFixedPointInEndEffectorFrame);
+      bodyFixedPointToControlToPack.setIncludingFrame(bodyFixedPointInEndEffectorFrame);
+   }
+
+   public FramePoint3DReadOnly getBodyFixedPointToControl()
+   {
+      return bodyFixedPointInEndEffectorFrame;
    }
 
    public FramePoint3DReadOnly getDesiredPosition()
