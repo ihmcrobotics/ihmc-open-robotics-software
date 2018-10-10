@@ -683,4 +683,61 @@ public class MatrixToolsTest
          JUnitTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
       }
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 40000)
+   public void testEasyMultAddInner()
+   {
+      Random random = new Random(124L);
+
+      int iters = 1000;
+
+      for (int i = 0; i < iters; i++)
+      {
+         int variables = 4;
+         int taskSize = 3;
+
+         double diagonalScalar = RandomNumbers.nextDouble(random, 100.0);
+         DenseMatrix64F randomMatrix = RandomMatrices.createRandom(taskSize, variables, -50.0, 50.0, random);
+         DenseMatrix64F solution = RandomMatrices.createRandom(variables, variables, -50.0, 50.0, random);
+         DenseMatrix64F expectedSolution = new DenseMatrix64F(solution);
+
+         DenseMatrix64F tempJtW = new DenseMatrix64F(variables, taskSize);
+         CommonOps.transpose(randomMatrix, tempJtW);
+         CommonOps.multAdd(diagonalScalar, tempJtW, randomMatrix, expectedSolution);
+
+         MatrixTools.multAddInner(diagonalScalar, randomMatrix, solution);
+
+         JUnitTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @Test(timeout = 40000)
+   public void testRandomMultAddInner()
+   {
+      Random random = new Random(124L);
+
+      int iters = 100;
+
+      for (int i = 0; i < iters; i++)
+      {
+         int variables = RandomNumbers.nextInt(random, 1, 100);
+         int taskSize = RandomNumbers.nextInt(random, 1, 100);
+
+         double scale = RandomNumbers.nextDouble(random, 100.0);
+         DenseMatrix64F randomMatrix = RandomMatrices.createRandom(taskSize, variables, -50.0, 50.0, random);
+         DenseMatrix64F solution = RandomMatrices.createRandom(variables, variables, -50, 50, random);
+         DenseMatrix64F expectedSolution = new DenseMatrix64F(solution);
+
+
+         DenseMatrix64F tempJtW = new DenseMatrix64F(variables, taskSize);
+         CommonOps.transpose(randomMatrix, tempJtW);
+         CommonOps.multAdd(scale, tempJtW, randomMatrix, expectedSolution);
+
+         MatrixTools.multAddInner(scale, randomMatrix, solution);
+
+         JUnitTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
+      }
+   }
 }

@@ -1564,6 +1564,60 @@ public class MatrixTools
     * <br>
     * c = c + a * b<sup>T</sup> * b <br>
     * <br>
+    * c<sub>ij</sub> = c<sub>ij</sub> + a * &sum;<sub>k=1:n</sub> { b<sub>ki</sub> * b<sub>kj</sub>}
+    * </p>
+    * <p>
+    * Is faster than using a generic matrix multiplication by taking advantage of symmetry.
+    * </p>
+    * @param a The scalar multiplier of the matrix.
+    * @param b The matrix being multiplied. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multAddInner(double a, RowD1Matrix64F b, RowD1Matrix64F c)
+   {
+      if (b == c)
+         throw new IllegalArgumentException("'b' cannot be the same matrix as 'c'");
+      else if (b.numCols != c.numRows || b.numCols != c.numCols)
+         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+
+      for (int i = 0; i < b.numCols; i++)
+      {
+         int j = i;
+         int indexC1 = i * c.numCols + j;
+         int indexA = i;
+         double sum = 0;
+         int end = indexA + b.numRows * b.numCols;
+         for (; indexA < end; indexA += b.numCols)
+         {
+            sum += b.data[indexA] * b.data[indexA];
+         }
+         c.data[indexC1] += a * sum;
+         j++;
+
+         for (; j < b.numCols; j++)
+         {
+            indexC1 = i * c.numCols + j;
+            int indexC2 = j * c.numCols + i;
+            indexA = i;
+            int indexB = j;
+            sum = 0;
+            end = indexA + b.numRows * b.numCols;
+            for (; indexA < end; indexA += b.numCols, indexB += b.numCols)
+            {
+               sum += b.data[indexA] * b.data[indexB];
+            }
+            sum *= a;
+            c.data[indexC1] += sum;
+            c.data[indexC2] += sum;
+         }
+      }
+   }
+
+   /**
+    * <p>Computes the matrix multiplication inner product:<br>
+    * <br>
+    * c = c + a * b<sup>T</sup> * b <br>
+    * <br>
     * c<sub>(cRowStart + i) (cColStart + j)</sub> = c<sub>(cRowStart + i) (cColStart + j)</sub> + a * &sum;<sub>k=1:n</sub> { b<sub>ki</sub> * b<sub>kj</sub> }
     * </p>
     * <p> The block is added to matrix 'c' starting at cStartRow, cStartCol </p>
