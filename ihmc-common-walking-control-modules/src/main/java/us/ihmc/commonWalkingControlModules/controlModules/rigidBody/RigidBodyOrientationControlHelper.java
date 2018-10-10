@@ -9,6 +9,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
@@ -56,8 +57,8 @@ public class RigidBodyOrientationControlHelper
    private final String warningPrefix;
 
    public RigidBodyOrientationControlHelper(String postfix, String warningPrefix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
-                                            Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
-                                            BooleanProvider useBaseFrameForControl, BooleanProvider useWeightFromMessage, YoVariableRegistry registry)
+                                            Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame baseFrame, BooleanProvider useBaseFrameForControl,
+                                            BooleanProvider useWeightFromMessage, YoVariableRegistry registry)
    {
       this.warningPrefix = warningPrefix;
       this.baseFrame = baseFrame;
@@ -137,6 +138,19 @@ public class RigidBodyOrientationControlHelper
       desiredOrientation.setIncludingFrame(orientation);
       desiredOrientation.changeFrame(baseFrame);
       trajectoryPoint.setOrientation(desiredOrientation);
+   }
+
+   public void getDesiredOrientation(FixedFrameQuaternionBasics orientationToPack)
+   {
+      if (trajectoryGenerator.isEmpty())
+      {
+         orientationToPack.setFromReferenceFrame(bodyFrame);
+      }
+      else
+      {
+         trajectoryGenerator.getOrientation(desiredOrientation);
+         orientationToPack.setMatchingFrame(desiredOrientation);
+      }
    }
 
    public boolean doAction(double timeInTrajectory)
