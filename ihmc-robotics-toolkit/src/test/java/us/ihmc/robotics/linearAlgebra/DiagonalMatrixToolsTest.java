@@ -643,48 +643,6 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 5.3)
-   @Test(timeout = 40000)
-   public void testRandomMultAddBlockInnerWithScalar()
-   {
-      Random random = new Random(124L);
-
-      int iters = 1000;
-
-      for (int i = 0; i < iters; i++)
-      {
-         int variables = RandomNumbers.nextInt(random, 1, 100);
-         int taskSize = RandomNumbers.nextInt(random, 1, 100);
-         int fullVariables = RandomNumbers.nextInt(random, variables, 500);
-
-         int startRow = RandomNumbers.nextInt(random, 0, fullVariables - variables);
-         int startCol = RandomNumbers.nextInt(random, 0, fullVariables - variables);
-
-         DenseMatrix64F diagonal = CommonOps.identity(taskSize, taskSize);
-         double diagonalValue = RandomNumbers.nextDouble(random, 50.0);
-         DenseMatrix64F randomMatrix = RandomMatrices.createRandom(taskSize, variables, -50.0, 50.0, random);
-
-         DenseMatrix64F expectedSolution = RandomMatrices.createRandom(fullVariables, fullVariables, -50, 50, random);
-         DenseMatrix64F solution = new DenseMatrix64F(expectedSolution);
-
-         for (int index = 0; index < taskSize; index++)
-         {
-            diagonal.set(index, index, diagonalValue);
-         }
-
-         DenseMatrix64F tempJtW = new DenseMatrix64F(variables, taskSize);
-         DenseMatrix64F temp = new DenseMatrix64F(variables, variables);
-         CommonOps.multTransA(randomMatrix, diagonal, tempJtW);
-         CommonOps.mult(tempJtW, randomMatrix, temp);
-
-         MatrixTools.addMatrixBlock(expectedSolution, startRow, startCol, temp, 0, 0, variables, variables, 1.0);
-
-         DiagonalMatrixTools.multAddBlockInner(randomMatrix, diagonalValue, solution, startRow, startCol);
-
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
-      }
-   }
-
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 40000)
    public void testEasyMultAddBlockInner()
