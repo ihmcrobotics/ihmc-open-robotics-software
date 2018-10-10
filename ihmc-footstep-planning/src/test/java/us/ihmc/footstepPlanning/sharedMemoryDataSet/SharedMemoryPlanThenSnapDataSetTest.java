@@ -6,7 +6,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.SLOW)
 public class SharedMemoryPlanThenSnapDataSetTest extends SharedMemoryPlannerDataSetTest
 {
    @Override
