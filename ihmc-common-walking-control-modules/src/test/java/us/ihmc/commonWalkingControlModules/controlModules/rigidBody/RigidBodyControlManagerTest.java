@@ -418,7 +418,7 @@ public class RigidBodyControlManagerTest
       Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
       Point3D controlFramePosition = EuclidCoreRandomTools.nextPoint3D(random);
-      Quaternion controlFrameOrientation = EuclidCoreRandomTools.nextQuaternion(random);
+      Quaternion controlFrameOrientation = new Quaternion();
 
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
       message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
