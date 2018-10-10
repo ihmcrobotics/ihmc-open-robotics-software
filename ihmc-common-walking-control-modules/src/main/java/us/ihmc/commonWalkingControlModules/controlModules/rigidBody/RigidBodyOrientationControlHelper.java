@@ -103,17 +103,14 @@ public class RigidBodyOrientationControlHelper
 
    public void holdCurrentDesired()
    {
+      getDesiredOrientation(desiredOrientation);
       clear();
-      trajectoryGenerator.getOrientation(desiredOrientation);
       queueInitialPoint(desiredOrientation);
    }
 
    public void goToOrientationFromCurrent(FrameQuaternionReadOnly orientation, double trajectoryTime)
    {
-      clear();
-      trajectoryGenerator.changeFrame(baseFrame);
-      desiredOrientation.setIncludingFrame(orientation);
-      queueInitialPoint(desiredOrientation);
+      holdCurrent();
 
       FrameSO3TrajectoryPoint trajectoryPoint = pointQueue.addLast();
       trajectoryPoint.setToZero(baseFrame);
@@ -124,12 +121,9 @@ public class RigidBodyOrientationControlHelper
       trajectoryPoint.setOrientation(desiredOrientation);
    }
 
-   public void goToOrientation(FrameQuaternionReadOnly orientation, FrameQuaternionReadOnly initialOrientation, double trajectoryTime)
+   public void goToOrientation(FrameQuaternionReadOnly orientation, double trajectoryTime)
    {
-      clear();
-      trajectoryGenerator.changeFrame(baseFrame);
-      desiredOrientation.setIncludingFrame(initialOrientation);
-      queueInitialPoint(desiredOrientation);
+      holdCurrentDesired();
 
       FrameSO3TrajectoryPoint trajectoryPoint = pointQueue.addLast();
       trajectoryPoint.setToZero(baseFrame);
@@ -224,17 +218,24 @@ public class RigidBodyOrientationControlHelper
       return false;
    }
 
-   public boolean handleSO3TrajectoryCommand(SO3TrajectoryControllerCommand command, FrameQuaternionReadOnly initialOrientation)
+   public boolean handleTrajectoryCommand(SO3TrajectoryControllerCommand command)
    {
       if (command.getExecutionMode() == ExecutionMode.OVERRIDE || isEmpty())
       {
+         getDesiredOrientation(desiredOrientation);
          clear();
+
+         if (command.useCustomControlFrame() && !command.getControlFramePose().getRotationMatrix().isIdentity())
+         {
+            // TODO: instead of throwing an exception here change the message format to use a position instead of a pose.
+            throw new RuntimeException("Can not have a custom orientation for the control frame.");
+         }
+
          trajectoryGenerator.changeFrame(command.getTrajectoryFrame());
          selectionMatrix.set(command.getSelectionMatrix());
 
          if (command.getTrajectoryPoint(0).getTime() > RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint)
          {
-            desiredOrientation.setIncludingFrame(initialOrientation);
             queueInitialPoint(desiredOrientation);
          }
 
@@ -358,5 +359,12 @@ public class RigidBodyOrientationControlHelper
       selectionMatrix.resetSelection();
       trajectoryGenerator.clear(baseFrame);
       pointQueue.clear();
+   }
+
+   public void disable()
+   {
+      clear();
+      holdCurrentDesired();
+      selectionMatrix.clearSelection();
    }
 }

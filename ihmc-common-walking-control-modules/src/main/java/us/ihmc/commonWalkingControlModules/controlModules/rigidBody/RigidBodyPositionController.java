@@ -3,16 +3,14 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -20,17 +18,17 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class RigidBodyPositionController extends RigidBodyControlState
 {
+   private final YoBoolean usingWeightFromMessage;
+
    private final YoInteger numberOfPointsInQueue;
    private final YoInteger numberOfPointsInGenerator;
    private final YoInteger numberOfPoints;
 
-   private final YoBoolean usingWeightFromMessage;
-
-   private final RigidBodyPositionControlHelper positionControlHelper;
+   private final RigidBodyPositionControlHelper positionHelper;
 
    public RigidBodyPositionController(String postfix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
                                       Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, YoDouble yoTime,
-                                      BooleanProvider useBaseFrameForControl, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+                                      YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName() + postfix, yoTime, parentRegistry);
 
@@ -42,63 +40,50 @@ public class RigidBodyPositionController extends RigidBodyControlState
       numberOfPoints = new YoInteger(prefix + "NumberOfPoints", registry);
 
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
-      positionControlHelper = new RigidBodyPositionControlHelper(postfix, prefix, bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
-                                                                 useBaseFrameForControl, usingWeightFromMessage, registry, graphicsListRegistry);
+      BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
+      positionHelper = new RigidBodyPositionControlHelper(postfix, prefix, bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
+                                                          useBaseFrameForControl, usingWeightFromMessage, registry, graphicsListRegistry);
 
-      graphics.addAll(positionControlHelper.getGraphics());
+      graphics.addAll(positionHelper.getGraphics());
       hideGraphics();
    }
 
    public void setGains(PID3DGainsReadOnly gains)
    {
-      positionControlHelper.setGains(gains);
+      positionHelper.setGains(gains);
    }
 
    public void setWeights(Vector3DReadOnly weights)
    {
-      positionControlHelper.setWeights(weights);
-   }
-
-   public void setDefaultControlFrame()
-   {
-      positionControlHelper.setDefaultControlFrame();
-   }
-
-   public void setControlFramePosition(Tuple3DReadOnly positionInBodyFrame)
-   {
-      positionControlHelper.setControlFramePosition(positionInBodyFrame);
+      positionHelper.setWeights(weights);
    }
 
    public void holdCurrent()
    {
       clear();
       setTrajectoryStartTimeToCurrentTime();
-      positionControlHelper.holdCurrent();
-      trajectoryDone.set(false);
+      positionHelper.holdCurrent();
    }
 
    public void holdCurrentDesired()
    {
       clear();
       setTrajectoryStartTimeToCurrentTime();
-      positionControlHelper.holdCurrentDesired();
-      trajectoryDone.set(false);
+      positionHelper.holdCurrentDesired();
    }
 
    public void goToPositionFromCurrent(FramePoint3DReadOnly position, double trajectoryTime)
    {
       clear();
       setTrajectoryStartTimeToCurrentTime();
-      positionControlHelper.goToPositionFromCurrent(position, trajectoryTime);
-      trajectoryDone.set(false);
+      positionHelper.goToPositionFromCurrent(position, trajectoryTime);
    }
 
-   public void goToPosition(FramePoint3DReadOnly position, FramePoint3DReadOnly initialPosition, double trajectoryTime)
+   public void goToPosition(FramePoint3DReadOnly position, double trajectoryTime)
    {
       clear();
       setTrajectoryStartTimeToCurrentTime();
-      positionControlHelper.goToPosition(position, initialPosition, trajectoryTime);
-      trajectoryDone.set(false);
+      positionHelper.goToPosition(position, trajectoryTime);
    }
 
    @Override
@@ -110,29 +95,31 @@ public class RigidBodyPositionController extends RigidBodyControlState
    public void doAction(double timeInState)
    {
       double timeInTrajectory = getTimeInTrajectory();
-      trajectoryDone.set(positionControlHelper.doAction(timeInTrajectory));
+      trajectoryDone.set(positionHelper.doAction(timeInTrajectory));
 
-      numberOfPointsInQueue.set(positionControlHelper.getNumberOfPointsInQueue());
-      numberOfPointsInGenerator.set(positionControlHelper.getNumberOfPointsInGenerator());
+      numberOfPointsInQueue.set(positionHelper.getNumberOfPointsInQueue());
+      numberOfPointsInGenerator.set(positionHelper.getNumberOfPointsInGenerator());
       numberOfPoints.set(numberOfPointsInQueue.getIntegerValue() + numberOfPointsInGenerator.getIntegerValue());
 
       updateGraphics();
    }
 
-   public boolean handleEuclideanTrajectoryCommand(EuclideanTrajectoryControllerCommand command, FramePoint3D initialPosition)
+   public boolean handleTrajectoryCommand(EuclideanTrajectoryControllerCommand command)
    {
-      if (!handleCommandInternal(command))
+      if (handleCommandInternal(command) && positionHelper.handleTrajectoryCommand(command))
       {
-         return false;
+         usingWeightFromMessage.set(positionHelper.isMessageWeightValid());
+         return true;
       }
 
-      return positionControlHelper.handleEuclideanTrajectoryCommand(command, initialPosition);
+      clear();
+      return false;
    }
 
    @Override
    public PointFeedbackControlCommand getFeedbackControlCommand()
    {
-      return positionControlHelper.getFeedbackControlCommand();
+      return positionHelper.getFeedbackControlCommand();
    }
 
    @Override
@@ -145,22 +132,23 @@ public class RigidBodyPositionController extends RigidBodyControlState
    @Override
    public boolean isEmpty()
    {
-      return positionControlHelper.isEmpty();
+      return positionHelper.isEmpty();
    }
 
    @Override
    public double getLastTrajectoryPointTime()
    {
-      return positionControlHelper.getLastTrajectoryPointTime();
+      return positionHelper.getLastTrajectoryPointTime();
    }
 
    public void clear()
    {
-      positionControlHelper.clear();
+      positionHelper.clear();
       numberOfPointsInQueue.set(0);
       numberOfPointsInGenerator.set(0);
       numberOfPoints.set(0);
       usingWeightFromMessage.set(false);
+      trajectoryDone.set(true);
       resetLastCommandId();
    }
 }
