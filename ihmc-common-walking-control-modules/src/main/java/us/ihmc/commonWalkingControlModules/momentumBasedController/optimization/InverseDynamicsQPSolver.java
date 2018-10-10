@@ -1,11 +1,9 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.Matrix;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -62,7 +60,7 @@ public class InverseDynamicsQPSolver
    private final YoDouble jointTorqueWeight = new YoDouble("jointTorqueWeight", registry);
    private final DenseMatrix64F regularizationMatrix;
 
-   private final DenseMatrix64F tempTorque_J;
+   private final DenseMatrix64F tempJtW;
 
    private final int numberOfDoFs;
    private final int rhoSize;
@@ -115,7 +113,7 @@ public class InverseDynamicsQPSolver
       solverOutput_jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
 
-      tempTorque_J = new DenseMatrix64F(numberOfDoFs, problemSize);
+      tempJtW = new DenseMatrix64F(problemSize, problemSize);
 
       jointAccelerationRegularization.set(0.005);
       jointJerkRegularization.set(0.1);
@@ -357,23 +355,28 @@ public class InverseDynamicsQPSolver
       }
 
       MatrixTools.addMatrixBlock(solverInput_H, offset, offset, taskWeight, 0, 0, variables, variables, 1.0);
-
-      DiagonalMatrixTools.preMultAddBlock(-1.0, taskWeight, taskObjective, solverInput_f, offset, 0);
+      MatrixTools.multAddBlock(-1.0, taskWeight, taskObjective, solverInput_f, offset, 0);
    }
 
    private void addTaskInternal(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight, int offset)
    {
+      int taskSize = taskJacobian.getNumRows();
       int variables = taskJacobian.getNumCols();
       if (offset + variables > problemSize)
       {
          throw new RuntimeException("This task does not fit.");
       }
 
+      tempJtW.reshape(variables, taskSize);
+
+      // J^T W
+      CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
+
       // Compute: H += J^T W J
-      DiagonalMatrixTools.multAddBlockInner(taskJacobian, taskWeight, solverInput_H, offset, offset);
+      MatrixTools.multAddBlock(tempJtW, taskJacobian, solverInput_H, offset, offset);
 
       // Compute: f += - J^T W Objective
-      DiagonalMatrixTools.innerDiagonalMultAddBlockTransA(-1.0, taskJacobian, taskWeight, taskObjective, solverInput_f, offset, 0);
+      MatrixTools.multAddBlock(-1.0, tempJtW, taskObjective, solverInput_f, offset, 0);
    }
 
    private void addTaskInternal(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double taskWeight, int offset)
@@ -385,7 +388,7 @@ public class InverseDynamicsQPSolver
       }
 
       // Compute: H += J^T W J
-      DiagonalMatrixTools.multAddBlockInner(taskJacobian, taskWeight, solverInput_H, offset, offset);
+      MatrixTools.multAddBlockInner(taskWeight, taskJacobian, solverInput_H, offset, offset);
 
       // Compute: f += - J^T W Objective
       MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, offset, 0);
@@ -480,7 +483,7 @@ public class InverseDynamicsQPSolver
    public void addTorqueMinimizationObjective(DenseMatrix64F torqueJacobian, DenseMatrix64F torqueObjective)
    {
       // Compute: H += J^T W J
-      DiagonalMatrixTools.multAddInner(torqueJacobian, jointTorqueWeight.getDoubleValue(), solverInput_H);
+      MatrixTools.multAddInner(jointTorqueWeight.getDoubleValue(), torqueJacobian, solverInput_H);
 
       // Compute: f += - J^T W Objective
       CommonOps.multTransA(-jointTorqueWeight.getDoubleValue(), torqueJacobian, torqueObjective, solverInput_f);
@@ -490,11 +493,11 @@ public class InverseDynamicsQPSolver
    {
       int taskSize = torqueObjective.getNumRows();
 
-      tempTorque_J.reshape(taskSize, problemSize);
-      CommonOps.insert(torqueQddotJacobian, tempTorque_J, 0, 0);
-      CommonOps.insert(torqueRhoJacobian, tempTorque_J, 0, numberOfDoFs);
+      tempJtW.reshape(taskSize, problemSize);
+      CommonOps.insert(torqueQddotJacobian, tempJtW, 0, 0);
+      CommonOps.insert(torqueRhoJacobian, tempJtW, 0, numberOfDoFs);
 
-      addTorqueMinimizationObjective(tempTorque_J, torqueObjective);
+      addTorqueMinimizationObjective(tempJtW, torqueObjective);
    }
 
    /**
@@ -539,7 +542,7 @@ public class InverseDynamicsQPSolver
          CommonOps.insert(rhoJacobian, tempWrenchConstraint_J, 0, numberOfDoFs);
 
          double weight = 150.0;
-         DiagonalMatrixTools.multAddInner(tempWrenchConstraint_J, weight, solverInput_H);
+         MatrixTools.multAddInner(weight, tempWrenchConstraint_J, solverInput_H);
 
          CommonOps.multAddTransA(-weight, tempWrenchConstraint_J, tempWrenchConstraint_RHS, solverInput_f);
       }
