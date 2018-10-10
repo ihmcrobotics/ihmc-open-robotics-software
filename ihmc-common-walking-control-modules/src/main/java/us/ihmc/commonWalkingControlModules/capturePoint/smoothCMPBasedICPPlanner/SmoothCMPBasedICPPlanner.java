@@ -154,7 +154,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
                                                                   numberOfUpcomingFootsteps, upcomingFootstepsData, registry);
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, true, registry, yoGraphicsListRegistry);
 
-      referenceICPGenerator = new ReferenceICPTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isInitialTransfer, true, registry, yoGraphicsListRegistry);
+      referenceICPGenerator = new ReferenceICPTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isInitialTransfer, isStanding, true, registry, yoGraphicsListRegistry);
 
       referenceCoMGenerator = new ReferenceCoMTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isInitialTransfer, isDoubleSupport, registry);
       angularMomentumTrajectoryGenerator = new AngularMomentumTrajectoryMultiplexer(namePrefix, momentumTrajectoryHandler, yoTime, omega0, debug, registry);
@@ -659,7 +659,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    {
       List<CoPPointsInFoot> plannedCoPWaypoints = referenceCoPGenerator.getWaypoints();
       CoPPointsInFoot copPointsInFoot = plannedCoPWaypoints.get(1);
-      copPointsInFoot.get(copPointsInFoot.getCoPPointList().size() - 1).getPosition(exitCMPToPack);
+      copPointsInFoot.get(copPointsInFoot.getNumberOfCoPPoints() - 1).getPosition(exitCMPToPack);
    }
 
    /** {@inheritDoc} */
