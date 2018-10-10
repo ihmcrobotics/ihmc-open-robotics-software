@@ -12,7 +12,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -51,9 +50,7 @@ public class RigidBodyControlManager
    private final RigidBodyUserControlState userControlState;
    private final RigidBodyLoadBearingControlState loadBearingControlState;
 
-   private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
    private final double[] initialJointPositions;
-   private final FramePose3D initialPose = new FramePose3D();
    private final FramePose3D homePose;
 
    private final OneDoFJoint[] jointsToControl;
@@ -199,52 +196,26 @@ public class RigidBodyControlManager
 
    public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand command)
    {
-      if (command.useCustomControlFrame())
-      {
-         command.getControlFramePose(controlFrameTransform);
-         taskspaceControlState.setControlFramePose(controlFrameTransform);
-      }
-      else
-      {
-         taskspaceControlState.setDefaultControlFrame();
-      }
-
-      computeDesiredPose(initialPose);
-
-      if (taskspaceControlState.handleOrientationTrajectoryCommand(command, initialPose))
+      if (taskspaceControlState.handleOrientationTrajectoryCommand(command))
       {
          requestState(taskspaceControlState.getControlMode());
       }
       else
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid orientation trajectory command.");
-         taskspaceControlState.clear();
          hold();
       }
    }
 
    public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand command)
    {
-      if (command.useCustomControlFrame())
-      {
-         command.getControlFramePose(controlFrameTransform);
-         taskspaceControlState.setControlFramePose(controlFrameTransform);
-      }
-      else
-      {
-         taskspaceControlState.setDefaultControlFrame();
-      }
-
-      computeDesiredPose(initialPose);
-
-      if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
+      if (taskspaceControlState.handlePoseTrajectoryCommand(command))
       {
          requestState(taskspaceControlState.getControlMode());
       }
       else
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
-         taskspaceControlState.clear();
          hold();
       }
    }
@@ -266,20 +237,9 @@ public class RigidBodyControlManager
 
    public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand)
    {
-      if (taskspaceCommand.useCustomControlFrame())
-      {
-         taskspaceCommand.getControlFramePose(controlFrameTransform);
-         taskspaceControlState.setControlFramePose(controlFrameTransform);
-      }
-      else
-      {
-         taskspaceControlState.setDefaultControlFrame();
-      }
-
       computeDesiredJointPositions(initialJointPositions);
-      computeDesiredPose(initialPose);
 
-      if (taskspaceControlState.handleHybridPoseTrajectoryCommand(taskspaceCommand, initialPose, jointSpaceCommand, initialJointPositions))
+      if (taskspaceControlState.handleHybridPoseTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions))
       {
          requestState(taskspaceControlState.getControlMode());
       }
@@ -402,9 +362,7 @@ public class RigidBodyControlManager
          requestState(jointspaceControlState.getControlMode());
          break;
       case TASKSPACE:
-         taskspaceControlState.setDefaultControlFrame();
-         computeDesiredPose(initialPose);
-         taskspaceControlState.goToPose(homePose, initialPose, trajectoryTime);
+         taskspaceControlState.goToPose(homePose, trajectoryTime);
          requestState(taskspaceControlState.getControlMode());
          break;
       default:
@@ -464,18 +422,6 @@ public class RigidBodyControlManager
       {
          for (int i = 0; i < jointsToControl.length; i++)
             desiredJointPositionsToPack[i] = jointsToControl[i].getQ();
-      }
-   }
-
-   private void computeDesiredPose(FramePose3D poseToPack)
-   {
-      if (stateMachine.getCurrentStateKey() == taskspaceControlState.getControlMode())
-      {
-         taskspaceControlState.getDesiredPose(poseToPack);
-      }
-      else
-      {
-         poseToPack.setToZero(taskspaceControlState.getControlFrame());
       }
    }
 
