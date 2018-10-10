@@ -5,7 +5,6 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -31,7 +30,7 @@ public class SelectionCalculator
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final DenseMatrix64F tempRotationMatrix = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F tempRotationMatrixWithSelection = new DenseMatrix64F(1, 1);
-//   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F denseSelectionMatrix = new DenseMatrix64F(1, 1);
 
    private final DenseMatrix64F taskJacobian3D = new DenseMatrix64F(1, 1);
@@ -117,7 +116,10 @@ public class SelectionCalculator
          tempTransform.getRotation(tempRotationMatrix);
          tempRotationMatrixWithSelection.reshape(reducedTaskSize, 3);
          CommonOps.mult(denseSelectionMatrix, tempRotationMatrix, tempRotationMatrixWithSelection);
-         DiagonalMatrixTools.multOuter(tempRotationMatrixWithSelection, taskWeightToPack, taskWeightToPack);
+         tempTaskWeight.reshape(reducedTaskSize, 3);
+         CommonOps.mult(tempRotationMatrixWithSelection, taskWeightToPack, tempTaskWeight);
+         taskWeightToPack.reshape(reducedTaskSize, reducedTaskSize);
+         CommonOps.multTransB(tempTaskWeight, tempRotationMatrixWithSelection, taskWeightToPack);
       }
       else
       {
