@@ -1,6 +1,10 @@
 package us.ihmc.valkyrieRosControl;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.EXIT_WALKING;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_PREP_STATE;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_READY;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_TRANSITION_STATE;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -367,8 +371,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSimpleRobotName(), sensorInformation, contactPointParameters, robotModel,
                                                                   stateEstimatorParameters, sensorReaderFactory, threadDataSynchronizer,
-                                                                  estimatorRealtimeRos2Node, valkyrieLowLevelOutputWriter, yoVariableServer, gravity);
-      estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+                                                                  estimatorRealtimeRos2Node, externalPelvisPoseSubscriber, valkyrieLowLevelOutputWriter,
+                                                                  yoVariableServer, gravity);
 
       if (ENABLE_FINGER_JOINTS)
       {

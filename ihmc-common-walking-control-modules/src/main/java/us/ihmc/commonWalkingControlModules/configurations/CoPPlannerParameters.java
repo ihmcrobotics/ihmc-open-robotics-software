@@ -22,11 +22,6 @@ public interface CoPPlannerParameters
    int getNumberOfCoPWayPointsPerFoot();
 
    /**
-    * Name of the cop point that is designed as the entry, which is the first CoP for the swing phase. Typically Heel.
-    */
-   CoPPointName getEntryCoPName();
-
-   /**
     * Name of the cop point that is designed as the exit, which is the last CoP for the swing phase. Typically Toe.
     */
    CoPPointName getExitCoPName();

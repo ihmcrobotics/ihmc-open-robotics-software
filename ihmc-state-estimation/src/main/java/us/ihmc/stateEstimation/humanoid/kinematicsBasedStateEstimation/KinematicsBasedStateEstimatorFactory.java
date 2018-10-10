@@ -10,6 +10,8 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwi
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -29,7 +31,9 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.tools.factories.FactoryTools;
+import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -56,6 +60,9 @@ public class KinematicsBasedStateEstimatorFactory
 
    private RequiredFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolderFromControllerField = new RequiredFactoryField<>("centerOfPressureDataHolderFromControllerField");
    private RequiredFactoryField<RobotMotionStatusHolder> robotMotionStatusFromControllerField = new RequiredFactoryField<>("robotMotionStatusFromControllerField");
+
+   private OptionalFactoryField<StateEstimatorModeSubscriber> operatingModeSubscriberField = new OptionalFactoryField<>("operatingModeSubscriberField");
+   private OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisPoseSubscriberField = new OptionalFactoryField<>("externalPelvisPoseSubscriberField");
 
    public KinematicsBasedStateEstimatorFactory setEstimatorFullRobotModel(FullHumanoidRobotModel estimatorFullRobotModel)
    {
@@ -123,7 +130,19 @@ public class KinematicsBasedStateEstimatorFactory
       return this;
    }
 
-   public DRCKinematicsBasedStateEstimator createStateEstimator(YoVariableRegistry stateEstimatorRegistry, YoGraphicsListRegistry stateEstimatorYoGraphicsListRegistry)
+   public KinematicsBasedStateEstimatorFactory setOperatingModeSubscriber(StateEstimatorModeSubscriber operatingModeSubscriber)
+   {
+      this.operatingModeSubscriberField.set(operatingModeSubscriber);
+      return this;
+   }
+
+   public KinematicsBasedStateEstimatorFactory setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
+   {
+      this.externalPelvisPoseSubscriberField.set(externalPelvisPoseSubscriber);
+      return this;
+   }
+
+   public StateEstimatorController createStateEstimator(YoVariableRegistry stateEstimatorRegistry, YoGraphicsListRegistry stateEstimatorYoGraphicsListRegistry)
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -199,12 +218,24 @@ public class KinematicsBasedStateEstimatorFactory
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
 
       // Create the sensor readers and state estimator here:
+      DRCKinematicsBasedStateEstimator estimator = new DRCKinematicsBasedStateEstimator(fullInverseDynamicsStructure, stateEstimatorParameters,
+                                                                                        sensorOutputMapReadOnlyField.get(),
+                                                                                        estimatorCenterOfMassDataHolderToUpdateField.get(),
+                                                                                        imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
+                                                                                        centerOfPressureDataHolderFromControllerField.get(),
+                                                                                        robotMotionStatusFromControllerField.get(), bipedFeetMap,
+                                                                                        stateEstimatorYoGraphicsListRegistry);
 
-      return new DRCKinematicsBasedStateEstimator(fullInverseDynamicsStructure, stateEstimatorParameters, sensorOutputMapReadOnlyField.get(),
-                                                  estimatorForceSensorDataHolderToUpdate, estimatorCenterOfMassDataHolderToUpdateField.get(),
-                                                  imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
-                                                  centerOfPressureDataHolderFromControllerField.get(), robotMotionStatusFromControllerField.get(), bipedFeetMap,
-                                                  stateEstimatorYoGraphicsListRegistry);
+      if (operatingModeSubscriberField.hasValue())
+      {
+         estimator.setOperatingModeSubscriber(operatingModeSubscriberField.get());
+      }
+      if (externalPelvisPoseSubscriberField.hasValue())
+      {
+         estimator.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriberField.get());
+      }
+
+      return estimator;
    }
 
    private FullInverseDynamicsStructure createFullInverseDynamicsStructure(FullHumanoidRobotModel fullRobotModel)

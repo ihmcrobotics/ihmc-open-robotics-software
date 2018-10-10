@@ -12,12 +12,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+
 import controller_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.apache.commons.lang3.mutable.MutableDouble;
-import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
@@ -50,6 +49,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -108,6 +108,7 @@ public class DRCSimulationTestHelper
    private ControllerStateTransitionFactory<HighLevelControllerName> controllerStateTransitionFactory = null;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = null;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = null;
+   private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber = null;
    private final DRCGuiInitialSetup guiInitialSetup;
 
    private final boolean checkIfDesiredICPHasBeenInvalid = true;
@@ -191,6 +192,8 @@ public class DRCSimulationTestHelper
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
       simulationStarter.setInitializeEstimatorToActual(true);
       simulationStarter.setFlatGroundWalkingScriptParameters(walkingScriptParameters);
+      if (externalPelvisCorrectorSubscriber != null)
+         simulationStarter.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
 
       if (addFootstepMessageGenerator)
          simulationStarter.addFootstepMessageGenerator(useHeadingAndVelocityScript, cheatWithGroundHeightAtFootstep);
@@ -642,6 +645,11 @@ public class DRCSimulationTestHelper
       this.networkProcessorParameters = networkProcessorParameters;
    }
 
+   public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
+   {
+      this.externalPelvisCorrectorSubscriber = externalPelvisCorrectorSubscriber;
+   }
+
    public String getRobotName()
    {
       return robotName;
@@ -705,6 +713,9 @@ public class DRCSimulationTestHelper
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
+            if (scs == null || !scs.isSimulating())
+               return; // Do not perform this check if the sim is not running, so the user can scrub the data when sim is done.
+
             desiredICP.setX(desiredICPX.getDoubleValue());
             if (xTicks.getValue() > ticksToInitialize && yTicks.getValue() > ticksToInitialize)
             {
@@ -722,6 +733,9 @@ public class DRCSimulationTestHelper
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
+            if (scs == null || !scs.isSimulating())
+               return; // Do not perform this check if the sim is not running, so the user can scrub the data when sim is done.
+
             desiredICP.setY(desiredICPY.getDoubleValue());
             if (xTicks.getValue() > ticksToInitialize && yTicks.getValue() > ticksToInitialize)
             {

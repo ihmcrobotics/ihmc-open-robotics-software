@@ -182,10 +182,9 @@ public class HighLevelHumanoidControllerToolbox
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       this.icpControlPlane = new ICPControlPlane(this.omega0, centerOfMassFrame, gravityZ, registry);
-      SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>(referenceFrames.getAnkleZUpReferenceFrames());
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(referenceFrames.getSoleZUpFrames());
-      bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
       icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
 
       this.footSwitches = footSwitches;

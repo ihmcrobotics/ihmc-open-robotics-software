@@ -1,22 +1,49 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
 import gnu.trove.list.TByteList;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public enum ConfigurationSpaceName
 {
-   X, Y, Z, ROLL, PITCH, YAW;
+   X, Y, Z, ROLL, PITCH, YAW, SO3;
 
    public static final ConfigurationSpaceName[] values = values();
 
-   public double getDefaultExplorationLowerLimit()
-   {
-      return -getDefaultExplorationAmplitude();
-   }
-
    public double getDefaultExplorationUpperLimit()
    {
-      return getDefaultExplorationAmplitude();
+      switch (this)
+      {
+      case X:
+      case Y:
+      case Z:
+         return 0.1;
+      case ROLL:
+      case PITCH:
+      case YAW:
+         return 0.3 * Math.PI;
+      case SO3:
+         return 1.0;
+      default:
+         throw new RuntimeException("Unexpected value: " + this);
+      }
+   }
+
+   public double getDefaultExplorationLowerLimit()
+   {
+      switch (this)
+      {
+      case X:
+      case Y:
+      case Z:
+         return -0.1;
+      case ROLL:
+      case PITCH:
+      case YAW:
+         return -0.3 * Math.PI;
+      case SO3:
+         return 0.0;
+      default:
+         throw new RuntimeException("Unexpected value: " + this);
+      }
    }
 
    public double getDefaultExplorationAmplitude()
@@ -26,43 +53,16 @@ public enum ConfigurationSpaceName
       case X:
       case Y:
       case Z:
-         return 1.0;
+         return 0.15;
       case ROLL:
       case PITCH:
       case YAW:
-         return 0.25 * Math.PI;
+         return 0.3 * Math.PI;
+      case SO3:
+         return 1.0;
       default:
          throw new RuntimeException("Unexpected value: " + this);
       }
-   }
-
-   public RigidBodyTransform getLocalRigidBodyTransform(double configuration)
-   {
-      RigidBodyTransform ret = new RigidBodyTransform();
-
-      switch (this)
-      {
-      case X:
-         ret.appendTranslation(configuration, 0, 0);
-         break;
-      case Y:
-         ret.appendTranslation(0, configuration, 0);
-         break;
-      case Z:
-         ret.appendTranslation(0, 0, configuration);
-         break;
-      case ROLL:
-         ret.appendRollRotation(configuration);
-         break;
-      case PITCH:
-         ret.appendPitchRotation(configuration);
-         break;
-      case YAW:
-         ret.appendYawRotation(configuration);
-         break;
-      }
-
-      return ret;
    }
 
    public byte toByte()
@@ -86,7 +86,7 @@ public enum ConfigurationSpaceName
          byteArray[i] = enumArray[i].toByte();
       return byteArray;
    }
-   
+
    public static ConfigurationSpaceName[] fromBytes(TByteList enumListAsBytes)
    {
       if (enumListAsBytes == null)
@@ -96,7 +96,7 @@ public enum ConfigurationSpaceName
          enumArray[i] = fromByte(enumListAsBytes.get(i));
       return enumArray;
    }
-   
+
    public static ConfigurationSpaceName[] fromBytes(byte[] enumArrayAsBytes)
    {
       if (enumArrayAsBytes == null)

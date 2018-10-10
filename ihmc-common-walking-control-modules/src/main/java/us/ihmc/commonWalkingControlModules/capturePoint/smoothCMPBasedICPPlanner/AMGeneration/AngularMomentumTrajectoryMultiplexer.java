@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration;
 
-import controller_msgs.msg.dds.MomentumTrajectoryMessage;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
@@ -10,8 +11,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.List;
 
 /**
  * This class is a wrapper around the predicted and commanded angular momentum trajectory generators.
@@ -30,6 +29,7 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
    private final FootstepAngularMomentumPredictor predictedAngularMomentum;
 
    private AngularMomentumTrajectoryGeneratorInterface currentAngularMomentumTrajectoryGenerator;
+   private SmoothCMPPlannerParameters smoothCMPPlannerParameters;
 
    public AngularMomentumTrajectoryMultiplexer(String namePrefix, MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoDouble omega0,
                                                boolean debug, YoVariableRegistry parentRegistry)
@@ -65,6 +65,7 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
    @Override
    public void initializeParameters(SmoothCMPPlannerParameters smoothCMPPlannerParameters, double totalMass, double gravityZ)
    {
+      this.smoothCMPPlannerParameters = smoothCMPPlannerParameters;
       predictedAngularMomentum.initializeParameters(smoothCMPPlannerParameters, totalMass, gravityZ);
 
       if (commandedAngularMomentum != null)
@@ -98,10 +99,10 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
    }
 
    @Override
-   public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop)
+   public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean initialTransfer, boolean standing)
    {
       updateCurrentAngularMomentumTrajectoryGenerator();
-      currentAngularMomentumTrajectoryGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(atAStop);
+      currentAngularMomentumTrajectoryGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(initialTransfer, standing);
    }
 
    @Override
@@ -142,7 +143,7 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
 
    private void updateCurrentAngularMomentumTrajectoryGenerator()
    {
-      if (commandedAngularMomentum != null && commandedAngularMomentum.hasReferenceTrajectory())
+      if (referenceTrajectoryIsAvailable())
       {
          usingReferenceAngularMomentum.set(true);
          currentAngularMomentumTrajectoryGenerator = commandedAngularMomentum;
@@ -152,5 +153,17 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
          usingReferenceAngularMomentum.set(false);
          currentAngularMomentumTrajectoryGenerator = predictedAngularMomentum;
       }
+   }
+
+   private boolean referenceTrajectoryIsAvailable()
+   {
+      return commandedAngularMomentum != null && commandedAngularMomentum.hasReferenceTrajectory();
+   }
+
+   public boolean isPredictingAngularMomentum()
+   {
+      boolean isPlanningAngularMomentum = smoothCMPPlannerParameters.planSwingAngularMomentum() || smoothCMPPlannerParameters.planTransferAngularMomentum();
+      boolean isUsingPrediction = !referenceTrajectoryIsAvailable();
+      return isPlanningAngularMomentum && isUsingPrediction;
    }
 }
