@@ -691,63 +691,6 @@ public class DiagonalMatrixTools
    /**
     * <p>Computes the matrix multiplication inner product:<br>
     * <br>
-    * c = c + b * a<sup>T</sup> * a <br>
-    * <br>
-    * c<sub>(cRowStart + i) (cColStart + j)</sub> = c<sub>(cRowStart + i) (cColStart + j)</sub> + b * &sum;<sub>k=1:n</sub> { a<sub>ki</sub> * a<sub>kj</sub> }
-    * </p>
-    * <p> The block is added to matrix 'c' starting at cStartRow, cStartCol </p>
-    * <p>
-    * Is faster than using a generic matrix multiplication by taking advantage of symmetry.
-    * </p>
-    * @param a The matrix being multiplied. Not modified.
-    * @param b The scalar multiplier for the inner operation.
-    * @param c Where the results of the operation are stored. Modified.
-    * @param cRowStart The row index to start writing to in the block 'c'.
-    * @param cColStart The col index to start writing to in the block 'c'.
-    */
-   public static void multAddBlockInner(RowD1Matrix64F a, double b, RowD1Matrix64F c, int cRowStart, int cColStart)
-   {
-      if (a == c)
-         throw new IllegalArgumentException("'a' cannot be the same matrix as 'c'");
-      else if (a.numCols + cRowStart > c.numRows || a.numCols + cColStart > c.numCols)
-         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
-
-      for (int i = 0; i < a.numCols; i++)
-      {
-         int j = i;
-         int indexA = i;
-         double sum = 0;
-         int end = indexA + a.numRows * a.numCols;
-         for (; indexA < end; indexA += a.numCols)
-         {
-            sum += a.data[indexA] * a.data[indexA];
-         }
-         int indexC1 = (i + cRowStart) * c.numCols + j + cColStart;
-         c.data[indexC1] += b * sum;
-         j++;
-
-         for (; j < a.numCols; j++)
-         {
-            indexA = i;
-            int indexB = j;
-            sum = 0;
-            end = indexA + a.numRows * a.numCols;
-            for (; indexA < end; indexA += a.numCols, indexB += a.numCols)
-            {
-               sum += a.data[indexA] * a.data[indexB];
-            }
-            indexC1 = (i + cRowStart) * c.numCols + j + cColStart;
-            int indexC2 = (j + cRowStart) * c.numCols + i + cColStart;
-            sum *= b;
-            c.data[indexC1] += sum;
-            c.data[indexC2] += sum;
-         }
-      }
-   }
-
-   /**
-    * <p>Computes the matrix multiplication inner product:<br>
-    * <br>
     * d = d + a * b<sup>T</sup> * c * b <br>
     * <br>
     * d<sub>ij</sub> = d<sub>ij</sub> + b * &sum;<sub>k=1:n</sub> { b<sub>ki</sub> * b<sub>kj</sub> * c<sub>k</sub>}
