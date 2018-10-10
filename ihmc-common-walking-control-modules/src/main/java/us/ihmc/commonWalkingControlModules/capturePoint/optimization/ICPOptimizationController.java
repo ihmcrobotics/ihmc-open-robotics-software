@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
@@ -105,8 +106,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final DoubleProvider forwardFootstepWeight;
    private final DoubleProvider lateralFootstepWeight;
    private final YoMatrix yoFootstepWeights = new YoMatrix(yoNamePrefix + "FootstepWeights", 2, 2, registry);
-private final DenseMatrix64F footstepWeights = new DenseMatrix64F(2, 2);
-
+   private final DenseMatrix64F footstepWeights = new DenseMatrix64F(2, 2);
 
    private final DoubleProvider copFeedbackForwardWeight;
    private final DoubleProvider copFeedbackLateralWeight;
@@ -114,7 +114,6 @@ private final DenseMatrix64F footstepWeights = new DenseMatrix64F(2, 2);
    private final YoMatrix yoScaledCoPFeedbackWeight = new YoMatrix(yoNamePrefix + "ScaledCoPFeedbackWeight", 2, 2, registry);
    private final YoDouble scaledCMPFeedbackWeight = new YoDouble(yoNamePrefix + "ScaledCMPFeedbackWeight", registry);
    private final DenseMatrix64F scaledCoPFeedbackWeight = new DenseMatrix64F(2, 2);
-
 
    private final DoubleProvider maxAllowedDistanceCMPSupport;
    private final DoubleProvider safeCoPDistanceToEdge;
@@ -800,8 +799,8 @@ private final DenseMatrix64F footstepWeights = new DenseMatrix64F(2, 2);
             projectedTempPoint3d.set(upcomingFootstepLocation.getPosition());
 
          footstepLocationSubmitted.set(projectedTempPoint3d);
-         solver.setFootstepAdjustmentConditions(footstepMultiplier.getDoubleValue(), footstepWeights,
-                                                footstepAdjustmentSafetyFactor.getValue(), projectedTempPoint3d);
+         solver.setFootstepAdjustmentConditions(footstepMultiplier.getDoubleValue(), footstepWeights, footstepAdjustmentSafetyFactor.getValue(),
+                                                projectedTempPoint3d);
       }
 
       if (useFootstepRate.getValue())
@@ -944,13 +943,8 @@ private final DenseMatrix64F footstepWeights = new DenseMatrix64F(2, 2);
       {
          double parallel = feedbackGains.getKpParallelToMotion();
          double orthogonal = feedbackGains.getKpOrthogonalToMotion();
-         helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, parallel,
-                                                orthogonal);
-         double magnitude = Math.sqrt(parallel * parallel + orthogonal * orthogonal);
-         for (int element = 0; element < scaledCoPFeedbackWeight.getNumElements(); element++)
-            scaledCoPFeedbackWeight.div(element, magnitude);
-
-//         yoScaledCoPFeedbackWeight.scale(1.0 / transformedGains.length());
+         double magnitude = helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, parallel, orthogonal);
+         CommonOps.scale(1.0 / magnitude, scaledCoPFeedbackWeight);
       }
 
       yoScaledCoPFeedbackWeight.set(scaledCoPFeedbackWeight);
