@@ -31,12 +31,9 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    private Vector3DReadOnly angularWeight;
    private Vector3DReadOnly linearWeight;
 
-   private final FramePose3D initialPose = new FramePose3D();
-
    private final FrameVector3DReadOnly touchdownVelocity;
    private final FrameVector3DReadOnly touchdownAcceleration;
 
-   private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
    private ReferenceFrame controlFrame;
    private final ReferenceFrame ankleFrame;
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
@@ -90,20 +87,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
-      if (command.getSE3Trajectory().useCustomControlFrame())
-      {
-         command.getSE3Trajectory().getControlFramePose(controlFrameTransform);
-         taskspaceControlState.setControlFramePose(controlFrameTransform);
-      }
-      else
-      {
-         taskspaceControlState.setDefaultControlFrame();
-      }
-
-      controlFrame = taskspaceControlState.getControlFrame();
-      initialPose.setToZero(controlFrame);
-
-      if (!taskspaceControlState.handlePoseTrajectoryCommand(command.getSE3Trajectory(), initialPose))
+      if (!taskspaceControlState.handlePoseTrajectoryCommand(command.getSE3Trajectory()))
       {
          taskspaceControlState.holdCurrent();
       }
@@ -136,7 +120,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       else
       {
          taskspaceControlState.doAction(timeInState);
-         spatialFeedbackControlCommand.set(taskspaceControlState.getSpatialFeedbackControlCommand());
+         spatialFeedbackControlCommand.set((SpatialFeedbackControlCommand) taskspaceControlState.getFeedbackControlCommand());
 
          if (taskspaceControlState.abortState())
             requestTouchdownForDisturbanceRecovery(timeInState);
