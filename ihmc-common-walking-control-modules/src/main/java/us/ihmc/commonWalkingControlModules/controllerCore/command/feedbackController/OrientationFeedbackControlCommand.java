@@ -10,9 +10,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
@@ -44,13 +44,12 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
  */
 public class OrientationFeedbackControlCommand implements FeedbackControlCommand<OrientationFeedbackControlCommand>
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    /** The end-effector's desired orientation expressed in world frame. */
-   private final Quaternion desiredOrientationInWorld = new Quaternion();
+   private final FixedFrameQuaternionBasics desiredOrientationInWorld = new FrameQuaternion(ReferenceFrame.getWorldFrame());
    /** The end-effector's desired angular velocity expressed in world frame. */
-   private final Vector3D desiredAngularVelocityInWorld = new Vector3D();
+   private final FixedFrameVector3DBasics desiredAngularVelocityInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
    /** The feed-forward to be used for the end-effector. Useful to improve tracking performance. */
-   private final Vector3D feedForwardAngularActionInWorld = new Vector3D();
+   private final FixedFrameVector3DBasics feedForwardAngularActionInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final PID3DGains gains = new DefaultPID3DGains();
@@ -199,10 +198,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FixedFrameQuaternionBasics desiredOrientation)
+   public void set(FrameQuaternionReadOnly desiredOrientation)
    {
-      desiredOrientation.checkReferenceFrameMatch(worldFrame);
-
       desiredOrientationInWorld.set(desiredOrientation);
       desiredAngularVelocityInWorld.setToZero();
       feedForwardAngularActionInWorld.setToZero();
@@ -219,11 +216,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FixedFrameQuaternionBasics desiredOrientation, FixedFrameVector3DBasics desiredAngularVelocity)
+   public void set(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity)
    {
-      desiredOrientation.checkReferenceFrameMatch(worldFrame);
-      desiredAngularVelocity.checkReferenceFrameMatch(worldFrame);
-
       desiredOrientationInWorld.set(desiredOrientation);
       desiredAngularVelocityInWorld.set(desiredAngularVelocity);
       feedForwardAngularActionInWorld.setToZero();
@@ -238,9 +232,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void setFeedForwardAction(FixedFrameVector3DBasics feedForwardAngularAction)
+   public void setFeedForwardAction(FrameVector3DReadOnly feedForwardAngularAction)
    {
-      feedForwardAngularAction.checkReferenceFrameMatch(worldFrame);
       feedForwardAngularActionInWorld.set(feedForwardAngularAction);
    }
 
@@ -253,13 +246,10 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @param desiredAngularVelocity describes the desired linear velocity of
     *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Modified.
     */
-   public void changeFrameAndSet(FrameQuaternion desiredOrientation, FrameVector3D desiredAngularVelocity)
+   public void changeFrameAndSet(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity)
    {
-      desiredOrientation.changeFrame(worldFrame);
-      desiredAngularVelocity.changeFrame(worldFrame);
-
-      desiredOrientationInWorld.set(desiredOrientation);
-      desiredAngularVelocityInWorld.set(desiredAngularVelocity);
+      desiredOrientationInWorld.setMatchingFrame(desiredOrientation);
+      desiredAngularVelocityInWorld.setMatchingFrame(desiredAngularVelocity);
    }
 
    /**
@@ -273,10 +263,9 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     *           {@code controlFrame} with respect to the {@code base}. It is equivalent to the
     *           desired angular action of {@code endEffector.getBodyFixedFrame()}. Modified.
     */
-   public void changeFrameAndSetFeedForward(FrameVector3D feedForwardAngularAction)
+   public void changeFrameAndSetFeedForward(FrameVector3DReadOnly feedForwardAngularAction)
    {
-      feedForwardAngularAction.changeFrame(worldFrame);
-      feedForwardAngularActionInWorld.set(feedForwardAngularAction);
+      feedForwardAngularActionInWorld.setMatchingFrame(feedForwardAngularAction);
    }
 
    /**
@@ -357,18 +346,33 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
 
    public void getIncludingFrame(FrameQuaternion desiredOrientationToPack)
    {
-      desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
+      desiredOrientationToPack.setIncludingFrame(desiredOrientationInWorld);
    }
 
    public void getIncludingFrame(FrameQuaternion desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack)
    {
-      desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
-      desiredAngularVelocityToPack.setIncludingFrame(worldFrame, desiredAngularVelocityInWorld);
+      desiredOrientationToPack.setIncludingFrame(desiredOrientationInWorld);
+      desiredAngularVelocityToPack.setIncludingFrame(desiredAngularVelocityInWorld);
    }
 
    public void getFeedForwardActionIncludingFrame(FrameVector3D feedForwardAngularActionToPack)
    {
-      feedForwardAngularActionToPack.setIncludingFrame(worldFrame, feedForwardAngularActionInWorld);
+      feedForwardAngularActionToPack.setIncludingFrame(feedForwardAngularActionInWorld);
+   }
+
+   public FrameQuaternionReadOnly getDesiredOrientation()
+   {
+      return desiredOrientationInWorld;
+   }
+
+   public FrameVector3DReadOnly getDesiredAngularVelocity()
+   {
+      return desiredAngularVelocityInWorld;
+   }
+
+   public FrameVector3DReadOnly getFeedForwardAngularAction()
+   {
+      return feedForwardAngularActionInWorld;
    }
 
    public RigidBody getBase()

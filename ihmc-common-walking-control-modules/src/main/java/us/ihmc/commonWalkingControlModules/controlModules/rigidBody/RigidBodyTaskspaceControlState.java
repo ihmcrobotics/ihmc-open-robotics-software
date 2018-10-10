@@ -9,10 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
@@ -121,14 +118,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       updateGraphics();
    }
 
-   private final FramePoint3D desiredPosition = new FramePoint3D();
-   private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
-   private final FrameVector3D desiredLinearAcceleration = new FrameVector3D();
-   private final FrameQuaternion desiredOrientation = new FrameQuaternion();
-   private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
-   private final FrameVector3D desiredAngularAcceleration = new FrameVector3D();
-   private final FramePose3D controlFramePose = new FramePose3D();
-
    private void updateCommand()
    {
       PointFeedbackControlCommand positionCommand = positionControlHelper.getFeedbackControlCommand();
@@ -147,18 +136,13 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       feedbackControlCommand.setGainsFrames(orientationCommand.getAngularGainsFrame(), positionCommand.getLinearGainsFrame());
 
       // Copy over desired values
-      positionCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
-      positionCommand.getFeedForwardActionIncludingFrame(desiredLinearAcceleration);
-      orientationCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
-      orientationCommand.getFeedForwardActionIncludingFrame(desiredAngularAcceleration);
-      feedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
-      feedbackControlCommand.setFeedForwardLinearAction(desiredLinearAcceleration);
-      feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
-      feedbackControlCommand.setFeedForwardAngularAction(desiredAngularAcceleration);
+      feedbackControlCommand.set(positionCommand.getDesiredPosition(), positionCommand.getDesiredLinearVelocity());
+      feedbackControlCommand.setFeedForwardLinearAction(positionCommand.getFeedForwardLinearAction());
+      feedbackControlCommand.set(orientationCommand.getDesiredOrientation(), orientationCommand.getDesiredAngularVelocity());
+      feedbackControlCommand.setFeedForwardAngularAction(orientationCommand.getFeedForwardAngularAction());
 
       // Copy from the position command since the orientation does not have a control frame.
-      positionCommand.getSpatialAccelerationCommand().getControlFramePoseIncludingFrame(controlFramePose);
-      feedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
+      feedbackControlCommand.setControlFrameFixedInEndEffector(positionCommand.getSpatialAccelerationCommand().getControlFramePose());
 
       feedbackControlCommand.setControlBaseFrame(positionCommand.getControlBaseFrame());
    }
