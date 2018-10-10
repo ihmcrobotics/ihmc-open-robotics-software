@@ -322,7 +322,7 @@ public class RigidBodyPositionControlHelper
          for (int i = 0; i < 3; i++)
          {
             double weight = messageWeightMatrix.getElement(i);
-            messageHasValidWeights = messageHasValidWeights && (Double.isNaN(weight) || weight < 0.0);
+            messageHasValidWeights = messageHasValidWeights && !(Double.isNaN(weight) || weight < 0.0);
          }
          messageWeightValid = messageHasValidWeights;
       }

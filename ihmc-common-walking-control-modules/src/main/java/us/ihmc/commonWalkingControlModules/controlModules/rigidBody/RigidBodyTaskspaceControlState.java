@@ -136,7 +136,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       feedbackControlCommand.setFeedForwardAngularAction(orientationCommand.getFeedForwardAngularAction());
 
       // Copy from the position command since the orientation does not have a control frame.
-      feedbackControlCommand.setControlFrameFixedInEndEffector(positionCommand.getSpatialAccelerationCommand().getControlFramePose());
+      feedbackControlCommand.setControlFrameFixedInEndEffector(positionCommand.getBodyFixedPointToControl());
 
       feedbackControlCommand.setControlBaseFrame(positionCommand.getControlBaseFrame());
    }
@@ -244,13 +244,15 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      feedbackControlCommandList.clear();
-      feedbackControlCommandList.addCommand(feedbackControlCommand);
       if (hybridModeActive.getBooleanValue())
       {
+         feedbackControlCommandList.clear();
+         feedbackControlCommandList.addCommand(feedbackControlCommand);
          feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
+         return feedbackControlCommandList;
       }
-      return feedbackControlCommandList;
+
+      return feedbackControlCommand;
    }
 
    @Override

@@ -47,8 +47,8 @@ public class CommandConversionTools
    {
       commandToPack.setQueueableCommandVariables(command);
       commandToPack.setTrajectoryFrame(command.getTrajectoryFrame());
-      commandToPack.getSelectionMatrix().set(command.getSelectionMatrix().getAngularPart());
-      commandToPack.getWeightMatrix().set(command.getWeightMatrix().getAngularPart());
+      commandToPack.getSelectionMatrix().set(command.getSelectionMatrix().getLinearPart());
+      commandToPack.getWeightMatrix().set(command.getWeightMatrix().getLinearPart());
       commandToPack.setUseCustomControlFrame(command.useCustomControlFrame());
       commandToPack.setControlFramePose(command.getControlFramePose());
       commandToPack.getTrajectoryPointList().setIncludingFrame(command.getTrajectoryPointList());
