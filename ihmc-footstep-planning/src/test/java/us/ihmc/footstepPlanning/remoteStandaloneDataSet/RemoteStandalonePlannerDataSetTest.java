@@ -127,6 +127,11 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
       planningRequestPacket.getPlanarRegionsListMessage().set(planarRegions);
       planningRequestPacket.setTimeout(dataset.getTimeout(getPlannerType()));
 
+      if (dataset.hasGoalOrientation())
+         planningRequestPacket.getGoalOrientationInWorld().set(dataset.getGoalOrientation());
+      if (dataset.hasStartOrientation())
+         planningRequestPacket.getStanceFootOrientationInWorld().set(dataset.getStartOrientation());
+
       footstepPlanningRequestPublisher.publish(planningRequestPacket);
    }
 
