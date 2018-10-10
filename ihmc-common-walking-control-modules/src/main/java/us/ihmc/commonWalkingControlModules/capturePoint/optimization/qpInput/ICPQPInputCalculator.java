@@ -1,9 +1,10 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
@@ -22,9 +23,14 @@ public class ICPQPInputCalculator
 
    final DenseMatrix64F feedbackJacobian = new DenseMatrix64F(2, 6);
    final DenseMatrix64F feedbackObjective = new DenseMatrix64F(2, 1);
+   private final DenseMatrix64F feedbackJtW = new DenseMatrix64F(6, 2);
+
 
    final DenseMatrix64F adjustmentJacobian = new DenseMatrix64F(2, 6);
    final DenseMatrix64F adjustmentObjective = new DenseMatrix64F(2, 1);
+   private final DenseMatrix64F adjustmentJtW = new DenseMatrix64F(6, 2);
+
+   final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(2);
 
    private final DenseMatrix64F invertedFeedbackGain = new DenseMatrix64F(2, 2);
 
@@ -200,7 +206,8 @@ public class ICPQPInputCalculator
                                    DenseMatrix64F weight, double footstepRecursionMultiplier, double footstepAdjustmentSafetyFactor)
    {
       invertedFeedbackGain.zero();
-      DiagonalMatrixTools.invertDiagonalMatrix(feedbackGain, invertedFeedbackGain);
+      solver.setA(feedbackGain);
+      solver.invert(invertedFeedbackGain);
 
       int size = 2;
       if (indexHandler.hasCMPFeedbackTask())
@@ -209,12 +216,16 @@ public class ICPQPInputCalculator
          size += 2;
 
       feedbackJacobian.reshape(2, size);
+      feedbackJtW.reshape(size, 2);
       adjustmentJacobian.reshape(2, size);
+      adjustmentJtW.reshape(size, 2);
 
       feedbackJacobian.zero();
+      feedbackJtW.zero();
       feedbackObjective.zero();
 
       adjustmentJacobian.zero();
+      adjustmentJtW.zero();
       adjustmentObjective.zero();
 
       if (considerFeedbackInAdjustment && considerAngularMomentumInAdjustment)
@@ -310,13 +321,15 @@ public class ICPQPInputCalculator
          }
       }
 
-      DiagonalMatrixTools.multAddInner(feedbackJacobian, weight, icpQPInput.quadraticTerm);
-      DiagonalMatrixTools.innerDiagonalMultAddTransA(feedbackJacobian, weight, feedbackObjective, icpQPInput.linearTerm);
-      DiagonalMatrixTools.multAddInner(0.5, feedbackObjective, weight, icpQPInput.residualCost);
+      CommonOps.multTransA(feedbackJacobian, weight, feedbackJtW);
+      CommonOps.multAdd(feedbackJtW, feedbackJacobian, icpQPInput.quadraticTerm);
+      CommonOps.multAdd(feedbackJtW, feedbackObjective, icpQPInput.linearTerm);
+      multAddInner(0.5, feedbackObjective, weight, icpQPInput.residualCost);
 
-      DiagonalMatrixTools.multAddInner(adjustmentJacobian, weight, icpQPInput.quadraticTerm);
-      DiagonalMatrixTools.innerDiagonalMultAddTransA(adjustmentJacobian, weight, adjustmentObjective, icpQPInput.linearTerm);
-      DiagonalMatrixTools.multAddInner(0.5, adjustmentObjective, weight, icpQPInput.residualCost);
+      CommonOps.multTransA(adjustmentJacobian, weight, adjustmentJtW);
+      CommonOps.multAdd(adjustmentJtW, adjustmentJacobian, icpQPInput.quadraticTerm);
+      CommonOps.multAdd(adjustmentJtW, adjustmentObjective, icpQPInput.linearTerm);
+      multAddInner(0.5, adjustmentObjective, weight, icpQPInput.residualCost);
    }
 
    public void computeDynamicConstraintError(DenseMatrix64F solution, DenseMatrix64F errorToPack)
@@ -430,12 +443,37 @@ public class ICPQPInputCalculator
    {
       MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, startIndex, startIndex, weight, 0, 0, 2, 2, 1.0);
 
-      DiagonalMatrixTools.preMultAddBlock(weight, objective, icpQPInputToPack.linearTerm, startIndex, 0);
+      MatrixTools.multAddBlock(weight, objective, icpQPInputToPack.linearTerm, startIndex, 0);
 
       if (includeResidual)
       {
-         DiagonalMatrixTools.multAddInner(0.5, objective, weight, icpQPInputToPack.residualCost);
+         multAddInner(0.5, objective, weight, icpQPInputToPack.residualCost);
       }
    }
 
+   private final DenseMatrix64F aTb = new DenseMatrix64F(6, 6);
+
+   private void multAddInner(DenseMatrix64F jac, DenseMatrix64F weight, DenseMatrix64F resultToPack)
+   {
+      quadraticMultAddTransA(jac, weight, jac, resultToPack);
+   }
+
+   private void multAddInner(double scalar, DenseMatrix64F jac, DenseMatrix64F weight, DenseMatrix64F resultToPack)
+   {
+      quadraticMultAddTransA(scalar, jac, weight, jac, resultToPack);
+   }
+
+   private void quadraticMultAddTransA(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, DenseMatrix64F resultToPack)
+   {
+      aTb.reshape(a.getNumCols(), b.getNumCols());
+      CommonOps.multTransA(a, b, aTb);
+      CommonOps.multAdd(aTb, c, resultToPack);
+   }
+
+   private void quadraticMultAddTransA(double scalar, DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, DenseMatrix64F resultToPack)
+   {
+      aTb.reshape(a.getNumCols(), b.getNumCols());
+      CommonOps.multTransA(scalar, a, b, aTb);
+      CommonOps.multAdd(aTb, c, resultToPack);
+   }
 }
