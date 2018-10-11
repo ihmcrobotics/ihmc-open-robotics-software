@@ -6,11 +6,47 @@ import java.util.List;
 
 public interface JointDesiredOutputListBasics extends JointDesiredOutputListReadOnly
 {
-   void clear();
+   default void clear()
+   {
+      for (int i = 0; i < getNumberOfJointsWithDesiredOutput(); i++)
+         getJointDesiredOutput(i).clear();
+   }
 
-   void overwriteWith(JointDesiredOutputListReadOnly other);
+   /**
+    * Clear this and copy the data held in other.
+    */
+   default void overwriteWith(JointDesiredOutputListReadOnly other)
+   {
+      clear();
 
-   void completeWith(JointDesiredOutputListReadOnly other);
+      for (int otherIndex = 0; otherIndex < other.getNumberOfJointsWithDesiredOutput(); otherIndex++)
+      {
+         OneDoFJoint otherJoint = other.getOneDoFJoint(otherIndex);
+         JointDesiredOutputBasics jointDesiredOutput = getJointDesiredOutput(otherJoint.getNameBasedHashCode());
+
+         if (jointDesiredOutput == null)
+            continue;
+
+         jointDesiredOutput.set(other.getJointDesiredOutput(otherIndex));
+      }
+   }
+   /**
+    * Complete the information held in this using other.
+    * Does not overwrite the data already set in this.
+    */
+   default void completeWith(JointDesiredOutputListReadOnly other)
+   {
+      for (int otherIndex = 0; otherIndex < other.getNumberOfJointsWithDesiredOutput(); otherIndex++)
+      {
+         OneDoFJoint otherJoint = other.getOneDoFJoint(otherIndex);
+         JointDesiredOutputBasics jointDesiredOutput = getJointDesiredOutput(otherJoint.getNameBasedHashCode());
+
+         if (jointDesiredOutput == null)
+            throwJointNotRegisteredException(otherJoint);
+
+         jointDesiredOutput.completeWith(other.getJointDesiredOutput(otherIndex));
+      }
+   }
 
    default void setJointControlMode(OneDoFJoint joint, JointDesiredControlMode controlMode)
    {
@@ -221,6 +257,8 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
 
       lowLevelJointData.setResetIntegrators(reset);
    }
+
+
 
    @Override
    JointDesiredOutputBasics getJointDesiredOutput(int index);
