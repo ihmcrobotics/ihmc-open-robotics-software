@@ -64,7 +64,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "IHMCJavaDecklinkCapture", version: "0.2"
    compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.8.3"
    compile group: "us.ihmc", name: "ihmc-pub-sub-serializers-extra", version: "0.8.3"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.2"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
@@ -75,7 +75,7 @@ testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
 
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.23.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.24.0"
 }
 
 mainClassName = hasProperty("mainClass") ? mainClass : "us.ihmc.robotDataLogger.logger.YoVariableLoggerDispatcher"
