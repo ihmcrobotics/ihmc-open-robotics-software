@@ -21,6 +21,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StandingState extends WalkingState
 {
@@ -37,6 +38,7 @@ public class StandingState extends WalkingState
 
    private final YoBoolean doPrepareManipulationForLocomotion = new YoBoolean("doPrepareManipulationForLocomotion", registry);
    private final YoBoolean doPreparePelvisForLocomotion = new YoBoolean("doPreparePelvisForLocomotion", registry);
+   private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
 
    public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
@@ -75,6 +77,7 @@ public class StandingState extends WalkingState
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
       doPreparePelvisForLocomotion.set(walkingControllerParameters.doPreparePelvisForLocomotion());
+      finalTransferTime.set(walkingControllerParameters.getDefaultFinalTransferTime());
    }
 
    @Override
@@ -93,10 +96,10 @@ public class StandingState extends WalkingState
       // need to always update biped support polygons after a change to the contact states
       controllerToolbox.updateBipedSupportPolygons();
 
-      balanceManager.clearICPPlan();
       balanceManager.resetPushRecovery();
       balanceManager.enablePelvisXYControl();
       balanceManager.setICPPlanTransferFromSide(null);
+      balanceManager.initializeICPPlanForStanding();
 
       walkingMessageHandler.reportWalkingComplete();
 

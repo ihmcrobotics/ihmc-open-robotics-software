@@ -60,15 +60,27 @@ public class MomentumTrajectoryHandler extends EuclideanTrajectoryHandler
    {
       if (!isWithinInterval(time))
       {
-         angularMomentumToPack.setToNaN(ReferenceFrame.getWorldFrame());
-         angularMomentumRateToPack.setToNaN(ReferenceFrame.getWorldFrame());
+         if (angularMomentumToPack != null)
+         {
+            angularMomentumToPack.setToNaN(ReferenceFrame.getWorldFrame());
+         }
+         if (angularMomentumRateToPack != null)
+         {
+            angularMomentumRateToPack.setToNaN(ReferenceFrame.getWorldFrame());
+         }
          return false;
       }
 
       packDesiredsAtTime(time);
 
-      angularMomentumToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), getPosition());
-      angularMomentumRateToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), getVelocity());
+      if (angularMomentumToPack != null)
+      {
+         angularMomentumToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), getPosition());
+      }
+      if (angularMomentumRateToPack != null)
+      {
+         angularMomentumRateToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), getVelocity());
+      }
       return true;
    }
 }

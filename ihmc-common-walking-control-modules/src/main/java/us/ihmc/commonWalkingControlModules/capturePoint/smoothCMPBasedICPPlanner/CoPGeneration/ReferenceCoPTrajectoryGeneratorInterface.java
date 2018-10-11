@@ -37,10 +37,6 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
    void getDesiredCenterOfPressure(FixedFramePoint3DBasics desiredCoPToPack);
    void getDesiredCenterOfPressure(FixedFramePoint3DBasics desiredCoPToPack, FixedFrameVector3DBasics desiredCoPVelocityToPack);
 
-   void initializeForTransfer(double currentTime);
-
-   void initializeForSwing(double currentTime);
-
    void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide, RobotSide previousTransferToSide);
 
    void computeReferenceCoPsStartingFromSingleSupport(RobotSide supportSide);

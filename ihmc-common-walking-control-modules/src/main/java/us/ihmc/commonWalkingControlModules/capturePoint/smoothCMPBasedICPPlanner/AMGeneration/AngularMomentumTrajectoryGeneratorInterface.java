@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration;
 
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
-import java.util.List;
-
-public interface AngularMomentumTrajectoryGeneratorInterface 
+public interface AngularMomentumTrajectoryGeneratorInterface
 {
    void clear();
 
@@ -20,7 +20,7 @@ public interface AngularMomentumTrajectoryGeneratorInterface
 
    void initializeForSingleSupport(double currentTime);
 
-   void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop);
+   void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean initialTransfer, boolean standing);
 
    void computeReferenceAngularMomentumStartingFromSingleSupport();
 
