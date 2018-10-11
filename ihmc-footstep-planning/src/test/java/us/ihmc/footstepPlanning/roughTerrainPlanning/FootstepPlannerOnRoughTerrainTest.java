@@ -1,10 +1,16 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
@@ -14,7 +20,10 @@ import us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
+import us.ihmc.footstepPlanning.ui.ApplicationRunner;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -26,15 +35,73 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemory
 public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private FootstepPlannerUI ui;
+
+   protected static boolean visualize = false;
+
+   @Before
+   public void setup()
+   {
+      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
+      if (visualize)
+      {
+         ApplicationRunner.runApplication(new Application()
+         {
+            @Override
+            public void start(Stage stage) throws Exception
+            {
+               messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+               messager.startMessager();
+
+               ui = FootstepPlannerUI.createMessagerUI(stage, messager);
+               ui.show();
+            }
+
+            @Override
+            public void stop()
+            {
+               ui.stop();
+               Platform.exit();
+            }
+         });
+
+         double maxStartUpTime = 5.0;
+         double currentTime = 0.0;
+         long sleepDuration = 100;
+         while (ui == null)
+         {
+            if (currentTime > maxStartUpTime)
+               throw new RuntimeException("Failed to start UI");
+
+            currentTime += Conversions.millisecondsToSeconds(sleepDuration);
+            ThreadTools.sleep(sleepDuration);
+         }
+      }
+
+      setupInternal();
+   }
 
    @After
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
+
+      if (ui != null)
+      {
+         ui.stop();
+         Platform.exit();
+      }
+
+      destroyInternal();
    }
+
 
    protected JavaFXMessager messager;
    protected AtomicReference<FootstepPlannerParameters> parametersReference;
+
+   protected abstract void setupInternal();
+   protected abstract void destroyInternal();
 
    public abstract boolean assertPlannerReturnedResult();
 

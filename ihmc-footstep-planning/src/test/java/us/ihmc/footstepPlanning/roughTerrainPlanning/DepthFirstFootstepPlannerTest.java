@@ -1,30 +1,21 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
-import org.junit.Before;
 import org.junit.Test;
-
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
-import us.ihmc.footstepPlanning.ui.ApplicationRunner;
-import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -32,41 +23,10 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
 {
    private YoFootstepPlannerParameters parameters;
    private DepthFirstFootstepPlanner planner;
-   private FootstepPlannerUI ui;
 
    private static final boolean showPlannerVisualizer = false;
 
-   private static boolean visualize = true;
    private static boolean keepUp = false;
-
-   @Before
-   public void setup()
-   {
-      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
-
-      if (visualize)
-      {
-         ApplicationRunner.runApplication(new Application()
-         {
-            @Override
-            public void start(Stage stage) throws Exception
-            {
-               messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
-               ui = FootstepPlannerUI.createMessagerUI(stage, messager);
-               ui.show();
-            }
-
-            @Override
-            public void stop()
-            {
-               ui.stop();
-            }
-         });
-
-         while (ui == null)
-            ThreadTools.sleep(100);
-      }
-   }
 
    @Override
    public boolean assertPlannerReturnedResult()
@@ -213,8 +173,8 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       super.testSpiralStaircase();
    }
 
-   @Before
-   public void setupPlanner()
+   @Override
+   public void setupInternal()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters());
@@ -238,6 +198,12 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setFeetPolygons(footPolygonsInSoleFrame);
       planner.setMaximumNumberOfNodesToExpand(100);
       planner.setBipedalFootstepPlannerListener(visualizer);
+   }
+
+   @Override
+   public void destroyInternal()
+   {
+      planner = null;
    }
 
    @Override
