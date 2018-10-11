@@ -328,10 +328,10 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    private void assertAngularWeightsMatchDefault(RigidBody rigidBody, SimulationConstructionSet scs)
    {
-      String prefix = rigidBody.getName() + "Taskspace";
-      YoDouble angularWeightX = (YoDouble) scs.getVariable(prefix + "CurrentAngularWeightX");
-      YoDouble angularWeightY = (YoDouble) scs.getVariable(prefix + "CurrentAngularWeightY");
-      YoDouble angularWeightZ = (YoDouble) scs.getVariable(prefix + "CurrentAngularWeightZ");
+      String prefix = rigidBody.getName() + "TaskspaceOrientation";
+      YoDouble angularWeightX = (YoDouble) scs.getVariable(prefix + "CurrentWeightX");
+      YoDouble angularWeightY = (YoDouble) scs.getVariable(prefix + "CurrentWeightY");
+      YoDouble angularWeightZ = (YoDouble) scs.getVariable(prefix + "CurrentWeightZ");
       YoDouble defaultAngularWeightX = (YoDouble) scs.getVariable("ChestAngularWeightX");
       YoDouble defaultAngularWeightY = (YoDouble) scs.getVariable("ChestAngularWeightY");
       YoDouble defaultAngularWeightZ = (YoDouble) scs.getVariable("ChestAngularWeightZ");
@@ -343,14 +343,10 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    private void assertWeightsMatch(double xWeight, double yWeight, double zWeight, RigidBody rigidBody, SimulationConstructionSet scs)
    {
-//      AngularWeightX
-      String prefix = rigidBody.getName() + "Taskspace";
-      YoDouble angularWeightX = (YoDouble) scs.getVariable(prefix + "CurrentAngularWeightX");
-      YoDouble angularWeightY = (YoDouble) scs.getVariable(prefix + "CurrentAngularWeightY");
-      YoDouble angularWeightZ = (YoDouble) scs.getVariable(prefix + "CurrentAngularWeightZ");
-//      YoDouble linearWeightX = (YoDouble) scs.getVariable(prefix + "CurrentLinearWeightX");
-//      YoDouble linearWeightY = (YoDouble) scs.getVariable(prefix + "CurrentLinearWeightY");
-//      YoDouble linearWeightZ = (YoDouble) scs.getVariable(prefix + "CurrentLinearWeightZ");
+      String prefix = rigidBody.getName() + "TaskspaceOrientation";
+      YoDouble angularWeightX = (YoDouble) scs.getVariable(prefix + "CurrentWeightX");
+      YoDouble angularWeightY = (YoDouble) scs.getVariable(prefix + "CurrentWeightY");
+      YoDouble angularWeightZ = (YoDouble) scs.getVariable(prefix + "CurrentWeightZ");
 
       assertEquals(xWeight, angularWeightX.getDoubleValue(), 1e-8);
       assertEquals(yWeight, angularWeightY.getDoubleValue(), 1e-8);
