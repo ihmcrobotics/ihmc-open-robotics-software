@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.ui;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -28,6 +29,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class RemotePlannerMessageConverter
 {
+   private static final boolean verbose = false;
+
    private final RealtimeRos2Node ros2Node;
 
    private final SharedMemoryMessager messager;
@@ -54,7 +57,8 @@ public class RemotePlannerMessageConverter
       return createConverter(messager, robotName, DomainFactory.PubSubImplementation.INTRAPROCESS);
    }
 
-   public static RemotePlannerMessageConverter createConverter(SharedMemoryMessager messager, String robotName, DomainFactory.PubSubImplementation implementation)
+   public static RemotePlannerMessageConverter createConverter(SharedMemoryMessager messager, String robotName,
+                                                               DomainFactory.PubSubImplementation implementation)
    {
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "ihmc_footstep_planner_ui");
       return new RemotePlannerMessageConverter(ros2Node, messager, robotName);
@@ -102,6 +106,9 @@ public class RemotePlannerMessageConverter
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
    {
+      if (verbose)
+         PrintTools.info("Received planning request over the network.");
+
       PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsListMessage();
       if (planarRegionsListMessage == null)
       {
@@ -157,6 +164,9 @@ public class RemotePlannerMessageConverter
    {
       while (!hasResult.get())
          ThreadTools.sleep(10);
+
+      if (verbose)
+         PrintTools.info("Finished planning, publishing the result on the network.");
 
       FootstepPlanningToolboxOutputStatus result = new FootstepPlanningToolboxOutputStatus();
 

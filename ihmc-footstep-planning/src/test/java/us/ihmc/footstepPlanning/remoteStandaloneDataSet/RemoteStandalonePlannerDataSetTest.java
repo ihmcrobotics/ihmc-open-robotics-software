@@ -17,6 +17,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -72,7 +73,7 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
          messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
       else
          messager = new SharedMemoryMessager(FootstepPlannerSharedMemoryAPI.API);
-      messageConverter = RemotePlannerMessageConverter.createConverter(messager, "", DomainFactory.PubSubImplementation.INTRAPROCESS);
+      messageConverter = RemotePlannerMessageConverter.createConverter(messager, robotName, DomainFactory.PubSubImplementation.INTRAPROCESS);
       module = new FootstepPathCalculatorModule(messager);
 
       try
@@ -122,11 +123,11 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
 
-      footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class, ROS2Tools
-            .getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
+      footstepPlanningRequestPublisher = ROS2Tools
+            .createPublisher(ros2Node, FootstepPlanningRequestPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
 
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class,
-                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT),
+                                           FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
 
       uiReceivedPlan = new AtomicReference<>(false);
@@ -196,6 +197,9 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
       if (dataset.hasStartOrientation())
          planningRequestPacket.getStanceFootOrientationInWorld().set(dataset.getStartOrientation());
 
+      if (DEBUG)
+         PrintTools.info("Sending out planning request packet.");
+
       footstepPlanningRequestPublisher.publish(planningRequestPacket);
    }
 
@@ -203,7 +207,7 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
    public String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset)
    {
       double totalTimeWaiting = 0;
-      double maxTimeToWait = dataset.getTimeout(getPlannerType()) + 5.0;
+      double maxTimeToWait = 2.0 * dataset.getTimeout(getPlannerType());
       long waitTime = 10;
 
       queryUIResults();
