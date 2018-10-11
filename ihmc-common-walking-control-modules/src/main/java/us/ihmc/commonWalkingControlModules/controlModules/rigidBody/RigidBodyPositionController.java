@@ -5,6 +5,7 @@ import java.util.Collection;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
@@ -16,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class RigidBodyPositionController extends RigidBodyControlState
+public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
 {
    private final YoBoolean usingWeightFromMessage;
 
@@ -26,13 +27,13 @@ public class RigidBodyPositionController extends RigidBodyControlState
 
    private final RigidBodyPositionControlHelper positionHelper;
 
-   public RigidBodyPositionController(String postfix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
-                                      Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, YoDouble yoTime,
-                                      YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public RigidBodyPositionController(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
+                                      ReferenceFrame controlFrame, ReferenceFrame baseFrame, YoDouble yoTime, YoVariableRegistry parentRegistry,
+                                      YoGraphicsListRegistry graphicsListRegistry)
    {
-      super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName() + postfix, yoTime, parentRegistry);
+      super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
 
-      String bodyName = bodyToControl.getName() + postfix;
+      String bodyName = bodyToControl.getName();
       String prefix = bodyName + "TaskspacePosition";
 
       numberOfPointsInQueue = new YoInteger(prefix + "NumberOfPointsInQueue", registry);
@@ -41,7 +42,7 @@ public class RigidBodyPositionController extends RigidBodyControlState
 
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
-      positionHelper = new RigidBodyPositionControlHelper(postfix, prefix, bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
+      positionHelper = new RigidBodyPositionControlHelper(prefix, bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
                                                           useBaseFrameForControl, usingWeightFromMessage, registry, graphicsListRegistry);
 
       graphics.addAll(positionHelper.getGraphics());
@@ -58,6 +59,7 @@ public class RigidBodyPositionController extends RigidBodyControlState
       positionHelper.setWeights(weights);
    }
 
+   @Override
    public void holdCurrent()
    {
       clear();
@@ -65,11 +67,24 @@ public class RigidBodyPositionController extends RigidBodyControlState
       positionHelper.holdCurrent();
    }
 
+   @Override
    public void holdCurrentDesired()
    {
       clear();
       setTrajectoryStartTimeToCurrentTime();
       positionHelper.holdCurrentDesired();
+   }
+
+   @Override
+   public void goToPoseFromCurrent(FramePose3DReadOnly pose, double trajectoryTime)
+   {
+      goToPositionFromCurrent(pose.getPosition(), trajectoryTime);
+   }
+
+   @Override
+   public void goToPose(FramePose3DReadOnly pose, double trajectoryTime)
+   {
+      goToPosition(pose.getPosition(), trajectoryTime);
    }
 
    public void goToPositionFromCurrent(FramePoint3DReadOnly position, double trajectoryTime)
@@ -104,6 +119,7 @@ public class RigidBodyPositionController extends RigidBodyControlState
       updateGraphics();
    }
 
+   @Override
    public boolean handleTrajectoryCommand(EuclideanTrajectoryControllerCommand command)
    {
       if (handleCommandInternal(command) && positionHelper.handleTrajectoryCommand(command))

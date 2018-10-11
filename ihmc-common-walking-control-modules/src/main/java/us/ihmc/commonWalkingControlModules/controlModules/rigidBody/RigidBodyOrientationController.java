@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
@@ -15,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class RigidBodyOrientationController extends RigidBodyControlState
+public class RigidBodyOrientationController extends RigidBodyTaskspaceControlState
 {
    private final YoBoolean usingWeightFromMessage;
 
@@ -25,13 +26,12 @@ public class RigidBodyOrientationController extends RigidBodyControlState
 
    private final RigidBodyOrientationControlHelper orientationHelper;
 
-   public RigidBodyOrientationController(String postfix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
-                                         Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame baseFrame, YoDouble yoTime,
-                                         YoVariableRegistry parentRegistry)
+   public RigidBodyOrientationController(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
+                                         ReferenceFrame baseFrame, YoDouble yoTime, YoVariableRegistry parentRegistry)
    {
-      super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName() + postfix, yoTime, parentRegistry);
+      super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
 
-      String bodyName = bodyToControl.getName() + postfix;
+      String bodyName = bodyToControl.getName();
       String prefix = bodyName + "TaskspaceOrientation";
 
       numberOfPointsInQueue = new YoInteger(prefix + "NumberOfPointsInQueue", registry);
@@ -40,8 +40,8 @@ public class RigidBodyOrientationController extends RigidBodyControlState
 
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
-      orientationHelper = new RigidBodyOrientationControlHelper(postfix, prefix, bodyToControl, baseBody, elevator, trajectoryFrames, baseFrame,
-                                                                       useBaseFrameForControl, usingWeightFromMessage, registry);
+      orientationHelper = new RigidBodyOrientationControlHelper(prefix, bodyToControl, baseBody, elevator, trajectoryFrames, baseFrame, useBaseFrameForControl,
+                                                                usingWeightFromMessage, registry);
    }
 
    public void setGains(PID3DGainsReadOnly gains)
@@ -54,6 +54,7 @@ public class RigidBodyOrientationController extends RigidBodyControlState
       orientationHelper.setWeights(weights);
    }
 
+   @Override
    public void holdCurrent()
    {
       clear();
@@ -61,11 +62,24 @@ public class RigidBodyOrientationController extends RigidBodyControlState
       orientationHelper.holdCurrent();
    }
 
+   @Override
    public void holdCurrentDesired()
    {
       clear();
       setTrajectoryStartTimeToCurrentTime();
       orientationHelper.holdCurrentDesired();
+   }
+
+   @Override
+   public void goToPoseFromCurrent(FramePose3DReadOnly pose, double trajectoryTime)
+   {
+      goToOrientationFromCurrent(pose.getOrientation(), trajectoryTime);
+   }
+
+   @Override
+   public void goToPose(FramePose3DReadOnly pose, double trajectoryTime)
+   {
+      goToOrientation(pose.getOrientation(), trajectoryTime);
    }
 
    public void goToOrientationFromCurrent(FrameQuaternionReadOnly orientation, double trajectoryTime)
@@ -100,6 +114,7 @@ public class RigidBodyOrientationController extends RigidBodyControlState
       updateGraphics();
    }
 
+   @Override
    public boolean handleTrajectoryCommand(SO3TrajectoryControllerCommand command)
    {
       if (handleCommandInternal(command) && orientationHelper.handleTrajectoryCommand(command))

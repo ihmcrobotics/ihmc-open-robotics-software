@@ -70,7 +70,7 @@ public class RigidBodyPositionControlHelper
 
    private final String warningPrefix;
 
-   public RigidBodyPositionControlHelper(String postfix, String warningPrefix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
+   public RigidBodyPositionControlHelper(String warningPrefix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
                                          Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
                                          BooleanProvider useBaseFrameForControl, BooleanProvider useWeightFromMessage, YoVariableRegistry registry,
                                          YoGraphicsListRegistry graphicsListRegistry)
@@ -80,7 +80,7 @@ public class RigidBodyPositionControlHelper
       this.useBaseFrameForControl = useBaseFrameForControl;
       this.useWeightFromMessage = useWeightFromMessage;
 
-      String bodyName = bodyToControl.getName() + postfix;
+      String bodyName = bodyToControl.getName();
       String prefix = bodyName + "TaskspacePosition";
 
       trajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(bodyName, RigidBodyTaskspaceControlState.maxPointsInGenerator, true,
