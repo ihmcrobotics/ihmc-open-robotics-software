@@ -12,6 +12,7 @@ import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -76,7 +77,7 @@ public class QuadrupedFreezeController implements QuadrupedController
       for (int i = 0; i < joints.size(); i++)
       {
          OneDoFJoint joint = joints.get(i);
-         JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+         JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
          double desiredPosition = jointDesiredOutput.hasDesiredPosition() ? jointDesiredOutput.getDesiredPosition() : joint.getQ();
          desiredFreezePositions.get(i).set(desiredPosition);
       }
@@ -95,7 +96,7 @@ public class QuadrupedFreezeController implements QuadrupedController
       for (int i = 0; i < joints.size(); i++)
       {
          OneDoFJoint oneDoFJoint = joints.get(i);
-         JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint);
+         JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint);
          jointDesiredOutput.clear();
          jointDesiredOutput.setStiffness(freezeJointStiffness.getValue());
          jointDesiredOutput.setDamping(freezeJointDamping.getValue());

@@ -17,6 +17,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.lists.PairList;
@@ -38,7 +39,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
    private final DiagnosticTaskExecutor diagnosticTaskExecutor;
 
-   private final PairList<OneDoFJoint, JointDesiredOutput> controlledJoints = new PairList<>();
+   private final PairList<OneDoFJoint, JointDesiredOutputBasics> controlledJoints = new PairList<>();
    private final Map<OneDoFJoint, PDController> jointPDControllerMap = new LinkedHashMap<>();
    private final Map<OneDoFJoint, YoDouble> jointDesiredPositionMap = new LinkedHashMap<>();
    private final Map<OneDoFJoint, YoDouble> jointDesiredVelocityMap = new LinkedHashMap<>();
@@ -253,7 +254,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
       for (int i = 0; i < controlledJoints.size(); i++)
       {
          OneDoFJoint state = controlledJoints.first(i);
-         JointDesiredOutput output = controlledJoints.second(i);
+         JointDesiredOutputBasics output = controlledJoints.second(i);
          PDController jointPDController = jointPDControllerMap.get(state);
 
          double desiredJointPositionOffset = 0.0;
@@ -311,7 +312,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
       for (int i = 0; i < controlledJoints.size(); i++)
       {
          OneDoFJoint state = controlledJoints.first(i);
-         JointDesiredOutput output = controlledJoints.second(i);
+         JointDesiredOutputBasics output = controlledJoints.second(i);
          PDController jointPDController = jointPDControllerMap.get(state);
 
          OneDoFJointQuinticTrajectoryGenerator jointTrajectory = jointTrajectories.get(state);
