@@ -217,10 +217,16 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    @Override
    public boolean handleTrajectoryCommand(SE3TrajectoryControllerCommand command)
    {
+      if (!handleCommandInternal(command))
+      {
+         clear();
+         return false;
+      }
+
       CommandConversionTools.convertToEuclidean(command, euclideanCommand);
       CommandConversionTools.convertToSO3(command, so3Command);
 
-      if (handleCommandInternal(command) && positionHelper.handleTrajectoryCommand(euclideanCommand) && orientationHelper.handleTrajectoryCommand(so3Command))
+      if (positionHelper.handleTrajectoryCommand(euclideanCommand) && orientationHelper.handleTrajectoryCommand(so3Command))
       {
          usingWeightFromMessage.set(positionHelper.isMessageWeightValid() && orientationHelper.isMessageWeightValid());
          return true;
