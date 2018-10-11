@@ -12,6 +12,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -96,7 +97,7 @@ public class JointAccelerationIntegrationCalculator
       {
          OneDoFJoint joint = jointsToComputeDesiredPositionFor.get(jointIndex);
 
-         JointDesiredOutput lowLevelJointData = lowLevelJointDataHolderToUpdate.getJointDesiredOutput(joint);
+         JointDesiredOutputBasics lowLevelJointData = lowLevelJointDataHolderToUpdate.getJointDesiredOutput(joint);
          if (lowLevelJointData == null || !lowLevelJointData.hasDesiredAcceleration())
         	 continue;
 
