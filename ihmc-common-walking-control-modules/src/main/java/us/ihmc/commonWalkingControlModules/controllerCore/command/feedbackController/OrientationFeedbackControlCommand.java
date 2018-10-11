@@ -44,6 +44,9 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
  */
 public class OrientationFeedbackControlCommand implements FeedbackControlCommand<OrientationFeedbackControlCommand>
 {
+   // TODO: This is not used by the controller core. The control point orientation is only used with the spatial control command.
+   private final FrameQuaternion bodyFixedOrientationInEndEffectorFrame = new FrameQuaternion();
+
    /** The end-effector's desired orientation expressed in world frame. */
    private final FixedFrameQuaternionBasics desiredOrientationInWorld = new FrameQuaternion(ReferenceFrame.getWorldFrame());
    /** The end-effector's desired angular velocity expressed in world frame. */
@@ -94,6 +97,10 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       gains.set(other.gains);
 
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
+
+      resetBodyFixedOrientation();
+      setBodyFixedOrientationToControl(other.getBodyFixedOrientationToControl());
+
       controlBaseFrame = other.controlBaseFrame;
    }
 
@@ -111,6 +118,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public void set(RigidBody base, RigidBody endEffector)
    {
       spatialAccelerationCommand.set(base, endEffector);
+      resetBodyFixedOrientation();
    }
 
    /**
@@ -238,6 +246,35 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    }
 
    /**
+    * Zeroes the offset of the {@code bodyFixedOrientation} such that after calling this method <br>
+    * {@code bodyFixedOrientation == new FrameQuaternion(endEffector.getBodyFixedFrame())}.
+    */
+   public void resetBodyFixedOrientation()
+   {
+      bodyFixedOrientationInEndEffectorFrame.setToZero(getEndEffector().getBodyFixedFrame());
+   }
+
+   /**
+    * Sets the position of the {@code bodyFixedOrientation} with respect to the
+    * {@code endEffector.getBodyFixedFrame()}.
+    * <p>
+    * The {@code bodyFixedOrientation} describes on what the feedback control is applied, such that the
+    * feedback controller for this end-effector will do its best to bring the {@code controlFrame}
+    * to the given desired orientation.
+    * </p>
+    *
+    * @param bodyFixedOrientationInEndEffectorFrame the position of the {@code bodyFixedOrientation}. Not
+    *           modified.
+    * @throws ReferenceFrameMismatchException if any the argument is not expressed in
+    *            {@code endEffector.getBodyFixedFrame()}.
+    */
+   public void setBodyFixedOrientationToControl(FrameQuaternionReadOnly bodyFixedOrientationInEndEffectorFrame)
+   {
+      bodyFixedOrientationInEndEffectorFrame.checkReferenceFrameMatch(getEndEffector().getBodyFixedFrame());
+      this.bodyFixedOrientationInEndEffectorFrame.set(bodyFixedOrientationInEndEffectorFrame);
+   }
+
+   /**
     * Change the reference frame of the given data such that it is expressed in
     * {@link ReferenceFrame#getWorldFrame()}. The data will be used for the next control tick.
     *
@@ -358,6 +395,16 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public void getFeedForwardActionIncludingFrame(FrameVector3D feedForwardAngularActionToPack)
    {
       feedForwardAngularActionToPack.setIncludingFrame(feedForwardAngularActionInWorld);
+   }
+
+   public void getBodyFixedOrientationIncludingFrame(FrameQuaternion bodyFixedOrientationToControlToPack)
+   {
+      bodyFixedOrientationToControlToPack.setIncludingFrame(bodyFixedOrientationInEndEffectorFrame);
+   }
+
+   public FrameQuaternionReadOnly getBodyFixedOrientationToControl()
+   {
+      return bodyFixedOrientationInEndEffectorFrame;
    }
 
    public FrameQuaternionReadOnly getDesiredOrientation()

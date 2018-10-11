@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -51,14 +52,17 @@ public class RigidBodyOrientationControlHelper
 
    private final BooleanProvider useBaseFrameForControl;
 
+   private final FixedFrameQuaternionBasics controlFrameOrientation;
+   private final ReferenceFrame defaultControlFrame;
+
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame baseFrame;
 
    private final String warningPrefix;
 
    public RigidBodyOrientationControlHelper(String warningPrefix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
-                                            Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame baseFrame, BooleanProvider useBaseFrameForControl,
-                                            BooleanProvider useWeightFromMessage, YoVariableRegistry registry)
+                                            Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
+                                            BooleanProvider useBaseFrameForControl, BooleanProvider useWeightFromMessage, YoVariableRegistry registry)
    {
       this.warningPrefix = warningPrefix;
       this.baseFrame = baseFrame;
@@ -81,7 +85,10 @@ public class RigidBodyOrientationControlHelper
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
 
+      defaultControlFrame = controlFrame;
       bodyFrame = bodyToControl.getBodyFixedFrame();
+      controlFrameOrientation = new FrameQuaternion(bodyFrame);
+      setDefaultControlFrame();
    }
 
    public void setGains(PID3DGainsReadOnly gains)
@@ -94,17 +101,36 @@ public class RigidBodyOrientationControlHelper
       this.defaultWeight = weights;
    }
 
+   private void setDefaultControlFrame()
+   {
+      controlFrameOrientation.setFromReferenceFrame(defaultControlFrame);
+      feedbackControlCommand.setBodyFixedOrientationToControl(controlFrameOrientation);
+   }
+
+   private void setControlFrameOrientation(RotationMatrixReadOnly controlFrameOrientationInBodyFrame)
+   {
+      controlFrameOrientation.set(controlFrameOrientationInBodyFrame);
+      feedbackControlCommand.setBodyFixedOrientationToControl(controlFrameOrientation);
+   }
+
    public void holdCurrent()
    {
       clear();
-      desiredOrientation.setToZero(bodyFrame);
+      desiredOrientation.setIncludingFrame(controlFrameOrientation);
       queueInitialPoint(desiredOrientation);
    }
 
    public void holdCurrentDesired()
    {
+      // Compute the initial desired orientation for the body frame.
       getDesiredOrientation(desiredOrientation);
+      desiredOrientation.changeFrame(controlFrameOrientation.getReferenceFrame());
+      desiredOrientation.preMultiplyConjugateOther(controlFrameOrientation);
+
       clear();
+
+      // Set the new control frame and move the initial desired position to be for that frame.
+      desiredOrientation.preMultiply(controlFrameOrientation);
       queueInitialPoint(desiredOrientation);
    }
 
@@ -138,7 +164,7 @@ public class RigidBodyOrientationControlHelper
    {
       if (trajectoryGenerator.isEmpty())
       {
-         orientationToPack.setFromReferenceFrame(bodyFrame);
+         orientationToPack.setMatchingFrame(controlFrameOrientation);
       }
       else
       {
@@ -222,14 +248,19 @@ public class RigidBodyOrientationControlHelper
    {
       if (command.getExecutionMode() == ExecutionMode.OVERRIDE || isEmpty())
       {
+         // Compute the initial desired orientation for the body frame.
          getDesiredOrientation(desiredOrientation);
+         desiredOrientation.changeFrame(controlFrameOrientation.getReferenceFrame());
+         desiredOrientation.preMultiplyConjugateOther(controlFrameOrientation);
+
          clear();
 
-         if (command.useCustomControlFrame() && !command.getControlFramePose().getRotationMatrix().isIdentity())
+         // Set the new control frame and move the initial desired position to be for that frame.
+         if (command.useCustomControlFrame())
          {
-            // TODO: instead of throwing an exception here change the message format to use a position instead of a pose.
-            throw new RuntimeException("Can not have a custom orientation for the control frame.");
+            setControlFrameOrientation(command.getControlFramePose().getRotationMatrix());
          }
+         desiredOrientation.preMultiply(controlFrameOrientation);
 
          trajectoryGenerator.changeFrame(command.getTrajectoryFrame());
          selectionMatrix.set(command.getSelectionMatrix());
@@ -358,6 +389,7 @@ public class RigidBodyOrientationControlHelper
    {
       selectionMatrix.resetSelection();
       trajectoryGenerator.clear(baseFrame);
+      setDefaultControlFrame();
       pointQueue.clear();
    }
 
