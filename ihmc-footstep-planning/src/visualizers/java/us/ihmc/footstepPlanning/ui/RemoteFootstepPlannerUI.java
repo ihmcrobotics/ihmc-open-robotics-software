@@ -1,7 +1,10 @@
 package us.ihmc.footstepPlanning.ui;
 
+import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -21,7 +24,6 @@ public class RemoteFootstepPlannerUI extends Application
    private RemoteUIMessageConverter messageConverter;
 
    private FootstepPlannerUI ui;
-
 
    public static RemoteFootstepPlannerUI createIntraprocessUI(String robotName)
    {
@@ -62,7 +64,6 @@ public class RemoteFootstepPlannerUI extends Application
       this.visualize = true;
    }
 
-
    @Override
    public void start(Stage primaryStage) throws Exception
    {
@@ -73,10 +74,11 @@ public class RemoteFootstepPlannerUI extends Application
 
       messager.startMessager();
 
-      ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager);
-
       if (visualize)
+      {
+         ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager);
          ui.show();
+      }
    }
 
    @Override
@@ -84,21 +86,34 @@ public class RemoteFootstepPlannerUI extends Application
    {
       super.stop();
 
-      ui.stop();
       messager.closeMessager();
-
       messageConverter.destroy();
+
+      if (visualize)
+         ui.stop();
+
+      Platform.exit();
    }
 
    public boolean isRunning()
    {
-      return ui != null && messager != null && messageConverter != null;
+      return messager != null && messageConverter != null && (!visualize || ui != null);
    }
 
    public JavaFXMessager getMessager()
    {
+      double maxTimeForStartUp = 5.0;
+      double currentTime = 0.0;
+      long sleepDuration = 100;
+
       while (!isRunning())
-         ThreadTools.sleep(100);
+      {
+         if (currentTime > maxTimeForStartUp)
+            throw new RuntimeException("Failed to start.");
+
+         currentTime += Conversions.millisecondsToSeconds(sleepDuration);
+         ThreadTools.sleep(sleepDuration);
+      }
 
       return messager;
    }
