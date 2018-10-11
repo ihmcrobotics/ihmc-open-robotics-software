@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.sharedMemoryDataSet;
 
 import org.junit.After;
 import org.junit.Before;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
@@ -76,24 +77,18 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
 
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.ComputePathTopic, true);
 
+      double timeout = dataset.getTimeout(getPlannerType());
+      double totalTimeTaken = 0.0;
+      long sleepDuration = 10;
       while (!receivedPlan.get() && !receivedResult.get())
       {
-         ThreadTools.sleep(10);
+         if (totalTimeTaken > timeout + 5.0)
+            throw new RuntimeException("Timed out waiting for a result.");
+
+         ThreadTools.sleep(sleepDuration);
+         totalTimeTaken += Conversions.millisecondsToSeconds(sleepDuration);
       }
       String datasetName = dataset.getDatasetName();
-
-      int ticksToWait = 100;
-      int tick = 0;
-      if (receivedResult.get() && footstepPlanningResult.get().validForExecution())
-      { // we know there's a valid plan, so wait until we've received it
-         while (!receivedPlan.get())
-         {
-            if (tick > ticksToWait)
-               return "Supposedly found a solution, but never received a plan out.";
-            ThreadTools.sleep(10);
-            tick++;
-         }
-      }
 
       String errorMessage = "";
       errorMessage += assertTrue(datasetName, "Planning result for " + datasetName + " is invalid, result was " + footstepPlanningResult.get(),
