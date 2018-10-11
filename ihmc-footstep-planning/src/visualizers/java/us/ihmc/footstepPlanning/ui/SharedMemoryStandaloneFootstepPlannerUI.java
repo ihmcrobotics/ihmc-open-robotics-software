@@ -16,22 +16,10 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
  */
 public class SharedMemoryStandaloneFootstepPlannerUI extends Application
 {
-   private final boolean visualize;
-
    private JavaFXMessager messager;
    private FootstepPathCalculatorModule module;
 
    private FootstepPlannerUI ui;
-
-   public SharedMemoryStandaloneFootstepPlannerUI(boolean visualize)
-   {
-      this.visualize = visualize;
-   }
-
-   public SharedMemoryStandaloneFootstepPlannerUI()
-   {
-      this(true);
-   }
 
    @Override
    public void start(Stage primaryStage) throws Exception
@@ -40,13 +28,11 @@ public class SharedMemoryStandaloneFootstepPlannerUI extends Application
       messager.startMessager();
 
       module = FootstepPathCalculatorModule.createMessagerModule(messager);
-
       module.start();
-      if (visualize)
-      {
-         ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager);
-         ui.show();
-      }
+
+      ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager);
+      ui.show();
+
    }
 
    @Override
@@ -54,35 +40,9 @@ public class SharedMemoryStandaloneFootstepPlannerUI extends Application
    {
       super.stop();
 
-      if (module != null)
-         module.stop();
-      if (ui != null)
-         ui.stop();
-
-      Platform.exit();
-   }
-
-   public JavaFXMessager getMessager()
-   {
-      double maxTimeForStartUp = 5.0;
-      double currentTime = 0.0;
-      long sleepDuration = 100;
-
-      while (!isRunning())
-      {
-         if (currentTime > maxTimeForStartUp)
-            throw new RuntimeException("Failed to start.");
-
-         currentTime += Conversions.millisecondsToSeconds(sleepDuration);
-         ThreadTools.sleep(sleepDuration);
-      }
-
-      return messager;
-   }
-
-   private boolean isRunning()
-   {
-      return module != null && messager != null && (!visualize || ui != null);
+      messager.closeMessager();
+      module.stop();
+      ui.stop();
    }
 
    public static void main(String[] args)

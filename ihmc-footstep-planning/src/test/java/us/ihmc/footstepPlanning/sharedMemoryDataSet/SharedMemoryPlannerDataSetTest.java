@@ -1,5 +1,8 @@
 package us.ihmc.footstepPlanning.sharedMemoryDataSet;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import org.junit.After;
 import org.junit.Before;
 import us.ihmc.commons.Conversions;
@@ -13,8 +16,11 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnit
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.SharedMemoryStandaloneFootstepPlannerUI;
+import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,8 +28,9 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemory
 
 public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
-   private SharedMemoryStandaloneFootstepPlannerUI launcher;
-   protected JavaFXMessager messager;
+   protected JavaFXMessager messager = null;
+   protected FootstepPathCalculatorModule module = null;
+   protected FootstepPlannerUI ui = null;
 
 
    @Before
@@ -31,18 +38,65 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
-      launcher = new SharedMemoryStandaloneFootstepPlannerUI(VISUALIZE);
-      ApplicationRunner.runApplication(launcher);
+      messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      try
+      {
+         messager.startMessager();
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException("Failed to start message.");
+      }
 
-      messager = launcher.getMessager();
+      module = FootstepPathCalculatorModule.createMessagerModule(messager);
+      module.start();
+
+      if (VISUALIZE)
+      {
+
+         ApplicationRunner.runApplication(new Application()
+         {
+            @Override
+            public void start(Stage stage) throws Exception
+            {
+               ui = FootstepPlannerUI.createMessagerUI(stage, messager);
+               ui.show();
+            }
+
+            @Override
+            public void stop() throws Exception
+            {
+               ui.stop();
+               Platform.exit();
+            }
+         });
+
+         double maxWaitTime = 5.0;
+         double totalTime = 0.0;
+         long sleepDuration = 100;
+
+         while (ui == null)
+         {
+            if (totalTime > maxWaitTime)
+               throw new RuntimeException("Timed out waiting for the UI to start.");
+            ThreadTools.sleep(sleepDuration);
+            totalTime += Conversions.millisecondsToSeconds(sleepDuration);
+         }
+
+      }
    }
 
    @After
    public void tearDown() throws Exception
    {
-      launcher.stop();
+      module.stop();
+      messager.closeMessager();
+      if (ui != null)
+         ui.stop();
+
+      module = null;
       messager = null;
-      launcher = null;
+      ui = null;
    }
 
 
