@@ -45,6 +45,7 @@ import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -770,7 +771,7 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
       }
 
       @Override
-      public SegmentDependentList<RobotSide, MovingReferenceFrame> getSoleFrames()
+      public SideDependentList<MovingReferenceFrame> getSoleFrames()
       {
          return null;
       }
