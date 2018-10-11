@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.Collection;
 
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPoseController;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
@@ -25,7 +25,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    private final YoBoolean isPerformingTouchdown;
    private final SoftTouchdownPositionTrajectoryGenerator positionTrajectoryForDisturbanceRecovery;
 
-   private final RigidBodyTaskspaceControlState taskspaceControlState;
+   private final RigidBodyPoseController poseController;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
    private Vector3DReadOnly angularWeight;
@@ -62,9 +62,9 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       ankleFrame = foot.getParentJoint().getFrameAfterJoint();
       controlFrame = ankleFrame;
 
-      taskspaceControlState = new RigidBodyTaskspaceControlState("", foot, pelvis, rootBody, trajectoryFrames, controlFrame, pelvisFrame, true, true, yoTime,
-            null, graphicsListRegistry, registry);
-      taskspaceControlState.setGains(gains.getOrientationGains(), gains.getPositionGains());
+      poseController = new RigidBodyPoseController(foot, pelvis, rootBody, trajectoryFrames, controlFrame, pelvisFrame, yoTime, null, graphicsListRegistry,
+                                                   registry);
+      poseController.setGains(gains.getOrientationGains(), gains.getPositionGains());
 
       spatialFeedbackControlCommand.set(rootBody, foot);
       spatialFeedbackControlCommand.setPrimaryBase(pelvis);
@@ -77,26 +77,26 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       this.angularWeight = angularWeight;
       this.linearWeight = linearWeight;
 
-      taskspaceControlState.setWeights(angularWeight, linearWeight);
+      poseController.setWeights(angularWeight, linearWeight);
    }
 
    public void holdCurrentPosition()
    {
-      taskspaceControlState.holdCurrent();
+      poseController.holdCurrent();
    }
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
-      if (!taskspaceControlState.handlePoseTrajectoryCommand(command.getSE3Trajectory()))
+      if (!poseController.handleTrajectoryCommand(command.getSE3Trajectory()))
       {
-         taskspaceControlState.holdCurrent();
+         poseController.holdCurrent();
       }
    }
 
    @Override
    public void onEntry()
    {
-      taskspaceControlState.onEntry();
+      poseController.onEntry();
       isPerformingTouchdown.set(false);
 
       if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
@@ -119,10 +119,10 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       }
       else
       {
-         taskspaceControlState.doAction(timeInState);
-         spatialFeedbackControlCommand.set((SpatialFeedbackControlCommand) taskspaceControlState.getFeedbackControlCommand());
+         poseController.doAction(timeInState);
+         spatialFeedbackControlCommand.set((SpatialFeedbackControlCommand) poseController.getFeedbackControlCommand());
 
-         if (taskspaceControlState.abortState())
+         if (poseController.abortState())
             requestTouchdownForDisturbanceRecovery(timeInState);
       }
 
@@ -199,7 +199,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    public void requestStopTrajectory()
    {
-      taskspaceControlState.holdCurrent();
+      poseController.holdCurrent();
    }
 
    @Override
@@ -217,6 +217,6 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    @Override
    public void onExit()
    {
-      taskspaceControlState.onExit();
+      poseController.onExit();
    }
 }

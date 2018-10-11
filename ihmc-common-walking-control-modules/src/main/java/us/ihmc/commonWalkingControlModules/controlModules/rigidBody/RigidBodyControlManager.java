@@ -80,9 +80,8 @@ public class RigidBodyControlManager
       RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, parentRegistry);
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
-      taskspaceControlState = new RigidBodyTaskspaceControlState("", bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
-                                                                 enablePositionTracking, enableOrientationTracking, yoTime, jointControlHelper,
-                                                                 graphicsListRegistry, registry);
+      taskspaceControlState = new RigidBodyPoseController(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame, yoTime,
+                                                          jointControlHelper, graphicsListRegistry, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
 
       if (contactableBody != null)
@@ -100,7 +99,7 @@ public class RigidBodyControlManager
       checkDefaultControlMode(defaultControlMode, this.homePose, bodyName);
       String description = "WARNING: only " + RigidBodyControlMode.JOINTSPACE + " or " + RigidBodyControlMode.TASKSPACE + " possible!";
       this.defaultControlMode = new EnumParameter<>(namePrefix + "DefaultControlMode", description, registry, RigidBodyControlMode.class, false,
-            defaultControlMode);
+                                                    defaultControlMode);
       this.defaultControlMode.addParameterChangedListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
 
       allJointsEnabled = new YoBoolean(namePrefix + "AllJointsEnabled", registry);
@@ -142,8 +141,7 @@ public class RigidBodyControlManager
          loadBearingControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
    }
 
-   public void setGains(Map<String, PIDGainsReadOnly> jointspaceGains, PID3DGainsReadOnly taskspaceOrientationGains,
-                        PID3DGainsReadOnly taskspacePositionGains)
+   public void setGains(Map<String, PIDGainsReadOnly> jointspaceGains, PID3DGainsReadOnly taskspaceOrientationGains, PID3DGainsReadOnly taskspacePositionGains)
    {
       jointspaceControlState.setGains(jointspaceGains);
       taskspaceControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
@@ -196,7 +194,7 @@ public class RigidBodyControlManager
 
    public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand command)
    {
-      if (taskspaceControlState.handleOrientationTrajectoryCommand(command))
+      if (taskspaceControlState.handleTrajectoryCommand(command))
       {
          requestState(taskspaceControlState.getControlMode());
       }
@@ -209,7 +207,7 @@ public class RigidBodyControlManager
 
    public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand command)
    {
-      if (taskspaceControlState.handlePoseTrajectoryCommand(command))
+      if (taskspaceControlState.handleTrajectoryCommand(command))
       {
          requestState(taskspaceControlState.getControlMode());
       }
@@ -239,7 +237,7 @@ public class RigidBodyControlManager
    {
       computeDesiredJointPositions(initialJointPositions);
 
-      if (taskspaceControlState.handleHybridPoseTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions))
+      if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions))
       {
          requestState(taskspaceControlState.getControlMode());
       }
