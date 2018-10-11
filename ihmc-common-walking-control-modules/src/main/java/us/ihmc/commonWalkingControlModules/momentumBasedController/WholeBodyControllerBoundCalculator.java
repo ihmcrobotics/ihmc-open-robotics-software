@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -318,7 +319,7 @@ public class WholeBodyControllerBoundCalculator
    {
       for (OneDoFJoint joint : oneDoFJoints)
       {
-         JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+         JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
 
          if (jointLimitData.containsKey(joint))
          {
@@ -328,7 +329,7 @@ public class WholeBodyControllerBoundCalculator
       }
    }
 
-   private void enforceJointTorqueLimit(OneDoFJoint joint, JointDesiredOutput jointDesiredOutput, JointLimitData jointLimitData)
+   private void enforceJointTorqueLimit(OneDoFJoint joint, JointDesiredOutputBasics jointDesiredOutput, JointLimitData jointLimitData)
    {
       double torque;
       if (!jointDesiredOutput.hasDesiredTorque())

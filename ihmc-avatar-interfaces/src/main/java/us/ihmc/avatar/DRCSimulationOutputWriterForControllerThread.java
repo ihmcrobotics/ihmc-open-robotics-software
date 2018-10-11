@@ -7,6 +7,7 @@ import us.ihmc.robotics.math.filters.DelayedYoDouble;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -30,7 +31,7 @@ public class DRCSimulationOutputWriterForControllerThread implements DRCOutputPr
    private class OutputDataSet
    {
       private OneDegreeOfFreedomJoint simulatedJoint;
-      private JointDesiredOutput jointData;
+      private JointDesiredOutputBasics jointData;
       private YoDouble rawJointTorque;
       private DelayedYoDouble delayedJointTorque;
    }

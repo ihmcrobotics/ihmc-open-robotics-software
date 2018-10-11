@@ -6,6 +6,7 @@ import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -64,7 +65,7 @@ public class JointControlBlender
     * @param outputData1 the second output data to be blended. Not modified.
     * @param blendingFactor the blending factor.
     */
-   public void computeAndUpdateJointControl(JointDesiredOutput outputDataToPack, JointDesiredOutputReadOnly outputData0, JointDesiredOutputReadOnly outputData1,
+   public void computeAndUpdateJointControl(JointDesiredOutputBasics outputDataToPack, JointDesiredOutputReadOnly outputData0, JointDesiredOutputReadOnly outputData1,
                                             double blendingFactor)
    {
       blendingFactor = MathTools.clamp(blendingFactor, 0.0, 1.0);
