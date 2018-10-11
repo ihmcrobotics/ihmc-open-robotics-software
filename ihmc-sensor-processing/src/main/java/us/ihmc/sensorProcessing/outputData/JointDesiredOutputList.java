@@ -45,19 +45,19 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
    }
 
    @Override
-   public JointDesiredOutputBasics getJointDesiredOutput(int index)
+   public JointDesiredOutput getJointDesiredOutput(int index)
    {
       return jointsData[index];
    }
 
    @Override
-   public JointDesiredOutputBasics getJointDesiredOutput(OneDoFJoint joint)
+   public JointDesiredOutput getJointDesiredOutput(OneDoFJoint joint)
    {
       return jointMap.get(joint.getNameBasedHashCode());
    }
 
    @Override
-   public JointDesiredOutputBasics getJointDesiredOutput(long jointName)
+   public JointDesiredOutput getJointDesiredOutput(long jointName)
    {
       return jointMap.get(jointName);
    }

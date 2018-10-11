@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.output;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -12,14 +13,14 @@ public class QuadrupedJointIntegrator
    private final YoVariableRegistry registry;
 
    private final OneDoFJoint controllerJoint;
-   private final JointDesiredOutput jointDesiredSetpoints;
+   private final JointDesiredOutputBasics jointDesiredSetpoints;
 
    private final double controlDT;
    private final YoDouble integratedVelocity;
    private final YoDouble integratedPosition;
    private boolean resetIntegrators;
 
-   public QuadrupedJointIntegrator(OneDoFJoint controllerJoint, JointDesiredOutput jointDesiredSetpoints, double controlDT, YoVariableRegistry parentRegistry)
+   public QuadrupedJointIntegrator(OneDoFJoint controllerJoint, JointDesiredOutputBasics jointDesiredSetpoints, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
 

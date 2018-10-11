@@ -12,6 +12,7 @@ import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -56,7 +57,7 @@ public class QuadrupedDoNothingController implements QuadrupedController
       for (int i = 0; i < legJoints.size(); i++)
       {
          OneDoFJoint joint = legJoints.get(i);
-         JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+         JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
          if (forceFeedbackControlEnabled.getBooleanValue())
             jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
          else
@@ -74,7 +75,7 @@ public class QuadrupedDoNothingController implements QuadrupedController
       for (int i = 0; i < legJoints.size(); i++)
       {
          OneDoFJoint joint = legJoints.get(i);
-         JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+         JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
          jointDesiredOutput.setDesiredTorque(desiredDoNothingTorques.get(i).getDoubleValue());
       }
    }
