@@ -11,6 +11,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -190,7 +191,9 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
       planningRequestPacket.getGoalPositionInWorld().set(dataset.getGoal());
       planningRequestPacket.setRequestedFootstepPlannerType(plannerType);
       planningRequestPacket.getPlanarRegionsListMessage().set(planarRegions);
-      planningRequestPacket.setTimeout(dataset.getTimeout(getPlannerType()));
+
+      double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? 2.0 : 1.0;
+      planningRequestPacket.setTimeout(timeoutMultiplier * dataset.getTimeout(getPlannerType()));
 
       if (dataset.hasGoalOrientation())
          planningRequestPacket.getGoalOrientationInWorld().set(dataset.getGoalOrientation());
