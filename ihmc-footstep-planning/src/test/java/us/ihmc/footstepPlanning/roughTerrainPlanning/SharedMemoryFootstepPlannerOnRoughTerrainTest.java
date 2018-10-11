@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
 import org.junit.Test;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -62,8 +63,16 @@ public abstract class SharedMemoryFootstepPlannerOnRoughTerrainTest
 
       messager.submitMessage(ComputePathTopic, true);
 
+      double timeout = 5.0;
+      double totalTimeTaken = 0.0;
+      long sleepDuration = 10;
       while (!receivedPlan.get() && !receivedResult.get())
       {
+         if (totalTimeTaken > timeout + 5.0)
+            throw new RuntimeException("Waited too long for a result.");
+
+         ThreadTools.sleep(sleepDuration);
+         totalTimeTaken += Conversions.millisecondsToSeconds(sleepDuration);
       }
 
       ThreadTools.sleep(10);
