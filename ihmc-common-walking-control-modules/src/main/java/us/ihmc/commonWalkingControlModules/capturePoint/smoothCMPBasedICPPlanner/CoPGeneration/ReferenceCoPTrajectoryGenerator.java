@@ -567,6 +567,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          if (atAStop)
          {  // this guy is starting a series of steps from standing
             computeMidFeetPointWithChickenSupportForInitialTransfer(previousCoPLocation);
+            copLocationWaypoint.addWaypoint(CoPPointName.START_COP, 0.0, previousCoPLocation);
          }
          else
          {  // starting while currently executing a step cycle
@@ -575,8 +576,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             // Put first CoP at the exitCoP of the swing foot when starting in motion
             computeExitCoPPointLocationForPreviousPlan(previousCoPLocation, copPointParametersMap.get(exitCoPName), transferToSide.getOppositeSide(),
                                                        transferringToSameSideAsStartingFrom);
+            copLocationWaypoint.addWaypoint(exitCoPName, 0.0, previousCoPLocation);
          }
-         copLocationWaypoint.addWaypoint(exitCoPName, 0.0, previousCoPLocation);
 
          // set swing parameters for angular momentum estimation
          convertToFramePointRetainingZ(tempFramePoint1, transferringToPolygon.getFirst().getCentroid(), worldFrame);
@@ -705,7 +706,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       clearHeldPosition();
 
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
-      copLocationWaypoint.addWaypoint(exitCoPName, 0.0, previousCoPLocation);
+      copLocationWaypoint.addWaypoint(CoPPointName.START_COP, 0.0, previousCoPLocation);
 
       // set swing parameters for angular momentum estimation
       convertToFramePointRetainingZ(tempFramePoint1, transferringToPolygon.getFirst().getCentroid(), worldFrame);
