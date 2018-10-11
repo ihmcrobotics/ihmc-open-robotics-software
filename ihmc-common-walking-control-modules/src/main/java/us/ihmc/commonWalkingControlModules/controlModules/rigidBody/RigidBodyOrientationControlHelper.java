@@ -57,7 +57,6 @@ public class RigidBodyOrientationControlHelper
    private final ReferenceFrame defaultControlFrame;
 
    private final ReferenceFrame bodyFrame;
-   private final ReferenceFrame baseFrame;
 
    private final String warningPrefix;
 
@@ -66,7 +65,6 @@ public class RigidBodyOrientationControlHelper
                                             BooleanProvider useBaseFrameForControl, BooleanProvider useWeightFromMessage, YoVariableRegistry registry)
    {
       this.warningPrefix = warningPrefix;
-      this.baseFrame = baseFrame;
       this.useBaseFrameForControl = useBaseFrameForControl;
       this.useWeightFromMessage = useWeightFromMessage;
 
@@ -80,6 +78,7 @@ public class RigidBodyOrientationControlHelper
          trajectoryFrames.forEach(frame -> trajectoryGenerator.registerNewTrajectoryFrame(frame));
       }
       trajectoryGenerator.registerNewTrajectoryFrame(baseFrame);
+      trajectoryGenerator.clear(baseFrame);
 
       currentWeight = new YoFrameVector3D(prefix + "CurrentWeight", null, registry);
 
@@ -140,11 +139,11 @@ public class RigidBodyOrientationControlHelper
       holdCurrent();
 
       FrameSO3TrajectoryPoint trajectoryPoint = pointQueue.addLast();
-      trajectoryPoint.setToZero(baseFrame);
+      trajectoryPoint.setToZero(trajectoryGenerator.getCurrentTrajectoryFrame());
       trajectoryPoint.setTime(trajectoryTime);
 
       desiredOrientation.setIncludingFrame(orientation);
-      desiredOrientation.changeFrame(baseFrame);
+      desiredOrientation.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
       trajectoryPoint.setOrientation(desiredOrientation);
    }
 
@@ -153,11 +152,11 @@ public class RigidBodyOrientationControlHelper
       holdCurrentDesired();
 
       FrameSO3TrajectoryPoint trajectoryPoint = pointQueue.addLast();
-      trajectoryPoint.setToZero(baseFrame);
+      trajectoryPoint.setToZero(trajectoryGenerator.getCurrentTrajectoryFrame());
       trajectoryPoint.setTime(trajectoryTime);
 
       desiredOrientation.setIncludingFrame(orientation);
-      desiredOrientation.changeFrame(baseFrame);
+      desiredOrientation.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
       trajectoryPoint.setOrientation(desiredOrientation);
    }
 
@@ -390,7 +389,7 @@ public class RigidBodyOrientationControlHelper
    public void clear()
    {
       selectionMatrix.resetSelection();
-      trajectoryGenerator.clear(baseFrame);
+      trajectoryGenerator.clear();
       setDefaultControlFrame();
       pointQueue.clear();
    }

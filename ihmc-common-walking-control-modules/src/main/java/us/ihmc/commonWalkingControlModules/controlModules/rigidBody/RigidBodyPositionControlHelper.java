@@ -63,7 +63,6 @@ public class RigidBodyPositionControlHelper
    private final ReferenceFrame defaultControlFrame;
 
    private final ReferenceFrame bodyFrame;
-   private final ReferenceFrame baseFrame;
 
    private final YoFramePoint3D yoCurrentPosition;
    private final YoFramePoint3D yoDesiredPosition;
@@ -77,7 +76,6 @@ public class RigidBodyPositionControlHelper
                                          YoGraphicsListRegistry graphicsListRegistry)
    {
       this.warningPrefix = warningPrefix;
-      this.baseFrame = baseFrame;
       this.useBaseFrameForControl = useBaseFrameForControl;
       this.useWeightFromMessage = useWeightFromMessage;
 
@@ -91,6 +89,7 @@ public class RigidBodyPositionControlHelper
          trajectoryFrames.forEach(frame -> trajectoryGenerator.registerNewTrajectoryFrame(frame));
       }
       trajectoryGenerator.registerNewTrajectoryFrame(baseFrame);
+      trajectoryGenerator.clear(baseFrame);
 
       currentWeight = new YoFrameVector3D(prefix + "CurrentWeight", null, registry);
 
@@ -181,11 +180,11 @@ public class RigidBodyPositionControlHelper
       holdCurrent();
 
       FrameEuclideanTrajectoryPoint trajectoryPoint = pointQueue.addLast();
-      trajectoryPoint.setToZero(baseFrame);
+      trajectoryPoint.setToZero(trajectoryGenerator.getCurrentTrajectoryFrame());
       trajectoryPoint.setTime(trajectoryTime);
 
       desiredPosition.setIncludingFrame(position);
-      desiredPosition.changeFrame(baseFrame);
+      desiredPosition.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
       trajectoryPoint.setPosition(desiredPosition);
    }
 
@@ -194,11 +193,11 @@ public class RigidBodyPositionControlHelper
       holdCurrentDesired();
 
       FrameEuclideanTrajectoryPoint trajectoryPoint = pointQueue.addLast();
-      trajectoryPoint.setToZero(baseFrame);
+      trajectoryPoint.setToZero(trajectoryGenerator.getCurrentTrajectoryFrame());
       trajectoryPoint.setTime(trajectoryTime);
 
       desiredPosition.setIncludingFrame(position);
-      desiredPosition.changeFrame(baseFrame);
+      desiredPosition.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
       trajectoryPoint.setPosition(desiredPosition);
    }
 
@@ -437,7 +436,7 @@ public class RigidBodyPositionControlHelper
    public void clear()
    {
       selectionMatrix.resetSelection();
-      trajectoryGenerator.clear(baseFrame);
+      trajectoryGenerator.clear();
       setDefaultControlFrame();
       pointQueue.clear();
    }
