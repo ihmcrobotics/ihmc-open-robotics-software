@@ -197,6 +197,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       }
 
       clear();
+      positionHelper.clear();
+      orientationHelper.clear();
       return false;
    }
 
@@ -211,6 +213,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       }
 
       clear();
+      positionHelper.clear();
+      orientationHelper.clear();
       return false;
    }
 
@@ -220,6 +224,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       if (!handleCommandInternal(command))
       {
          clear();
+         positionHelper.clear();
+         orientationHelper.clear();
          return false;
       }
 
@@ -233,6 +239,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       }
 
       clear();
+      positionHelper.clear();
+      orientationHelper.clear();
       return false;
    }
 
@@ -247,6 +255,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       }
 
       clear();
+      positionHelper.clear();
+      orientationHelper.clear();
       return false;
    }
 
@@ -290,8 +300,6 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
    private void clear()
    {
-      positionHelper.clear();
-      orientationHelper.clear();
       numberOfPointsInQueue.set(0);
       numberOfPointsInGenerator.set(0);
       numberOfPoints.set(0);

@@ -129,6 +129,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       }
 
       clear();
+      positionHelper.clear();
       return false;
    }
 
@@ -141,8 +142,9 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    @Override
    public void onExit()
    {
-      clear();
+      positionHelper.onExit();
       hideGraphics();
+      clear();
    }
 
    @Override
@@ -157,9 +159,8 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       return positionHelper.getLastTrajectoryPointTime();
    }
 
-   public void clear()
+   private void clear()
    {
-      positionHelper.clear();
       numberOfPointsInQueue.set(0);
       numberOfPointsInGenerator.set(0);
       numberOfPoints.set(0);
