@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.junit.After;
 import org.junit.Test;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -78,7 +79,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       if (ui != null)
          ui.stop();
-         ui = null;
+      ui = null;
 
       messager = null;
       messageConverter = null;
@@ -328,13 +329,18 @@ public class RemoteFootstepPlannerUIMessagingTest
 
          footstepPlanningRequestPublisher.publish(packet);
 
-         int tick = 0;
-         while (startPositionReference.get() == null)
+         double maxWaitTime = 5.0;
+         double currentWaitTime = 0.0;
+         long sleepDuration = 10;
+         while (startPositionReference.get() == null || goalPositionReference.get() == null || timeoutReference.get() == null
+               || planningTypeReference.get() == null || robotSideReference.get() == null || startOrientationReference.get() == null
+               || goalOrientationReference.get() == null || sequenceIdReference.get() == null || plannerRequestIdReference.get() == null
+               || plannerHorizonLengthReference.get() == null || planarRegionsListReference.get() == null)
          {
-            ThreadTools.sleep(10);
-            tick++;
-            if (tick > 100)
-               assertTrue("Timed out waiting on the results.", false);
+            assertFalse("Timed out waiting on the results.", currentWaitTime > maxWaitTime);
+
+            ThreadTools.sleep(sleepDuration);
+            currentWaitTime += Conversions.millisecondsToSeconds(sleepDuration);
          }
 
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Start positions aren't equal.", startPosition, startPositionReference.getAndSet(null), epsilon);
