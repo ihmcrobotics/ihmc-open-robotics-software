@@ -125,12 +125,12 @@ public class RigidBodyOrientationControlHelper
       // Compute the initial desired orientation for the body frame.
       getDesiredOrientation(desiredOrientation);
       desiredOrientation.changeFrame(controlFrameOrientation.getReferenceFrame());
-      desiredOrientation.preMultiplyConjugateOther(controlFrameOrientation);
+      desiredOrientation.multiplyConjugateOther(controlFrameOrientation);
 
       clear();
 
       // Set the new control frame and move the initial desired position to be for that frame.
-      desiredOrientation.preMultiply(controlFrameOrientation);
+      desiredOrientation.multiply(controlFrameOrientation);
       queueInitialPoint(desiredOrientation);
    }
 
@@ -251,7 +251,7 @@ public class RigidBodyOrientationControlHelper
          // Compute the initial desired orientation for the body frame.
          getDesiredOrientation(desiredOrientation);
          desiredOrientation.changeFrame(controlFrameOrientation.getReferenceFrame());
-         desiredOrientation.preMultiplyConjugateOther(controlFrameOrientation);
+         desiredOrientation.multiplyConjugateOther(controlFrameOrientation);
 
          clear();
 
@@ -260,7 +260,7 @@ public class RigidBodyOrientationControlHelper
          {
             setControlFrameOrientation(command.getControlFramePose().getRotationMatrix());
          }
-         desiredOrientation.preMultiply(controlFrameOrientation);
+         desiredOrientation.multiply(controlFrameOrientation);
 
          trajectoryGenerator.changeFrame(command.getTrajectoryFrame());
          selectionMatrix.set(command.getSelectionMatrix());
