@@ -1,6 +1,9 @@
 package us.ihmc.footstepPlanning.remoteStandaloneDataSet;
 
 import controller_msgs.msg.dds.*;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import org.junit.After;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
@@ -14,11 +17,16 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.footstepPlanning.ui.RemotePlannerMessageConverter;
 import us.ihmc.footstepPlanning.ui.RemoteStandaloneFootstepPlannerUI;
+import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -30,10 +38,8 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemory
 
 public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlannerDataSetTest
 {
-   private static final boolean visualize = false;
    private static final String robotName = "testBot";
 
-   protected RemoteStandaloneFootstepPlannerUI uiNode;
    private RealtimeRos2Node ros2Node;
 
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
@@ -54,32 +60,69 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
 
    protected DomainFactory.PubSubImplementation pubSubImplementation;
 
+   private JavaFXMessager messager = null;
+   private RemotePlannerMessageConverter messageConverter = null;
+   private FootstepPathCalculatorModule module = null;
+   private FootstepPlannerUI ui = null;
+
    public void setup()
    {
-      uiNode = RemoteStandaloneFootstepPlannerUI.createUI(robotName, pubSubImplementation, visualize);
-      ApplicationRunner.runApplication(uiNode);
+      messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      messageConverter = RemotePlannerMessageConverter.createConverter(messager, "", DomainFactory.PubSubImplementation.INTRAPROCESS);
+      module = new FootstepPathCalculatorModule(messager);
 
-      double maxWaitTime = 5.0;
-      double totalTime = 0.0;
-      long sleepDuration = 100;
-
-      while (!uiNode.isRunning())
+      try
       {
-         if (totalTime > maxWaitTime)
-            throw new RuntimeException("Timed out waiting for the UI to start.");
-         ThreadTools.sleep(sleepDuration);
-         totalTime += Conversions.millisecondsToSeconds(sleepDuration);
+         messager.startMessager();
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException("Failed to start messager.");
       }
 
-      JavaFXMessager messager = uiNode.getMessager();
+      module.start();
+
+      if (VISUALIZE)
+      {
+
+         ApplicationRunner.runApplication(new Application()
+         {
+            @Override
+            public void start(Stage stage) throws Exception
+            {
+               ui = FootstepPlannerUI.createMessagerUI(stage, messager);
+               ui.show();
+            }
+
+            @Override
+            public void stop() throws Exception
+            {
+               ui.stop();
+               Platform.exit();
+            }
+         });
+
+         double maxWaitTime = 5.0;
+         double totalTime = 0.0;
+         long sleepDuration = 100;
+
+         while (ui == null)
+         {
+            if (totalTime > maxWaitTime)
+               throw new RuntimeException("Timed out waiting for the UI to start.");
+            ThreadTools.sleep(sleepDuration);
+            totalTime += Conversions.millisecondsToSeconds(sleepDuration);
+         }
+
+      }
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
 
       footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class, ROS2Tools
             .getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
 
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class, ROS2Tools
-                                                 .getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT),
+      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class,
+                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
 
       uiReceivedPlan = new AtomicReference<>(false);
@@ -99,12 +142,16 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
          ThreadTools.sleep(10);
    }
 
-
    @After
    public void tearDown() throws Exception
    {
       ros2Node.destroy();
-      uiNode.stop();
+
+      module.stop();
+      messager.closeMessager();
+      messageConverter.destroy();
+      if (ui != null)
+         ui.stop();
 
       uiReceivedPlan = null;
       uiReceivedResult = null;
@@ -117,7 +164,11 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
 
       ros2Node = null;
       footstepPlanningRequestPublisher = null;
-      uiNode = null;
+
+      module = null;
+      messageConverter = null;
+      messager = null;
+      ui = null;
    }
 
    @Override
@@ -237,7 +288,6 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
 
       return footstepPlan;
    }
-
 
    private String assertTrue(String datasetName, String message, boolean condition)
    {

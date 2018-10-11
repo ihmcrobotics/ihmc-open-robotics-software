@@ -1,6 +1,9 @@
 package us.ihmc.footstepPlanning;
 
 import controller_msgs.msg.dds.*;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import org.junit.After;
 import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
@@ -23,9 +26,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteFootstepPlannerUI;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
+import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -52,13 +58,12 @@ public class RemoteFootstepPlannerUIMessagingTest
    private static final String robotName = "testBot";
 
    private RealtimeRos2Node localNode = null;
-   private RemoteFootstepPlannerUI uiNode = null;
+   private RemoteUIMessageConverter messageConverter = null;
    private JavaFXMessager messager = null;
    private DomainFactory.PubSubImplementation pubSubImplementation = null;
 
    private final AtomicReference<FootstepPlanningRequestPacket> planningRequestReference = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlannerParametersPacket> footstepPlannerParametersReference = new AtomicReference<>(null);
-
 
    @After
    public void tearDown() throws Exception
@@ -67,23 +72,63 @@ public class RemoteFootstepPlannerUIMessagingTest
          ThreadTools.sleep(10);
 
       localNode.destroy();
-      uiNode.stop();
+      messager.closeMessager();
+      messageConverter.destroy();
 
-      uiNode = null;
+      if (ui != null)
+         ui.stop();
+         ui = null;
+
+      messager = null;
+      messageConverter = null;
       localNode = null;
       pubSubImplementation = null;
 
       planningRequestReference.set(null);
    }
 
+   private FootstepPlannerUI ui;
 
    public void setup()
    {
       localNode = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
-      uiNode = RemoteFootstepPlannerUI.createUI(robotName, pubSubImplementation, VISUALIZE);
-      ApplicationRunner.runApplication(uiNode);
+      messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      messageConverter = RemoteUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
 
-      messager = uiNode.getMessager();
+
+
+      try
+      {
+         messager.startMessager();
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException("Failed to start messager.");
+      }
+
+      if (VISUALIZE)
+      {
+
+         ApplicationRunner.runApplication(new Application()
+         {
+            @Override
+            public void start(Stage stage) throws Exception
+            {
+               ui = FootstepPlannerUI.createMessagerUI(stage, messager);
+               ui.show();
+            }
+
+            @Override
+            public void stop() throws Exception
+            {
+               ui.stop();
+               Platform.exit();
+            }
+         });
+
+         while (ui == null)
+            ThreadTools.sleep(10);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 2.2)
@@ -94,6 +139,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       setup();
       runPlanningRequestTestFromUI();
    }
+
    @ContinuousIntegrationTest(estimatedDuration = 2.2)
    @Test(timeout = 30000)
    public void testSendingFootstepPlanningRequestPacketFromUIFastRTPS()
@@ -226,7 +272,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       }
    }
 
-
    private void runPlannerRequestToUI()
    {
       Random random = new Random(1738L);
@@ -252,7 +297,6 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       AtomicReference<Double> plannerHorizonLengthReference = messager.createInput(FootstepPlannerSharedMemoryAPI.PlannerHorizonLengthTopic);
 
-
       for (int iter = 0; iter < iters; iter++)
       {
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
@@ -267,7 +311,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
 
-
          FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
          packet.getStanceFootPositionInWorld().set(startPosition);
          packet.getGoalPositionInWorld().set(goalPosition);
@@ -280,7 +323,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          packet.setSequenceId(sequenceId);
          packet.setHorizonLength(horizonLength);
          packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
-
 
          footstepPlanningRequestPublisher.publish(packet);
 
@@ -305,13 +347,11 @@ public class RemoteFootstepPlannerUIMessagingTest
          assertEquals("Planner horizon lengths aren't equal.", horizonLength, plannerHorizonLengthReference.getAndSet(null), epsilon);
          checkPlanarRegionListsAreEqual(planarRegionsList, planarRegionsListReference.getAndSet(null));
 
-
          for (int i = 0; i < 100; i++)
             ThreadTools.sleep(10);
       }
 
    }
-
 
    private void runPlannerParametersPacket()
    {
@@ -336,7 +376,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          int sequenceId = RandomNumbers.nextInt(random, 1, 100);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
-
          messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalPositionTopic, goalPosition);
          messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalOrientationTopic, goalOrientation);
          messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartPositionTopic, startPosition);
@@ -348,7 +387,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          messager.submitMessage(FootstepPlannerSharedMemoryAPI.SequenceIdTopic, sequenceId);
          messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerRequestIdTopic, plannerRequestId);
          messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerHorizonLengthTopic, horizonLength);
-
 
          messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerParametersTopic, randomParameters);
 
@@ -371,7 +409,6 @@ public class RemoteFootstepPlannerUIMessagingTest
             ThreadTools.sleep(10);
       }
    }
-
 
    private void runOutputStatusToUI()
    {

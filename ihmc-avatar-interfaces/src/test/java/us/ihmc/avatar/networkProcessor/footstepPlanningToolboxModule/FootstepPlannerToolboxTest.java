@@ -2,6 +2,9 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
 import com.jme3.math.Transform;
 import controller_msgs.msg.dds.*;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import org.junit.After;
 import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -29,14 +32,18 @@ import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteFootstepPlannerUI;
+import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotDataLogger.logger.LogSettings;
@@ -74,7 +81,6 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
    private static final boolean visualize = false;
 
    private static final String robotName = "testBot";
-   protected RemoteFootstepPlannerUI uiNode;
    private FootstepPlanningToolboxModule toolboxModule;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
@@ -95,26 +101,52 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
    private final AtomicReference<FootstepPlanningResult> expectedResult = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlanningResult> actualResult = new AtomicReference<>(null);
 
+   private JavaFXMessager messager = null;
+   private RemoteUIMessageConverter messageConverter = null;
+   private FootstepPlannerUI ui;
+
    protected DomainFactory.PubSubImplementation pubSubImplementation;
 
    public void setup()
    {
       tryToStartModule(() -> setupFootstepPlanningToolboxModule());
-      uiNode = RemoteFootstepPlannerUI.createUI(robotName, pubSubImplementation, visualize);
-      ApplicationRunner.runApplication(uiNode);
+//      uiNode = RemoteFootstepPlannerUI.createUI(robotName, pubSubImplementation, visualize);
 
-      double maxWaitTime = 5.0;
-      double totalWaitTime = 0.0;
-      long sleepDuration = 100;
-      while (!uiNode.isRunning())
+      messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      messageConverter = RemoteUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
+
+      try
       {
-         if (totalWaitTime > maxWaitTime)
-            throw new RuntimeException("Timed out waiting for the UI to start.");
-         ThreadTools.sleep(sleepDuration);
-         totalWaitTime += Conversions.millisecondsToSeconds(sleepDuration);
+         messager.startMessager();
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException("Failed to start messager.");
       }
 
-      JavaFXMessager messager = uiNode.getMessager();
+      if (VISUALIZE)
+      {
+
+         ApplicationRunner.runApplication(new Application()
+         {
+            @Override
+            public void start(Stage stage) throws Exception
+            {
+               ui = FootstepPlannerUI.createMessagerUI(stage, messager);
+               ui.show();
+            }
+
+            @Override
+            public void stop() throws Exception
+            {
+               ui.stop();
+               Platform.exit();
+            }
+         });
+
+         while (ui == null)
+            ThreadTools.sleep(10);
+      }
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
 
@@ -164,8 +196,13 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
    public void tearDown() throws Exception
    {
       ros2Node.destroy();
-      uiNode.stop();
+      messager.closeMessager();
+      messageConverter.destroy();
       toolboxModule.destroy();
+
+      if (ui != null)
+         ui.stop();
+      ui = null;
 
       uiReceivedPlan = null;
       uiReceivedResult = null;
@@ -176,9 +213,10 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
       uiFootstepPlanReference = null;
       uiPlanningResultReference = null;
 
+      messager = null;
+      messageConverter = null;
       ros2Node = null;
       footstepPlanningRequestPublisher = null;
-      uiNode = null;
       toolboxModule = null;
    }
 
