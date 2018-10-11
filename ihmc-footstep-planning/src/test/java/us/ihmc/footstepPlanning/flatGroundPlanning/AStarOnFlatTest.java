@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.graphSearch.aStar;
+package us.ihmc.footstepPlanning.flatGroundPlanning;
 
 import org.junit.After;
 import org.junit.Before;
@@ -9,6 +9,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.aStar.FootstepNodeVisualization;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.flatGroundPlanning.FootstepPlannerOnFlatGroundTest;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
