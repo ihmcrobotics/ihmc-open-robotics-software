@@ -45,19 +45,19 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
    }
 
    @Override
-   public JointDesiredOutput getJointDesiredOutput(int index)
+   public JointDesiredOutputBasics getJointDesiredOutput(int index)
    {
       return jointsData[index];
    }
 
    @Override
-   public JointDesiredOutput getJointDesiredOutput(OneDoFJoint joint)
+   public JointDesiredOutputBasics getJointDesiredOutput(OneDoFJoint joint)
    {
       return jointMap.get(joint.getNameBasedHashCode());
    }
 
    @Override
-   public JointDesiredOutput getJointDesiredOutput(long jointName)
+   public JointDesiredOutputBasics getJointDesiredOutput(long jointName)
    {
       return jointMap.get(jointName);
    }
@@ -65,49 +65,5 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
    public String getJointName(int index)
    {
       return joints[index].getName();
-   }
-
-   @Override
-   public void clear()
-   {
-      for (JointDesiredOutput jointData : jointsData)
-         jointData.clear();
-   }
-
-
-   @Override
-   public void overwriteWith(JointDesiredOutputListReadOnly other)
-   {
-      for (int i = 0; i < joints.length; i++)
-      {
-         OneDoFJoint joint = joints[i];
-         JointDesiredOutput data = jointsData[i];
-
-         JointDesiredOutputReadOnly otherData = other.getJointDesiredOutput(joint);
-         if (otherData != null)
-         {
-            data.set(otherData);
-         }
-      }
-   }
-
-   /**
-    * Complete the information held in this using other.
-    * Does not overwrite the data already set in this.
-    */
-   @Override
-   public void completeWith(JointDesiredOutputListReadOnly other)
-   {
-      for (int i = 0; i < joints.length; i++)
-      {
-         OneDoFJoint joint = joints[i];
-         JointDesiredOutput data = jointsData[i];
-
-         JointDesiredOutputReadOnly otherData = other.getJointDesiredOutput(joint);
-         if (otherData != null)
-         {
-            data.completeWith(otherData);
-         }
-      }
    }
 }

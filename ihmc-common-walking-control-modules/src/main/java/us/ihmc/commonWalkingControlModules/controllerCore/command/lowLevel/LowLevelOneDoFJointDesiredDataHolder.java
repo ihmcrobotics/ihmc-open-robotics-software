@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.*;
 
@@ -10,10 +11,9 @@ import java.util.Map;
 
 public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListBasics
 {
-   private final List<JointDesiredOutput> unusedData;
    private final List<OneDoFJoint> jointsWithDesiredData;
    private final TLongObjectHashMap<JointDesiredOutput> lowLevelJointDataMap;
-   private final List<JointDesiredOutput> lowLevelJointData;
+   private final RecyclingArrayList<JointDesiredOutput> lowLevelJointData;
 
    public LowLevelOneDoFJointDesiredDataHolder()
    {
@@ -22,11 +22,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
 
    public LowLevelOneDoFJointDesiredDataHolder(int initialCapacity)
    {
-      unusedData = new ArrayList<>(initialCapacity);
-      lowLevelJointData = new ArrayList<>(initialCapacity);
-
-      while (unusedData.size() < initialCapacity)
-         unusedData.add(new JointDesiredOutput());
+      lowLevelJointData = new RecyclingArrayList<>(initialCapacity, JointDesiredOutput::new);
 
       jointsWithDesiredData = new ArrayList<>(initialCapacity);
 
@@ -35,27 +31,26 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
        * is created by emptying and filling the map repeatedly. @dcalvert
        */
       float disableAutoCompaction = 0;
-      lowLevelJointDataMap = new TLongObjectHashMap<JointDesiredOutput>(initialCapacity);
+      lowLevelJointDataMap = new TLongObjectHashMap<>(initialCapacity);
       lowLevelJointDataMap.setAutoCompactionFactor(disableAutoCompaction);
    }
 
    @Override
    public void clear()
    {
-      lowLevelJointData.clear();
-      while (!jointsWithDesiredData.isEmpty())
+      for (int i = 0; i < getNumberOfJointsWithDesiredOutput(); i++)
       {
-         OneDoFJoint lastJoint = jointsWithDesiredData.remove(jointsWithDesiredData.size() - 1);
-         JointDesiredOutput jointDataToReset = lowLevelJointDataMap.remove(lastJoint.getNameBasedHashCode());
-         jointDataToReset.clear();
-         unusedData.add(jointDataToReset);
+         lowLevelJointData.get(i).clear();
       }
+      jointsWithDesiredData.clear();
+      lowLevelJointDataMap.clear();
+      lowLevelJointData.clear();
    }
 
-   public void registerJointsWithEmptyData(OneDoFJoint[] joint)
+   public void registerJointsWithEmptyData(OneDoFJoint[] joints)
    {
-      for (int i = 0; i < joint.length; i++)
-         registerJointWithEmptyData(joint[i]);
+      for (OneDoFJoint joint : joints)
+         registerJointWithEmptyData(joint);
    }
 
    public JointDesiredOutput registerJointWithEmptyData(OneDoFJoint joint)
@@ -66,34 +61,6 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
       return registerJointWithEmptyDataUnsafe(joint);
    }
 
-   public void registerLowLevelJointData(OneDoFJoint joint, JointDesiredOutputReadOnly jointDataToRegister)
-   {
-      if (lowLevelJointDataMap.containsKey(joint.getNameBasedHashCode()))
-         throwJointAlreadyRegisteredException(joint);
-
-      registerLowLevelJointDataUnsafe(joint, jointDataToRegister);
-   }
-
-   private void registerLowLevelJointDataUnsafe(OneDoFJoint joint, JointDesiredOutputReadOnly jointDataToRegister)
-   {
-      JointDesiredOutput jointData = registerJointWithEmptyDataUnsafe(joint);
-      jointData.set(jointDataToRegister);
-   }
-
-   private JointDesiredOutput registerJointWithEmptyDataUnsafe(OneDoFJoint joint)
-   {
-      JointDesiredOutput jointData;
-
-      if (unusedData.isEmpty())
-         jointData = new JointDesiredOutput();
-      else
-         jointData = unusedData.remove(unusedData.size() - 1);
-      lowLevelJointDataMap.put(joint.getNameBasedHashCode(), jointData);
-      jointsWithDesiredData.add(joint);
-      lowLevelJointData.add(jointData);
-      return jointData;
-   }
-
    public void retrieveJointsFromName(Map<String, OneDoFJoint> nameToJointMap)
    {
       for (int i = 0; i < jointsWithDesiredData.size(); i++)
@@ -101,8 +68,6 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
          jointsWithDesiredData.set(i, nameToJointMap.get(jointsWithDesiredData.get(i).getName()));
       }
    }
-
-
 
    /**
     * Complete the information held in this using other.
@@ -118,8 +83,8 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
       {
          OneDoFJoint joint = other.getOneDoFJoint(i);
 
-         JointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getNameBasedHashCode());
-         JointDesiredOutputReadOnly otherLowLevelJointData = other.getJointDesiredOutput(joint);
+         JointDesiredOutputBasics lowLevelJointData = getJointDesiredOutput(joint.getNameBasedHashCode());
+         JointDesiredOutputReadOnly otherLowLevelJointData = other.getJointDesiredOutput(i);
 
          if (lowLevelJointData != null)
          {
@@ -146,7 +111,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
       for (int i = 0; i < other.getNumberOfJointsWithDesiredOutput(); i++)
       {
          OneDoFJoint joint = other.getOneDoFJoint(i);
-         registerLowLevelJointDataUnsafe(joint, other.getJointDesiredOutput(joint));
+         registerLowLevelJointDataUnsafe(joint, other.getJointDesiredOutput(i));
       }
    }
 
@@ -155,7 +120,6 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
    {
       return lowLevelJointDataMap.containsKey(joint.getNameBasedHashCode());
    }
-
 
    @Override
    public OneDoFJoint getOneDoFJoint(int index)
@@ -187,6 +151,19 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
       return lowLevelJointData.get(index);
    }
 
+   private void registerLowLevelJointDataUnsafe(OneDoFJoint joint, JointDesiredOutputReadOnly jointDataToRegister)
+   {
+      JointDesiredOutput jointData = registerJointWithEmptyDataUnsafe(joint);
+      jointData.set(jointDataToRegister);
+   }
+
+   private JointDesiredOutput registerJointWithEmptyDataUnsafe(OneDoFJoint joint)
+   {
+      JointDesiredOutput jointData = lowLevelJointData.add();
+      lowLevelJointDataMap.put(joint.getNameBasedHashCode(), jointData);
+      jointsWithDesiredData.add(joint);
+      return jointData;
+   }
 
    private static void throwJointAlreadyRegisteredException(OneDoFJoint joint)
    {

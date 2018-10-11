@@ -44,54 +44,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    }
 
    @Override
-   public void clear()
-   {
-      for (YoJointDesiredOutput jointDataToReset : lowLevelJointDataList)
-         jointDataToReset.clear();
-   }
-
-   /**
-    * Complete the information held in this using other.
-    * Does not overwrite the data already set in this.
-    */
-   @Override
-   public void completeWith(JointDesiredOutputListReadOnly other)
-   {
-      for (int i = 0; i < other.getNumberOfJointsWithDesiredOutput(); i++)
-      {
-         OneDoFJoint joint = other.getOneDoFJoint(i);
-
-         YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getNameBasedHashCode());
-         JointDesiredOutputReadOnly otherLowLevelJointData = other.getJointDesiredOutput(joint);
-
-         if (lowLevelJointData == null)
-            throwJointNotRegisteredException(joint);
-         lowLevelJointData.completeWith(otherLowLevelJointData);
-      }
-   }
-
-   /**
-    * Clear this and copy the data held in other.
-    */
-   @Override
-   public void overwriteWith(JointDesiredOutputListReadOnly other)
-   {
-      clear();
-
-      for (int otherIndex = 0; otherIndex < other.getNumberOfJointsWithDesiredOutput(); otherIndex++)
-      {
-         OneDoFJoint joint = other.getOneDoFJoint(otherIndex);
-         YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getNameBasedHashCode());
-         if (lowLevelJointData == null)
-            continue;
-
-         lowLevelJointData.set(other.getJointDesiredOutput(otherIndex));
-      }
-   }
-
-
-
-   @Override
    public boolean hasDataForJoint(OneDoFJoint joint)
    {
       return lowLevelJointDataMap.containsKey(joint.getNameBasedHashCode());
@@ -125,10 +77,5 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    public JointDesiredOutputBasics getJointDesiredOutput(int index)
    {
       return lowLevelJointDataList[index];
-   }
-
-   private static void throwJointNotRegisteredException(OneDoFJoint joint)
-   {
-      throw new RuntimeException("The joint: " + joint.getName() + " has not been registered.");
    }
 }
