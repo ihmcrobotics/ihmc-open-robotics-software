@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListBasics
 {

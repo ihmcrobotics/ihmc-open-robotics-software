@@ -2,7 +2,6 @@ package us.ihmc.sensorProcessing.outputData;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.tools.lists.PairList;
 
 public class JointDesiredOutputList implements JointDesiredOutputListBasics
 {
@@ -25,8 +24,6 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
          jointsData[i] = data;
          jointMap.put(joints[i].getNameBasedHashCode(), data);
       }
-
-
    }
 
    @Override
@@ -40,8 +37,6 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
    {
       return joints[index];
    }
-
-
 
    @Override
    public int getNumberOfJointsWithDesiredOutput()
@@ -79,18 +74,6 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
          jointData.clear();
    }
 
-//   public void updateFromModel()
-//   {
-//
-//      for (int i = 0; i < jointsAndData.size(); i++)
-//      {
-//
-//         OneDoFJoint joint = jointsAndData.first(i);
-//         LowLevelJointData data = jointsAndData.second(i);
-//
-//         data.setDesiredsFromOneDoFJoint(joint);
-//      }
-//   }
 
    @Override
    public void overwriteWith(JointDesiredOutputListReadOnly other)
@@ -126,11 +109,5 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
             data.completeWith(otherData);
          }
       }
-   }
-
-   public void requestIntegratorReset()
-   {
-      for (JointDesiredOutput jointData : jointsData)
-         jointData.setResetIntegrators(true);
    }
 }

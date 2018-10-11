@@ -9,8 +9,6 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.Map;
-
 public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListBasics
 {
    private final OneDoFJoint[] jointsWithDesiredData;
@@ -52,25 +50,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
          jointDataToReset.clear();
    }
 
-   public void retrieveJointsFromName(Map<String, OneDoFJoint> nameToJointMap)
-   {
-      for (int i = 0; i < jointsWithDesiredData.length; i++)
-      {
-         jointsWithDesiredData[i] = nameToJointMap.get(jointsWithDesiredData[i].getName());
-      }
-   }
-
-
-
-   public void overwriteJointData(OneDoFJoint joint, JointDesiredOutputReadOnly jointData)
-   {
-      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getNameBasedHashCode());
-      if (lowLevelJointData == null)
-         throwJointNotRegisteredException(joint);
-
-      lowLevelJointData.set(jointData);
-   }
-
    /**
     * Complete the information held in this using other.
     * Does not overwrite the data already set in this.
@@ -110,10 +89,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
       }
    }
 
-   static void throwJointNotRegisteredException(OneDoFJoint joint)
-   {
-      throw new RuntimeException("The joint: " + joint.getName() + " has not been registered.");
-   }
+
 
    @Override
    public boolean hasDataForJoint(OneDoFJoint joint)
@@ -126,8 +102,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    {
       return jointsWithDesiredData[index];
    }
-
-
 
    @Override
    public int getNumberOfJointsWithDesiredOutput()
@@ -151,5 +125,10 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    public JointDesiredOutputBasics getJointDesiredOutput(int index)
    {
       return lowLevelJointDataList[index];
+   }
+
+   private static void throwJointNotRegisteredException(OneDoFJoint joint)
+   {
+      throw new RuntimeException("The joint: " + joint.getName() + " has not been registered.");
    }
 }

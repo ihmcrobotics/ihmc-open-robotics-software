@@ -75,6 +75,12 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
       }
    }
 
+   default void requestIntegratorReset()
+   {
+      for (int i = 0; i < getNumberOfJointsWithDesiredOutput(); i++)
+         getJointDesiredOutput(i).setResetIntegrators(true);
+   }
+
    default void setJointControlMode(int index, JointDesiredControlMode controlMode)
    {
       JointDesiredOutputBasics jointDesiredOutput = getJointDesiredOutput(index);
