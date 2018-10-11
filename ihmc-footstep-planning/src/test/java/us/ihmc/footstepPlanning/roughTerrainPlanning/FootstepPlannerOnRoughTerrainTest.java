@@ -38,6 +38,8 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
    private FootstepPlannerUI ui;
 
    protected static boolean visualize = false;
+   protected JavaFXMessager messager;
+
 
    @Before
    public void setup()
@@ -97,7 +99,6 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
    }
 
 
-   protected JavaFXMessager messager;
    protected AtomicReference<FootstepPlannerParameters> parametersReference;
 
    protected abstract void setupInternal();

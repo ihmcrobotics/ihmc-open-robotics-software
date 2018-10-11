@@ -23,6 +23,7 @@ import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.Messager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -203,7 +204,7 @@ public class FootstepPathCalculatorModule
       return footstepPlanner;
    }
 
-   public static FootstepPathCalculatorModule createMessagerModule(JavaFXMessager messager)
+   public static FootstepPathCalculatorModule createMessagerModule(SharedMemoryMessager messager)
    {
       return new FootstepPathCalculatorModule(messager);
    }

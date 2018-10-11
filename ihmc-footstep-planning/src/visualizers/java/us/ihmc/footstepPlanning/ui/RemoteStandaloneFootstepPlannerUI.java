@@ -18,7 +18,7 @@ import us.ihmc.pubsub.DomainFactory;
 public class RemoteStandaloneFootstepPlannerUI extends Application
 {
    private FootstepPathCalculatorModule module;
-   private JavaFXMessager messager;
+   private SharedMemoryJavaFXMessager messager;
    private RemotePlannerMessageConverter messageConverter;
 
    private FootstepPlannerUI ui;

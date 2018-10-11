@@ -16,7 +16,7 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
  */
 public class SharedMemoryStandaloneFootstepPlannerUI extends Application
 {
-   private JavaFXMessager messager;
+   private SharedMemoryJavaFXMessager messager;
    private FootstepPathCalculatorModule module;
 
    private FootstepPlannerUI ui;
