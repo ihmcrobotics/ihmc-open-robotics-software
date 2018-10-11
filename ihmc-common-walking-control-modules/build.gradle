@@ -26,7 +26,7 @@ testSuites {
 
 mainDependencies {
    compile group: "gov.nist.math", name: "jama", version: "1.0.3"
-   compile group: "org.apache.commons", name: "commons-lang3", version: "3.7"
+   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
    compile group: "com.google.guava", name: "guava", version: "18.0"
    compile group: "org.ejml", name: "dense64", version: "0.30"
    compile group: "org.ejml", name: "core", version: "0.30"

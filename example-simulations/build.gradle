@@ -29,7 +29,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
    compile group: "org.ejml", name: "dense64", version: "0.30"
    compile group: "org.ejml", name: "core", version: "0.30"
-   compile "org.apache.commons:commons-lang3:3.7"
+   compile "org.apache.commons:commons-lang3:3.8.1"
    compile group: "us.ihmc.thirdparty.jinput", name: "jinput", version: "180727"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"

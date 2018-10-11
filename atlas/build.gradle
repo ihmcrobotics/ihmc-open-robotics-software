@@ -37,7 +37,7 @@ mainDependencies {
    compile group: "org.ddogleg", name: "ddogleg", version: "0.7"
    compile group: "org.apache.xmlgraphics", name: "batik-dom", version: "1.7"
    compile group: "org.apache.ant", name: "ant", version: "1.9.0"
-   compile group: "org.apache.commons", name: "commons-lang3", version: "3.7"
+   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
    compile group: "com.martiansoftware", name: "jsap", version: "2.1"
    compile group: "org.ros.rosjava_core", name: "rosjava", version: "0.2.1"
    compile group: "org.ejml", name: "core", version: "0.30"
