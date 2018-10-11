@@ -41,11 +41,7 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
       return joints[index];
    }
 
-   @Override
-   public JointDesiredOutput getJointDesiredOutput(OneDoFJoint joint)
-   {
-      return jointMap.get(joint.getNameBasedHashCode());
-   }
+
 
    @Override
    public int getNumberOfJointsWithDesiredOutput()
@@ -57,6 +53,18 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
    public JointDesiredOutput getJointDesiredOutput(int index)
    {
       return jointsData[index];
+   }
+
+   @Override
+   public JointDesiredOutput getJointDesiredOutput(OneDoFJoint joint)
+   {
+      return jointMap.get(joint.getNameBasedHashCode());
+   }
+
+   @Override
+   public JointDesiredOutput getJointDesiredOutput(long jointName)
+   {
+      return jointMap.get(jointName);
    }
 
    public String getJointName(int index)
