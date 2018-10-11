@@ -25,6 +25,9 @@ module controller_msgs
       const octet CONFIGURATION_SPACE_NAME_YAW =
       5;
 
+      const octet CONFIGURATION_SPACE_NAME_SO3 =
+      6;
+
 
       /**
        * Message used to configure the exploration for a RRT-based planner.

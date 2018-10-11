@@ -481,9 +481,9 @@ public class PacketCodeQualityTest
                {
                   Packet packetInstance = packetType.newInstance();
                   Object fieldInstance = field.get(packetInstance);
-                  Field clazzField = typeToCheck.getSuperclass().getDeclaredField("clazz");
-                  clazzField.setAccessible(true);
-                  typeToCheck = (Class<?>) clazzField.get(fieldInstance);
+                  Field allocatorField = typeToCheck.getSuperclass().getDeclaredField("allocator");
+                  allocatorField.setAccessible(true);
+                  typeToCheck = (Class<?>) ((Supplier) allocatorField.get(fieldInstance)).get().getClass();
                }
                while (typeToCheck.isArray())
                   typeToCheck = typeToCheck.getComponentType();

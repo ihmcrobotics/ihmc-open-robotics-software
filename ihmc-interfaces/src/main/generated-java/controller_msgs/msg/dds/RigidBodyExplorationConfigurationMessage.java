@@ -18,6 +18,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
    public static final byte CONFIGURATION_SPACE_NAME_ROLL = (byte) 3;
    public static final byte CONFIGURATION_SPACE_NAME_PITCH = (byte) 4;
    public static final byte CONFIGURATION_SPACE_NAME_YAW = (byte) 5;
+   public static final byte CONFIGURATION_SPACE_NAME_SO3 = (byte) 6;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */

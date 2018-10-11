@@ -7,6 +7,7 @@ byte CONFIGURATION_SPACE_NAME_Z = 2
 byte CONFIGURATION_SPACE_NAME_ROLL = 3
 byte CONFIGURATION_SPACE_NAME_PITCH = 4
 byte CONFIGURATION_SPACE_NAME_YAW = 5
+byte CONFIGURATION_SPACE_NAME_SO3 = 6
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
