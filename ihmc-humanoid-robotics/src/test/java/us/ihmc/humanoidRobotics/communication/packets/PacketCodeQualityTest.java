@@ -721,8 +721,6 @@ public class PacketCodeQualityTest
       fieldsToIngore.add(ExoskeletonBehaviorStatePacket.class.getField("exoskeleton_behavior_state_")); // In exo land
       fieldsToIngore.add(QuadrupedSteppingStateChangeMessage.class.getField("initial_quadruped_stepping_state_enum_")); // In quadruped land
       fieldsToIngore.add(QuadrupedSteppingStateChangeMessage.class.getField("end_quadruped_stepping_state_enum_")); // In quadruped land
-      fieldsToIngore.add(RigidBodyExplorationConfigurationMessage.class.getField("configuration_space_names_to_explore_")); // In definition of exploring space
-      fieldsToIngore.add(ReachingManifoldMessage.class.getField("manifold_configuration_space_names_")); // In definition of manifold space
       
       for (Class<? extends Packet> packetType : allPacketTypes)
       {
