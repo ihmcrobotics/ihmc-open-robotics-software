@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -222,7 +221,6 @@ public class RigidBodyPositionControlHelper
          done = fillAndReinitializeTrajectories();
       }
 
-      timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryGenerator.getLastWaypointTime());
       trajectoryGenerator.compute(timeInTrajectory);
       trajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, feedForwardAcceleration);
 
