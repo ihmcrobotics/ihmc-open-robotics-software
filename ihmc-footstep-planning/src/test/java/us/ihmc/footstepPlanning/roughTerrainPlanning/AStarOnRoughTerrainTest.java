@@ -1,11 +1,14 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -30,48 +33,10 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    private static final boolean visualizePlanner = false;
    private AStarFootstepPlanner planner;
    private FootstepNodeVisualization visualization = null;
-   private FootstepPlannerUI ui;
 
-   private static boolean visualize = true;
    private static boolean keepUp = false;
 
-   @Before
-   public void setup()
-   {
-      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
-      if (visualize)
-      {
-         ApplicationRunner.runApplication(new Application()
-         {
-            @Override
-            public void start(Stage stage) throws Exception
-            {
-               messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
-               messager.startMessager();
-
-               ui = FootstepPlannerUI.createMessagerUI(stage, messager);
-               ui.show();
-            }
-
-            @Override
-            public void stop()
-            {
-               ui.stop();
-            }
-         });
-
-         while (ui == null)
-            ThreadTools.sleep(100);
-      }
-   }
-
-   @After
-   public void tearDown()
-   {
-      if (ui != null)
-         ui.stop();
-   }
 
    @Override
    public boolean assertPlannerReturnedResult()
@@ -80,6 +45,7 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    }
 
    @Override
+   @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 51000)
    public void testPartialGaps()
@@ -88,22 +54,12 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    }
 
    @Override
+   @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 51000)
    public void testSpiralStaircase()
    {
       super.testSpiralStaircase();
-   }
-
-   @Before
-   public void createPlanner()
-   {
-      if (visualizePlanner)
-         visualization = new FootstepNodeVisualization(1000, 1.0, null);
-      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(getPlannerParameters());
-      planner = AStarFootstepPlanner
-            .createRoughTerrainPlanner(getPlannerParameters(), visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
    }
 
    @After
@@ -137,5 +93,22 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    public boolean keepUp()
    {
       return keepUp;
+   }
+
+   @Override
+   public void setupInternal()
+   {
+      if (visualizePlanner)
+         visualization = new FootstepNodeVisualization(1000, 1.0, null);
+      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(getPlannerParameters());
+      planner = AStarFootstepPlanner
+            .createRoughTerrainPlanner(getPlannerParameters(), visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
+   }
+
+   @Override
+   public void destroyInternal()
+   {
+      planner = null;
    }
 }
