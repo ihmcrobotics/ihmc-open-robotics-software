@@ -32,7 +32,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
 
       String bodyName = bodyToControl.getName();
-      String prefix = bodyName + "TaskspaceOrientation";
+      String prefix = bodyName + "Taskspace";
 
       numberOfPointsInQueue = new YoInteger(prefix + "NumberOfPointsInQueue", registry);
       numberOfPointsInGenerator = new YoInteger(prefix + "NumberOfPointsInGenerator", registry);
