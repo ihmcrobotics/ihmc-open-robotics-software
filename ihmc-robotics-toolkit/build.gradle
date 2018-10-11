@@ -42,7 +42,7 @@ mainDependencies {
 
    compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
    compile group: "us.ihmc", name: "euclid", version: "0.9.3"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
    compile group: "us.ihmc", name: "simulation-construction-set-utilities", version: "0.12.6"
@@ -55,5 +55,5 @@ testDependencies {
    compile group: "org.jfree", name: "jcommon", version: "1.0.21"
 
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.23.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.24.0"
 }
