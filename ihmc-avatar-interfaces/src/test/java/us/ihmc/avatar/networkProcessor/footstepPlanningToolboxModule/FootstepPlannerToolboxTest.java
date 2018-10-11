@@ -103,8 +103,16 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
       uiNode = RemoteFootstepPlannerUI.createUI(robotName, pubSubImplementation, visualize);
       ApplicationRunner.runApplication(uiNode);
 
+      double maxWaitTime = 5.0;
+      double totalWaitTime = 0.0;
+      long sleepDuration = 100;
       while (!uiNode.isRunning())
-         ThreadTools.sleep(100);
+      {
+         if (totalWaitTime > maxWaitTime)
+            throw new RuntimeException("Timed out waiting for the UI to start.");
+         ThreadTools.sleep(sleepDuration);
+         totalWaitTime += Conversions.millisecondsToSeconds(sleepDuration);
+      }
 
       JavaFXMessager messager = uiNode.getMessager();
 

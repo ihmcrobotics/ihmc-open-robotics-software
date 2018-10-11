@@ -20,7 +20,7 @@ public abstract class FootstepPlannerDataSetTest
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
-   protected static boolean DEBUG = true;
+   protected static boolean DEBUG = false;
 
    public abstract FootstepPlannerType getPlannerType();
 
