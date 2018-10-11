@@ -1,10 +1,13 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
@@ -12,6 +15,8 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
+import us.ihmc.footstepPlanning.ui.ApplicationRunner;
+import us.ihmc.footstepPlanning.ui.SharedMemoryStandaloneFootstepPlannerUI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
 import java.util.ArrayList;
@@ -31,6 +36,28 @@ public abstract class SharedMemoryFootstepPlannerOnRoughTerrainTest
 
    public abstract FootstepPlannerType getPlannerType();
 
+   private static boolean visualize = false;
+   private SharedMemoryStandaloneFootstepPlannerUI launcher;
+
+   @Before
+   public void setup()
+   {
+      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
+      launcher = new SharedMemoryStandaloneFootstepPlannerUI(visualize);
+      ApplicationRunner.runApplication(launcher);
+
+      messager = launcher.getMessager();
+   }
+
+   @After
+   public void tearDown() throws Exception
+   {
+      launcher.stop();
+
+      messager = null;
+      launcher = null;
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 20)
    @Test(timeout = 30000000)
@@ -45,8 +72,6 @@ public abstract class SharedMemoryFootstepPlannerOnRoughTerrainTest
          ThreadTools.sleep(100);
       }
    }
-
-
 
    private void runTestAndAssert(PlannerTestEnvironments.PlannerTestData testData)
    {
@@ -95,21 +120,6 @@ public abstract class SharedMemoryFootstepPlannerOnRoughTerrainTest
       messager.submitMessage(PlannerTypeTopic, getPlannerType());
    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    public List<String> getTestsToRun()
    {
       List<String> tests = new ArrayList<>();
@@ -125,14 +135,12 @@ public abstract class SharedMemoryFootstepPlannerOnRoughTerrainTest
       tests.add(simpleStepOnBoxTwo);
       tests.add(random);
       tests.add(simpleGaps);
-//      tests.add(partialGaps);
+      //      tests.add(partialGaps);
       tests.add(box);
-//      tests.add(spiralStaircase);
+      //      tests.add(spiralStaircase);
       tests.add(hole);
 
       return tests;
    }
-
-
 
 }
