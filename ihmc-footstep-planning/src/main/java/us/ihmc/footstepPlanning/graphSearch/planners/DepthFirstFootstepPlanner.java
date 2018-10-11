@@ -66,8 +66,8 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    private final YoInteger numberOfNodesExpanded = new YoInteger("numberOfNodesExpanded", registry);
    private final YoLong planningStartTime = new YoLong("planningStartTime", registry);
 
-   public DepthFirstFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper,
-                                    FootstepNodeChecker checker, FootstepCost stepCostCalculator, YoVariableRegistry parentRegistry)
+   public DepthFirstFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper, FootstepNodeChecker checker,
+                                    FootstepCost stepCostCalculator, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.parameters = parameters;
@@ -78,11 +78,11 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
       nodeExpansion = new ParameterBasedNodeExpansion(parameters);
 
       DistanceAndYawBasedHeuristics costToGoHeuristics = new DistanceAndYawBasedHeuristics(parameters, registry);
-      this.nodeComparator = (node1, node2) ->
-      {
+      this.nodeComparator = (node1, node2) -> {
          double cost1 = costToGoHeuristics.compute(node1, goalNodes.get(node1.getRobotSide()));
          double cost2 = costToGoHeuristics.compute(node2, goalNodes.get(node2.getRobotSide()));
-         if (cost1 == cost2) return 0;
+         if (cost1 == cost2)
+            return 0;
          return cost1 > cost2 ? -1 : 1;
       };
 
@@ -114,7 +114,8 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
 
    @Override
    public void setPlanningHorizonLength(double planningHorizonLength)
-   {}
+   {
+   }
 
    public void setExitAfterInitialSolution(boolean exitAfterInitialSolution)
    {
@@ -177,7 +178,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    {
       checker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
-      if(listener != null)
+      if (listener != null)
          listener.planarRegionsListSet(planarRegionsList);
    }
 
@@ -201,7 +202,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
          footstepPose.setTranslationY(path.get(i).getY());
 
          RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i)).getSnapTransform();
-         if(!snapTransform.containsNaN())
+         if (!snapTransform.containsNaN())
             snapTransform.transform(footstepPose);
 
          plan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
@@ -233,7 +234,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
          numberOfNodesExpanded.increment();
 
          FootstepNode nodeToExpand;
-         if(bestGoalNode == null)
+         if (bestGoalNode == null)
             nodeToExpand = stack.pollFirst();
          else
             nodeToExpand = stack.pollLast();
@@ -273,8 +274,10 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
 
          long timeInNano = System.nanoTime();
          if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime.getLongValue()) > timeout.getDoubleValue())
+         {
             planningDuration.set(-1.0);
             break;
+         }
       }
 
       if (bestGoalNode == null)
@@ -317,7 +320,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
             footstepPose.setTranslationY(path.get(i).getY());
 
             RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i)).getSnapTransform();
-            if(!snapTransform.containsNaN())
+            if (!snapTransform.containsNaN())
                snapTransform.transform(footstepPose);
 
             plan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
