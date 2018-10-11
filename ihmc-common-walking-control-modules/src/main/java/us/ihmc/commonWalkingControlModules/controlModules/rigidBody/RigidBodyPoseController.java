@@ -61,7 +61,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
       positionHelper = new RigidBodyPositionControlHelper(warningPrefix, bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
                                                           useBaseFrameForControl, usingWeightFromMessage, registry, graphicsListRegistry);
-      orientationHelper = new RigidBodyOrientationControlHelper(warningPrefix, bodyToControl, baseBody, elevator, trajectoryFrames, baseFrame,
+      orientationHelper = new RigidBodyOrientationControlHelper(warningPrefix, bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
                                                                 useBaseFrameForControl, usingWeightFromMessage, registry);
 
       this.jointControlHelper = jointControlHelper;
@@ -130,7 +130,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       feedbackControlCommand.setFeedForwardAngularAction(orientationCommand.getFeedForwardAngularAction());
 
       // Copy from the position command since the orientation does not have a control frame.
-      feedbackControlCommand.setControlFrameFixedInEndEffector(positionCommand.getBodyFixedPointToControl());
+      feedbackControlCommand.setControlFrameFixedInEndEffector(positionCommand.getBodyFixedPointToControl(),
+                                                               orientationCommand.getBodyFixedOrientationToControl());
 
       feedbackControlCommand.setControlBaseFrame(positionCommand.getControlBaseFrame());
    }

@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -40,8 +41,10 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
 
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
-      orientationHelper = new RigidBodyOrientationControlHelper(prefix, bodyToControl, baseBody, elevator, trajectoryFrames, baseFrame, useBaseFrameForControl,
-                                                                usingWeightFromMessage, registry);
+      // Must be the body frame until the controller core allows custom control frame rotations for orientation commands:
+      MovingReferenceFrame controlFrame = bodyToControl.getBodyFixedFrame();
+      orientationHelper = new RigidBodyOrientationControlHelper(prefix, bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
+                                                                useBaseFrameForControl, usingWeightFromMessage, registry);
    }
 
    public void setGains(PID3DGainsReadOnly gains)
@@ -130,6 +133,12 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
    @Override
    public OrientationFeedbackControlCommand getFeedbackControlCommand()
    {
+      // TODO: this can be removed once the controller core can handle control frame orientations with orientation commands.
+      if (Math.abs(orientationHelper.getFeedbackControlCommand().getBodyFixedOrientationToControl().getS()) < 1.0 - 1.0e-5)
+      {
+         throw new RuntimeException("Control frame orientations for orientation control only are not supported!");
+      }
+
       return orientationHelper.getFeedbackControlCommand();
    }
 
