@@ -96,10 +96,10 @@ public class StandingState extends WalkingState
       // need to always update biped support polygons after a change to the contact states
       controllerToolbox.updateBipedSupportPolygons();
 
-      balanceManager.initializeICPPlanForStanding(finalTransferTime.getDoubleValue());
       balanceManager.resetPushRecovery();
       balanceManager.enablePelvisXYControl();
       balanceManager.setICPPlanTransferFromSide(null);
+      balanceManager.initializeICPPlanForStanding();
 
       walkingMessageHandler.reportWalkingComplete();
 
