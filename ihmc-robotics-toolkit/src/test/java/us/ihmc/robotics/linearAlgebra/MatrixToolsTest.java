@@ -561,4 +561,84 @@ public class MatrixToolsTest
       }
 
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 8.1) @Test(timeout = 40000)
+   public void testMultAddBlockTransA()
+   {
+      Random random = new Random(124L);
+
+      int iters = 100;
+
+      for (int i = 0; i < iters; i++)
+      {
+         int rows = RandomNumbers.nextInt(random, 1, 100);
+         int cols = RandomNumbers.nextInt(random, 1, 100);
+         int fullRows = RandomNumbers.nextInt(random, rows, 500);
+         int fullCols = RandomNumbers.nextInt(random, cols, 500);
+         int taskSize = RandomNumbers.nextInt(random, 1, 100);
+
+         int rowStart = RandomNumbers.nextInt(random, 0, fullRows - rows);
+         int colStart = RandomNumbers.nextInt(random, 0, fullCols - cols);
+
+         double scale = RandomNumbers.nextDouble(random, 1000.0);
+         DenseMatrix64F randomMatrixA = RandomMatrices.createRandom(taskSize, rows, -50.0, 50.0, random);
+         DenseMatrix64F randomMatrixB = RandomMatrices.createRandom(taskSize, cols, -50.0, 50.0, random);
+
+         DenseMatrix64F solution = RandomMatrices.createRandom(fullRows, fullCols, -50.0, 50.0, random);
+         DenseMatrix64F solutionB = new DenseMatrix64F(solution);
+         DenseMatrix64F expectedSolution = new DenseMatrix64F(solution);
+         DenseMatrix64F expectedSolutionB = new DenseMatrix64F(solution);
+
+         DenseMatrix64F temp = new DenseMatrix64F(rows, cols);
+         CommonOps.multTransA(randomMatrixA, randomMatrixB, temp);
+         MatrixTools.addMatrixBlock(expectedSolution, rowStart, colStart, temp, 0, 0, rows, cols, 1.0);
+         MatrixTools.addMatrixBlock(expectedSolutionB, rowStart, colStart, temp, 0, 0, rows, cols, scale);
+
+         MatrixTools.multAddBlockTransA(randomMatrixA, randomMatrixB, solution, rowStart, colStart);
+         MatrixTools.multAddBlockTransA(scale, randomMatrixA, randomMatrixB, solutionB, rowStart, colStart);
+
+         JUnitTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
+         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionB, 1e-6);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 8.1) @Test(timeout = 40000)
+   public void testMultAddBlock()
+   {
+      Random random = new Random(124L);
+
+      int iters = 100;
+
+      for (int i = 0; i < iters; i++)
+      {
+         int rows = RandomNumbers.nextInt(random, 1, 100);
+         int cols = RandomNumbers.nextInt(random, 1, 100);
+         int fullRows = RandomNumbers.nextInt(random, rows, 500);
+         int fullCols = RandomNumbers.nextInt(random, cols, 500);
+         int taskSize = RandomNumbers.nextInt(random, 1, 100);
+
+         int rowStart = RandomNumbers.nextInt(random, 0, fullRows - rows);
+         int colStart = RandomNumbers.nextInt(random, 0, fullCols - cols);
+
+         double scale = RandomNumbers.nextDouble(random, 1000.0);
+         DenseMatrix64F randomMatrixA = RandomMatrices.createRandom(rows, taskSize, -50.0, 50.0, random);
+         DenseMatrix64F randomMatrixB = RandomMatrices.createRandom(taskSize, cols, -50.0, 50.0, random);
+
+         DenseMatrix64F solution = RandomMatrices.createRandom(fullRows, fullCols, -50.0, 50.0, random);
+         DenseMatrix64F solutionB = new DenseMatrix64F(solution);
+         DenseMatrix64F expectedSolution = new DenseMatrix64F(solution);
+         DenseMatrix64F expectedSolutionB = new DenseMatrix64F(solution);
+
+         DenseMatrix64F temp = new DenseMatrix64F(rows, cols);
+         CommonOps.mult(randomMatrixA, randomMatrixB, temp);
+         MatrixTools.addMatrixBlock(expectedSolution, rowStart, colStart, temp, 0, 0, rows, cols, 1.0);
+         MatrixTools.addMatrixBlock(expectedSolutionB, rowStart, colStart, temp, 0, 0, rows, cols, scale);
+
+         MatrixTools.multAddBlock(randomMatrixA, randomMatrixB, solution, rowStart, colStart);
+         MatrixTools.multAddBlock(scale, randomMatrixA, randomMatrixB, solutionB, rowStart, colStart);
+
+         JUnitTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
+         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionB, 1e-6);
+      }
+   }
 }

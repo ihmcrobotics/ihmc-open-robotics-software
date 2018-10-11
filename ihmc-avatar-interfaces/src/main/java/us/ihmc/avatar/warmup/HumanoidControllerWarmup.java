@@ -84,6 +84,7 @@ public abstract class HumanoidControllerWarmup
    private OneDoFJoint[] oneDoFJoints;
 
    private HighLevelControlManagerFactory managerFactory;
+   private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingHighLevelHumanoidController walkingController;
    private WholeBodyControllerCore controllerCore;
    private JointDesiredOutputList controllerOutput;
@@ -96,6 +97,7 @@ public abstract class HumanoidControllerWarmup
       controlDT = robotModel.getControllerDT();
 
       setupController();
+      controllerToolbox.initialize();
       walkingController.initialize();
       controllerCore.initialize();
    }
@@ -139,6 +141,7 @@ public abstract class HumanoidControllerWarmup
    private void doSingleTimeUpdate()
    {
       // (1) do control and compute desired accelerations
+      controllerToolbox.update();
       walkingController.doAction();
       ControllerCoreCommand coreCommand = walkingController.getControllerCoreCommand();
       controllerCore.submitControllerCoreCommand(coreCommand);
@@ -292,7 +295,7 @@ public abstract class HumanoidControllerWarmup
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityZ;
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, totalRobotWeight, referenceFrames.getSoleZUpFrames());
 
-      HighLevelHumanoidControllerToolbox controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, null,
+      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, null,
                                                                                                     yoTime, gravityZ, omega0, feet, controlDT, null,
                                                                                                     contactableBodies, yoGraphicsListRegistry);
 
@@ -355,7 +358,7 @@ public abstract class HumanoidControllerWarmup
          footStates.put(robotSide, footState);
       }
 
-      ParameterLoaderHelper.loadParameters(this, robotModel.getWholeBodyControllerParametersFile(), drcControllerThread, false);
+      ParameterLoaderHelper.loadParameters(this, robotModel.getWholeBodyControllerParametersFile(), drcControllerThread);
 
       YoVariable<?> defaultHeight = registry.getVariable(PelvisHeightControlState.class.getSimpleName(),
                                                          PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");

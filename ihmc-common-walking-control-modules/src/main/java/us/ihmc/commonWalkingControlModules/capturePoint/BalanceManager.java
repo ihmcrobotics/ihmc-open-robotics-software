@@ -72,6 +72,7 @@ public class BalanceManager
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPPlannerWithAngularMomentumOffsetInterface icpPlanner;
+   private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final PrecomputedICPPlanner precomputedICPPlanner;
    private final LeggedLinearMomentumRateOfChangeControlModule linearMomentumRateOfChangeControlModule;
    private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
@@ -231,8 +232,8 @@ public class BalanceManager
       if (walkingMessageHandler != null)
       {
          CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
-         MomentumTrajectoryHandler momentumTrajectoryHandler = walkingMessageHandler.getMomentumTrajectoryHandler();
          double dt = controllerToolbox.getControlDT();
+         momentumTrajectoryHandler = walkingMessageHandler.getMomentumTrajectoryHandler();
          precomputedICPPlanner = new PrecomputedICPPlanner(dt, comTrajectoryHandler, momentumTrajectoryHandler, registry, yoGraphicsListRegistry);
          precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
          precomputedICPPlanner.setMass(totalMass);
@@ -240,6 +241,7 @@ public class BalanceManager
       }
       else
       {
+         momentumTrajectoryHandler = null;
          precomputedICPPlanner = null;
       }
       blendICPTrajectories.set(true);
@@ -509,6 +511,12 @@ public class BalanceManager
       {
          controllerToolbox.reportControllerFailureToListeners(emptyVector);
       }
+
+      // This is for debugging such that the momentum trajectory handler YoVariables contain the current value:
+      if (momentumTrajectoryHandler != null)
+      {
+         momentumTrajectoryHandler.packDesiredAngularMomentumAtTime(yoTime.getValue(), null, null);
+      }
    }
 
    public void computeICPPlan(RobotSide supportLeg)
@@ -656,7 +664,18 @@ public class BalanceManager
       }
    }
 
-   public void initializeICPPlanForStanding(double finalTransferTime)
+   public void initializeICPPlanForStanding()
+   {
+      if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
+      {
+         requestICPPlannerToHoldCurrentCoM();
+         holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
+      }
+      icpPlanner.initializeForStanding(yoTime.getDoubleValue());
+      linearMomentumRateOfChangeControlModule.initializeForStanding();
+   }
+
+   public void initializeICPPlanForTransferToStanding(double finalTransferTime)
    {
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
@@ -664,7 +683,7 @@ public class BalanceManager
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
       setFinalTransferTime(finalTransferTime);
-      icpPlanner.initializeForStanding(yoTime.getDoubleValue());
+      icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForStanding();
    }
 
