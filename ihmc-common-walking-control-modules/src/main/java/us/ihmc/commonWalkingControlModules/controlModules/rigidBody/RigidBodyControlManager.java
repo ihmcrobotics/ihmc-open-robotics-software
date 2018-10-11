@@ -62,9 +62,9 @@ public class RigidBodyControlManager
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
                                   Pose3D homePose, Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
-                                  boolean enablePositionTracking, boolean enableOrientationTracking, ContactablePlaneBody contactableBody,
-                                  RigidBodyControlMode defaultControlMode, YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry,
-                                  YoVariableRegistry parentRegistry)
+                                  Vector3DReadOnly taskspaceAngularWeight, Vector3DReadOnly taskspaceLinearWeight, PID3DGainsReadOnly taskspaceOrientationGains,
+                                  PID3DGainsReadOnly taskspacePositionGains, ContactablePlaneBody contactableBody, RigidBodyControlMode defaultControlMode,
+                                  YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
@@ -80,15 +80,48 @@ public class RigidBodyControlManager
       RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, parentRegistry);
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
-      taskspaceControlState = new RigidBodyPoseController(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame, yoTime,
-                                                          jointControlHelper, graphicsListRegistry, registry);
+
+      if (taskspaceAngularWeight != null && taskspaceLinearWeight == null)
+      {
+         RigidBodyOrientationController taskspaceControlState = new RigidBodyOrientationController(bodyToControl, baseBody, elevator, trajectoryFrames,
+                                                                                                   baseFrame, yoTime, parentRegistry);
+         taskspaceControlState.setGains(taskspaceOrientationGains);
+         taskspaceControlState.setWeights(taskspaceAngularWeight);
+         this.taskspaceControlState = taskspaceControlState;
+         PrintTools.info("Creating manager for " + bodyName + " with orientation controller.");
+      }
+      else if (taskspaceAngularWeight == null && taskspaceLinearWeight != null)
+      {
+         RigidBodyPositionController taskspaceControlState = new RigidBodyPositionController(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame,
+                                                                                             baseFrame, yoTime, parentRegistry, graphicsListRegistry);
+         taskspaceControlState.setGains(taskspacePositionGains);
+         taskspaceControlState.setWeights(taskspaceLinearWeight);
+         this.taskspaceControlState = taskspaceControlState;
+         PrintTools.info("Creating manager for " + bodyName + " with position controller.");
+      }
+      else
+      {
+         RigidBodyPoseController taskspaceControlState = new RigidBodyPoseController(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame,
+                                                                                     baseFrame, yoTime, jointControlHelper, graphicsListRegistry, registry);
+         taskspaceControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
+         taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
+         this.taskspaceControlState = taskspaceControlState;
+         PrintTools.info("Creating manager for " + bodyName + " with pose controller.");
+      }
+
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
 
       if (contactableBody != null)
+      {
          loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, contactableBody, elevator, yoTime, jointControlHelper,
                                                                         graphicsListRegistry, registry);
+         loadBearingControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
+         loadBearingControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
+      }
       else
+      {
          loadBearingControlState = null;
+      }
 
       if (homePose != null)
          this.homePose = new FramePose3D(baseFrame, homePose);
@@ -131,22 +164,15 @@ public class RigidBodyControlManager
       return factory.build(RigidBodyControlMode.JOINTSPACE);
    }
 
-   public void setWeights(Map<String, DoubleProvider> jointspaceWeights, Vector3DReadOnly taskspaceAngularWeight, Vector3DReadOnly taskspaceLinearWeight,
-                          Map<String, DoubleProvider> userModeWeights)
+   public void setWeights(Map<String, DoubleProvider> jointspaceWeights, Map<String, DoubleProvider> userModeWeights)
    {
       jointspaceControlState.setDefaultWeights(jointspaceWeights);
-      taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
       userControlState.setWeights(userModeWeights);
-      if (loadBearingControlState != null)
-         loadBearingControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
    }
 
-   public void setGains(Map<String, PIDGainsReadOnly> jointspaceGains, PID3DGainsReadOnly taskspaceOrientationGains, PID3DGainsReadOnly taskspacePositionGains)
+   public void setGains(Map<String, PIDGainsReadOnly> jointspaceGains)
    {
       jointspaceControlState.setGains(jointspaceGains);
-      taskspaceControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
-      if (loadBearingControlState != null)
-         loadBearingControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
    }
 
    private static void checkDefaultControlMode(RigidBodyControlMode defaultControlMode, FramePose3D homePose, String bodyName)
