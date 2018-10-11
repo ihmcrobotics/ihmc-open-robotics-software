@@ -86,10 +86,13 @@ public class RemoteFootstepPlannerUI extends Application
    {
       super.stop();
 
-      messager.closeMessager();
-      messageConverter.destroy();
+      if (messager != null)
+         messager.closeMessager();
 
-      if (visualize)
+      if (messageConverter != null)
+         messageConverter.destroy();
+
+      if (ui != null)
          ui.stop();
 
       Platform.exit();

@@ -54,8 +54,9 @@ public class SharedMemoryStandaloneFootstepPlannerUI extends Application
    {
       super.stop();
 
-      module.stop();
-      if (visualize)
+      if (module != null)
+         module.stop();
+      if (ui != null)
          ui.stop();
 
       Platform.exit();
