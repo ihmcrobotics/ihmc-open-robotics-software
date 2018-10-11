@@ -117,7 +117,8 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
 
       messager.submitMessage(PlannerTypeTopic, getPlannerType());
 
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerTimeoutTopic, dataset.getTimeout(getPlannerType()));
+      double timeMultiplier = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? 2.0 : 1.0;
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerTimeoutTopic, timeMultiplier * dataset.getTimeout(getPlannerType()));
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
    }
 
