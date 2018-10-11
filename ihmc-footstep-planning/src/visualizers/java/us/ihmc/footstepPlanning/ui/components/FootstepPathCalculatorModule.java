@@ -37,7 +37,7 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemory
 
 public class FootstepPathCalculatorModule
 {
-   private static final boolean VERBOSE = true;
+   private static final boolean VERBOSE = false;
 
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
