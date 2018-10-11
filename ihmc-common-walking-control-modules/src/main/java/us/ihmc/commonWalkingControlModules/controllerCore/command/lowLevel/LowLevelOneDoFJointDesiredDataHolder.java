@@ -6,11 +6,7 @@ import java.util.Map;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.sensorProcessing.outputData.*;
 
 public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListBasics
 {
@@ -161,28 +157,10 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
    }
 
 
-   static void throwJointAlreadyRegisteredException(OneDoFJoint joint)
-   {
-      throw new RuntimeException("The joint: " + joint.getName() + " has already been registered.");
-   }
-
-
    @Override
    public OneDoFJoint getOneDoFJoint(int index)
    {
       return jointsWithDesiredData.get(index);
-   }
-
-   @Override
-   public JointDesiredOutput getJointDesiredOutput(OneDoFJoint joint)
-   {
-      return lowLevelJointDataMap.get(joint.getNameBasedHashCode());
-   }
-
-   @Override
-   public JointDesiredOutput getJointDesiredOutput(long jointName)
-   {
-      return lowLevelJointDataMap.get(jointName);
    }
 
    @Override
@@ -192,8 +170,26 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
    }
 
    @Override
-   public JointDesiredOutput getJointDesiredOutput(int index)
+   public JointDesiredOutputBasics getJointDesiredOutput(OneDoFJoint joint)
+   {
+      return lowLevelJointDataMap.get(joint.getNameBasedHashCode());
+   }
+
+   @Override
+   public JointDesiredOutputBasics getJointDesiredOutput(long jointName)
+   {
+      return lowLevelJointDataMap.get(jointName);
+   }
+
+   @Override
+   public JointDesiredOutputBasics getJointDesiredOutput(int index)
    {
       return lowLevelJointData.get(index);
+   }
+
+
+   private static void throwJointAlreadyRegisteredException(OneDoFJoint joint)
+   {
+      throw new RuntimeException("The joint: " + joint.getName() + " has already been registered.");
    }
 }
