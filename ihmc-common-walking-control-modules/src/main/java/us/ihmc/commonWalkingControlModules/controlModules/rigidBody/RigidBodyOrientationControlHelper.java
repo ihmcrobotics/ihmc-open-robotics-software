@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -181,6 +182,7 @@ public class RigidBodyOrientationControlHelper
          done = fillAndReinitializeTrajectories();
       }
 
+      timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryGenerator.getLastWaypointTime());
       trajectoryGenerator.compute(timeInTrajectory);
       trajectoryGenerator.getAngularData(desiredOrientation, desiredVelocity, feedForwardAcceleration);
 
