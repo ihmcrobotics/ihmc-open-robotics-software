@@ -134,12 +134,12 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
 
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.ComputePathTopic, true);
 
-      double timeout = dataset.getTimeout(getPlannerType());
+      double timeout = 2.0 * dataset.getTimeout(getPlannerType());
       double totalTimeTaken = 0.0;
       long sleepDuration = 10;
-      while (!receivedPlan.get() && !receivedResult.get())
+      while (!receivedPlan.get() || !receivedResult.get() || footstepPlanningResult.get() == null || footstepPlanReference.get() == null)
       {
-         if (totalTimeTaken > timeout + 5.0)
+         if (totalTimeTaken > timeout)
             throw new RuntimeException("Timed out waiting for a result.");
 
          ThreadTools.sleep(sleepDuration);
