@@ -21,6 +21,7 @@ import us.ihmc.footstepPlanning.ui.SharedMemoryStandaloneFootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -28,17 +29,20 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemory
 
 public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
-   protected JavaFXMessager messager = null;
+   protected SharedMemoryMessager messager = null;
    protected FootstepPathCalculatorModule module = null;
    protected FootstepPlannerUI ui = null;
-
 
    @Before
    public void setup()
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
-      messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      if (VISUALIZE)
+         messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      else
+         messager = new SharedMemoryMessager(FootstepPlannerSharedMemoryAPI.API);
+
       try
       {
          messager.startMessager();
@@ -59,7 +63,7 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
             @Override
             public void start(Stage stage) throws Exception
             {
-               ui = FootstepPlannerUI.createMessagerUI(stage, messager);
+               ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
                ui.show();
             }
 
@@ -98,7 +102,6 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
       messager = null;
       ui = null;
    }
-
 
    @Override
    public void submitDataSet(FootstepPlannerUnitTestDataset dataset)

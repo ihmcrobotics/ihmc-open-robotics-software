@@ -44,6 +44,7 @@ import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotDataLogger.logger.LogSettings;
@@ -78,8 +79,6 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemory
 
 public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetTest
 {
-   private static final boolean visualize = false;
-
    private static final String robotName = "testBot";
    private FootstepPlanningToolboxModule toolboxModule;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
@@ -101,7 +100,7 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
    private final AtomicReference<FootstepPlanningResult> expectedResult = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlanningResult> actualResult = new AtomicReference<>(null);
 
-   private JavaFXMessager messager = null;
+   private SharedMemoryMessager messager = null;
    private RemoteUIMessageConverter messageConverter = null;
    private FootstepPlannerUI ui;
 
@@ -110,9 +109,12 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
    public void setup()
    {
       tryToStartModule(() -> setupFootstepPlanningToolboxModule());
-//      uiNode = RemoteFootstepPlannerUI.createUI(robotName, pubSubImplementation, visualize);
+      //      uiNode = RemoteFootstepPlannerUI.createUI(robotName, pubSubImplementation, visualize);
 
-      messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      if (VISUALIZE)
+         messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      else
+         messager = new SharedMemoryMessager(FootstepPlannerSharedMemoryAPI.API);
       messageConverter = RemoteUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
 
       try
@@ -132,7 +134,7 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
             @Override
             public void start(Stage stage) throws Exception
             {
-               ui = FootstepPlannerUI.createMessagerUI(stage, messager);
+               ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
                ui.show();
             }
 

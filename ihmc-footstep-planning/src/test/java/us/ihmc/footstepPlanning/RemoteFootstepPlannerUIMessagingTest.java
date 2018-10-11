@@ -32,6 +32,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -59,7 +60,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
    private RealtimeRos2Node localNode = null;
    private RemoteUIMessageConverter messageConverter = null;
-   private JavaFXMessager messager = null;
+   private SharedMemoryMessager messager = null;
    private DomainFactory.PubSubImplementation pubSubImplementation = null;
 
    private final AtomicReference<FootstepPlanningRequestPacket> planningRequestReference = new AtomicReference<>(null);
@@ -92,10 +93,11 @@ public class RemoteFootstepPlannerUIMessagingTest
    public void setup()
    {
       localNode = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
-      messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      if (VISUALIZE)
+         messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      else
+         messager = new SharedMemoryMessager(FootstepPlannerSharedMemoryAPI.API);
       messageConverter = RemoteUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
-
-
 
       try
       {
@@ -114,7 +116,7 @@ public class RemoteFootstepPlannerUIMessagingTest
             @Override
             public void start(Stage stage) throws Exception
             {
-               ui = FootstepPlannerUI.createMessagerUI(stage, messager);
+               ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
                ui.show();
             }
 

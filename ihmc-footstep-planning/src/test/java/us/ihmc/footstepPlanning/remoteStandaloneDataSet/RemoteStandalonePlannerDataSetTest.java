@@ -27,6 +27,7 @@ import us.ihmc.footstepPlanning.ui.RemoteStandaloneFootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -60,14 +61,17 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
 
    protected DomainFactory.PubSubImplementation pubSubImplementation;
 
-   private JavaFXMessager messager = null;
+   private SharedMemoryMessager messager = null;
    private RemotePlannerMessageConverter messageConverter = null;
    private FootstepPathCalculatorModule module = null;
    private FootstepPlannerUI ui = null;
 
    public void setup()
    {
-      messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      if (VISUALIZE)
+         messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      else
+         messager = new SharedMemoryMessager(FootstepPlannerSharedMemoryAPI.API);
       messageConverter = RemotePlannerMessageConverter.createConverter(messager, "", DomainFactory.PubSubImplementation.INTRAPROCESS);
       module = new FootstepPathCalculatorModule(messager);
 
@@ -90,7 +94,7 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
             @Override
             public void start(Stage stage) throws Exception
             {
-               ui = FootstepPlannerUI.createMessagerUI(stage, messager);
+               ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
                ui.show();
             }
 

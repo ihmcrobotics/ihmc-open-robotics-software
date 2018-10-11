@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory;
 
 /**
@@ -16,7 +17,7 @@ import us.ihmc.pubsub.DomainFactory;
 public class RemoteFootstepPlannerUI extends Application
 {
 
-   private JavaFXMessager messager;
+   private SharedMemoryJavaFXMessager messager;
    private RemoteUIMessageConverter messageConverter;
 
    private FootstepPlannerUI ui;
