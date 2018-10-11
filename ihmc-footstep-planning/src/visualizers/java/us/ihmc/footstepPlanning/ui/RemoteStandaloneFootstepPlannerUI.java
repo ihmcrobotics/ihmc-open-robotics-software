@@ -80,7 +80,6 @@ public class RemoteStandaloneFootstepPlannerUI extends Application
 
       module.start();
 
-
       if (visualize)
       {
          ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager);
@@ -93,22 +92,24 @@ public class RemoteStandaloneFootstepPlannerUI extends Application
    {
       super.stop();
 
-      module.stop();
-      messager.closeMessager();
+      if (module != null)
+         module.stop();
 
-      messageConverter.destroy();
+      if (messager != null)
+         messager.closeMessager();
 
-      if (visualize)
-      {
+      if (messageConverter != null)
+         messageConverter.destroy();
+
+      if (ui != null)
          ui.stop();
-      }
 
       Platform.exit();
    }
 
    public boolean isRunning()
    {
-      return messager != null && messageConverter != null && (!visualize || ui != null );
+      return messager != null && messageConverter != null && (!visualize || ui != null);
    }
 
    public JavaFXMessager getMessager()
