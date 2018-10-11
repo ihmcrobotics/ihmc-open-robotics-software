@@ -109,6 +109,7 @@ public class SmoothCMPBasedICPPlannerTest
    private final double defaultInitialTransferTime = 0.2;
    private final double defaultFinalSwingTime = defaultSwingTime;
    private final double defaultFinalTransferTime = 0.2;
+   private final double defaultStandingTime = 0.2;
 
    private static final double stepWidth = 0.25;
    private final double stepLength = 0.5;
@@ -882,7 +883,7 @@ public class SmoothCMPBasedICPPlannerTest
    }
 
    @SuppressWarnings("unused")
-   private void simulate(boolean checkForDiscontinuities, boolean checkForPlanningConsistency, boolean checkIfDyanmicsAreSatisfied)
+   private void simulate(boolean checkForDiscontinuities, boolean checkForPlanningConsistency, boolean checkIfDynamicsAreSatisfied)
    {
       if (visualize)
          startSCS();
@@ -903,7 +904,7 @@ public class SmoothCMPBasedICPPlannerTest
       planner.setDefaultPhaseTimes(defaultSwingTime, defaultTransferTime);
       planner.holdCurrentICP(new FramePoint3D(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid()));
       planner.initializeForStanding(yoTime.getDoubleValue());
-      simulateTicks(checkForDiscontinuities, checkIfDyanmicsAreSatisfied, 0.5, 0);
+      simulateTicks(checkForDiscontinuities, checkIfDynamicsAreSatisfied, defaultStandingTime, -1);
 
       for (int currentStepCount = 0; currentStepCount < numberOfFootstepsForTest; )
       {
@@ -924,7 +925,7 @@ public class SmoothCMPBasedICPPlannerTest
             updateVisualization(currentStepCount);
          if (checkForPlanningConsistency)
             testForPlanningConsistency(inDoubleSupport.getBooleanValue(), currentStepCount);
-         simulateTicks(checkForDiscontinuities, checkIfDyanmicsAreSatisfied, (inDoubleSupport.getBooleanValue() ?
+         simulateTicks(checkForDiscontinuities, checkIfDynamicsAreSatisfied, (inDoubleSupport.getBooleanValue() ?
                timingList.get(currentStepCount).getTransferTime() :
                timingList.get(currentStepCount).getSwingTime()), currentStepCount);
          currentStepCount = updateStateMachine(currentStepCount);
@@ -933,13 +934,13 @@ public class SmoothCMPBasedICPPlannerTest
       addFootsteps(numberOfFootstepsForTest, footstepList, timingList, planner);
       updateContactState(-1, 0.0);
       planner.setTransferToSide(footstepList.get(numberOfFootstepsForTest - 1).getRobotSide());
-      planner.initializeForStanding(yoTime.getDoubleValue());
+      planner.initializeForTransfer(yoTime.getDoubleValue());
 
       if (visualize)
          updateVisualization(numberOfFootstepsForTest);
       if (checkForPlanningConsistency)
          testForPlanningConsistency(true, numberOfFootstepsForTest);
-      simulateTicks(checkForDiscontinuities, checkIfDyanmicsAreSatisfied, defaultFinalTransferTime, -1);
+      simulateTicks(checkForDiscontinuities, checkIfDynamicsAreSatisfied, defaultFinalTransferTime, -1);
 
       if (visualize && keepSCSUp)
          ThreadTools.sleepForever();
