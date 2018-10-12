@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.planners;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -38,6 +39,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 {
+   private static final boolean debug = false;
+   private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
+
    private final FootstepPlannerParameters parameters;
    private final WaypointDefinedBodyPathPlan bodyPath;
    private final FootstepPlanner footstepPlanner;
@@ -79,6 +83,14 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
    @Override
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
    {
+      if (side == null)
+      {
+         if (debug)
+            PrintTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
+
+         side = defaultStartNodeSide;
+      }
+
       double defaultStepWidth = parameters.getIdealFootstepWidth();
       ReferenceFrame stanceFrame = new PoseReferenceFrame("stanceFrame", stanceFootPose);
       FramePoint2D bodyStartPoint = new FramePoint2D(stanceFrame);

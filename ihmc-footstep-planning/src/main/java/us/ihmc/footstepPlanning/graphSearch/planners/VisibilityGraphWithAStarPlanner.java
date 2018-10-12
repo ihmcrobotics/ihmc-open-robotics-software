@@ -53,7 +53,7 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
    private static final double defaultHeuristicWeight = 15.0;
