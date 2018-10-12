@@ -45,6 +45,7 @@ public class AtlasJoystickBasedSteppingApplication extends Application
    {
       super.stop();
       ui.stop();
+      ros2Node.destroy();
 
       if (bdiBehaviorcommandPublisher != null)
          bdiBehaviorcommandPublisher.publish(HumanoidMessageTools.createBDIBehaviorCommandPacket(true));
