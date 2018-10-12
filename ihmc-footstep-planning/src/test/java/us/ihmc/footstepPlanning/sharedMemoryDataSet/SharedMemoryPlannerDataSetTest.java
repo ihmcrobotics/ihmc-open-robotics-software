@@ -136,23 +136,36 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
 
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.ComputePathTopic, true);
 
+      String errorMessage = "";
+
       double timeout = 2.0 * dataset.getTimeout(getPlannerType());
       double totalTimeTaken = 0.0;
       long sleepDuration = 10;
       while (!receivedResult.get() || footstepPlanningResult.get() == null)
       {
-         Assert.assertFalse("Timed out waiting for a result with dataset " + dataset.getDatasetName(), totalTimeTaken > timeout);
+         if (totalTimeTaken > timeout)
+         {
+            errorMessage += "Timed out waiting for a result with dataset " + dataset.getDatasetName();
+            return errorMessage;
+         }
 
          ThreadTools.sleep(sleepDuration);
          totalTimeTaken += Conversions.millisecondsToSeconds(sleepDuration);
       }
 
-      Assert.assertTrue("Dataset " + dataset.getDatasetName() + " failed to find a result.", footstepPlanningResult.get().validForExecution());
-
+      if (!footstepPlanningResult.get().validForExecution())
+      {
+         errorMessage += "Dataset " + dataset.getDatasetName() + " failed to find a result.";
+         return errorMessage;
+      }
 
       while (!receivedPlan.get() || footstepPlanningResult.get() == null )
       {
-         Assert.assertFalse("Timed out waiting for a plan with dataset " + dataset.getDatasetName(), totalTimeTaken > timeout);
+         if (totalTimeTaken > timeout)
+         {
+            errorMessage += "Timed out waiting for a result with dataset " + dataset.getDatasetName();
+            return errorMessage;
+         }
 
          ThreadTools.sleep(sleepDuration);
          totalTimeTaken += Conversions.millisecondsToSeconds(sleepDuration);
@@ -160,7 +173,6 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
 
       String datasetName = dataset.getDatasetName();
 
-      String errorMessage = "";
       errorMessage += assertTrue(datasetName, "Planning result for " + datasetName + " is invalid, result was " + footstepPlanningResult.get(),
                                  footstepPlanningResult.get().validForExecution());
 
