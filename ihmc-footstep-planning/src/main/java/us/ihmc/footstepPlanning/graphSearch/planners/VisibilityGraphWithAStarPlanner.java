@@ -54,6 +54,8 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 {
    private static final boolean DEBUG = true;
+   private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
+
    private static final double defaultHeuristicWeight = 15.0;
    private static final double defaultTimeout = 5.0;
 
@@ -124,6 +126,14 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    @Override
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
    {
+      if (side == null)
+      {
+         if (DEBUG)
+            PrintTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
+
+         side = defaultStartNodeSide;
+      }
+
       double defaultStepWidth = parameters.getIdealFootstepWidth();
       ReferenceFrame stanceFrame = new PoseReferenceFrame("stanceFrame", stanceFootPose);
       bodyStartPose.setToZero(stanceFrame);
