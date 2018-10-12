@@ -66,6 +66,18 @@ public class FootstepTiming
    }
 
    /**
+    * Sets the {@link #transferTime} of the footstep.
+    */
+   public void setTransferTime(double transferTime)
+   {
+      this.transferTime = transferTime;
+      if (transferTime < 0.0)
+      {
+         throw new RuntimeException("Transfer duration can not be negative.");
+      }
+   }
+
+   /**
     * Returns the time from swing foot lift-off to touch-down.
     */
    public double getSwingTime()

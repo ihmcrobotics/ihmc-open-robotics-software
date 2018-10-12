@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.output;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -11,13 +12,13 @@ public class QuadrupedJointController
    private final YoVariableRegistry registry;
 
    private final OneDoFJoint controllerJoint;
-   private final JointDesiredOutput jointDesiredSetpoints;
+   private final JointDesiredOutputBasics jointDesiredSetpoints;
 
    private final YoDouble jointErrorFeedback;
    private final YoDouble jointEffort;
    private final YoDouble jointDampingFeedback;
 
-   public QuadrupedJointController(OneDoFJoint controllerJoint, JointDesiredOutput jointDesiredSetpoints, YoVariableRegistry parentRegistry)
+   public QuadrupedJointController(OneDoFJoint controllerJoint, JointDesiredOutputBasics jointDesiredSetpoints, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(controllerJoint.getName() + name);
 

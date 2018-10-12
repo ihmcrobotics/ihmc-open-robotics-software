@@ -62,6 +62,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    private final List<? extends IMUSensorReadOnly> imuProcessedOutputs;
    private final Map<IMUSensorReadOnly, Integer> imuToIndexMap = new HashMap<>();
    private final List<RigidBody> feet;
+   private final BooleanParameter alwaysTrustFeet = new BooleanParameter("imuBiasEstimatorAlwaysTrustFeet", registry, false);
 
    private final Vector3D gravityVectorInWorld = new Vector3D();
    private final Vector3D zUpVector = new Vector3D();
@@ -176,6 +177,9 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
    public void compute(List<RigidBody> trustedFeet)
    {
+      if (alwaysTrustFeet.getValue())
+         trustedFeet = feet;
+
       checkIfBiasEstimationPossible(trustedFeet);
       estimateBiases();
    }

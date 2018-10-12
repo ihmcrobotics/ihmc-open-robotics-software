@@ -37,6 +37,8 @@ import com.google.common.base.CaseFormat;
 import controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket;
 import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
+import controller_msgs.msg.dds.ReachingManifoldMessage;
+import controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
 import controller_msgs.msg.dds.SnapFootstepPacket;
 import controller_msgs.msg.dds.VideoPacket;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -479,9 +481,9 @@ public class PacketCodeQualityTest
                {
                   Packet packetInstance = packetType.newInstance();
                   Object fieldInstance = field.get(packetInstance);
-                  Field clazzField = typeToCheck.getSuperclass().getDeclaredField("clazz");
-                  clazzField.setAccessible(true);
-                  typeToCheck = (Class<?>) clazzField.get(fieldInstance);
+                  Field allocatorField = typeToCheck.getSuperclass().getDeclaredField("allocator");
+                  allocatorField.setAccessible(true);
+                  typeToCheck = (Class<?>) ((Supplier) allocatorField.get(fieldInstance)).get().getClass();
                }
                while (typeToCheck.isArray())
                   typeToCheck = typeToCheck.getComponentType();
@@ -638,7 +640,8 @@ public class PacketCodeQualityTest
       enumLowerCaseNames.add("QuadrupedControllerRequestedEvent".toLowerCase()); // In quadruped land
       enumLowerCaseNames.add("QuadrupedSteppingStateEnum".toLowerCase()); // In quadruped land
       enumLowerCaseNames.add("QuadrupedSteppingRequestedEvent".toLowerCase()); // In quadruped land
-
+      enumLowerCaseNames.add("ValkyrieFingerMotorName".toLowerCase()); // In valkyrie land
+      
       Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
       Set<Field> fieldsToIngore = new HashSet<>();
@@ -718,7 +721,7 @@ public class PacketCodeQualityTest
       fieldsToIngore.add(ExoskeletonBehaviorStatePacket.class.getField("exoskeleton_behavior_state_")); // In exo land
       fieldsToIngore.add(QuadrupedSteppingStateChangeMessage.class.getField("initial_quadruped_stepping_state_enum_")); // In quadruped land
       fieldsToIngore.add(QuadrupedSteppingStateChangeMessage.class.getField("end_quadruped_stepping_state_enum_")); // In quadruped land
-
+      
       for (Class<? extends Packet> packetType : allPacketTypes)
       {
          try

@@ -63,8 +63,6 @@ public class ICPOptimizationCoPConstraintHandlerTest
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
-      solver.setMinimumFeedbackWeight(0.0001);
-      solver.setMinimumFootstepWeight(0.0001);
 
       solver.resetCoPLocationConstraint();
       solver.addSupportPolygon(constraintHandler.updateCoPConstraintForDoubleSupport());
@@ -122,8 +120,6 @@ public class ICPOptimizationCoPConstraintHandlerTest
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
-      solver.setMinimumFeedbackWeight(0.0001);
-      solver.setMinimumFootstepWeight(0.0001);
 
       // test left support
       solver.resetCoPLocationConstraint();
@@ -226,8 +222,6 @@ public class ICPOptimizationCoPConstraintHandlerTest
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
-      solver.setMinimumFeedbackWeight(0.0001);
-      solver.setMinimumFootstepWeight(0.0001);
 
       solver.resetCoPLocationConstraint();
       solver.addSupportPolygon(constraintHandler.updateCoPConstraintForDoubleSupport());
@@ -279,8 +273,6 @@ public class ICPOptimizationCoPConstraintHandlerTest
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
-      solver.setMinimumFeedbackWeight(0.0001);
-      solver.setMinimumFootstepWeight(0.0001);
 
       // test left support
       solver.resetCoPLocationConstraint();
@@ -414,7 +406,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
 
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, ankleZUpFrames, registry, null);
+      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       return bipedSupportPolygons;

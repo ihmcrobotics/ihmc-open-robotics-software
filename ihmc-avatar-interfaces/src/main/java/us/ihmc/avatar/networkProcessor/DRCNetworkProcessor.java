@@ -11,7 +11,7 @@ import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDat
 import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
-import us.ihmc.avatar.networkProcessor.rrtToolboxModule.WholeBodyTrajectoryToolboxModule;
+import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
@@ -22,6 +22,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -37,11 +38,12 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupRosModule(robotModel, params));
       tryToStartModule(() -> setupMocapModule(robotModel, params));
       tryToStartModule(() -> setupZeroPoseRobotConfigurationPublisherModule(robotModel, params));
-      tryToStartModule(() -> setupConstrainedWholebodyPlanningToolboxModule(robotModel, params));
+      tryToStartModule(() -> setupWholebodyTrajectoryToolboxModule(robotModel, params));
       tryToStartModule(() -> setupKinematicsToolboxModule(robotModel, params));
       tryToStartModule(() -> setupFootstepPlanningToolboxModule(robotModel, params));
       tryToStartModule(() -> addTextToSpeechEngine(params));
       tryToStartModule(() -> setupHeightQuadTreeToolboxModule(robotModel, params));
+      tryToStartModule(() -> setupRobotEnvironmentAwerenessModule(params));
    }
 
    private void addTextToSpeechEngine(DRCNetworkModuleParameters params)
@@ -56,15 +58,12 @@ public class DRCNetworkProcessor
          new ZeroPoseMockRobotConfigurationDataPublisherModule(robotModel);
    }
 
-   private void setupConstrainedWholebodyPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   private void setupWholebodyTrajectoryToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
-      if (!params.isConstrainedWholeBodyPlanningToolboxEnabled())
+      if (!params.isWholeBodyTrajectoryToolboxEnabled())
          return;
 
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-
-      new WholeBodyTrajectoryToolboxModule(robotModel, fullRobotModel, null, params.isConstrainedWholeBodyToolboxVisualizerEnabled());
-      PrintTools.info("setupConstrainedWholebodyPlanningToolboxModule");
+      new WholeBodyTrajectoryToolboxModule(robotModel, params.isWholeBodyTrajectoryToolboxVisualizerEnabled());
    }
 
    private void setupKinematicsToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
@@ -163,6 +162,20 @@ public class DRCNetworkProcessor
    {
       if (params.isHeightQuadTreeToolboxEnabled())
          new HeightQuadTreeToolboxModule(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider());
+   }
+   
+
+   private void setupRobotEnvironmentAwerenessModule(DRCNetworkModuleParameters params) throws IOException
+   {
+      if (params.isRobotEnvironmentAwerenessModuleEnabled())
+         try
+         {
+            LIDARBasedREAModule.createRemoteModule(System.getProperty("user.home") + "/.ihmc/Configurations/defaultREAModuleConfiguration.txt").start();
+         }
+         catch (Exception e)
+         {
+            throw new RuntimeException(e);
+         };
    }
 
    protected void connect(PacketCommunicator communicator)

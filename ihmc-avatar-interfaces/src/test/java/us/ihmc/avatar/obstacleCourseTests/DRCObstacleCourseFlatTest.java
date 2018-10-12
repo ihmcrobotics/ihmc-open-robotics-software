@@ -1,6 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +15,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commons.PrintTools;
@@ -27,6 +28,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
@@ -37,16 +39,22 @@ import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
+import us.ihmc.simulationconstructionset.scripts.Script;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisKinematicsBasedLinearStateCalculator;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
 {
@@ -312,6 +320,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       queuedControllerCommands.add(footstepList);
 
+      double perStepDuration = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime() + getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+      double simulationDuration = footstepList.getNumberOfFootsteps() * perStepDuration + getRobotModel().getWalkingControllerParameters().getDefaultFinalTransferTime() +
+            getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime();
+
       footstepList = new FootstepDataListCommand();
       footstepCommand = new FootstepDataCommand();
 
@@ -341,7 +353,11 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       queuedControllerCommands.add(footstepList);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+      perStepDuration += getRobotModel().getWalkingControllerParameters().getDefaultSwingTime() + getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+      simulationDuration += footstepList.getNumberOfFootsteps() * perStepDuration + getRobotModel().getWalkingControllerParameters().getDefaultFinalTransferTime() +
+            getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime();
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationDuration + 1.5);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -628,8 +644,68 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 113.3)
-   @Test(timeout = 570000)
+   public void testStandingWithStateEstimatorDrift() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      setupCameraForWalkingUpToRamp();
+      Vector3DReadOnly slidingVelocity = new Vector3D(0.10, 0.0, 0.0);
+      double simDT = simulationConstructionSet.getDT();
+
+      Script stateEstimatorDriftator = createStateEstimatorDriftator(simulationConstructionSet, fullRobotModel, slidingVelocity, simDT);
+      simulationConstructionSet.addScript(stateEstimatorDriftator);
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      Point3D center = new Point3D(0.0, 0.0, 0.86);
+      Vector3D plusMinusVector = new Vector3D(0.06, 0.06, 0.05);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   private Script createStateEstimatorDriftator(SimulationConstructionSet simulationConstructionSet, FullHumanoidRobotModel fullRobotModel,
+                                                Vector3DReadOnly slidingVelocity, double simDT)
+   {
+      SideDependentList<YoFramePoint3D> stateEstimatorFootPosition = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String nameSpace = PelvisKinematicsBasedLinearStateCalculator.class.getSimpleName();
+         String namePrefix = fullRobotModel.getFoot(robotSide).getName() + "FootPositionInWorld";
+         YoDouble x = (YoDouble) simulationConstructionSet.getVariable(nameSpace, namePrefix + "X");
+         YoDouble y = (YoDouble) simulationConstructionSet.getVariable(nameSpace, namePrefix + "Y");
+         YoDouble z = (YoDouble) simulationConstructionSet.getVariable(nameSpace, namePrefix + "Z");
+         stateEstimatorFootPosition.put(robotSide, new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame()));
+      }
+
+      Script stateEstimatorDriftator = new Script()
+      {
+         @Override
+         public void doScript(double t)
+         {
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               YoFramePoint3D position = stateEstimatorFootPosition.get(robotSide);
+               position.scaleAdd(simDT, slidingVelocity, position);
+            }
+         }
+      };
+      return stateEstimatorDriftator;
+   }
+
    public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -647,7 +723,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongStepsMaxHeightPauseAndRestart_LeftFootTest.xml";
       loadScriptFileInLeftSoleFrame(scriptName);
 
-      success = success & drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
+      success = success & drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -737,7 +813,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       loadScriptFileInLeftSoleFrame(scriptName);
 
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.5);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.0);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -810,12 +886,18 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
       FootstepDataListMessage footstepDataList = createFootstepsForRotatedStepInTheAir(scriptedFootstepGenerator);
       drcSimulationTestHelper.publishToController(footstepDataList);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
+      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
+
+      double stepDuration =
+            walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultInitialTransferTime() + walkingControllerParameters
+                  .getDefaultFinalTransferTime();
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(stepDuration + 1.5);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -880,7 +962,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       drcSimulationTestHelper.publishToController(footstepDataList);
       //      drcSimulationTestHelper.send(new ComHeightPacket(0.08, 1.0));
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();

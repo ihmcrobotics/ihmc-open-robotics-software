@@ -68,6 +68,7 @@ import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -850,7 +851,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       {
          OneDoFJoint oneDoFJoint = oneDoFJointsActual[i];
          OneDoFJoint oneDoFJointFeedforward = oneDoFJointsFeedforward[i];
-         JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint);
+         JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint);
 
          //		   oneDoFJointFeedforward.setQ(oneDoFJoint.getQ());
          double qd = jointDesiredOutput.getDesiredVelocity() - oneDoFJointFeedforward.getQ();

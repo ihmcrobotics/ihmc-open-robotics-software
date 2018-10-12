@@ -1,8 +1,12 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
+import us.ihmc.commons.InterpolationTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -29,10 +33,21 @@ public class MomentumTrajectoryHandler extends EuclideanTrajectoryHandler
          return;
       }
 
-      for (int idx = 0; idx < numberOfPoints; idx++)
+      for (int pointIndex = 0; pointIndex < numberOfPoints; pointIndex++)
       {
-         double time = startTime + (endTime - startTime) * idx / (numberOfPoints - 1);
+         double phaseThroughTrajectory = ((double) pointIndex) / ((double) (numberOfPoints - 1));
+         double time = InterpolationTools.linearInterpolate(startTime, endTime, phaseThroughTrajectory);
          packDesiredsAtTime(time);
+
+         FramePoint3DReadOnly position = getPosition();
+         FrameVector3DReadOnly velocity = getVelocity();
+
+         if (!Double.isFinite(time) || position.containsNaN() || velocity.containsNaN())
+         {
+            PrintTools.warn("Position or velocity of AM contains NaN at time " + time + ". Skipping this trajectory.");
+            trajectoryToPack.clear();
+            return;
+         }
 
          SimpleEuclideanTrajectoryPoint trajectoryPoint = trajectoryToPack.add();
          trajectoryPoint.setTime(time - startTime);
@@ -45,15 +60,27 @@ public class MomentumTrajectoryHandler extends EuclideanTrajectoryHandler
    {
       if (!isWithinInterval(time))
       {
-         angularMomentumToPack.setToNaN(ReferenceFrame.getWorldFrame());
-         angularMomentumRateToPack.setToNaN(ReferenceFrame.getWorldFrame());
+         if (angularMomentumToPack != null)
+         {
+            angularMomentumToPack.setToNaN(ReferenceFrame.getWorldFrame());
+         }
+         if (angularMomentumRateToPack != null)
+         {
+            angularMomentumRateToPack.setToNaN(ReferenceFrame.getWorldFrame());
+         }
          return false;
       }
 
       packDesiredsAtTime(time);
 
-      angularMomentumToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), getPosition());
-      angularMomentumRateToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), getVelocity());
+      if (angularMomentumToPack != null)
+      {
+         angularMomentumToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), getPosition());
+      }
+      if (angularMomentumRateToPack != null)
+      {
+         angularMomentumRateToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), getVelocity());
+      }
       return true;
    }
 }

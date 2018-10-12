@@ -11,6 +11,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -90,12 +91,18 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       setupCameraForWalkingOverRamp(simulationConstructionSet);
       ThreadTools.sleep(1000);
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingDownRampMediumSteps(scriptedFootstepGenerator);
       drcSimulationTestHelper.publishToController(footstepDataList);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(18.0);
+      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
+      double stepDuration = walkingControllerParameters.getDefaultTransferTime() + walkingControllerParameters.getDefaultSwingTime();
+      double totalDuration = footstepDataList.getFootstepDataList().size() * stepDuration;
+      totalDuration += walkingControllerParameters.getDefaultFinalTransferTime() - walkingControllerParameters.getDefaultTransferTime() + walkingControllerParameters.getDefaultInitialTransferTime();
+      totalDuration += 0.5;
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(totalDuration);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -188,7 +195,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       setupCameraForWalkingOverRamp(simulationConstructionSet);
       ThreadTools.sleep(1000);
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingUpRamp(scriptedFootstepGenerator, stepLength);
 
@@ -199,7 +206,13 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       drcSimulationTestHelper.publishToController(footstepDataList);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(16.0);
+      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
+      double stepDuration = walkingControllerParameters.getDefaultTransferTime() + walkingControllerParameters.getDefaultSwingTime();
+      double totalDuration = footstepDataList.getFootstepDataList().size() * stepDuration;
+      totalDuration += walkingControllerParameters.getDefaultFinalTransferTime() - walkingControllerParameters.getDefaultTransferTime() + walkingControllerParameters.getDefaultInitialTransferTime();
+      totalDuration += 0.5;
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(totalDuration);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
 

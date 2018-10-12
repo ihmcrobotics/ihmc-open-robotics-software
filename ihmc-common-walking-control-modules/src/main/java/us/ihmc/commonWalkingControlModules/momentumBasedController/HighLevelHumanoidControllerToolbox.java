@@ -135,6 +135,7 @@ public class HighLevelHumanoidControllerToolbox
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final InverseDynamicsJoint[] controlledJoints;
+   private final OneDoFJoint[] controlledOneDoFJoints;
 
    private final SideDependentList<Wrench> handWrenches = new SideDependentList<>();
 
@@ -181,10 +182,9 @@ public class HighLevelHumanoidControllerToolbox
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       this.icpControlPlane = new ICPControlPlane(this.omega0, centerOfMassFrame, gravityZ, registry);
-      SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>(referenceFrames.getAnkleZUpReferenceFrames());
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(referenceFrames.getSoleZUpFrames());
-      bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
       icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
 
       this.footSwitches = footSwitches;
@@ -260,6 +260,7 @@ public class HighLevelHumanoidControllerToolbox
       }
 
       controlledJoints = computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+      controlledOneDoFJoints = ScrewTools.filterJoints(controlledJoints, OneDoFJoint.class);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -933,6 +934,11 @@ public class HighLevelHumanoidControllerToolbox
    public InverseDynamicsJoint[] getControlledJoints()
    {
       return controlledJoints;
+   }
+
+   public OneDoFJoint[] getControlledOneDoFJoints()
+   {
+      return controlledOneDoFJoints;
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)

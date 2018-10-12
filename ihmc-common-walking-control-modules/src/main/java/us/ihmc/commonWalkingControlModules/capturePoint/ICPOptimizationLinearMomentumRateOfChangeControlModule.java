@@ -29,17 +29,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
                                                                  double gravityZ, double controlDT, YoVariableRegistry parentRegistry,
                                                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(referenceFrames, bipedSupportPolygons, icpControlPolygons, contactableFeet, walkingControllerParameters, yoTime, totalMass, gravityZ, controlDT,
-           parentRegistry, yoGraphicsListRegistry, true);
-   }
-
-   public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-                                                                 ICPControlPolygons icpControlPolygons, SideDependentList<ContactableFoot> contactableFeet,
-                                                                 WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass,
-                                                                 double gravityZ, double controlDT, YoVariableRegistry parentRegistry,
-                                                                 YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
-   {
-      super("", referenceFrames, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry, use2DProjection);
+      super("", referenceFrames, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry);
 
       this.yoTime = yoTime;
 
@@ -100,6 +90,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       }
 
       icpOptimizationController.getDesiredCMP(desiredCMP);
+      icpOptimizationController.getDesiredCoP(desiredCoP);
 
       yoUnprojectedDesiredCMP.set(desiredCMP);
    }
