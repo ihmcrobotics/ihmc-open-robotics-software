@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -40,6 +41,9 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 public class DepthFirstFootstepPlanner implements FootstepPlanner
 {
+   private static final boolean debug = false;
+   private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
+
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -140,6 +144,14 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    @Override
    public final void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide initialSide)
    {
+      if (initialSide == null)
+      {
+         if (debug)
+            PrintTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
+
+         initialSide = defaultStartNodeSide;
+      }
+
       stanceFootPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), initialSide);
       RigidBodyTransform startNodeSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, stanceFootPose);
