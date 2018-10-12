@@ -118,7 +118,7 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
 
       messager.submitMessage(PlannerTypeTopic, getPlannerType());
 
-      double timeMultiplier = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? 2.0 : 1.0;
+      double timeMultiplier = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? 3.0 : 1.0;
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerTimeoutTopic, timeMultiplier * dataset.getTimeout(getPlannerType()));
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
    }
@@ -138,14 +138,15 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
 
       String errorMessage = "";
 
-      double timeout = 2.0 * dataset.getTimeout(getPlannerType());
+      double timeMultiplier = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? 3.0 : 1.0;
+      double timeout = 2.0 * timeMultiplier * dataset.getTimeout(getPlannerType());
       double totalTimeTaken = 0.0;
       long sleepDuration = 10;
       while (!receivedResult.get() || footstepPlanningResult.get() == null)
       {
          if (totalTimeTaken > timeout)
          {
-            errorMessage += "Timed out waiting for a result with dataset " + dataset.getDatasetName();
+            errorMessage += "Timed out waiting for a result with dataset " + dataset.getDatasetName() + ".\n";
             return errorMessage;
          }
 
@@ -155,7 +156,7 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
 
       if (!footstepPlanningResult.get().validForExecution())
       {
-         errorMessage += "Dataset " + dataset.getDatasetName() + " failed to find a result.";
+         errorMessage += "Dataset " + dataset.getDatasetName() + " failed to find a valid result. Result : " + footstepPlanningResult.get() + "\n";
          return errorMessage;
       }
 
@@ -163,7 +164,7 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
       {
          if (totalTimeTaken > timeout)
          {
-            errorMessage += "Timed out waiting for a result with dataset " + dataset.getDatasetName();
+            errorMessage += "Timed out waiting for a result with dataset " + dataset.getDatasetName() + ".\n";
             return errorMessage;
          }
 
