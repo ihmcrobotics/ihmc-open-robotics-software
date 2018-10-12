@@ -29,7 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumMap;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -323,12 +323,10 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
    private void performZeroCalibrationNow(RobotSide sideToCalibrateNow)
    {
       EnumMap<ValkyrieHandJointName, YoDouble> biases = sideDependentBiases.get(sideToCalibrateNow);
-      EnumMap<ValkyrieHandJointName, DoubleProvider> motorBasedFingerJointPositions = sideDependentMotorBasedFingerJointPositions.get(sideToCalibrateNow);
 
       for (ValkyrieHandJointName jointName : ValkyrieHandJointName.values)
       {
-         double offset = motorBasedFingerJointPositions.get(jointName).getValue();
-         biases.get(jointName).sub(offset);
+         biases.get(jointName).set(0.0);
       }
 
       saveTransmissionCoeffsToFile(FINGER_TRANSMISSION_FILE);
