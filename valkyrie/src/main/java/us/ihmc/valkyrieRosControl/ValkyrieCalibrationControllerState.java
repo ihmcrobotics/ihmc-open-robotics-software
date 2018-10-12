@@ -11,6 +11,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
@@ -156,7 +157,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             trajectory.compute(timeInTrajectory);
             double desiredPosition = trajectory.getPosition();
 
-            JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+            JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             lowLevelJointData.clear();
             lowLevelJointData.setDesiredPosition(desiredPosition);
             lowLevelJointData.setDesiredVelocity(trajectory.getVelocity());
@@ -273,7 +274,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             trajectory.compute(timeInTrajectory);
             double desiredPosition = trajectory.getPosition();
 
-            JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+            JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             lowLevelJointData.clear();
             lowLevelJointData.setDesiredPosition(desiredPosition);
             lowLevelJointData.setDesiredVelocity(trajectory.getVelocity());

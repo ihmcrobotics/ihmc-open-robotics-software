@@ -27,7 +27,7 @@ mainDependencies {
    compile group: "com.thoughtworks.xstream", name: "xstream", version: "1.4.7"
    compile group: "org.ejml", name: "core", version: "0.30"
    compile group: "org.ejml", name: "dense64", version: "0.30"
-   compile group: "org.apache.commons", name: "commons-lang3", version: "3.7"
+   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
    compile group: "junit", name: "junit", version: "4.12"
    compile group: "org.georegression", name: "georegression", version: "0.11"
    compile group: "org.boofcv", name: "geo", version: "0.24.1"
@@ -40,7 +40,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "IHMCRealtime", version: "1.1.8"
    compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.6"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
    compile group: "us.ihmc", name: "ihmc-manipulation-planning", version: "source"
@@ -61,6 +61,6 @@ testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
 
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.23.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.24.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

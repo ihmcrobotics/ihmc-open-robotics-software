@@ -14,6 +14,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.tools.lists.PairList;
@@ -59,15 +60,15 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
    private final YoDouble kPosArmJointTorque = new YoDouble("kPosArmJointTorque",
          "Gain for position control in order to achieve acceleration control using additional joint torque (Arms only)", registry);
 
-   private PairList<OneDoFJoint, JointDesiredOutput> jointStateAndData;
-   private LinkedHashMap<JointDesiredOutput, YoDouble> alphaDesiredVelocityMap;
-   private LinkedHashMap<JointDesiredOutput, YoDouble> alphaDesiredPositionMap;
-   private LinkedHashMap<JointDesiredOutput, YoDouble> velocityTorqueMap;
-   private LinkedHashMap<JointDesiredOutput, YoDouble> positionTorqueMap;
-   private LinkedHashMap<JointDesiredOutput, YoDouble> kVelJointTorqueMap;
-   private LinkedHashMap<JointDesiredOutput, YoDouble> kPosJointTorqueMap;
-   private LinkedHashMap<JointDesiredOutput, YoDouble> desiredVelocities;
-   private LinkedHashMap<JointDesiredOutput, YoDouble> desiredPositions;
+   private PairList<OneDoFJoint, JointDesiredOutputBasics> jointStateAndData;
+   private LinkedHashMap<JointDesiredOutputBasics, YoDouble> alphaDesiredVelocityMap;
+   private LinkedHashMap<JointDesiredOutputBasics, YoDouble> alphaDesiredPositionMap;
+   private LinkedHashMap<JointDesiredOutputBasics, YoDouble> velocityTorqueMap;
+   private LinkedHashMap<JointDesiredOutputBasics, YoDouble> positionTorqueMap;
+   private LinkedHashMap<JointDesiredOutputBasics, YoDouble> kVelJointTorqueMap;
+   private LinkedHashMap<JointDesiredOutputBasics, YoDouble> kPosJointTorqueMap;
+   private LinkedHashMap<JointDesiredOutputBasics, YoDouble> desiredVelocities;
+   private LinkedHashMap<JointDesiredOutputBasics, YoDouble> desiredPositions;
 
    private final double updateDT;
    private final boolean conservative;
@@ -175,7 +176,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
    {
       for (int i = 0; i < jointStateAndData.size(); i++)
       {
-         JointDesiredOutput jointData = jointStateAndData.second(i);
+         JointDesiredOutputBasics jointData = jointStateAndData.second(i);
          OneDoFJoint jointState = jointStateAndData.first(i);
          YoDouble qd_d_joint = desiredVelocities.get(jointData);
          YoDouble q_d_joint = desiredPositions.get(jointData);
@@ -214,7 +215,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       }
    }
 
-   private void integrateAccelerationsToGetDesiredVelocities(OneDoFJoint jointState, JointDesiredOutput lowLevelJointData, YoDouble qd_d_joint, YoDouble q_d_joint)
+   private void integrateAccelerationsToGetDesiredVelocities(OneDoFJoint jointState, JointDesiredOutputBasics lowLevelJointData, YoDouble qd_d_joint, YoDouble q_d_joint)
    {
       double currentPosition = jointState.getQ();
       double currentVelocity = jointState.getQd();
@@ -246,7 +247,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       return alpha * (previousDesiredValue + desiredValueRate * updateDT) + (1.0 - alpha) * currentValue;
    }
 
-   private final LinkedHashMap<JointDesiredOutput, YoBoolean> doAccelerationIntegrationMap = new LinkedHashMap<>();
+   private final LinkedHashMap<JointDesiredOutputBasics, YoBoolean> doAccelerationIntegrationMap = new LinkedHashMap<>();
 
    @Override
    public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, JointDesiredOutputList lowLevelControllerCoreOutput, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
@@ -307,7 +308,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       for (int i = 0; i < jointStateAndData.size(); i++)
       {
          final OneDoFJoint jointState = jointStateAndData.first(i);
-         final JointDesiredOutput jointData = jointStateAndData.second(i);
+         final JointDesiredOutputBasics jointData = jointStateAndData.second(i);
          
          final YoBoolean doAccelerationIntegration = new YoBoolean("doAccelerationIntegration_" + jointState.getName(), registry);
          YoDouble desiredVelocity = new YoDouble("qd_d_" + jointState.getName(), registry);

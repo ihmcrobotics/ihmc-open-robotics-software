@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoJoi
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -12,7 +13,7 @@ public class YoEffortJointHandleHolder
    private final String name;
    private final EffortJointHandle handle;
    private final OneDoFJoint joint;
-   private final JointDesiredOutput desiredJointData;
+   private final JointDesiredOutputBasics desiredJointData;
    private final YoJointDesiredOutput yoDesiredJointData;
 
    private final YoDouble tauDesired;
@@ -20,7 +21,7 @@ public class YoEffortJointHandleHolder
    private final YoDouble q;
    private final YoDouble qd;
 
-   public YoEffortJointHandleHolder(EffortJointHandle handle, OneDoFJoint joint, JointDesiredOutput desiredJointData, YoVariableRegistry parentRegistry)
+   public YoEffortJointHandleHolder(EffortJointHandle handle, OneDoFJoint joint, JointDesiredOutputBasics desiredJointData, YoVariableRegistry parentRegistry)
    {
       this.name = handle.getName();
       YoVariableRegistry registry = new YoVariableRegistry(name);

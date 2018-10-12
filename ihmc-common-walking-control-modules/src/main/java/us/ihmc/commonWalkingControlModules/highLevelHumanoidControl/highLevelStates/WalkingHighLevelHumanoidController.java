@@ -71,6 +71,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -705,7 +706,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          OneDoFJoint joint = allOneDoFjoints[i];
          if (joint.getResetDesiredAccelerationIntegrator())
          {
-            JointDesiredOutput jointData = jointDesiredDataHolder.getJointDesiredOutput(joint);
+            JointDesiredOutputBasics jointData = jointDesiredDataHolder.getJointDesiredOutput(joint);
             if (jointData == null)
                jointData = jointDesiredDataHolder.registerJointWithEmptyData(joint);
             jointData.setResetIntegrators(true);
