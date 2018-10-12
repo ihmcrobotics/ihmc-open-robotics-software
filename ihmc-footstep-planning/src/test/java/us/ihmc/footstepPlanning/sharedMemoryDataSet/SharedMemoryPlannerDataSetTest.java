@@ -4,7 +4,6 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
@@ -13,14 +12,12 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
-import us.ihmc.footstepPlanning.ui.SharedMemoryStandaloneFootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 
@@ -111,6 +108,16 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartPositionTopic, dataset.getStart());
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalPositionTopic, dataset.getGoal());
+
+      if (DEBUG)
+      {
+         PrintTools.info("Dataset " + dataset.getDatasetName());
+         PrintTools.info("          Planning From : " );
+         PrintTools.info("             " + dataset.getStart());
+         PrintTools.info("          To : ");
+         PrintTools.info("             " + dataset.getGoal());
+
+      }
 
       if (dataset.hasGoalOrientation())
          messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalOrientationTopic, dataset.getGoalOrientation());

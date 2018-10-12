@@ -36,7 +36,7 @@ public class SharedMemoryVisGraphAStarDataSetTest extends SharedMemoryPlannerDat
       SharedMemoryVisGraphAStarDataSetTest test = new SharedMemoryVisGraphAStarDataSetTest();
       String prefix = "unitTestDataSets/test/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171115_171243_SimplePlaneAndWall");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214730_CinderBlockField");
       test.tearDown();
 
    }
