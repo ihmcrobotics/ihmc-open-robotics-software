@@ -30,7 +30,12 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
    protected SharedMemoryMessager messager = null;
    protected FootstepPathCalculatorModule module = null;
    protected FootstepPlannerUI ui = null;
-   private static final double bambooTimeScaling = 4.0;
+
+   private AtomicReference<Boolean> receivedPlan = new AtomicReference<>(false);
+   private AtomicReference<Boolean> receivedResult = new AtomicReference<>(false);
+
+   private AtomicReference<FootstepPlan> footstepPlanReference;
+   private AtomicReference<FootstepPlanningResult> footstepPlanningResult;
 
    @Before
    public void setup()
@@ -53,6 +58,15 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
 
       module = FootstepPathCalculatorModule.createMessagerModule(messager);
       module.start();
+
+      receivedPlan = new AtomicReference<>(false);
+      receivedResult = new AtomicReference<>(false);
+
+      messager.registerTopicListener(FootstepPlanTopic, request -> receivedPlan.set(true));
+      messager.registerTopicListener(PlanningResultTopic, request -> receivedResult.set(true));
+
+      footstepPlanReference = messager.createInput(FootstepPlanTopic);
+      footstepPlanningResult = messager.createInput(PlanningResultTopic);
 
       if (VISUALIZE)
       {
@@ -90,12 +104,18 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
    }
 
    @After
-   public void tearDown() throws Exception
+   public void tearDown()
    {
       module.stop();
       messager.closeMessager();
       if (ui != null)
          ui.stop();
+
+      receivedPlan = null;
+      receivedResult = null;
+
+      footstepPlanReference = null;
+      footstepPlanningResult = null;
 
       module = null;
       messager = null;
@@ -105,45 +125,12 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
    @Override
    public void submitDataSet(FootstepPlannerUnitTestDataset dataset)
    {
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartPositionTopic, dataset.getStart());
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalPositionTopic, dataset.getGoal());
-
-      if (DEBUG)
-      {
-         PrintTools.info("Dataset " + dataset.getDatasetName());
-         PrintTools.info("          Planning From : " );
-         PrintTools.info("             " + dataset.getStart());
-         PrintTools.info("          To : ");
-         PrintTools.info("             " + dataset.getGoal());
-
-      }
-
-      if (dataset.hasGoalOrientation())
-         messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalOrientationTopic, dataset.getGoalOrientation());
-      if (dataset.hasStartOrientation())
-         messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartOrientationTopic, dataset.getStartOrientation());
-
-      messager.submitMessage(PlannerTypeTopic, getPlannerType());
-
-      double timeMultiplier = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerTimeoutTopic, timeMultiplier * dataset.getTimeout(getPlannerType()));
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
+      packPlanningRequest(dataset, messager);
    }
 
    @Override
    public String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset)
    {
-      AtomicReference<Boolean> receivedPlan = new AtomicReference<>(false);
-      AtomicReference<Boolean> receivedResult = new AtomicReference<>(false);
-      messager.registerTopicListener(FootstepPlanTopic, request -> receivedPlan.set(true));
-      messager.registerTopicListener(PlanningResultTopic, request -> receivedResult.set(true));
-
-      AtomicReference<FootstepPlan> footstepPlanReference = messager.createInput(FootstepPlanTopic);
-      AtomicReference<FootstepPlanningResult> footstepPlanningResult = messager.createInput(PlanningResultTopic);
-
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.ComputePathTopic, true);
-
       String errorMessage = "";
 
       double timeMultiplier = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
@@ -154,7 +141,7 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
       {
          if (totalTimeTaken > timeout)
          {
-            errorMessage += "Timed out waiting for a result with dataset " + dataset.getDatasetName() + ".\n";
+            errorMessage += dataset.getDatasetName() + " timed out waiting for a result.\n";
             return errorMessage;
          }
 
@@ -182,24 +169,13 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
 
       String datasetName = dataset.getDatasetName();
 
-      errorMessage += assertTrue(datasetName, "Planning result for " + datasetName + " is invalid, result was " + footstepPlanningResult.get(),
-                                 footstepPlanningResult.get().validForExecution());
+      FootstepPlanningResult result = footstepPlanningResult.getAndSet(null);
+      FootstepPlan plan = footstepPlanReference.getAndSet(null);
+      receivedPlan.getAndSet(false);
+      receivedResult.getAndSet(false);
 
-      if (footstepPlanningResult.get().validForExecution())
-         errorMessage += assertTrue(datasetName, datasetName + " did not reach goal.",
-                                    PlannerTools.isGoalNextToLastStep(dataset.getGoal(), footstepPlanReference.get()));
+      errorMessage += assertPlanIsValid(datasetName, result, plan, dataset.getGoal());
 
       return errorMessage;
    }
-
-   private String assertTrue(String datasetName, String message, boolean condition)
-   {
-      if (VISUALIZE || DEBUG)
-      {
-         if (!condition)
-            PrintTools.error(datasetName + ": " + message);
-      }
-      return !condition ? "\n" + message : "";
-   }
-
 }
