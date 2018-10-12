@@ -36,7 +36,7 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemory
 
 public abstract class FootstepPlannerDataSetTest
 {
-   protected static final double bambooTimeScaling = 10.0;
+   protected static final double bambooTimeScaling = 4.0;
 
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = false;
@@ -275,7 +275,7 @@ public abstract class FootstepPlannerDataSetTest
       messager.submitMessage(PlannerTypeTopic, getPlannerType());
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
 
-      double timeMultiplier = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
+      double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerTimeoutTopic, timeMultiplier * dataset.getTimeout(getPlannerType()));
 
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);

@@ -76,7 +76,7 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
    public String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset)
    {
       totalTimeTaken = 0.0;
-      double timeoutMultiplier = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
+      double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
       double maxTimeToWait = 2.0 * timeoutMultiplier * dataset.getTimeout(getPlannerType());
       String datasetName = dataset.getDatasetName();
 
