@@ -56,9 +56,9 @@ public class VisibilityGraphsFrameworkTest extends Application
    private static final double START_GOAL_EPSILON = 1.0e-2;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = true;
+   private static boolean VISUALIZE = false;
    // For enabling helpful prints.
-   private static boolean DEBUG = true;
+   private static boolean DEBUG = false;
 
    // Because we use JavaFX, there will be two instance of VisibilityGraphsFrameworkTest, one for running the test and one starting the ui. The messager has to be static so both the ui and test use the same instance.
    private static JavaFXMessager messager = null;
