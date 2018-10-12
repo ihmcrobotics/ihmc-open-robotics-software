@@ -11,6 +11,7 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -73,6 +74,7 @@ public abstract class FootstepPlannerDataSetTest
 
       FootstepPlannerUnitTestDataset dataset = allDatasets.get(currentDatasetIndex);
 
+      List<String> dataSetNames = new ArrayList<>();
       while (dataset != null)
       {
          if (DEBUG)
@@ -89,6 +91,7 @@ public abstract class FootstepPlannerDataSetTest
 
          if (hasType)
          {
+            dataSetNames.add(dataset.getDatasetName());
             String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
             if (!errorMessagesForCurrentFile.isEmpty())
                numberOfFailingDatasets++;
@@ -107,6 +110,10 @@ public abstract class FootstepPlannerDataSetTest
 
       Assert.assertTrue("Number of failing datasets: " + numberOfFailingDatasets + " out of " + numberOfTotalDatasets + ". Errors:" + errorMessages,
                         errorMessages.isEmpty());
+
+      PrintTools.info("Passed tests: ");
+      for (String name : dataSetNames)
+         PrintTools.info(name);
    }
 
    public String runAssertions(FootstepPlannerUnitTestDataset dataset)
