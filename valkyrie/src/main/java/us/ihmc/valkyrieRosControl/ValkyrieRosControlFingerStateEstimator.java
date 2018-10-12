@@ -407,12 +407,12 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
          Files.createDirectories(transmissionFilePath.getParent());
          File file = transmissionFilePath.toFile();
          Yaml yaml = new Yaml();
-         Map<String, Map<String, Double>> coeffs = new HashMap<>();
+         Map<String, Map<String, Double>> coeffs = new LinkedHashMap<>();
          for (RobotSide robotSide : RobotSide.values)
          {
             for (ValkyrieHandJointName jointName : ValkyrieHandJointName.values)
             {
-               Map<String, Double> jointCoeffs = new HashMap<>();
+               Map<String, Double> jointCoeffs = new LinkedHashMap<>();
                jointCoeffs.put("scale", sideDependentScales.get(robotSide).get(jointName).getDoubleValue());
                jointCoeffs.put("bias", sideDependentBiases.get(robotSide).get(jointName).getDoubleValue());
                coeffs.put(jointName.getJointName(robotSide), jointCoeffs);
