@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
@@ -300,8 +301,7 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
 
       while (actualPlan.get() == null || actualResult.get() == null || expectedPlan.get() == null || expectedResult.get() == null)
       {
-         if (totalTimeWaiting > maxTimeToWait)
-            throw new RuntimeException("Overran our maximum wait time for a result");
+         Assert.assertTrue("Overran our maximum wait time for a result with dataset " + dataset.getDatasetName(), totalTimeWaiting < maxTimeToWait);
 
          ThreadTools.sleep(waitTime);
          totalTimeWaiting += Conversions.millisecondsToSeconds(waitTime);

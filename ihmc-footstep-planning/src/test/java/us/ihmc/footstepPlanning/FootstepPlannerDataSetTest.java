@@ -109,14 +109,14 @@ public abstract class FootstepPlannerDataSetTest
                         errorMessages.isEmpty());
    }
 
-   protected String runAssertions(FootstepPlannerUnitTestDataset dataset)
+   public String runAssertions(FootstepPlannerUnitTestDataset dataset)
    {
       submitDataSet(dataset);
 
       return findPlanAndAssertGoodResult(dataset);
    }
 
-   protected void runAssertionsOnDataset(DatasetTestRunner datasetTestRunner, String datasetName)
+   public void runAssertionsOnDataset(DatasetTestRunner datasetTestRunner, String datasetName)
    {
       List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools.loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerDataExporter.class);
 
