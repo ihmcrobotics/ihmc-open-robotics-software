@@ -24,7 +24,17 @@ public class RemoteStandaloneAStarDataSetTest extends RemoteStandalonePlannerDat
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       setup();
-      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
+      runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
+   }
+
+   @Override
+   @Test(timeout = 500000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 125.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   public void testDatasetsWithoutOcclusionInDevelopment()
+   {
+      pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
+      setup();
+      runAssertionsOnAllDatasetsWithoutOcclusionsInDevelopment(dataset -> runAssertions(dataset));
    }
 
    @Test(timeout = 500000)
@@ -33,7 +43,7 @@ public class RemoteStandaloneAStarDataSetTest extends RemoteStandalonePlannerDat
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
       setup();
-      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
+      runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
    }
 
    public static void main(String[] args) throws Exception
@@ -42,7 +52,7 @@ public class RemoteStandaloneAStarDataSetTest extends RemoteStandalonePlannerDat
       String prefix = "unitTestData/testable/";
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171026_131304_PlanarRegion_Ramp_2Story_UnitTest");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171026_131304_PlanarRegion_Ramp_2Story_UnitTest");
       test.tearDown();
 
    }

@@ -23,7 +23,17 @@ public class RemoteStandalonePlanarRegionBipedalDataSetTest extends RemoteStanda
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       setup();
-      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
+      runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
+   }
+
+   @Override
+   @Test(timeout = 500000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 125.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   public void testDatasetsWithoutOcclusionInDevelopment()
+   {
+      pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
+      setup();
+      runAssertionsOnAllDatasetsWithoutOcclusionsInDevelopment(dataset -> runAssertions(dataset));
    }
 
    @Test(timeout = 500000)
@@ -32,7 +42,7 @@ public class RemoteStandalonePlanarRegionBipedalDataSetTest extends RemoteStanda
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
       setup();
-      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
+      runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
    }
 
    public static void main(String[] args) throws Exception
@@ -41,7 +51,7 @@ public class RemoteStandalonePlanarRegionBipedalDataSetTest extends RemoteStanda
       RemoteStandalonePlanarRegionBipedalDataSetTest test = new RemoteStandalonePlanarRegionBipedalDataSetTest();
       String prefix = "unitTestData/testable/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
       test.tearDown();
 
    }

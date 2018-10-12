@@ -41,10 +41,10 @@ public class FootstepPlannerDataExporter
       timeout = messager.createInput(FootstepPlannerSharedMemoryAPI.PlannerTimeoutTopic);
       plannerType = messager.createInput(FootstepPlannerSharedMemoryAPI.PlannerTypeTopic);
       dataDirectoryPath = messager.createInput(FootstepPlannerSharedMemoryAPI.exportUnitTestPath, null);
-      messager.registerTopicListener(FootstepPlannerSharedMemoryAPI.exportUnitTestDataFile, this::exportVisibilityGraphsData);
+      messager.registerTopicListener(FootstepPlannerSharedMemoryAPI.exportUnitTestDataFile, this::exportFootstepPlannerData);
    }
 
-   private void exportVisibilityGraphsData(boolean export)
+   private void exportFootstepPlannerData(boolean export)
    {
       PlanarRegionsList planarRegionData = planarRegionsState.get();
       executor.execute(

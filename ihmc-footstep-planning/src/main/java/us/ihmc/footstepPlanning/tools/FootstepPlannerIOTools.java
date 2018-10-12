@@ -20,6 +20,9 @@ import java.util.List;
 
 public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
 {
+   private static final String TEST_DATA_URL = "unitTestData/testable";
+   private static final String IN_DEVELOPMENT_TEST_DATA_URL = "unitTestData/inDevelopment";
+
    private static final String TYPE_FIELD_OPEN = "<Type,";
    private static final String TYPE_FIELD_CLOSE = ",Type>";
 
@@ -146,9 +149,19 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
       return true;
    }
 
-   public static List<FootstepPlannerUnitTestDataset> loadAllFootstepPlannerDatasets(Class<?> loadingClass)
+   public static List<FootstepPlannerUnitTestDataset> loadAllFootstepPlannerDatasetsWithoutOcclusions(Class<?> loadingClass)
    {
-      List<String> childDirectories = PlanarRegionFileTools.listResourceDirectoryContents(loadingClass, TEST_DATA_URL);
+      return loadAllFootstepPlannerDatasets(loadingClass, TEST_DATA_URL);
+   }
+
+   public static List<FootstepPlannerUnitTestDataset> loadAllFootstepPlannerDatasetsWithoutOcclusionsInDevelopment(Class<?> loadingClass)
+   {
+      return loadAllFootstepPlannerDatasets(loadingClass, IN_DEVELOPMENT_TEST_DATA_URL);
+   }
+
+   public static List<FootstepPlannerUnitTestDataset> loadAllFootstepPlannerDatasets(Class<?> loadingClass, String dataURL)
+   {
+      List<String> childDirectories = PlanarRegionFileTools.listResourceDirectoryContents(loadingClass, dataURL);
       List<FootstepPlannerUnitTestDataset> datasets = new ArrayList<>();
 
       if (DEBUG && childDirectories.size() < 1)
@@ -158,9 +171,9 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
       for (int i = 0; i < childDirectories.size(); i++)
       {
          PrintTools.info("trying to load:");
-         PrintTools.info(TEST_DATA_URL + "/" + childDirectories.get(i));
+         PrintTools.info(dataURL + "/" + childDirectories.get(i));
 
-         datasets.add(loadDataset(loadingClass, TEST_DATA_URL + "/" + childDirectories.get(i)));
+         datasets.add(loadDataset(loadingClass, dataURL + "/" + childDirectories.get(i)));
       }
 
       if (DEBUG && datasets.size() < 1)

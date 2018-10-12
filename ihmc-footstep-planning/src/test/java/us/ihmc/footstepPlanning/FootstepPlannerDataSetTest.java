@@ -5,11 +5,10 @@ import org.junit.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.VisibilityGraphsDataExporter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.List;
@@ -28,13 +27,32 @@ public abstract class FootstepPlannerDataSetTest
    @ContinuousIntegrationTest(estimatedDuration = 13.0)
    public void testDatasetsWithoutOcclusion()
    {
-      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
+      runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
    }
 
-   protected void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner)
+   @Test(timeout = 500000)
+   @ContinuousIntegrationTest(estimatedDuration = 13.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   public void testDatasetsWithoutOcclusionInDevelopment()
    {
-      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools.loadAllFootstepPlannerDatasets(VisibilityGraphsDataExporter.class);
+      runAssertionsOnAllDatasetsWithoutOcclusionsInDevelopment(dataset -> runAssertions(dataset));
+   }
 
+   protected void runAssertionsOnAllDatasetsWithoutOcclusions(DatasetTestRunner datasetTestRunner)
+   {
+      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools.loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerDataExporter.class);
+
+      runAssertionsOnAllDatasets(datasetTestRunner, allDatasets);
+   }
+
+   protected void runAssertionsOnAllDatasetsWithoutOcclusionsInDevelopment(DatasetTestRunner datasetTestRunner)
+   {
+      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools.loadAllFootstepPlannerDatasetsWithoutOcclusionsInDevelopment(FootstepPlannerDataExporter.class);
+
+      runAssertionsOnAllDatasets(datasetTestRunner, allDatasets);
+   }
+
+   protected void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner, List<FootstepPlannerUnitTestDataset> allDatasets)
+   {
       if (DEBUG)
       {
          PrintTools.info("Unit test files found: " + allDatasets.size());
@@ -50,7 +68,7 @@ public abstract class FootstepPlannerDataSetTest
 
       // Randomizing the regionIds so the viz is better
       Random random = new Random(324);
-      allDatasets.stream().map(VisibilityGraphsUnitTestDataset::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
+      allDatasets.stream().map(FootstepPlannerUnitTestDataset::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
                  .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
 
       FootstepPlannerUnitTestDataset dataset = allDatasets.get(currentDatasetIndex);
@@ -91,7 +109,7 @@ public abstract class FootstepPlannerDataSetTest
                         errorMessages.isEmpty());
    }
 
-   protected String runAssertionsWithoutOcclusion(FootstepPlannerUnitTestDataset dataset)
+   protected String runAssertions(FootstepPlannerUnitTestDataset dataset)
    {
       submitDataSet(dataset);
 
@@ -100,7 +118,7 @@ public abstract class FootstepPlannerDataSetTest
 
    protected void runAssertionsOnDataset(DatasetTestRunner datasetTestRunner, String datasetName)
    {
-      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools.loadAllFootstepPlannerDatasets(VisibilityGraphsDataExporter.class);
+      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools.loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerDataExporter.class);
 
       if (DEBUG)
       {
@@ -114,7 +132,7 @@ public abstract class FootstepPlannerDataSetTest
 
       // Randomizing the regionIds so the viz is better
       Random random = new Random(324);
-      allDatasets.stream().map(VisibilityGraphsUnitTestDataset::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
+      allDatasets.stream().map(FootstepPlannerUnitTestDataset::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
                  .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
 
       FootstepPlannerUnitTestDataset dataset = null;
