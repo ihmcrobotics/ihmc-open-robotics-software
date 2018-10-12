@@ -175,6 +175,7 @@ public class LIDARBasedREAModule
       PrintTools.info("REA Module is going down.");
 
       reaMessager.closeMessager();
+      ros2Node.destroy();
 
       if (scheduled != null)
       {
