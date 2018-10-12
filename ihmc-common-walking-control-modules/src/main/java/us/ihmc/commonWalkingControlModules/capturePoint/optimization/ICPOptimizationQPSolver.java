@@ -169,11 +169,6 @@ public class ICPOptimizationQPSolver
    /** boolean indicating whether or not the feedback rate term has been added and can be used. */
    private boolean hasFeedbackRateTerm = false;
 
-   /** Minimum allowable weight on the step adjustment task. */
-   private double minimumFootstepWeight;
-   /** Minimum allowable weight on the feedback task. */
-   private double minimumFeedbackWeight;
-
    private double maxFeedbackXMagnitude = Double.POSITIVE_INFINITY;
    private double maxFeedbackYMagnitude = Double.POSITIVE_INFINITY;
    private double maximumFeedbackRate = Double.POSITIVE_INFINITY;
@@ -182,8 +177,6 @@ public class ICPOptimizationQPSolver
    private final DenseMatrix64F tmpCost;
    private final DenseMatrix64F tmpFootstepCost;
    private final DenseMatrix64F tmpFeedbackCost;
-
-   private final DenseMatrix64F identity = CommonOps.identity(2, 2);
 
    private double copSafeDistanceToEdge = 0.0001;
    private double cmpSafeDistanceFromEdge = Double.POSITIVE_INFINITY;
@@ -210,9 +203,6 @@ public class ICPOptimizationQPSolver
       indexHandler = new ICPQPIndexHandler();
       inputCalculator = new ICPQPInputCalculator(indexHandler);
       constraintCalculator = new ICPQPConstraintCalculator(indexHandler);
-
-      this.minimumFootstepWeight = 0.0;
-      this.minimumFeedbackWeight = 0.0;
 
       int maximumNumberOfFreeVariables = 6;
       int maximumNumberOfLagrangeMultipliers = 8;
@@ -288,32 +278,6 @@ public class ICPOptimizationQPSolver
       boolean ret = resetActiveSet;
       resetActiveSet = false;
       return ret;
-   }
-
-   /**
-    * Sets a lower limit for the optimization weight for the feedback objective. When calling
-    * {@link #setFeedbackConditions(double, double, double, double, double)} the user can provide
-    * weights for the feedback conditions. If they are lower then the value specified here they will
-    * be increased to {@link #minimumFeedbackWeight}.
-    *
-    * @param minimumFeedbackWeight the new value {@link #minimumFeedbackWeight}.
-    */
-   public void setMinimumFeedbackWeight(double minimumFeedbackWeight)
-   {
-      this.minimumFeedbackWeight = minimumFeedbackWeight;
-   }
-
-   /**
-    * Sets a lower limit for the optimization weight for the feedback objective. When calling
-    * {@link #setFootstepAdjustmentConditions(double, double, double, double, double)} the user can provide
-    * weights for the feedback conditions. If they are lower then the value specified here they will
-    * be increased to {@link #minimumFootstepWeight}.
-    *
-    * @param minimumFootstepWeight the new value {@link #minimumFootstepWeight}.
-    */
-   public void setMinimumFootstepWeight(double minimumFootstepWeight)
-   {
-      this.minimumFootstepWeight = minimumFootstepWeight;
    }
 
    /**
@@ -415,9 +379,10 @@ public class ICPOptimizationQPSolver
    public void setMaximumFeedbackMagnitude(FrameVector2DReadOnly maximumFeedbackMagnitude)
    {
       maximumFeedbackMagnitude.checkReferenceFrameMatch(worldFrame);
-      this.maxFeedbackXMagnitude = maximumFeedbackMagnitude.getX();
-      this.maxFeedbackYMagnitude = maximumFeedbackMagnitude.getY();
+      this.maxFeedbackXMagnitude = Math.abs(maximumFeedbackMagnitude.getX());
+      this.maxFeedbackYMagnitude = Math.abs(maximumFeedbackMagnitude.getY());
    }
+
 
    /**
     * Sets the maximum allowable feedback rate in X and Y. This defines an inequality constraint on the sum of the feedback terms in the QP.
@@ -578,6 +543,7 @@ public class ICPOptimizationQPSolver
       hasFootstepRateTerm = false;
    }
 
+   private final DenseMatrix64F tempFootstepWeight = new DenseMatrix64F(2, 2);
    /**
     * Sets the conditions for the footstep adjustment task. This includes the weight of tracking the specified footstep by the optimization algorithm,
     * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
@@ -587,19 +553,14 @@ public class ICPOptimizationQPSolver
     */
    public void setFootstepAdjustmentConditions(double recursionMultiplier, double weight, FramePoint2D referenceFootstepLocation)
    {
-      this.setFootstepAdjustmentConditions(recursionMultiplier, weight, 1.0, referenceFootstepLocation);
+      this.setFootstepAdjustmentConditions(recursionMultiplier, weight, weight, 1.0, referenceFootstepLocation);
    }
 
-   /**
-    * Sets the conditions for the footstep adjustment task. This includes the weight of tracking the specified footstep by the optimization algorithm,
-    * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
-    *
-    * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
-    * @param weight weight on tracking the reference footstep location in the solver.
-    */
-   public void setFootstepAdjustmentConditions(double recursionMultiplier, double weight, FramePoint3D referenceFootstepLocation)
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor, FramePoint2D referenceFootstepLocation)
    {
-      this.setFootstepAdjustmentConditions(recursionMultiplier, weight, 1.0, referenceFootstepLocation);
+      tempFootstepWeight.set(0, 0, xWeight);
+      tempFootstepWeight.set(1, 1, yWeight);
+      this.setFootstepAdjustmentConditions(recursionMultiplier, tempFootstepWeight, safetyFactor, referenceFootstepLocation);
    }
 
    /**
@@ -607,69 +568,38 @@ public class ICPOptimizationQPSolver
     * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
     *
     * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
-    * @param weight weight on tracking the reference footstep location in the solver.
-    */
-   public void setFootstepAdjustmentConditions(double recursionMultiplier, double weight, double safetyFactor, FramePoint2D referenceFootstepLocation)
-   {
-      this.setFootstepAdjustmentConditions(recursionMultiplier, weight, weight, safetyFactor, referenceFootstepLocation);
-   }
-
-   /**
-    * Sets the conditions for the footstep adjustment task. This includes the weight of tracking the specified footstep by the optimization algorithm,
-    * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
-    *
-    * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
-    * @param weight weight on tracking the reference footstep location in the solver.
-    */
-   public void setFootstepAdjustmentConditions(double recursionMultiplier, double weight, double safetyFactor, FramePoint3D referenceFootstepLocation)
-   {
-      this.setFootstepAdjustmentConditions(recursionMultiplier, weight, weight, safetyFactor, referenceFootstepLocation);
-   }
-
-   /**
-    * Sets the conditions for the footstep adjustment task. This includes the weight of tracking the specified footstep by the optimization algorithm,
-    * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
-    *
-    * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
-    * @param xWeight weight on tracking the reference footstep location in the solver in the Cartesian x coordinate.
-    * @param yWeight weight on tracking the reference footstep location in the solver in the Cartesian y coordinate.
+    * @param footstepWeights weight on tracking the reference footstep location in the solver in the world frame.
     * @param referenceFootstepLocation location of the desired reference footstep.
     */
-   public void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor,
-                                               FramePoint2D referenceFootstepLocation)
-   {
-      referenceFootstepLocation.changeFrame(worldFrame);
-      setFootstepAdjustmentConditions(recursionMultiplier, xWeight, yWeight, safetyFactor, referenceFootstepLocation.getX(), referenceFootstepLocation.getY());
-   }
-
-   /**
-    * Sets the conditions for the footstep adjustment task. This includes the weight of tracking the specified footstep by the optimization algorithm,
-    * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
-    *
-    * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
-    * @param xWeight weight on tracking the reference footstep location in the solver in the Cartesian x coordinate.
-    * @param yWeight weight on tracking the reference footstep location in the solver in the Cartesian y coordinate.
-    * @param referenceFootstepLocation location of the desired reference footstep.
-    */
-   public void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor,
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, DenseMatrix64F footstepWeights, double safetyFactor,
                                                FramePoint3D referenceFootstepLocation)
    {
       referenceFootstepLocation.changeFrame(worldFrame);
-      setFootstepAdjustmentConditions(recursionMultiplier, xWeight, yWeight, safetyFactor, referenceFootstepLocation.getX(), referenceFootstepLocation.getY());
+      setFootstepAdjustmentConditions(recursionMultiplier, footstepWeights, safetyFactor, referenceFootstepLocation.getX(), referenceFootstepLocation.getY());
    }
 
-   private void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor,
+   /**
+    * Sets the conditions for the footstep adjustment task. This includes the weight of tracking the specified footstep by the optimization algorithm,
+    * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
+    *
+    * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
+    * @param footstepWeights weight on tracking the reference footstep location in the solver in the world frame.
+    * @param referenceFootstepLocation location of the desired reference footstep.
+    */
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, DenseMatrix64F footstepWeights, double safetyFactor,
+                                               FramePoint2D referenceFootstepLocation)
+   {
+      referenceFootstepLocation.changeFrame(worldFrame);
+      setFootstepAdjustmentConditions(recursionMultiplier, footstepWeights, safetyFactor, referenceFootstepLocation.getX(), referenceFootstepLocation.getY());
+   }
+
+   private void setFootstepAdjustmentConditions(double recursionMultiplier, DenseMatrix64F footstepWeights, double safetyFactor,
                                                 double referenceXPositionInWorld, double referenceYPositionInWorld)
    {
       footstepRecursionMultiplier = recursionMultiplier;
       footstepAdjustmentSafetyFactor = safetyFactor;
 
-      xWeight = Math.max(minimumFootstepWeight, xWeight);
-      yWeight = Math.max(minimumFootstepWeight, yWeight);
-
-      footstepWeight.zero();
-      footstepWeight.set(0, 0, xWeight);
-      footstepWeight.set(1, 1, yWeight);
+      footstepWeight.set(footstepWeights);
 
       this.referenceFootstepLocation.set(0, 0, referenceXPositionInWorld);
       this.referenceFootstepLocation.set(1, 0, referenceYPositionInWorld);
@@ -686,9 +616,8 @@ public class ICPOptimizationQPSolver
     */
    public void setCMPFeedbackConditions(double cmpFeedbackWeight, boolean useAngularMomentum)
    {
-      CommonOps.setIdentity(identity);
+      MatrixTools.setDiagonal(this.cmpFeedbackWeight, cmpFeedbackWeight);
 
-      MatrixTools.setMatrixBlock(this.cmpFeedbackWeight, 0, 0, identity, 0, 0, 2, 2, cmpFeedbackWeight);
       indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.setUseAngularMomentum(useAngularMomentum);
    }
@@ -701,8 +630,7 @@ public class ICPOptimizationQPSolver
     */
    public void setFootstepRateWeight(double rateWeight)
    {
-      CommonOps.setIdentity(footstepRateWeight);
-      CommonOps.scale(rateWeight, footstepRateWeight);
+      MatrixTools.setDiagonal(footstepRateWeight, rateWeight);
 
       hasFootstepRateTerm = true;
    }
@@ -757,6 +685,10 @@ public class ICPOptimizationQPSolver
       this.setFeedbackConditions(copFeedbackWeight, copFeedbackWeight, feedbackGain, feedbackGain, dynamicsWeight);
    }
 
+
+   private final DenseMatrix64F tempCoPFeedbackWeight = new DenseMatrix64F(2, 2);
+   private final DenseMatrix64F tempFeedbackGains = new DenseMatrix64F(2, 2);
+
    /**
     * Sets the conditions for the feedback minimization task and the dynamic relaxation minimization task. This task minimizes the difference between
     * the nominal CMP location and the one used to control the ICP dynamics. The dynamic relaxation allows the ICP recursive dynamics to be violated by a
@@ -770,19 +702,31 @@ public class ICPOptimizationQPSolver
     */
    public void setFeedbackConditions(double copFeedbackXWeight, double copFeedbackYWeight, double feedbackXGain, double feedbackYGain, double dynamicsWeight)
    {
-      copFeedbackXWeight = Math.max(copFeedbackXWeight, minimumFeedbackWeight);
-      copFeedbackYWeight = Math.max(copFeedbackYWeight, minimumFeedbackWeight);
+      tempCoPFeedbackWeight.set(0, 0, copFeedbackXWeight);
+      tempCoPFeedbackWeight.set(1, 1, copFeedbackYWeight);
 
-      this.copFeedbackWeight.zero();
-      this.copFeedbackWeight.set(0, 0, copFeedbackXWeight);
-      this.copFeedbackWeight.set(1, 1, copFeedbackYWeight);
+      tempFeedbackGains.set(0, 0, feedbackXGain);
+      tempFeedbackGains.set(1, 1, feedbackYGain);
 
-      this.feedbackGain.zero();
-      this.feedbackGain.set(0, 0, feedbackXGain);
-      this.feedbackGain.set(1, 1, feedbackYGain);
+      this.setFeedbackConditions(tempCoPFeedbackWeight, tempFeedbackGains, dynamicsWeight);
+   }
 
-      CommonOps.setIdentity(this.dynamicsWeight);
-      CommonOps.scale(dynamicsWeight, this.dynamicsWeight);
+
+   /**
+    * Sets the conditions for the feedback minimization task and the dynamic relaxation minimization task. This task minimizes the difference between
+    * the nominal CMP location and the one used to control the ICP dynamics. The dynamic relaxation allows the ICP recursive dynamics to be violated by a
+    * small magnitude, which is critical to not overconstraining the problem.
+    *
+    * @param copFeedbackWeights weight on the minimization of the CoP feedback action for the solver in the world frame.
+    * @param feedbackGains ICP controller proportional gain in the world frame.
+    * @param dynamicsWeight weight on the minimization of the dynamic relaxation for the solver.
+    */
+   public void setFeedbackConditions(DenseMatrix64F copFeedbackWeights, DenseMatrix64F feedbackGains, double dynamicsWeight)
+   {
+      this.copFeedbackWeight.set(copFeedbackWeights);
+      this.feedbackGain.set(feedbackGains);
+
+      MatrixTools.setDiagonal(this.dynamicsWeight, dynamicsWeight);
    }
 
    /**
@@ -794,11 +738,8 @@ public class ICPOptimizationQPSolver
     */
    public void setFeedbackRateWeight(double copCMPFeedbackRateWeight, double feedbackRateWeight)
    {
-      CommonOps.setIdentity(this.feedbackRateWeight);
-      CommonOps.setIdentity(this.copCMPFeedbackRateWeight);
-
-      CommonOps.scale(feedbackRateWeight, this.feedbackRateWeight);
-      CommonOps.scale(copCMPFeedbackRateWeight, this.copCMPFeedbackRateWeight);
+      MatrixTools.setDiagonal(this.feedbackRateWeight, feedbackRateWeight);
+      MatrixTools.setDiagonal(this.copCMPFeedbackRateWeight, copCMPFeedbackRateWeight);
 
       hasFeedbackRateTerm = true;
    }
@@ -1207,8 +1148,7 @@ public class ICPOptimizationQPSolver
       costToGo.zero();
 
       CommonOps.mult(solverInput_H, solution, tmpCost);
-      CommonOps.multTransA(solution, tmpCost, costToGo);
-      CommonOps.scale(0.5, costToGo);
+      CommonOps.multTransA(0.5, solution, tmpCost, costToGo);
 
       CommonOps.multAddTransA(solverInput_h, solution, costToGo); // already scaled by -1.0
       CommonOps.addEquals(costToGo, solverInputResidualCost);
@@ -1233,16 +1173,14 @@ public class ICPOptimizationQPSolver
 
       // feedback cost:
       CommonOps.mult(copFeedbackTaskInput.quadraticTerm, copDeltaSolution, tmpFeedbackCost);
-      CommonOps.multTransA(copDeltaSolution, tmpFeedbackCost, copFeedbackCostToGo);
-      CommonOps.scale(0.5, copFeedbackCostToGo);
+      CommonOps.multTransA(0.5, copDeltaSolution, tmpFeedbackCost, copFeedbackCostToGo);
 
       CommonOps.multAddTransA(-1.0, copFeedbackTaskInput.linearTerm, copDeltaSolution, copFeedbackCostToGo);
       CommonOps.addEquals(copFeedbackCostToGo, copFeedbackTaskInput.residualCost);
 
       // dynamics cost:
       CommonOps.mult(dynamicsTaskInput.quadraticTerm, solution, tmpCost);
-      CommonOps.multTransA(solution, tmpCost, dynamicsCostToGo);
-      CommonOps.scale(0.5, dynamicsCostToGo);
+      CommonOps.multTransA(0.5, solution, tmpCost, dynamicsCostToGo);
 
       CommonOps.multAddTransA(-1.0, dynamicsTaskInput.linearTerm, solution, dynamicsCostToGo);
       CommonOps.addEquals(dynamicsCostToGo, dynamicsTaskInput.residualCost);
@@ -1250,8 +1188,7 @@ public class ICPOptimizationQPSolver
       if (indexHandler.useStepAdjustment())
       { // footstep cost:
          CommonOps.mult(footstepTaskInput.quadraticTerm, footstepLocationSolution, tmpFootstepCost);
-         CommonOps.multTransA(footstepLocationSolution, tmpFootstepCost, footstepCostToGo);
-         CommonOps.scale(0.5, footstepCostToGo);
+         CommonOps.multTransA(0.5, footstepLocationSolution, tmpFootstepCost, footstepCostToGo);
 
          CommonOps.multAddTransA(-1.0, footstepTaskInput.linearTerm, footstepLocationSolution, footstepCostToGo);
          CommonOps.addEquals(footstepCostToGo, footstepTaskInput.residualCost);
@@ -1260,8 +1197,7 @@ public class ICPOptimizationQPSolver
       if (indexHandler.hasCMPFeedbackTask())
       { // cmp feedback cost:
          CommonOps.mult(cmpFeedbackTaskInput.quadraticTerm, cmpDeltaSolution, tmpFeedbackCost);
-         CommonOps.multTransA(cmpDeltaSolution, tmpFeedbackCost, cmpFeedbackCostToGo);
-         CommonOps.scale(0.5, cmpFeedbackCostToGo);
+         CommonOps.multTransA(0.5, cmpDeltaSolution, tmpFeedbackCost, cmpFeedbackCostToGo);
 
          CommonOps.multAddTransA(-1.0, cmpFeedbackTaskInput.linearTerm, cmpDeltaSolution, cmpFeedbackCostToGo);
          CommonOps.addEquals(cmpFeedbackCostToGo, cmpFeedbackTaskInput.residualCost);
