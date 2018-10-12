@@ -42,7 +42,6 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemory
 public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlannerDataSetTest
 {
    private static final String robotName = "testBot";
-   private static final double bambooTimeScaling = 4.0;
 
    private RealtimeRos2Node ros2Node;
 
@@ -184,25 +183,9 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
       for (int i = 0; i < 10; i++)
          ThreadTools.sleep(100);
 
-      byte plannerType = getPlannerType().toByte();
-      PlanarRegionsListMessage planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(dataset.getPlanarRegionsList());
-
       FootstepPlanningRequestPacket planningRequestPacket = new FootstepPlanningRequestPacket();
-      planningRequestPacket.getStanceFootPositionInWorld().set(dataset.getStart());
-      planningRequestPacket.getGoalPositionInWorld().set(dataset.getGoal());
-      planningRequestPacket.setRequestedFootstepPlannerType(plannerType);
-      planningRequestPacket.getPlanarRegionsListMessage().set(planarRegions);
 
-      double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      planningRequestPacket.setTimeout(timeoutMultiplier * dataset.getTimeout(getPlannerType()));
-
-      if (dataset.hasGoalOrientation())
-         planningRequestPacket.getGoalOrientationInWorld().set(dataset.getGoalOrientation());
-      if (dataset.hasStartOrientation())
-         planningRequestPacket.getStanceFootOrientationInWorld().set(dataset.getStartOrientation());
-
-      if (DEBUG)
-         PrintTools.info("Sending out planning request packet.");
+      packPlanningRequest(dataset, planningRequestPacket);
 
       footstepPlanningRequestPublisher.publish(planningRequestPacket);
    }
@@ -224,7 +207,7 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
       {
          if (totalTimeWaiting > maxTimeToWait)
          {
-            errorMessage += "Timed out waiting on result for dataset " + dataset.getDatasetName() + ".\n";
+            errorMessage += dataset.getDatasetName() + " timed out waiting on result.\n";
             return errorMessage;
          }
 
@@ -256,7 +239,6 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
 
       String datasetName = dataset.getDatasetName();
 
-
       FootstepPlanningResult expectedResult = this.expectedResult.getAndSet(null);
       FootstepPlanningResult actualResult = this.actualResult.getAndSet(null);
       FootstepPlan expectedPlan = this.expectedPlan.getAndSet(null);
@@ -266,16 +248,7 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
       uiReceivedPlan.set(false);
       publishedReceivedPlan.set(false);
 
-      errorMessage += assertTrue(datasetName, "Planning result for " + datasetName + " is invalid, result was " + actualResult,
-                                 actualResult.validForExecution());
-      errorMessage += assertTrue(datasetName, "Planning results for " + datasetName + " are not equal: " + expectedResult + " and " + actualResult + ".\n",
-                                 expectedResult.equals(actualResult));
-
-      if (actualResult.validForExecution())
-      {
-         errorMessage += areFootstepPlansEqual(actualPlan, expectedPlan);
-         errorMessage += assertTrue(datasetName, datasetName + " did not reach goal.", PlannerTools.isGoalNextToLastStep(dataset.getGoal(), actualPlan));
-      }
+      errorMessage += assertPlansAreValid(datasetName, expectedResult, actualResult, expectedPlan, actualPlan, dataset.getGoal());
 
       return errorMessage;
    }
@@ -324,60 +297,5 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
       }
 
       return footstepPlan;
-   }
-
-   private String assertTrue(String datasetName, String message, boolean condition)
-   {
-      if (VISUALIZE || DEBUG)
-      {
-         if (!condition)
-            PrintTools.error(datasetName + ": " + message);
-      }
-      return !condition ? "\n" + message : "";
-   }
-
-   private String areFootstepPlansEqual(FootstepPlan footstepPlanA, FootstepPlan footstepPlanB)
-   {
-      String errorMessage = "";
-
-      if (footstepPlanA.getNumberOfSteps() != footstepPlanB.getNumberOfSteps())
-      {
-         errorMessage += "Plan A has " + footstepPlanA.getNumberOfSteps() + ", while Plan B has " + footstepPlanB.getNumberOfSteps() + ".\n";
-      }
-
-      for (int i = 0; i < Math.min(footstepPlanA.getNumberOfSteps(), footstepPlanB.getNumberOfSteps()); i++)
-      {
-         errorMessage += areFootstepsEqual(i, footstepPlanA.getFootstep(i), footstepPlanB.getFootstep(i));
-      }
-
-      return errorMessage;
-   }
-
-   private String areFootstepsEqual(int footstepNumber, SimpleFootstep footstepA, SimpleFootstep footstepB)
-   {
-      String errorMessage = "";
-
-      if (!footstepA.getRobotSide().equals(footstepB.getRobotSide()))
-      {
-         errorMessage += "Footsteps " + footstepNumber + " are different robot sides: " + footstepA.getRobotSide() + " and " + footstepB.getRobotSide() + ".\n";
-      }
-
-      FramePose3D poseA = new FramePose3D();
-      FramePose3D poseB = new FramePose3D();
-
-      footstepA.getSoleFramePose(poseA);
-      footstepB.getSoleFramePose(poseB);
-
-      if (!poseA.epsilonEquals(poseB, 1e-5))
-      {
-         errorMessage += "Footsteps " + footstepNumber + " have different poses: \n \t" + poseA.toString() + "\n and \n\t " + poseB.toString() + ".\n";
-      }
-
-      if (!footstepA.epsilonEquals(footstepB, 1e-5))
-      {
-         errorMessage += "Footsteps " + footstepNumber + " are not equal: \n \t" + footstepA.toString() + "\n and \n\t " + footstepB.toString() + ".\n";
-      }
-
-      return errorMessage;
    }
 }
