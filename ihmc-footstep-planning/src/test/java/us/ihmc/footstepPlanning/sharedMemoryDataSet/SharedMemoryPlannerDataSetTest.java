@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
@@ -140,8 +141,7 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
       long sleepDuration = 10;
       while (!receivedPlan.get() || !receivedResult.get() || footstepPlanningResult.get() == null || footstepPlanReference.get() == null)
       {
-         if (totalTimeTaken > timeout)
-            throw new RuntimeException("Timed out waiting for a result.");
+         Assert.assertFalse("Timed out waiting for a result with dataset " + dataset.getDatasetName(), totalTimeTaken > timeout);
 
          ThreadTools.sleep(sleepDuration);
          totalTimeTaken += Conversions.millisecondsToSeconds(sleepDuration);
