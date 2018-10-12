@@ -73,7 +73,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
          // Can go up to kp = 30.0, kd = 4.0
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 15.0, 2.0);
          // Can go up to kp = 60.0, kd = 6.0
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 30.0, 3.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 20.0, 3.0);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 30.0, 3.0);
          // Can go up to kp = 30.0, kd = 2.0
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.0);
