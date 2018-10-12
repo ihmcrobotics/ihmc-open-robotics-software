@@ -5,8 +5,11 @@ import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.math.FastFourierTransform;
 
@@ -21,6 +24,7 @@ public class TrajectoryMathTools
    private final ComplexNumber[] tempComplex1;
    private final ComplexNumber[] tempComplex2;
 
+
    public TrajectoryMathTools(int maxNumberOfCoefficients)
    {
       this.maxNumberOfCoefficients = (int) Math.pow(2, Math.ceil(Math.log(maxNumberOfCoefficients) / Math.log(2.0))); // Rounding up the nearest power of two
@@ -34,6 +38,7 @@ public class TrajectoryMathTools
 
    public static void scale(Trajectory scaledTrajectoryToPack, Trajectory trajectoryToScale, double scalar)
    {
+      scaledTrajectoryToPack.set(trajectoryToScale);
       for (int i = 0; i < trajectoryToScale.getNumberOfCoefficients(); i++)
          scaledTrajectoryToPack.setDirectlyFast(i, trajectoryToScale.getCoefficient(i) * scalar);
    }
@@ -61,16 +66,23 @@ public class TrajectoryMathTools
 
    /**
     * Adds two trajectories by taking the intersection of the time intervals over which they are defined.
-    * Throws runtime exception in case null intersection is found between the two trajectories
-    * @param trajToPack
-    * @param traj1
-    * @param traj2
+    * Throws runtime exception in case null intersection is found between the two trajectories.
     */
-   public static void addByTrimming(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   public static void addByTrimming(Trajectory3D segmentToPack, Trajectory3D segment1, Trajectory3D segment2)
    {
-      validatePackingTrajectoryForLinearCombination(trajToPack, traj1, traj2);
-      setTimeIntervalByTrimming(trajToPack, traj1, traj2);
-      setCoeffsByAddition(trajToPack, traj1, traj2);
+      for (int direction = 0; direction < 3; direction++)
+         addByTrimming(segmentToPack.getTrajectory(direction), segment1.getTrajectory(direction), segment2.getTrajectory(direction));
+   }
+
+   /**
+    * Adds two trajectories by taking the intersection of the time intervals over which they are defined.
+    * Throws runtime exception in case null intersection is found between the two trajectories.
+    */
+   public static void addByTrimming(Trajectory segmentToPack, Trajectory segment1, Trajectory segment2)
+   {
+      validatePackingTrajectoryForLinearCombination(segmentToPack, segment1, segment2);
+      setTimeIntervalByTrimming(segmentToPack, segment1, segment2);
+      setCoeffsByAddition(segmentToPack, segment1, segment2);
    }
 
    private static void setCoeffsByAddition(Trajectory trajectoryToPack, Trajectory trajectory1, Trajectory trajectory2)
@@ -192,6 +204,44 @@ public class TrajectoryMathTools
       trajectoryToPack.reshape(numberOfCoeffsToSet);
    }
 
+   public static void multiplyNaive(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   {
+      validatePackingTrajectoryForMultiplication(trajToPack, traj1, traj2);
+      validateTrajectoryTimes(traj1, traj2);
+      trajToPack.setTime(traj1.getInitialTime(), traj2.getFinalTime());
+      setCoefficientsByNaiveMultiplication(trajToPack, traj1, traj2);
+   }
+
+   /*
+    * TODO The FFT algorithm is supposed to be faster than simple brute-force multiplication, but it
+    * appears to be even slower. It is possible that either the FFT implementation is slow or that
+    * the fact that it requires the use of temporary variables prevents a good usage of the memory.
+    * I think we could implement a divide-and-conquer alogrithm that could still be static and thus
+    * definitely faster than the FFT based or naive approach. (Sylvain)
+    */
+   private static void setCoefficientsByNaiveMultiplication(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   {
+      int aLength = traj1.getNumberOfCoefficients();
+      int bLength = traj2.getNumberOfCoefficients();
+      int n = aLength + bLength;
+      trajToPack.reshape(n - 1);
+
+      double[] a = traj1.getCoefficients();
+      double[] b = traj2.getCoefficients();
+
+      for (int k = 0; k < n; k++)
+      {
+         double ck = 0.0;
+
+         for (int i = Math.max(k - bLength + 1, 0); i <= Math.min(aLength - 1, k); i++)
+         {
+            ck += a[i] * b[k - i];
+         }
+
+         trajToPack.setDirectly(k, ck);
+      }
+   }
+
    private void addCoefficientsByMultiplication(Trajectory trajectoryToPack, Trajectory trajectory1, Trajectory trajectory2)
    {
       int numberOfCoeffsToSet = trajectory1.getNumberOfCoefficients() + trajectory2.getNumberOfCoefficients() - 1;
@@ -245,7 +295,7 @@ public class TrajectoryMathTools
       scale(trajToPack.getTrajectoryZ(), traj.getTrajectoryZ(), scalarZ);
    }
 
-   public static void scale(Trajectory3D traj, double scalarX, double scalarY, double scalarZ)
+   private static void scale(Trajectory3D traj, double scalarX, double scalarY, double scalarZ)
    {
       scale(traj.getTrajectoryX(), scalarX);
       scale(traj.getTrajectoryY(), scalarY);
@@ -266,12 +316,6 @@ public class TrajectoryMathTools
    {
       for (int direction = 0; direction < 3; direction++)
          add(trajToPack.getTrajectory(direction), traj1.getTrajectory(direction), traj2.getTrajectory(direction));
-   }
-
-   public static void addByTrimming(Trajectory3D trajToPack, Trajectory3D traj1, Trajectory3D traj2)
-   {
-      for (int direction = 0; direction < 3; direction++)
-         addByTrimming(trajToPack.getTrajectory(direction), traj1.getTrajectory(direction), traj2.getTrajectory(direction));
    }
 
    public static void subtract(Trajectory3D trajToPack, Trajectory3D traj1, Trajectory3D traj2)
@@ -399,26 +443,26 @@ public class TrajectoryMathTools
       }
    }
 
-   private static void setTimeIntervalByTrimming(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   private static void setTimeIntervalByTrimming(Trajectory segmentToPack, Trajectory segment1, Trajectory segment2)
    {
-      double latestStartingTime = Math.max(traj1.getInitialTime(), traj2.getInitialTime());
-      double earliestEndingTime = Math.min(traj1.getFinalTime(), traj2.getFinalTime());
+      double latestStartingTime = Math.max(segment1.getInitialTime(), segment2.getInitialTime());
+      double earliestEndingTime = Math.min(segment1.getFinalTime(), segment2.getFinalTime());
       if (earliestEndingTime <= latestStartingTime)
       {
-         PrintTools.debug(traj1.toString());
-         PrintTools.debug(traj2.toString());
+         PrintTools.debug(segment1.toString());
+         PrintTools.debug(segment2.toString());
          throw new RuntimeException("Got null intersection for time intervals during trajectory operation");
       }
-      trajToPack.setInitialTime(latestStartingTime);
-      trajToPack.setFinalTime(earliestEndingTime);
+      segmentToPack.setInitialTime(latestStartingTime);
+      segmentToPack.setFinalTime(earliestEndingTime);
    }
 
-   public static void validatePackingTrajectoryForLinearCombination(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   private static void validatePackingTrajectoryForLinearCombination(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
    {
       if (trajToPack.getMaximumNumberOfCoefficients() < Math.max(traj1.getNumberOfCoefficients(), traj2.getNumberOfCoefficients()))
       {
-         PrintTools.warn("Not enough coefficients to store result of trajectory operation. Needed: "
-               + Math.max(traj1.getNumberOfCoefficients(), traj2.getNumberOfCoefficients()) + " Available: " + trajToPack.getMaximumNumberOfCoefficients());
+         PrintTools.warn("Not enough coefficients to store result of trajectory operation. Needed: " + Math
+               .max(traj1.getNumberOfCoefficients(), traj2.getNumberOfCoefficients()) + " Available: " + trajToPack.getMaximumNumberOfCoefficients());
          throw new InvalidParameterException();
       }
    }
@@ -513,11 +557,11 @@ public class TrajectoryMathTools
       trajToPack.set(traj);
       trajToPack.setInitialTime(segmentStartTime);
       trajToPack.setFinalTime(segmentFinalTime);
-      if (traj.getInitialTime() > segmentStartTime + TIME_EPSILON || traj.getFinalTime() < segmentStartTime + TIME_EPSILON)
+      if (traj.getInitialTime() > segmentStartTime + TIME_EPSILON || traj.getFinalTime() < segmentFinalTime - TIME_EPSILON)
          trajToPack.setZero();
    }
 
-   private static void setCurrentSegmentPolynomial(Trajectory3D trajToPack, Trajectory3D traj, double segmentStartTime, double segmentFinalTime,
+   static void setCurrentSegmentPolynomial(Trajectory3D trajToPack, Trajectory3D traj, double segmentStartTime, double segmentFinalTime,
                                                    double TIME_EPSILON)
    {
       for (int i = 0; i < 3; i++)
@@ -562,8 +606,9 @@ public class TrajectoryMathTools
    public static void checkZeroTimeTrajectory(Trajectory trajectory, double TIME_EPSILON)
    {
       if (Math.abs(trajectory.getFinalTime() - trajectory.getInitialTime()) < TIME_EPSILON)
-         throw new RuntimeException("Cannot operate with null trajectory, start time: " + trajectory.getInitialTime() + " end time: "
-               + trajectory.getFinalTime() + " epsilon: " + TIME_EPSILON);
+         throw new RuntimeException(
+               "Cannot operate with null trajectory, start time: " + trajectory.getInitialTime() + " end time: " + trajectory.getFinalTime() + " epsilon: "
+                     + TIME_EPSILON);
    }
 
    public void addTimeOffset(Trajectory trajectory, double timeOffset)
@@ -609,7 +654,7 @@ public class TrajectoryMathTools
       trajectory.setTime(trajectory.getInitialTime() + timeOffset, trajectory.getFinalTime() + timeOffset);
    }
 
-   public static void getIntergal(Trajectory trajectoryToPack, Trajectory trajectoryToIntegrate)
+   public static void getIntegral(Trajectory trajectoryToPack, Trajectory trajectoryToIntegrate)
    {
       if (trajectoryToPack.getMaximumNumberOfCoefficients() < trajectoryToIntegrate.getNumberOfCoefficients() + 1)
          throw new InvalidParameterException("Not enough coefficients to store result of trajectory integration");
@@ -626,67 +671,140 @@ public class TrajectoryMathTools
    public static void getDerivative(Trajectory derivativeToPack, Trajectory trajectoryToDifferentiate)
    {
       if (derivativeToPack.getMaximumNumberOfCoefficients() < trajectoryToDifferentiate.getNumberOfCoefficients() - 1)
+      {
          throw new InvalidParameterException("Not enough coefficients to store the result of differentiation");
+      }
 
       derivativeToPack.reshape(Math.max(trajectoryToDifferentiate.getNumberOfCoefficients() - 1, 1));
       if (trajectoryToDifferentiate.getNumberOfCoefficients() == 1)
+      {
          derivativeToPack.setConstant(trajectoryToDifferentiate.getInitialTime(), trajectoryToDifferentiate.getFinalTime(), 0);
+         return;
+      }
+
       for (int i = trajectoryToDifferentiate.getNumberOfCoefficients() - 1; i > 0; i--)
+      {
          derivativeToPack.setDirectlyFast(i - 1, i * trajectoryToDifferentiate.getCoefficient(i));
+      }
       derivativeToPack.setTime(trajectoryToDifferentiate.getInitialTime(), trajectoryToDifferentiate.getFinalTime());
    }
 
-   public static void addSegmentedTrajectories(SegmentedFrameTrajectory3D trajToPack, SegmentedFrameTrajectory3D traj1, SegmentedFrameTrajectory3D traj2,
-                                               double TIME_EPSILON)
+   public static void addSegmentedTrajectories(SegmentedFrameTrajectory3D trajectoryToPack, SegmentedFrameTrajectory3D trajectory1,
+                                               SegmentedFrameTrajectory3D trajectory2, double epsilon)
    {
-      double currentTime = Math.min(traj1.getSegment(0).getInitialTime(), traj2.getSegment(0).getInitialTime());
-      for (int i = 0, j = 0; i < traj1.getNumberOfSegments() || j < traj2.getNumberOfSegments();)
+      addSegmentedTrajectories(trajectoryToPack, trajectory1, trajectory2, 0.0, epsilon);
+   }
+
+   public static void addSegmentedTrajectories(SegmentedFrameTrajectory3D trajectoryToPack, SegmentedFrameTrajectory3D trajectory1,
+                                               SegmentedFrameTrajectory3D trajectory2, double minimumSegmentLength, double epsilon)
+   {
+      trajectoryToPack.reset();
+      double currentTime = Math.min(trajectory1.getSegment(0).getInitialTime(), trajectory2.getSegment(0).getInitialTime());
+      for (int trajectory1Index = 0, trajectory2Index = 0;
+           trajectory1Index < trajectory1.getNumberOfSegments() || trajectory2Index < trajectory2.getNumberOfSegments(); )
       {
-         FrameTrajectory3D segmentTraj1, segmentTraj2;
-         FrameTrajectory3D currentTrajectoryToPack = trajToPack.add();
+         FrameTrajectory3D firstSegment, secondSegment;
+         FrameTrajectory3D currentTrajectoryToPack = trajectoryToPack.add();
+
+         boolean trajectory2SegmentBeforeTrajectory1 = false;
+         boolean trajectory1SegmentBeforeTrajectory2 = false;
+         boolean trajectory1IsOver = trajectory1Index >= trajectory1.getNumberOfSegments();
+         boolean trajectory2IsOver = trajectory2Index >= trajectory2.getNumberOfSegments();
+
+         boolean trajectory1IsFirst;
+         if (!trajectory1IsOver)
+         {
+            trajectory2SegmentBeforeTrajectory1 = (trajectory2Index < trajectory2.getNumberOfSegments() && (
+                  trajectory2.getSegment(trajectory2Index).getFinalTime() < trajectory1.getSegment(trajectory1Index).getInitialTime() - epsilon));
+         }
+         if (!trajectory2IsOver)
+         {
+            trajectory1SegmentBeforeTrajectory2 = (trajectory1Index < trajectory1.getNumberOfSegments() && (
+                  trajectory1.getSegment(trajectory1Index).getFinalTime() < trajectory2.getSegment(trajectory2Index).getInitialTime() - epsilon));
+         }
 
          // Select the one that is ahead or set if no intersection
-         if (i >= traj1.getNumberOfSegments()
-               || (j < traj2.getNumberOfSegments() && traj2.getSegment(j).getFinalTime() < traj1.getSegment(i).getInitialTime() - TIME_EPSILON))
-         {
-            setCurrentSegmentPolynomial(currentTrajectoryToPack, traj2.getSegment(j), currentTime, traj2.getSegment(j).getFinalTime(), TIME_EPSILON);
-            currentTime = traj2.getSegment(j++).getFinalTime();
+         if (trajectory1IsOver)
+         { // No intersection because the first trajectory is over
+            setCurrentSegmentPolynomial(currentTrajectoryToPack, trajectory2.getSegment(trajectory2Index), currentTime,
+                                        trajectory2.getSegment(trajectory2Index).getFinalTime(), epsilon);
+            currentTime = trajectory2.getSegment(trajectory2Index++).getFinalTime();
             continue;
          }
-         else if (j >= traj2.getNumberOfSegments()
-               || (i < traj1.getNumberOfSegments() && traj1.getSegment(i).getFinalTime() < traj2.getSegment(j).getInitialTime() - TIME_EPSILON))
-         {
-            setCurrentSegmentPolynomial(currentTrajectoryToPack, traj1.getSegment(i), currentTime, traj1.getSegment(i).getFinalTime(), TIME_EPSILON);
-            currentTime = traj1.getSegment(i++).getFinalTime();
+         else if (trajectory2SegmentBeforeTrajectory1)
+         { // No intersection. The second trajectory segment ends before the first trajectory segment starts
+            FrameTrajectory3D trajectory2Segment = trajectory2.getSegment(trajectory2Index);
+            setCurrentSegmentPolynomial(currentTrajectoryToPack, trajectory2Segment, currentTime, trajectory2Segment.getFinalTime(), epsilon);
+            currentTime = trajectory2Segment.getFinalTime();
+            trajectory2Index++;
             continue;
          }
-         else if (traj1.getSegment(i).getInitialTime() < traj2.getSegment(j).getInitialTime())
-         {
-            segmentTraj1 = traj1.getSegment(i);
-            segmentTraj2 = traj2.getSegment(j);
+         else if (trajectory2IsOver || trajectory1SegmentBeforeTrajectory2)
+         { // No intersection. Either the second trajectory is over, or the first trajectory segment ends before the second trajectory segment starts
+            setCurrentSegmentPolynomial(currentTrajectoryToPack, trajectory1.getSegment(trajectory1Index), currentTime,
+                                        trajectory1.getSegment(trajectory1Index).getFinalTime(), epsilon);
+            currentTime = trajectory1.getSegment(trajectory1Index++).getFinalTime();
+            continue;
+         }
+         else if (trajectory1.getSegment(trajectory1Index).getInitialTime() < trajectory2.getSegment(trajectory2Index).getInitialTime())
+         { // trajectory 1 segment starts first
+            firstSegment = trajectory1.getSegment(trajectory1Index);
+            secondSegment = trajectory2.getSegment(trajectory2Index);
+            trajectory1IsFirst = true;
          }
          else
-         {
-            segmentTraj2 = traj1.getSegment(i);
-            segmentTraj1 = traj2.getSegment(j);
+         { // trajectory 2 segment starts first, or they both start at the same time
+            secondSegment = trajectory1.getSegment(trajectory1Index);
+            firstSegment = trajectory2.getSegment(trajectory2Index);
+            trajectory1IsFirst = false;
          }
 
-         // FIXME why get the next one
-         if (segmentTraj1.getInitialTime() < segmentTraj2.getInitialTime() - TIME_EPSILON && currentTime - TIME_EPSILON < segmentTraj1.getInitialTime())
-         {
-            setCurrentSegmentPolynomial(currentTrajectoryToPack, segmentTraj1, currentTime, segmentTraj2.getInitialTime(), TIME_EPSILON);
+         boolean semgentsDontStartAtTheSameTime = firstSegment.getInitialTime() < secondSegment.getInitialTime() - epsilon;
+         boolean readingFromBeforeSecondSegment = currentTime < secondSegment.getInitialTime() - epsilon;
+         boolean startDifferenceIsTooSmall = secondSegment.getInitialTime() - firstSegment.getInitialTime() < minimumSegmentLength;
+         if (semgentsDontStartAtTheSameTime && readingFromBeforeSecondSegment)
+         { // the first segment starts before the second segment, so add that first bit in, as it does not get included in the add by trimming function
+            if (startDifferenceIsTooSmall)
+            { // its too short to change anything
+               secondSegment.setInitialTimeMaintainingBounds(firstSegment.getInitialTime());
+            }
+            else
+            {
+               setCurrentSegmentPolynomial(currentTrajectoryToPack, firstSegment, currentTime, secondSegment.getInitialTime(), epsilon);
+               currentTrajectoryToPack = trajectoryToPack.add();
+            }
          }
 
-         addByTrimming(currentTrajectoryToPack, segmentTraj1, segmentTraj2);
-         currentTime = Math.min(segmentTraj1.getFinalTime(), segmentTraj2.getFinalTime());
-         if (currentTime < traj2.getSegment(j).getFinalTime() - TIME_EPSILON)
-            i++;
-         else if (currentTime < traj1.getSegment(j).getFinalTime() - TIME_EPSILON)
-            j++;
+         boolean segmentsDontEndAtTheSameTime = secondSegment.getFinalTime() > firstSegment.getFinalTime() + epsilon;
+         boolean endDifferenceIsTooSmall = secondSegment.getFinalTime() - firstSegment.getFinalTime() < minimumSegmentLength;
+         if (segmentsDontEndAtTheSameTime && endDifferenceIsTooSmall)
+         { // they don't end at the same time, but the difference is too small to include, so stretch the first one to the end one.
+            firstSegment.setFinalTimeMaintainingBounds(secondSegment.getFinalTime());
+
+            // need to shift the time of the next segment forward, too
+            if (trajectory1IsFirst && trajectory1Index + 1 < trajectory1.getNumberOfSegments())
+               trajectory1.getSegment(trajectory1Index + 1).setInitialTimeMaintainingBounds(secondSegment.getFinalTime());
+            else if (!trajectory1IsFirst && trajectory2Index + 1 < trajectory2.getNumberOfSegments())
+               trajectory2.getSegment(trajectory2Index + 1).setInitialTimeMaintainingBounds(secondSegment.getFinalTime());
+         }
+
+         addByTrimming(currentTrajectoryToPack, firstSegment, secondSegment);
+
+         currentTime = Math.min(firstSegment.getFinalTime(), secondSegment.getFinalTime());
+
+         if (currentTime < trajectory2.getSegment(trajectory2Index).getFinalTime() - epsilon)
+         { // we haven't reached the end of trajectory 2, so only advance trajectory 1
+            trajectory1Index++;
+         }
+         else if (currentTime < trajectory1.getSegment(trajectory1Index).getFinalTime() - epsilon)
+         //         else if (currentTime < trajectory1.getSegment(trajectory2Index).getFinalTime() - epsilon) // FIXME why does this work?
+         { // we haven't reached the end of trajectory 1, so only advance trajectory 2
+            trajectory2Index++;
+         }
          else
-         {
-            i++;
-            j++;
+         { // we've reached the end of both trajectories, so advance them both.
+            trajectory1Index++;
+            trajectory2Index++;
          }
       }
    }
@@ -699,13 +817,14 @@ public class TrajectoryMathTools
 
    public static boolean epsilonEquals(FrameTrajectory3D trajectory1, FrameTrajectory3D trajectory2, double epsilon)
    {
-      return (trajectory1.getReferenceFrame() == trajectory2.getReferenceFrame() && epsilonEquals((Trajectory3D)trajectory1, (Trajectory3D)trajectory2, epsilon));
+      return (trajectory1.getReferenceFrame() == trajectory2.getReferenceFrame() && epsilonEquals((Trajectory3D) trajectory1, (Trajectory3D) trajectory2,
+                                                                                                  epsilon));
    }
 
    public static boolean epsilonEquals(Trajectory3D trajectory1, Trajectory3D trajectory2, double epsilon)
    {
-      return (epsilonEquals(trajectory1.getTrajectoryX(), trajectory2.getTrajectoryX(), epsilon)
-            && epsilonEquals(trajectory1.getTrajectoryY(), trajectory2.getTrajectoryY(), epsilon)
+      return (epsilonEquals(trajectory1.getTrajectoryX(), trajectory2.getTrajectoryX(), epsilon) && epsilonEquals(trajectory1.getTrajectoryY(),
+                                                                                                                  trajectory2.getTrajectoryY(), epsilon)
             && epsilonEquals(trajectory1.getTrajectoryZ(), trajectory2.getTrajectoryZ(), epsilon));
    }
 
@@ -729,5 +848,249 @@ public class TrajectoryMathTools
       }
 
       return result;
+   }
+
+   public static void removeShortSegments(SegmentedFrameTrajectory3D trajectory, double minimumSegmentDuration)
+   {
+      int numberOfSegments = trajectory.getNumberOfSegments();
+
+      // check last segment duration
+      while (trajectory.getSegment(numberOfSegments - 1).getDuration() < minimumSegmentDuration && numberOfSegments > 1)
+      { // stretch time of previous segment end forward
+         double finalTime = trajectory.getSegment(numberOfSegments - 1).getFinalTime();
+         trajectory.getSegment(numberOfSegments - 2).setFinalTimeMaintainingBounds(finalTime);
+         trajectory.removeSegment(numberOfSegments - 1);
+         numberOfSegments = trajectory.getNumberOfSegments();
+      }
+
+      // check first segment duration
+      while (trajectory.getSegment(0).getDuration() < minimumSegmentDuration && numberOfSegments > 1)
+      { // pull time of next segment start back
+         double initialTime = trajectory.getSegment(0).getInitialTime();
+         trajectory.getSegment(1).setInitialTimeMaintainingBounds(initialTime);
+         trajectory.removeSegment(0);
+         numberOfSegments = trajectory.getNumberOfSegments();
+      }
+
+
+      // iterate over all the internal segments
+      int currentSegmentIndex = 1;
+      while (currentSegmentIndex < trajectory.getNumberOfSegments())
+      {
+         while (trajectory.getSegment(currentSegmentIndex).getDuration() < minimumSegmentDuration && currentSegmentIndex < trajectory.getNumberOfSegments())
+         {
+             boolean hasNextSegment = currentSegmentIndex < trajectory.getNumberOfSegments() - 1;
+             boolean nextSegmentIsLarger = hasNextSegment && trajectory.getSegment(currentSegmentIndex - 1).getDuration() < trajectory.getSegment(currentSegmentIndex + 1).getDuration();
+
+             if (nextSegmentIsLarger)
+             { // stretch time of previous segment end forward
+                double finalTime = trajectory.getSegment(currentSegmentIndex).getFinalTime();
+                trajectory.getSegment(currentSegmentIndex - 1).setFinalTimeMaintainingBounds(finalTime);
+             }
+             else
+             { // pull time of previous segment start back
+                double initialTime = trajectory.getSegment(currentSegmentIndex).getInitialTime();
+                trajectory.getSegment(currentSegmentIndex + 1).setInitialTimeMaintainingBounds(initialTime);
+             }
+            trajectory.removeSegment(currentSegmentIndex);
+         }
+
+         currentSegmentIndex++;
+      }
+   }
+
+   private final RecyclingArrayList<Point3D> initialBounds = new RecyclingArrayList<>(Point3D::new);
+   private final RecyclingArrayList<Point3D> midpointBounds = new RecyclingArrayList<>(Point3D::new);
+   private final RecyclingArrayList<Point3D> finalBounds = new RecyclingArrayList<>(Point3D::new);
+
+
+   public void resampleTrajectoryToMatchWaypoints(SegmentedFrameTrajectory3D trajectoryToResample, SegmentedFrameTrajectory3D trajectoryToMatch, double minimumTimeDeltaForResample)
+   {
+      stretchTrajectoriesToMatchBounds(trajectoryToResample, trajectoryToMatch);
+
+      for (int currentSegmentIndex = 0; currentSegmentIndex < trajectoryToResample.getNumberOfSegments() - 1; currentSegmentIndex++)
+      {
+         double waypointTime = trajectoryToResample.getSegment(currentSegmentIndex).getFinalTime();
+         int closestOtherKnotIndex = 0;
+         double minDistanceToOtherKnot = Double.POSITIVE_INFINITY;
+         for (int otherKnotIndex = 0; otherKnotIndex < trajectoryToMatch.getNumberOfSegments() - 1; otherKnotIndex++)
+         {
+            double timeDelta = Math.abs(trajectoryToMatch.getSegment(otherKnotIndex).getFinalTime() - waypointTime);
+            if (timeDelta < minDistanceToOtherKnot)
+            {
+               minDistanceToOtherKnot = timeDelta;
+               closestOtherKnotIndex = otherKnotIndex;
+            }
+         }
+
+         if (minDistanceToOtherKnot > minimumTimeDeltaForResample)
+            continue;
+
+
+         double timeToResampleTo = trajectoryToMatch.getSegment(closestOtherKnotIndex).getFinalTime();
+         FrameTrajectory3D nextTrajectory = trajectoryToResample.getSegment(currentSegmentIndex + 1);
+         FrameTrajectory3D currentTrajectory = trajectoryToResample.getSegment(currentSegmentIndex);
+         FrameTrajectory3D trajectoryAtTime = trajectoryToResample.getCurrentSegment(timeToResampleTo);
+
+         double startTime = currentTrajectory.getInitialTime();
+         double endTime = nextTrajectory.getFinalTime();
+
+         int maxOrder = Math.max(currentTrajectory.getNumberOfCoefficients(), nextTrajectory.getNumberOfCoefficients());
+
+         int currentNumberOfInitialBounds = Math.floorDiv(currentTrajectory.getNumberOfCoefficients(), 2);
+         int currentNumberOfFinalBounds = maxOrder - currentNumberOfInitialBounds;
+         int nextNumberOfFinalBounds = Math.floorDiv(currentTrajectory.getNumberOfCoefficients(), 2);
+         int nextNumberOfInitialBounds = maxOrder - nextNumberOfFinalBounds;
+
+         // get bounds
+         initialBounds.clear();
+         midpointBounds.clear();
+         finalBounds.clear();
+
+         for (int order = 0; order < currentNumberOfInitialBounds; order++)
+         {
+            for (Axis axis : Axis.values)
+            {
+               initialBounds.getAndGrowIfNeeded(order).setElement(axis.ordinal(), currentTrajectory.getDerivative(axis.ordinal(), order, startTime));
+            }
+         }
+         for (int order = 0; order < Math.max(currentNumberOfFinalBounds, nextNumberOfInitialBounds); order++)
+         {
+            for (Axis axis : Axis.values)
+            {
+               midpointBounds.getAndGrowIfNeeded(order).setElement(axis.ordinal(), trajectoryAtTime.getDerivative(axis.ordinal(), order, timeToResampleTo));
+            }
+         }
+         for (int order = 0; order < nextNumberOfFinalBounds; order++)
+         {
+            for (Axis axis : Axis.values)
+            {
+               finalBounds.getAndGrowIfNeeded(order).setElement(axis.ordinal(), nextTrajectory.getDerivative(axis.ordinal(), order, endTime));
+            }
+         }
+
+         currentTrajectory.reshape(maxOrder);
+         currentTrajectory.setTime(startTime, timeToResampleTo);
+
+         int currentConstraintRow = 0;
+         for (int initialConstraintOrder = 0; initialConstraintOrder < currentNumberOfInitialBounds; initialConstraintOrder++, currentConstraintRow++)
+         {
+            currentTrajectory.setConstraintRow(currentConstraintRow, startTime, initialBounds.get(initialConstraintOrder), initialConstraintOrder);
+         }
+
+         for (int finalConstraintOrder = 0; finalConstraintOrder < currentNumberOfFinalBounds; finalConstraintOrder++, currentConstraintRow++)
+         {
+            currentTrajectory.setConstraintRow(currentConstraintRow, timeToResampleTo, midpointBounds.get(finalConstraintOrder), finalConstraintOrder);
+         }
+
+         currentTrajectory.solveForCoefficients();
+         currentTrajectory.setCoefficientVariables();
+
+         nextTrajectory.reshape(maxOrder);
+         nextTrajectory.setTime(timeToResampleTo, endTime);
+
+         int nextConstraintRow = 0;
+         for (int initialConstraintOrder = 0; initialConstraintOrder < nextNumberOfInitialBounds; initialConstraintOrder++, nextConstraintRow++)
+         {
+            nextTrajectory.setConstraintRow(nextConstraintRow, timeToResampleTo, midpointBounds.get(initialConstraintOrder), initialConstraintOrder);
+         }
+
+         for (int finalConstraintOrder = 0; finalConstraintOrder < nextNumberOfFinalBounds; finalConstraintOrder++, nextConstraintRow++)
+         {
+            nextTrajectory.setConstraintRow(nextConstraintRow, endTime, finalBounds.get(finalConstraintOrder), finalConstraintOrder);
+         }
+
+         nextTrajectory.solveForCoefficients();
+         nextTrajectory.setCoefficientVariables();
+      }
+   }
+
+   public static void stretchTrajectoriesToMatchBounds(SegmentedFrameTrajectory3D trajectory1, SegmentedFrameTrajectory3D trajectory2)
+   {
+      FrameTrajectory3D firstSegment1 = trajectory1.getFirstSegment();
+      FrameTrajectory3D firstSegment2 = trajectory2.getFirstSegment();
+
+      FrameTrajectory3D lastSegment1 = trajectory1.getLastSegment();
+      FrameTrajectory3D lastSegment2 = trajectory2.getLastSegment();
+
+      if (firstSegment1.getInitialTime() < firstSegment2.getInitialTime())
+         firstSegment2.setInitialTimeMaintainingBounds(firstSegment1.getInitialTime());
+      else
+         firstSegment1.setInitialTimeMaintainingBounds(firstSegment2.getInitialTime());
+
+      if (lastSegment1.getFinalTime() > lastSegment2.getFinalTime())
+         lastSegment2.setFinalTimeMaintainingBounds(lastSegment1.getFinalTime());
+      else
+         lastSegment1.setFinalTimeMaintainingBounds(lastSegment2.getFinalTime());
+   }
+
+   public static void shrinkTrajectoriesToMatchBounds(SegmentedFrameTrajectory3D trajectory1, SegmentedFrameTrajectory3D trajectory2)
+   {
+      FrameTrajectory3D firstSegment1 = trajectory1.getFirstSegment();
+      FrameTrajectory3D firstSegment2 = trajectory2.getFirstSegment();
+
+      FrameTrajectory3D lastSegment1 = trajectory1.getLastSegment();
+      FrameTrajectory3D lastSegment2 = trajectory2.getLastSegment();
+
+      if (firstSegment1.getInitialTime() < firstSegment2.getInitialTime())
+         firstSegment1.setInitialTimeMaintainingBounds(firstSegment2.getInitialTime());
+      else
+         firstSegment2.setInitialTimeMaintainingBounds(firstSegment1.getInitialTime());
+
+      if (lastSegment1.getFinalTime() > lastSegment2.getFinalTime())
+         lastSegment1.setFinalTimeMaintainingBounds(lastSegment2.getFinalTime());
+      else
+         lastSegment2.setFinalTimeMaintainingBounds(lastSegment1.getFinalTime());
+   }
+
+
+   public static void combineSegments(SegmentedFrameTrajectory3D trajectory, int firstSegmentIndex)
+   {
+      int secondSegmentIndex = firstSegmentIndex + 1;
+      FrameTrajectory3D segmentToRemove = trajectory.getSegment(firstSegmentIndex);
+      FrameTrajectory3D combinedSegment = trajectory.getSegment(secondSegmentIndex);
+      double combinedStartTime = segmentToRemove.getInitialTime();
+      double combinedFinalTime = combinedSegment.getFinalTime();
+      int combinedNumberOfIndices = Math.max(segmentToRemove.getNumberOfCoefficients(), combinedSegment.getNumberOfCoefficients());
+
+      segmentToRemove.compute(combinedStartTime);
+      combinedSegment.compute(combinedFinalTime);
+
+      if (combinedNumberOfIndices > 5)
+      {
+         combinedSegment.setQuintic(combinedStartTime, combinedFinalTime, segmentToRemove.getPosition(), segmentToRemove.getVelocity(),
+                                    segmentToRemove.getAcceleration(), combinedSegment.getPosition(), combinedSegment.getVelocity(),
+                                    segmentToRemove.getAcceleration());
+      }
+      else if (combinedNumberOfIndices > 4)
+      {
+         combinedSegment.setQuartic(combinedStartTime, combinedFinalTime, segmentToRemove.getPosition(), segmentToRemove.getVelocity(),
+                                    segmentToRemove.getAcceleration(), combinedSegment.getPosition(), combinedSegment.getVelocity());
+      }
+      else if (combinedNumberOfIndices > 3)
+      {
+         combinedSegment
+               .setCubic(combinedStartTime, combinedFinalTime, segmentToRemove.getPosition(), segmentToRemove.getVelocity(), combinedSegment.getPosition(),
+                         combinedSegment.getVelocity());
+      }
+      else if (combinedNumberOfIndices > 2)
+      {
+         combinedSegment
+               .setQuadratic(combinedStartTime, combinedFinalTime, segmentToRemove.getPosition(), segmentToRemove.getVelocity(), combinedSegment.getPosition());
+      }
+      else if (combinedNumberOfIndices > 1)
+      {
+         combinedSegment.setLinear(combinedStartTime, combinedFinalTime, segmentToRemove.getPosition(), combinedSegment.getPosition());
+         trajectory.removeSegment(firstSegmentIndex);
+      }
+      else if (combinedNumberOfIndices > 0)
+      {
+         combinedSegment.setConstant(combinedStartTime, combinedFinalTime, combinedSegment.getPosition());
+         trajectory.removeSegment(firstSegmentIndex);
+      }
+      else
+      {
+         throw new RuntimeException("Yeah I don't know what to do here.");
+      }
    }
 }

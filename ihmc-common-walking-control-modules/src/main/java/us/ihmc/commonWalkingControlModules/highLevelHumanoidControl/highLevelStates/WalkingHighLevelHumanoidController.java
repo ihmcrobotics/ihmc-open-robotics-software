@@ -49,6 +49,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -70,6 +71,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -131,6 +133,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
    private final DoubleProvider unloadFraction;
+
+   private final ParameterizedControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
@@ -237,6 +241,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          }
          jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
       }
+
+      ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
+      controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
    }
 
    private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
@@ -254,13 +261,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       SideDependentList<TransferToWalkingSingleSupportState> walkingTransferStates = new SideDependentList<>();
 
       DoubleProvider minimumTransferTime = new DoubleParameter("MinimumTransferTime", registry, walkingControllerParameters.getMinimumTransferTime());
+      DoubleProvider rhoMin = () -> controllerCoreOptimizationSettings.getRhoMin();
       for (RobotSide transferToSide : RobotSide.values)
       {
          WalkingStateEnum stateEnum = WalkingStateEnum.getWalkingTransferState(transferToSide);
          TransferToWalkingSingleSupportState transferState = new TransferToWalkingSingleSupportState(stateEnum, walkingMessageHandler, controllerToolbox,
                                                                                                      managerFactory, walkingControllerParameters,
                                                                                                      failureDetectionControlModule, minimumTransferTime,
-                                                                                                     unloadFraction, registry);
+                                                                                                     unloadFraction, rhoMin, registry);
          walkingTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
       }
@@ -283,7 +291,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          WalkingStateEnum stateEnum = WalkingStateEnum.getFlamingoTransferState(transferToSide);
          TransferToFlamingoStanceState transferState = new TransferToFlamingoStanceState(stateEnum, walkingControllerParameters, walkingMessageHandler,
                                                                                          controllerToolbox, managerFactory, failureDetectionControlModule,
-                                                                                         null, registry);
+                                                                                         null, rhoMin, registry);
          flamingoTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
       }
@@ -684,6 +692,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
 
+      controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
+
       /*
        * FIXME: This is mainly used for resetting the integrators at touchdown. It is done in
        * SingleSupportState.doTransitionOutOfAction. Need to figure out how to use directly the joint data
@@ -696,7 +706,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          OneDoFJoint joint = allOneDoFjoints[i];
          if (joint.getResetDesiredAccelerationIntegrator())
          {
-            JointDesiredOutput jointData = jointDesiredDataHolder.getJointDesiredOutput(joint);
+            JointDesiredOutputBasics jointData = jointDesiredDataHolder.getJointDesiredOutput(joint);
             if (jointData == null)
                jointData = jointDesiredDataHolder.registerJointWithEmptyData(joint);
             jointData.setResetIntegrators(true);

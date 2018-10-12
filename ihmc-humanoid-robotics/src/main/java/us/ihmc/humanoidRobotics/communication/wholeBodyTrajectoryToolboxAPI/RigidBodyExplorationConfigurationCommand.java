@@ -124,6 +124,6 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    @Override
    public boolean isCommandValid()
    {
-      return false;
+      return rigidBody != null;
    }
 }

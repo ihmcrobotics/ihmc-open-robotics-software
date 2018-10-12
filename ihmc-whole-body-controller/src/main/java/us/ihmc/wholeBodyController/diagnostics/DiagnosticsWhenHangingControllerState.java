@@ -30,15 +30,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.FinishableState;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
@@ -114,7 +113,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
                                                 HighLevelHumanoidControllerToolbox controllerToolbox,
                                                 HighLevelControllerParameters highLevelControllerParameters, TorqueOffsetPrinter torqueOffsetPrinter)
    {
-      super(controllerState, highLevelControllerParameters, controllerToolbox);
+      super(controllerState, highLevelControllerParameters, controllerToolbox.getControlledOneDoFJoints());
 
       this.humanoidJointPoseList = humanoidJointPoseList;
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
@@ -142,8 +141,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       fullRobotModel = controllerToolbox.getFullRobotModel();
       fullRobotModel.getOneDoFJoints(oneDoFJoints);
 
-      OneDoFJoint[] jointArray = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
-      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointArray);
+      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
@@ -294,7 +292,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       for (int jointIdx = 0; jointIdx < jointArray.length; jointIdx++)
       {
          OneDoFJoint joint = jointArray[jointIdx];
-         JointDesiredOutput jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+         JointDesiredOutputBasics jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          jointDesiredOutput.clear();
          jointDesiredOutput.setDesiredTorque(joint.getTau());
       }

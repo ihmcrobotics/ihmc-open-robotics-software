@@ -79,7 +79,14 @@ public class TransferToStandingState extends WalkingState
       feetManager.initializeContactStatesForDoubleSupport(null);
 
       WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
-      RobotSide previousSupportSide = previousStateEnum != null ? previousStateEnum.getSupportSide() : null;
+      RobotSide previousSupportSide = null;
+      if (previousStateEnum != null)
+      {
+         if (previousStateEnum.getSupportSide() != null)
+            previousSupportSide = previousStateEnum.getSupportSide();
+         else if (previousStateEnum.getTransferToSide() != null)
+            previousSupportSide = previousStateEnum.getTransferToSide();
+      }
 
       if (doFootExplorationInTransferToStanding.getBooleanValue())
       {
@@ -107,7 +114,7 @@ public class TransferToStandingState extends WalkingState
       // Just standing in double support, do nothing
       pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
       balanceManager.setICPPlanTransferFromSide(previousSupportSide);
-      balanceManager.initializeICPPlanForStanding(finalTransferTime);
+      balanceManager.initializeICPPlanForTransferToStanding(finalTransferTime);
 
       if (previousSupportSide != null)
       {

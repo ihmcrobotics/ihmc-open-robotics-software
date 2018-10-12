@@ -1,10 +1,14 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration;
 
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-
 import java.util.List;
 
-public interface AngularMomentumTrajectoryGeneratorInterface 
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+
+public interface AngularMomentumTrajectoryGeneratorInterface
 {
    void clear();
 
@@ -16,11 +20,18 @@ public interface AngularMomentumTrajectoryGeneratorInterface
 
    void initializeForSingleSupport(double currentTime);
 
-   void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop);
+   void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean initialTransfer, boolean standing);
 
    void computeReferenceAngularMomentumStartingFromSingleSupport();
 
-   List<? extends AngularMomentumTrajectoryInterface> getTransferAngularMomentumTrajectories();
+   List<AngularMomentumTrajectory> getTransferAngularMomentumTrajectories();
 
-   List<? extends AngularMomentumTrajectoryInterface> getSwingAngularMomentumTrajectories();
+   List<AngularMomentumTrajectory> getSwingAngularMomentumTrajectories();
+
+   void initializeParameters(SmoothCMPPlannerParameters smoothCMPPlannerParameters, double totalMass, double gravityZ);
+
+   void addCopAndComSetpointsToPlan(List<CoPPointsInFoot> copLocations, List<? extends FramePoint3DReadOnly> comInitialPositions,
+                                    List<? extends FramePoint3DReadOnly> comFinalPositions, List<? extends FrameVector3DReadOnly> comInitialVelocities,
+                                    List<? extends FrameVector3DReadOnly> comFinalVelocities, List<? extends FrameVector3DReadOnly> comInitialAccelerations,
+                                    List<? extends FrameVector3DReadOnly> comFinalAccelerations, int numberOfRegisteredFootsteps);
 }

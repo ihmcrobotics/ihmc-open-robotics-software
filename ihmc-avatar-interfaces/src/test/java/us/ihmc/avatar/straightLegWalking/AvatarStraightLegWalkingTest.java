@@ -1,10 +1,17 @@
 package us.ihmc.avatar.straightLegWalking;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -12,15 +19,11 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -34,12 +37,6 @@ import us.ihmc.simulationConstructionSetTools.util.environments.StairsUpAndDownE
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInterface
 {
@@ -425,10 +422,14 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       message.getFootstepDataList().add().set(footstepData);
       //message.setOffsetFootstepsWithExecutionError(true);
 
+      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
+      double stepDuration = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
+      double addedTime = walkingControllerParameters.getDefaultInitialTransferTime() - walkingControllerParameters.getDefaultTransferTime() + walkingControllerParameters.getDefaultFinalTransferTime();
+
       drcSimulationTestHelper.publishToController(message);
 
-      double timeOverrunFactor = 1.2;
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.getFootstepDataList().size() * 2.0);
+      double timeOverrunFactor = 1.03;
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.getFootstepDataList().size() * stepDuration + addedTime);
 
       assertTrue(success);
       assertReachedGoal(message);
@@ -772,7 +773,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    {
       int numberOfSteps = footsteps.getFootstepDataList().size();
       Point3D lastStep = footsteps.getFootstepDataList().get(numberOfSteps - 1).getLocation();
-      Point3D nextToLastStep = footsteps.getFootstepDataList().get(numberOfSteps - 1).getLocation();
+      Point3D nextToLastStep = footsteps.getFootstepDataList().get(numberOfSteps - 2).getLocation();
 
       Point3D midStance = new Point3D();
       midStance.interpolate(lastStep, nextToLastStep, 0.5);

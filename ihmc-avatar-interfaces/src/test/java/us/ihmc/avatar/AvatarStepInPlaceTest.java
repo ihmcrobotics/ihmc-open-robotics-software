@@ -1,12 +1,15 @@
 package us.ihmc.avatar;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import static junit.framework.TestCase.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -15,13 +18,14 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -34,12 +38,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import java.util.ArrayList;
-import java.util.Random;
-
-import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
 {
@@ -204,13 +202,13 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       forceDirection.changeFrame(ReferenceFrame.getWorldFrame());
 
       double icpErrorDeadband = robotModel.getWalkingControllerParameters().getICPOptimizationParameters().getMinICPErrorForStepAdjustment();
-      double desiredICPError = icpErrorDeadband * 0.9;
+      double desiredICPError = icpErrorDeadband * 0.7;
       double omega = robotModel.getWalkingControllerParameters().getOmega0();
       double desiredVelocityError = desiredICPError * omega;
       double mass = fullRobotModel.getTotalMass();
       double pushDuration = 0.05;
 
-      double magnitude = mass * desiredVelocityError / pushDuration;
+      double magnitude = getPushForceScaler() * mass * desiredVelocityError / pushDuration;
       PrintTools.info("Push 1 magnitude = " + magnitude);
       pushRobotController.applyForceDelayed(singleSupportStartConditions.get(RobotSide.LEFT), 0.0, forceDirection, magnitude, pushDuration);
 
@@ -228,10 +226,10 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
 
       drcSimulationTestHelper.publishToController(footMessage);
 
-      desiredICPError = icpErrorDeadband * 1.25;
+      desiredICPError = icpErrorDeadband * 1.15;
       desiredVelocityError = desiredICPError * omega;
 
-      magnitude = mass * desiredVelocityError / pushDuration;
+      magnitude = getPushForceScaler() * mass * desiredVelocityError / pushDuration;
       PrintTools.info("Push 2 magnitude = " + magnitude);
       pushRobotController.applyForceDelayed(singleSupportStartConditions.get(RobotSide.LEFT), 0.0, forceDirection, magnitude, pushDuration);
 
@@ -246,7 +244,16 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
    }
 
-
+   /**
+    * Overwrite this if the force required to trigger a step adjustment is higher. This can happen for example is step adjustment
+    * phase in is used.
+    *
+    * @return multiplier for the push force.
+    */
+   public double getPushForceScaler()
+   {
+      return 1.0;
+   }
 
 
    private void setupCameraSideView()

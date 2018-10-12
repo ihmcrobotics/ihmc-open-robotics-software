@@ -11,11 +11,14 @@ module controller_msgs
   {
     module dds
     {
-      const octet ROBOT_MOTION_STATUS_STANDING =
+      const octet ROBOT_MOTION_STATUS_UNKNOWN =
       0;
 
-      const octet ROBOT_MOTION_STATUS_IN_MOTION =
+      const octet ROBOT_MOTION_STATUS_STANDING =
       1;
+
+      const octet ROBOT_MOTION_STATUS_IN_MOTION =
+      2;
 
 
       /**
