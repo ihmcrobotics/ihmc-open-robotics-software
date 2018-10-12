@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.tools;
 
+import org.junit.Assert;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -25,11 +26,11 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
    private static final String TIMEOUT_FIELD_OPEN = "<Timeout,";
    private static final String TIMEOUT_FIELD_CLOSE = ",Timeout>";
 
-   protected static final String START_ORIENTATION_FIELD_OPEN = "<StartOrientation,";
-   protected static final String START_ORIENTATION_FIELD_CLOSE = ",StartOrientation>";
+   private static final String START_ORIENTATION_FIELD_OPEN = "<StartOrientation,";
+   private static final String START_ORIENTATION_FIELD_CLOSE = ",StartOrientation>";
 
-   protected static final String GOAL_ORIENTATION_FIELD_OPEN = "<GoalOrientation,";
-   protected static final String GOAL_ORIENTATION_FIELD_CLOSE = ",GoalOrientation>";
+   private static final String GOAL_ORIENTATION_FIELD_OPEN = "<GoalOrientation,";
+   private static final String GOAL_ORIENTATION_FIELD_CLOSE = ",GoalOrientation>";
 
    public static class FootstepPlannerUnitTestDataset extends VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset
    {
@@ -150,6 +151,10 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
       List<String> childDirectories = PlanarRegionFileTools.listResourceDirectoryContents(loadingClass, TEST_DATA_URL);
       List<FootstepPlannerUnitTestDataset> datasets = new ArrayList<>();
 
+      if (DEBUG && childDirectories.size() < 1)
+         Assert.fail("Unable to find the directory contents.");
+
+
       for (int i = 0; i < childDirectories.size(); i++)
       {
          PrintTools.info("trying to load:");
@@ -157,6 +162,9 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
 
          datasets.add(loadDataset(loadingClass, TEST_DATA_URL + "/" + childDirectories.get(i)));
       }
+
+      if (DEBUG && datasets.size() < 1)
+         Assert.fail("Could not find any datasets.");
 
       return datasets;
    }

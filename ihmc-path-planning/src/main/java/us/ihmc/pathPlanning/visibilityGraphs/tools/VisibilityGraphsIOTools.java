@@ -23,7 +23,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class VisibilityGraphsIOTools
 {
-   private static final boolean DEBUG = true;
+   protected static final boolean DEBUG = true;
 
    public static final String TEST_DATA_URL = "unitTestData/testable";
    public static final String IN_DEVELOLOPMENT_TEST_DATA_URL = "unitTestData/inDevelopment";
