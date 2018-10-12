@@ -333,6 +333,10 @@ public class AvatarSimulationFactory
             OneDegreeOfFreedomJoint simulatedJoint = humanoidFloatingRootJointRobot.getOneDegreeOfFreedomJoint(positionControlledJointName);
             FullRobotModel controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
             OneDoFJoint controllerJoint = controllerFullRobotModel.getOneDoFJointByName(positionControlledJointName);
+
+            if (simulatedJoint == null || controllerJoint == null)
+               continue;
+
             JointDesiredOutputList controllerLowLevelDataList = threadDataSynchronizer.getControllerDesiredJointDataHolder();
             JointDesiredOutputBasics controllerDesiredOutput = controllerLowLevelDataList.getJointDesiredOutput(controllerJoint);
 
@@ -340,8 +344,6 @@ public class AvatarSimulationFactory
             boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
             boolean isBackJoint = jointRole == JointRole.SPINE;
 
-            if (simulatedJoint == null || controllerJoint == null)
-               continue;
 
             JointLowLevelJointControlSimulator positionControlSimulator = new JointLowLevelJointControlSimulator(simulatedJoint, controllerJoint,
                                                                                                                  controllerDesiredOutput, isUpperBodyJoint,
