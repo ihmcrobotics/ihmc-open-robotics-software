@@ -484,8 +484,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double zetaOrientationZ = runningOnRealRobot ? 0.8 : 0.7; // Was 0.5 before tuneup of sep 2018
       double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxLinearJerk = runningOnRealRobot ? 250.0 : Double.POSITIVE_INFINITY;
-      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = runningOnRealRobot ? 200.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = runningOnRealRobot ? 3000.0 : Double.POSITIVE_INFINITY;
 
       DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpX, kpY, kpZ);
