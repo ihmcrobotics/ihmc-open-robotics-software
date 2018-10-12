@@ -30,12 +30,12 @@ public class FootstepPlannerDataExporterAnchorPaneController
 
       try
       {
-         URL testDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(FootstepPlannerIOTools.TEST_DATA_URL);
+         URL testDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(FootstepPlannerIOTools.IN_DEVELOPMENT_TEST_DATA_URL);
          file = new File(testDataFolderURL.toURI());
       }
       catch(URISyntaxException e)
       {
-         PrintTools.error("Could not load test data folder with URL: " + FootstepPlannerIOTools.TEST_DATA_URL);
+         PrintTools.error("Could not load test data folder with URL: " + FootstepPlannerIOTools.IN_DEVELOPMENT_TEST_DATA_URL);
          e.printStackTrace();
       }
 

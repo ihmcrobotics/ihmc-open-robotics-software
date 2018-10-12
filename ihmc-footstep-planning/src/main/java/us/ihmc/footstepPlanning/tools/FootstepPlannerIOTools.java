@@ -20,8 +20,8 @@ import java.util.List;
 
 public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
 {
-   private static final String TEST_DATA_URL = "unitTestData/testable";
-   private static final String IN_DEVELOPMENT_TEST_DATA_URL = "unitTestData/inDevelopment";
+   public static final String TEST_DATA_URL = "unitTestData/testable";
+   public static final String IN_DEVELOPMENT_TEST_DATA_URL = "unitTestData/inDevelopment";
 
    private static final String TYPE_FIELD_OPEN = "<Type,";
    private static final String TYPE_FIELD_CLOSE = ",Type>";
