@@ -59,7 +59,7 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
-   public static final boolean HAS_FOREARMS_ON = false;
+   public static final boolean HAS_FOREARMS_ON = true;
    public static final boolean ENABLE_FINGER_JOINTS = true && HAS_FOREARMS_ON;
    public static final boolean HAS_LIGHTER_BACKPACK = true;
 
