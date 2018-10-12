@@ -400,7 +400,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public double getControllerDT()
    {
-      return 0.004;
+      return 0.006;
    }
 
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
