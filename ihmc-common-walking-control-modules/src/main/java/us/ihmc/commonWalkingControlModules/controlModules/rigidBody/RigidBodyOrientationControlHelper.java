@@ -55,6 +55,7 @@ public class RigidBodyOrientationControlHelper
    private final FixedFrameQuaternionBasics controlFrameOrientation;
    private final ReferenceFrame defaultControlFrame;
 
+   private final ReferenceFrame baseFrame;
    private final ReferenceFrame bodyFrame;
 
    private final String warningPrefix;
@@ -66,6 +67,7 @@ public class RigidBodyOrientationControlHelper
       this.warningPrefix = warningPrefix;
       this.useBaseFrameForControl = useBaseFrameForControl;
       this.useWeightFromMessage = useWeightFromMessage;
+      this.baseFrame = baseFrame;
 
       String bodyName = bodyToControl.getName();
       String prefix = bodyName + "TaskspaceOrientation";
@@ -387,7 +389,7 @@ public class RigidBodyOrientationControlHelper
    public void clear()
    {
       selectionMatrix.resetSelection();
-      trajectoryGenerator.clear();
+      trajectoryGenerator.clear(baseFrame);
       setDefaultControlFrame();
       pointQueue.clear();
    }

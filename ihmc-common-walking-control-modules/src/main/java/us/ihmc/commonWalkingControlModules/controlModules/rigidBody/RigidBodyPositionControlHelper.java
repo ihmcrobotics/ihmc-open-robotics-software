@@ -61,6 +61,7 @@ public class RigidBodyPositionControlHelper
    private final FixedFramePoint3DBasics controlFramePosition;
    private final ReferenceFrame defaultControlFrame;
 
+   private final ReferenceFrame baseFrame;
    private final ReferenceFrame bodyFrame;
 
    private final YoFramePoint3D yoCurrentPosition;
@@ -77,6 +78,7 @@ public class RigidBodyPositionControlHelper
       this.warningPrefix = warningPrefix;
       this.useBaseFrameForControl = useBaseFrameForControl;
       this.useWeightFromMessage = useWeightFromMessage;
+      this.baseFrame = baseFrame;
 
       String bodyName = bodyToControl.getName();
       String prefix = bodyName + "TaskspacePosition";
@@ -434,7 +436,7 @@ public class RigidBodyPositionControlHelper
    public void clear()
    {
       selectionMatrix.resetSelection();
-      trajectoryGenerator.clear();
+      trajectoryGenerator.clear(baseFrame);
       setDefaultControlFrame();
       pointQueue.clear();
    }

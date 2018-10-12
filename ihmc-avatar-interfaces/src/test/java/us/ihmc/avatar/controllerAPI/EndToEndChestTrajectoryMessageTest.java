@@ -1320,6 +1320,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       // Apply a push to the robot so we get some tracking error going
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       double forceMagnitude = fullRobotModel.getTotalMass() * 0.1;
       double zOffset = 0.3;
       String pushJointName = fullRobotModel.getChest().getParentJoint().getName();
@@ -1330,24 +1331,25 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       // Need to hold in world to avoid error from slight robot motions.
       double trajectoryTime = 0.5;
-      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, new Quaternion(), ReferenceFrame.getWorldFrame());
+      Quaternion desiredOrientation = new Quaternion();
+      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation, referenceFrames.getPelvisZUpFrame());
       drcSimulationTestHelper.publishToController(chestTrajectoryMessage);
       drcSimulationTestHelper.simulateAndBlock(trajectoryTime + 0.1);
 
-      // Record the desired chest orientation (in world)
-      Quaternion initialDesiredChestOrientation = findControllerDesiredOrientation(drcSimulationTestHelper.getSimulationConstructionSet(), fullRobotModel.getChest());
-
       // Step the trajectory repeatedly
-      StopAllTrajectoryMessage stopMessage = new StopAllTrajectoryMessage();
-      for (int i = 0; i < 10; i++)
+      for (int i = 0; i < 20; i++)
       {
+         StopAllTrajectoryMessage stopMessage = new StopAllTrajectoryMessage();
          drcSimulationTestHelper.publishToController(stopMessage);
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
       }
 
       // Record the desired chest orientation (in world)
-      Quaternion finalDesiredChestOrientation = findControllerDesiredOrientation(drcSimulationTestHelper.getSimulationConstructionSet(), fullRobotModel.getChest());
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(initialDesiredChestOrientation, finalDesiredChestOrientation, 1.0e-10);
+      referenceFrames.updateFrames();
+      FrameQuaternion finalOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), findControllerDesiredOrientation(drcSimulationTestHelper.getSimulationConstructionSet(), fullRobotModel.getChest()));
+      finalOrientation.changeFrame(referenceFrames.getPelvisZUpFrame());
+      Quaternion finalDesiredChestOrientation = new Quaternion(finalOrientation);
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(desiredOrientation, finalDesiredChestOrientation, 1.0e-5);
    }
 
    public static Quaternion findControllerDesiredOrientation(SimulationConstructionSet scs, RigidBody chest)
