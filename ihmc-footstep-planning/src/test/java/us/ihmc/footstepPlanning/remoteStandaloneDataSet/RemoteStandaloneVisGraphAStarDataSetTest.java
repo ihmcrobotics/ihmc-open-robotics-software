@@ -23,7 +23,17 @@ public class RemoteStandaloneVisGraphAStarDataSetTest extends RemoteStandalonePl
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       setup();
-      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
+      runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
+   }
+
+   @Override
+   @Test(timeout = 500000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 125.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   public void testDatasetsWithoutOcclusionInDevelopment()
+   {
+      pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
+      setup();
+      runAssertionsOnAllDatasetsWithoutOcclusionsInDevelopment(dataset -> runAssertions(dataset));
    }
 
    @Test(timeout = 500000)
@@ -32,7 +42,7 @@ public class RemoteStandaloneVisGraphAStarDataSetTest extends RemoteStandalonePl
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
       setup();
-      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
+      runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
    }
 
    public static void main(String[] args) throws Exception
@@ -40,7 +50,7 @@ public class RemoteStandaloneVisGraphAStarDataSetTest extends RemoteStandalonePl
       RemoteStandaloneVisGraphAStarDataSetTest test = new RemoteStandaloneVisGraphAStarDataSetTest();
       String prefix = "unitTestData/testable/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171218_205040_SimpleMaze");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205040_SimpleMaze");
       test.tearDown();
 
    }

@@ -40,10 +40,8 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnit
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
-import us.ihmc.footstepPlanning.ui.RemoteFootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -53,7 +51,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
@@ -110,7 +107,6 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
    public void setup()
    {
       tryToStartModule(() -> setupFootstepPlanningToolboxModule());
-      //      uiNode = RemoteFootstepPlannerUI.createUI(robotName, pubSubImplementation, visualize);
 
       if (VISUALIZE)
          messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
@@ -177,13 +173,24 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
          ThreadTools.sleep(10);
    }
 
+   @Override
    @Test(timeout = 500000)
    @ContinuousIntegrationTest(estimatedDuration = 125.0)
    public void testDatasetsWithoutOcclusion()
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       setup();
-      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
+      runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
+   }
+
+   @Override
+   @Test(timeout = 500000)
+   @ContinuousIntegrationTest(estimatedDuration = 125.0)
+   public void testDatasetsWithoutOcclusionInDevelopment()
+   {
+      pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
+      setup();
+      runAssertionsOnAllDatasetsWithoutOcclusionsInDevelopment(dataset -> runAssertions(dataset));
    }
 
    @Test(timeout = 500000)
@@ -192,11 +199,11 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
       setup();
-      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
+      runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
    }
 
    @After
-   public void tearDown() throws Exception
+   public void tearDown()
    {
       ros2Node.destroy();
       messager.closeMessager();

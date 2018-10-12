@@ -21,8 +21,8 @@ public class AStarPlannerToolboxTest extends FootstepPlannerToolboxTest
       String prefix = "unitTestData/testable/";
       test.pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
       test.setup();
-//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171215_214730_CinderBlockField");
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171215_220523_SteppingStones");
+//      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214730_CinderBlockField");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_220523_SteppingStones");
       PrintTools.info("Test passed.");
       test.tearDown();
    }

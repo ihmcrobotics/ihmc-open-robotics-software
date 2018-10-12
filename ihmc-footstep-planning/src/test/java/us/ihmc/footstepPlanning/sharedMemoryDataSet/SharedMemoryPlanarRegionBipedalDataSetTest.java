@@ -15,11 +15,20 @@ public class SharedMemoryPlanarRegionBipedalDataSetTest extends SharedMemoryPlan
       return FootstepPlannerType.PLANAR_REGION_BIPEDAL;
    }
 
+   @Override
    @Test(timeout = 500000)
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 90.0)
    public void testDatasetsWithoutOcclusion()
    {
-      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
+      runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
+   }
+
+   @Override
+   @Test(timeout = 500000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   public void testDatasetsWithoutOcclusionInDevelopment()
+   {
+      runAssertionsOnAllDatasetsWithoutOcclusionsInDevelopment(dataset -> runAssertions(dataset));
    }
 
    public static void main(String[] args) throws Exception
@@ -28,7 +37,7 @@ public class SharedMemoryPlanarRegionBipedalDataSetTest extends SharedMemoryPlan
       SharedMemoryPlanarRegionBipedalDataSetTest test = new SharedMemoryPlanarRegionBipedalDataSetTest();
       String prefix = "unitTestData/testable/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
       test.tearDown();
 
    }

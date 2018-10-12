@@ -15,11 +15,20 @@ public class SharedMemorySimpleBodyPathDataSetTest extends SharedMemoryPlannerDa
       return FootstepPlannerType.SIMPLE_BODY_PATH;
    }
 
+   @Override
    @Test(timeout = 500000)
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 30.0)
    public void testDatasetsWithoutOcclusion()
    {
-      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
+      runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
+   }
+
+   @Override
+   @Test(timeout = 500000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   public void testDatasetsWithoutOcclusionInDevelopment()
+   {
+      runAssertionsOnAllDatasetsWithoutOcclusionsInDevelopment(dataset -> runAssertions(dataset));
    }
 
    public static void main(String[] args) throws Exception
@@ -27,7 +36,7 @@ public class SharedMemorySimpleBodyPathDataSetTest extends SharedMemoryPlannerDa
       SharedMemorySimpleBodyPathDataSetTest test = new SharedMemorySimpleBodyPathDataSetTest();
       String prefix = "unitTestData/testable/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171218_204953_FlatGroundWithWall");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204953_FlatGroundWithWall");
       test.tearDown();
 
    }
