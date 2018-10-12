@@ -34,7 +34,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
 
       String bodyName = bodyToControl.getName();
-      String prefix = bodyName + "Taskspace";
+      String prefix = bodyName + "PositionTaskspace";
 
       numberOfPointsInQueue = new YoInteger(prefix + "NumberOfPointsInQueue", registry);
       numberOfPointsInGenerator = new YoInteger(prefix + "NumberOfPointsInGenerator", registry);
