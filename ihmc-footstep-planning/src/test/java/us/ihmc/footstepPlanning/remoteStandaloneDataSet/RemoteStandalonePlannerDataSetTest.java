@@ -1,16 +1,11 @@
 package us.ihmc.footstepPlanning.remoteStandaloneDataSet;
 
 import controller_msgs.msg.dds.*;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.stage.Stage;
 import org.junit.After;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -19,17 +14,9 @@ import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.footstepPlanning.ui.ApplicationRunner;
-import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemotePlannerMessageConverter;
-import us.ihmc.footstepPlanning.ui.RemoteStandaloneFootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -47,80 +34,27 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
 
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
 
-   private final AtomicReference<FootstepPlan> publishedPlanReference = new AtomicReference<>(null);
-   private final AtomicReference<FootstepPlanningResult> publishedResultReference = new AtomicReference<>(null);
-   private AtomicReference<Boolean> publishedReceivedPlan = new AtomicReference<>(false);
-
-   private AtomicReference<FootstepPlan> uiFootstepPlanReference;
-   private AtomicReference<FootstepPlanningResult> uiPlanningResultReference;
-   private AtomicReference<Boolean> uiReceivedPlan = new AtomicReference<>(false);
-   private AtomicReference<Boolean> uiReceivedResult = new AtomicReference<>(false);
-
-   private final AtomicReference<FootstepPlan> expectedPlan = new AtomicReference<>(null);
-   private final AtomicReference<FootstepPlan> actualPlan = new AtomicReference<>(null);
-   private final AtomicReference<FootstepPlanningResult> expectedResult = new AtomicReference<>(null);
-   private final AtomicReference<FootstepPlanningResult> actualResult = new AtomicReference<>(null);
-
    protected DomainFactory.PubSubImplementation pubSubImplementation;
 
-   private SharedMemoryMessager messager = null;
    private RemotePlannerMessageConverter messageConverter = null;
    private FootstepPathCalculatorModule module = null;
-   private FootstepPlannerUI ui = null;
 
-   public void setup()
+   @Override
+   public void setupInternal()
    {
-      if (VISUALIZE)
-         messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
-      else
-         messager = new SharedMemoryMessager(FootstepPlannerSharedMemoryAPI.API);
       messageConverter = RemotePlannerMessageConverter.createConverter(messager, robotName, DomainFactory.PubSubImplementation.INTRAPROCESS);
+
       module = new FootstepPathCalculatorModule(messager);
-
-      try
-      {
-         messager.startMessager();
-      }
-      catch (Exception e)
-      {
-         throw new RuntimeException("Failed to start messager.");
-      }
-
       module.start();
 
-      if (VISUALIZE)
-      {
+      uiReceivedPlan = new AtomicReference<>(false);
+      uiReceivedResult = new AtomicReference<>(false);
 
-         ApplicationRunner.runApplication(new Application()
-         {
-            @Override
-            public void start(Stage stage) throws Exception
-            {
-               ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
-               ui.show();
-            }
+      messager.registerTopicListener(FootstepPlanTopic, request -> uiReceivedPlan.set(true));
+      messager.registerTopicListener(PlanningResultTopic, request -> uiReceivedResult.set(true));
 
-            @Override
-            public void stop() throws Exception
-            {
-               ui.stop();
-               Platform.exit();
-            }
-         });
-
-         double maxWaitTime = 5.0;
-         double totalTime = 0.0;
-         long sleepDuration = 100;
-
-         while (ui == null)
-         {
-            if (totalTime > maxWaitTime)
-               throw new RuntimeException("Timed out waiting for the UI to start.");
-            ThreadTools.sleep(sleepDuration);
-            totalTime += Conversions.millisecondsToSeconds(sleepDuration);
-         }
-
-      }
+      uiFootstepPlanReference = messager.createInput(FootstepPlanTopic);
+      uiPlanningResultReference = messager.createInput(PlanningResultTopic);
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
 
@@ -131,38 +65,25 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
 
-      uiReceivedPlan = new AtomicReference<>(false);
-      uiReceivedResult = new AtomicReference<>(false);
-
-      publishedReceivedPlan = new AtomicReference<>(false);
-
-      messager.registerTopicListener(FootstepPlanTopic, request -> uiReceivedPlan.set(true));
-      messager.registerTopicListener(PlanningResultTopic, request -> uiReceivedResult.set(true));
-
-      uiFootstepPlanReference = messager.createInput(FootstepPlanTopic);
-      uiPlanningResultReference = messager.createInput(PlanningResultTopic);
-
       ros2Node.spin();
-
-      for (int i = 0; i < 100; i++)
-         ThreadTools.sleep(10);
    }
 
    @After
-   public void tearDown() throws Exception
+   public void tearDown()
    {
       ros2Node.destroy();
 
       module.stop();
       messager.closeMessager();
       messageConverter.destroy();
+
       if (ui != null)
          ui.stop();
+      ui = null;
 
       uiReceivedPlan = null;
       uiReceivedResult = null;
 
-      publishedReceivedPlan = null;
       pubSubImplementation = null;
 
       uiFootstepPlanReference = null;
@@ -174,7 +95,6 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
       module = null;
       messageConverter = null;
       messager = null;
-      ui = null;
    }
 
    @Override
@@ -193,51 +113,21 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
    @Override
    public String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset)
    {
-      double totalTimeWaiting = 0;
+      totalTimeTaken = 0;
       double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
       double maxTimeToWait = 2.0 * timeoutMultiplier * dataset.getTimeout(getPlannerType());
-      long waitTime = 10;
+      String datasetName = dataset.getDatasetName();
 
       queryUIResults();
       queryPlannerResults();
 
       String errorMessage = "";
 
-      while (actualResult.get() == null || expectedResult.get() == null)
-      {
-         if (totalTimeWaiting > maxTimeToWait)
-         {
-            errorMessage += dataset.getDatasetName() + " timed out waiting on result.\n";
-            return errorMessage;
-         }
+      errorMessage += waitForResult(() -> actualResult.get() == null || expectedResult.get() == null, maxTimeToWait, datasetName);
 
-         ThreadTools.sleep(waitTime);
-         totalTimeWaiting += Conversions.millisecondsToSeconds(waitTime);
-         queryUIResults();
-         queryPlannerResults();
-      }
+      errorMessage += validateResult(() -> actualResult.get().validForExecution() && expectedResult.get().validForExecution(), actualResult.get(), datasetName);
 
-      if (!actualResult.get().validForExecution() || !expectedResult.get().validForExecution())
-      {
-         errorMessage += "Dataset " + dataset.getDatasetName() + " failed to find a valid result. Result : " + actualResult.get() + "\n";
-         return errorMessage;
-      }
-
-      while (actualPlan.get() == null || expectedPlan.get() == null)
-      {
-         if (totalTimeWaiting > maxTimeToWait)
-         {
-            errorMessage += "Timed out waiting on plan for dataset " + dataset.getDatasetName() + ".\n";
-            return errorMessage;
-         }
-
-         ThreadTools.sleep(waitTime);
-         totalTimeWaiting += Conversions.millisecondsToSeconds(waitTime);
-         queryUIResults();
-         queryPlannerResults();
-      }
-
-      String datasetName = dataset.getDatasetName();
+      errorMessage += waitForPlan(() -> expectedPlan.get() == null || actualPlan.get() == null, maxTimeToWait, datasetName);
 
       FootstepPlanningResult expectedResult = this.expectedResult.getAndSet(null);
       FootstepPlanningResult actualResult = this.actualResult.getAndSet(null);
@@ -246,36 +136,21 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
 
       uiReceivedResult.set(false);
       uiReceivedPlan.set(false);
-      publishedReceivedPlan.set(false);
+      plannerReceivedPlan.set(false);
 
       errorMessage += assertPlansAreValid(datasetName, expectedResult, actualResult, expectedPlan, actualPlan, dataset.getGoal());
+
+      for (int i = 0; i < 10; i++)
+         ThreadTools.sleep(100);
 
       return errorMessage;
    }
 
-   private void queryUIResults()
-   {
-      if (uiReceivedPlan.get() && uiFootstepPlanReference.get() != null && actualPlan.get() == null)
-         actualPlan.set(uiFootstepPlanReference.get());
-
-      if (uiReceivedResult.get() && uiPlanningResultReference.get() != null && actualResult.get() == null)
-         actualResult.set(uiPlanningResultReference.get());
-   }
-
-   private void queryPlannerResults()
-   {
-      if (publishedReceivedPlan.get() && publishedPlanReference.get() != null && expectedPlan.get() == null)
-         expectedPlan.set(publishedPlanReference.get());
-
-      if (publishedReceivedPlan.get() && publishedResultReference.get() != null && expectedResult.get() == null)
-         expectedResult.set(publishedResultReference.get());
-   }
-
    private void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus packet)
    {
-      publishedResultReference.set(FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult()));
-      publishedPlanReference.set(convertToFootstepPlan(packet.getFootstepDataList()));
-      publishedReceivedPlan.set(true);
+      plannerResultReference.set(FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult()));
+      plannerPlanReference.set(convertToFootstepPlan(packet.getFootstepDataList()));
+      plannerReceivedPlan.set(true);
    }
 
    private static FootstepPlan convertToFootstepPlan(FootstepDataListMessage footstepDataListMessage)

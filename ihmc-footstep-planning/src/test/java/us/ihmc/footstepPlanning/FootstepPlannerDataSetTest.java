@@ -2,8 +2,12 @@ package us.ihmc.footstepPlanning;
 
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import org.junit.Assert;
 import org.junit.Test;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -12,31 +16,86 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.footstepPlanning.ui.ApplicationRunner;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.PlannerTypeTopic;
 
 public abstract class FootstepPlannerDataSetTest
 {
-   protected static final double bambooTimeScaling = 5.0;
+   protected static final double bambooTimeScaling = 10.0;
 
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
    protected static boolean DEBUG = true;
 
+   protected FootstepPlannerUI ui = null;
+   protected SharedMemoryMessager messager = null;
+
+   protected final AtomicReference<FootstepPlan> plannerPlanReference = new AtomicReference<>(null);
+   protected final AtomicReference<FootstepPlanningResult> plannerResultReference = new AtomicReference<>(null);
+   protected final AtomicReference<Boolean> plannerReceivedPlan = new AtomicReference<>(false);
+
+   protected AtomicReference<FootstepPlan> uiFootstepPlanReference;
+   protected AtomicReference<FootstepPlanningResult> uiPlanningResultReference;
+   protected AtomicReference<Boolean> uiReceivedPlan = new AtomicReference<>(false);
+   protected AtomicReference<Boolean> uiReceivedResult = new AtomicReference<>(false);
+
+   protected final AtomicReference<FootstepPlan> expectedPlan = new AtomicReference<>(null);
+   protected final AtomicReference<FootstepPlan> actualPlan = new AtomicReference<>(null);
+   protected final AtomicReference<FootstepPlanningResult> expectedResult = new AtomicReference<>(null);
+   protected final AtomicReference<FootstepPlanningResult> actualResult = new AtomicReference<>(null);
+
+
    public abstract FootstepPlannerType getPlannerType();
+
+   public void setup()
+   {
+      VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
+      if (VISUALIZE)
+         messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      else
+         messager = new SharedMemoryMessager(FootstepPlannerSharedMemoryAPI.API);
+
+      setupInternal();
+
+      try
+      {
+         messager.startMessager();
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException("Failed to start messager.");
+      }
+
+      if (VISUALIZE)
+      {
+         createUI(messager);
+      }
+
+      for (int i = 0; i < 100; i++)
+         ThreadTools.sleep(10);
+   }
+
+   public void setupInternal()
+   {
+
+   }
 
    @Test(timeout = 500000)
    @ContinuousIntegrationTest(estimatedDuration = 13.0)
@@ -321,6 +380,114 @@ public abstract class FootstepPlannerDataSetTest
       return errorMessage;
    }
 
+   protected void createUI(SharedMemoryMessager messager)
+   {
+      ApplicationRunner.runApplication(new Application()
+      {
+         @Override
+         public void start(Stage stage) throws Exception
+         {
+            ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
+            ui.show();
+         }
+
+         @Override
+         public void stop() throws Exception
+         {
+            ui.stop();
+            Platform.exit();
+         }
+      });
+
+      double maxWaitTime = 5.0;
+      double totalTime = 0.0;
+      long sleepDuration = 100;
+
+      while (ui == null)
+      {
+         if (totalTime > maxWaitTime)
+            throw new RuntimeException("Timed out waiting for the UI to start.");
+         ThreadTools.sleep(sleepDuration);
+         totalTime += Conversions.millisecondsToSeconds(sleepDuration);
+      }
+   }
+
+   protected double totalTimeTaken;
+
+   protected String waitForResult(ConditionChecker conditionChecker, double maxTimeToWait, String prefix)
+   {
+      String errorMessage = "";
+      long waitTime = 10;
+      while (conditionChecker.checkCondition())
+      {
+         if (totalTimeTaken > maxTimeToWait)
+         {
+            errorMessage += prefix + " timed out waiting for a result.\n";
+            return errorMessage;
+         }
+
+         ThreadTools.sleep(waitTime);
+         totalTimeTaken += Conversions.millisecondsToSeconds(waitTime);
+         queryUIResults();
+         queryPlannerResults();
+      }
+
+      return errorMessage;
+   }
+
+   protected String validateResult(ConditionChecker conditionChecker, FootstepPlanningResult result, String prefix)
+   {
+      String errorMessage = "";
+
+      if (!conditionChecker.checkCondition())
+      {
+         errorMessage += prefix + " failed to find a valid result. Result : " + result + "\n";
+      }
+
+      return errorMessage;
+   }
+
+   protected String waitForPlan(ConditionChecker conditionChecker, double maxTimeToWait, String prefix)
+   {
+      String errorMessage = "";
+
+      while (conditionChecker.checkCondition())
+      {
+         long waitTime = 10;
+
+         if (totalTimeTaken > maxTimeToWait)
+         {
+            errorMessage += prefix + " timed out waiting on plan.\n";
+            return errorMessage;
+         }
+
+         ThreadTools.sleep(waitTime);
+         totalTimeTaken += Conversions.millisecondsToSeconds(waitTime);
+         queryUIResults();
+         queryPlannerResults();
+      }
+
+      return errorMessage;
+   }
+
+   protected void queryUIResults()
+   {
+      if (uiReceivedPlan.get() && uiFootstepPlanReference.get() != null && actualPlan.get() == null)
+         actualPlan.set(uiFootstepPlanReference.get());
+
+      if (uiReceivedResult.get() && uiPlanningResultReference.get() != null && actualResult.get() == null)
+         actualResult.set(uiPlanningResultReference.get());
+   }
+
+   protected void queryPlannerResults()
+   {
+      if (plannerReceivedPlan.get() && plannerPlanReference.get() != null && expectedPlan.get() == null)
+         expectedPlan.set(plannerPlanReference.get());
+
+      if (plannerReceivedPlan.get() && plannerResultReference.get() != null && expectedResult.get() == null)
+         expectedResult.set(plannerResultReference.get());
+   }
+
    public abstract void submitDataSet(FootstepPlannerUnitTestDataset dataset);
 
    public abstract String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset);
@@ -328,5 +495,10 @@ public abstract class FootstepPlannerDataSetTest
    protected static interface DatasetTestRunner
    {
       String testDataset(FootstepPlannerUnitTestDataset dataset);
+   }
+
+   protected static interface ConditionChecker
+   {
+      boolean checkCondition();
    }
 }
