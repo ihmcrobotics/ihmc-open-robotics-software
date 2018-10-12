@@ -42,6 +42,7 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemory
 public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlannerDataSetTest
 {
    private static final String robotName = "testBot";
+   private static final double bambooTimeScaling = 4.0;
 
    private RealtimeRos2Node ros2Node;
 
@@ -192,7 +193,7 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
       planningRequestPacket.setRequestedFootstepPlannerType(plannerType);
       planningRequestPacket.getPlanarRegionsListMessage().set(planarRegions);
 
-      double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? 2.0 : 1.0;
+      double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
       planningRequestPacket.setTimeout(timeoutMultiplier * dataset.getTimeout(getPlannerType()));
 
       if (dataset.hasGoalOrientation())
@@ -210,16 +211,42 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
    public String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset)
    {
       double totalTimeWaiting = 0;
-      double maxTimeToWait = 2.0 * dataset.getTimeout(getPlannerType());
+      double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
+      double maxTimeToWait = 2.0 * timeoutMultiplier * dataset.getTimeout(getPlannerType());
       long waitTime = 10;
 
       queryUIResults();
       queryPlannerResults();
 
-      while (actualPlan.get() == null || actualResult.get() == null || expectedPlan.get() == null || expectedResult.get() == null)
+      String errorMessage = "";
+
+      while (actualResult.get() == null || expectedResult.get() == null)
       {
          if (totalTimeWaiting > maxTimeToWait)
-            throw new RuntimeException("Overran our maximum wait time for a result");
+         {
+            errorMessage += "Timed out waiting on result for dataset " + dataset.getDatasetName() + ".\n";
+            return errorMessage;
+         }
+
+         ThreadTools.sleep(waitTime);
+         totalTimeWaiting += Conversions.millisecondsToSeconds(waitTime);
+         queryUIResults();
+         queryPlannerResults();
+      }
+
+      if (!actualResult.get().validForExecution() || !expectedResult.get().validForExecution())
+      {
+         errorMessage += "Dataset " + dataset.getDatasetName() + " failed to find a valid result. Result : " + actualResult.get() + "\n";
+         return errorMessage;
+      }
+
+      while (actualPlan.get() == null || expectedPlan.get() == null)
+      {
+         if (totalTimeWaiting > maxTimeToWait)
+         {
+            errorMessage += "Timed out waiting on plan for dataset " + dataset.getDatasetName() + ".\n";
+            return errorMessage;
+         }
 
          ThreadTools.sleep(waitTime);
          totalTimeWaiting += Conversions.millisecondsToSeconds(waitTime);
@@ -229,7 +256,6 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
 
       String datasetName = dataset.getDatasetName();
 
-      String errorMessage = "";
 
       FootstepPlanningResult expectedResult = this.expectedResult.getAndSet(null);
       FootstepPlanningResult actualResult = this.actualResult.getAndSet(null);

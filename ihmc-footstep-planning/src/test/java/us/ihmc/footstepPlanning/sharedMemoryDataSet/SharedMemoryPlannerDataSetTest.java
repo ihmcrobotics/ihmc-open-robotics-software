@@ -33,6 +33,7 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
    protected SharedMemoryMessager messager = null;
    protected FootstepPathCalculatorModule module = null;
    protected FootstepPlannerUI ui = null;
+   private static final double bambooTimeScaling = 4.0;
 
    @Before
    public void setup()
@@ -118,7 +119,7 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
 
       messager.submitMessage(PlannerTypeTopic, getPlannerType());
 
-      double timeMultiplier = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? 3.0 : 1.0;
+      double timeMultiplier = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerTimeoutTopic, timeMultiplier * dataset.getTimeout(getPlannerType()));
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
    }
@@ -138,7 +139,7 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
 
       String errorMessage = "";
 
-      double timeMultiplier = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? 3.0 : 1.0;
+      double timeMultiplier = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
       double timeout = 2.0 * timeMultiplier * dataset.getTimeout(getPlannerType());
       double totalTimeTaken = 0.0;
       long sleepDuration = 10;
