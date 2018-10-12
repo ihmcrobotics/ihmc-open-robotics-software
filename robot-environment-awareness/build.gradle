@@ -28,11 +28,11 @@ testSuites {
 
 mainDependencies {
    compile group: "com.vividsolutions", name: "jts", version: "1.13"
-   compile group: "org.apache.commons", name: "commons-lang3", version: "3.7"
+   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
    
    compile group: "us.ihmc", name: "euclid", version: "0.9.3"
    compile group: "us.ihmc", name: "joctomap", version: "1.6.9"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.4"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
