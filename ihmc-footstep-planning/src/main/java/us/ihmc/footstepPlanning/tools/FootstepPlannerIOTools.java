@@ -217,6 +217,8 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
          return stringPlannerTypes;
       }
 
+      footstepPlannerTypes.add(FootstepPlannerType.fromString(stringPlannerTypes));
+
       return null;
    }
 
@@ -252,6 +254,8 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
 
          return stringTimeouts;
       }
+
+      footstepPlannerTimeouts.add(Double.parseDouble(stringTimeouts));
 
       return null;
    }
