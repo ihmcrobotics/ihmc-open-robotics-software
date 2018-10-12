@@ -139,13 +139,25 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
       double timeout = 2.0 * dataset.getTimeout(getPlannerType());
       double totalTimeTaken = 0.0;
       long sleepDuration = 10;
-      while (!receivedPlan.get() || !receivedResult.get() || footstepPlanningResult.get() == null || footstepPlanReference.get() == null)
+      while (!receivedResult.get() || footstepPlanningResult.get() == null)
       {
          Assert.assertFalse("Timed out waiting for a result with dataset " + dataset.getDatasetName(), totalTimeTaken > timeout);
 
          ThreadTools.sleep(sleepDuration);
          totalTimeTaken += Conversions.millisecondsToSeconds(sleepDuration);
       }
+
+      Assert.assertTrue("Dataset " + dataset.getDatasetName() + " failed to find a result.", footstepPlanningResult.get().validForExecution());
+
+
+      while (!receivedPlan.get() || footstepPlanningResult.get() == null )
+      {
+         Assert.assertFalse("Timed out waiting for a plan with dataset " + dataset.getDatasetName(), totalTimeTaken > timeout);
+
+         ThreadTools.sleep(sleepDuration);
+         totalTimeTaken += Conversions.millisecondsToSeconds(sleepDuration);
+      }
+
       String datasetName = dataset.getDatasetName();
 
       String errorMessage = "";
