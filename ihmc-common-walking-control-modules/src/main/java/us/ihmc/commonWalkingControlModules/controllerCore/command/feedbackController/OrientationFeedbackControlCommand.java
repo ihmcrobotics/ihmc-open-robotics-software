@@ -10,7 +10,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
@@ -283,10 +285,13 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @param desiredAngularVelocity describes the desired linear velocity of
     *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Modified.
     */
-   public void changeFrameAndSet(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity)
+   public void changeFrameAndSet(FrameQuaternionBasics desiredOrientation, FrameVector3DBasics desiredAngularVelocity)
    {
-      desiredOrientationInWorld.setMatchingFrame(desiredOrientation);
-      desiredAngularVelocityInWorld.setMatchingFrame(desiredAngularVelocity);
+      desiredOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredAngularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+
+      desiredOrientationInWorld.set(desiredOrientation);
+      desiredAngularVelocityInWorld.set(desiredAngularVelocity);
    }
 
    /**
@@ -300,9 +305,10 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     *           {@code controlFrame} with respect to the {@code base}. It is equivalent to the
     *           desired angular action of {@code endEffector.getBodyFixedFrame()}. Modified.
     */
-   public void changeFrameAndSetFeedForward(FrameVector3DReadOnly feedForwardAngularAction)
+   public void changeFrameAndSetFeedForward(FrameVector3DBasics feedForwardAngularAction)
    {
-      feedForwardAngularActionInWorld.setMatchingFrame(feedForwardAngularAction);
+      feedForwardAngularAction.changeFrame(ReferenceFrame.getWorldFrame());
+      feedForwardAngularActionInWorld.set(feedForwardAngularAction);
    }
 
    /**
@@ -355,7 +361,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * optimization will behave but the ratio between them. A command with a higher weight than other
     * commands value will be treated as more important than the other commands.
     * </p>
-    * 
+    *
     * @param angularWeightMatrix weight matrix holding the angular weights to use for each component of the desired
     *           acceleration. Not modified.
     */
