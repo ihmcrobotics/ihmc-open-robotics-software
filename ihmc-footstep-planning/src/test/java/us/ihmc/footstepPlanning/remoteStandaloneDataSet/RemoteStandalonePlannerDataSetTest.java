@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.remoteStandaloneDataSet;
 import controller_msgs.msg.dds.*;
 import org.junit.After;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -50,8 +51,8 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
       uiReceivedPlan = new AtomicReference<>(false);
       uiReceivedResult = new AtomicReference<>(false);
 
-      messager.registerTopicListener(FootstepPlanTopic, request -> uiReceivedPlan.set(true));
-      messager.registerTopicListener(PlanningResultTopic, request -> uiReceivedResult.set(true));
+      messager.registerTopicListener(FootstepPlanTopic, request -> receivedPlan());
+      messager.registerTopicListener(PlanningResultTopic, request -> receivedResult());
 
       uiFootstepPlanReference = messager.createInput(FootstepPlanTopic);
       uiPlanningResultReference = messager.createInput(PlanningResultTopic);
@@ -66,6 +67,20 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
 
       ros2Node.spin();
+   }
+
+   private void receivedPlan()
+   {
+      uiReceivedPlan.set(true);
+      if (DEBUG)
+         PrintTools.info("Received a plan over Java FX.");
+   }
+
+   private void receivedResult()
+   {
+      uiReceivedResult.set(true);
+      if (DEBUG)
+         PrintTools.info("Received a result over Java FX.");
    }
 
    @After
@@ -100,8 +115,8 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
    @Override
    public void submitDataSet(FootstepPlannerUnitTestDataset dataset)
    {
-      for (int i = 0; i < 10; i++)
-         ThreadTools.sleep(100);
+      for (int i = 0; i < 100; i++)
+         ThreadTools.sleep(10);
 
       FootstepPlanningRequestPacket planningRequestPacket = new FootstepPlanningRequestPacket();
 
@@ -123,11 +138,23 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
 
       String errorMessage = "";
 
+      if (DEBUG)
+         PrintTools.info("Waiting for result.");
+
       errorMessage += waitForResult(() -> actualResult.get() == null || expectedResult.get() == null, maxTimeToWait, datasetName);
+
+      if (DEBUG)
+         PrintTools.info("Received a result (actual = " + actualResult.get() + " expected = " + expectedResult.get() + "), checking its validity.");
 
       errorMessage += validateResult(() -> actualResult.get().validForExecution() && expectedResult.get().validForExecution(), actualResult.get(), datasetName);
 
+      if (DEBUG)
+         PrintTools.info("Results are valid, waiting for plan.");
+
       errorMessage += waitForPlan(() -> expectedPlan.get() == null || actualPlan.get() == null, maxTimeToWait, datasetName);
+
+      if (DEBUG)
+         PrintTools.info("Received a plan, checking its validity.");
 
       FootstepPlanningResult expectedResult = this.expectedResult.getAndSet(null);
       FootstepPlanningResult actualResult = this.actualResult.getAndSet(null);
@@ -140,37 +167,9 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
 
       errorMessage += assertPlansAreValid(datasetName, expectedResult, actualResult, expectedPlan, actualPlan, dataset.getGoal());
 
-      for (int i = 0; i < 10; i++)
-         ThreadTools.sleep(100);
+      for (int i = 0; i < 100; i++)
+         ThreadTools.sleep(10);
 
       return errorMessage;
-   }
-
-   private void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus packet)
-   {
-      plannerResultReference.set(FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult()));
-      plannerPlanReference.set(convertToFootstepPlan(packet.getFootstepDataList()));
-      plannerReceivedPlan.set(true);
-   }
-
-   private static FootstepPlan convertToFootstepPlan(FootstepDataListMessage footstepDataListMessage)
-   {
-      FootstepPlan footstepPlan = new FootstepPlan();
-
-      for (FootstepDataMessage footstepMessage : footstepDataListMessage.getFootstepDataList())
-      {
-         FramePose3D stepPose = new FramePose3D();
-         stepPose.setPosition(footstepMessage.getLocation());
-         stepPose.setOrientation(footstepMessage.getOrientation());
-         SimpleFootstep footstep = footstepPlan.addFootstep(RobotSide.fromByte(footstepMessage.getRobotSide()), stepPose);
-
-         ConvexPolygon2D foothold = new ConvexPolygon2D();
-         for (int i = 0; i < footstepMessage.getPredictedContactPoints2d().size(); i++)
-            foothold.addVertex(footstepMessage.getPredictedContactPoints2d().get(i));
-         foothold.update();
-         footstep.setFoothold(foothold);
-      }
-
-      return footstepPlan;
    }
 }
