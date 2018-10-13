@@ -142,16 +142,22 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
          PrintTools.info("Waiting for result.");
 
       errorMessage += waitForResult(() -> actualResult.get() == null || expectedResult.get() == null, maxTimeToWait, datasetName);
+      if (!errorMessage.isEmpty())
+         return errorMessage;
 
       if (DEBUG)
          PrintTools.info("Received a result (actual = " + actualResult.get() + " expected = " + expectedResult.get() + "), checking its validity.");
 
       errorMessage += validateResult(() -> actualResult.get().validForExecution() && expectedResult.get().validForExecution(), actualResult.get(), datasetName);
+      if (!errorMessage.isEmpty())
+         return errorMessage;
 
       if (DEBUG)
          PrintTools.info("Results are valid, waiting for plan.");
 
       errorMessage += waitForPlan(() -> expectedPlan.get() == null || actualPlan.get() == null, maxTimeToWait, datasetName);
+      if (!errorMessage.isEmpty())
+         return errorMessage;
 
       if (DEBUG)
          PrintTools.info("Received a plan, checking its validity.");

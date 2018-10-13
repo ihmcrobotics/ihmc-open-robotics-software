@@ -231,16 +231,22 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
          PrintTools.info("Waiting for result.");
 
       errorMessage += waitForResult(() -> actualResult.get() == null || expectedResult.get() == null, maxTimeToWait, datasetName);
+      if (!errorMessage.isEmpty())
+         return errorMessage;
 
       if (DEBUG)
          PrintTools.info("Received a result (actual = " + actualResult.get() + " expected = " + expectedResult.get() + ", checking it's validity.");
 
       errorMessage += validateResult(() -> actualResult.get().validForExecution() && expectedResult.get().validForExecution(), actualResult.get(), datasetName);
+      if (!errorMessage.isEmpty())
+         return errorMessage;
 
       if (DEBUG)
          PrintTools.info("Results are valid, waiting for plan.");
 
       errorMessage += waitForPlan(() -> expectedPlan.get() == null || actualPlan.get() == null, maxTimeToWait, datasetName);
+      if (!errorMessage.isEmpty())
+         return errorMessage;
 
       if (DEBUG)
          PrintTools.info("Received a plan, checking it's validity.");
