@@ -13,7 +13,9 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.tools.QuaternionTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -58,12 +60,14 @@ public class RigidBodyPositionControlHelper
 
    private final BooleanProvider useBaseFrameForControl;
 
-   private final FixedFramePoint3DBasics controlFramePosition;
+   private final RigidBodyTransform previousControlFramePose = new RigidBodyTransform();
+   private final RigidBodyTransform controlFramePose = new RigidBodyTransform();
    private final ReferenceFrame defaultControlFrame;
 
    private final ReferenceFrame baseFrame;
    private final ReferenceFrame bodyFrame;
 
+   private final FramePoint3D currentPosition = new FramePoint3D();
    private final YoFramePoint3D yoCurrentPosition;
    private final YoFramePoint3D yoDesiredPosition;
    private final List<YoGraphicPosition> graphics = new ArrayList<>();
@@ -99,7 +103,6 @@ public class RigidBodyPositionControlHelper
 
       defaultControlFrame = controlFrame;
       bodyFrame = bodyToControl.getBodyFixedFrame();
-      controlFramePosition = new FramePoint3D(bodyFrame);
       setDefaultControlFrame();
 
       if (graphicsListRegistry != null)
@@ -145,34 +148,50 @@ public class RigidBodyPositionControlHelper
 
    private void setDefaultControlFrame()
    {
-      controlFramePosition.setFromReferenceFrame(defaultControlFrame);
-      feedbackControlCommand.setBodyFixedPointToControl(controlFramePosition);
+      defaultControlFrame.getTransformToDesiredFrame(controlFramePose, bodyFrame);
+      currentPosition.setIncludingFrame(bodyFrame, controlFramePose.getTranslationVector());
+      feedbackControlCommand.setBodyFixedPointToControl(currentPosition);
    }
 
-   private void setControlFramePosition(Tuple3DReadOnly controlFramePositionInBodyFrame)
+   private void setControlFramePose(RigidBodyTransform controlFramePoseInBody)
    {
-      controlFramePosition.set(controlFramePositionInBodyFrame);
-      feedbackControlCommand.setBodyFixedPointToControl(controlFramePosition);
+      controlFramePose.set(controlFramePoseInBody);
+      currentPosition.setIncludingFrame(bodyFrame, controlFramePose.getTranslationVector());
+      feedbackControlCommand.setBodyFixedPointToControl(currentPosition);
+   }
+
+   public static void modifyControlFrame(FixedFramePoint3DBasics desiredPositionToModify, FrameQuaternionReadOnly desiredOrientationOfPreviousControlFrame,
+                                         RigidBodyTransform previousControlFramePose, RigidBodyTransform newControlFramePose)
+   {
+      // We may skip this if there is no change in control frame.
+      if (previousControlFramePose.equals(newControlFramePose))
+      {
+         return;
+      }
+      else if (desiredOrientationOfPreviousControlFrame == null)
+      {
+         throw new RuntimeException("Changing the control frame requires a desired orientation. Bodies that are position controlled do not support control frame changes.");
+      }
+
+      desiredPositionToModify.checkReferenceFrameMatch(desiredOrientationOfPreviousControlFrame);
+      previousControlFramePose.invert();
+      previousControlFramePose.multiply(newControlFramePose);
+      QuaternionTools.addTransform(desiredOrientationOfPreviousControlFrame, previousControlFramePose.getTranslationVector(), desiredPositionToModify);
    }
 
    public void holdCurrent()
    {
       clear();
-      desiredPosition.setIncludingFrame(controlFramePosition);
+      desiredPosition.setIncludingFrame(bodyFrame, controlFramePose.getTranslationVector());
       queueInitialPoint(desiredPosition);
    }
 
-   public void holdCurrentDesired()
+   public void holdCurrentDesired(FrameQuaternionReadOnly currentDesiredOrientation)
    {
-      // Compute the desired position in the body frame.
       getDesiredPosition(desiredPosition);
-      desiredPosition.changeFrame(controlFramePosition.getReferenceFrame());
-      desiredPosition.sub(controlFramePosition);
-
+      previousControlFramePose.set(controlFramePose);
       clear();
-
-      // Move the desired position to the control frame
-      desiredPosition.add(controlFramePosition);
+      modifyControlFrame(desiredPosition, currentDesiredOrientation, previousControlFramePose, controlFramePose);
       queueInitialPoint(desiredPosition);
    }
 
@@ -189,9 +208,9 @@ public class RigidBodyPositionControlHelper
       trajectoryPoint.setPosition(desiredPosition);
    }
 
-   public void goToPosition(FramePoint3DReadOnly position, double trajectoryTime)
+   public void goToPosition(FramePoint3DReadOnly position, FrameQuaternionReadOnly currentDesiredOrientation, double trajectoryTime)
    {
-      holdCurrentDesired();
+      holdCurrentDesired(currentDesiredOrientation);
 
       FrameEuclideanTrajectoryPoint trajectoryPoint = pointQueue.addLast();
       trajectoryPoint.setToZero(trajectoryGenerator.getCurrentTrajectoryFrame());
@@ -202,16 +221,16 @@ public class RigidBodyPositionControlHelper
       trajectoryPoint.setPosition(desiredPosition);
    }
 
-   public void getDesiredPosition(FixedFramePoint3DBasics positionToPack)
+   public void getDesiredPosition(FramePoint3D positionToPack)
    {
       if (trajectoryGenerator.isEmpty())
       {
-         positionToPack.setMatchingFrame(controlFramePosition);
+         positionToPack.setIncludingFrame(bodyFrame, controlFramePose.getTranslationVector());
+         positionToPack.changeFrame(trajectoryGenerator.getCurrentTrajectoryFrame());
       }
       else
       {
-         trajectoryGenerator.getPosition(desiredPosition);
-         positionToPack.setMatchingFrame(desiredPosition);
+         trajectoryGenerator.getPosition(positionToPack);
       }
    }
 
@@ -255,7 +274,8 @@ public class RigidBodyPositionControlHelper
 
       if (yoCurrentPosition != null && yoDesiredPosition != null)
       {
-         yoCurrentPosition.setMatchingFrame(controlFramePosition);
+         currentPosition.setIncludingFrame(bodyFrame, controlFramePose.getTranslationVector());
+         yoCurrentPosition.setMatchingFrame(currentPosition);
          yoDesiredPosition.setMatchingFrame(desiredPosition);
       }
 
@@ -292,23 +312,22 @@ public class RigidBodyPositionControlHelper
       return false;
    }
 
-   public boolean handleTrajectoryCommand(EuclideanTrajectoryControllerCommand command)
+   public boolean handleTrajectoryCommand(EuclideanTrajectoryControllerCommand command, FrameQuaternionReadOnly currentDesiredOrientation)
    {
       if (command.getExecutionMode() == ExecutionMode.OVERRIDE || isEmpty())
       {
-         // Compute the initial desired position for the body frame.
+         // Record the current desired position and the control frame pose.
          getDesiredPosition(desiredPosition);
-         desiredPosition.changeFrame(controlFramePosition.getReferenceFrame());
-         desiredPosition.sub(controlFramePosition);
+         previousControlFramePose.set(controlFramePose);
 
          clear();
 
-         // Set the new control frame and move the initial desired position to be for that frame.
+         // Set the new control frame and move the desired position to be for that frame.
          if (command.useCustomControlFrame())
          {
-            setControlFramePosition(command.getControlFramePose().getTranslationVector());
+            setControlFramePose(command.getControlFramePose());
          }
-         desiredPosition.add(controlFramePosition);
+         modifyControlFrame(desiredPosition, currentDesiredOrientation, previousControlFramePose, controlFramePose);
 
          trajectoryGenerator.changeFrame(command.getTrajectoryFrame());
          selectionMatrix.set(command.getSelectionMatrix());
@@ -444,7 +463,7 @@ public class RigidBodyPositionControlHelper
    public void disable()
    {
       clear();
-      holdCurrentDesired();
+      holdCurrent();
       selectionMatrix.clearSelection();
    }
 }
