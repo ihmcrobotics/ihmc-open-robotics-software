@@ -113,21 +113,26 @@ public class PlanarRegionTools
     */
    public static Point3D projectPointToPlanesVertically(Point3DReadOnly point, List<PlanarRegion> regions)
    {
-      Line3D projectionLine = new Line3D(point, new Vector3D(0.0, 0.0, 1.0));
       Point3D highestIntersection = null;
 
       for (PlanarRegion region : regions)
       {
-         Point3D intersection = intersectRegionWithLine(region, projectionLine);
-
-         if (intersection == null)
+         if (!region.isPointInside(point, 0.0))
          {
             continue;
          }
 
-         if (highestIntersection == null || highestIntersection.getZ() < intersection.getZ())
+         if (highestIntersection == null)
          {
-            highestIntersection = intersection;
+            highestIntersection = new Point3D(point);
+            highestIntersection.setZ(Double.NEGATIVE_INFINITY);
+         }
+
+         double height = region.getPlaneZGivenXY(point.getX(), point.getY());
+
+         if(highestIntersection.getZ() < height)
+         {
+            highestIntersection.setZ(height);
          }
       }
 
