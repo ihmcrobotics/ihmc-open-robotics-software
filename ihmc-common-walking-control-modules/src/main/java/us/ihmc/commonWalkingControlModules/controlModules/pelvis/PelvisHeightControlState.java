@@ -13,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -50,7 +49,6 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
    /** When we handle the PelvisTrajectoryCommand we pull out the z component and pack it into another PelvisTrajectoryCommand**/
    private final EuclideanTrajectoryControllerCommand euclideanCommand = new EuclideanTrajectoryControllerCommand();
-   private final PelvisTrajectoryCommand tempPelvisTrajectoryCommand = new PelvisTrajectoryCommand();
 
    /** handles the trajectory and the queuing**/
    private final RigidBodyPositionController positionController;
@@ -67,8 +65,6 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    private double previousOffset = 0.0;
 
    private final FramePoint3D tempPosition = new FramePoint3D();
-   private final Point3D tempPoint = new Point3D();
-   private final RigidBodyTransform controlFrame = new RigidBodyTransform();
 
    private final AbstractPDController linearMomentumZPDController;
    private final YoSE3OffsetFrame yoControlFrame;
