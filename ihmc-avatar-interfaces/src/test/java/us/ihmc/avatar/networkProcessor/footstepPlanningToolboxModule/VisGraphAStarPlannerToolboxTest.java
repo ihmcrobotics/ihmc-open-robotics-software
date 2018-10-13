@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
 import org.junit.Test;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
@@ -43,5 +44,17 @@ public class VisGraphAStarPlannerToolboxTest extends FootstepPlannerToolboxTest
       pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
       setup();
       runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
+   }
+
+   public static void main(String[] args) throws Exception
+   {
+      AStarPlannerToolboxTest test = new AStarPlannerToolboxTest();
+      String prefix = "unitTestDataSets/test/";
+      test.pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
+      test.setup();
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171216_111326_CrossoverPlatforms");
+//      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
+      PrintTools.info("Test passed.");
+      test.tearDown();
    }
 }
