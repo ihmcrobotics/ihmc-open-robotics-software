@@ -75,7 +75,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    {
       clear();
       setTrajectoryStartTimeToCurrentTime();
-      positionHelper.holdCurrentDesired();
+      positionHelper.holdCurrentDesired(null);
    }
 
    @Override
@@ -101,7 +101,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    {
       clear();
       setTrajectoryStartTimeToCurrentTime();
-      positionHelper.goToPosition(position, trajectoryTime);
+      positionHelper.goToPosition(position, null, trajectoryTime);
    }
 
    @Override
@@ -135,7 +135,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
          return false;
       }
 
-      if (handleCommandInternal(command) && positionHelper.handleTrajectoryCommand(command))
+      if (handleCommandInternal(command) && positionHelper.handleTrajectoryCommand(command, null))
       {
          usingWeightFromMessage.set(positionHelper.isMessageWeightValid());
          return true;

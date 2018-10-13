@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -39,6 +40,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    private final SO3TrajectoryControllerCommand so3Command = new SO3TrajectoryControllerCommand();
    private final EuclideanTrajectoryControllerCommand euclideanCommand = new EuclideanTrajectoryControllerCommand();
 
+   private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final RigidBodyPositionControlHelper positionHelper;
    private final RigidBodyOrientationControlHelper orientationHelper;
 
@@ -164,7 +166,9 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    {
       clear();
       setTrajectoryStartTimeToCurrentTime();
-      positionHelper.holdCurrentDesired();
+
+      orientationHelper.getDesiredOrientation(desiredOrientation);
+      positionHelper.holdCurrentDesired(desiredOrientation);
       orientationHelper.holdCurrentDesired();
    }
 
@@ -182,7 +186,9 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    {
       clear();
       setTrajectoryStartTimeToCurrentTime();
-      positionHelper.goToPosition(pose.getPosition(), trajectoryTime);
+
+      orientationHelper.getDesiredOrientation(desiredOrientation);
+      positionHelper.goToPosition(pose.getPosition(), desiredOrientation, trajectoryTime);
       orientationHelper.goToOrientation(pose.getOrientation(), trajectoryTime);
    }
 
@@ -193,22 +199,6 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       if (handleCommandInternal(command) && orientationHelper.handleTrajectoryCommand(command))
       {
          usingWeightFromMessage.set(orientationHelper.isMessageWeightValid());
-         return true;
-      }
-
-      clear();
-      positionHelper.clear();
-      orientationHelper.clear();
-      return false;
-   }
-
-   @Override
-   public boolean handleTrajectoryCommand(EuclideanTrajectoryControllerCommand command)
-   {
-      orientationHelper.disable();
-      if (handleCommandInternal(command) && positionHelper.handleTrajectoryCommand(command))
-      {
-         usingWeightFromMessage.set(positionHelper.isMessageWeightValid());
          return true;
       }
 
@@ -232,7 +222,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       CommandConversionTools.convertToEuclidean(command, euclideanCommand);
       CommandConversionTools.convertToSO3(command, so3Command);
 
-      if (positionHelper.handleTrajectoryCommand(euclideanCommand) && orientationHelper.handleTrajectoryCommand(so3Command))
+      orientationHelper.getDesiredOrientation(desiredOrientation);
+      if (positionHelper.handleTrajectoryCommand(euclideanCommand, desiredOrientation) && orientationHelper.handleTrajectoryCommand(so3Command))
       {
          usingWeightFromMessage.set(positionHelper.isMessageWeightValid() && orientationHelper.isMessageWeightValid());
          return true;
