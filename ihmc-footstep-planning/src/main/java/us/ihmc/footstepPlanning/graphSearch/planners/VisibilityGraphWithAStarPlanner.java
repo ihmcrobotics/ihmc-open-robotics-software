@@ -207,7 +207,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
          if(DEBUG)
          {
-            PrintTools.info("Starting to plan using )" + getClass().getSimpleName());
+            PrintTools.info("Starting to plan using " + getClass().getSimpleName());
             PrintTools.info("Body start pose: " + startPos);
             PrintTools.info("Body goal pose:  " + goalPos);
          }

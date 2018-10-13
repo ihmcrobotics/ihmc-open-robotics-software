@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -14,6 +13,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
@@ -26,6 +26,7 @@ import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +60,6 @@ public abstract class FootstepPlannerDataSetTest
    protected final AtomicReference<FootstepPlan> actualPlan = new AtomicReference<>(null);
    protected final AtomicReference<FootstepPlanningResult> expectedResult = new AtomicReference<>(null);
    protected final AtomicReference<FootstepPlanningResult> actualResult = new AtomicReference<>(null);
-
 
    public abstract FootstepPlannerType getPlannerType();
 
@@ -291,6 +291,38 @@ public abstract class FootstepPlannerDataSetTest
          PrintTools.info("Sending out planning request packet.");
    }
 
+   protected void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus packet)
+   {
+      if (DEBUG)
+         PrintTools.info("Processed an output from a remote planner.");
+
+      plannerResultReference.set(FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult()));
+      plannerPlanReference.set(convertToFootstepPlan(packet.getFootstepDataList()));
+      plannerReceivedPlan.set(true);
+   }
+
+
+   private static FootstepPlan convertToFootstepPlan(FootstepDataListMessage footstepDataListMessage)
+   {
+      FootstepPlan footstepPlan = new FootstepPlan();
+
+      for (FootstepDataMessage footstepMessage : footstepDataListMessage.getFootstepDataList())
+      {
+         FramePose3D stepPose = new FramePose3D();
+         stepPose.setPosition(footstepMessage.getLocation());
+         stepPose.setOrientation(footstepMessage.getOrientation());
+         SimpleFootstep footstep = footstepPlan.addFootstep(RobotSide.fromByte(footstepMessage.getRobotSide()), stepPose);
+
+         ConvexPolygon2D foothold = new ConvexPolygon2D();
+         for (int i = 0; i < footstepMessage.getPredictedContactPoints2d().size(); i++)
+            foothold.addVertex(footstepMessage.getPredictedContactPoints2d().get(i));
+         foothold.update();
+         footstep.setFoothold(foothold);
+      }
+
+      return footstepPlan;
+   }
+
    protected String assertPlansAreValid(String datasetName, FootstepPlanningResult expectedResult, FootstepPlanningResult actualResult,
                                         FootstepPlan expectedPlan, FootstepPlan actualPlan, Point3D goal)
    {
@@ -473,19 +505,35 @@ public abstract class FootstepPlannerDataSetTest
    protected void queryUIResults()
    {
       if (uiReceivedPlan.get() && uiFootstepPlanReference.get() != null && actualPlan.get() == null)
+      {
+         if (DEBUG)
+            PrintTools.info("Received a plan from the UI.");
          actualPlan.set(uiFootstepPlanReference.get());
+      }
 
       if (uiReceivedResult.get() && uiPlanningResultReference.get() != null && actualResult.get() == null)
+      {
+         if (DEBUG)
+            PrintTools.info("Received a result " + uiPlanningResultReference.get() + " from the UI.");
          actualResult.set(uiPlanningResultReference.get());
+      }
    }
 
    protected void queryPlannerResults()
    {
       if (plannerReceivedPlan.get() && plannerPlanReference.get() != null && expectedPlan.get() == null)
+      {
+         if (DEBUG)
+            PrintTools.info("Received a plan from the planner.");
          expectedPlan.set(plannerPlanReference.get());
+      }
 
       if (plannerReceivedPlan.get() && plannerResultReference.get() != null && expectedResult.get() == null)
+      {
+         if (DEBUG)
+            PrintTools.info("Received a result " + plannerResultReference.get() + " from the planner.");
          expectedResult.set(plannerResultReference.get());
+      }
    }
 
    public abstract void submitDataSet(FootstepPlannerUnitTestDataset dataset);
