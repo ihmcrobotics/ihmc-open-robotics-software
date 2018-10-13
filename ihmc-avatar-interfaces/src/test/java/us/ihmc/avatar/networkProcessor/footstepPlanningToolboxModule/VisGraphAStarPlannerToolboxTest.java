@@ -17,7 +17,7 @@ public class VisGraphAStarPlannerToolboxTest extends FootstepPlannerToolboxTest
 
    @Override
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 4.2)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 85.0)
    public void testDatasetsWithoutOcclusion()
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;

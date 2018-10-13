@@ -16,7 +16,7 @@ public class SimpleBodyPathPlannerToolboxTest extends FootstepPlannerToolboxTest
    }
 
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 13.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 46.8)
    public void testDatasetsWithoutOcclusion()
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
