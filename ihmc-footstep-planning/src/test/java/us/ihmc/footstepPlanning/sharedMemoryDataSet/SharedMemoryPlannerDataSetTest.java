@@ -85,10 +85,16 @@ public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerData
       String errorMessage = "";
 
       errorMessage += waitForResult(() -> actualResult.get() == null, maxTimeToWait, datasetName);
+      if (!errorMessage.isEmpty())
+         return errorMessage;
 
       errorMessage += validateResult(() -> actualResult.get().validForExecution(), actualResult.get(), datasetName);
+      if (!errorMessage.isEmpty())
+         return errorMessage;
 
       errorMessage += waitForPlan(() -> actualPlan.get() == null, maxTimeToWait, datasetName);
+      if (!errorMessage.isEmpty())
+         return errorMessage;
 
       FootstepPlanningResult result = actualResult.getAndSet(null);
       FootstepPlan plan = actualPlan.getAndSet(null);
