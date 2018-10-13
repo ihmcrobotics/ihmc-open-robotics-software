@@ -2,7 +2,10 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import java.util.Collection;
 
+import org.apache.commons.math3.util.Precision;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -122,6 +125,16 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    @Override
    public boolean handleTrajectoryCommand(EuclideanTrajectoryControllerCommand command)
    {
+      // A purely position controlled body may not specify a control frame offset since a desired orientation is required
+      // to transform desired positions between body fixed control frames.
+      if (command.useCustomControlFrame() && !Precision.equals(command.getControlFramePose().getTranslationVector().lengthSquared(), 0.0))
+      {
+         PrintTools.warn("Specifying a control frame offset for a body position controller is not possible.");
+         clear();
+         positionHelper.clear();
+         return false;
+      }
+
       if (handleCommandInternal(command) && positionHelper.handleTrajectoryCommand(command))
       {
          usingWeightFromMessage.set(positionHelper.isMessageWeightValid());
