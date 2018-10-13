@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.ui;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -45,7 +46,7 @@ public class RemotePlannerMessageConverter
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Integer> sequenceIdReference;
 
-   private final AtomicReference<Boolean> hasResult = new AtomicReference<>(false);
+   private final AtomicReference<Boolean> hasPlan = new AtomicReference<>(false);
 
    public static RemotePlannerMessageConverter createRemoteConverter(SharedMemoryMessager messager, String robotName)
    {
@@ -100,8 +101,8 @@ public class RemotePlannerMessageConverter
       outputStatusPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningToolboxOutputStatus.class,
                                                         FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName));
 
-      messager.registerTopicListener(FootstepPlannerSharedMemoryAPI.PlanningResultTopic, request -> hasResult.set(true));
-      messager.registerTopicListener(FootstepPlannerSharedMemoryAPI.FootstepPlanTopic, request -> publishResultingPlan());
+      messager.registerTopicListener(FootstepPlannerSharedMemoryAPI.PlanningResultTopic, request -> publishResultingPlan());
+      messager.registerTopicListener(FootstepPlannerSharedMemoryAPI.FootstepPlanTopic, request -> hasPlan.set(true));
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
@@ -162,8 +163,21 @@ public class RemotePlannerMessageConverter
 
    private void publishResultingPlan()
    {
-      while (!hasResult.get())
-         ThreadTools.sleep(10);
+      double totalWaitTime = 0.0;
+      double maxWaitTime = 5.0;
+      long sleepDuration = 10;
+
+      while (resultReference.get().validForExecution() && !hasPlan.get())
+      {
+         if (totalWaitTime > maxWaitTime)
+         {
+            if (verbose)
+               PrintTools.info("Timed out waiting for a plan when we received a valid result for execution.");
+            return;
+         }
+         ThreadTools.sleep(sleepDuration);
+         totalWaitTime += Conversions.millisecondsToSeconds(sleepDuration);
+      }
 
       if (verbose)
          PrintTools.info("Finished planning, publishing the result on the network.");
@@ -175,7 +189,11 @@ public class RemotePlannerMessageConverter
       result.setSequenceId(sequenceIdReference.get());
       result.setPlanId(plannerRequestIdReference.get());
 
-      result.getFootstepDataList().set(convertToFootstepDataListMessage(footstepPlanReference.get()));
+      if (resultReference.get().validForExecution())
+         result.getFootstepDataList().set(convertToFootstepDataListMessage(footstepPlanReference.get()));
+      else if (verbose)
+         PrintTools.info("Publishing without a valid footstep plan because there wasn't one.");
+
 
       outputStatusPublisher.publish(result);
    }
