@@ -27,7 +27,7 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    @Override
    public double getInPlaceWidth()
    {
-      return 0.25;
+      return 0.3;
    }
 
    @Override
@@ -45,9 +45,6 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    @Override
    public double getMaxStepLength()
    {
-      if (target == RobotTarget.SCS)
-         return 0.6; // 0.5; //0.35;
-
       return 0.4;
    }
 
