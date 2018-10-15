@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.sharedMemoryDataSet;
 
 import org.junit.Test;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -33,11 +34,13 @@ public class SharedMemoryPlanarRegionBipedalDataSetTest extends SharedMemoryPlan
 
    public static void main(String[] args) throws Exception
    {
-      VISUALIZE = true;
+//      VISUALIZE = true;
       SharedMemoryPlanarRegionBipedalDataSetTest test = new SharedMemoryPlanarRegionBipedalDataSetTest();
-      String prefix = "unitTestData/testable/";
+      String prefix = "unitTestDataSets/test/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
+      PrintTools.info("Running test.");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214801_StairsUpDown");
+      PrintTools.info("Test finished.");
       test.tearDown();
 
    }

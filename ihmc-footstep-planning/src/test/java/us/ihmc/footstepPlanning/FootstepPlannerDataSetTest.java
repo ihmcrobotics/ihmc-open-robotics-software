@@ -43,6 +43,7 @@ public abstract class FootstepPlannerDataSetTest
    protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
    protected static boolean DEBUG = false;
+   protected static boolean VERBOSE = false;
 
    protected FootstepPlannerUI ui = null;
    protected SharedMemoryMessager messager = null;
@@ -135,6 +136,8 @@ public abstract class FootstepPlannerDataSetTest
       List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools
             .loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerDataExporter.class);
 
+      resetAllAtomics();
+
       runAssertionsOnAllDatasets(datasetTestRunner, allDatasets);
    }
 
@@ -142,6 +145,8 @@ public abstract class FootstepPlannerDataSetTest
    {
       List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools
             .loadAllFootstepPlannerDatasetsWithoutOcclusionsInDevelopment(FootstepPlannerDataExporter.class);
+
+      resetAllAtomics();
 
       runAssertionsOnAllDatasets(datasetTestRunner, allDatasets);
    }
@@ -157,7 +162,7 @@ public abstract class FootstepPlannerDataSetTest
 
    protected void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner, List<FootstepPlannerUnitTestDataset> allDatasets)
    {
-      if (DEBUG)
+      if (VERBOSE || DEBUG)
       {
          PrintTools.info("Unit test files found: " + allDatasets.size());
       }
@@ -177,10 +182,12 @@ public abstract class FootstepPlannerDataSetTest
 
       FootstepPlannerUnitTestDataset dataset = allDatasets.get(currentDatasetIndex);
 
+      ThreadTools.sleep(100);
+
       List<String> dataSetNames = new ArrayList<>();
       while (dataset != null)
       {
-         if (DEBUG)
+         if (DEBUG || VERBOSE)
          {
             PrintTools.info("Processing file: " + dataset.getDatasetName());
          }
@@ -193,6 +200,8 @@ public abstract class FootstepPlannerDataSetTest
          }
 
          resetAllAtomics();
+
+         ThreadTools.sleep(100);
 
          if (hasType)
          {
