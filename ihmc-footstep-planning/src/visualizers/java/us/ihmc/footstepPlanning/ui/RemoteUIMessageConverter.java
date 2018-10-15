@@ -5,15 +5,18 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory;
@@ -37,7 +40,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class RemoteUIMessageConverter
 {
-   private static final boolean verbose = true;
+   private static final boolean verbose = false;
 
    private final RealtimeRos2Node ros2Node;
 
@@ -174,11 +177,12 @@ public class RemoteUIMessageConverter
       FootstepDataListMessage footstepDataListMessage = packet.getFootstepDataList();
       int plannerRequestId = packet.getPlanId();
       int sequenceId = (int) packet.getSequenceId();
+      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
       FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
+      FootstepPlan footstepPlan = convertToFootstepPlan(footstepDataListMessage);
 
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic,
-                             PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.FootstepPlanTopic, convertToFootstepPlan(footstepDataListMessage));
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic, planarRegionsList);
+      messager.submitMessage(FootstepPlannerSharedMemoryAPI.FootstepPlanTopic, footstepPlan);
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerRequestIdTopic, plannerRequestId);
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.SequenceIdTopic, sequenceId);
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanningResultTopic, result);
@@ -280,7 +284,19 @@ public class RemoteUIMessageConverter
          FramePose3D stepPose = new FramePose3D();
          stepPose.setPosition(footstepMessage.getLocation());
          stepPose.setOrientation(footstepMessage.getOrientation());
-         footstepPlan.addFootstep(RobotSide.fromByte(footstepMessage.getRobotSide()), stepPose);
+         SimpleFootstep simpleFootstep = footstepPlan.addFootstep(RobotSide.fromByte(footstepMessage.getRobotSide()), stepPose);
+
+         IDLSequence.Object<Point3D> predictedContactPoints = footstepMessage.getPredictedContactPoints2d();
+         if (!predictedContactPoints.isEmpty())
+         {
+            ConvexPolygon2D foothold = new ConvexPolygon2D();
+            for (int i = 0; i < predictedContactPoints.size(); i++)
+            {
+               foothold.addVertex(predictedContactPoints.get(i));
+            }
+            foothold.update();
+            simpleFootstep.setFoothold(foothold);
+         }
       }
 
       return footstepPlan;
