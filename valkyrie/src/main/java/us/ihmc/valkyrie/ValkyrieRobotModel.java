@@ -618,7 +618,16 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public InputStream getWholeBodyControllerParametersFile()
    {
-      return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller.xml");
+      switch (target)
+      {
+      case SCS:
+         return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_simulation.xml");
+      case GAZEBO:
+      case REAL_ROBOT:
+         return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_hardware.xml");
+      default:
+         throw new UnsupportedOperationException("Unsupported target: " + target);
+      }
    }
 
    public ValkyrieCalibrationParameters getCalibrationParameters()
