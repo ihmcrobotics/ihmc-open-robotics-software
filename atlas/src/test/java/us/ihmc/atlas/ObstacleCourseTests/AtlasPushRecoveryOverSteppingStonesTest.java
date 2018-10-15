@@ -70,7 +70,13 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
                      @Override
                      public double getMaxStepLength()
                      {
-                        return 1.0;
+                        return 0.8;
+                     }
+
+                     @Override
+                     public double getMaxStepWidth()
+                     {
+                        return 0.65;
                      }
                   };
                }
