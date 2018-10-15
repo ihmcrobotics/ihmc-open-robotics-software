@@ -182,7 +182,7 @@ public abstract class FootstepPlannerDataSetTest
 
       FootstepPlannerUnitTestDataset dataset = allDatasets.get(currentDatasetIndex);
 
-      ThreadTools.sleep(100);
+      ThreadTools.sleep(200);
 
       List<String> dataSetNames = new ArrayList<>();
       while (dataset != null)
@@ -201,7 +201,7 @@ public abstract class FootstepPlannerDataSetTest
 
          resetAllAtomics();
 
-         ThreadTools.sleep(100);
+         ThreadTools.sleep(500);
 
          if (hasType)
          {
@@ -219,7 +219,7 @@ public abstract class FootstepPlannerDataSetTest
          else
             dataset = null;
 
-         ThreadTools.sleep(100); // Apparently need to give some time for the prints to appear in the right order.
+         ThreadTools.sleep(500); // Apparently need to give some time for the prints to appear in the right order.
       }
 
       Assert.assertTrue("Number of failing datasets: " + numberOfFailingDatasets + " out of " + numberOfTotalDatasets + ". Errors:" + errorMessages,
