@@ -239,6 +239,11 @@ public abstract class FootstepPlannerDataSetTest
       String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
       errorMessages += errorMessagesForCurrentFile;
 
+      if (DEBUG)
+      {
+         PrintTools.info("Error messages : " + errorMessagesForCurrentFile);
+      }
+
       ThreadTools.sleep(100); // Apparently need to give some time for the prints to appear in the right order.
 
       Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
