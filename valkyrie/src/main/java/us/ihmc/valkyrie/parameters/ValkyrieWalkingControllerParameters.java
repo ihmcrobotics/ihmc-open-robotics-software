@@ -480,7 +480,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double zetaZ = runningOnRealRobot ? 1.0 : 0.7;
       double kpXYOrientation = runningOnRealRobot ? 300.0 : 300.0;
       double kpZOrientation = runningOnRealRobot ? 150.0 : 200.0; // 160
-      double zetaOrientationXY = runningOnRealRobot ? 1.0 : 0.7; // Was 0.7 before tuneup of sep 2018
+      double zetaOrientationXY = runningOnRealRobot ? 0.8 : 0.7; // Was 0.7 before tuneup of sep 2018
       double zetaOrientationZ = runningOnRealRobot ? 0.8 : 0.7; // Was 0.5 before tuneup of sep 2018
       double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxLinearJerk = runningOnRealRobot ? 250.0 : Double.POSITIVE_INFINITY;
