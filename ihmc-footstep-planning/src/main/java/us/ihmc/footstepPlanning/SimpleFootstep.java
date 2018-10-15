@@ -77,4 +77,13 @@ public class SimpleFootstep
          return false;
       return true;
    }
+
+   public String toString()
+   {
+      String message = "Robot side = " + robotSide;
+      message += "\nSole frame pose = " + soleFramePose;
+      message += "\nFoothold = " + foothold;
+
+      return message;
+   }
 }
