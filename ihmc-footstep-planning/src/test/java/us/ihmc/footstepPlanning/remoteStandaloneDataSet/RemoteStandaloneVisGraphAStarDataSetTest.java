@@ -48,9 +48,10 @@ public class RemoteStandaloneVisGraphAStarDataSetTest extends RemoteStandalonePl
    public static void main(String[] args) throws Exception
    {
       RemoteStandaloneVisGraphAStarDataSetTest test = new RemoteStandaloneVisGraphAStarDataSetTest();
-      String prefix = "unitTestData/testable/";
+      String prefix = "unitTestDataSets/test/";
+      test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205040_SimpleMaze");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
       test.tearDown();
 
    }

@@ -17,7 +17,7 @@ public class SharedMemoryPlanarRegionBipedalDataSetTest extends SharedMemoryPlan
 
    @Override
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 90.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 122.8)
    public void testDatasetsWithoutOcclusion()
    {
       runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));

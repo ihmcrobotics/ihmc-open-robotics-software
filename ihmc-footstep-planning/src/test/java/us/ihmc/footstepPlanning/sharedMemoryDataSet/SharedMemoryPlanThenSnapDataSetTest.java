@@ -17,7 +17,7 @@ public class SharedMemoryPlanThenSnapDataSetTest extends SharedMemoryPlannerData
 
    @Override
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 2.5)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 21.8)
    public void testDatasetsWithoutOcclusion()
    {
       runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));

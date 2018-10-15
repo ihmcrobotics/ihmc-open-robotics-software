@@ -93,7 +93,8 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
       messager.registerTopicListener(FootstepPlanTopic, request -> uiReceivedPlan.set(true));
       messager.registerTopicListener(PlanningResultTopic, request -> uiReceivedResult.set(true));
 
-      uiFootstepPlanReference = messager.createInput(FootstepPlanTopic);
+//      uiFootstepPlanReference = messager.createInput(FootstepPlanTopic);
+      uiFootstepPlanReference = new AtomicReference<>();
       uiPlanningResultReference = messager.createInput(PlanningResultTopic);
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");

@@ -17,7 +17,7 @@ public class SharedMemoryAStarDataSetTest extends SharedMemoryPlannerDataSetTest
 
    @Override
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 90.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 135.6)
    public void testDatasetsWithoutOcclusion()
    {
       runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
@@ -34,9 +34,9 @@ public class SharedMemoryAStarDataSetTest extends SharedMemoryPlannerDataSetTest
    public static void main(String[] args) throws Exception
    {
       SharedMemoryAStarDataSetTest test = new SharedMemoryAStarDataSetTest();
-      String prefix = "unitTestData/testable/";
+      String prefix = "unitTestDataSets/test/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205040_SimpleMaze");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
       test.tearDown();
 
    }

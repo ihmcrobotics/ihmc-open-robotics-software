@@ -18,7 +18,7 @@ public class RemoteStandalonePlanarRegionBipedalDataSetTest extends RemoteStanda
 
    @Override
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 125.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 93.2)
    public void testDatasetsWithoutOcclusion()
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
@@ -37,7 +37,7 @@ public class RemoteStandalonePlanarRegionBipedalDataSetTest extends RemoteStanda
    }
 
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 13.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 93.2, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    public void testDatasetsWithoutOcclusionRTPS()
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;

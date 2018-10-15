@@ -46,8 +46,6 @@ public class RemotePlannerMessageConverter
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Integer> sequenceIdReference;
 
-   private final AtomicReference<Boolean> hasPlan = new AtomicReference<>(false);
-
    public static RemotePlannerMessageConverter createRemoteConverter(SharedMemoryMessager messager, String robotName)
    {
       return createConverter(messager, robotName, DomainFactory.PubSubImplementation.FAST_RTPS);
@@ -101,8 +99,8 @@ public class RemotePlannerMessageConverter
       outputStatusPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningToolboxOutputStatus.class,
                                                         FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName));
 
-      messager.registerTopicListener(FootstepPlannerSharedMemoryAPI.PlanningResultTopic, request -> publishResultingPlan());
-      messager.registerTopicListener(FootstepPlannerSharedMemoryAPI.FootstepPlanTopic, request -> hasPlan.set(true));
+      messager.registerTopicListener(FootstepPlannerSharedMemoryAPI.PlanningResultTopic, request -> checkAndPublishIfInvalidResult());
+      messager.registerTopicListener(FootstepPlannerSharedMemoryAPI.FootstepPlanTopic, request -> publishResultingPlan());
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
@@ -164,10 +162,10 @@ public class RemotePlannerMessageConverter
    private void publishResultingPlan()
    {
       double totalWaitTime = 0.0;
-      double maxWaitTime = 5.0;
-      long sleepDuration = 10;
+      double maxWaitTime = 10.0;
+      long sleepDuration = 1;
 
-      while (resultReference.get().validForExecution() && !hasPlan.get())
+      while (resultReference.get() == null)
       {
          if (totalWaitTime > maxWaitTime)
          {
@@ -184,18 +182,38 @@ public class RemotePlannerMessageConverter
 
       FootstepPlanningToolboxOutputStatus result = new FootstepPlanningToolboxOutputStatus();
 
+      FootstepPlanningResult planningResult = resultReference.getAndSet(null);
+      if (!planningResult.validForExecution())
+         throw new RuntimeException("The result is completely invalid, which is a problem.");
+      FootstepPlan footstepPlan = footstepPlanReference.getAndSet(null);
+
       planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
-      result.setFootstepPlanningResult(resultReference.get().toByte());
+      result.setFootstepPlanningResult(planningResult.toByte());
+      result.getFootstepDataList().set(convertToFootstepDataListMessage(footstepPlan));
       result.setSequenceId(sequenceIdReference.get());
       result.setPlanId(plannerRequestIdReference.get());
 
-      if (resultReference.get().validForExecution())
-         result.getFootstepDataList().set(convertToFootstepDataListMessage(footstepPlanReference.get()));
-      else if (verbose)
-         PrintTools.info("Publishing without a valid footstep plan because there wasn't one.");
+      outputStatusPublisher.publish(result);
+   }
 
+   private void checkAndPublishIfInvalidResult()
+   {
+      if (resultReference.get().validForExecution())
+         return;
+
+      FootstepPlanningToolboxOutputStatus result = new FootstepPlanningToolboxOutputStatus();
+
+      FootstepPlanningResult planningResult = resultReference.getAndSet(null);
+
+      planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
+      result.setFootstepPlanningResult(planningResult.toByte());
+      result.setSequenceId(sequenceIdReference.get());
+      result.setPlanId(plannerRequestIdReference.get());
 
       outputStatusPublisher.publish(result);
+
+      if (verbose)
+         PrintTools.info("Finished planning, but result isn't valid, so publishing blank result on the network.");
    }
 
    private static FootstepDataListMessage convertToFootstepDataListMessage(FootstepPlan footstepPlan)
