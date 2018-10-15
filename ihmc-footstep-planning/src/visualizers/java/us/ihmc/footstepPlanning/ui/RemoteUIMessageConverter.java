@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.ui;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -36,6 +37,8 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class RemoteUIMessageConverter
 {
+   private static final boolean verbose = true;
+
    private final RealtimeRos2Node ros2Node;
 
    private final SharedMemoryMessager messager;
@@ -131,6 +134,9 @@ public class RemoteUIMessageConverter
    {
       PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsListMessage();
 
+      if (verbose)
+         PrintTools.info("Received a planning request.");
+
       Point3D goalPosition = packet.getGoalPositionInWorld();
       Quaternion goalOrientation = packet.getGoalOrientationInWorld();
       Point3D startPosition = packet.getStanceFootPositionInWorld();
@@ -177,6 +183,9 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.SequenceIdTopic, sequenceId);
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanningResultTopic, result);
 
+      if (verbose)
+         PrintTools.info("Received a footstep planning result from the toolbox.");
+
       // Goal pose
       // TODO visualize body path
    }
@@ -184,6 +193,9 @@ public class RemoteUIMessageConverter
    private void processIncomingPlanarRegionMessage(PlanarRegionsListMessage packet)
    {
       messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic, PlanarRegionMessageConverter.convertToPlanarRegionsList(packet));
+
+      if (verbose)
+         PrintTools.info("Received updated planner regions.");
    }
 
    private void requestNewPlan()
@@ -254,8 +266,7 @@ public class RemoteUIMessageConverter
       if (plannerHorizonLengthReference.get() != null)
          packet.setHorizonLength(plannerHorizonLengthReference.get());
       if (plannerPlanarRegionReference.get() != null)
-         packet.getPlanarRegionsListMessage()
-               .set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get()));
+         packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get()));
 
       footstepPlanningRequestPublisher.publish(packet);
    }

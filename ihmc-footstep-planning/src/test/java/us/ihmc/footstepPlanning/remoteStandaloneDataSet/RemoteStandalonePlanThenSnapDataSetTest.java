@@ -18,7 +18,7 @@ public class RemoteStandalonePlanThenSnapDataSetTest extends RemoteStandalonePla
 
    @Override
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 125.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 22.3)
    public void testDatasetsWithoutOcclusion()
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
@@ -37,7 +37,7 @@ public class RemoteStandalonePlanThenSnapDataSetTest extends RemoteStandalonePla
    }
 
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 13.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 22.3, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    public void testDatasetsWithoutOcclusionRTPS()
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;

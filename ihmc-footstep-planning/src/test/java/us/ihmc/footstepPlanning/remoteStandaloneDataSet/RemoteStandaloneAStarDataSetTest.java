@@ -38,7 +38,7 @@ public class RemoteStandaloneAStarDataSetTest extends RemoteStandalonePlannerDat
    }
 
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 13.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 125.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    public void testDatasetsWithoutOcclusionRTPS()
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
@@ -49,10 +49,10 @@ public class RemoteStandaloneAStarDataSetTest extends RemoteStandalonePlannerDat
    public static void main(String[] args) throws Exception
    {
       RemoteStandaloneAStarDataSetTest test = new RemoteStandaloneAStarDataSetTest();
-      String prefix = "unitTestData/testable/";
+      String prefix = "unitTestDataSets/test/";
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171026_131304_PlanarRegion_Ramp_2Story_UnitTest");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
       test.tearDown();
 
    }

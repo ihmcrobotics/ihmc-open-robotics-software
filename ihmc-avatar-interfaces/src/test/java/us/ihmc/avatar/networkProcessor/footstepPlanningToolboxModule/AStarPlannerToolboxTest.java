@@ -49,11 +49,12 @@ public class AStarPlannerToolboxTest extends FootstepPlannerToolboxTest
    public static void main(String[] args) throws Exception
    {
       AStarPlannerToolboxTest test = new AStarPlannerToolboxTest();
-      String prefix = "unitTestData/testable/";
+      String prefix = "unitTestDataSets/test/";
       test.pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
       test.setup();
 //      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214730_CinderBlockField");
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_220523_SteppingStones");
+//      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171026_131304_PlanarRegion_Ramp_2Story_UnitTest");
       PrintTools.info("Test passed.");
       test.tearDown();
    }

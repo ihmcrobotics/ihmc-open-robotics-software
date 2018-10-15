@@ -42,7 +42,7 @@ public abstract class FootstepPlannerDataSetTest
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
-   protected static boolean DEBUG = false;
+   protected static boolean DEBUG = true;
 
    protected FootstepPlannerUI ui = null;
    protected SharedMemoryMessager messager = null;
@@ -186,7 +186,7 @@ public abstract class FootstepPlannerDataSetTest
       Assert.assertTrue("Number of failing datasets: " + numberOfFailingDatasets + " out of " + numberOfTotalDatasets + ". Errors:" + errorMessages,
                         errorMessages.isEmpty());
 
-      PrintTools.info("Passed tests: ");
+      PrintTools.info("Tests ran: ");
       for (String name : dataSetNames)
          PrintTools.info(name);
    }

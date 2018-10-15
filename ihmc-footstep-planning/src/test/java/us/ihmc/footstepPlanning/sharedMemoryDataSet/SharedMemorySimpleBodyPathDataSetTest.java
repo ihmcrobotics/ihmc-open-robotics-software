@@ -17,7 +17,7 @@ public class SharedMemorySimpleBodyPathDataSetTest extends SharedMemoryPlannerDa
 
    @Override
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 37.4)
    public void testDatasetsWithoutOcclusion()
    {
       runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
