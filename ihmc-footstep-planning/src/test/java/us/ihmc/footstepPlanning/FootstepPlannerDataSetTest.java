@@ -97,6 +97,25 @@ public abstract class FootstepPlannerDataSetTest
 
    }
 
+   private void resetAllAtomics()
+   {
+      plannerPlanReference.set(null);
+      plannerResultReference.set(null);
+      plannerReceivedPlan.set(false);
+
+      if (uiFootstepPlanReference != null)
+         uiFootstepPlanReference.set(null);
+      if (uiPlanningResultReference != null)
+         uiPlanningResultReference.set(null);
+      uiReceivedPlan.set(false);
+      uiReceivedResult.set(false);
+
+      expectedPlan.set(null);
+      actualPlan.set(null);
+      expectedResult.set(null);
+      actualResult.set(null);
+   }
+
    @Test(timeout = 500000)
    @ContinuousIntegrationTest(estimatedDuration = 13.0)
    public void testDatasetsWithoutOcclusion()
@@ -164,6 +183,8 @@ public abstract class FootstepPlannerDataSetTest
                hasType = true;
          }
 
+         resetAllAtomics();
+
          if (hasType)
          {
             dataSetNames.add(dataset.getDatasetName());
@@ -203,50 +224,13 @@ public abstract class FootstepPlannerDataSetTest
       List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools
             .loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerDataExporter.class);
 
-      if (DEBUG)
+      List<FootstepPlannerUnitTestDataset> croppedDatasets = new ArrayList<>();
+      for (FootstepPlannerUnitTestDataset dataset : allDatasets)
       {
-         PrintTools.info("Unit test files found: " + allDatasets.size());
+         if (dataset.getDatasetName().equals(datasetName))
+            croppedDatasets.add(dataset);
       }
-
-      String errorMessages = "";
-
-      if (allDatasets.isEmpty())
-         Assert.fail("Did not find any datasets to test.");
-
-      // Randomizing the regionIds so the viz is better
-      Random random = new Random(324);
-      allDatasets.stream().map(FootstepPlannerUnitTestDataset::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
-                 .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
-
-      FootstepPlannerUnitTestDataset dataset = null;
-      for (FootstepPlannerUnitTestDataset datasetToQuery : allDatasets)
-      {
-         if (datasetToQuery.getDatasetName().equals(datasetName))
-         {
-            dataset = datasetToQuery;
-            break;
-         }
-      }
-
-      if (dataset == null)
-         throw new RuntimeException("Dataset " + datasetName + " does not exist!");
-
-      if (DEBUG)
-      {
-         PrintTools.info("Processing file: " + dataset.getDatasetName());
-      }
-
-      String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
-      errorMessages += errorMessagesForCurrentFile;
-
-      if (DEBUG)
-      {
-         PrintTools.info("Error messages : " + errorMessagesForCurrentFile);
-      }
-
-      ThreadTools.sleep(100); // Apparently need to give some time for the prints to appear in the right order.
-
-      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
+      runAssertionsOnAllDatasets(datasetTestRunner, croppedDatasets);
    }
 
    protected void packPlanningRequest(FootstepPlannerUnitTestDataset dataset, FootstepPlanningRequestPacket packet)
