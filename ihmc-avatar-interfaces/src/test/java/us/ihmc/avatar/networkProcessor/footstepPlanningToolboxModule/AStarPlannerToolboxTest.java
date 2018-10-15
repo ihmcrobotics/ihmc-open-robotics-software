@@ -51,9 +51,10 @@ public class AStarPlannerToolboxTest extends FootstepPlannerToolboxTest
       AStarPlannerToolboxTest test = new AStarPlannerToolboxTest();
       String prefix = "unitTestDataSets/test/";
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
+      VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204917_FlatGround");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171216_111326_CrossoverPlatforms");
       PrintTools.info("Test passed.");
-      test.tearDown();
+//      test.tearDown();
    }
 }

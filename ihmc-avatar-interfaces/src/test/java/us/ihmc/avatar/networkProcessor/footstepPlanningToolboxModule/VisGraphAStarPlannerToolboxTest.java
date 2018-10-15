@@ -51,11 +51,10 @@ public class VisGraphAStarPlannerToolboxTest extends FootstepPlannerToolboxTest
    {
       VisGraphAStarPlannerToolboxTest test = new VisGraphAStarPlannerToolboxTest();
       String prefix = "unitTestDataSets/test/";
+      VISUALIZE = true;
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       test.setup();
-
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204917_FlatGround");
-//      test.runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> test.runAssertions(dataset));
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
       PrintTools.info("Test passed.");
       test.tearDown();
    }
