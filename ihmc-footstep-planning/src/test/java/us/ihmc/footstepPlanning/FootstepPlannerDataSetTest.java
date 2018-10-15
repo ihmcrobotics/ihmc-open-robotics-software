@@ -42,7 +42,7 @@ public abstract class FootstepPlannerDataSetTest
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
-   protected static boolean DEBUG = true;
+   protected static boolean DEBUG = false;
 
    protected FootstepPlannerUI ui = null;
    protected SharedMemoryMessager messager = null;
@@ -366,47 +366,47 @@ public abstract class FootstepPlannerDataSetTest
       return !condition ? "\n" + message : "";
    }
 
-   private String areFootstepPlansEqual(FootstepPlan footstepPlanA, FootstepPlan footstepPlanB)
+   private String areFootstepPlansEqual(FootstepPlan actualPlan, FootstepPlan expectedPlan)
    {
       String errorMessage = "";
 
-      if (footstepPlanA.getNumberOfSteps() != footstepPlanB.getNumberOfSteps())
+      if (actualPlan.getNumberOfSteps() != expectedPlan.getNumberOfSteps())
       {
-         errorMessage += "Plan A has " + footstepPlanA.getNumberOfSteps() + ", while Plan B has " + footstepPlanB.getNumberOfSteps() + ".\n";
+         errorMessage += "Actual Plan has " + actualPlan.getNumberOfSteps() + ", while Expected Plan has " + expectedPlan.getNumberOfSteps() + ".\n";
       }
 
-      for (int i = 0; i < Math.min(footstepPlanA.getNumberOfSteps(), footstepPlanB.getNumberOfSteps()); i++)
+      for (int i = 0; i < Math.min(actualPlan.getNumberOfSteps(), expectedPlan.getNumberOfSteps()); i++)
       {
-         errorMessage += areFootstepsEqual(i, footstepPlanA.getFootstep(i), footstepPlanB.getFootstep(i));
+         errorMessage += areFootstepsEqual(i, actualPlan.getFootstep(i), expectedPlan.getFootstep(i));
       }
 
       return errorMessage;
    }
 
-   private String areFootstepsEqual(int footstepNumber, SimpleFootstep footstepA, SimpleFootstep footstepB)
+   private String areFootstepsEqual(int footstepNumber, SimpleFootstep actual, SimpleFootstep expected)
    {
       String errorMessage = "";
 
-      if (!footstepA.getRobotSide().equals(footstepB.getRobotSide()))
+      if (!actual.getRobotSide().equals(expected.getRobotSide()))
       {
-         errorMessage += "Footsteps " + footstepNumber + " are different robot sides: " + footstepA.getRobotSide() + " and " + footstepB.getRobotSide() + ".\n";
+         errorMessage += "Footsteps " + footstepNumber + " are different robot sides: " + actual.getRobotSide() + " and " + expected.getRobotSide() + ".\n";
       }
 
       FramePose3D poseA = new FramePose3D();
       FramePose3D poseB = new FramePose3D();
 
-      footstepA.getSoleFramePose(poseA);
-      footstepB.getSoleFramePose(poseB);
+      actual.getSoleFramePose(poseA);
+      expected.getSoleFramePose(poseB);
 
       if (!poseA.epsilonEquals(poseB, 1e-5))
       {
          errorMessage += "Footsteps " + footstepNumber + " have different poses: \n \t" + poseA.toString() + "\n and \n\t " + poseB.toString() + ".\n";
       }
 
-      if (!footstepA.epsilonEquals(footstepB, 1e-5))
+      if (!actual.epsilonEquals(expected, 1e-5))
 
       {
-         errorMessage += "Footsteps " + footstepNumber + " are not equal: \n \t" + footstepA.toString() + "\n and \n\t " + footstepB.toString() + ".\n";
+         errorMessage += "Footsteps " + footstepNumber + " are not equal: \n \t" + actual.toString() + "\n and \n\t " + expected.toString() + ".\n";
       }
 
       return errorMessage;
