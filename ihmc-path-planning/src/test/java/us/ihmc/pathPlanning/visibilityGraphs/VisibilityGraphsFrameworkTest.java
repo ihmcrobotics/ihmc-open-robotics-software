@@ -56,7 +56,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    private static final double START_GOAL_EPSILON = 1.0e-2;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = true;
+   private static boolean VISUALIZE = false;
    // For enabling helpful prints.
    private static boolean DEBUG = false;
 
