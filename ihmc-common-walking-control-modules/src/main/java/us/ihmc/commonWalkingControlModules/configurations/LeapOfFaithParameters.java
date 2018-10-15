@@ -32,7 +32,7 @@ public class LeapOfFaithParameters
     */
    public double getVerticalFootWeightScaleFactor()
    {
-      return 20.0;
+      return 100.0;
    }
 
    /**
