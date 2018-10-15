@@ -146,6 +146,15 @@ public abstract class FootstepPlannerDataSetTest
       runAssertionsOnAllDatasets(datasetTestRunner, allDatasets);
    }
 
+   public void runAssertionsOnDataset(DatasetTestRunner datasetTestRunner, String datasetName)
+   {
+      FootstepPlannerUnitTestDataset dataset = FootstepPlannerIOTools.loadDataset(FootstepPlannerDataExporter.class, datasetName);
+
+      resetAllAtomics();
+      String errorMessages = datasetTestRunner.testDataset(dataset);
+      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
+   }
+
    protected void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner, List<FootstepPlannerUnitTestDataset> allDatasets)
    {
       if (DEBUG)
@@ -219,20 +228,6 @@ public abstract class FootstepPlannerDataSetTest
       return findPlanAndAssertGoodResult(dataset);
    }
 
-   public void runAssertionsOnDataset(DatasetTestRunner datasetTestRunner, String datasetName)
-   {
-      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools
-            .loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerDataExporter.class);
-
-      List<FootstepPlannerUnitTestDataset> croppedDatasets = new ArrayList<>();
-      for (FootstepPlannerUnitTestDataset dataset : allDatasets)
-      {
-         if (dataset.getDatasetName().equals(datasetName))
-            croppedDatasets.add(dataset);
-      }
-      runAssertionsOnAllDatasets(datasetTestRunner, croppedDatasets);
-   }
-
    protected void packPlanningRequest(FootstepPlannerUnitTestDataset dataset, FootstepPlanningRequestPacket packet)
    {
       byte plannerType = getPlannerType().toByte();
@@ -289,7 +284,6 @@ public abstract class FootstepPlannerDataSetTest
       plannerPlanReference.set(convertToFootstepPlan(packet.getFootstepDataList()));
       plannerReceivedPlan.set(true);
    }
-
 
    private static FootstepPlan convertToFootstepPlan(FootstepDataListMessage footstepDataListMessage)
    {

@@ -49,6 +49,7 @@ public class RemoteStandaloneSimpleBodyPathDataSetTest extends RemoteStandaloneP
    {
       RemoteStandaloneSimpleBodyPathDataSetTest test = new RemoteStandaloneSimpleBodyPathDataSetTest();
       String prefix = "unitTestData/testable/";
+      test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       test.setup();
       test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204953_FlatGroundWithWall");
       test.tearDown();

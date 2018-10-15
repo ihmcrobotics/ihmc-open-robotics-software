@@ -36,7 +36,7 @@ public class SharedMemoryAStarDataSetTest extends SharedMemoryPlannerDataSetTest
       SharedMemoryAStarDataSetTest test = new SharedMemoryAStarDataSetTest();
       String prefix = "unitTestDataSets/test/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204917_FlatGround");
       test.tearDown();
 
    }

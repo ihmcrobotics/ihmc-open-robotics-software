@@ -49,6 +49,7 @@ public class RemoteStandalonePlanThenSnapDataSetTest extends RemoteStandalonePla
    {
       RemoteStandalonePlanThenSnapDataSetTest test = new RemoteStandalonePlanThenSnapDataSetTest();
       String prefix = "unitTestData/testable/";
+      test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       test.setup();
       test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205040_SimpleMaze");
       test.tearDown();

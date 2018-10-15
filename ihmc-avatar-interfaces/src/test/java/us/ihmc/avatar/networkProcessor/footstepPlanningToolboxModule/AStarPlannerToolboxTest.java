@@ -50,11 +50,9 @@ public class AStarPlannerToolboxTest extends FootstepPlannerToolboxTest
    {
       AStarPlannerToolboxTest test = new AStarPlannerToolboxTest();
       String prefix = "unitTestDataSets/test/";
-      test.pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
+      test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       test.setup();
-//      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214730_CinderBlockField");
-//      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171026_131304_PlanarRegion_Ramp_2Story_UnitTest");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204917_FlatGround");
       PrintTools.info("Test passed.");
       test.tearDown();
    }
