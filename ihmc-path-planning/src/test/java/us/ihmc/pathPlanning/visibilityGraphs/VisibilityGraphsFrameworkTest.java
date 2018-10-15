@@ -56,7 +56,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    private static final double START_GOAL_EPSILON = 1.0e-2;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = false;
+   private static boolean VISUALIZE = true;
    // For enabling helpful prints.
    private static boolean DEBUG = false;
 
@@ -792,7 +792,7 @@ private static interface DatasetTestRunner
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
       String prefix = "unitTestData/testable/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171215_214730_CinderBlockField");
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
       test.tearDown();
 
    }
