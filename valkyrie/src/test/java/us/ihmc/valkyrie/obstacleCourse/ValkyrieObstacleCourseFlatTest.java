@@ -34,18 +34,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
-   @Override
-   protected Vector3D getFootSlipVector()
-   {
-      return new Vector3D(0.02, -0.02, 0.0);
-   }
-
-   @Override
-   protected double getFootSlipTimeDeltaAfterTouchdown()
-   {
-      return 0.1;
-   }
-
    /**
     * Doesn't work with Valkyrie yet. Need to get it working some day.
     */
@@ -55,14 +43,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    public void testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 103.8)
-   @Test(timeout = 520000)
-   public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
-   {
-      super.testSimpleFlatGroundScriptWithOscillatingFeet();
    }
 
    @Override
@@ -102,27 +82,11 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 92.0)
-   @Test(timeout = 460000)
-   public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
-   {
-      super.testSimpleFlatGroundScriptWithRandomFootSlip();
-   }
-
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 91.2)
    @Test(timeout = 460000)
    public void testWalkingUpToRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpToRampWithShortSteps();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 75.5)
-   @Test(timeout = 380000)
-   public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
-   {
-      super.testSideStepsWithSlipping();
    }
 
    @Override
@@ -134,27 +98,11 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 39.7)
-   @Test(timeout = 200000)
-   public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
-   {
-      super.testStandingWithOscillatingFeet();
-   }
-
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 25.4, categoriesOverride = IntegrationCategory.SLOW)
    @Test(timeout = 130000)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
       super.testStandingForACoupleSeconds();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 78.3)
-   @Test(timeout = 390000)
-   public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException
-   {
-      super.testSideStepsWithRandomSlipping();
    }
 
    @Override
@@ -182,7 +130,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 272.9)
+   @ContinuousIntegrationTest(estimatedDuration = 272.9, categoriesOverride = IntegrationCategory.MANUAL)
    @Test(timeout = 1400000)
    public void testForMemoryLeaks() throws Exception
    {
