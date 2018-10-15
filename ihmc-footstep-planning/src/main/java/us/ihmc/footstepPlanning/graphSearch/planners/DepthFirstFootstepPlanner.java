@@ -301,9 +301,19 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
 
       planningDuration.set(Conversions.nanosecondsToSeconds(System.nanoTime() - planningStartTime.getLongValue()));
 
+      FootstepPlanningResult result;
       if (stack.isEmpty())
-         return FootstepPlanningResult.OPTIMAL_SOLUTION;
-      return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
+         result = FootstepPlanningResult.OPTIMAL_SOLUTION;
+      else
+         result = FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
+
+      if (debug)
+      {
+         PrintTools.info("Time taken = " + planningDuration.getDoubleValue());
+         PrintTools.info("Result = " + result);
+      }
+
+      return result;
    }
 
    private ArrayList<FootstepNode> getSortedNodeList(HashSet<FootstepNode> nodeSet)
