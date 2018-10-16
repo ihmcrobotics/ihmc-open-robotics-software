@@ -19,8 +19,8 @@ module controller_msgs
          */
         unsigned long sequence_id;
         long long robot_timestamp;
-        sequence<float> point_cloud;
-        sequence<long> colors;
+        sequence<float, 600000> point_cloud;
+        sequence<long, 200000> colors;
       };
     };
   };

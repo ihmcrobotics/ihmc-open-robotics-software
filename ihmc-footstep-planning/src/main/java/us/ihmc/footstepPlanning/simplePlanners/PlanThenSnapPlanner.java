@@ -25,7 +25,9 @@ public class PlanThenSnapPlanner implements FootstepPlanner
    {
       this.internalPlanner = internalPlanner;
       this.footPolygons = footPolygons;
-      snapAndWiggleSingleStep = new SnapAndWiggleSingleStep();
+      SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
+      parameters.setWiggleInWrongDirectionThreshold(Double.NaN);
+      snapAndWiggleSingleStep = new SnapAndWiggleSingleStep(parameters);
    }
 
    @Override
@@ -67,7 +69,7 @@ public class PlanThenSnapPlanner implements FootstepPlanner
          {
             FramePose3D solePose = new FramePose3D();
             footstep.getSoleFramePose(solePose);
-            ConvexPolygon2D footHold = snapAndWiggleSingleStep.snapAndWiggle(solePose, footPolygons.get(footstep.getRobotSide()));
+            ConvexPolygon2D footHold = snapAndWiggleSingleStep.snapAndWiggle(solePose, footPolygons.get(footstep.getRobotSide()), true);
             footstep.setSoleFramePose(solePose);
             if(footHold!=null)
             {
