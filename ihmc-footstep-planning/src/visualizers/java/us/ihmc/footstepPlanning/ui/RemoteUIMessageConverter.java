@@ -247,6 +247,15 @@ public class RemoteUIMessageConverter
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
 
       FootstepPlannerCostParameters costParameters = parameters.getCostParameters();
+
+      packet.getCostParameters().setUseQuadraticDistanceCost(costParameters.useQuadraticDistanceCost());
+      packet.getCostParameters().setUseQuadraticHeightCost(costParameters.useQuadraticHeightCost());
+
+      packet.getCostParameters().setAStarHeuristicsWeight(costParameters.getAStarHeuristicsWeight().getValue());
+      packet.getCostParameters().setVisGraphWithAStarHeuristicsWeight(costParameters.getVisGraphWithAStarHeuristicsWeight().getValue());
+      packet.getCostParameters().setDepthFirstHeuristicsWeight(costParameters.getDepthFirstHeuristicsWeight().getValue());
+      packet.getCostParameters().setBodyPathBasedHeuristicsWeight(costParameters.getBodyPathBasedHeuristicsWeight().getValue());
+
       packet.getCostParameters().setYawWeight(costParameters.getYawWeight());
       packet.getCostParameters().setPitchWeight(costParameters.getPitchWeight());
       packet.getCostParameters().setRollWeight(costParameters.getRollWeight());
