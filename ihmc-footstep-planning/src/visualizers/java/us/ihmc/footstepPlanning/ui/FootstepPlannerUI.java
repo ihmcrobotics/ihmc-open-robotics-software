@@ -6,7 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.footstepPlanning.ui.components.*;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -16,7 +16,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.*;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 /**
  * This class is the visualization element of the footstep planner. It also contains a graphical interface for
@@ -57,7 +57,7 @@ public class FootstepPlannerUI
 
    public FootstepPlannerUI(Stage primaryStage) throws Exception
    {
-      this(primaryStage, new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API));
+      this(primaryStage, new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API));
       messager.startMessager();
    }
 

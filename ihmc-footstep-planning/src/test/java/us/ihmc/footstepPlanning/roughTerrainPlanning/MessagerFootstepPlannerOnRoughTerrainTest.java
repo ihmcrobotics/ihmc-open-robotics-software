@@ -17,12 +17,10 @@ import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
-import us.ihmc.footstepPlanning.ui.SharedMemoryStandaloneFootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 
@@ -32,9 +30,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertTrue;
 import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.*;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
-public abstract class SharedMemoryFootstepPlannerOnRoughTerrainTest
+public abstract class MessagerFootstepPlannerOnRoughTerrainTest
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -53,9 +51,9 @@ public abstract class SharedMemoryFootstepPlannerOnRoughTerrainTest
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
       if (visualize)
-         messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+         messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       else
-         messager = new SharedMemoryMessager(FootstepPlannerSharedMemoryAPI.API);
+         messager = new SharedMemoryMessager(FootstepPlannerMessagerAPI.API);
 
       try
       {
@@ -170,11 +168,11 @@ public abstract class SharedMemoryFootstepPlannerOnRoughTerrainTest
 
    private void submitInfoToUI(PlannerTestEnvironments.PlannerTestData testData)
    {
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalPositionTopic, testData.getGoalPosition());
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalOrientationTopic, testData.getGoalOrientation());
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartPositionTopic, testData.getStartPosition());
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartOrientationTopic, testData.getStartOrientation());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, testData.getGoalPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, testData.getGoalOrientation());
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, testData.getStartPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, testData.getStartOrientation());
 
       messager.submitMessage(PlannerTypeTopic, getPlannerType());
    }

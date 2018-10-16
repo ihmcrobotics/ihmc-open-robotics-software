@@ -26,7 +26,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.*;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public class NodeCheckerRenderer extends AnimationTimer
 {

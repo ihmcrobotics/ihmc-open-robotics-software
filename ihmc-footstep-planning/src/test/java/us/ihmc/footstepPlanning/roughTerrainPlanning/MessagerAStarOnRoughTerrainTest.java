@@ -5,7 +5,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
-public class SharedMemoryAStarOnRoughTerrainTest extends SharedMemoryFootstepPlannerOnRoughTerrainTest
+public class MessagerAStarOnRoughTerrainTest extends MessagerFootstepPlannerOnRoughTerrainTest
 {
    @Override
    public FootstepPlannerType getPlannerType()

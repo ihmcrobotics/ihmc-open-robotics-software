@@ -3,10 +3,8 @@ package us.ihmc.footstepPlanning.ui;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory;
 
 /**
@@ -25,7 +23,7 @@ public class RemoteFootstepPlannerUI extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+      messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       messageConverter = RemoteUIMessageConverter.createConverter(messager, "", DomainFactory.PubSubImplementation.INTRAPROCESS);
 
       messager.startMessager();

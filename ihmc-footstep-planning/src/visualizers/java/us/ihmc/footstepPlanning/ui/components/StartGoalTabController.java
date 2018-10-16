@@ -1,17 +1,17 @@
 package us.ihmc.footstepPlanning.ui.components;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.GlobalResetTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.GoalOrientationTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.GoalPositionTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.StartOrientationTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.StartPositionTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GlobalResetTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPositionTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionTopic;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
@@ -76,26 +76,26 @@ public class StartGoalTabController
    {
       setupControls();
 
-      messager.bindBidirectional(FootstepPlannerSharedMemoryAPI.StartPositionEditModeEnabledTopic, startPositionToggleButton.selectedProperty(), false);
-      messager.bindBidirectional(FootstepPlannerSharedMemoryAPI.GoalPositionEditModeEnabledTopic, goalPositionToggleButton.selectedProperty(), false);
-      messager.bindBidirectional(FootstepPlannerSharedMemoryAPI.StartOrientationEditModeEnabledTopic, startRotationToggleButton.selectedProperty(), false);
-      messager.bindBidirectional(FootstepPlannerSharedMemoryAPI.GoalOrientationEditModeEnabledTopic, goalRotationToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, startPositionToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, goalPositionToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, startRotationToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, goalRotationToggleButton.selectedProperty(), false);
 
-      messager.bindPropertyToTopic(FootstepPlannerSharedMemoryAPI.GoalPositionEditModeEnabledTopic, startPositionToggleButton.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerSharedMemoryAPI.StartOrientationEditModeEnabledTopic, startPositionToggleButton.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerSharedMemoryAPI.GoalOrientationEditModeEnabledTopic, startPositionToggleButton.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, startPositionToggleButton.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, startPositionToggleButton.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, startPositionToggleButton.disableProperty());
 
-      messager.bindPropertyToTopic(FootstepPlannerSharedMemoryAPI.StartPositionEditModeEnabledTopic, goalPositionToggleButton.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerSharedMemoryAPI.StartOrientationEditModeEnabledTopic, goalPositionToggleButton.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerSharedMemoryAPI.GoalOrientationEditModeEnabledTopic, goalPositionToggleButton.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, goalPositionToggleButton.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, goalPositionToggleButton.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, goalPositionToggleButton.disableProperty());
 
-      messager.bindPropertyToTopic(FootstepPlannerSharedMemoryAPI.StartPositionEditModeEnabledTopic, startRotationToggleButton.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerSharedMemoryAPI.GoalPositionEditModeEnabledTopic, startRotationToggleButton.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerSharedMemoryAPI.GoalOrientationEditModeEnabledTopic, startRotationToggleButton.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, startRotationToggleButton.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, startRotationToggleButton.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, startRotationToggleButton.disableProperty());
 
-      messager.bindPropertyToTopic(FootstepPlannerSharedMemoryAPI.StartPositionEditModeEnabledTopic, goalRotationToggleButton.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerSharedMemoryAPI.GoalPositionEditModeEnabledTopic, goalRotationToggleButton.disableProperty());
-      messager.bindPropertyToTopic(FootstepPlannerSharedMemoryAPI.StartOrientationEditModeEnabledTopic, goalRotationToggleButton.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, goalRotationToggleButton.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, goalRotationToggleButton.disableProperty());
+      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, goalRotationToggleButton.disableProperty());
 
       startPositionProperty.bindBidirectionalX(startXSpinner.getValueFactory().valueProperty());
       startPositionProperty.bindBidirectionalY(startYSpinner.getValueFactory().valueProperty());
@@ -106,7 +106,7 @@ public class StartGoalTabController
       goalPositionProperty.bindBidirectionalY(goalYSpinner.getValueFactory().valueProperty());
       goalPositionProperty.bindBidirectionalZ(goalZSpinner.getValueFactory().valueProperty());
 
-      messager.bindBidirectional(FootstepPlannerSharedMemoryAPI.GoalPositionTopic, goalPositionProperty, false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.GoalPositionTopic, goalPositionProperty, false);
 
       messager.bindBidirectional(GoalPositionTopic, goalPositionProperty, false);
 

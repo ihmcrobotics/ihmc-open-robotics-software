@@ -1,8 +1,7 @@
-package us.ihmc.footstepPlanning.sharedMemoryDataSet;
+package us.ihmc.footstepPlanning.messager;
 
 import org.junit.After;
 import org.junit.Before;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -13,10 +12,10 @@ import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.FootstepPlanTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.PlanningResultTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
 
-public abstract class SharedMemoryPlannerDataSetTest extends FootstepPlannerDataSetTest
+public abstract class MessagerPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
    protected FootstepPathCalculatorModule module = null;
 

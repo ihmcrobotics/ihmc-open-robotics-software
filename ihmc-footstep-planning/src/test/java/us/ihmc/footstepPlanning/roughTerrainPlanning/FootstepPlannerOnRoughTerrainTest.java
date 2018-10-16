@@ -19,7 +19,7 @@ import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -29,8 +29,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertTrue;
 import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.ComputePathTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.PlannerParametersTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerParametersTopic;
 
 public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 {
@@ -53,7 +53,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
             @Override
             public void start(Stage stage) throws Exception
             {
-               messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+               messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
                messager.startMessager();
 
                ui = FootstepPlannerUI.createMessagerUI(stage, messager);
@@ -274,13 +274,13 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
    private void submitInfoToUI(PlannerTestEnvironments.PlannerTestData testData, FootstepPlan footstepPlan)
    {
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalPositionTopic, testData.getGoalPosition());
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalOrientationTopic, testData.getGoalOrientation());
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartPositionTopic, testData.getStartPosition());
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartOrientationTopic, testData.getStartOrientation());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, testData.getGoalPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, testData.getGoalOrientation());
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, testData.getStartPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, testData.getStartOrientation());
 
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.FootstepPlanTopic, footstepPlan);
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
    }
 
 }

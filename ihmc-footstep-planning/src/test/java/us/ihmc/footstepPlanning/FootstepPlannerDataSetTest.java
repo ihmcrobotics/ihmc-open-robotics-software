@@ -16,7 +16,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.PlannerTypeTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTypeTopic;
 
 public abstract class FootstepPlannerDataSetTest
 {
@@ -70,9 +70,9 @@ public abstract class FootstepPlannerDataSetTest
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
       if (VISUALIZE)
-         messager = new SharedMemoryJavaFXMessager(FootstepPlannerSharedMemoryAPI.API);
+         messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       else
-         messager = new SharedMemoryMessager(FootstepPlannerSharedMemoryAPI.API);
+         messager = new SharedMemoryMessager(FootstepPlannerMessagerAPI.API);
 
       setupInternal();
 
@@ -264,22 +264,22 @@ public abstract class FootstepPlannerDataSetTest
 
    protected void packPlanningRequest(FootstepPlannerUnitTestDataset dataset, SharedMemoryMessager messager)
    {
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartPositionTopic, dataset.getStart());
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalPositionTopic, dataset.getGoal());
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, dataset.getStart());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, dataset.getGoal());
       messager.submitMessage(PlannerTypeTopic, getPlannerType());
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
 
       double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerTimeoutTopic, timeMultiplier * dataset.getTimeout(getPlannerType()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeMultiplier * dataset.getTimeout(getPlannerType()));
 
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
 
       if (dataset.hasGoalOrientation())
-         messager.submitMessage(FootstepPlannerSharedMemoryAPI.GoalOrientationTopic, dataset.getGoalOrientation());
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, dataset.getGoalOrientation());
       if (dataset.hasStartOrientation())
-         messager.submitMessage(FootstepPlannerSharedMemoryAPI.StartOrientationTopic, dataset.getStartOrientation());
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, dataset.getStartOrientation());
 
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.ComputePathTopic, true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
 
       if (DEBUG)
          PrintTools.info("Sending out planning request packet.");

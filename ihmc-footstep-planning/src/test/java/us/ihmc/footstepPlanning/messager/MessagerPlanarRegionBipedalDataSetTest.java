@@ -1,23 +1,24 @@
-package us.ihmc.footstepPlanning.sharedMemoryDataSet;
+package us.ihmc.footstepPlanning.messager;
 
 import org.junit.Test;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
-public class SharedMemoryAStarDataSetTest extends SharedMemoryPlannerDataSetTest
+@ContinuousIntegrationPlan(categories = IntegrationCategory.SLOW)
+public class MessagerPlanarRegionBipedalDataSetTest extends MessagerPlannerDataSetTest
 {
    @Override
    public FootstepPlannerType getPlannerType()
    {
-      return FootstepPlannerType.A_STAR;
+      return FootstepPlannerType.PLANAR_REGION_BIPEDAL;
    }
 
    @Override
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 135.6)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 122.8)
    public void testDatasetsWithoutOcclusion()
    {
       runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
@@ -33,10 +34,13 @@ public class SharedMemoryAStarDataSetTest extends SharedMemoryPlannerDataSetTest
 
    public static void main(String[] args) throws Exception
    {
-      SharedMemoryAStarDataSetTest test = new SharedMemoryAStarDataSetTest();
+//      VISUALIZE = true;
+      MessagerPlanarRegionBipedalDataSetTest test = new MessagerPlanarRegionBipedalDataSetTest();
       String prefix = "unitTestDataSets/test/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204917_FlatGround");
+      PrintTools.info("Running test.");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214801_StairsUpDown");
+      PrintTools.info("Test finished.");
       test.tearDown();
 
    }

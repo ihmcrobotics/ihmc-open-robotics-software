@@ -5,7 +5,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
@@ -41,14 +41,14 @@ public class FootstepNodeCheckingUIController
    {
       setupControls();
 
-      messager.bindBidirectional(FootstepPlannerSharedMemoryAPI.EnableNodeChecking, enableNodeChecking.selectedProperty(), false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.EnableNodeChecking, enableNodeChecking.selectedProperty(), false);
 
       nodeCheckerFootPosition.bindBidirectionalX(nodeCheckerFootXSpinner.getValueFactory().valueProperty());
       nodeCheckerFootPosition.bindBidirectionalY(nodeCheckerFootYSpinner.getValueFactory().valueProperty());
-      messager.bindBidirectional(FootstepPlannerSharedMemoryAPI.NodeCheckingPosition, nodeCheckerFootPosition, false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.NodeCheckingPosition, nodeCheckerFootPosition, false);
 
       nodeCheckerFootYawProperty.bindBidirectionalYaw(nodeCheckerFootYaw.getValueFactory().valueProperty());
-      messager.bindBidirectional(FootstepPlannerSharedMemoryAPI.NodeCheckingOrientation, nodeCheckerFootYawProperty, false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.NodeCheckingOrientation, nodeCheckerFootYawProperty, false);
    }
 
 
