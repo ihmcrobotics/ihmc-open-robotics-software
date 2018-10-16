@@ -369,7 +369,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
 
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters, registry);
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics("aStarFlat", parameters, registry);
       FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(parameters);
 
       return new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz, registry);
@@ -386,7 +386,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
       FootstepNodeChecker checkerOfCheckers = new FootstepNodeCheckerOfCheckers(Arrays.asList(nodeChecker, cliffAvoider));
 
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters, registry);
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics("aStar", parameters, registry);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
