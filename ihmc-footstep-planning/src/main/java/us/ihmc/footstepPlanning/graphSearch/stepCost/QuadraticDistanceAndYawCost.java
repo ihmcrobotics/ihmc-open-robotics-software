@@ -15,8 +15,6 @@ public class QuadraticDistanceAndYawCost implements FootstepCost
    private final FootstepPlannerParameters parameters;
    private final FootstepPlannerCostParameters costParameters;
 
-   private static final double yawCostScaler = 10.0;
-
    private final FramePoint3D endNodePosition = new FramePoint3D();
    private final FramePose3D startNodePose = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame startNodeFrame = new PoseReferenceFrame("startNodeFrame", ReferenceFrame.getWorldFrame());
@@ -40,13 +38,11 @@ public class QuadraticDistanceAndYawCost implements FootstepCost
       endNodePosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), endPoint, 0.0);
       endNodePosition.changeFrame(startNodeFrame);
 
-      double euclideanDistance = startPoint.distance(endPoint);
       double cost = costParameters.getForwardWeight() * Math.pow(endNodePosition.getX(), 2.0);
       cost += costParameters.getLateralWeight() * Math.pow(endNodePosition.getY(), 2.0);
 
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getYaw(), endNode.getYaw());
-
-      cost += yawCostScaler * euclideanDistance * costParameters.getYawWeight() * Math.abs(yaw);
+      cost += costParameters.getYawWeight() * Math.abs(yaw) + costParameters.getCostPerStep();
 
       return cost;
    }

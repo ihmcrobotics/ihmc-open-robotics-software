@@ -35,6 +35,10 @@ float64 step_down_weight -1.0
 # taken. Setting this value to a high number will favor plans with less steps.
 float64 cost_per_step -1.0
 
+# Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
 bool use_quadratic_distance_cost false
+
+# Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
+bool use_quadratic_height_cost false
 
 
