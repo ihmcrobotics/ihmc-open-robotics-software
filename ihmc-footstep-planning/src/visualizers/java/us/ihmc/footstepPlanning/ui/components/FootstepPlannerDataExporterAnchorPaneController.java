@@ -6,7 +6,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
@@ -61,14 +61,14 @@ public class FootstepPlannerDataExporterAnchorPaneController
       if (result == null)
          return;
       String newPath = result.getAbsolutePath();
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.exportUnitTestPath, newPath);
+      messager.submitMessage(FootstepPlannerMessagerAPI.exportUnitTestPath, newPath);
       Platform.runLater(() -> currentPlanarRegionDataFolderTextField.setText(newPath));
    }
 
    @FXML
    private void exportPlanarRegion()
    {
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.exportUnitTestPath, currentPlanarRegionDataFolderTextField.getText());
-      messager.submitMessage(FootstepPlannerSharedMemoryAPI.exportUnitTestDataFile, true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.exportUnitTestPath, currentPlanarRegionDataFolderTextField.getText());
+      messager.submitMessage(FootstepPlannerMessagerAPI.exportUnitTestDataFile, true);
    }
 }

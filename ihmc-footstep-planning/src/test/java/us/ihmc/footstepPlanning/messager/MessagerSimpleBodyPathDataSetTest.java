@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.sharedMemoryDataSet;
+package us.ihmc.footstepPlanning.messager;
 
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
@@ -6,18 +6,18 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
-public class SharedMemoryVisGraphAStarDataSetTest extends SharedMemoryPlannerDataSetTest
+@ContinuousIntegrationPlan(categories = IntegrationCategory.SLOW)
+public class MessagerSimpleBodyPathDataSetTest extends MessagerPlannerDataSetTest
 {
    @Override
    public FootstepPlannerType getPlannerType()
    {
-      return FootstepPlannerType.VIS_GRAPH_WITH_A_STAR;
+      return FootstepPlannerType.SIMPLE_BODY_PATH;
    }
 
    @Override
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 90.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 37.4)
    public void testDatasetsWithoutOcclusion()
    {
       runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
@@ -25,7 +25,7 @@ public class SharedMemoryVisGraphAStarDataSetTest extends SharedMemoryPlannerDat
 
    @Override
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    public void testDatasetsWithoutOcclusionInDevelopment()
    {
       runAssertionsOnAllDatasetsWithoutOcclusionsInDevelopment(dataset -> runAssertions(dataset));
@@ -33,10 +33,10 @@ public class SharedMemoryVisGraphAStarDataSetTest extends SharedMemoryPlannerDat
 
    public static void main(String[] args) throws Exception
    {
-      SharedMemoryVisGraphAStarDataSetTest test = new SharedMemoryVisGraphAStarDataSetTest();
-      String prefix = "unitTestDataSets/test/";
+      MessagerSimpleBodyPathDataSetTest test = new MessagerSimpleBodyPathDataSetTest();
+      String prefix = "unitTestData/testable/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171216_111326_CrossoverPlatforms");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204953_FlatGroundWithWall");
       test.tearDown();
 
    }

@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.sharedMemoryDataSet;
+package us.ihmc.footstepPlanning.messager;
 
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
@@ -6,18 +6,18 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.SLOW)
-public class SharedMemorySimpleBodyPathDataSetTest extends SharedMemoryPlannerDataSetTest
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
+public class MessagerAStarDataSetTest extends MessagerPlannerDataSetTest
 {
    @Override
    public FootstepPlannerType getPlannerType()
    {
-      return FootstepPlannerType.SIMPLE_BODY_PATH;
+      return FootstepPlannerType.A_STAR;
    }
 
    @Override
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 37.4)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 135.6)
    public void testDatasetsWithoutOcclusion()
    {
       runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
@@ -25,7 +25,7 @@ public class SharedMemorySimpleBodyPathDataSetTest extends SharedMemoryPlannerDa
 
    @Override
    @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    public void testDatasetsWithoutOcclusionInDevelopment()
    {
       runAssertionsOnAllDatasetsWithoutOcclusionsInDevelopment(dataset -> runAssertions(dataset));
@@ -33,10 +33,10 @@ public class SharedMemorySimpleBodyPathDataSetTest extends SharedMemoryPlannerDa
 
    public static void main(String[] args) throws Exception
    {
-      SharedMemorySimpleBodyPathDataSetTest test = new SharedMemorySimpleBodyPathDataSetTest();
-      String prefix = "unitTestData/testable/";
+      MessagerAStarDataSetTest test = new MessagerAStarDataSetTest();
+      String prefix = "unitTestDataSets/test/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204953_FlatGroundWithWall");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204917_FlatGround");
       test.tearDown();
 
    }

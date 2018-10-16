@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.sharedMemoryDataSet;
+package us.ihmc.footstepPlanning.messager;
 
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
@@ -7,7 +7,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.SLOW)
-public class SharedMemoryPlanThenSnapDataSetTest extends SharedMemoryPlannerDataSetTest
+public class MessagerPlanThenSnapDataSetTest extends MessagerPlannerDataSetTest
 {
    @Override
    public FootstepPlannerType getPlannerType()
@@ -33,7 +33,7 @@ public class SharedMemoryPlanThenSnapDataSetTest extends SharedMemoryPlannerData
 
    public static void main(String[] args) throws Exception
    {
-      SharedMemoryPlanThenSnapDataSetTest test = new SharedMemoryPlanThenSnapDataSetTest();
+      MessagerPlanThenSnapDataSetTest test = new MessagerPlanThenSnapDataSetTest();
       String prefix = "unitTestData/testable/";
       test.setup();
       test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205040_SimpleMaze");

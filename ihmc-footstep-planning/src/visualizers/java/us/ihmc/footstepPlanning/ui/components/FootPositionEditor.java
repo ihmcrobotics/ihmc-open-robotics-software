@@ -8,7 +8,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
 
@@ -26,14 +26,14 @@ public class FootPositionEditor extends AnimationTimer
    private final Node sceneNode;
 
    private final AtomicReference<Boolean> editModeEnabled;
-   private final MessagerAPIFactory.Topic<Point3D> positionTopic = FootstepPlannerSharedMemoryAPI.NodeCheckingPosition;
+   private final MessagerAPIFactory.Topic<Point3D> positionTopic = FootstepPlannerMessagerAPI.NodeCheckingPosition;
 
    public FootPositionEditor(Messager messager, Node sceneNode)
    {
       this.messager = messager;
       this.sceneNode = sceneNode;
 
-      this.editModeEnabled = messager.createInput(FootstepPlannerSharedMemoryAPI.EnableNodeChecking, false);
+      this.editModeEnabled = messager.createInput(FootstepPlannerMessagerAPI.EnableNodeChecking, false);
 
       rayCastInterceptor = new EventHandler<MouseEvent>()
       {

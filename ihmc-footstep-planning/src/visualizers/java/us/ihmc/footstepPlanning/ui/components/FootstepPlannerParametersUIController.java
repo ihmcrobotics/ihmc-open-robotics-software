@@ -4,11 +4,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI.ComputePathTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
 
 public class FootstepPlannerParametersUIController
 {
@@ -61,7 +61,7 @@ public class FootstepPlannerParametersUIController
       property.bidirectionalBindMinSurfaceIncline(minSurfaceIncline.valueProperty());
       property.bidirectionalBindMaxStepWidth(maxStepWidth.valueProperty());
 
-      messager.bindBidirectional(FootstepPlannerSharedMemoryAPI.PlannerParametersTopic, property, createConverter(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, property, createConverter(), true);
    }
 
    private PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters> createConverter()

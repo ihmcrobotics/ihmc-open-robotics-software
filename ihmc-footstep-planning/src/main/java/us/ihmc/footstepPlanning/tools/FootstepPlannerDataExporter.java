@@ -10,7 +10,7 @@ import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerSharedMemoryAPI;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,15 +33,15 @@ public class FootstepPlannerDataExporter
 
    public FootstepPlannerDataExporter(Messager messager)
    {
-      planarRegionsState = messager.createInput(FootstepPlannerSharedMemoryAPI.PlanarRegionDataTopic);
-      startPosition = messager.createInput(FootstepPlannerSharedMemoryAPI.StartPositionTopic);
-      startOrientation = messager.createInput(FootstepPlannerSharedMemoryAPI.StartOrientationTopic);
-      goalPosition = messager.createInput(FootstepPlannerSharedMemoryAPI.GoalPositionTopic);
-      goalOrientation = messager.createInput(FootstepPlannerSharedMemoryAPI.GoalOrientationTopic);
-      timeout = messager.createInput(FootstepPlannerSharedMemoryAPI.PlannerTimeoutTopic);
-      plannerType = messager.createInput(FootstepPlannerSharedMemoryAPI.PlannerTypeTopic);
-      dataDirectoryPath = messager.createInput(FootstepPlannerSharedMemoryAPI.exportUnitTestPath, null);
-      messager.registerTopicListener(FootstepPlannerSharedMemoryAPI.exportUnitTestDataFile, this::exportFootstepPlannerData);
+      planarRegionsState = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
+      startPosition = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic);
+      startOrientation = messager.createInput(FootstepPlannerMessagerAPI.StartOrientationTopic);
+      goalPosition = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic);
+      goalOrientation = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientationTopic);
+      timeout = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeoutTopic);
+      plannerType = messager.createInput(FootstepPlannerMessagerAPI.PlannerTypeTopic);
+      dataDirectoryPath = messager.createInput(FootstepPlannerMessagerAPI.exportUnitTestPath, null);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.exportUnitTestDataFile, this::exportFootstepPlannerData);
    }
 
    private void exportFootstepPlannerData(boolean export)
