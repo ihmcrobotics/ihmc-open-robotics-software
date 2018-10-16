@@ -88,7 +88,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       parentRegistry.addChild(registry);
       this.parameters = parameters;
       bodyPath = new WaypointDefinedBodyPathPlan();
-      heuristics = new BodyPathHeuristics(registry, parameters, bodyPath);
+      heuristics = new BodyPathHeuristics("visAStar", registry, parameters, bodyPath);
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);

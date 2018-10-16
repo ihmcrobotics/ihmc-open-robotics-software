@@ -14,7 +14,12 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 
    public DistanceAndYawBasedHeuristics(FootstepPlannerParameters parameters, YoVariableRegistry registry)
    {
-      super(registry);
+      this("", parameters, registry);
+   }
+
+   public DistanceAndYawBasedHeuristics(String namePrefix, FootstepPlannerParameters parameters, YoVariableRegistry registry)
+   {
+      super(namePrefix, registry);
       this.parameters = parameters;
       this.costParameters = parameters.getCostParameters();
    }

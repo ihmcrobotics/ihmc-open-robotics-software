@@ -8,9 +8,9 @@ public abstract class CostToGoHeuristics
 {
    private final YoDouble weight;
 
-   public CostToGoHeuristics(YoVariableRegistry registry)
+   public CostToGoHeuristics(String namePrefix, YoVariableRegistry registry)
    {
-      weight = new YoDouble("HeuristicWeight", registry);
+      weight = new YoDouble(namePrefix + "HeuristicWeight", registry);
       weight.set(1.0);
    }
 

@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
-import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -8,7 +7,12 @@ public class ZeroHeuristics extends CostToGoHeuristics
 {
    public ZeroHeuristics(YoVariableRegistry registry)
    {
-      super(registry);
+      this("", registry);
+   }
+
+   public ZeroHeuristics(String namePrefix, YoVariableRegistry registry)
+   {
+      super(namePrefix, registry);
    }
 
    @Override

@@ -21,7 +21,13 @@ public class BodyPathHeuristics extends CostToGoHeuristics
 
    public BodyPathHeuristics(YoVariableRegistry registry, FootstepPlannerParameters parameters, BodyPathPlanner bodyPath)
    {
-      super(registry);
+      this("", registry, parameters, bodyPath);
+   }
+
+   public BodyPathHeuristics(String namePrefix, YoVariableRegistry registry, FootstepPlannerParameters parameters, BodyPathPlanner bodyPath)
+   {
+      super(namePrefix, registry);
+
       this.bodyPath = bodyPath;
       this.parameters = parameters;
       costParameters = parameters.getCostParameters();

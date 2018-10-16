@@ -68,7 +68,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
-      CostToGoHeuristics heuristics = new BodyPathHeuristics(registry, parameters, bodyPath);
+      CostToGoHeuristics heuristics = new BodyPathHeuristics("bodyPath", registry, parameters, bodyPath);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
       FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(parameters);
       FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
