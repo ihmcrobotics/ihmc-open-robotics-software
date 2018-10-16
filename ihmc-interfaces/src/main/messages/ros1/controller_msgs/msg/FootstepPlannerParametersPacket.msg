@@ -186,6 +186,30 @@ uint32 minimum_steps_for_best_effort_plan
 # Field default value -1.0
 float64 body_ground_clearance
 
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the box height.
+# Field default value -1.0
+float64 body_box_height
+
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the box depth.
+# Field default value -1.0
+float64 body_box_depth
+
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the box width.
+# Field default value -1.0
+float64 body_box_width
+
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the height of the center of the box.
+# Field default value -1.0
+float64 body_box_center_height
+
 # Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
 # Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
 # this parameter.

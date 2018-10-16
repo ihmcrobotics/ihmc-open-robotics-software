@@ -94,6 +94,14 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -190,6 +198,18 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType.getCdrSerializedSize(data.getCostParameters(), current_alignment);
 
 
@@ -247,6 +267,14 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       cdr.write_type_4(data.getMinimumStepsForBestEffortPlan());
 
       cdr.write_type_6(data.getBodyGroundClearance());
+
+      cdr.write_type_6(data.getBodyBoxHeight());
+
+      cdr.write_type_6(data.getBodyBoxDepth());
+
+      cdr.write_type_6(data.getBodyBoxWidth());
+
+      cdr.write_type_6(data.getBodyBoxCenterHeight());
 
       cdr.write_type_6(data.getMinXClearanceFromStance());
 
@@ -307,6 +335,14 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setBodyGroundClearance(cdr.read_type_6());
       	
+      data.setBodyBoxHeight(cdr.read_type_6());
+      	
+      data.setBodyBoxDepth(cdr.read_type_6());
+      	
+      data.setBodyBoxWidth(cdr.read_type_6());
+      	
+      data.setBodyBoxCenterHeight(cdr.read_type_6());
+      	
       data.setMinXClearanceFromStance(cdr.read_type_6());
       	
       data.setMinYClearanceFromStance(cdr.read_type_6());
@@ -343,6 +379,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_7("return_best_effort_plan", data.getReturnBestEffortPlan());
       ser.write_type_4("minimum_steps_for_best_effort_plan", data.getMinimumStepsForBestEffortPlan());
       ser.write_type_6("body_ground_clearance", data.getBodyGroundClearance());
+      ser.write_type_6("body_box_height", data.getBodyBoxHeight());
+      ser.write_type_6("body_box_depth", data.getBodyBoxDepth());
+      ser.write_type_6("body_box_width", data.getBodyBoxWidth());
+      ser.write_type_6("body_box_center_height", data.getBodyBoxCenterHeight());
       ser.write_type_6("min_x_clearance_from_stance", data.getMinXClearanceFromStance());
       ser.write_type_6("min_y_clearance_from_stance", data.getMinYClearanceFromStance());
       ser.write_type_a("cost_parameters", new controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType(), data.getCostParameters());
@@ -377,6 +417,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setReturnBestEffortPlan(ser.read_type_7("return_best_effort_plan"));
       data.setMinimumStepsForBestEffortPlan(ser.read_type_4("minimum_steps_for_best_effort_plan"));
       data.setBodyGroundClearance(ser.read_type_6("body_ground_clearance"));
+      data.setBodyBoxHeight(ser.read_type_6("body_box_height"));
+      data.setBodyBoxDepth(ser.read_type_6("body_box_depth"));
+      data.setBodyBoxWidth(ser.read_type_6("body_box_width"));
+      data.setBodyBoxCenterHeight(ser.read_type_6("body_box_center_height"));
       data.setMinXClearanceFromStance(ser.read_type_6("min_x_clearance_from_stance"));
       data.setMinYClearanceFromStance(ser.read_type_6("min_y_clearance_from_stance"));
       ser.read_type_a("cost_parameters", new controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType(), data.getCostParameters());

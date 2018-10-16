@@ -321,6 +321,46 @@ public interface FootstepPlannerParameters
    }
 
    /**
+    * Some node checkers will check if a bounding box that describes the body of the robot will move
+    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+    * collisions, this defines the box height.
+    */
+   default double getBodyBoxHeight()
+   {
+      return 1.0;
+   }
+
+   /**
+    * Some node checkers will check if a bounding box that describes the body of the robot will move
+    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+    * collisions, this defines the box depth.
+    */
+   default double getBodyBoxDepth()
+   {
+      return 0.3;
+   }
+
+   /**
+    * Some node checkers will check if a bounding box that describes the body of the robot will move
+    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+    * collisions, this defines the box width.
+    */
+   default double getBodyBoxWidth()
+   {
+      return 0.7;
+   }
+
+   /**
+    * Some node checkers will check if a bounding box that describes the body of the robot will move
+    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+    * collisions, this defines the height of the center of the box.
+    */
+   default double getBodyBoxCenterHeight()
+   {
+      return 1.5;
+   }
+
+   /**
     * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
     * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
     * this parameter.
