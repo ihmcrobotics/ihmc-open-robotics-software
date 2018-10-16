@@ -55,6 +55,7 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
             * taken. Setting this value to a high number will favor plans with less steps.
             */
    public double cost_per_step_ = -1.0;
+   public boolean use_quadratic_distance_cost_;
 
    public FootstepPlannerCostParametersPacket()
    {
@@ -85,6 +86,8 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
       step_down_weight_ = other.step_down_weight_;
 
       cost_per_step_ = other.cost_per_step_;
+
+      use_quadratic_distance_cost_ = other.use_quadratic_distance_cost_;
 
    }
 
@@ -239,6 +242,15 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
       return cost_per_step_;
    }
 
+   public void setUseQuadraticDistanceCost(boolean use_quadratic_distance_cost)
+   {
+      use_quadratic_distance_cost_ = use_quadratic_distance_cost;
+   }
+   public boolean getUseQuadraticDistanceCost()
+   {
+      return use_quadratic_distance_cost_;
+   }
+
 
    public static Supplier<FootstepPlannerCostParametersPacketPubSubType> getPubSubType()
    {
@@ -275,6 +287,8 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cost_per_step_, other.cost_per_step_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_quadratic_distance_cost_, other.use_quadratic_distance_cost_, epsilon)) return false;
+
 
       return true;
    }
@@ -306,6 +320,8 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
 
       if(this.cost_per_step_ != otherMyClass.cost_per_step_) return false;
 
+      if(this.use_quadratic_distance_cost_ != otherMyClass.use_quadratic_distance_cost_) return false;
+
 
       return true;
    }
@@ -333,7 +349,9 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
       builder.append("step_down_weight=");
       builder.append(this.step_down_weight_);      builder.append(", ");
       builder.append("cost_per_step=");
-      builder.append(this.cost_per_step_);
+      builder.append(this.cost_per_step_);      builder.append(", ");
+      builder.append("use_quadratic_distance_cost=");
+      builder.append(this.use_quadratic_distance_cost_);
       builder.append("}");
       return builder.toString();
    }

@@ -11,7 +11,6 @@ public class FootstepCostBuilder
 
    private final OptionalFactoryField<Boolean> includeHeightCost = new OptionalFactoryField<>("includeHeightCost");
    private final OptionalFactoryField<Boolean> useQuadraticHeightCost = new OptionalFactoryField<>("useQuadraticHeightCost");
-   private final OptionalFactoryField<Boolean> useQuadraticStepCost = new OptionalFactoryField<>("useQuadraticStepCost");
    private final OptionalFactoryField<Boolean> usePitchAndRollCost = new OptionalFactoryField<>("usePitchAndRollCost");
 
    public void setFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
@@ -29,11 +28,6 @@ public class FootstepCostBuilder
       this.useQuadraticHeightCost.set(useQuadraticHeightCost);
    }
 
-   public void setUseQuadraticStepCost(boolean useQuadraticStepCost)
-   {
-      this.useQuadraticStepCost.set(useQuadraticStepCost);
-   }
-
    public void setUsePitchAndRollCost(boolean usePitchAndRollCost)
    {
       this.usePitchAndRollCost.set(usePitchAndRollCost);
@@ -43,7 +37,6 @@ public class FootstepCostBuilder
    {
       includeHeightCost.setDefaultValue(false);
       useQuadraticHeightCost.setDefaultValue(false);
-      useQuadraticStepCost.setDefaultValue(false);
       usePitchAndRollCost.setDefaultValue(false);
 
       CompositeFootstepCost compositeFootstepCost = new CompositeFootstepCost();
@@ -59,15 +52,7 @@ public class FootstepCostBuilder
       if (usePitchAndRollCost.get())
          compositeFootstepCost.addFootstepCost(new PitchAndRollBasedCost(footstepPlannerParameters.get().getCostParameters()));
 
-      if (useQuadraticStepCost.get())
-      {
-         compositeFootstepCost.addFootstepCost(new QuadraticDistanceAndYawCost(footstepPlannerParameters.get()));
-         compositeFootstepCost.addFootstepCost(new PerStepCost(footstepPlannerParameters.get()));
-      }
-      else
-      {
-         compositeFootstepCost.addFootstepCost(new DistanceAndYawBasedCost(footstepPlannerParameters.get()));
-      }
+      compositeFootstepCost.addFootstepCost(new DistanceAndYawBasedCost(footstepPlannerParameters.get()));
 
       FactoryTools.disposeFactory(this);
 

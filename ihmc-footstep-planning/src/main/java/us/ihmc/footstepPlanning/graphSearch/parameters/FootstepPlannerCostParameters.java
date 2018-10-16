@@ -2,6 +2,11 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 public interface FootstepPlannerCostParameters
 {
+   default boolean useQuadraticDistanceCost()
+   {
+      return false;
+   }
+
    /**
     * When using a cost based planning approach this value defined how the yaw of a footstep will be
     * weighted in comparison to its position.

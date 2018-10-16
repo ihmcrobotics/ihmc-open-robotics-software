@@ -41,4 +41,6 @@ float64 step_down_weight
 # Field default value -1.0
 float64 cost_per_step
 
+bool use_quadratic_distance_cost
+
 

@@ -934,9 +934,9 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Max step z isn't equal.", parameters.getMaximumStepZ(), packet.getMaximumStepZ(), epsilon);
       assertEquals("Min foothold percent aren't equal.", parameters.getMinimumFootholdPercent(), packet.getMinimumFootholdPercent(), epsilon);
       assertEquals("Min surface incline aren't equal.", parameters.getMinimumSurfaceInclineRadians(), packet.getMinimumSurfaceInclineRadians(), epsilon);
-      assertTrue("Wiggle into convex hull isn't equal.",
-                 parameters.getWiggleIntoConvexHullOfPlanarRegions() == packet.getWiggleIntoConvexHullOfPlanarRegions());
-      assertTrue("Reject if cannot wiggle isn't equal.", parameters.getRejectIfCannotFullyWiggleInside() == packet.getRejectIfCannotFullyWiggleInside());
+      assertEquals("Wiggle into convex hull isn't equal.",
+                 parameters.getWiggleIntoConvexHullOfPlanarRegions(), packet.getWiggleIntoConvexHullOfPlanarRegions());
+      assertEquals("Reject if cannot wiggle isn't equal.", parameters.getRejectIfCannotFullyWiggleInside(), packet.getRejectIfCannotFullyWiggleInside());
       assertEquals("Max XY wiggle distance isn't equal.", parameters.getMaximumXYWiggleDistance(), packet.getMaximumXyWiggleDistance(), epsilon);
       assertEquals("Max yaw wiggle isn't equal.", parameters.getMaximumYawWiggle(), packet.getMaximumYawWiggle(), epsilon);
       assertEquals("Max Z penetration isn't equal.", parameters.getMaximumZPenetrationOnValleyRegions(), packet.getMaximumZPenetrationOnValleyRegions(),
@@ -945,7 +945,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Cliff height to avoid isn't equal.", parameters.getCliffHeightToAvoid(), packet.getCliffHeightToAvoid(), epsilon);
       assertEquals("Minimum distance from cliff bottoms isn't equal.", parameters.getMinimumDistanceFromCliffBottoms(),
                    packet.getMinimumDistanceFromCliffBottoms(), epsilon);
-      assertTrue("Return best effort isn't equal.", parameters.getReturnBestEffortPlan() == packet.getReturnBestEffortPlan());
+      assertEquals("Return best effort isn't equal.", parameters.getReturnBestEffortPlan(), packet.getReturnBestEffortPlan());
       assertEquals("Min steps for best effort aren't equal.", parameters.getMinimumStepsForBestEffortPlan(), packet.getMinimumStepsForBestEffortPlan(),
                    epsilon);
       assertEquals("Body ground clearance isn't equal.", parameters.getBodyGroundClearance(), packet.getBodyGroundClearance(), epsilon);
@@ -957,9 +957,14 @@ public class RemoteFootstepPlannerUIMessagingTest
 
    private static void checkFootstepPlannerCostParameters(FootstepPlannerCostParameters parameters, FootstepPlannerCostParametersPacket packet)
    {
+      assertEquals("Use quadratic distance cost flags aren't equal.", parameters.useQuadraticDistanceCost(), packet.getUseQuadraticDistanceCost());
       assertEquals("Yaw weights aren't equal.", parameters.getYawWeight(), packet.getYawWeight(), epsilon);
+      assertEquals("Roll weights aren't equal.", parameters.getRollWeight(), packet.getRollWeight(), epsilon);
+      assertEquals("Pitch weights aren't equal.", parameters.getPitchWeight(), packet.getPitchWeight(), epsilon);
       assertEquals("Forward weights aren't equal.", parameters.getForwardWeight(), packet.getForwardWeight(), epsilon);
       assertEquals("Lateral weights aren't equal.", parameters.getLateralWeight(), packet.getLateralWeight(), epsilon);
+      assertEquals("Step up weights aren't equal.", parameters.getStepUpWeight(), packet.getStepUpWeight(), epsilon);
+      assertEquals("Step down weights aren't equal.", parameters.getStepDownWeight(), packet.getStepDownWeight(), epsilon);
       assertEquals("Cost per step isn't equal.", parameters.getCostPerStep(), packet.getCostPerStep(), epsilon);
    }
 }
