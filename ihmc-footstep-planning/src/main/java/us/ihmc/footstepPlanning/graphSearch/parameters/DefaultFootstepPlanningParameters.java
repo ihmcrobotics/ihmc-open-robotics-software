@@ -1,6 +1,4 @@
-package us.ihmc.footstepPlanning;
-
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 public class DefaultFootstepPlanningParameters implements FootstepPlannerParameters
 {

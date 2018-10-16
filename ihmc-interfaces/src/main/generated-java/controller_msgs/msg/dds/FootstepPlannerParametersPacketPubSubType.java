@@ -94,13 +94,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -196,17 +190,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
+      current_alignment += controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType.getCdrSerializedSize(data.getCostParameters(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -262,20 +246,13 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_4(data.getMinimumStepsForBestEffortPlan());
 
-      cdr.write_type_6(data.getYawWeight());
-
-      cdr.write_type_6(data.getCostPerStep());
-
-      cdr.write_type_6(data.getForwardWeight());
-
-      cdr.write_type_6(data.getLateralWeight());
-
       cdr.write_type_6(data.getBodyGroundClearance());
 
       cdr.write_type_6(data.getMinXClearanceFromStance());
 
       cdr.write_type_6(data.getMinYClearanceFromStance());
 
+      controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType.write(data.getCostParameters(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -328,20 +305,13 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setMinimumStepsForBestEffortPlan(cdr.read_type_4());
       	
-      data.setYawWeight(cdr.read_type_6());
-      	
-      data.setCostPerStep(cdr.read_type_6());
-      	
-      data.setForwardWeight(cdr.read_type_6());
-      	
-      data.setLateralWeight(cdr.read_type_6());
-      	
       data.setBodyGroundClearance(cdr.read_type_6());
       	
       data.setMinXClearanceFromStance(cdr.read_type_6());
       	
       data.setMinYClearanceFromStance(cdr.read_type_6());
       	
+      controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType.read(data.getCostParameters(), cdr);	
 
    }
 
@@ -372,13 +342,11 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("minimum_distance_from_cliff_bottoms", data.getMinimumDistanceFromCliffBottoms());
       ser.write_type_7("return_best_effort_plan", data.getReturnBestEffortPlan());
       ser.write_type_4("minimum_steps_for_best_effort_plan", data.getMinimumStepsForBestEffortPlan());
-      ser.write_type_6("yaw_weight", data.getYawWeight());
-      ser.write_type_6("cost_per_step", data.getCostPerStep());
-      ser.write_type_6("forward_weight", data.getForwardWeight());
-      ser.write_type_6("lateral_weight", data.getLateralWeight());
       ser.write_type_6("body_ground_clearance", data.getBodyGroundClearance());
       ser.write_type_6("min_x_clearance_from_stance", data.getMinXClearanceFromStance());
       ser.write_type_6("min_y_clearance_from_stance", data.getMinYClearanceFromStance());
+      ser.write_type_a("cost_parameters", new controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType(), data.getCostParameters());
+
    }
 
    @Override
@@ -408,13 +376,11 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setMinimumDistanceFromCliffBottoms(ser.read_type_6("minimum_distance_from_cliff_bottoms"));
       data.setReturnBestEffortPlan(ser.read_type_7("return_best_effort_plan"));
       data.setMinimumStepsForBestEffortPlan(ser.read_type_4("minimum_steps_for_best_effort_plan"));
-      data.setYawWeight(ser.read_type_6("yaw_weight"));
-      data.setCostPerStep(ser.read_type_6("cost_per_step"));
-      data.setForwardWeight(ser.read_type_6("forward_weight"));
-      data.setLateralWeight(ser.read_type_6("lateral_weight"));
       data.setBodyGroundClearance(ser.read_type_6("body_ground_clearance"));
       data.setMinXClearanceFromStance(ser.read_type_6("min_x_clearance_from_stance"));
       data.setMinYClearanceFromStance(ser.read_type_6("min_y_clearance_from_stance"));
+      ser.read_type_a("cost_parameters", new controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType(), data.getCostParameters());
+
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerParametersPacket src, controller_msgs.msg.dds.FootstepPlannerParametersPacket dest)

@@ -26,6 +26,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
@@ -739,22 +740,6 @@ public class RemoteFootstepPlannerUIMessagingTest
             return minSteps;
          }
 
-         private final double yawWeight = RandomNumbers.nextDouble(random, 0.0, 10.0);
-
-         @Override
-         public double getYawWeight()
-         {
-            return yawWeight;
-         }
-
-         private final double costPerStep = RandomNumbers.nextDouble(random, 0.0, 10.0);
-
-         @Override
-         public double getCostPerStep()
-         {
-            return costPerStep;
-         }
-
          private final double bodyGroundClearance = RandomNumbers.nextDouble(random, 0.1, 0.5);
 
          @Override
@@ -777,6 +762,78 @@ public class RemoteFootstepPlannerUIMessagingTest
          public double getMinYClearanceFromStance()
          {
             return minYClearance;
+         }
+
+         @Override
+         public FootstepPlannerCostParameters getCostParameters()
+         {
+
+            return new FootstepPlannerCostParameters()
+            {
+               private final double yawWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+               @Override
+               public double getYawWeight()
+               {
+                  return yawWeight;
+               }
+
+               private final double forwardWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+               @Override
+               public double getForwardWeight()
+               {
+                  return forwardWeight;
+               }
+
+               private final double lateralWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+               @Override
+               public double getLateralWeight()
+               {
+                  return lateralWeight;
+               }
+
+               private final double costPerStep = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+               @Override
+               public double getCostPerStep()
+               {
+                  return costPerStep;
+               }
+
+               private final double stepUpWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+               @Override
+               public double getStepUpWeight()
+               {
+                  return stepUpWeight;
+               }
+
+               private final double stepDownWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+               @Override
+               public double getStepDownWeight()
+               {
+                  return stepDownWeight;
+               }
+
+               private final double rollWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+               @Override
+               public double getRollWeight()
+               {
+                  return rollWeight;
+               }
+
+               private final double pitchWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+               @Override
+               public double getPitchWeight()
+               {
+                  return pitchWeight;
+               }
+            };
          }
       };
 
@@ -891,13 +948,19 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertTrue("Return best effort isn't equal.", parameters.getReturnBestEffortPlan() == packet.getReturnBestEffortPlan());
       assertEquals("Min steps for best effort aren't equal.", parameters.getMinimumStepsForBestEffortPlan(), packet.getMinimumStepsForBestEffortPlan(),
                    epsilon);
+      assertEquals("Body ground clearance isn't equal.", parameters.getBodyGroundClearance(), packet.getBodyGroundClearance(), epsilon);
+      assertEquals("Min X clearance from stance isn't equal.", parameters.getMinXClearanceFromStance(), packet.getMinXClearanceFromStance(), epsilon);
+      assertEquals("Min Y clearance from stance isn't equal.", parameters.getMinYClearanceFromStance(), packet.getMinYClearanceFromStance(), epsilon);
+
+      checkFootstepPlannerCostParameters(parameters.getCostParameters(), packet.getCostParameters());
+   }
+
+   private static void checkFootstepPlannerCostParameters(FootstepPlannerCostParameters parameters, FootstepPlannerCostParametersPacket packet)
+   {
       assertEquals("Yaw weights aren't equal.", parameters.getYawWeight(), packet.getYawWeight(), epsilon);
       assertEquals("Forward weights aren't equal.", parameters.getForwardWeight(), packet.getForwardWeight(), epsilon);
       assertEquals("Lateral weights aren't equal.", parameters.getLateralWeight(), packet.getLateralWeight(), epsilon);
       assertEquals("Cost per step isn't equal.", parameters.getCostPerStep(), packet.getCostPerStep(), epsilon);
-      assertEquals("Body ground clearance isn't equal.", parameters.getBodyGroundClearance(), packet.getBodyGroundClearance(), epsilon);
-      assertEquals("Min X clearance from stance isn't equal.", parameters.getMinXClearanceFromStance(), packet.getMinXClearanceFromStance(), epsilon);
-      assertEquals("Min Y clearance from stance isn't equal.", parameters.getMinYClearanceFromStance(), packet.getMinYClearanceFromStance(), epsilon);
    }
 }
 

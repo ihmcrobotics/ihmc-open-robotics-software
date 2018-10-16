@@ -102,7 +102,7 @@ public interface FootstepPlannerParameters
    /**
     * Minimum step yaw.
     */
-   public default double getMinimumStepYaw()
+   default double getMinimumStepYaw()
    {
       return 0.0;
    }
@@ -124,7 +124,7 @@ public interface FootstepPlannerParameters
     * it's very close to hitting it's ankle pitch joint limit
     * </p>
     */
-   public default double getMaximumStepXWhenForwardAndDown()
+   default double getMaximumStepXWhenForwardAndDown()
    {
       return Double.POSITIVE_INFINITY;
    }
@@ -309,53 +309,6 @@ public interface FootstepPlannerParameters
       return 3;
    }
 
-   /**
-    * When using a cost based planning approach this value defined how the yaw of a footstep will be
-    * weighted in comparison to its position.
-    */
-   default double getYawWeight()
-   {
-      return 0.1;
-   }
-
-   /**
-    * <p>
-    * This value defined how the forward (or backward) displacement of a footstep will be weighted in
-    * comparison to its position.
-    * </p>
-    * <p>
-    *    Note that when using a Euclidean distance, this weight is averaged with the value returned by
-    *    {@link #getLateralWeight()}
-    * </p>
-    */
-   default double getForwardWeight()
-   {
-      return 1.0;
-   }
-
-   /**
-    * <p>
-    * This value defined how the lateral displacement of a footstep will be weighted in comparison to
-    * its position.
-    * </p>
-    * <p>
-    *    Note that when using a Euclidean distance, this weight is averaged with the value returned by
-    *    {@link #getForwardWeight()}
-    * </p>
-    */
-   default double getLateralWeight()
-   {
-      return 1.0;
-   }
-
-   /**
-    * When using a cost based planning approach this value defines the cost that is added for each step
-    * taken. Setting this value to a high number will favor plans with less steps.
-    */
-   public default double getCostPerStep()
-   {
-      return 0.15;
-   }
 
    /**
     * Some node checkers will check if the body of the robot will move through a higher planar region
@@ -363,7 +316,7 @@ public interface FootstepPlannerParameters
     * ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
     * This should be set to be slightly above cinder block height (20.3cm) for Atlas.
     */
-   public default double getBodyGroundClearance()
+   default double getBodyGroundClearance()
    {
       return 0.25;
    }
@@ -373,7 +326,7 @@ public interface FootstepPlannerParameters
     * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
     * this parameter.
     */
-   public default double getMinXClearanceFromStance()
+   default double getMinXClearanceFromStance()
    {
       return 0.0;
    }
@@ -383,8 +336,13 @@ public interface FootstepPlannerParameters
     * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
     * this parameter.
     */
-   public default double getMinYClearanceFromStance()
+   default double getMinYClearanceFromStance()
    {
       return 0.0;
+   }
+
+   default FootstepPlannerCostParameters getCostParameters()
+   {
+      return new DefaultFootstepPlannerCostParameters();
    }
 }

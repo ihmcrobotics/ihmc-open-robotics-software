@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
+import controller_msgs.msg.dds.FootstepPlannerCostParametersPacket;
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -31,18 +32,18 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoDouble minimumDistanceFromCliffBottoms = new YoDouble("minimumDistanceFromCliffBottoms", registry);
    private final YoDouble minimumSurfaceInclineRadians = new YoDouble("minimumSurfaceInclineRadians", registry);
    private final YoDouble maximumZPenetrationOnValleyRegions = new YoDouble("maximumZPenetrationOnValleyRegions", registry);
-   private final YoDouble yawWeight = new YoDouble("yawWeight", registry);
-   private final YoDouble forwardWeight = new YoDouble("forwardWeight", registry);
-   private final YoDouble lateralWeight  = new YoDouble("lateralWeight", registry);
-   private final YoDouble costPerStep = new YoDouble("costPerStep", registry);
    private final YoDouble bodyGroundClearance = new YoDouble("bodyGroundClearance", registry);
    private final YoBoolean returnBestEffortPlan = new YoBoolean("returnBestEffortPlan", registry);
    private final YoInteger minimumStepForBestEffortPlan = new YoInteger("minimumStepForBestEffortPlan", registry);
    private final YoDouble minXClearanceFromStance = new YoDouble("minXClearanceFromStance", registry);
    private final YoDouble minYClearanceFromStance = new YoDouble("minYClearanceFromStance", registry);
 
+   private final YoFootstepPlannerCostParameters costParameters;
+
    public YoFootstepPlannerParameters(YoVariableRegistry parentRegistry, FootstepPlannerParameters defaults)
    {
+      costParameters = new YoFootstepPlannerCostParameters(registry, defaults.getCostParameters());
+
       parentRegistry.addChild(registry);
       set(defaults);
    }
@@ -70,15 +71,13 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       minimumDistanceFromCliffBottoms.set(defaults.getMinimumDistanceFromCliffBottoms());
       minimumSurfaceInclineRadians.set(defaults.getMinimumSurfaceInclineRadians());
       maximumZPenetrationOnValleyRegions.set(defaults.getMaximumZPenetrationOnValleyRegions());
-      yawWeight.set(defaults.getYawWeight());
-      forwardWeight.set(defaults.getForwardWeight());
-      lateralWeight.set(defaults.getLateralWeight());
-      costPerStep.set(defaults.getCostPerStep());
       bodyGroundClearance.set(defaults.getBodyGroundClearance());
       returnBestEffortPlan.set(defaults.getReturnBestEffortPlan());
       minimumStepForBestEffortPlan.set(defaults.getMinimumStepsForBestEffortPlan());
       minXClearanceFromStance.set(defaults.getMinXClearanceFromStance());
       minYClearanceFromStance.set(defaults.getMinYClearanceFromStance());
+
+      costParameters.set(defaults.getCostParameters());
    }
 
    @Override
@@ -208,30 +207,6 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    }
 
    @Override
-   public double getYawWeight()
-   {
-      return yawWeight.getDoubleValue();
-   }
-
-   @Override
-   public double getForwardWeight()
-   {
-      return forwardWeight.getDoubleValue();
-   }
-
-   @Override
-   public double getLateralWeight()
-   {
-      return lateralWeight.getDoubleValue();
-   }
-
-   @Override
-   public double getCostPerStep()
-   {
-      return costPerStep.getDoubleValue();
-   }
-
-   @Override
    public double getBodyGroundClearance()
    {
       return bodyGroundClearance.getDoubleValue();
@@ -261,6 +236,11 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       return minYClearanceFromStance.getDoubleValue();
    }
 
+   @Override
+   public FootstepPlannerCostParameters getCostParameters()
+   {
+      return costParameters;
+   }
 
    public void set(FootstepPlannerParametersPacket parametersPacket)
    {
@@ -307,20 +287,14 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       setReturnBestEffortPlan(parametersPacket.getReturnBestEffortPlan());
       if (parametersPacket.getMinimumStepsForBestEffortPlan() > 0)
          setMinimumStepForBestEffortPlan((int) parametersPacket.getMinimumStepsForBestEffortPlan());
-      if (parametersPacket.getYawWeight() != -1.0)
-         setYawWeight(parametersPacket.getYawWeight());
-      if (parametersPacket.getForwardWeight() != -1.0)
-         setForwardWeight(parametersPacket.getForwardWeight());
-      if (parametersPacket.getLateralWeight() != -1.0)
-         setLateralWeight(parametersPacket.getLateralWeight());
-      if (parametersPacket.getCostPerStep() != -1.0)
-         setCostPerStep(parametersPacket.getCostPerStep());
       if (parametersPacket.getBodyGroundClearance() != -1.0)
          setBodyGroundClearance(parametersPacket.getBodyGroundClearance());
       if (parametersPacket.getMinXClearanceFromStance() != -1.0)
          setMinXClearanceFromStance(parametersPacket.getMinXClearanceFromStance());
       if (parametersPacket.getMinYClearanceFromStance() != -1.0)
          setMinYClearanceFromStance(parametersPacket.getMinYClearanceFromStance());
+
+      setCostParameters(parametersPacket.getCostParameters());
    }
 
    public void setIdealFootstepWidth(double idealFootstepWidth)
@@ -438,26 +412,6 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       this.minimumStepForBestEffortPlan.set(minimumStepForBestEffortPlan);
    }
 
-   public void setYawWeight(double yawWeight)
-   {
-      this.yawWeight.set(yawWeight);
-   }
-
-   public void setForwardWeight(double forwardWeight)
-   {
-      this.forwardWeight.set(forwardWeight);
-   }
-
-   public void setLateralWeight(double lateralWeight)
-   {
-      this.lateralWeight.set(lateralWeight);
-   }
-
-   public void setCostPerStep(double costPerStep)
-   {
-      this.costPerStep.set(costPerStep);
-   }
-
    public void setBodyGroundClearance(double bodyGroundClearance)
    {
       this.bodyGroundClearance.set(bodyGroundClearance);
@@ -471,5 +425,15 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void setMinYClearanceFromStance(double minYClearanceFromStance)
    {
       this.minYClearanceFromStance.set(minYClearanceFromStance);
+   }
+
+   public void setCostParameters(FootstepPlannerCostParameters parameters)
+   {
+      this.costParameters.set(parameters);
+   }
+
+   public void setCostParameters(FootstepPlannerCostParametersPacket packet)
+   {
+      this.costParameters.set(packet);
    }
 }

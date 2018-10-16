@@ -198,28 +198,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public long minimum_steps_for_best_effort_plan_;
    /**
-            * When using a cost based planning approach this value defined how the yaw of a footstep will be
-            * weighted in comparison to its position.
-            */
-   public double yaw_weight_ = -1.0;
-   /**
-            * When using a cost based planning approach this value defines the cost that is added for each step
-            * taken. Setting this value to a high number will favor plans with less steps.
-            */
-   public double cost_per_step_ = -1.0;
-   /**
-            * When using a cost based planning approach, this value defines how the forward (or backward) displacement
-            * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
-            * weight is averaged with the value returned by {@link #getLateralWeight()}
-            */
-   public double forward_weight_ = -1.0;
-   /**
-            * When using a cost based planning approach, this value defines how the lateral displacement
-            * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
-            * weight is averaged with the value returned by {@link #getForwardWeight()}
-            */
-   public double lateral_weight_ = -1.0;
-   /**
             * Some node checkers will check if the body of the robot will move through a higher planar region
             * (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
             * ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
@@ -238,9 +216,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * this parameter.
             */
    public double min_y_clearance_from_stance_ = -1.0;
+   /**
+            * When using a cost based planning approach this value defines the weighting parameters to be used
+            */
+   public controller_msgs.msg.dds.FootstepPlannerCostParametersPacket cost_parameters_;
 
    public FootstepPlannerParametersPacket()
    {
+      cost_parameters_ = new controller_msgs.msg.dds.FootstepPlannerCostParametersPacket();
    }
 
    public FootstepPlannerParametersPacket(FootstepPlannerParametersPacket other)
@@ -299,20 +282,13 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       minimum_steps_for_best_effort_plan_ = other.minimum_steps_for_best_effort_plan_;
 
-      yaw_weight_ = other.yaw_weight_;
-
-      cost_per_step_ = other.cost_per_step_;
-
-      forward_weight_ = other.forward_weight_;
-
-      lateral_weight_ = other.lateral_weight_;
-
       body_ground_clearance_ = other.body_ground_clearance_;
 
       min_x_clearance_from_stance_ = other.min_x_clearance_from_stance_;
 
       min_y_clearance_from_stance_ = other.min_y_clearance_from_stance_;
 
+      controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType.staticCopy(other.cost_parameters_, cost_parameters_);
    }
 
    /**
@@ -856,78 +832,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
-            * When using a cost based planning approach this value defined how the yaw of a footstep will be
-            * weighted in comparison to its position.
-            */
-   public void setYawWeight(double yaw_weight)
-   {
-      yaw_weight_ = yaw_weight;
-   }
-   /**
-            * When using a cost based planning approach this value defined how the yaw of a footstep will be
-            * weighted in comparison to its position.
-            */
-   public double getYawWeight()
-   {
-      return yaw_weight_;
-   }
-
-   /**
-            * When using a cost based planning approach this value defines the cost that is added for each step
-            * taken. Setting this value to a high number will favor plans with less steps.
-            */
-   public void setCostPerStep(double cost_per_step)
-   {
-      cost_per_step_ = cost_per_step;
-   }
-   /**
-            * When using a cost based planning approach this value defines the cost that is added for each step
-            * taken. Setting this value to a high number will favor plans with less steps.
-            */
-   public double getCostPerStep()
-   {
-      return cost_per_step_;
-   }
-
-   /**
-            * When using a cost based planning approach, this value defines how the forward (or backward) displacement
-            * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
-            * weight is averaged with the value returned by {@link #getLateralWeight()}
-            */
-   public void setForwardWeight(double forward_weight)
-   {
-      forward_weight_ = forward_weight;
-   }
-   /**
-            * When using a cost based planning approach, this value defines how the forward (or backward) displacement
-            * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
-            * weight is averaged with the value returned by {@link #getLateralWeight()}
-            */
-   public double getForwardWeight()
-   {
-      return forward_weight_;
-   }
-
-   /**
-            * When using a cost based planning approach, this value defines how the lateral displacement
-            * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
-            * weight is averaged with the value returned by {@link #getForwardWeight()}
-            */
-   public void setLateralWeight(double lateral_weight)
-   {
-      lateral_weight_ = lateral_weight;
-   }
-   /**
-            * When using a cost based planning approach, this value defines how the lateral displacement
-            * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
-            * weight is averaged with the value returned by {@link #getForwardWeight()}
-            */
-   public double getLateralWeight()
-   {
-      return lateral_weight_;
-   }
-
-   /**
             * Some node checkers will check if the body of the robot will move through a higher planar region
             * (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
             * ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
@@ -984,6 +888,15 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getMinYClearanceFromStance()
    {
       return min_y_clearance_from_stance_;
+   }
+
+
+   /**
+            * When using a cost based planning approach this value defines the weighting parameters to be used
+            */
+   public controller_msgs.msg.dds.FootstepPlannerCostParametersPacket getCostParameters()
+   {
+      return cost_parameters_;
    }
 
 
@@ -1052,20 +965,13 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_steps_for_best_effort_plan_, other.minimum_steps_for_best_effort_plan_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yaw_weight_, other.yaw_weight_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cost_per_step_, other.cost_per_step_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.forward_weight_, other.forward_weight_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.lateral_weight_, other.lateral_weight_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_ground_clearance_, other.body_ground_clearance_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_x_clearance_from_stance_, other.min_x_clearance_from_stance_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_y_clearance_from_stance_, other.min_y_clearance_from_stance_, epsilon)) return false;
 
+      if (!this.cost_parameters_.epsilonEquals(other.cost_parameters_, epsilon)) return false;
 
       return true;
    }
@@ -1127,20 +1033,13 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.minimum_steps_for_best_effort_plan_ != otherMyClass.minimum_steps_for_best_effort_plan_) return false;
 
-      if(this.yaw_weight_ != otherMyClass.yaw_weight_) return false;
-
-      if(this.cost_per_step_ != otherMyClass.cost_per_step_) return false;
-
-      if(this.forward_weight_ != otherMyClass.forward_weight_) return false;
-
-      if(this.lateral_weight_ != otherMyClass.lateral_weight_) return false;
-
       if(this.body_ground_clearance_ != otherMyClass.body_ground_clearance_) return false;
 
       if(this.min_x_clearance_from_stance_ != otherMyClass.min_x_clearance_from_stance_) return false;
 
       if(this.min_y_clearance_from_stance_ != otherMyClass.min_y_clearance_from_stance_) return false;
 
+      if (!this.cost_parameters_.equals(otherMyClass.cost_parameters_)) return false;
 
       return true;
    }
@@ -1199,20 +1098,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.return_best_effort_plan_);      builder.append(", ");
       builder.append("minimum_steps_for_best_effort_plan=");
       builder.append(this.minimum_steps_for_best_effort_plan_);      builder.append(", ");
-      builder.append("yaw_weight=");
-      builder.append(this.yaw_weight_);      builder.append(", ");
-      builder.append("cost_per_step=");
-      builder.append(this.cost_per_step_);      builder.append(", ");
-      builder.append("forward_weight=");
-      builder.append(this.forward_weight_);      builder.append(", ");
-      builder.append("lateral_weight=");
-      builder.append(this.lateral_weight_);      builder.append(", ");
       builder.append("body_ground_clearance=");
       builder.append(this.body_ground_clearance_);      builder.append(", ");
       builder.append("min_x_clearance_from_stance=");
       builder.append(this.min_x_clearance_from_stance_);      builder.append(", ");
       builder.append("min_y_clearance_from_stance=");
-      builder.append(this.min_y_clearance_from_stance_);
+      builder.append(this.min_y_clearance_from_stance_);      builder.append(", ");
+      builder.append("cost_parameters=");
+      builder.append(this.cost_parameters_);
       builder.append("}");
       return builder.toString();
    }
