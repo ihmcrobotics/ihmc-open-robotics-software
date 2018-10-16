@@ -76,7 +76,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
    public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
    {
-      positionHelper.setWeights(angularWeight);
+      positionHelper.setWeights(linearWeight);
       orientationHelper.setWeights(angularWeight);
    }
 
