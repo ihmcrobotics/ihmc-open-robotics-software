@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -30,40 +30,40 @@ public abstract class RigidBodyTaskspaceControlState extends RigidBodyControlSta
 
    public boolean handleTrajectoryCommand(EuclideanTrajectoryControllerCommand command)
    {
-      PrintTools.warn("Handling of " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
+      LogTools.warn("Handling of " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
       return false;
    }
 
    public boolean handleTrajectoryCommand(SO3TrajectoryControllerCommand command)
    {
-      PrintTools.warn("Handling of " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
+      LogTools.warn("Handling of " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
       return false;
    }
 
    public boolean handleTrajectoryCommand(SE3TrajectoryControllerCommand command)
    {
-      PrintTools.warn("Handling of " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
+      LogTools.warn("Handling of " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
       return false;
    }
 
    public boolean handleHybridTrajectoryCommand(EuclideanTrajectoryControllerCommand command, JointspaceTrajectoryCommand jointspaceCommand,
                                                 double[] initialJointPositions)
    {
-      PrintTools.warn("Handling of hybrid command " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
+      LogTools.warn("Handling of hybrid command " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
       return false;
    }
 
    public boolean handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand command, JointspaceTrajectoryCommand jointspaceCommand,
                                                 double[] initialJointPositions)
    {
-      PrintTools.warn("Handling of hybrid command " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
+      LogTools.warn("Handling of hybrid command " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
       return false;
    }
 
    public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command, JointspaceTrajectoryCommand jointspaceCommand,
                                                 double[] initialJointPositions)
    {
-      PrintTools.warn("Handling of hybrid command " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
+      LogTools.warn("Handling of hybrid command " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
       return false;
    }
 

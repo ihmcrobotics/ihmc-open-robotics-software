@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -21,6 +20,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
@@ -348,13 +348,13 @@ public class RigidBodyPositionControlHelper
       }
       else if (command.getTrajectoryFrame() != trajectoryGenerator.getCurrentTrajectoryFrame())
       {
-         PrintTools.warn(warningPrefix + "Was executing in " + trajectoryGenerator.getCurrentTrajectoryFrame() + " can not switch to "
+         LogTools.warn(warningPrefix + "Was executing in " + trajectoryGenerator.getCurrentTrajectoryFrame() + " can not switch to "
                + command.getTrajectoryFrame() + " without override.");
          return false;
       }
       else if (!selectionMatrix.equals(command.getSelectionMatrix()))
       {
-         PrintTools.warn(warningPrefix + "Received a change of selection matrix without an override. Was\n" + selectionMatrix + "\nRequested\n"
+         LogTools.warn(warningPrefix + "Received a change of selection matrix without an override. Was\n" + selectionMatrix + "\nRequested\n"
                + command.getSelectionMatrix());
          return false;
       }
@@ -399,7 +399,7 @@ public class RigidBodyPositionControlHelper
    {
       if (pointQueue.size() >= RigidBodyTaskspaceControlState.maxPoints)
       {
-         PrintTools.info(warningPrefix + "Reached maximum capacity of " + RigidBodyTaskspaceControlState.maxPoints + " can not execute trajectory.");
+         LogTools.warn(warningPrefix + "Reached maximum capacity of " + RigidBodyTaskspaceControlState.maxPoints + " can not execute trajectory.");
          return false;
       }
 
@@ -411,7 +411,7 @@ public class RigidBodyPositionControlHelper
    {
       if (time <= getLastTrajectoryPointTime())
       {
-         PrintTools.warn(warningPrefix + "Time in trajectory must be strictly increasing.");
+         LogTools.warn(warningPrefix + "Time in trajectory must be strictly increasing.");
          return false;
       }
       return true;

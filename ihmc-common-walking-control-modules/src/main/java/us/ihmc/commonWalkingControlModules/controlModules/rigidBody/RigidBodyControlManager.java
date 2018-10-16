@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,6 +20,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingC
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -88,7 +88,7 @@ public class RigidBodyControlManager
          taskspaceControlState.setGains(taskspaceOrientationGains);
          taskspaceControlState.setWeights(taskspaceAngularWeight);
          this.taskspaceControlState = taskspaceControlState;
-         PrintTools.info("Creating manager for " + bodyName + " with orientation controller.");
+         LogTools.info("Creating manager for " + bodyName + " with orientation controller.");
       }
       else if (taskspaceAngularWeight == null && taskspaceLinearWeight != null)
       {
@@ -97,7 +97,7 @@ public class RigidBodyControlManager
          taskspaceControlState.setGains(taskspacePositionGains);
          taskspaceControlState.setWeights(taskspaceLinearWeight);
          this.taskspaceControlState = taskspaceControlState;
-         PrintTools.info("Creating manager for " + bodyName + " with position controller.");
+         LogTools.info("Creating manager for " + bodyName + " with position controller.");
       }
       else
       {
@@ -106,7 +106,7 @@ public class RigidBodyControlManager
          taskspaceControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
          taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
          this.taskspaceControlState = taskspaceControlState;
-         PrintTools.info("Creating manager for " + bodyName + " with pose controller.");
+         LogTools.info("Creating manager for " + bodyName + " with pose controller.");
       }
 
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
@@ -226,7 +226,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid orientation trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid orientation trajectory command.");
          hold();
       }
    }
@@ -239,7 +239,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
          hold();
       }
    }
@@ -254,7 +254,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
          hold();
       }
    }
@@ -269,7 +269,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SE3 trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SE3 trajectory command.");
          hold();
       }
    }
@@ -282,7 +282,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid desired accelerations command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid desired accelerations command.");
          hold();
       }
    }
@@ -398,7 +398,7 @@ public class RigidBodyControlManager
    {
       if (loadBearingControlState == null)
       {
-         PrintTools.info(getClass().getSimpleName() + " for " + bodyName + " can not go to load bearing.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " can not go to load bearing.");
          return;
       }
 
