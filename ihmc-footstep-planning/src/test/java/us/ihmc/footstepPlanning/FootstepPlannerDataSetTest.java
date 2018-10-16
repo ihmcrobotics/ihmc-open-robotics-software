@@ -23,6 +23,7 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnit
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -46,7 +47,7 @@ public abstract class FootstepPlannerDataSetTest
    protected static boolean VERBOSE = false;
 
    protected FootstepPlannerUI ui = null;
-   protected SharedMemoryMessager messager = null;
+   protected Messager messager = null;
 
    protected final AtomicReference<FootstepPlan> plannerPlanReference = new AtomicReference<>(null);
    protected final AtomicReference<FootstepPlanningResult> plannerResultReference = new AtomicReference<>(null);
@@ -404,7 +405,7 @@ public abstract class FootstepPlannerDataSetTest
       return errorMessage;
    }
 
-   protected void createUI(SharedMemoryMessager messager)
+   protected void createUI(Messager messager)
    {
       ApplicationRunner.runApplication(new Application()
       {
