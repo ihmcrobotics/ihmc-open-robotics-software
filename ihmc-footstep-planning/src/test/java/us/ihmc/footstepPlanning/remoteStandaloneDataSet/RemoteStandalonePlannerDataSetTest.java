@@ -79,7 +79,7 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
    }
 
    @After
-   public void tearDown()
+   public void tearDown() throws Exception
    {
       ros2Node.destroy();
 
