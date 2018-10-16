@@ -1,11 +1,16 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 
 public class LinearHeightCost implements FootstepCost
 {
-   private static final double stepUpCost = 1.0;
-   private static final double stepDownCost = 2.0;
+   private final FootstepPlannerCostParameters costParameters;
+
+   public LinearHeightCost(FootstepPlannerCostParameters costParameters)
+   {
+      this.costParameters = costParameters;
+   }
 
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
@@ -16,8 +21,8 @@ public class LinearHeightCost implements FootstepCost
       double heightChange = endNode.getZ() - startNode.getZ();
 
       if (heightChange > 0.0)
-         return stepUpCost * heightChange;
+         return costParameters.getStepUpWeight() * heightChange;
       else
-         return -stepDownCost * heightChange;
+         return -costParameters.getStepDownWeight() * heightChange;
    }
 }
