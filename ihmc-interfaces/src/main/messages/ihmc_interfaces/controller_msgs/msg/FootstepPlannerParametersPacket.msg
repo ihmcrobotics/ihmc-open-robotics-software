@@ -167,6 +167,26 @@ uint32 minimum_steps_for_best_effort_plan
 # This should be set to be slightly above cinder block height (20.3cm) for Atlas.
 float64 body_ground_clearance -1.0
 
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the box height.
+float64 body_box_height -1.0
+
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the box depth.
+float64 body_box_depth -1.0
+
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the box width.
+float64 body_box_width -1.0
+
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the height of the center of the box.
+float64 body_box_center_height -1.0
+
 # Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
 # Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
 # this parameter.

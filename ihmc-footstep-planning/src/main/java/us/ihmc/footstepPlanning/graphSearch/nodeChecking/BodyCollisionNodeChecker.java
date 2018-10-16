@@ -7,11 +7,11 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.geometry.polytope.ConvexPolytope;
 import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -35,12 +35,12 @@ public class BodyCollisionNodeChecker implements FootstepNodeChecker
 
    private final RecyclingArrayList<ConvexPolytope> planarRegionPolytopes = new RecyclingArrayList<>(ConvexPolytope.class);
 
-   public BodyCollisionNodeChecker()
+   public BodyCollisionNodeChecker(FootstepPlannerParameters parameters)
    {
       bodyCollisionBox = new Box3D();
-      bodyCollisionBox.setSize(0.3, 0.7, 1.0);
+      bodyCollisionBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
 
-      bodyCollisionFrame.updateTranslation(new Vector3D(0.0, 0.0, 1.5));
+      bodyCollisionFrame.updateTranslation(new Vector3D(0.0, 0.0, parameters.getBodyBoxCenterHeight()));
    }
 
    private final FramePoint3D tempPoint = new FramePoint3D();

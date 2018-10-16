@@ -1,13 +1,10 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerCostParametersPacket;
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParameters
 {

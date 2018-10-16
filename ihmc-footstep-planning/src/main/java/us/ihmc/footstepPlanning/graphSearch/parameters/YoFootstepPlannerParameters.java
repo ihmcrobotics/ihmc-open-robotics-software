@@ -33,6 +33,10 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoDouble minimumSurfaceInclineRadians = new YoDouble("minimumSurfaceInclineRadians", registry);
    private final YoDouble maximumZPenetrationOnValleyRegions = new YoDouble("maximumZPenetrationOnValleyRegions", registry);
    private final YoDouble bodyGroundClearance = new YoDouble("bodyGroundClearance", registry);
+   private final YoDouble bodyBoxHeight = new YoDouble("bodyBoxHeight", registry);
+   private final YoDouble bodyBoxWidth = new YoDouble("bodyBoxWidth", registry);
+   private final YoDouble bodyBoxDepth = new YoDouble("bodyBoxDepth", registry);
+   private final YoDouble bodyBoxCenterHeight = new YoDouble("bodyBoxCenterHeight", registry);
    private final YoBoolean returnBestEffortPlan = new YoBoolean("returnBestEffortPlan", registry);
    private final YoInteger minimumStepForBestEffortPlan = new YoInteger("minimumStepForBestEffortPlan", registry);
    private final YoDouble minXClearanceFromStance = new YoDouble("minXClearanceFromStance", registry);
@@ -72,6 +76,10 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       minimumSurfaceInclineRadians.set(defaults.getMinimumSurfaceInclineRadians());
       maximumZPenetrationOnValleyRegions.set(defaults.getMaximumZPenetrationOnValleyRegions());
       bodyGroundClearance.set(defaults.getBodyGroundClearance());
+      bodyBoxDepth.set(defaults.getBodyBoxDepth());
+      bodyBoxHeight.set(defaults.getBodyBoxHeight());
+      bodyBoxWidth.set(defaults.getBodyBoxWidth());
+      bodyBoxCenterHeight.set(defaults.getBodyBoxCenterHeight());
       returnBestEffortPlan.set(defaults.getReturnBestEffortPlan());
       minimumStepForBestEffortPlan.set(defaults.getMinimumStepsForBestEffortPlan());
       minXClearanceFromStance.set(defaults.getMinXClearanceFromStance());
@@ -213,6 +221,30 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    }
 
    @Override
+   public double getBodyBoxHeight()
+   {
+      return bodyBoxHeight.getDoubleValue();
+   }
+
+   @Override
+   public double getBodyBoxDepth()
+   {
+      return bodyBoxDepth.getDoubleValue();
+   }
+
+   @Override
+   public double getBodyBoxWidth()
+   {
+      return bodyBoxWidth.getDoubleValue();
+   }
+
+   @Override
+   public double getBodyBoxCenterHeight()
+   {
+      return bodyBoxCenterHeight.getDoubleValue();
+   }
+
+   @Override
    public boolean getReturnBestEffortPlan()
    {
       return returnBestEffortPlan.getBooleanValue();
@@ -289,6 +321,14 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
          setMinimumStepForBestEffortPlan((int) parametersPacket.getMinimumStepsForBestEffortPlan());
       if (parametersPacket.getBodyGroundClearance() != -1.0)
          setBodyGroundClearance(parametersPacket.getBodyGroundClearance());
+      if (parametersPacket.getBodyBoxHeight() != -1.0)
+         setBodyBoxHeight(parametersPacket.getBodyBoxHeight());
+      if (parametersPacket.getBodyBoxDepth() != -1.0)
+         setBodyBoxDepth(parametersPacket.getBodyBoxDepth());
+      if (parametersPacket.getBodyBoxWidth() != -1.0)
+         setBodyBoxWidth(parametersPacket.getBodyBoxWidth());
+      if (parametersPacket.getBodyBoxCenterHeight() != -1.0)
+         setBodyBoxCenterHeight(parametersPacket.getBodyBoxCenterHeight());
       if (parametersPacket.getMinXClearanceFromStance() != -1.0)
          setMinXClearanceFromStance(parametersPacket.getMinXClearanceFromStance());
       if (parametersPacket.getMinYClearanceFromStance() != -1.0)
@@ -415,6 +455,26 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void setBodyGroundClearance(double bodyGroundClearance)
    {
       this.bodyGroundClearance.set(bodyGroundClearance);
+   }
+
+   public void setBodyBoxHeight(double bodyBoxHeight)
+   {
+      this.bodyBoxHeight.set(bodyBoxHeight);
+   }
+
+   public void setBodyBoxDepth(double bodyBoxDepth)
+   {
+      this.bodyBoxDepth.set(bodyBoxDepth);
+   }
+
+   public void setBodyBoxWidth(double bodyBoxWidth)
+   {
+      this.bodyBoxWidth.set(bodyBoxWidth);
+   }
+
+   public void setBodyBoxCenterHeight(double bodyBoxCenterHeight)
+   {
+      this.bodyBoxCenterHeight.set(bodyBoxCenterHeight);
    }
 
    public void setMinXClearanceFromStance(double minXClearanceFromStance)

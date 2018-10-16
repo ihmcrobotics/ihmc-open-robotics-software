@@ -274,6 +274,10 @@ public class RemoteUIMessageConverter
       packet.setReturnBestEffortPlan(parameters.getReturnBestEffortPlan());
       packet.setMinimumStepsForBestEffortPlan(parameters.getMinimumStepsForBestEffortPlan());
       packet.setBodyGroundClearance(parameters.getBodyGroundClearance());
+      packet.setBodyBoxHeight(parameters.getBodyBoxHeight());
+      packet.setBodyBoxDepth(parameters.getBodyBoxDepth());
+      packet.setBodyBoxWidth(parameters.getBodyBoxWidth());
+      packet.setBodyBoxCenterHeight(parameters.getBodyBoxCenterHeight());
       packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
 
