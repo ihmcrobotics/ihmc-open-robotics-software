@@ -4,10 +4,12 @@ import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.aStar.FootstepNodeVisualization;
@@ -19,7 +21,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
 {
-   private static final boolean visualizePlanner = false;
    private AStarFootstepPlanner planner;
    private FootstepNodeVisualization visualization = null;
 
@@ -38,6 +39,7 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    @Test(timeout = 100000)
    public void testDownCorridor()
    {
+      setCheckForBodyBoxCollision(true);
       super.testDownCorridor();
    }
 
@@ -64,12 +66,9 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    {
       planner = null;
 
-      if (visualizePlanner)
-      {
-         for (int i = 0; i < 1000; i++)
-            visualization.tickAndUpdate();
-         visualization.showAndSleep(true);
-      }
+      if (visualize)
+         ThreadTools.sleepForever();
+
    }
 
    @Override
@@ -81,8 +80,6 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    @Override
    public boolean visualize()
    {
-      if (visualizePlanner)
-         return false;
       return visualize;
    }
 
@@ -95,8 +92,6 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    @Override
    public void setupInternal()
    {
-      if (visualizePlanner)
-         visualization = new FootstepNodeVisualization(1000, 1.0, null);
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(getPlannerParameters());
       planner = AStarFootstepPlanner

@@ -40,11 +40,13 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
    protected static boolean visualize = false;
    protected JavaFXMessager messager;
 
+   private boolean checkForBodyBoxCollision = false;
 
    @Before
    public void setup()
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+      checkForBodyBoxCollision = false;
 
       if (visualize)
       {
@@ -98,10 +100,15 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       destroyInternal();
    }
 
+   public void setCheckForBodyBoxCollision(boolean checkForBodyBoxCollision)
+   {
+      this.checkForBodyBoxCollision = checkForBodyBoxCollision;
+   }
 
    protected AtomicReference<FootstepPlannerParameters> parametersReference;
 
    protected abstract void setupInternal();
+
    protected abstract void destroyInternal();
 
    public abstract boolean assertPlannerReturnedResult();
@@ -232,7 +239,15 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
    protected FootstepPlannerParameters getDefaultPlannerParameters()
    {
-      return new DefaultFootstepPlanningParameters();
+      return new DefaultFootstepPlanningParameters()
+
+      {
+         @Override
+         public boolean checkForBodyBoxCollisions()
+         {
+            return checkForBodyBoxCollision;
+         }
+      };
    }
 
    protected FootstepPlannerParameters getPlannerParameters()
@@ -245,6 +260,9 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
    private void runTestAndAssert(PlannerTestEnvironments.PlannerTestData testData)
    {
+      if (messager != null && visualize())
+         submitInfoToUI(testData);
+
       FootstepPlan footstepPlan = PlannerTools
             .runPlanner(getPlanner(), testData.getStartPose(), testData.getStartSide(), testData.getGoalPose(), testData.getPlanarRegionsList(),
                         assertPlannerReturnedResult());
@@ -256,7 +274,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       {
          parametersReference = messager.createInput(PlannerParametersTopic, getDefaultPlannerParameters());
 
-         submitInfoToUI(testData, footstepPlan);
+         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
 
          ThreadTools.sleep(10);
 
@@ -274,18 +292,15 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
             .runPlanner(getPlanner(), testData.getStartPose(), testData.getStartSide(), testData.getGoalPose(), testData.getPlanarRegionsList(),
                         assertPlannerReturnedResult());
 
-      submitInfoToUI(testData, footstepPlan);
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
    }
 
-   private void submitInfoToUI(PlannerTestEnvironments.PlannerTestData testData, FootstepPlan footstepPlan)
+   private void submitInfoToUI(PlannerTestEnvironments.PlannerTestData testData)
    {
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, testData.getGoalPosition());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, testData.getGoalOrientation());
       messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, testData.getStartPosition());
       messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, testData.getStartOrientation());
-
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
    }
-
 }
