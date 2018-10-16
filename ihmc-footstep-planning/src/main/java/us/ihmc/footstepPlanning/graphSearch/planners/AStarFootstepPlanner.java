@@ -392,7 +392,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       costBuilder.setFootstepPlannerParameters(parameters);
       costBuilder.setIncludeHeightCost(true);
       costBuilder.setIncludeHeightCost(true);
-      costBuilder.setUsePitchAndRollCost(true);
+      costBuilder.setIncludePitchAndRollCost(true);
 
       FootstepCost footstepCost = costBuilder.buildCost();
 

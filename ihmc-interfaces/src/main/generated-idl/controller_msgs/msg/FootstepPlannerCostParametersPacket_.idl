@@ -66,7 +66,14 @@ module controller_msgs
          */
         @defaultValue(value=-1.0)
         double cost_per_step;
+        /**
+         * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
+         */
         boolean use_quadratic_distance_cost;
+        /**
+         * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
+         */
+        boolean use_quadratic_height_cost;
       };
     };
   };

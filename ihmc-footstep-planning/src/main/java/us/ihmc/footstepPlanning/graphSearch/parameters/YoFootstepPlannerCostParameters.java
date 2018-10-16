@@ -11,7 +11,8 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoBoolean useQuadraticDistanceCost = new YoBoolean("useQuadraticDistancCost", registry);
+   private final YoBoolean useQuadraticDistanceCost = new YoBoolean("useQuadraticDistanceCost", registry);
+   private final YoBoolean useQuadraticHeightCost = new YoBoolean("useQuadraticHeightCost", registry);
 
    private final YoDouble yawWeight = new YoDouble("yawWeight", registry);
    private final YoDouble pitchWeight = new YoDouble("pitchWeight", registry);
@@ -31,6 +32,7 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
    public void set(FootstepPlannerCostParameters defaults)
    {
       setUseQuadraticDistanceCost(defaults.useQuadraticDistanceCost());
+      setUseQuadraticHeightCost(defaults.useQuadraticHeightCost());
 
       setYawWeight(defaults.getYawWeight());
       setPitchWeight(defaults.getPitchWeight());
@@ -46,6 +48,12 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
    public boolean useQuadraticDistanceCost()
    {
       return useQuadraticDistanceCost.getBooleanValue();
+   }
+
+   @Override
+   public boolean useQuadraticHeightCost()
+   {
+      return useQuadraticHeightCost.getBooleanValue();
    }
 
    @Override
@@ -99,6 +107,7 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
    public void set(FootstepPlannerCostParametersPacket parametersPacket)
    {
       setUseQuadraticDistanceCost(parametersPacket.getUseQuadraticDistanceCost());
+      setUseQuadraticHeightCost(parametersPacket.getUseQuadraticHeightCost());
 
       if (parametersPacket.getYawWeight() != -1.0)
          setYawWeight(parametersPacket.getYawWeight());
@@ -121,6 +130,11 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
    public void setUseQuadraticDistanceCost(boolean useQuadraticDistanceCost)
    {
       this.useQuadraticDistanceCost.set(useQuadraticDistanceCost);
+   }
+
+   public void setUseQuadraticHeightCost(boolean useQuadraticHeightCost)
+   {
+      this.useQuadraticHeightCost.set(useQuadraticHeightCost);
    }
 
    public void setYawWeight(double yawWeight)

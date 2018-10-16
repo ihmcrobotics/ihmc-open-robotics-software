@@ -60,6 +60,8 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -103,6 +105,9 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -129,6 +134,8 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
 
       cdr.write_type_7(data.getUseQuadraticDistanceCost());
 
+      cdr.write_type_7(data.getUseQuadraticHeightCost());
+
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerCostParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -153,6 +160,8 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       	
       data.setUseQuadraticDistanceCost(cdr.read_type_7());
       	
+      data.setUseQuadraticHeightCost(cdr.read_type_7());
+      	
 
    }
 
@@ -169,6 +178,7 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       ser.write_type_6("step_down_weight", data.getStepDownWeight());
       ser.write_type_6("cost_per_step", data.getCostPerStep());
       ser.write_type_7("use_quadratic_distance_cost", data.getUseQuadraticDistanceCost());
+      ser.write_type_7("use_quadratic_height_cost", data.getUseQuadraticHeightCost());
    }
 
    @Override
@@ -184,6 +194,7 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       data.setStepDownWeight(ser.read_type_6("step_down_weight"));
       data.setCostPerStep(ser.read_type_6("cost_per_step"));
       data.setUseQuadraticDistanceCost(ser.read_type_7("use_quadratic_distance_cost"));
+      data.setUseQuadraticHeightCost(ser.read_type_7("use_quadratic_height_cost"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerCostParametersPacket src, controller_msgs.msg.dds.FootstepPlannerCostParametersPacket dest)

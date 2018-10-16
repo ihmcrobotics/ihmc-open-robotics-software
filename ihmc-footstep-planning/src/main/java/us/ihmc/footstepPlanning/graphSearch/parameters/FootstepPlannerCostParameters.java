@@ -1,8 +1,25 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
+import us.ihmc.footstepPlanning.graphSearch.stepCost.QuadraticDistanceAndYawCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.QuadraticHeightCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.LinearHeightCost;
+
+
 public interface FootstepPlannerCostParameters
 {
+   /**
+    * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
+    */
    default boolean useQuadraticDistanceCost()
+   {
+      return false;
+   }
+
+   /**
+    * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
+    */
+   default boolean useQuadraticHeightCost()
    {
       return false;
    }
