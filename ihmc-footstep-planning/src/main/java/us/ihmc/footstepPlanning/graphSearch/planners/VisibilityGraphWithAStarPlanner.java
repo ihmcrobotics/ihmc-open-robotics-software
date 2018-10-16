@@ -53,9 +53,10 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
+   private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
+
    private static final double defaultHeuristicWeight = 15.0;
-   private static final double planningHorizon = 1.0;
    private static final double defaultTimeout = 5.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -63,6 +64,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
    private final YoDouble timeSpentBeforeFootstepPlanner = new  YoDouble("timeSpentBeforeFootstepPlanner", registry);
    private final YoDouble timeSpentInFootstepPlanner = new  YoDouble("timeSpentInFootstepPlanner", registry);
+   private final YoDouble planningHorizonLength = new YoDouble("planningHorizonLength", registry);
    private final YoEnum<FootstepPlanningResult> yoResult = new YoEnum<>("planningResult", registry, FootstepPlanningResult.class);
    private final NavigableRegionsManager navigableRegionsManager;
 
@@ -94,6 +96,8 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       FootstepCost stepCostCalculator = new DistanceAndYawBasedCost(parameters);
       FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
 
+      planningHorizonLength.set(1.0);
+
       heuristics.setWeight(defaultHeuristicWeight);
       footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, postProcessingSnapper, registry);
 
@@ -122,6 +126,14 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    @Override
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
    {
+      if (side == null)
+      {
+         if (DEBUG)
+            PrintTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
+
+         side = defaultStartNodeSide;
+      }
+
       double defaultStepWidth = parameters.getIdealFootstepWidth();
       ReferenceFrame stanceFrame = new PoseReferenceFrame("stanceFrame", stanceFootPose);
       bodyStartPose.setToZero(stanceFrame);
@@ -149,6 +161,18 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    {
       footstepPlanner.setPlanarRegions(planarRegionsList);
       this.planarRegionsList = planarRegionsList;
+   }
+
+   @Override
+   public double getPlanningDuration()
+   {
+      return timeSpentBeforeFootstepPlanner.getDoubleValue() + timeSpentInFootstepPlanner.getDoubleValue();
+   }
+
+   @Override
+   public void setPlanningHorizonLength(double planningHorizon)
+   {
+      planningHorizonLength.set(planningHorizon);
    }
 
    @Override
@@ -183,7 +207,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
          if(DEBUG)
          {
-            PrintTools.info("Starting to plan using )" + getClass().getSimpleName());
+            PrintTools.info("Starting to plan using " + getClass().getSimpleName());
             PrintTools.info("Body start pose: " + startPos);
             PrintTools.info("Body goal pose:  " + goalPos);
          }
@@ -198,7 +222,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
                {
                   Vector2D goalDirection = new Vector2D(bodyGoalPose.getPosition());
                   goalDirection.sub(bodyStartPose.getX(), bodyStartPose.getY());
-                  goalDirection.scale(planningHorizon / goalDirection.length());
+                  goalDirection.scale(planningHorizonLength.getDoubleValue() / goalDirection.length());
                   waypoints.add(new Point2D(goalDirection.getX() + bodyStartPose.getX(), goalDirection.getY() + bodyStartPose.getY()));
                }
                else
@@ -237,7 +261,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
       Pose2D goalPose2d = new Pose2D();
       double pathLength = bodyPath.computePathLength(0.0);
-      double alpha = MathTools.clamp(planningHorizon / pathLength, 0.0, 1.0);
+      double alpha = MathTools.clamp(planningHorizonLength.getDoubleValue() / pathLength, 0.0, 1.0);
       bodyPath.getPointAlongPath(alpha, goalPose2d);
       heuristics.setGoalAlpha(alpha);
 
@@ -316,7 +340,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    {
       Pose2D goalPose2d = new Pose2D();
       double pathLength = bodyPath.computePathLength(0.0);
-      double alpha = MathTools.clamp(planningHorizon / pathLength, 0.0, 1.0);
+      double alpha = MathTools.clamp(planningHorizonLength.getDoubleValue() / pathLength, 0.0, 1.0);
       bodyPath.getPointAlongPath(alpha, goalPose2d);
       return goalPose2d;
    }

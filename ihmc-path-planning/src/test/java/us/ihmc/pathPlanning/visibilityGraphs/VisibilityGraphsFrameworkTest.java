@@ -58,7 +58,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    // Whether to start the UI or not.
    private static boolean VISUALIZE = false;
    // For enabling helpful prints.
-   private static boolean DEBUG = true;
+   private static boolean DEBUG = false;
 
    // Because we use JavaFX, there will be two instance of VisibilityGraphsFrameworkTest, one for running the test and one starting the ui. The messager has to be static so both the ui and test use the same instance.
    private static JavaFXMessager messager = null;
@@ -84,33 +84,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 
    private static VisibilityGraphsParameters createTestParameters()
    {
-      return new DefaultVisibilityGraphParameters()
-      {
-         @Override
-         public double getTooHighToStepDistance()
-         {
-            return 0.4;
-         }
-
-         @Override
-         public double getExtrusionDistance()
-         {
-            return 0.4;
-         }
-
-         @Override
-         public NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
-         {
-            return new NavigableExtrusionDistanceCalculator()
-            {
-               @Override
-               public double computeExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
-               {
-                  return 0.01;
-               }
-            };
-         }
-      };
+      return new DefaultVisibilityGraphParameters();
    }
 
    @Before
@@ -248,8 +222,8 @@ public class VisibilityGraphsFrameworkTest extends Application
             messager.submitMessage(UIVisibilityGraphsTopics.ReloadDatasetRequest, false);
             messager.submitMessage(UIVisibilityGraphsTopics.PreviousDatasetRequest, false);
 
-            while (!nextDatasetRequested.get() && !reloadDatasetRequested.get() && !previousDatasetRequested.get()
-                  && dataset.getDatasetName().equals(requestedDatasetPathReference.get()))
+            while (!nextDatasetRequested.get() && !reloadDatasetRequested.get() && !previousDatasetRequested.get() && dataset.getDatasetName().equals(
+                  requestedDatasetPathReference.get()))
             {
                if (!messager.isMessagerOpen())
                   return; // The ui has been closed
@@ -304,6 +278,53 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       Assert.assertTrue("Number of failing datasets: " + numberOfFailingDatasets + " out of " + allDatasets.size() + ". Errors:" + errorMessages,
                         errorMessages.isEmpty());
+   }
+
+   private void runAssertionsOnDataset(DatasetTestRunner datasetTestRunner, String datasetname) throws Exception
+   {
+      List<VisibilityGraphsUnitTestDataset> allDatasets = VisibilityGraphsIOTools.loadAllDatasets(VisibilityGraphsDataExporter.class);
+
+      if (DEBUG)
+      {
+         PrintTools.info("Unit test files found: " + allDatasets.size());
+      }
+
+
+
+      if (VISUALIZE)
+      {
+         List<String> allDatasetNames = allDatasets.stream().map(VisibilityGraphsUnitTestDataset::getDatasetName).collect(Collectors.toList());
+         messager.submitMessage(UIVisibilityGraphsTopics.AllDatasetPaths, allDatasetNames);
+
+      }
+
+
+      if (allDatasets.isEmpty())
+         Assert.fail("Did not find any datasets to test.");
+
+      // Randomizing the regionIds so the viz is better
+      Random random = new Random(324);
+      allDatasets.stream().map(VisibilityGraphsUnitTestDataset::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
+                 .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
+
+      VisibilityGraphsUnitTestDataset dataset = allDatasets.stream().filter(d -> d.getDatasetName().equals(datasetname)).findFirst().orElse(null);
+
+      if (VISUALIZE)
+      {
+         messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
+         messager.submitMessage(UIVisibilityGraphsTopics.CurrentDatasetPath, dataset.getDatasetName());
+      }
+
+      if (DEBUG)
+      {
+         PrintTools.info("Processing file: " + dataset.getDatasetName());
+      }
+
+      String errorMessages = datasetTestRunner.testDataset(dataset);
+
+
+      Assert.assertTrue("Errors: " + errorMessages, errorMessages.isEmpty());
+      ThreadTools.sleepForever(); // Apparently need to give some time for the prints to appear in the right order.
    }
 
    private String runAssertionsWithoutOcclusion(VisibilityGraphsUnitTestDataset dataset)
@@ -760,8 +781,19 @@ public class VisibilityGraphsFrameworkTest extends Application
       }
    }
 
-   private static interface DatasetTestRunner
+private static interface DatasetTestRunner
+{
+   String testDataset(VisibilityGraphsUnitTestDataset dataset);
+
+}
+
+   public static void main(String[] args) throws Exception
    {
-      String testDataset(VisibilityGraphsUnitTestDataset dataset);
+      VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
+      String prefix = "unitTestData/testable/";
+      test.setup();
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
+      test.tearDown();
+
    }
 }
