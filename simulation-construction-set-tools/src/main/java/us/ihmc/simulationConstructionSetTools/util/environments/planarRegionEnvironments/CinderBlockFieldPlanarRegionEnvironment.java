@@ -1,6 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments;
 
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -143,6 +144,8 @@ public class CinderBlockFieldPlanarRegionEnvironment extends PlanarRegionEnviron
       generator.translate(xPosition, 0.0, -0.01);
       generator.addCubeReferencedAtBottomMiddle(1.5, 4.0 * cinderBlockLength, 0.01);
       generator.identity();
+
+      addPlanarRegionsToTerrain(YoAppearance.Grey());
    }
 
    private static void setUpFlatBlock(PlanarRegionsListGenerator generator, double xInWorld, double yInWorld, double bottomSurfaceHeightLowestPoint)

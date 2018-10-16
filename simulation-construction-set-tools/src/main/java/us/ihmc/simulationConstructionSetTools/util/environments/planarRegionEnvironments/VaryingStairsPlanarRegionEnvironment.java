@@ -1,5 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments;
 
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+
 public class VaryingStairsPlanarRegionEnvironment extends PlanarRegionEnvironmentInterface
 {
    public VaryingStairsPlanarRegionEnvironment(double startX, double startZ, double[] stepTreads, double[] stepRises)
@@ -11,5 +13,7 @@ public class VaryingStairsPlanarRegionEnvironment extends PlanarRegionEnvironmen
          generator.addCubeReferencedAtBottomNegativeXEdgeCenter(stepTreads[i], 1.0, -0.1);
          generator.translate(stepTreads[i] + 0.01, 0.0, stepRises[i]);
       }
+
+      addPlanarRegionsToTerrain(YoAppearance.Grey());
    }
 }
