@@ -5,13 +5,13 @@ import java.util.Collection;
 import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -129,7 +129,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       // to transform desired positions between body fixed control frames.
       if (command.useCustomControlFrame() && !Precision.equals(command.getControlFramePose().getTranslationVector().lengthSquared(), 0.0))
       {
-         PrintTools.warn("Specifying a control frame offset for a body position controller is not possible.");
+         LogTools.warn("Specifying a control frame offset for a body position controller is not possible.");
          clear();
          positionHelper.clear();
          return false;

@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -16,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
@@ -287,13 +287,13 @@ public class RigidBodyOrientationControlHelper
       }
       else if (command.getTrajectoryFrame() != trajectoryGenerator.getCurrentTrajectoryFrame())
       {
-         PrintTools.warn(warningPrefix + "Was executing in " + trajectoryGenerator.getCurrentTrajectoryFrame() + " can not switch to "
+         LogTools.warn(warningPrefix + "Was executing in " + trajectoryGenerator.getCurrentTrajectoryFrame() + " can not switch to "
                + command.getTrajectoryFrame() + " without override.");
          return false;
       }
       else if (!selectionMatrix.equals(command.getSelectionMatrix()))
       {
-         PrintTools.warn(warningPrefix + "Received a change of selection matrix without an override. Was\n" + selectionMatrix + "\nRequested\n"
+         LogTools.warn(warningPrefix + "Received a change of selection matrix without an override. Was\n" + selectionMatrix + "\nRequested\n"
                + command.getSelectionMatrix());
          return false;
       }
@@ -338,7 +338,7 @@ public class RigidBodyOrientationControlHelper
    {
       if (pointQueue.size() >= RigidBodyTaskspaceControlState.maxPoints)
       {
-         PrintTools.info(warningPrefix + "Reached maximum capacity of " + RigidBodyTaskspaceControlState.maxPoints + " can not execute trajectory.");
+         LogTools.warn(warningPrefix + "Reached maximum capacity of " + RigidBodyTaskspaceControlState.maxPoints + " can not execute trajectory.");
          return false;
       }
 
@@ -350,7 +350,7 @@ public class RigidBodyOrientationControlHelper
    {
       if (time <= getLastTrajectoryPointTime())
       {
-         PrintTools.warn(warningPrefix + "Time in trajectory must be strictly increasing.");
+         LogTools.warn(warningPrefix + "Time in trajectory must be strictly increasing.");
          return false;
       }
       return true;
