@@ -343,7 +343,8 @@ public abstract class FootstepPlannerDataSetTest
 
       if (result.validForExecution())
       {
-         errorMessage += assertTrue(datasetName, datasetName + " did not reach goal.", PlannerTools.isGoalNextToLastStep(goal, plan));
+         errorMessage += assertTrue(datasetName, datasetName + " did not reach goal. Made it to " + PlannerTools.getEndPosition(plan) + ", trying to get to " +
+               goal, PlannerTools.isGoalNextToLastStep(goal, plan));
       }
 
       return errorMessage;

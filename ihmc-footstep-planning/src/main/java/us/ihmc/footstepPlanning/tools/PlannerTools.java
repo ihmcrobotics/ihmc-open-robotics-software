@@ -167,9 +167,19 @@ public class PlannerTools
 
    public static boolean isGoalNextToLastStep(Point3D desiredPosition, FootstepPlan footstepPlan, double epsilon)
    {
+      Point3D goalPosition = getEndPosition(footstepPlan);
+
+      if (goalPosition.epsilonEquals(desiredPosition, epsilon))
+         return true;
+      else
+         return false;
+   }
+
+   public static Point3D getEndPosition(FootstepPlan footstepPlan)
+   {
       int steps = footstepPlan.getNumberOfSteps();
       if (steps < 1)
-         throw new RuntimeException("Did not get enough footsteps to check if goal is within feet.");
+         throw new RuntimeException("Did not get enough footsteps to get end position.");
 
       SimpleFootstep footstep = footstepPlan.getFootstep(steps - 1);
       FramePose3D stepPose = new FramePose3D();
@@ -186,9 +196,6 @@ public class PlannerTools
       Point3D goalPosition = new Point3D(achievedGoal.getPosition());
       goalPosition.add(goalOffset);
 
-      if (goalPosition.epsilonEquals(desiredPosition, epsilon))
-         return true;
-      else
-         return false;
+      return goalPosition;
    }
 }
