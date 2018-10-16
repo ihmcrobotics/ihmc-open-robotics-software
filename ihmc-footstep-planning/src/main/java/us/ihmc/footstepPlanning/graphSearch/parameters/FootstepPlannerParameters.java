@@ -8,6 +8,15 @@ import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 public interface FootstepPlannerParameters
 {
    /**
+    * Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
+    * to run slower.
+    */
+   default boolean checkForBodyBoxCollisions()
+   {
+      return false;
+   }
+
+   /**
     * Returns the ideal step width for walking on flat ground.
     */
    double getIdealFootstepWidth();

@@ -20,6 +20,11 @@ module controller_msgs
          */
         unsigned long sequence_id;
         /**
+         * Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
+         * to run slower.
+         */
+        boolean check_for_body_box_collisions;
+        /**
          * Returns the ideal step width for walking on flat ground.
          */
         @defaultValue(value=-1.0)

@@ -42,6 +42,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -118,6 +120,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -220,6 +225,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
    {
       cdr.write_type_4(data.getSequenceId());
 
+      cdr.write_type_7(data.getCheckForBodyBoxCollisions());
+
       cdr.write_type_6(data.getIdealFootstepWidth());
 
       cdr.write_type_6(data.getIdealFootstepLength());
@@ -286,6 +293,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
    public static void read(controller_msgs.msg.dds.FootstepPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
+      	
+      data.setCheckForBodyBoxCollisions(cdr.read_type_7());
       	
       data.setIdealFootstepWidth(cdr.read_type_6());
       	
@@ -355,6 +364,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
    public final void serialize(controller_msgs.msg.dds.FootstepPlannerParametersPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_7("check_for_body_box_collisions", data.getCheckForBodyBoxCollisions());
       ser.write_type_6("ideal_footstep_width", data.getIdealFootstepWidth());
       ser.write_type_6("ideal_footstep_length", data.getIdealFootstepLength());
       ser.write_type_6("wiggle_inside_delta", data.getWiggleInsideDelta());
@@ -393,6 +403,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepPlannerParametersPacket data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setCheckForBodyBoxCollisions(ser.read_type_7("check_for_body_box_collisions"));
       data.setIdealFootstepWidth(ser.read_type_6("ideal_footstep_width"));
       data.setIdealFootstepLength(ser.read_type_6("ideal_footstep_length"));
       data.setWiggleInsideDelta(ser.read_type_6("wiggle_inside_delta"));
