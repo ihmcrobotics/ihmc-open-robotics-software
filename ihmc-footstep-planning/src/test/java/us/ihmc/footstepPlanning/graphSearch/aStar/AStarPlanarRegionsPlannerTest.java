@@ -45,6 +45,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
@@ -225,7 +226,7 @@ public class AStarPlanarRegionsPlannerTest
          }
       };
       FootstepNodeChecker nodeChecker = new SimpleNodeChecker();
-      EuclideanDistanceHeuristics heuristics = new EuclideanDistanceHeuristics(registry);
+      EuclideanDistanceHeuristics heuristics = new EuclideanDistanceHeuristics(() -> 5.0);
       SimpleGridResolutionBasedExpansion expansion = new SimpleGridResolutionBasedExpansion();
       EuclideanBasedCost stepCostCalculator = new EuclideanBasedCost(parameters);
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
@@ -250,7 +251,6 @@ public class AStarPlanarRegionsPlannerTest
          goalPose.setY(-parameters.getIdealFootstepWidth() / 2.0);
          assertTrue(goalPose.epsilonEquals(achievedGoalPose, FootstepNode.gridSizeXY));
 
-         planner.setWeight(5.0);
          assertEquals(FootstepPlanningResult.SUB_OPTIMAL_SOLUTION, planner.plan());
 
          planner.setTimeout(1.0e-10);

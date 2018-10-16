@@ -89,7 +89,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       parentRegistry.addChild(registry);
       this.parameters = parameters;
       bodyPath = new WaypointDefinedBodyPathPlan();
-      heuristics = new BodyPathHeuristics("visAStar", registry, parameters, bodyPath);
+      heuristics = new BodyPathHeuristics(parameters.getCostParameters().getVisGraphWithAStarHeuristicsWeight(), parameters, bodyPath);
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
@@ -105,7 +105,6 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
       planningHorizonLength.set(1.0);
 
-      heuristics.setWeight(defaultHeuristicWeight);
       footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, registry);
 
       this.navigableRegionsManager = new NavigableRegionsManager(new YoVisibilityGraphParameters(new DefaultVisibilityGraphParameters(), registry));

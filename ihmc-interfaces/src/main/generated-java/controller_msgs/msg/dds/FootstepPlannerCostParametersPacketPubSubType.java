@@ -62,6 +62,14 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -108,6 +116,18 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -136,6 +156,14 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
 
       cdr.write_type_7(data.getUseQuadraticHeightCost());
 
+      cdr.write_type_6(data.getAStarHeuristicsWeight());
+
+      cdr.write_type_6(data.getVisGraphWithAStarHeuristicsWeight());
+
+      cdr.write_type_6(data.getDepthFirstHeuristicsWeight());
+
+      cdr.write_type_6(data.getBodyPathBasedHeuristicsWeight());
+
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerCostParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -162,6 +190,14 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       	
       data.setUseQuadraticHeightCost(cdr.read_type_7());
       	
+      data.setAStarHeuristicsWeight(cdr.read_type_6());
+      	
+      data.setVisGraphWithAStarHeuristicsWeight(cdr.read_type_6());
+      	
+      data.setDepthFirstHeuristicsWeight(cdr.read_type_6());
+      	
+      data.setBodyPathBasedHeuristicsWeight(cdr.read_type_6());
+      	
 
    }
 
@@ -179,6 +215,10 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       ser.write_type_6("cost_per_step", data.getCostPerStep());
       ser.write_type_7("use_quadratic_distance_cost", data.getUseQuadraticDistanceCost());
       ser.write_type_7("use_quadratic_height_cost", data.getUseQuadraticHeightCost());
+      ser.write_type_6("a_star_heuristics_weight", data.getAStarHeuristicsWeight());
+      ser.write_type_6("vis_graph_with_a_star_heuristics_weight", data.getVisGraphWithAStarHeuristicsWeight());
+      ser.write_type_6("depth_first_heuristics_weight", data.getDepthFirstHeuristicsWeight());
+      ser.write_type_6("body_path_based_heuristics_weight", data.getBodyPathBasedHeuristicsWeight());
    }
 
    @Override
@@ -195,6 +235,10 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       data.setCostPerStep(ser.read_type_6("cost_per_step"));
       data.setUseQuadraticDistanceCost(ser.read_type_7("use_quadratic_distance_cost"));
       data.setUseQuadraticHeightCost(ser.read_type_7("use_quadratic_height_cost"));
+      data.setAStarHeuristicsWeight(ser.read_type_6("a_star_heuristics_weight"));
+      data.setVisGraphWithAStarHeuristicsWeight(ser.read_type_6("vis_graph_with_a_star_heuristics_weight"));
+      data.setDepthFirstHeuristicsWeight(ser.read_type_6("depth_first_heuristics_weight"));
+      data.setBodyPathBasedHeuristicsWeight(ser.read_type_6("body_path_based_heuristics_weight"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerCostParametersPacket src, controller_msgs.msg.dds.FootstepPlannerCostParametersPacket dest)

@@ -74,6 +74,26 @@ module controller_msgs
          * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
          */
         boolean use_quadratic_height_cost;
+        /**
+         * Gets the weight for the heuristics in the A Star planner.
+         */
+        @defaultValue(value=-1.0)
+        double a_star_heuristics_weight;
+        /**
+         * Gets the weight for the heuristics in the Visibility graph with A star planner.
+         */
+        @defaultValue(value=-1.0)
+        double vis_graph_with_a_star_heuristics_weight;
+        /**
+         * Gets the weight for the heuristics in the Depth First planner.
+         */
+        @defaultValue(value=-1.0)
+        double depth_first_heuristics_weight;
+        /**
+         * Gets the weight for the heuristics in the Body path based planner.
+         */
+        @defaultValue(value=-1.0)
+        double body_path_based_heuristics_weight;
       };
     };
   };

@@ -47,4 +47,20 @@ bool use_quadratic_distance_cost
 # Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
 bool use_quadratic_height_cost
 
+# Gets the weight for the heuristics in the A Star planner.
+# Field default value -1.0
+float64 a_star_heuristics_weight
+
+# Gets the weight for the heuristics in the Visibility graph with A star planner.
+# Field default value -1.0
+float64 vis_graph_with_a_star_heuristics_weight
+
+# Gets the weight for the heuristics in the Depth First planner.
+# Field default value -1.0
+float64 depth_first_heuristics_weight
+
+# Gets the weight for the heuristics in the Body path based planner.
+# Field default value -1.0
+float64 body_path_based_heuristics_weight
+
 

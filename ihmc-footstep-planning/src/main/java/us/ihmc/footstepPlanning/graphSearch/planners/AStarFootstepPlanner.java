@@ -95,10 +95,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
       parentRegistry.addChild(registry);
    }
 
-   public void setWeight(double weight)
-   {
-      heuristics.setWeight(weight);
-   }
 
    @Override
    public void setTimeout(double timeoutInSeconds)
@@ -352,6 +348,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       if (heuristics.getWeight() <= 1.0)
          return FootstepPlanningResult.OPTIMAL_SOLUTION;
+
       return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
    }
 
@@ -369,7 +366,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
 
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics("aStarFlat", parameters, registry);
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getAStarHeuristicsWeight(), parameters);
       FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(parameters);
 
       return new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz, registry);
@@ -386,7 +383,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
       FootstepNodeChecker checkerOfCheckers = new FootstepNodeCheckerOfCheckers(Arrays.asList(nodeChecker, cliffAvoider));
 
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics("aStar", parameters, registry);
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getAStarHeuristicsWeight(), parameters);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
@@ -395,8 +392,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
       costBuilder.setIncludePitchAndRollCost(true);
 
       FootstepCost footstepCost = costBuilder.buildCost();
-
-      heuristics.setWeight(1.5);
 
       AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, checkerOfCheckers, heuristics, expansion, footstepCost, postProcessingSnapper, viz,
                                                               registry);

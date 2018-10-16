@@ -2,6 +2,8 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerCostParametersPacket;
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -14,11 +16,16 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
    private final YoBoolean useQuadraticDistanceCost = new YoBoolean("useQuadraticDistanceCost", registry);
    private final YoBoolean useQuadraticHeightCost = new YoBoolean("useQuadraticHeightCost", registry);
 
+   private final YoDouble aStarHeuristicsWeight = new YoDouble("aStarHeuristicsWeight", registry);
+   private final YoDouble visGraphAStarHeuristicsWeight = new YoDouble("visGraphAStarHeuristicsWeight", registry);
+   private final YoDouble depthFirstHeuristicsWeight = new YoDouble("depthFirstHeuristicsWeight", registry);
+   private final YoDouble bodyPathBasedHeuristicsWeight = new YoDouble("bodyPathBasedHeuristicsWeight", registry);
+
    private final YoDouble yawWeight = new YoDouble("yawWeight", registry);
    private final YoDouble pitchWeight = new YoDouble("pitchWeight", registry);
    private final YoDouble rollWeight = new YoDouble("rollWeight", registry);
    private final YoDouble forwardWeight = new YoDouble("forwardWeight", registry);
-   private final YoDouble lateralWeight  = new YoDouble("lateralWeight", registry);
+   private final YoDouble lateralWeight = new YoDouble("lateralWeight", registry);
    private final YoDouble stepUpWeight = new YoDouble("stepUpWeight", registry);
    private final YoDouble stepDownWeight = new YoDouble("stepDownWeight", registry);
    private final YoDouble costPerStep = new YoDouble("costPerStep", registry);
@@ -33,6 +40,11 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
    {
       setUseQuadraticDistanceCost(defaults.useQuadraticDistanceCost());
       setUseQuadraticHeightCost(defaults.useQuadraticHeightCost());
+
+      setAStarHeuristicsWeight(defaults.getAStarHeuristicsWeight().getValue());
+      setVisGraphWithAStarHeuristicsWeight(defaults.getVisGraphWithAStarHeuristicsWeight().getValue());
+      setDepthFirstHeuristicsWeight(defaults.getDepthFirstHeuristicsWeight().getValue());
+      setBodyPathBasedHeuristicWeight(defaults.getBodyPathBasedHeuristicsWeight().getValue());
 
       setYawWeight(defaults.getYawWeight());
       setPitchWeight(defaults.getPitchWeight());
@@ -54,6 +66,30 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
    public boolean useQuadraticHeightCost()
    {
       return useQuadraticHeightCost.getBooleanValue();
+   }
+
+   @Override
+   public DoubleProvider getAStarHeuristicsWeight()
+   {
+      return aStarHeuristicsWeight;
+   }
+
+   @Override
+   public DoubleProvider getVisGraphWithAStarHeuristicsWeight()
+   {
+      return visGraphAStarHeuristicsWeight;
+   }
+
+   @Override
+   public DoubleProvider getDepthFirstHeuristicsWeight()
+   {
+      return depthFirstHeuristicsWeight;
+   }
+
+   @Override
+   public DoubleProvider getBodyPathBasedHeuristicsWeight()
+   {
+      return bodyPathBasedHeuristicsWeight;
    }
 
    @Override
@@ -109,6 +145,15 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
       setUseQuadraticDistanceCost(parametersPacket.getUseQuadraticDistanceCost());
       setUseQuadraticHeightCost(parametersPacket.getUseQuadraticHeightCost());
 
+      if (parametersPacket.getAStarHeuristicsWeight() != -1.0)
+         setAStarHeuristicsWeight(parametersPacket.getAStarHeuristicsWeight());
+      if (parametersPacket.getVisGraphWithAStarHeuristicsWeight() != -1.0)
+         setVisGraphWithAStarHeuristicsWeight(parametersPacket.getVisGraphWithAStarHeuristicsWeight());
+      if (parametersPacket.getDepthFirstHeuristicsWeight() != -1.0)
+         setDepthFirstHeuristicsWeight(parametersPacket.getDepthFirstHeuristicsWeight());
+      if (parametersPacket.getBodyPathBasedHeuristicsWeight() != -1.0)
+         setBodyPathBasedHeuristicWeight(parametersPacket.getBodyPathBasedHeuristicsWeight());
+
       if (parametersPacket.getYawWeight() != -1.0)
          setYawWeight(parametersPacket.getYawWeight());
       if (parametersPacket.getPitchWeight() != -1.0)
@@ -135,6 +180,26 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
    public void setUseQuadraticHeightCost(boolean useQuadraticHeightCost)
    {
       this.useQuadraticHeightCost.set(useQuadraticHeightCost);
+   }
+
+   public void setAStarHeuristicsWeight(double aStarHeuristicsWeight)
+   {
+      this.aStarHeuristicsWeight.set(aStarHeuristicsWeight);
+   }
+
+   public void setVisGraphWithAStarHeuristicsWeight(double visGraphWithAStarHeuristicsWeight)
+   {
+      this.visGraphAStarHeuristicsWeight.set(visGraphWithAStarHeuristicsWeight);
+   }
+
+   public void setDepthFirstHeuristicsWeight(double depthFirstHeuristicsWeight)
+   {
+      this.depthFirstHeuristicsWeight.set(depthFirstHeuristicsWeight);
+   }
+
+   public void setBodyPathBasedHeuristicWeight(double bodyPathBasedHeuristicWeight)
+   {
+      this.bodyPathBasedHeuristicsWeight.set(bodyPathBasedHeuristicWeight);
    }
 
    public void setYawWeight(double yawWeight)

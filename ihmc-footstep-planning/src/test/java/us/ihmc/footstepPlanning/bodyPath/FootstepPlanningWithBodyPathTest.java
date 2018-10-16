@@ -150,12 +150,11 @@ public class FootstepPlanningWithBodyPathTest
                                                            WaypointDefinedBodyPathPlan bodyPath)
    {
       FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
-      CostToGoHeuristics heuristics = new BodyPathHeuristics(registry, parameters, bodyPath);
+      CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 10.0, parameters, bodyPath);
       FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(parameters);
       FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(parameters);
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
 
-      heuristics.setWeight(10.0);
       AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, nodeExpansion, stepCostCalculator, snapper, registry);
       return planner;
    }
