@@ -51,13 +51,13 @@ public class FootstepCostBuilder
       if (includeHeightCost.get())
       {
          if (useQuadraticHeightCost.get())
-            compositeFootstepCost.addFootstepCost(new QuadraticHeightCost());
+            compositeFootstepCost.addFootstepCost(new QuadraticHeightCost(footstepPlannerParameters.get().getCostParameters()));
          else
-            compositeFootstepCost.addFootstepCost(new LinearHeightCost());
+            compositeFootstepCost.addFootstepCost(new LinearHeightCost(footstepPlannerParameters.get().getCostParameters()));
       }
 
       if (usePitchAndRollCost.get())
-         compositeFootstepCost.addFootstepCost(new PitchAndRollBasedCost());
+         compositeFootstepCost.addFootstepCost(new PitchAndRollBasedCost(footstepPlannerParameters.get().getCostParameters()));
 
       if (useQuadraticStepCost.get())
       {

@@ -1,11 +1,16 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 
 public class PitchAndRollBasedCost implements FootstepCost
 {
-   private static final double pitchCost = 0.5;
-   private static final double rollCost = 2.0;
+   private final FootstepPlannerCostParameters costParameters;
+
+   public PitchAndRollBasedCost(FootstepPlannerCostParameters costParameters)
+   {
+      this.costParameters = costParameters;
+   }
 
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
@@ -13,6 +18,6 @@ public class PitchAndRollBasedCost implements FootstepCost
       if (!endNode.hasPitch() || !endNode.hasRoll())
          return 0.0;
 
-      return pitchCost * Math.abs(endNode.getPitch()) + rollCost * Math.abs(endNode.getRoll());
+      return costParameters.getPitchWeight() * Math.abs(endNode.getPitch()) + costParameters.getRollWeight() * Math.abs(endNode.getRoll());
    }
 }
