@@ -262,7 +262,7 @@ public abstract class FootstepPlannerDataSetTest
          PrintTools.info("Sending out planning request packet.");
    }
 
-   protected void packPlanningRequest(FootstepPlannerUnitTestDataset dataset, SharedMemoryMessager messager)
+   protected void packPlanningRequest(FootstepPlannerUnitTestDataset dataset, Messager messager)
    {
       messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, dataset.getStart());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, dataset.getGoal());

@@ -17,6 +17,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
@@ -33,7 +34,7 @@ public class RemotePlannerMessageConverter
 
    private final RealtimeRos2Node ros2Node;
 
-   private final SharedMemoryMessager messager;
+   private final Messager messager;
    private final String robotName;
 
    private IHMCRealtimeROS2Publisher<FootstepPlanningToolboxOutputStatus> outputStatusPublisher;
@@ -45,24 +46,24 @@ public class RemotePlannerMessageConverter
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Integer> sequenceIdReference;
 
-   public static RemotePlannerMessageConverter createRemoteConverter(SharedMemoryMessager messager, String robotName)
+   public static RemotePlannerMessageConverter createRemoteConverter(Messager messager, String robotName)
    {
       return createConverter(messager, robotName, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
-   public static RemotePlannerMessageConverter createIntraprocessConverter(SharedMemoryMessager messager, String robotName)
+   public static RemotePlannerMessageConverter createIntraprocessConverter(Messager messager, String robotName)
    {
       return createConverter(messager, robotName, DomainFactory.PubSubImplementation.INTRAPROCESS);
    }
 
-   public static RemotePlannerMessageConverter createConverter(SharedMemoryMessager messager, String robotName,
+   public static RemotePlannerMessageConverter createConverter(Messager messager, String robotName,
                                                                DomainFactory.PubSubImplementation implementation)
    {
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "ihmc_footstep_planner_ui");
       return new RemotePlannerMessageConverter(ros2Node, messager, robotName);
    }
 
-   public RemotePlannerMessageConverter(RealtimeRos2Node ros2Node, SharedMemoryMessager messager, String robotName)
+   public RemotePlannerMessageConverter(RealtimeRos2Node ros2Node, Messager messager, String robotName)
    {
       this.messager = messager;
       this.robotName = robotName;

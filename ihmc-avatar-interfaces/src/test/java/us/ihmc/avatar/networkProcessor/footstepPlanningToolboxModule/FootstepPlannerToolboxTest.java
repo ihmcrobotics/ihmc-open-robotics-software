@@ -140,7 +140,7 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
    }
 
    @After
-   public void tearDown()
+   public void tearDown() throws Exception
    {
       ros2Node.destroy();
 

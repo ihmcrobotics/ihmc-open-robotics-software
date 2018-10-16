@@ -44,7 +44,7 @@ public abstract class MessagerPlannerDataSetTest extends FootstepPlannerDataSetT
    }
 
    @After
-   public void tearDown()
+   public void tearDown() throws Exception
    {
       module.stop();
       messager.closeMessager();
