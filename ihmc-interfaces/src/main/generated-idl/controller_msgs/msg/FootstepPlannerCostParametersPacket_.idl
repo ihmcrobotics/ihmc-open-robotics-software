@@ -1,0 +1,74 @@
+#ifndef __controller_msgs__msg__FootstepPlannerCostParametersPacket__idl__
+#define __controller_msgs__msg__FootstepPlannerCostParametersPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC footstep planning module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::FootstepPlannerCostParametersPacket_")
+      struct FootstepPlannerCostParametersPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * When using a cost based planning approach this value defined how the yaw of a footstep will be
+         * weighted in comparison to its position.
+         */
+        @defaultValue(value=-1.0)
+        double yaw_weight;
+        /**
+         * When using a cost based planning approach this value defines how the pitch will be weighted.
+         */
+        @defaultValue(value=-1.0)
+        double pitch_weight;
+        /**
+         * When using a cost based planning approach this value defines how the roll will be weighted.
+         */
+        @defaultValue(value=-1.0)
+        double roll_weight;
+        /**
+         * When using a cost based planning approach, this value defines how the forward (or backward) displacement
+         * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
+         * weight is averaged with the value returned by {@link #getLateralWeight()}
+         */
+        @defaultValue(value=-1.0)
+        double forward_weight;
+        /**
+         * When using a cost based planning approach, this value defines how the lateral displacement
+         * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
+         * weight is averaged with the value returned by {@link #getForwardWeight()}
+         */
+        @defaultValue(value=-1.0)
+        double lateral_weight;
+        /**
+         * When using a cost based planning approach this value defines how the height change when stepping up will be
+         * weighted.
+         */
+        @defaultValue(value=-1.0)
+        double step_up_weight;
+        /**
+         * When using a cost based planning approach this value defines how the height change when stepping down will be
+         * weighted.
+         */
+        @defaultValue(value=-1.0)
+        double step_down_weight;
+        /**
+         * When using a cost based planning approach this value defines the cost that is added for each step
+         * taken. Setting this value to a high number will favor plans with less steps.
+         */
+        @defaultValue(value=-1.0)
+        double cost_per_step;
+      };
+    };
+  };
+};
+
+#endif

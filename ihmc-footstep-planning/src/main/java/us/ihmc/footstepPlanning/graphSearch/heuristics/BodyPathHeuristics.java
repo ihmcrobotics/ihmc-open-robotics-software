@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.heuristics;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
@@ -15,6 +16,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
    private static final double yawViolationWeight = 5.0;
    private final BodyPathPlanner bodyPath;
    private final FootstepPlannerParameters parameters;
+   private final FootstepPlannerCostParameters costParameters;
 
    private double goalAlpha = 1.0;
 
@@ -23,6 +25,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       super(registry);
       this.bodyPath = bodyPath;
       this.parameters = parameters;
+      costParameters = parameters.getCostParameters();
    }
 
    @Override
@@ -41,7 +44,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
 
       double yaw = yawViolationWeight * AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), closestPointOnPath.getYaw());
       double minSteps = remainingDistance / parameters.getMaximumStepReach();
-      return remainingDistance + parameters.getYawWeight() * Math.abs(yaw) + parameters.getCostPerStep() * minSteps;
+      return remainingDistance + costParameters.getYawWeight() * Math.abs(yaw) + costParameters.getCostPerStep() * minSteps;
    }
 
    public void setGoalAlpha(double alpha)

@@ -18,12 +18,14 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerCostParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
@@ -210,9 +212,16 @@ public class AStarPlanarRegionsPlannerTest
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters()
       {
          @Override
-         public double getCostPerStep()
+         public FootstepPlannerCostParameters getCostParameters()
          {
-            return 0.0;
+            return new DefaultFootstepPlannerCostParameters()
+            {
+               @Override
+               public double getCostPerStep()
+               {
+                  return 0.0;
+               }
+            };
          }
       };
       FootstepNodeChecker nodeChecker = new SimpleNodeChecker();
