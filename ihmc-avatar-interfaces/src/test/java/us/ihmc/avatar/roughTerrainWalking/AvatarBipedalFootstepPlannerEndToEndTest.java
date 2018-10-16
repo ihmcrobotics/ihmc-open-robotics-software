@@ -42,6 +42,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.TwoBollardEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -77,6 +78,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    private PacketCommunicator toolboxCommunicator;
    private PlanarRegionsList cinderBlockField;
    private PlanarRegionsList steppingStoneField;
+   private PlanarRegionsList bollardEnvironment;
 
    public static final double CINDER_BLOCK_START_X = 0.0;
    public static final double CINDER_BLOCK_START_Y = 0.0;
@@ -101,8 +103,9 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       PlanarRegionsListExamples.generateCinderBlockField(generator, CINDER_BLOCK_SIZE, CINDER_BLOCK_HEIGHT,
                                                                             CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS,
                                                                             CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS, CINDER_BLOCK_HEIGHT_VARIATION);
-      steppingStoneField = PlanarRegionsListExamples.generateSteppingStonesEnvironment(STEPPING_STONE_PATH_RADIUS);
       cinderBlockField = generator.getPlanarRegionsList();
+      steppingStoneField = PlanarRegionsListExamples.generateSteppingStonesEnvironment(STEPPING_STONE_PATH_RADIUS);
+      bollardEnvironment = new TwoBollardEnvironment(0.65).getPlanarRegionsList();
 
       networkModuleParameters = new DRCNetworkModuleParameters();
       networkModuleParameters.enableFootstepPlanningToolbox(true);
@@ -147,7 +150,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = timeout)
-   public void testShortCinderBlockFieldWithAStar() throws IOException
+   public void testShortCinderBlockFieldWithAStar()
    {
       double courseLength = CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS * CINDER_BLOCK_SIZE + CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, 0.0, 0.007);
@@ -158,7 +161,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = timeout)
-   public void testShortCinderBlockFieldWithVisibilityGraph() throws IOException
+   public void testShortCinderBlockFieldWithVisibilityGraph()
    {
       double courseLength = CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS * CINDER_BLOCK_SIZE + CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, 0.0, 0.007);
@@ -169,7 +172,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = timeout)
-   public void testShortCinderBlockFieldWithPlanarRegionBipedalPlanner() throws IOException
+   public void testShortCinderBlockFieldWithPlanarRegionBipedalPlanner()
    {
       double courseLength = CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS * CINDER_BLOCK_SIZE + CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, 0.0, 0.007);
@@ -180,7 +183,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = timeout)
-   public void testSteppingStonesWithAStar() throws IOException
+   public void testSteppingStonesWithAStar()
    {
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, -0.75, 0.007, 0.5 * Math.PI);
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
@@ -191,13 +194,23 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = timeout)
-   public void testSteppingStonesWithPlanarRegionBipedalPlanner() throws IOException
+   public void testSteppingStonesWithPlanarRegionBipedalPlanner()
    {
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, -0.75, 0.007, 0.5 * Math.PI);
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                              new Pose3D(STEPPING_STONE_PATH_RADIUS + 0.5, STEPPING_STONE_PATH_RADIUS, 0.0, 0.0, 0.0, 0.0));
 
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.PLANAR_REGION_BIPEDAL, steppingStoneField, startingLocation, goalPose);
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = timeout)
+   public void testWalkingBetweenBollardsAStarPlanner()
+   {
+      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(-1.5, 0.0, 0.007, 0.0);
+      FramePose3D goalPose = new FramePose3D();
+      goalPose.setX(1.5);
+      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, bollardEnvironment, startingLocation, goalPose);
    }
 
    private void runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType plannerType, PlanarRegionsList planarRegionsList,
