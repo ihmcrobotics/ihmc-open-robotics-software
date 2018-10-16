@@ -40,6 +40,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -770,6 +771,51 @@ public class RemoteFootstepPlannerUIMessagingTest
 
             return new FootstepPlannerCostParameters()
             {
+               private final boolean useQuadraticDistanceCost = RandomNumbers.nextBoolean(random, 0.5);
+
+               @Override
+               public boolean useQuadraticDistanceCost()
+               {
+                  return useQuadraticDistanceCost;
+               }
+
+               private final boolean useQuadraticHeightCost = RandomNumbers.nextBoolean(random, 0.5);
+
+               @Override
+               public boolean useQuadraticHeightCost()
+               {
+                  return useQuadraticHeightCost;
+               }
+
+               private final double aStarHeuristicsWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+               private final double visGraphWithAStarHeuristicsWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+               private final double depthFirstHeuristicsWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+               private final double bodyPathBasedHeuristicsWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+               @Override
+               public DoubleProvider getAStarHeuristicsWeight()
+               {
+                  return () -> aStarHeuristicsWeight;
+               }
+
+               @Override
+               public DoubleProvider getVisGraphWithAStarHeuristicsWeight()
+               {
+                  return () -> visGraphWithAStarHeuristicsWeight;
+               }
+
+               @Override
+               public DoubleProvider getDepthFirstHeuristicsWeight()
+               {
+                  return () -> depthFirstHeuristicsWeight;
+               }
+
+               @Override
+               public DoubleProvider getBodyPathBasedHeuristicsWeight()
+               {
+                  return () -> bodyPathBasedHeuristicsWeight;
+               }
+
                private final double yawWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
 
                @Override
@@ -959,6 +1005,12 @@ public class RemoteFootstepPlannerUIMessagingTest
    {
       assertEquals("Use quadratic distance cost flags aren't equal.", parameters.useQuadraticDistanceCost(), packet.getUseQuadraticDistanceCost());
       assertEquals("Use quadratic height cost flags aren't equal.", parameters.useQuadraticHeightCost(), packet.getUseQuadraticHeightCost());
+
+      assertEquals("A star heuristics weights aren't equal.", parameters.getAStarHeuristicsWeight().getValue(), packet.getAStarHeuristicsWeight(), epsilon);
+      assertEquals("Vis graph with A star heuristics weights aren't equal.", parameters.getVisGraphWithAStarHeuristicsWeight().getValue(), packet.getVisGraphWithAStarHeuristicsWeight(), epsilon);
+      assertEquals("Depth first heuristics weights aren't equal.", parameters.getDepthFirstHeuristicsWeight().getValue(), packet.getDepthFirstHeuristicsWeight(), epsilon);
+      assertEquals("Body path based heuristics weights aren't equal.", parameters.getBodyPathBasedHeuristicsWeight().getValue(), packet.getBodyPathBasedHeuristicsWeight(), epsilon);
+
       assertEquals("Yaw weights aren't equal.", parameters.getYawWeight(), packet.getYawWeight(), epsilon);
       assertEquals("Roll weights aren't equal.", parameters.getRollWeight(), packet.getRollWeight(), epsilon);
       assertEquals("Pitch weights aren't equal.", parameters.getPitchWeight(), packet.getPitchWeight(), epsilon);

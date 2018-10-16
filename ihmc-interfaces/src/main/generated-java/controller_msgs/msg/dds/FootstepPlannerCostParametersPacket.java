@@ -63,6 +63,22 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
             * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
             */
    public boolean use_quadratic_height_cost_;
+   /**
+            * Gets the weight for the heuristics in the A Star planner.
+            */
+   public double a_star_heuristics_weight_ = -1.0;
+   /**
+            * Gets the weight for the heuristics in the Visibility graph with A star planner.
+            */
+   public double vis_graph_with_a_star_heuristics_weight_ = -1.0;
+   /**
+            * Gets the weight for the heuristics in the Depth First planner.
+            */
+   public double depth_first_heuristics_weight_ = -1.0;
+   /**
+            * Gets the weight for the heuristics in the Body path based planner.
+            */
+   public double body_path_based_heuristics_weight_ = -1.0;
 
    public FootstepPlannerCostParametersPacket()
    {
@@ -97,6 +113,14 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
       use_quadratic_distance_cost_ = other.use_quadratic_distance_cost_;
 
       use_quadratic_height_cost_ = other.use_quadratic_height_cost_;
+
+      a_star_heuristics_weight_ = other.a_star_heuristics_weight_;
+
+      vis_graph_with_a_star_heuristics_weight_ = other.vis_graph_with_a_star_heuristics_weight_;
+
+      depth_first_heuristics_weight_ = other.depth_first_heuristics_weight_;
+
+      body_path_based_heuristics_weight_ = other.body_path_based_heuristics_weight_;
 
    }
 
@@ -281,6 +305,66 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
       return use_quadratic_height_cost_;
    }
 
+   /**
+            * Gets the weight for the heuristics in the A Star planner.
+            */
+   public void setAStarHeuristicsWeight(double a_star_heuristics_weight)
+   {
+      a_star_heuristics_weight_ = a_star_heuristics_weight;
+   }
+   /**
+            * Gets the weight for the heuristics in the A Star planner.
+            */
+   public double getAStarHeuristicsWeight()
+   {
+      return a_star_heuristics_weight_;
+   }
+
+   /**
+            * Gets the weight for the heuristics in the Visibility graph with A star planner.
+            */
+   public void setVisGraphWithAStarHeuristicsWeight(double vis_graph_with_a_star_heuristics_weight)
+   {
+      vis_graph_with_a_star_heuristics_weight_ = vis_graph_with_a_star_heuristics_weight;
+   }
+   /**
+            * Gets the weight for the heuristics in the Visibility graph with A star planner.
+            */
+   public double getVisGraphWithAStarHeuristicsWeight()
+   {
+      return vis_graph_with_a_star_heuristics_weight_;
+   }
+
+   /**
+            * Gets the weight for the heuristics in the Depth First planner.
+            */
+   public void setDepthFirstHeuristicsWeight(double depth_first_heuristics_weight)
+   {
+      depth_first_heuristics_weight_ = depth_first_heuristics_weight;
+   }
+   /**
+            * Gets the weight for the heuristics in the Depth First planner.
+            */
+   public double getDepthFirstHeuristicsWeight()
+   {
+      return depth_first_heuristics_weight_;
+   }
+
+   /**
+            * Gets the weight for the heuristics in the Body path based planner.
+            */
+   public void setBodyPathBasedHeuristicsWeight(double body_path_based_heuristics_weight)
+   {
+      body_path_based_heuristics_weight_ = body_path_based_heuristics_weight;
+   }
+   /**
+            * Gets the weight for the heuristics in the Body path based planner.
+            */
+   public double getBodyPathBasedHeuristicsWeight()
+   {
+      return body_path_based_heuristics_weight_;
+   }
+
 
    public static Supplier<FootstepPlannerCostParametersPacketPubSubType> getPubSubType()
    {
@@ -321,6 +405,14 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_quadratic_height_cost_, other.use_quadratic_height_cost_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.a_star_heuristics_weight_, other.a_star_heuristics_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.vis_graph_with_a_star_heuristics_weight_, other.vis_graph_with_a_star_heuristics_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.depth_first_heuristics_weight_, other.depth_first_heuristics_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_path_based_heuristics_weight_, other.body_path_based_heuristics_weight_, epsilon)) return false;
+
 
       return true;
    }
@@ -356,6 +448,14 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
 
       if(this.use_quadratic_height_cost_ != otherMyClass.use_quadratic_height_cost_) return false;
 
+      if(this.a_star_heuristics_weight_ != otherMyClass.a_star_heuristics_weight_) return false;
+
+      if(this.vis_graph_with_a_star_heuristics_weight_ != otherMyClass.vis_graph_with_a_star_heuristics_weight_) return false;
+
+      if(this.depth_first_heuristics_weight_ != otherMyClass.depth_first_heuristics_weight_) return false;
+
+      if(this.body_path_based_heuristics_weight_ != otherMyClass.body_path_based_heuristics_weight_) return false;
+
 
       return true;
    }
@@ -387,7 +487,15 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
       builder.append("use_quadratic_distance_cost=");
       builder.append(this.use_quadratic_distance_cost_);      builder.append(", ");
       builder.append("use_quadratic_height_cost=");
-      builder.append(this.use_quadratic_height_cost_);
+      builder.append(this.use_quadratic_height_cost_);      builder.append(", ");
+      builder.append("a_star_heuristics_weight=");
+      builder.append(this.a_star_heuristics_weight_);      builder.append(", ");
+      builder.append("vis_graph_with_a_star_heuristics_weight=");
+      builder.append(this.vis_graph_with_a_star_heuristics_weight_);      builder.append(", ");
+      builder.append("depth_first_heuristics_weight=");
+      builder.append(this.depth_first_heuristics_weight_);      builder.append(", ");
+      builder.append("body_path_based_heuristics_weight=");
+      builder.append(this.body_path_based_heuristics_weight_);
       builder.append("}");
       return builder.toString();
    }

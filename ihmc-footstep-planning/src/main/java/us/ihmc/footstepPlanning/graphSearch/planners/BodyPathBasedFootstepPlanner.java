@@ -69,7 +69,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
-      CostToGoHeuristics heuristics = new BodyPathHeuristics("bodyPath", registry, parameters, bodyPath);
+      CostToGoHeuristics heuristics = new BodyPathHeuristics(parameters.getCostParameters().getBodyPathBasedHeuristicsWeight(), parameters, bodyPath);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
@@ -81,7 +81,6 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
       FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
 
-      heuristics.setWeight(weight);
       footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, registry);
 
       planningHorizonLength = new YoDouble("planningHorizonLength", registry);

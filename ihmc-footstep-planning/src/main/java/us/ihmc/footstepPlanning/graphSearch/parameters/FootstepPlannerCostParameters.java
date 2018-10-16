@@ -1,10 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.footstepPlanning.graphSearch.stepCost.QuadraticDistanceAndYawCost;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.QuadraticHeightCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.LinearHeightCost;
-
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public interface FootstepPlannerCostParameters
 {
@@ -22,6 +21,38 @@ public interface FootstepPlannerCostParameters
    default boolean useQuadraticHeightCost()
    {
       return false;
+   }
+
+   /**
+    * Gets the weight for the heuristics in the A Star planner.
+    */
+   default DoubleProvider getAStarHeuristicsWeight()
+   {
+      return () -> 1.5;
+   }
+
+   /**
+    * Gets the weight for the heuristics in the Visibility graph with A star planner.
+    */
+   default DoubleProvider getVisGraphWithAStarHeuristicsWeight()
+   {
+      return () -> 15.0;
+   }
+
+   /**
+    * Gets the weight for the heuristics in the Depth First planner.
+    */
+   default DoubleProvider getDepthFirstHeuristicsWeight()
+   {
+      return () -> 1.0;
+   }
+
+   /**
+    * Gets the weight for the heuristics in the Body path based planner.
+    */
+   default DoubleProvider getBodyPathBasedHeuristicsWeight()
+   {
+      return () -> 1.0;
    }
 
    /**

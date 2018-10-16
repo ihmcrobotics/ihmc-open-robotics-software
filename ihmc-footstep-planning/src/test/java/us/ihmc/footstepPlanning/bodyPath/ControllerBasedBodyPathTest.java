@@ -149,7 +149,6 @@ public class ControllerBasedBodyPathTest
             yoSteps.put(side, poses);
          }
 
-         planner.setWeight(1.0);
          planner.setTimeout(1.0);
       }
 
@@ -274,7 +273,7 @@ public class ControllerBasedBodyPathTest
                                                               WaypointDefinedBodyPathPlan bodyPath)
       {
          FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
-         CostToGoHeuristics heuristics = new BodyPathHeuristics(registry, parameters, bodyPath);
+         CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 1.0, parameters, bodyPath);
 //         CostToGoHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters, registry);
          FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(parameters);
 //         FootstepNodeExpansion nodeExpansion = new SimpleSideBasedExpansion(parameters);
