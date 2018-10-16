@@ -1,6 +1,10 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+# Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
+# to run slower.
+bool check_for_body_box_collisions
+
 # Returns the ideal step width for walking on flat ground.
 # Field default value -1.0
 float64 ideal_footstep_width

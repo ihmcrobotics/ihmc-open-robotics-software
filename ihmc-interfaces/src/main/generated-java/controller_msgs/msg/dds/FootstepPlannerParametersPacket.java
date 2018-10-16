@@ -16,6 +16,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public long sequence_id_;
    /**
+            * Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
+            * to run slower.
+            */
+   public boolean check_for_body_box_collisions_;
+   /**
             * Returns the ideal step width for walking on flat ground.
             */
    public double ideal_footstep_width_ = -1.0;
@@ -260,6 +265,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    {
       sequence_id_ = other.sequence_id_;
 
+      check_for_body_box_collisions_ = other.check_for_body_box_collisions_;
+
       ideal_footstep_width_ = other.ideal_footstep_width_;
 
       ideal_footstep_length_ = other.ideal_footstep_length_;
@@ -336,6 +343,23 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   /**
+            * Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
+            * to run slower.
+            */
+   public void setCheckForBodyBoxCollisions(boolean check_for_body_box_collisions)
+   {
+      check_for_body_box_collisions_ = check_for_body_box_collisions;
+   }
+   /**
+            * Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
+            * to run slower.
+            */
+   public boolean getCheckForBodyBoxCollisions()
+   {
+      return check_for_body_box_collisions_;
    }
 
    /**
@@ -1027,6 +1051,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.check_for_body_box_collisions_, other.check_for_body_box_collisions_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_footstep_width_, other.ideal_footstep_width_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_footstep_length_, other.ideal_footstep_length_, epsilon)) return false;
@@ -1103,6 +1129,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.check_for_body_box_collisions_ != otherMyClass.check_for_body_box_collisions_) return false;
+
       if(this.ideal_footstep_width_ != otherMyClass.ideal_footstep_width_) return false;
 
       if(this.ideal_footstep_length_ != otherMyClass.ideal_footstep_length_) return false;
@@ -1176,6 +1204,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("FootstepPlannerParametersPacket {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("check_for_body_box_collisions=");
+      builder.append(this.check_for_body_box_collisions_);      builder.append(", ");
       builder.append("ideal_footstep_width=");
       builder.append(this.ideal_footstep_width_);      builder.append(", ");
       builder.append("ideal_footstep_length=");

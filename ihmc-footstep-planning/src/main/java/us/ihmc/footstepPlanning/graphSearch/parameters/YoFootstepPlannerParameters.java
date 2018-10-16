@@ -11,6 +11,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final YoBoolean checkForBodyBoxCollisions = new YoBoolean("checkForBodyBoxCollisions", registry);
    private final YoDouble maximumStepReach = new YoDouble("maximumStepReach", registry);
    private final YoDouble minimumFootholdPercent = new YoDouble("minimumFootholdPercent", registry);
    private final YoDouble idealFootstepLength = new YoDouble("idealFootstepLength", registry);
@@ -54,6 +55,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
 
    public void set(FootstepPlannerParameters defaults)
    {
+      setCheckForBodyBoxCollisions(defaults.checkForBodyBoxCollisions());
       maximumStepReach.set(defaults.getMaximumStepReach());
       minimumFootholdPercent.set(defaults.getMinimumFootholdPercent());
       idealFootstepLength.set(defaults.getIdealFootstepLength());
@@ -86,6 +88,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       minYClearanceFromStance.set(defaults.getMinYClearanceFromStance());
 
       costParameters.set(defaults.getCostParameters());
+   }
+
+   @Override
+   public boolean checkForBodyBoxCollisions()
+   {
+      return checkForBodyBoxCollisions.getBooleanValue();
    }
 
    @Override
@@ -276,6 +284,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
 
    public void set(FootstepPlannerParametersPacket parametersPacket)
    {
+      setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
       if (parametersPacket.getIdealFootstepWidth() != -1.0)
          setIdealFootstepWidth(parametersPacket.getIdealFootstepWidth());
       if (parametersPacket.getIdealFootstepLength() != -1.0)
@@ -335,6 +344,11 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
          setMinYClearanceFromStance(parametersPacket.getMinYClearanceFromStance());
 
       setCostParameters(parametersPacket.getCostParameters());
+   }
+
+   public void setCheckForBodyBoxCollisions(boolean checkForBodyBoxCollisions)
+   {
+      this.checkForBodyBoxCollisions.set(checkForBodyBoxCollisions);
    }
 
    public void setIdealFootstepWidth(double idealFootstepWidth)
