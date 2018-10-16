@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -112,7 +112,7 @@ public class RigidBodyOrientationControlHelper
       feedbackControlCommand.setBodyFixedOrientationToControl(controlFrameOrientation);
    }
 
-   private void setControlFrameOrientation(RotationMatrixReadOnly controlFrameOrientationInBodyFrame)
+   private void setControlFrameOrientation(Orientation3DReadOnly controlFrameOrientationInBodyFrame)
    {
       controlFrameOrientation.set(controlFrameOrientationInBodyFrame);
       feedbackControlCommand.setBodyFixedOrientationToControl(controlFrameOrientation);
