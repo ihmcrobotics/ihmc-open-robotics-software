@@ -66,4 +66,8 @@ public interface FootstepPlanner
     * @return
     */
    public FootstepPlan getPlan();
+
+   public void setPlanningHorizonLength(double planningHorizon);
+
+   public double getPlanningDuration();
 }

@@ -1,0 +1,186 @@
+# This message is part of the IHMC footstep planning module.
+
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
+
+# Returns the ideal step width for walking on flat ground.
+float64 ideal_footstep_width -1.0
+
+# Returns the ideal step length for walking on flat ground.
+float64 ideal_footstep_length -1.0
+
+# If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
+# regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
+# edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
+# to allowing footsteps that partially intersect planar regions.
+#
+# If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
+# choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
+#    The smallest acceptable distance to the edge of a cliff
+#    The maximum error between desired and actual foot placement
+float64 wiggle_inside_delta 0.0
+# Maximum xy-distance the planner will consider for candidate steps.
+# Step reach refers to the magnitude of the xy-position of a footstep expressed in its parent's z-up sole frame,
+# where the parent is the last footstep taken on the other foot.
+#
+# This parameter is intended to prevent accepting candidate footsteps that are near both the maximum step length and step width.
+float64 maximum_step_reach -1.0
+
+# Maximum yaw between consecutive footsteps
+#
+# A candidate footstep will be rejected if the yaw between it and its parent is greater than this value.
+#
+# This restricts the planner from planning kinematically infeasible footsteps. It is constant through the
+# space of potential steps, so the robot should be able to achieve this yaw, for example, when stepping at
+# its maximum reach.
+float64 maximum_step_yaw -1.0
+
+# Minimum step width the planner will consider for candidate steps.
+#
+# Step width refers to the magnitude of the y-position of a footstep expressed in its parent's sole frame,
+# where the parent is the last footstep taken on the other foot.
+#
+# If this value is too low, for example below the foot's width, the planner could place consecutive footsteps
+# on top of each other. If too high, footsteps might not be kinematically feasible.
+float64 minimum_step_width -10.0
+
+# Minimum step length the planner will consider for candidate steps.
+#
+# Step length refers to the x-position of a footstep expressed in its parent's sole frame,
+# where the parent is the last footstep taken on the other foot.
+#
+# If this value is too low, for example below the foot's length, the planner could place consecutive footsteps
+# on top of each other. If too high, footsteps might not be kinematically feasible.
+float64 minimum_step_length -1.0
+
+# Minimum step yaw.
+float64 minimum_step_yaw -1.0
+
+# Maximum step length when stepping forward and down.
+#
+# Large steps forward and down are rejected by the planner if two criteria are met:
+#    The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
+#    The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
+#
+# Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
+# These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
+# it's very close to hitting it's ankle pitch joint limit.
+float64 maximum_step_x_when_forward_and_down -10.0
+
+# Maximum step height when stepping forward and down.
+#
+# Large steps forward and down are rejected by the planner if two criteria are met:
+#    The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
+#    The z-position of the value of the footstep is less than -maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
+#
+# Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
+# These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
+# it's very close to hitting it's ankle pitch joint limit.
+float64 maximum_step_z_when_forward_and_down -10.0
+
+# Maximum vertical distance between consecutive footsteps
+#
+# A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
+# z-up sole frame.
+float64 maximum_step_z -1.0
+
+# Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
+#
+# If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
+float64 minimum_foothold_percent 0.9
+
+# The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
+# then the value specified here.
+#
+# More specifically, if a footstep has an associated planar region and that regions surface normal has a
+# z-value less than cos(minimumSurfaceInclineRadians), it will be rejected.
+float64 minimum_surface_incline_radians -1.0
+
+# There are two methods of wiggling a polygon into a planar region:
+#    Wiggle the polygon into the planar region itself, which isn't necessarily convex
+#    Wiggle the polygon into the convex hull of the planar region
+# The first method is not implemented completely. Instead it will wiggle into the sub polygon of the planar region that
+# has the biggest overlap with the foothold.
+#
+# If this parameter is set to true (recommended), the second wiggle method will be used.
+bool wiggle_into_convex_hull_of_planar_regions true
+
+# If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
+# This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},
+# {@link #getMaximumXYWiggleDistance}, and {@link #getMaximumYawWiggle}. If this transform cannot be found, the
+# candidate footstep will be rejected if this method returns {@code true}.
+bool reject_if_cannot_fully_wiggle_inside false
+
+# When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
+# distance the planner will use
+float64 maximum_xy_wiggle_distance -1.0
+
+# When wiggling a candidate footstep into a planar region, this is the maximum yaw
+# distance the planner will use
+float64 maximum_yaw_wiggle -1.0
+
+# When snapping a candidate footstep to a planar region, its possible that another planar region
+# intersects the footstep at a steep angle, i.e. a valley. If this intersecting planar region
+# is never more than maximumZPenetrationOnValleyRegions above the footstep, it won't be rejected,
+# otherwise it will.
+float64 maximum_z_penetration_on_valley_regions -1.0
+
+# Maximum step width the planner will consider for candidate steps.
+#
+# Step width refers to the magnitude of the y-position of a footstep expressed in its parent's sole frame,
+# where the parent is the last footstep taken on the other foot.
+#
+# If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
+float64 maximum_step_width -1.0
+
+# The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
+# nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
+# until it is minimumDistanceFromCliffBottoms away from it.
+#
+# If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+# hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+# generator is capable of swinging over.
+float64 cliff_height_to_avoid -1.0
+
+# The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
+# nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
+# until it is minimumDistanceFromCliffBottoms away from it.
+#
+# If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+# hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+# generator is capable of swinging over.
+float64 minimum_distance_from_cliff_bottoms -1.0
+
+# When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
+# planner should return the best plan that it found. If this value is false, the planner will return
+# a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
+# "best" is determined by the planner.
+bool return_best_effort_plan false
+
+# When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
+# contains at least this many footsteps.
+uint32 minimum_steps_for_best_effort_plan
+
+# When using a cost based planning approach this value defined how the yaw of a footstep will be
+# weighted in comparison to its position.
+float64 yaw_weight -1.0
+
+# When using a cost based planning approach this value defines the cost that is added for each step
+# taken. Setting this value to a high number will favor plans with less steps.
+float64 cost_per_step -1.0
+
+# Some node checkers will check if the body of the robot will move through a higher planar region
+# (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
+# ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
+# This should be set to be slightly above cinder block height (20.3cm) for Atlas.
+float64 body_ground_clearance -1.0
+
+# Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
+# Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
+# this parameter.
+float64 min_x_clearance_from_stance -1.0
+
+# Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
+# Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
+# this parameter.
+float64 min_y_clearance_from_stance -1.0

@@ -40,6 +40,7 @@ import java.util.PriorityQueue;
 public class AStarFootstepPlanner implements FootstepPlanner
 {
    private static final boolean debug = false;
+   private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -51,7 +52,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private PriorityQueue<FootstepNode> stack;
    private FootstepNode startNode;
    private FootstepNode endNode;
-   private PlanarRegionsList planarRegionsList;
 
    private final FootstepGraph graph;
    private final FootstepNodeChecker nodeChecker;
@@ -63,7 +63,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    private final YoDouble timeout;
    private final YoDouble planningTime = new YoDouble("PlanningTime", registry);
-   private final YoLong numberOfExpandedNodes = new YoLong("NumberOfExpandedNodex", registry);
+   private final YoLong numberOfExpandedNodes = new YoLong("NumberOfExpandedNodes", registry);
    private final YoDouble percentRejectedNodes = new YoDouble("PercentRejectedNodes", registry);
    private final YoLong itarationCount = new YoLong("ItarationCount", registry);
 
@@ -108,6 +108,13 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
    {
+      if (side == null)
+      {
+         if (debug)
+            PrintTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
+
+         side = defaultStartNodeSide;
+      }
       startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), side);
       RigidBodyTransform startNodeSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, stanceFootPose);
       snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransform));
@@ -135,7 +142,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      this.planarRegionsList = planarRegionsList;
       nodeChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
    }
@@ -191,6 +197,17 @@ public class AStarFootstepPlanner implements FootstepPlanner
       return plan;
    }
 
+   @Override
+   public double getPlanningDuration()
+   {
+      return planningTime.getDoubleValue();
+   }
+
+   @Override
+   public void setPlanningHorizonLength(double planningHorizon)
+   {
+   }
+
    private void initialize()
    {
       if (startNode == null)
@@ -214,6 +231,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
 //      RigidBodyTransform snapTransform = snapper.snapFootstepNode(startNode).getSnapTransform();
 //      FootstepNodeSnappingTools.constructGroundPlaneAroundFeet(planarRegionsList, startNode, snapTransform, parameters.getIdealFootstepWidth(), 0.5, 0.2,  0.5);
+
 
       stack.add(startNode);
       expandedNodes = new HashSet<>();

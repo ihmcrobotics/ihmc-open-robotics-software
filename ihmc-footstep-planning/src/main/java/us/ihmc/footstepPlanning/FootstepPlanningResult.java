@@ -1,5 +1,9 @@
 package us.ihmc.footstepPlanning;
 
+import us.ihmc.commons.RandomNumbers;
+
+import java.util.Random;
+
 public enum FootstepPlanningResult
 {
    OPTIMAL_SOLUTION,
@@ -10,6 +14,11 @@ public enum FootstepPlanningResult
    PLANNER_FAILED;
 
    public static final FootstepPlanningResult[] values = values();
+
+   public static FootstepPlanningResult generateRandomResult(Random random)
+   {
+      return values[RandomNumbers.nextInt(random, 0, values.length - 1)];
+   }
 
    public boolean validForExecution()
    {

@@ -5,14 +5,10 @@ import java.util.EnumMap;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.TextToSpeechPacket;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -31,6 +27,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
@@ -43,9 +40,9 @@ import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPla
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -59,20 +56,21 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class FootstepPlanningToolboxController extends ToolboxController
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
 
    private final YoEnum<FootstepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry, FootstepPlannerType.class);
    private final EnumMap<FootstepPlannerType, FootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
 
-   private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<FootstepPlanningRequestPacket>(null);
+   private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlannerParametersPacket> latestParametersReference = new AtomicReference<>(null);
    private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
    private final YoBoolean requestedPlanarRegions = new YoBoolean("RequestedPlanarRegions", registry);
    private final YoDouble toolboxTime = new YoDouble("ToolboxTime", registry);
+   private final YoDouble timeout = new YoDouble("ToolboxTimeout", registry);
    private final YoInteger planId = new YoInteger("planId", registry);
 
-   private final RobotContactPointParameters<RobotSide> contactPointParameters;
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
    private double dt;
@@ -80,24 +78,27 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final YoFootstepPlannerParameters footstepPlanningParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
-   public FootstepPlanningToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel,
+   public FootstepPlanningToolboxController(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
                                             StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry,
                                             YoGraphicsListRegistry graphicsListRegistry, double dt)
    {
       super(statusOutputManager, parentRegistry);
-      this.contactPointParameters = drcRobotModel.getContactPointParameters();
       this.dt = dt;
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerToolboxPlanarRegions", 200, 30, registry);
 
-      SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
+      SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame;
+      if (contactPointParameters == null)
+         contactPointsInSoleFrame = PlannerTools.createDefaultFootPolygons();
+      else
+         contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
 
-      footstepPlanningParameters = new YoFootstepPlannerParameters(registry, drcRobotModel.getFootstepPlannerParameters());
+      footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
 
       plannerMap.put(FootstepPlannerType.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame));
-      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH,
-                     new BodyPathBasedFootstepPlanner(footstepPlanningParameters, contactPointsInSoleFrame, parentRegistry));
+      plannerMap
+            .put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedFootstepPlanner(footstepPlanningParameters, contactPointsInSoleFrame, parentRegistry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
                      new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, graphicsListRegistry, parentRegistry));
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
@@ -117,7 +118,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private DepthFirstFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
    {
       FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, footstepPlanningParameters, null);
-      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, null, footstepPlanningParameters, null);
+      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, null, footstepPlanningParameters);
       ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
 
       DepthFirstFootstepPlanner footstepPlanner = new DepthFirstFootstepPlanner(footstepPlanningParameters, snapper, nodeChecker, stepCostCalculator, registry);
@@ -134,6 +135,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
       toolboxTime.add(dt);
       if (toolboxTime.getDoubleValue() > 20.0)
       {
+         if (debug)
+            PrintTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
          reportMessage(packResult(null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
          isDone.set(true);
          return;
@@ -178,6 +181,10 @@ public class FootstepPlanningToolboxController extends ToolboxController
       planId.set(request.getPlannerRequestId());
       FootstepPlannerType requestedPlannerType = FootstepPlannerType.fromByte(request.getRequestedFootstepPlannerType());
 
+      FootstepPlannerParametersPacket parameters = latestParametersReference.getAndSet(null);
+      if (parameters != null)
+         footstepPlanningParameters.set(parameters);
+
       if (debug)
       {
          PrintTools.info("Starting to plan. Plan id: " + request.getPlannerRequestId() + ". Timeout: " + request.getTimeout());
@@ -215,10 +222,15 @@ public class FootstepPlanningToolboxController extends ToolboxController
       goal.setGoalPoseBetweenFeet(goalPose);
       planner.setGoal(goal);
 
+      double horizonLength = request.getHorizonLength();
+      if (horizonLength > 0 && Double.isFinite(horizonLength))
+         planner.setPlanningHorizonLength(horizonLength);
+
       double timeout = request.getTimeout();
       if (timeout > 0.0 && Double.isFinite(timeout))
       {
          planner.setTimeout(timeout);
+         this.timeout.set(timeout);
 
          if (debug)
          {
@@ -283,6 +295,11 @@ public class FootstepPlanningToolboxController extends ToolboxController
    public void processRequest(FootstepPlanningRequestPacket request)
    {
       latestRequestReference.set(request);
+   }
+
+   public void processPlannerParameters(FootstepPlannerParametersPacket parameters)
+   {
+      latestParametersReference.set(parameters);
    }
 
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> publisher)
