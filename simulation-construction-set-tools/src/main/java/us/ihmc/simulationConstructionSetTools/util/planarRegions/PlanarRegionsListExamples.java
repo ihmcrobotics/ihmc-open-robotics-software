@@ -452,8 +452,8 @@ public class PlanarRegionsListExamples
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("exampleRobot"));
 //      PlanarRegionsList planarRegionsList = createMazeEnvironment();
       PlanarRegionsList planarRegionsList = generateSteppingStoneField(0.1, 0.1, 0.25, 0.3, 6);
-      PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment", planarRegionsList, 1e-5,
-                                                                                                false);
+      PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment",
+                                                                                                new PlanarRegionsList[] {planarRegionsList}, null, 1e-5, false);
       TerrainObject3D terrainObject3D = environment.getTerrainObject3D();
       scs.addStaticLinkGraphics(terrainObject3D.getLinkGraphics());
       scs.setGroundVisible(false);
