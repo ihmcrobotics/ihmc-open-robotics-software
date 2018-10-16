@@ -21,7 +21,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpa
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -278,7 +278,7 @@ public class ControllerBasedBodyPathTest
 //         CostToGoHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters, registry);
          FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(parameters);
 //         FootstepNodeExpansion nodeExpansion = new SimpleSideBasedExpansion(parameters);
-         FootstepCost stepCostCalculator = new DistanceAndYawBasedCost(parameters);
+         FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(parameters);
          FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
          AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, nodeExpansion, stepCostCalculator, snapper, registry);
          return planner;

@@ -58,6 +58,8 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -98,6 +100,9 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -122,6 +127,8 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
 
       cdr.write_type_6(data.getCostPerStep());
 
+      cdr.write_type_7(data.getUseQuadraticDistanceCost());
+
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerCostParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -144,6 +151,8 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       	
       data.setCostPerStep(cdr.read_type_6());
       	
+      data.setUseQuadraticDistanceCost(cdr.read_type_7());
+      	
 
    }
 
@@ -159,6 +168,7 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       ser.write_type_6("step_up_weight", data.getStepUpWeight());
       ser.write_type_6("step_down_weight", data.getStepDownWeight());
       ser.write_type_6("cost_per_step", data.getCostPerStep());
+      ser.write_type_7("use_quadratic_distance_cost", data.getUseQuadraticDistanceCost());
    }
 
    @Override
@@ -173,6 +183,7 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       data.setStepUpWeight(ser.read_type_6("step_up_weight"));
       data.setStepDownWeight(ser.read_type_6("step_down_weight"));
       data.setCostPerStep(ser.read_type_6("cost_per_step"));
+      data.setUseQuadraticDistanceCost(ser.read_type_7("use_quadratic_distance_cost"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerCostParametersPacket src, controller_msgs.msg.dds.FootstepPlannerCostParametersPacket dest)

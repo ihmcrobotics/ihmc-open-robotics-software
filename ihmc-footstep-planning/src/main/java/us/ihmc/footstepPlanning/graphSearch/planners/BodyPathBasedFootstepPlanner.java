@@ -25,7 +25,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
 import us.ihmc.commons.MathTools;
@@ -70,7 +70,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       CostToGoHeuristics heuristics = new BodyPathHeuristics(registry, parameters, bodyPath);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
-      FootstepCost stepCostCalculator = new DistanceAndYawBasedCost(parameters);
+      FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(parameters);
       FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
 
       heuristics.setWeight(weight);

@@ -35,4 +35,6 @@ float64 step_down_weight -1.0
 # taken. Setting this value to a high number will favor plans with less steps.
 float64 cost_per_step -1.0
 
+bool use_quadratic_distance_cost false
+
 
