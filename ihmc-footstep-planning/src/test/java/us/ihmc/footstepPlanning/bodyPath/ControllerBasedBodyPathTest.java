@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.BodyPathHeuristics;
@@ -107,7 +108,7 @@ public class ControllerBasedBodyPathTest
       private static final int numberOfPoints = 5;
       private final List<YoFramePoint3D> points = new ArrayList<>();
 
-      private final List<Point2D> waypoints = new ArrayList<>();
+      private final List<Point3D> waypoints = new ArrayList<>();
       private final WaypointDefinedBodyPathPlanner bodyPath = new WaypointDefinedBodyPathPlanner();
 
       private final FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
@@ -189,7 +190,7 @@ public class ControllerBasedBodyPathTest
                double percent = (double) i / (double) (numberOfPoints - 1);
                xPoly.compute(percent);
                yPoly.compute(percent);
-               Point2D point2d = new Point2D(xPoly.getPosition(), yPoly.getPosition());
+               Point3D point2d = new Point3D(xPoly.getPosition(), yPoly.getPosition(), 0.0);
                waypoints.add(point2d);
             }
 

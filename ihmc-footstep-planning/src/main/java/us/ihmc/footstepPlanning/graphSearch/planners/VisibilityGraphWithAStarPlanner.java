@@ -80,7 +80,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    private PlanarRegionsList planarRegionsList;
    private final FramePose3D bodyStartPose = new FramePose3D();
    private final FramePose3D bodyGoalPose = new FramePose3D();
-   private final List<Point2D> waypoints = new ArrayList<>();
+   private final List<Point3DReadOnly> waypoints = new ArrayList<>();
 
    private final boolean visualizing;
    private static final int bodyPathPointsForVisualization = 100;
@@ -198,8 +198,8 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
       if (planarRegionsList == null)
       {
-         waypoints.add(new Point2D(bodyStartPose.getPosition()));
-         waypoints.add(new Point2D(bodyGoalPose.getPosition()));
+         waypoints.add(new Point3D(bodyStartPose.getPosition()));
+         waypoints.add(new Point3D(bodyGoalPose.getPosition()));
       }
       else
       {
@@ -238,7 +238,9 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
                   Vector2D goalDirection = new Vector2D(bodyGoalPose.getPosition());
                   goalDirection.sub(bodyStartPose.getX(), bodyStartPose.getY());
                   goalDirection.scale(planningHorizonLength.getDoubleValue() / goalDirection.length());
-                  waypoints.add(new Point2D(goalDirection.getX() + bodyStartPose.getX(), goalDirection.getY() + bodyStartPose.getY()));
+                  Point3D waypoint = new Point3D(bodyStartPose.getPosition());
+                  waypoint.add(goalDirection.getX(), goalDirection.getY(), 0.0);
+                  waypoints.add(waypoint);
                }
                else
                {
@@ -252,7 +254,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
             for (Point3DReadOnly waypoint3d : path)
             {
-               waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
+               waypoints.add(new Point3D(waypoint3d));
             }
          }
          catch (Exception e)
@@ -362,7 +364,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       return navigableRegionsManager.getNavigableExtrusions();
    }
 
-   public List<Point2D> getBodyPathWaypoints()
+   public List<Point3DReadOnly> getBodyPathWaypoints()
    {
       return waypoints;
    }

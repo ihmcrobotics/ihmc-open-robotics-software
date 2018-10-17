@@ -74,12 +74,12 @@ public class FootstepPlanningWithBodyPathTest
       goalPose.setX(goalDistance);
 
       WaypointDefinedBodyPathPlanner bodyPath = new WaypointDefinedBodyPathPlanner();
-      List<Point2D> waypoints = new ArrayList<>();
-      waypoints.add(new Point2D(0.0, 0.0));
-      waypoints.add(new Point2D(goalDistance / 8.0, 2.0));
-      waypoints.add(new Point2D(2.0 * goalDistance / 3.0, -2.0));
-      waypoints.add(new Point2D(7.0 * goalDistance / 8.0, -2.0));
-      waypoints.add(new Point2D(goalDistance, 0.0));
+      List<Point3D> waypoints = new ArrayList<>();
+      waypoints.add(new Point3D(0.0, 0.0, 0.0));
+      waypoints.add(new Point3D(goalDistance / 8.0, 2.0, 0.0));
+      waypoints.add(new Point3D(2.0 * goalDistance / 3.0, -2.0, 0.0));
+      waypoints.add(new Point3D(7.0 * goalDistance / 8.0, -2.0, 0.0));
+      waypoints.add(new Point3D(goalDistance, 0.0, 0.0));
       bodyPath.setWaypoints(waypoints);
       bodyPath.compute();
 
@@ -95,7 +95,7 @@ public class FootstepPlanningWithBodyPathTest
    public void testMaze()
    {
       WaypointDefinedBodyPathPlanner bodyPath = new WaypointDefinedBodyPathPlanner();
-      List<Point2D> waypoints = new ArrayList<>();
+      List<Point3D> waypoints = new ArrayList<>();
 
       ArrayList<PlanarRegion> regions = PointCloudTools.loadPlanarRegionsFromFile("resources/PlanarRegions_NRI_Maze.txt");
       Point3D startPos = new Point3D(9.5, 9, 0);
@@ -107,7 +107,7 @@ public class FootstepPlanningWithBodyPathTest
       List<Point3DReadOnly> path = new ArrayList<>(navigableRegionsManager.calculateBodyPath(startPos, goalPos));
       for (Point3DReadOnly waypoint3d : path)
       {
-         waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
+         waypoints.add(new Point3D(waypoint3d));
       }
       bodyPath.setWaypoints(waypoints);
       bodyPath.compute();
