@@ -2,15 +2,18 @@ package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BodyPathPlan
 {
-   private final ArrayList<Point2DReadOnly> bodyPathWaypoints = new ArrayList<>();
+   private final ArrayList<Point3DReadOnly> bodyPathWaypoints = new ArrayList<>();
    private final Pose2D startPose = new Pose2D();
    private final Pose2D goalPose = new Pose2D();
 
@@ -23,20 +26,20 @@ public class BodyPathPlan
       return bodyPathWaypoints.size();
    }
 
-   public Point2DReadOnly getWaypoint(int waypointIndex)
+   public Point3DReadOnly getWaypoint(int waypointIndex)
    {
       return bodyPathWaypoints.get(waypointIndex);
    }
 
-   public Point2D addWaypoint(Point2DReadOnly waypoint)
+   public Point3DReadOnly addWaypoint(Point3DReadOnly waypoint)
    {
-      Point2D waypointCopy = new Point2D(waypoint);
+      Point3D waypointCopy = new Point3D(waypoint);
       bodyPathWaypoints.add(waypointCopy);
 
       return waypointCopy;
    }
 
-   public void addWaypoints(List<? extends Point2DReadOnly> waypoints)
+   public void addWaypoints(List<? extends Point3DReadOnly> waypoints)
    {
       for (int i = 0; i < waypoints.size(); i++)
          addWaypoint(waypoints.get(i));
@@ -52,19 +55,19 @@ public class BodyPathPlan
       this.startPose.set(startPose);
    }
 
-   public void setStartPose(Point2DReadOnly startPosition, double startYaw)
+   public void setStartPose(Point3DReadOnly startPosition, double startYaw)
    {
-      this.startPose.set(startPosition, startYaw);
+      this.startPose.set(startPosition.getX(), startPosition.getY(), startYaw);
    }
 
-   public void setGoalPose(Pose2DReadOnly goalPose)
+   public void setGoalPose(Pose3DReadOnly goalPose)
    {
       this.goalPose.set(goalPose);
    }
 
-   public void setGoalPose(Point2DReadOnly goalPosition, double goalYaw)
+   public void setGoalPose(Point3DReadOnly goalPosition, double goalYaw)
    {
-      this.goalPose.set(goalPosition, goalYaw);
+      this.goalPose.set(goalPosition.getX(), goalPosition.getY(), goalYaw);
    }
 
    public Pose2DReadOnly getStartPose()

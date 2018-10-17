@@ -3,6 +3,8 @@ package us.ihmc.pathPlanning.bodyPathPlanner;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -12,7 +14,7 @@ import java.util.List;
 public interface BodyPathPlanner
 {
    /** Adds the waypoints used by the body path planner. **/
-   void setWaypoints(List<? extends Point2DReadOnly> waypoints);
+   void setWaypoints(List<? extends Point3DReadOnly> waypoints);
 
    /** This method is now completely unused. **/
    @Deprecated
@@ -28,9 +30,9 @@ public interface BodyPathPlanner
    @Deprecated
    default void compute(Point2D startPoint, Point2D goalPoint)
    {
-      List<Point2DReadOnly> waypoints = new ArrayList<>();
-      waypoints.add(startPoint);
-      waypoints.add(goalPoint);
+      List<Point3DReadOnly> waypoints = new ArrayList<>();
+      waypoints.add(new Point3D(startPoint));
+      waypoints.add(new Point3D(goalPoint));
       setWaypoints(waypoints);
       compute();
    }
