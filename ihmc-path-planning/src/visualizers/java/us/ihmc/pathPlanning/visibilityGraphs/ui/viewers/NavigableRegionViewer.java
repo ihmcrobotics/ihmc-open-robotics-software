@@ -20,8 +20,10 @@ import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.messager.Messager;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
@@ -34,10 +36,12 @@ public class NavigableRegionViewer extends AnimationTimer
 
    private final Group root = new Group();
    private AtomicReference<Map<Integer, MeshView>> regionVisMapToRenderReference = new AtomicReference<>(null);
-   private final AtomicReference<Boolean> resetRequested;
-   private final AtomicReference<Boolean> show;
+   private AtomicReference<Boolean> resetRequested;
+   private AtomicReference<Boolean> show;
 
-   private final AtomicReference<List<? extends VisibilityMapHolder>> newRequestReference;
+   private AtomicReference<List<? extends VisibilityMapHolder>> newRequestReference;
+
+   private final Messager messager;
 
    public NavigableRegionViewer(Messager messager)
    {
@@ -46,6 +50,8 @@ public class NavigableRegionViewer extends AnimationTimer
 
    public NavigableRegionViewer(Messager messager, ExecutorService executorService)
    {
+      this.messager = messager;
+
       isExecutorServiceProvided = executorService == null;
 
       if (isExecutorServiceProvided)
@@ -57,6 +63,13 @@ public class NavigableRegionViewer extends AnimationTimer
       show = messager.createInput(ShowNavigableRegionVisibilityMaps, false);
       newRequestReference = messager.createInput(NavigableRegionVisibilityMap, null);
       root.setMouseTransparent(true);
+   }
+
+   public void setTopics(Topic<Boolean> globalResetTopic, Topic<Boolean> showNavigableRegionVisibilityMapsTopic, Topic<List<? extends VisibilityMapHolder>> navigigableRegionVisibilityMapTopic)
+   {
+      resetRequested = messager.createInput(globalResetTopic, false);
+      show = messager.createInput(showNavigableRegionVisibilityMapsTopic, false);
+      newRequestReference = messager.createInput(navigigableRegionVisibilityMapTopic, null);
    }
 
    @Override
