@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -14,7 +15,6 @@ import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
-import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -39,7 +39,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -118,8 +117,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       String postFix = "Orientation";
-      EndToEndTestTools.assertNumberOfPoints(pelvisName + postFix, 2, scs);
-      EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName + postFix, 1, waypoint, scs, epsilon);
+      EndToEndTestTools.assertNumberOfPoints(pelvisName, postFix, 2, scs);
+      EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName, 1, waypoint, scs, epsilon);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime);
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, scs, epsilon);
@@ -249,11 +248,11 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       String postFix = "Orientation";
-      EndToEndTestTools.assertNumberOfPoints(pelvisName + postFix, numberOfPoints + 1, scs);
+      EndToEndTestTools.assertNumberOfPoints(pelvisName, postFix, numberOfPoints + 1, scs);
       for (int point = 1; point < RigidBodyTaskspaceControlState.maxPointsInGenerator; point++)
       {
          SO3TrajectoryPointMessage waypoint = so3Trajectory.getTaskspaceTrajectoryPoints().get(point - 1);
-         EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName + postFix, point, waypoint, scs, epsilon);
+         EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName, point, waypoint, scs, epsilon);
       }
 
       double simulationTime = timePerPoint * numberOfPoints + 0.5;
