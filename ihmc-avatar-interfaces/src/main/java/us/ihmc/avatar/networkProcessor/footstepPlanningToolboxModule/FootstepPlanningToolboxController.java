@@ -140,7 +140,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       {
          if (debug)
             PrintTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
-         reportMessage(packStepResult(null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
+         reportMessage(packStepResult(null, null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
          isDone.set(true);
          return;
       }
@@ -165,10 +165,12 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       FootstepPlanningResult status = planner.planPath();
 
+      BodyPathPlan bodyPathPlan = null;
       if (status.validForExecution())
       {
+         bodyPathPlan = planner.getPathPlan();
          reportMessage(packStatus(FootstepPlannerStatus.PLANNING_STEPS));
-         reportMessage(packPathResult(planner.getPathPlan(), status));
+         reportMessage(packPathResult(bodyPathPlan, status));
 
          status = planner.plan();
       }
@@ -177,7 +179,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       sendMessageToUI("Result: " + planId.getIntegerValue() + ", " + status.toString());
 
-      reportMessage(packStepResult(footstepPlan, status));
+      reportMessage(packStepResult(footstepPlan, bodyPathPlan, status));
       reportMessage(packStatus(FootstepPlannerStatus.IDLE));
 
       isDone.set(true);
@@ -295,7 +297,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       return result;
    }
 
-   private FootstepPlanningToolboxOutputStatus packStepResult(FootstepPlan footstepPlan, FootstepPlanningResult status)
+   private FootstepPlanningToolboxOutputStatus packStepResult(FootstepPlan footstepPlan, BodyPathPlan bodyPathPlan, FootstepPlanningResult status)
    {
       if (debug)
       {
@@ -315,6 +317,12 @@ public class FootstepPlanningToolboxController extends ToolboxController
          {
             result.getLowLevelPlannerGoal().set(footstepPlan.getLowLevelPlanGoal());
          }
+      }
+
+      if (bodyPathPlan != null)
+      {
+         for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
+            result.getBodyPath().add().set(bodyPathPlan.getWaypoint(i));
       }
 
       planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
