@@ -49,7 +49,14 @@
                     </content>
                 </Tab>
 
-
+                <Tab text="Unit Test Exporter">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <children>
+                            <fx:include fx:id="dataExporterAnchorPane" source="FootstepPlannerDataExporterAnchorPane.fxml" />
+                        </children>
+                    </content>
+                </Tab>
             </tabs>
         </TabPane>
     </bottom>

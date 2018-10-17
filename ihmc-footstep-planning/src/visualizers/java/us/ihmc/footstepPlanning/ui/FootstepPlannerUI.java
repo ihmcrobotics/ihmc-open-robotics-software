@@ -42,21 +42,16 @@ public class FootstepPlannerUI
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
-
    @FXML
    private StartGoalTabController startGoalTabController;
-
    @FXML
    private FootstepNodeCheckingUIController footstepNodeCheckingUIController;
-
    @FXML
    private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
-
    @FXML
    private FootstepPlannerCostsUIController footstepPlannerCostsUIController;
-
    @FXML
-   private FootstepPlannerDataExporterAnchorPaneController footstepPlannerDataExporterAnchorPaneController;
+   private FootstepPlannerDataExporterAnchorPaneController dataExporterAnchorPaneController;
 
    public FootstepPlannerUI(Stage primaryStage) throws Exception
    {
@@ -80,6 +75,8 @@ public class FootstepPlannerUI
       footstepPlannerParametersUIController.attachMessager(messager);
       footstepPlannerCostsUIController.attachMessager(messager);
       footstepNodeCheckingUIController.attachMessager(messager);
+      dataExporterAnchorPaneController.attachMessager(messager);
+
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
