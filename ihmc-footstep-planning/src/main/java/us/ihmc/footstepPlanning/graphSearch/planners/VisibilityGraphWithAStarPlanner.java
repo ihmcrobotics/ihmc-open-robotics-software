@@ -37,10 +37,11 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -72,7 +73,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    private final NavigableRegionsManager navigableRegionsManager;
 
    private final FootstepPlannerParameters parameters;
-   private final WaypointDefinedBodyPathPlan bodyPath;
+   private final WaypointDefinedBodyPathPlanner bodyPathPlanner;
    private final BodyPathHeuristics heuristics;
    private final FootstepPlanner footstepPlanner;
 
@@ -90,8 +91,8 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    {
       parentRegistry.addChild(registry);
       this.parameters = parameters;
-      bodyPath = new WaypointDefinedBodyPathPlan();
-      heuristics = new BodyPathHeuristics(parameters.getCostParameters().getVisGraphWithAStarHeuristicsWeight(), parameters, bodyPath);
+      bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
+      heuristics = new BodyPathHeuristics(parameters.getCostParameters().getVisGraphWithAStarHeuristicsWeight(), parameters, bodyPathPlanner);
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
@@ -265,17 +266,17 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
          }
       }
 
-      bodyPath.setWaypoints(waypoints);
-      bodyPath.compute(null, null);
+      bodyPathPlanner.setWaypoints(waypoints);
+      bodyPathPlanner.compute();
 
       if (visualizing)
       {
          updateBodyPathVisualization();
       }
       Pose2D goalPose2d = new Pose2D();
-      double pathLength = bodyPath.computePathLength(0.0);
+      double pathLength = bodyPathPlanner.computePathLength(0.0);
       double alpha = MathTools.clamp(planningHorizonLength.getDoubleValue() / pathLength, 0.0, 1.0);
-      bodyPath.getPointAlongPath(alpha, goalPose2d);
+      bodyPathPlanner.getPointAlongPath(alpha, goalPose2d);
       heuristics.setGoalAlpha(alpha);
 
       FramePose3D footstepPlannerGoal = new FramePose3D();
@@ -341,7 +342,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       for (int i = 0; i < bodyPathPointsForVisualization; i++)
       {
          double percent = (double) i / (double) (bodyPathPointsForVisualization - 1);
-         bodyPath.getPointAlongPath(percent, tempPose);
+         bodyPathPlanner.getPointAlongPath(percent, tempPose);
          Point3D position = new Point3D();
          position.set(tempPose.getPosition());
          Point3D projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(position, planarRegionsList);
@@ -369,21 +370,27 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    public Pose2D getLowLevelPlannerGoal()
    {
       Pose2D goalPose2d = new Pose2D();
-      double pathLength = bodyPath.computePathLength(0.0);
+      double pathLength = bodyPathPlanner.computePathLength(0.0);
       double alpha = MathTools.clamp(planningHorizonLength.getDoubleValue() / pathLength, 0.0, 1.0);
-      bodyPath.getPointAlongPath(alpha, goalPose2d);
+      bodyPathPlanner.getPointAlongPath(alpha, goalPose2d);
       return goalPose2d;
    }
 
    public BodyPathPlanner getBodyPathPlanner()
    {
-      return bodyPath;
+      return bodyPathPlanner;
    }
 
    @Override
    public FootstepPlan getPlan()
    {
       return footstepPlanner.getPlan();
+   }
+
+   @Override
+   public BodyPathPlan getPathPlan()
+   {
+      return bodyPathPlanner.getPlan();
    }
 
 }

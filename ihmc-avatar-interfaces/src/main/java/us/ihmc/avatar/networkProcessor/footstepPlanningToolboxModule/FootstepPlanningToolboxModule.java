@@ -75,6 +75,7 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
       List<Class<? extends Settable<?>>> status = new ArrayList<>();
       status.add(FootstepPlanningToolboxOutputStatus.class);
       status.add(FootstepPlannerStatusMessage.class);
+      status.add(BodyPathPlanMessage.class);
       return status;
    }
 
