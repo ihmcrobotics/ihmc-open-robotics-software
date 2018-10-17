@@ -56,6 +56,9 @@ public class FootstepPlannerUI
    @FXML
    private FootstepPlannerDataExporterAnchorPaneController dataExporterAnchorPaneController;
 
+   @FXML
+   private VisualizationController visibilityGraphsUIController;
+
    public FootstepPlannerUI(Stage primaryStage) throws Exception
    {
       this(primaryStage, new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API));
@@ -78,8 +81,8 @@ public class FootstepPlannerUI
       footstepPlannerParametersUIController.attachMessager(messager);
       footstepPlannerCostsUIController.attachMessager(messager);
       footstepNodeCheckingUIController.attachMessager(messager);
+      visibilityGraphsUIController.attachMessager(messager);
       dataExporterAnchorPaneController.attachMessager(messager);
-
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
@@ -87,6 +90,7 @@ public class FootstepPlannerUI
       footstepPlannerParametersUIController.bindControls();
       footstepPlannerCostsUIController.bindControls();
       footstepNodeCheckingUIController.bindControls();
+      visibilityGraphsUIController.bindControls();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
