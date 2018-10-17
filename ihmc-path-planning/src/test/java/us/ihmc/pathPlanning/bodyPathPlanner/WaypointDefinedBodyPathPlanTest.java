@@ -19,22 +19,19 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.Pose2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -57,13 +54,13 @@ public class WaypointDefinedBodyPathPlanTest
    @Test(timeout = 30000)
    public void testSimpleBodyPath()
    {
-      WaypointDefinedBodyPathPlan plan = new WaypointDefinedBodyPathPlan();
+      WaypointDefinedBodyPathPlanner plan = new WaypointDefinedBodyPathPlanner();
       List<Point2D> waypoints = new ArrayList<Point2D>();
       waypoints.add(new Point2D(0.0, 0.0));
       waypoints.add(new Point2D(0.5, 0.0));
       waypoints.add(new Point2D(1.0, 1.0));
       plan.setWaypoints(waypoints);
-      plan.compute(null, null);
+      plan.compute();
 
       // test path length method
       double segmentLength1 = 0.5;
@@ -107,7 +104,7 @@ public class WaypointDefinedBodyPathPlanTest
       }
    }
 
-   public static void showPlotter(WaypointDefinedBodyPathPlan plan, String testName)
+   public static void showPlotter(WaypointDefinedBodyPathPlanner plan, String testName)
    {
       int markers = 5;
       YoVariableRegistry registry = new YoVariableRegistry(testName);
@@ -181,6 +178,6 @@ public class WaypointDefinedBodyPathPlanTest
 
    public static void main(String[] args)
    {
-      MutationTestFacilitator.facilitateMutationTestForClass(WaypointDefinedBodyPathPlan.class, WaypointDefinedBodyPathPlanTest.class);
+      MutationTestFacilitator.facilitateMutationTestForClass(WaypointDefinedBodyPathPlanner.class, WaypointDefinedBodyPathPlanTest.class);
    }
 }

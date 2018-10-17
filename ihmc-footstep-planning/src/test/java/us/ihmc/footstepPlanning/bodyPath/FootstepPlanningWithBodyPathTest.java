@@ -29,7 +29,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBase
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -73,7 +73,7 @@ public class FootstepPlanningWithBodyPathTest
       FramePose3D goalPose = new FramePose3D();
       goalPose.setX(goalDistance);
 
-      WaypointDefinedBodyPathPlan bodyPath = new WaypointDefinedBodyPathPlan();
+      WaypointDefinedBodyPathPlanner bodyPath = new WaypointDefinedBodyPathPlanner();
       List<Point2D> waypoints = new ArrayList<>();
       waypoints.add(new Point2D(0.0, 0.0));
       waypoints.add(new Point2D(goalDistance / 8.0, 2.0));
@@ -81,7 +81,7 @@ public class FootstepPlanningWithBodyPathTest
       waypoints.add(new Point2D(7.0 * goalDistance / 8.0, -2.0));
       waypoints.add(new Point2D(goalDistance, 0.0));
       bodyPath.setWaypoints(waypoints);
-      bodyPath.compute(null, null);
+      bodyPath.compute();
 
       FootstepPlanner planner = createBodyPathBasedPlanner(registry, parameters, bodyPath);
       FootstepPlan footstepPlan = PlannerTools.runPlanner(planner, initialStanceFootPose, initialStanceFootSide, goalPose, null, true);
@@ -94,7 +94,7 @@ public class FootstepPlanningWithBodyPathTest
    @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = {IntegrationCategory.EXCLUDE})
    public void testMaze()
    {
-      WaypointDefinedBodyPathPlan bodyPath = new WaypointDefinedBodyPathPlan();
+      WaypointDefinedBodyPathPlanner bodyPath = new WaypointDefinedBodyPathPlanner();
       List<Point2D> waypoints = new ArrayList<>();
 
       ArrayList<PlanarRegion> regions = PointCloudTools.loadPlanarRegionsFromFile("resources/PlanarRegions_NRI_Maze.txt");
@@ -110,7 +110,7 @@ public class FootstepPlanningWithBodyPathTest
          waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
       }
       bodyPath.setWaypoints(waypoints);
-      bodyPath.compute(null, null);
+      bodyPath.compute();
 
       Pose2D startPose = new Pose2D();
       bodyPath.getPointAlongPath(0.0, startPose);
@@ -147,7 +147,7 @@ public class FootstepPlanningWithBodyPathTest
    }
 
    private AStarFootstepPlanner createBodyPathBasedPlanner(YoVariableRegistry registry, FootstepPlannerParameters parameters,
-                                                           WaypointDefinedBodyPathPlan bodyPath)
+                                                           WaypointDefinedBodyPathPlanner bodyPath)
    {
       FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 10.0, parameters, bodyPath);

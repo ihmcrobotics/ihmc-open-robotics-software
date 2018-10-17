@@ -28,7 +28,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpa
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -44,7 +44,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
    private final FootstepPlannerParameters parameters;
-   private final WaypointDefinedBodyPathPlan bodyPath;
+   private final WaypointDefinedBodyPathPlanner bodyPath;
    private final FootstepPlanner footstepPlanner;
 
    private final FramePose3D bodyStart = new FramePose3D();
@@ -65,7 +65,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
       xPoly = new YoPolynomial("xPoly", 4, registry);
       yPoly = new YoPolynomial("yPoly", 4, registry);
 
-      bodyPath = new WaypointDefinedBodyPathPlan();
+      bodyPath = new WaypointDefinedBodyPathPlanner();
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
@@ -161,7 +161,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
          waypoints.add(point2d);
       }
       bodyPath.setWaypoints(waypoints);
-      bodyPath.compute(null, null);
+      bodyPath.compute();
 
       Pose2D goalPose2d = new Pose2D();
       double pathLength = bodyPath.computePathLength(0.0);
