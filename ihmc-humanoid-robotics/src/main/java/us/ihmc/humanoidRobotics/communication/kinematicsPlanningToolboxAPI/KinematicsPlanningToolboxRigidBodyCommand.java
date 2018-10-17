@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI;
 
 import java.util.Map;
 
-import controller_msgs.msg.dds.KinematicsPlanningToolboxMessage;
+import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.SelectionMatrix3DMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -14,7 +14,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class KinematicsPlanningToolboxCommand implements Command<KinematicsPlanningToolboxCommand, KinematicsPlanningToolboxMessage>
+public class KinematicsPlanningToolboxRigidBodyCommand implements Command<KinematicsPlanningToolboxRigidBodyCommand, KinematicsPlanningToolboxRigidBodyMessage>
 {
    /** This is the unique hash code of the end-effector to be solved for. */
    private long endEffectorNameBasedHashCode;
@@ -28,7 +28,7 @@ public class KinematicsPlanningToolboxCommand implements Command<KinematicsPlann
    private double allowableDisplacement = 0.0;
 
    @Override
-   public void set(KinematicsPlanningToolboxCommand other)
+   public void set(KinematicsPlanningToolboxRigidBodyCommand other)
    {
       endEffectorNameBasedHashCode = other.endEffectorNameBasedHashCode;
       endEffector = other.endEffector;
@@ -39,7 +39,7 @@ public class KinematicsPlanningToolboxCommand implements Command<KinematicsPlann
       allowableDisplacement = other.allowableDisplacement;
    }
 
-   public void set(KinematicsPlanningToolboxMessage message, Map<Long, RigidBody> rigidBodyNamedBasedHashMap,
+   public void set(KinematicsPlanningToolboxRigidBodyMessage message, Map<Long, RigidBody> rigidBodyNamedBasedHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       endEffectorNameBasedHashCode = message.getEndEffectorNameBasedHashCode();
@@ -80,15 +80,15 @@ public class KinematicsPlanningToolboxCommand implements Command<KinematicsPlann
    }
 
    @Override
-   public void setFromMessage(KinematicsPlanningToolboxMessage message)
+   public void setFromMessage(KinematicsPlanningToolboxRigidBodyMessage message)
    {
       set(message, null, null);
    }
 
    @Override
-   public Class<KinematicsPlanningToolboxMessage> getMessageClass()
+   public Class<KinematicsPlanningToolboxRigidBodyMessage> getMessageClass()
    {
-      return KinematicsPlanningToolboxMessage.class;
+      return KinematicsPlanningToolboxRigidBodyMessage.class;
    }
 
    @Override

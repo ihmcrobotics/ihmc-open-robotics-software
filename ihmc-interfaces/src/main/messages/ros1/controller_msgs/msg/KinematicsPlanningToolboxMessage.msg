@@ -12,6 +12,8 @@ geometry_msgs/Point control_frame_position_in_end_effector
 
 geometry_msgs/Quaternion control_frame_orientation_in_end_effector
 
-float64 allowable_displacement
+float64[] allowable_position_displacement
+
+float64[] allowable_orientation_displacement
 
 
