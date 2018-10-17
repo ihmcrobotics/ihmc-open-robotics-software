@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.ui.components;
+package us.ihmc.footstepPlanning.ui.viewers;
 
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
@@ -24,32 +24,39 @@ public class StartGoalOrientationViewer extends AnimationTimer
 
    private static final double cylinderLength = 5.0 * RADIUS;
    private final ArrowGraphic startArrow = new ArrowGraphic(0.2 * RADIUS, cylinderLength, Color.GREEN);
+   private final ArrowGraphic lowLevelGoalArrow = new ArrowGraphic(0.2 * RADIUS, cylinderLength, Color.DARKRED);
    private final ArrowGraphic goalArrow = new ArrowGraphic(0.2 * RADIUS, cylinderLength, Color.RED);
 
    private final AtomicReference<Boolean> startRotationEditModeEnabled;
    private final AtomicReference<Boolean> goalRotationEditModeEnabled;
 
    private final AtomicReference<Point3D> startPositionReference;
+   private final AtomicReference<Point3D> lowLevelGoalPositionReference;
    private final AtomicReference<Point3D> goalPositionReference;
 
    private final AtomicReference<Quaternion> startQuaternionReference;
+   private final AtomicReference<Quaternion> lowLevelGoalQuaternionReference;
    private final AtomicReference<Quaternion> goalQuaternionReference;
 
    public StartGoalOrientationViewer(Messager messager)
    {
       startArrow.setMouseTransparent(true);
+      lowLevelGoalArrow.setMouseTransparent(true);
       goalArrow.setMouseTransparent(true);
 
       root.getChildren().add(startArrow);
+      root.getChildren().add(lowLevelGoalArrow);
       root.getChildren().add(goalArrow);
 
       startRotationEditModeEnabled = messager.createInput(StartOrientationEditModeEnabledTopic, false);
       goalRotationEditModeEnabled = messager.createInput(GoalOrientationEditModeEnabledTopic, false);
 
       startPositionReference = messager.createInput(StartPositionTopic, new Point3D());
+      lowLevelGoalPositionReference = messager.createInput(LowLevelGoalPositionTopic, new Point3D());
       goalPositionReference = messager.createInput(GoalPositionTopic, new Point3D());
 
       startQuaternionReference = messager.createInput(StartOrientationTopic, new Quaternion());
+      lowLevelGoalQuaternionReference = messager.createInput(LowLevelGoalOrientationTopic, new Quaternion());
       goalQuaternionReference = messager.createInput(GoalOrientationTopic, new Quaternion());
    }
 
@@ -76,6 +83,12 @@ public class StartGoalOrientationViewer extends AnimationTimer
       if (goalPosition != null)
       {
          setArrowPose(goalArrow, goalPosition, goalQuaternionReference.get().getYaw());
+      }
+
+      Point3D lowLevelGoalPosition = lowLevelGoalPositionReference.get();
+      if (goalPosition != null)
+      {
+         setArrowPose(lowLevelGoalArrow, lowLevelGoalPosition, lowLevelGoalQuaternionReference.get().getYaw());
       }
    }
 
