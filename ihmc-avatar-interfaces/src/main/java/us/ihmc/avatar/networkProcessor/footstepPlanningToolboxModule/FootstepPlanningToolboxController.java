@@ -16,11 +16,11 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedFootstepPlanner;
@@ -123,6 +123,14 @@ public class FootstepPlanningToolboxController extends ToolboxController
       return footstepPlanner;
    }
 
+   private FootstepPlannerStatusMessage packStatus(FootstepPlannerStatus status)
+   {
+      FootstepPlannerStatusMessage message = new FootstepPlannerStatusMessage();
+      message.setPlanningStatus(status.toByte());
+
+      return message;
+   }
+
    @Override
    protected void updateInternal()
    {
@@ -152,12 +160,24 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       sendMessageToUI("Starting To Plan: " + planId.getIntegerValue() + ", " + activePlanner.getEnumValue().toString());
 
-      FootstepPlanningResult status = planner.plan();
+      reportMessage(packStatus(FootstepPlannerStatus.PLANNING_PATH));
+
+      FootstepPlanningResult status = planner.planPath();
+
+      if (status.validForExecution())
+      {
+         reportMessage(packStatus(FootstepPlannerStatus.PLANNING_STEPS));
+
+         status = planner.plan();
+      }
+
       FootstepPlan footstepPlan = planner.getPlan();
 
       sendMessageToUI("Result: " + planId.getIntegerValue() + ", " + status.toString());
 
       reportMessage(packResult(footstepPlan, status));
+      reportMessage(packStatus(FootstepPlannerStatus.IDLE));
+
       isDone.set(true);
    }
 
