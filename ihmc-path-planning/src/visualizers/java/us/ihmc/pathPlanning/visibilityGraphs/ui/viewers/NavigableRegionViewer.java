@@ -59,9 +59,6 @@ public class NavigableRegionViewer extends AnimationTimer
       else
          this.executorService = executorService;
 
-      resetRequested = messager.createInput(UIVisibilityGraphsTopics.GlobalReset, false);
-      show = messager.createInput(ShowNavigableRegionVisibilityMaps, false);
-      newRequestReference = messager.createInput(NavigableRegionVisibilityMap, null);
       root.setMouseTransparent(true);
    }
 
