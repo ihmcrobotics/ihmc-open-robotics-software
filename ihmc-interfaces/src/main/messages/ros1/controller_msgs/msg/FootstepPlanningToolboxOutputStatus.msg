@@ -30,6 +30,6 @@ controller_msgs/PlanarRegionsListMessage planar_regions_list
 
 geometry_msgs/Point[] body_path
 
-geometry_msgs/Pose2D low_level_planner_goal
+geometry_msgs/Pose low_level_planner_goal
 
 
