@@ -80,6 +80,7 @@ public class FootstepPlanningWithBodyPathTest
       waypoints.add(new Point3D(2.0 * goalDistance / 3.0, -2.0, 0.0));
       waypoints.add(new Point3D(7.0 * goalDistance / 8.0, -2.0, 0.0));
       waypoints.add(new Point3D(goalDistance, 0.0, 0.0));
+
       bodyPath.setWaypoints(waypoints);
       bodyPath.compute();
 
