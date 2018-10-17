@@ -9,34 +9,32 @@ import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMess
 
 public class FootstepPlannerParametersUIController
 {
-   private static final boolean verbose = false;
    private JavaFXMessager messager;
    private final FootstepPlannerParametersProperty property = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
 
    @FXML
-   private Slider maxStepReach;
+   private Slider plannerTimeout;
+   @FXML
+   private Slider horizonLength;
 
+   @FXML
+   private Slider maxStepLength;
+   @FXML
+   private Slider minStepWidth;
    @FXML
    private Slider maxStepYaw;
 
    @FXML
-   private Slider minStepWidth;
-
-   @FXML
    private Slider minStepLength;
-
+   @FXML
+   private Slider maxStepZ;
    @FXML
    private Slider minStepYaw;
 
    @FXML
-   private Slider maxStepZ;
-
-   @FXML
    private Slider minFootholdPercent;
-
    @FXML
    private Slider minSurfaceIncline;
-
    @FXML
    private Slider maxStepWidth;
 
@@ -47,12 +45,11 @@ public class FootstepPlannerParametersUIController
    }
 
 
-
    public void bindControls()
    {
 //      property.bidirectionalBindIdealFootstepWidth();
 //      property.bidirectionalBindIdealFootstepLength();
-      property.bidirectionalBindMaxStepReach(maxStepReach.valueProperty());
+      property.bidirectionalBindMaxStepReach(maxStepLength.valueProperty());
       property.bidirectionalBindMaxStepYaw(maxStepYaw.valueProperty());
       property.bidirectionalBindMinStepWidth(minStepWidth.valueProperty());
       property.bidirectionalBindMinStepLength(minStepLength.valueProperty());
@@ -63,9 +60,27 @@ public class FootstepPlannerParametersUIController
       property.bidirectionalBindMaxStepWidth(maxStepWidth.valueProperty());
 
 
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, plannerTimeout.valueProperty(), numberToDoubleConverter, true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength.valueProperty(), numberToDoubleConverter, true);
+
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, property, createConverter(), true);
 
    }
+
+   private final PropertyToMessageTypeConverter<Double, Number> numberToDoubleConverter = new PropertyToMessageTypeConverter<Double, Number>()
+   {
+      @Override
+      public Double convert(Number propertyValue)
+      {
+         return propertyValue.doubleValue();
+      }
+
+      @Override
+      public Number interpret(Double newValue)
+      {
+         return new Double(newValue.doubleValue());
+      }
+   };
 
    private PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters> createConverter()
    {
@@ -84,6 +99,7 @@ public class FootstepPlannerParametersUIController
          }
       };
    }
+
 
 
 
