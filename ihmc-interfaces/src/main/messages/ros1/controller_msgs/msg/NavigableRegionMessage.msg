@@ -1,0 +1,13 @@
+controller_msgs/PlanarRegionMessage home_region
+
+controller_msgs/VisibilityClusterMessage home_region_cluster
+
+controller_msgs/VisibilityMapMessage visibility_map_in_world
+
+controller_msgs/VisibilityClusterMessage[] obstacle_clusters
+
+controller_msgs/VisibilityClusterMessage[] all_clusters
+
+geometry_msgs/Transform transform_to_world
+
+
