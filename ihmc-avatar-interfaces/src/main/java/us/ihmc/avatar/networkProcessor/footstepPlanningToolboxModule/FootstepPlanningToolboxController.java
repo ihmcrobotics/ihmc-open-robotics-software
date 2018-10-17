@@ -32,6 +32,7 @@ import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -139,7 +140,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       {
          if (debug)
             PrintTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
-         reportMessage(packResult(null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
+         reportMessage(packStepResult(null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
          isDone.set(true);
          return;
       }
@@ -167,6 +168,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       if (status.validForExecution())
       {
          reportMessage(packStatus(FootstepPlannerStatus.PLANNING_STEPS));
+         reportMessage(packPathResult(planner.getPathPlan(), status));
 
          status = planner.plan();
       }
@@ -175,7 +177,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       sendMessageToUI("Result: " + planId.getIntegerValue() + ", " + status.toString());
 
-      reportMessage(packResult(footstepPlan, status));
+      reportMessage(packStepResult(footstepPlan, status));
       reportMessage(packStatus(FootstepPlannerStatus.IDLE));
 
       isDone.set(true);
@@ -270,7 +272,30 @@ public class FootstepPlanningToolboxController extends ToolboxController
       return isDone.getBooleanValue();
    }
 
-   private FootstepPlanningToolboxOutputStatus packResult(FootstepPlan footstepPlan, FootstepPlanningResult status)
+   private BodyPathPlanMessage packPathResult(BodyPathPlan bodyPathPlan, FootstepPlanningResult status)
+   {
+      if (debug)
+      {
+         PrintTools.info("Finished planning path. Result: " + status);
+      }
+
+      BodyPathPlanMessage result = new BodyPathPlanMessage();
+      if (bodyPathPlan != null)
+      {
+         for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
+            result.getBodyPath().add().set(bodyPathPlan.getWaypoint(i));
+
+         result.getPathPlannerStartPose().set(bodyPathPlan.getStartPose());
+         result.getPathPlannerGoalPose().set(bodyPathPlan.getGoalPose());
+      }
+
+      planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
+      result.setPlanId(planId.getIntegerValue());
+      result.setPathPlanningResult(status.toByte());
+      return result;
+   }
+
+   private FootstepPlanningToolboxOutputStatus packStepResult(FootstepPlan footstepPlan, FootstepPlanningResult status)
    {
       if (debug)
       {

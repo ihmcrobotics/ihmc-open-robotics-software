@@ -43,13 +43,13 @@ module controller_msgs
          */
         unsigned long sequence_id;
         @defaultValue(value=255)
-        octet footstep_planning_result;
+        octet path_planning_result;
         @defaultValue(value=-1)
         long plan_id;
         controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list;
         sequence<geometry_msgs::msg::dds::Point> body_path;
-        geometry_msgs::msg::dds::Pose2D low_level_planner_start_pose;
-        geometry_msgs::msg::dds::Pose2D low_level_planner_goal_pose;
+        geometry_msgs::msg::dds::Pose2D path_planner_start_pose;
+        geometry_msgs::msg::dds::Pose2D path_planner_goal_pose;
       };
     };
   };
