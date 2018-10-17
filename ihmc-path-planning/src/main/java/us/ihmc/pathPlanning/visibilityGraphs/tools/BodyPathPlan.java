@@ -55,7 +55,7 @@ public class BodyPathPlan
       this.startPose.set(startPose);
    }
 
-   public void setStartPose(Point3DReadOnly startPosition, double startYaw)
+   public void setStartPose(Point2DReadOnly startPosition, double startYaw)
    {
       this.startPose.set(startPosition.getX(), startPosition.getY(), startYaw);
    }
@@ -65,7 +65,7 @@ public class BodyPathPlan
       this.goalPose.set(goalPose);
    }
 
-   public void setGoalPose(Point3DReadOnly goalPosition, double goalYaw)
+   public void setGoalPose(Point2DReadOnly goalPosition, double goalYaw)
    {
       this.goalPose.set(goalPosition.getX(), goalPosition.getY(), goalYaw);
    }
