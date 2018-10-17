@@ -6,6 +6,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class TwoBollardEnvironment extends PlanarRegionEnvironmentInterface
 {
+   private final double bollardWidth = 0.2;
+   private final double bollardHeight = 0.75;
+
    public TwoBollardEnvironment(double barrelSeparation)
    {
       // ground plane
@@ -19,14 +22,24 @@ public class TwoBollardEnvironment extends PlanarRegionEnvironmentInterface
       // first bollard
       generator.identity();
       generator.translate(0.0, 0.5 * barrelSeparation, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(0.2, 0.2, 0.75);
+      generator.addCubeReferencedAtBottomMiddle(bollardWidth, bollardWidth, bollardHeight);
       addPlanarRegionsToTerrain(YoAppearance.Yellow());
 
       // second bollard
       generator.identity();
       generator.translate(0.0, -0.5 * barrelSeparation, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(0.2, 0.2, 0.75);
+      generator.addCubeReferencedAtBottomMiddle(bollardWidth, bollardWidth, bollardHeight);
       addPlanarRegionsToTerrain(YoAppearance.Yellow());
+   }
+
+   public double getBollardHeight()
+   {
+      return bollardHeight;
+   }
+
+   public double getBollardWidth()
+   {
+      return bollardWidth;
    }
 
    public static void main(String[] args)
