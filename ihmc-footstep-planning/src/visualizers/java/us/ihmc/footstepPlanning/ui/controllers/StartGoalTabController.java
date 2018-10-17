@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.ui.components;
+package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
