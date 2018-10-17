@@ -18,6 +18,9 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField minSurfaceIncline = new DoubleField(SettableFootstepPlannerParameters::getMinimumSurfaceInclineRadians, (p, v) -> p.getMinimumSurfaceInclineRadians());
    private DoubleField maxStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepWidth, (p, v) -> p.getMaximumStepWidth());
 
+   private DoubleField yawWeight = new DoubleField(SettableFootstepPlannerParameters::getYawWeight, (p, v) -> p.getYawWeight());
+   private DoubleField costPerStep = new DoubleField(SettableFootstepPlannerParameters::getCostPerStep, (p, v) -> p.getCostPerStep());
+
    public FootstepPlannerParametersProperty(Object bean, String name)
    {
       super(bean, name, new SettableFootstepPlannerParameters(new DefaultFootstepPlanningParameters()));
@@ -82,5 +85,15 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    public void bidirectionalBindMaxStepWidth(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, maxStepWidth);
+   }
+
+   public void bidirectionalBindYawWeight(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, yawWeight);
+   }
+
+   public void bidirectionalBindCostPerStep(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, costPerStep);
    }
 }
