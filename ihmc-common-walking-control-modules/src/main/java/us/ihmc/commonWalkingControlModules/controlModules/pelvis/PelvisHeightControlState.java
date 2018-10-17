@@ -259,7 +259,13 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
    public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
-      return positionController.handleTrajectoryCommand(command.getEuclideanTrajectory());
+      if (positionController.handleTrajectoryCommand(command.getEuclideanTrajectory()))
+      {
+         return true;
+      }
+
+      initializeDesiredHeightToCurrent();
+      return false;
    }
 
    /**
@@ -292,7 +298,13 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       euclideanCommand.getWeightMatrix().setYAxisWeight(0.0);
       euclideanCommand.getWeightMatrix().setWeightFrame(ReferenceFrame.getWorldFrame());
 
-      return positionController.handleTrajectoryCommand(euclideanCommand);
+      if (positionController.handleTrajectoryCommand(euclideanCommand))
+      {
+         return true;
+      }
+
+      initializeDesiredHeightToCurrent();
+      return false;
    }
 
    @Override
