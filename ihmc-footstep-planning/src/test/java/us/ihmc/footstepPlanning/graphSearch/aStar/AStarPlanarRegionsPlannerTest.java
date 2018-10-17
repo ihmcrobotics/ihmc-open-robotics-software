@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import org.junit.After;
 import org.junit.Test;
 
@@ -52,7 +53,8 @@ import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarPlanarRegionsPlannerTest
 {
-   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+//   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   private static final boolean visualize = false;
 
    @After
    public void tearDown()
@@ -226,7 +228,10 @@ public class AStarPlanarRegionsPlannerTest
          }
       };
       FootstepNodeChecker nodeChecker = new SimpleNodeChecker();
-      EuclideanDistanceHeuristics heuristics = new EuclideanDistanceHeuristics(() -> 5.0);
+
+      final AtomicDouble heuristicCost = new AtomicDouble(1.0);
+      DoubleProvider heuristicCostProvider = () -> heuristicCost.get();
+      EuclideanDistanceHeuristics heuristics = new EuclideanDistanceHeuristics(heuristicCostProvider);
       SimpleGridResolutionBasedExpansion expansion = new SimpleGridResolutionBasedExpansion();
       EuclideanBasedCost stepCostCalculator = new EuclideanBasedCost(parameters);
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
@@ -250,6 +255,8 @@ public class AStarPlanarRegionsPlannerTest
 
          goalPose.setY(-parameters.getIdealFootstepWidth() / 2.0);
          assertTrue(goalPose.epsilonEquals(achievedGoalPose, FootstepNode.gridSizeXY));
+
+         heuristicCost.set(5.0);
 
          assertEquals(FootstepPlanningResult.SUB_OPTIMAL_SOLUTION, planner.plan());
 
