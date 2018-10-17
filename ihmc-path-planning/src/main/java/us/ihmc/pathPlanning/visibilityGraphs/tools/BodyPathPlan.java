@@ -3,12 +3,9 @@ package us.ihmc.pathPlanning.visibilityGraphs.tools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +59,7 @@ public class BodyPathPlan
       this.startPose.set(startPosition.getX(), startPosition.getY(), startYaw);
    }
 
-   public void setGoalPose(Pose3DReadOnly goalPose)
+   public void setGoalPose(Pose2DReadOnly goalPose)
    {
       this.goalPose.set(goalPose);
    }
