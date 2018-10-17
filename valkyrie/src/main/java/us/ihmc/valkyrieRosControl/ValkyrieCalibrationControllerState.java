@@ -10,7 +10,6 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -57,12 +56,8 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       {
          String jointName = controlledJoint.getName();
          YoPolynomial trajectory = new YoPolynomial(jointName + "_CalibrationTrajectory", 4, registry);
-         YoDouble calibrationPosition = new YoDouble(jointName + "_CalibrationPosition", registry);
          YoDouble initialPosition = new YoDouble(jointName + "_CalibrationInitialPosition", registry);
-
-         calibrationPosition.set(calibrationParameters.getSetpoint(jointName));
-
-         jointsData.add(controlledJoint, new TrajectoryData(initialPosition, calibrationPosition, trajectory));
+         jointsData.add(controlledJoint, new TrajectoryData(initialPosition, trajectory));
       }
 
       timeToMoveForCalibration.set(timeToMove);
@@ -184,7 +179,6 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             TrajectoryData trajectoryData = jointsData.get(i).getRight();
 
             YoDouble initialPosition = trajectoryData.getInitialPosition();
-            YoDouble calibrationPosition = trajectoryData.getCalibrationPosition();
             YoPolynomial trajectory = trajectoryData.getTrajectory();
 
             JointDesiredOutputReadOnly jointDesiredOutput = highLevelControlOutput.getJointDesiredOutput(joint);
@@ -192,7 +186,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             double startAngle = jointDesiredOutput != null && jointDesiredOutput.hasDesiredPosition() ? jointDesiredOutput.getDesiredPosition() : joint.getQ();
             double startVelocity = 0.0;
 
-            double finalAngle = calibrationPosition.getDoubleValue();
+            double finalAngle = jointTorqueOffsetEstimatorController.getJointCalibrationPosition(joint);
             double finalVelocity = 0.0;
 
             initialPosition.set(startAngle);
@@ -297,13 +291,13 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       {
          for (int i = 0; i < jointsData.size(); i++)
          {
+            OneDoFJoint joint = jointsData.get(i).getLeft();
             TrajectoryData trajectoryData = jointsData.get(i).getRight();
 
-            YoDouble calibrationPosition = trajectoryData.getCalibrationPosition();
             YoDouble initialPosition = trajectoryData.getInitialPosition();
             YoPolynomial trajectory = trajectoryData.getTrajectory();
 
-            double startAngle = calibrationPosition.getDoubleValue();
+            double startAngle = jointTorqueOffsetEstimatorController.getJointCalibrationPosition(joint);
             double startVelocity = 0.0;
 
             double finalAngle = initialPosition.getDoubleValue();
@@ -322,24 +316,17 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    private class TrajectoryData
    {
       private final YoDouble initialPosition;
-      private final YoDouble calibrationPosition;
       private final YoPolynomial trajectory;
 
-      public TrajectoryData(YoDouble initialPosition, YoDouble calibrationPosition, YoPolynomial trajectory)
+      public TrajectoryData(YoDouble initialPosition, YoPolynomial trajectory)
       {
          this.initialPosition = initialPosition;
-         this.calibrationPosition = calibrationPosition;
          this.trajectory = trajectory;
       }
 
       public YoDouble getInitialPosition()
       {
          return initialPosition;
-      }
-
-      public YoDouble getCalibrationPosition()
-      {
-         return calibrationPosition;
       }
 
       public YoPolynomial getTrajectory()
