@@ -10,12 +10,13 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.footstepPlanning.ui.components.*;
 import us.ihmc.footstepPlanning.ui.viewers.BodyPathMeshViewer;
+import us.ihmc.footstepPlanning.ui.viewers.StartGoalOrientationViewer;
+import us.ihmc.footstepPlanning.ui.viewers.StartGoalPositionViewer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
@@ -93,10 +94,11 @@ public class FootstepPlannerUI
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
 
       this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
-      this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic, StartPositionTopic, GoalPositionTopic);
+      this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic,
+                                                                 StartPositionTopic, LowLevelGoalPositionTopic, GoalPositionTopic);
       this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
-      this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic, StartPositionTopic,
-                                                    GoalPositionTopic);
+      this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic,
+                                                         StartPositionTopic, GoalPositionTopic);
       this.footPositionEditor = new FootPositionEditor(messager, subScene);
       this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
       this.pathRenderer = new FootstepPathRenderer(messager);
