@@ -1,9 +1,13 @@
 package us.ihmc.footstepPlanning;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.List;
 
 public interface FootstepPlanner
 {
@@ -61,6 +65,11 @@ public interface FootstepPlanner
       return FootstepPlanningResult.OPTIMAL_SOLUTION;
    }
 
+   default BodyPathPlan getPathPlan()
+   {
+      return null;
+   }
+
    /**
     * Plan a sequence of footsteps given initial and goal conditions. The poses describe
     * the location and orientation of the sole frame in world.
@@ -70,8 +79,6 @@ public interface FootstepPlanner
 
    /**
     * Returns the plan that was solved for during the plan() method.
-    *
-    * @return
     */
    FootstepPlan getPlan();
 

@@ -16,7 +16,7 @@ int32 NO_PLAN_ID=-1
 uint32 sequence_id
 
 # Field default value 255
-int8 footstep_planning_result
+int8 path_planning_result
 
 # Field default value -1
 int32 plan_id
@@ -25,8 +25,8 @@ controller_msgs/PlanarRegionsListMessage planar_regions_list
 
 geometry_msgs/Point[] body_path
 
-geometry_msgs/Pose2D low_level_planner_start_pose
+geometry_msgs/Pose2D path_planner_start_pose
 
-geometry_msgs/Pose2D low_level_planner_goal_pose
+geometry_msgs/Pose2D path_planner_goal_pose
 
 

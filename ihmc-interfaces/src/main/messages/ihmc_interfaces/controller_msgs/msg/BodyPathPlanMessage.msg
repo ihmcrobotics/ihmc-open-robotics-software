@@ -12,11 +12,11 @@ byte FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED = 5
 
 int32 NO_PLAN_ID = -1
 
-byte footstep_planning_result 255
+byte path_planning_result 255
 int32 plan_id -1
 
 PlanarRegionsListMessage planar_regions_list
 
 geometry_msgs/Point[] body_path
-geometry_msgs/Pose2D low_level_planner_start_pose
-geometry_msgs/Pose2D low_level_planner_goal_pose
+geometry_msgs/Pose2D path_planner_start_pose
+geometry_msgs/Pose2D path_planner_goal_pose
