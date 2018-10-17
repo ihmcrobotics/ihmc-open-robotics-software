@@ -3,15 +3,13 @@ package us.ihmc.footstepPlanning.ui.components;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 
@@ -23,6 +21,11 @@ public class StartGoalTabController
 
    @FXML
    private ComboBox<FootstepPlannerType> plannerTypeComboBox;
+   @FXML
+   private TextField requestID;
+   @FXML
+   private TextField sequenceID;
+
 
    @FXML
    private ToggleButton startPositionToggleButton;
@@ -96,6 +99,8 @@ public class StartGoalTabController
       setupControls();
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTypeTopic, plannerTypeComboBox.valueProperty(), true);
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, v -> requestID.promptTextProperty().setValue(v.toString()));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.SequenceIdTopic, v -> sequenceID.promptTextProperty().setValue(v.toString()));
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, startPositionToggleButton.selectedProperty(), false);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, goalPositionToggleButton.selectedProperty(), false);
