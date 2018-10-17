@@ -2,9 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import java.util.Collection;
 
-import org.apache.commons.math3.util.Precision;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -28,6 +27,8 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    private final YoInteger numberOfPointsInGenerator;
    private final YoInteger numberOfPoints;
 
+   private final ReferenceFrame bodyFrame;
+   private final FrameQuaternion currentOrientation = new FrameQuaternion();
    private final RigidBodyPositionControlHelper positionHelper;
 
    public RigidBodyPositionController(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
@@ -42,6 +43,13 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       numberOfPointsInQueue = new YoInteger(prefix + "NumberOfPointsInQueue", registry);
       numberOfPointsInGenerator = new YoInteger(prefix + "NumberOfPointsInGenerator", registry);
       numberOfPoints = new YoInteger(prefix + "NumberOfPoints", registry);
+
+      // This needs to be identity to allow for consistent conversions of the control frame point if a message with a control frame is recieved.
+      bodyFrame = bodyToControl.getBodyFixedFrame();
+      if (!controlFrame.getTransformToDesiredFrame(bodyFrame).getRotationMatrix().isIdentity())
+      {
+         throw new RuntimeException("The control frame orientation of a position controlled body must be identity!");
+      }
 
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
@@ -75,7 +83,8 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    {
       clear();
       setTrajectoryStartTimeToCurrentTime();
-      positionHelper.holdCurrentDesired(null);
+      currentOrientation.setToZero(bodyFrame);
+      positionHelper.holdCurrentDesired(currentOrientation);
    }
 
    @Override
@@ -101,7 +110,8 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    {
       clear();
       setTrajectoryStartTimeToCurrentTime();
-      positionHelper.goToPosition(position, null, trajectoryTime);
+      currentOrientation.setToZero(bodyFrame);
+      positionHelper.goToPosition(position, currentOrientation, trajectoryTime);
    }
 
    @Override
@@ -125,17 +135,18 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    @Override
    public boolean handleTrajectoryCommand(EuclideanTrajectoryControllerCommand command)
    {
-      // A purely position controlled body may not specify a control frame offset since a desired orientation is required
-      // to transform desired positions between body fixed control frames.
-      if (command.useCustomControlFrame() && !Precision.equals(command.getControlFramePose().getTranslationVector().lengthSquared(), 0.0))
+      // For a position controlled body the control frame orientation must remain identity so the current orientation can be used to
+      // transform the desired from the old control frame position to the new.
+      if (command.useCustomControlFrame() && !command.getControlFramePose().getRotationMatrix().isIdentity())
       {
-         LogTools.warn("Specifying a control frame offset for a body position controller is not possible.");
+         LogTools.warn("Specifying a control frame orientation for a body position controller is not supported!");
          clear();
          positionHelper.clear();
          return false;
       }
 
-      if (handleCommandInternal(command) && positionHelper.handleTrajectoryCommand(command, null))
+      currentOrientation.setToZero(bodyFrame);
+      if (handleCommandInternal(command) && positionHelper.handleTrajectoryCommand(command, currentOrientation))
       {
          usingWeightFromMessage.set(positionHelper.isMessageWeightValid());
          return true;
