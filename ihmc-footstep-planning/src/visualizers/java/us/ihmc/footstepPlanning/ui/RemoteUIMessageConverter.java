@@ -6,9 +6,12 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -26,6 +29,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -119,7 +123,11 @@ public class RemoteUIMessageConverter
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningRequestPacket.class,
                                            FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
-      // we want to listen to the resulting plan from the toolbox
+      // we want to listen to the resulting body path plan from the toolbox
+      ROS2Tools.createCallbackSubscription(ros2Node, BodyPathPlanMessage.class,
+                                           FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
+                                           s -> processBodyPathPlanMessage(s.takeNextData()));
+      // we want to listen to the resulting foootstep plan from the toolbox
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class,
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
@@ -174,6 +182,23 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength);
    }
 
+   private void processBodyPathPlanMessage(BodyPathPlanMessage packet)
+   {
+      PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsList();
+      int plannerRequestId = packet.getPlanId();
+      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
+      FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getPathPlanningResult());
+      List<? extends Point3DReadOnly> bodyPath = packet.getBodyPath();
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResultTopic, result);
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathDataTopic, bodyPath);
+
+      if (verbose)
+         PrintTools.info("Received a footstep planning result from the toolbox.");
+   }
+
    private void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus packet)
    {
       PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsList();
@@ -183,6 +208,12 @@ public class RemoteUIMessageConverter
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
       FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
       FootstepPlan footstepPlan = convertToFootstepPlan(footstepDataListMessage);
+      List<? extends Point3DReadOnly> bodyPath = packet.getBodyPath();
+      Pose2DReadOnly lowLevelGoal = packet.getLowLevelPlannerGoal();
+
+      Point3D lowLevelGoalPosition = new Point3D(lowLevelGoal.getPosition());
+      Quaternion lowLevelGoalOrientation = new Quaternion();
+      lowLevelGoalOrientation.setYawPitchRoll(lowLevelGoal.getYaw(), 0.0, 0.0);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
@@ -190,12 +221,12 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.SequenceIdTopic, sequenceId);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResultTopic, result);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, packet.getTimeTaken());
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathDataTopic, bodyPath);
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic, lowLevelGoalPosition);
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic, lowLevelGoalOrientation);
 
       if (verbose)
          PrintTools.info("Received a footstep planning result from the toolbox.");
-
-      // Goal pose
-      // TODO visualize body path
    }
 
    private void processIncomingPlanarRegionMessage(PlanarRegionsListMessage packet)
