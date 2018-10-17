@@ -110,7 +110,7 @@ public class PelvisOrientationManager
          return;
       }
 
-      walkingManager.setOffset(userManager.getFeedbackControlCommand().getDesiredOrientation());
+      walkingManager.setOffset(userManager.getDesiredOrientation());
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()
