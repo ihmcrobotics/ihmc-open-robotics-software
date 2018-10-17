@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.communication;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
@@ -9,8 +10,11 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.*;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.List;
 
 public class FootstepPlannerMessagerAPI
 {
@@ -23,6 +27,7 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme OrientationTheme = apiFactory.createCategoryTheme("OrientationTheme");
    private static final CategoryTheme EditMode = apiFactory.createCategoryTheme("EditMode");
    private static final CategoryTheme FootstepPlan = apiFactory.createCategoryTheme("FootstepPlan");
+   private static final CategoryTheme BodyPath = apiFactory.createCategoryTheme("BodyPath");
    private static final CategoryTheme NodeChecking = apiFactory.createCategoryTheme("NodeChecking");
    private static final CategoryTheme UnitTest = apiFactory.createCategoryTheme("UnitTest");
 
@@ -74,11 +79,13 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> GoalOrientationEditModeEnabledTopic = Root.child(Goal).child(EditMode).child(OrientationTheme).topic(Enable);
 
    public static final Topic<RobotSide> InitialSupportSideTopic = Root.child(Start).topic(Side);
-   public static final Topic<Point3D> StartPositionTopic = Root.child(Start).topic(Position);
-   public static final Topic<Point3D> GoalPositionTopic = Root.child(Goal).topic(Position);
+   public static final Topic<Point3D> StartPositionTopic = Root.child(FootstepPlan).child(Start).topic(Position);
+   public static final Topic<Point3D> GoalPositionTopic = Root.child(FootstepPlan).child(Goal).topic(Position);
+   public static final Topic<Point3D> LowLevelGoalPositionTopic = Root.child(FootstepPlan).child(Goal).topic(Position);
+   public static final Topic<Quaternion> LowLevelGoalOrientationTopic = Root.child(FootstepPlan).child(Goal).topic(Orientation);
 
-   public static final Topic<Quaternion> StartOrientationTopic = Root.child(Start).topic(Orientation);
-   public static final Topic<Quaternion> GoalOrientationTopic = Root.child(Goal).topic(Orientation);
+   public static final Topic<Quaternion> StartOrientationTopic = Root.child(FootstepPlan).child(Start).topic(Orientation);
+   public static final Topic<Quaternion> GoalOrientationTopic = Root.child(FootstepPlan).child(Goal).topic(Orientation);
 
    public static final Topic<Boolean> GlobalResetTopic = Root.topic(Reset);
 
@@ -88,6 +95,8 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<Boolean> exportUnitTestDataFile = Root.child(UnitTest).topic(Export);
    public static final Topic<String> exportUnitTestPath = Root.child(UnitTest).topic(Path);
+
+   public static final Topic<List<? extends Point3DReadOnly>> BodyPathDataTopic = Root.child(BodyPath).topic(Data);
 
    private static final TypedTopicTheme<Boolean> ValidNode = apiFactory.createTypedTopicTheme("ValidNode");
    private static final TypedTopicTheme<Pose3D> FootstepPose = apiFactory.createTypedTopicTheme("FootstepPose");
