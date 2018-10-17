@@ -310,6 +310,11 @@ public class FootstepPlanningToolboxController extends ToolboxController
       else
       {
          result.getFootstepDataList().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE));
+
+         if (footstepPlan.hasLowLevelPlanGoal())
+         {
+            result.getLowLevelPlannerGoal().set(footstepPlan.getLowLevelPlanGoal());
+         }
       }
 
       planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));

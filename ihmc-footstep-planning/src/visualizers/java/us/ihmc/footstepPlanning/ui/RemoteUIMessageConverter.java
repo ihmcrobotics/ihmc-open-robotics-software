@@ -6,7 +6,9 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -209,11 +211,7 @@ public class RemoteUIMessageConverter
       FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
       FootstepPlan footstepPlan = convertToFootstepPlan(footstepDataListMessage);
       List<? extends Point3DReadOnly> bodyPath = packet.getBodyPath();
-      Pose2DReadOnly lowLevelGoal = packet.getLowLevelPlannerGoal();
-
-      Point3D lowLevelGoalPosition = new Point3D(lowLevelGoal.getPosition());
-      Quaternion lowLevelGoalOrientation = new Quaternion();
-      lowLevelGoalOrientation.setYawPitchRoll(lowLevelGoal.getYaw(), 0.0, 0.0);
+      Pose3D lowLevelGoal = packet.getLowLevelPlannerGoal();
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
@@ -222,8 +220,8 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResultTopic, result);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, packet.getTimeTaken());
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathDataTopic, bodyPath);
-      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic, lowLevelGoalPosition);
-      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic, lowLevelGoalOrientation);
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic, lowLevelGoal.getPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic, lowLevelGoal.getOrientation());
 
       if (verbose)
          PrintTools.info("Received a footstep planning result from the toolbox.");
