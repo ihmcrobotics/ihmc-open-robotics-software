@@ -12,14 +12,14 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField maxStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepYaw, (p, v) -> p.setMaximumStepYaw(v));
    private DoubleField minStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepWidth, (p, v) -> p.setMinimumStepWidth(v));
    private DoubleField minStepLength = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepLength, (p, v) -> p.setMinimumStepLength(v));
-   private DoubleField minStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepYaw, (p, v) -> p.getMinimumStepYaw());
-   private DoubleField maxStepZ = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepZ, (p, v) -> p.getMaximumStepZ());
-   private DoubleField minFootholdPercent = new DoubleField(SettableFootstepPlannerParameters::getMinimumFootholdPercent, (p, v) -> p.getMinimumFootholdPercent());
-   private DoubleField minSurfaceIncline = new DoubleField(SettableFootstepPlannerParameters::getMinimumSurfaceInclineRadians, (p, v) -> p.getMinimumSurfaceInclineRadians());
-   private DoubleField maxStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepWidth, (p, v) -> p.getMaximumStepWidth());
+   private DoubleField minStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepYaw, (p, v) -> p.setMinimumStepYaw(v));
+   private DoubleField maxStepZ = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepZ, (p, v) -> p.setMaximumStepZ(v));
+   private DoubleField minFootholdPercent = new DoubleField(SettableFootstepPlannerParameters::getMinimumFootholdPercent, (p, v) -> p.setMinimumFootholdPercent(v));
+   private DoubleField minSurfaceIncline = new DoubleField(SettableFootstepPlannerParameters::getMinimumSurfaceInclineRadians, (p, v) -> p.setMinimumSurfaceInclineRadians(v));
+   private DoubleField maxStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepWidth, (p, v) -> p.setMaximumStepWidth(v));
 
-   private DoubleField yawWeight = new DoubleField(SettableFootstepPlannerParameters::getYawWeight, (p, v) -> p.getYawWeight());
-   private DoubleField costPerStep = new DoubleField(SettableFootstepPlannerParameters::getCostPerStep, (p, v) -> p.getCostPerStep());
+   private DoubleField yawWeight = new DoubleField(SettableFootstepPlannerParameters::getYawWeight, (p, v) -> p.setYawWeight(v));
+   private DoubleField costPerStep = new DoubleField(SettableFootstepPlannerParameters::getCostPerStep, (p, v) -> p.setCostPerStep(v));
 
    public FootstepPlannerParametersProperty(Object bean, String name)
    {

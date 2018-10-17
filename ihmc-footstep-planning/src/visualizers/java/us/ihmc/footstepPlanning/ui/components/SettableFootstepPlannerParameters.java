@@ -34,8 +34,8 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.minFootholdPercent = footstepPlanningParameters.getMinimumFootholdPercent();
       this.minSurfaceIncline = footstepPlanningParameters.getMinimumSurfaceInclineRadians();
 
-      this.yawWeight = footstepPlanningParameters.getYawWeight();
-      this.costPerStep = footstepPlanningParameters.getCostPerStep();
+      this.yawWeight = footstepPlanningParameters.getCostParameters().getYawWeight();
+      this.costPerStep = footstepPlanningParameters.getCostParameters().getCostPerStep();
    }
 
    public void setIdealFootstepWidth(double idealFootstepLength)
@@ -88,7 +88,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.minFootholdPercent = minFootholdPercent;
    }
 
-   public void setMinimumSurfaceIncline(double minSurfaceIncline)
+   public void setMinimumSurfaceInclineRadians(double minSurfaceIncline)
    {
       this.minSurfaceIncline = minSurfaceIncline;
    }
