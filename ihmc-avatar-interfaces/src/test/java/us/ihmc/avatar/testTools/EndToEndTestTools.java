@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlState;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
@@ -32,9 +30,9 @@ public class EndToEndTestTools
     * controlling the {@link RigidBody} with given name. The number of waypoints checked is the total number
     * of trajectory points (in queue and in generator) of the controller.
     */
-   public static void assertNumberOfPoints(String bodyName, int points, SimulationConstructionSet scs)
+   public static void assertNumberOfPoints(String bodyName, String postfix, int points, SimulationConstructionSet scs)
    {
-      assertEquals("Unexpected number of waypoints:", points, findControllerNumberOfWaypoints(bodyName, scs));
+      assertEquals("Unexpected number of waypoints:", points, findControllerNumberOfWaypoints(bodyName, postfix, scs));
    }
 
    public static void assertCurrentDesiredsMatchWaypoint(String bodyName, SO3TrajectoryPointMessage waypoint, SimulationConstructionSet scs, double epsilon)
@@ -77,11 +75,10 @@ public class EndToEndTestTools
     * Finds the number of waypoints in a {@link RigidBodyTaskspaceControlState} for the body with the
     * given name.
     */
-   public static int findControllerNumberOfWaypoints(String bodyName, SimulationConstructionSet scs)
+   public static int findControllerNumberOfWaypoints(String bodyName, String postfix, SimulationConstructionSet scs)
    {
-      String namespace = RigidBodyControlState.createRegistryName(bodyName, RigidBodyControlMode.TASKSPACE);
-      String variableName = bodyName + "TaskspaceNumberOfPoints";
-      return (int) scs.getVariable(namespace, variableName).getValueAsLongBits();
+      String variableName = bodyName + postfix + "TaskspaceNumberOfPoints";
+      return (int) scs.getVariable(variableName).getValueAsLongBits();
    }
 
    /**

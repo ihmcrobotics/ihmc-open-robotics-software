@@ -168,14 +168,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (chest != null)
       {
          chestBodyFrame = chest.getBodyFixedFrame();
-         RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, false, true, trajectoryFrames);
+         RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, trajectoryFrames);
          bodyManagers.add(chestManager);
       }
 
       if (head != null)
       {
          ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
-         RigidBodyControlManager headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, false, true, trajectoryFrames);
+         RigidBodyControlManager headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, trajectoryFrames);
          bodyManagers.add(headManager);
       }
 
@@ -183,7 +183,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          RigidBody hand = fullRobotModel.getHand(robotSide);
          ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, true, true, trajectoryFrames);
+         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, trajectoryFrames);
          bodyManagers.add(handManager);
       }
 

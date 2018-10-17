@@ -296,12 +296,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    {
    }
 
-   @Override
-   public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint3D positionToPack)
-   {
-      positionToPack.setIncludingFrame(desiredCenterOfMassHeightPoint);
-   }
-
    public void setGains(PDGainsReadOnly gains, DoubleProvider maximumComVelocity)
    {
       centerOfMassHeightController.setGains(gains);

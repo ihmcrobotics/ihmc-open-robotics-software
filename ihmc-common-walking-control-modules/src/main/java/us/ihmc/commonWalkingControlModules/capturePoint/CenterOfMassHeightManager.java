@@ -11,8 +11,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -54,9 +52,6 @@ public class CenterOfMassHeightManager
 
    /** if the manager is in user mode before walking then stay in it while walking (PelvisHeightControlState) **/
    private final YoBoolean enableUserPelvisControlDuringWalking = new YoBoolean("centerOfMassHeightManagerEnableUserPelvisControlDuringWalking", registry);
-
-   private final FramePose3D tempPose = new FramePose3D();
-   private final FramePoint3D tempPosition = new FramePoint3D();
 
    private final boolean useStateMachine;
 
@@ -189,12 +184,7 @@ public class CenterOfMassHeightManager
          if (command.isEnableUserPelvisControl())
          {
             enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
-            stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
-
-            tempPose.setToZero(tempPosition.getReferenceFrame());
-            tempPose.setPosition(tempPosition);
-
-            if (pelvisHeightControlState.handlePelvisTrajectoryCommand(command, tempPose))
+            if (pelvisHeightControlState.handlePelvisTrajectoryCommand(command))
             {
                requestState(PelvisHeightControlMode.USER);
                return;
@@ -210,10 +200,7 @@ public class CenterOfMassHeightManager
       else
       {
          enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
-         pelvisHeightControlState.getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
-         tempPose.setToZero(tempPosition.getReferenceFrame());
-         tempPose.setPosition(tempPosition);
-         pelvisHeightControlState.handlePelvisTrajectoryCommand(command, tempPose);
+         pelvisHeightControlState.handlePelvisTrajectoryCommand(command);
       }
    }
 
@@ -229,12 +216,7 @@ public class CenterOfMassHeightManager
          if (command.isEnableUserPelvisControl())
          {
             enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
-            stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
-
-            tempPose.setToZero(tempPosition.getReferenceFrame());
-            tempPose.setPosition(tempPosition);
-
-            if (pelvisHeightControlState.handlePelvisHeightTrajectoryCommand(command, tempPose))
+            if (pelvisHeightControlState.handlePelvisHeightTrajectoryCommand(command))
             {
                requestState(PelvisHeightControlMode.USER);
                return;
@@ -249,10 +231,7 @@ public class CenterOfMassHeightManager
       else
       {
          enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
-         pelvisHeightControlState.getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
-         tempPose.setToZero(tempPosition.getReferenceFrame());
-         tempPose.setPosition(tempPosition);
-         pelvisHeightControlState.handlePelvisHeightTrajectoryCommand(command, tempPose);
+         pelvisHeightControlState.handlePelvisHeightTrajectoryCommand(command);
       }
    }
 

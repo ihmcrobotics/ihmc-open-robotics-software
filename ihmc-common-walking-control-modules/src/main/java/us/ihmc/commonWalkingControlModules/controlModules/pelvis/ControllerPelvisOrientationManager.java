@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -233,7 +234,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       pelvisOrientationOffsetTrajectoryGenerator.initialize();
    }
 
-   public void setOffset(FrameQuaternion offset)
+   public void setOffset(FrameQuaternionReadOnly offset)
    {
       tempOrientation.setIncludingFrame(offset);
       tempOrientation.changeFrame(desiredPelvisFrame);
@@ -396,11 +397,5 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return orientationFeedbackControlCommand;
-   }
-
-   @Override
-   public void getCurrentDesiredOrientation(FrameQuaternion orientationToPack)
-   {
-      orientationToPack.setIncludingFrame(desiredPelvisOrientationWithOffset);
    }
 }
