@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.footstepPlanning.ui.components.*;
+import us.ihmc.footstepPlanning.ui.viewers.BodyPathMeshViewer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -39,6 +40,7 @@ public class FootstepPlannerUI
    private final StartGoalOrientationEditor orientationEditor;
    private final NodeCheckerRenderer nodeCheckerRenderer;
    private final FootstepPlannerDataExporter dataExporter;
+   private final BodyPathMeshViewer bodyPathMeshViewer;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -100,12 +102,14 @@ public class FootstepPlannerUI
       this.pathRenderer = new FootstepPathRenderer(messager);
       this.nodeCheckerRenderer = new NodeCheckerRenderer(messager);
       this.dataExporter = new FootstepPlannerDataExporter(messager);
+      this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
       view3dFactory.addNodeToView(pathRenderer.getRoot());
       view3dFactory.addNodeToView(nodeCheckerRenderer.getRoot());
+      view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
 
       planarRegionViewer.start();
       startGoalPositionViewer.start();
@@ -115,6 +119,7 @@ public class FootstepPlannerUI
       pathRenderer.start();
       nodeCheckerRenderer.start();
       footPositionEditor.start();
+      bodyPathMeshViewer.start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -145,6 +150,7 @@ public class FootstepPlannerUI
       pathRenderer.stop();
       nodeCheckerRenderer.stop();
       dataExporter.stop();
+      bodyPathMeshViewer.stop();
    }
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager) throws Exception

@@ -98,6 +98,9 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<List<? extends Point3DReadOnly>> BodyPathDataTopic = Root.child(BodyPath).topic(Data);
 
+   public static final Topic<Boolean> ShowBodyPath = Root.child(BodyPath).topic(Show);
+
+
    private static final TypedTopicTheme<Boolean> ValidNode = apiFactory.createTypedTopicTheme("ValidNode");
    private static final TypedTopicTheme<Pose3D> FootstepPose = apiFactory.createTypedTopicTheme("FootstepPose");
 
