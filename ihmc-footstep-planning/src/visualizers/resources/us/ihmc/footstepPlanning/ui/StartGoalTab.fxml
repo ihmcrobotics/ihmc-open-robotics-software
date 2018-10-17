@@ -15,7 +15,7 @@
 <?import javafx.scene.control.TextField?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
             xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="us.ihmc.footstepPlanning.ui.components.StartGoalTabController">
+            fx:controller="us.ihmc.footstepPlanning.ui.controllers.StartGoalTabController">
     <children>
         <GridPane hgap="5.0" layoutX="25.0" layoutY="27.0">
             <columnConstraints>

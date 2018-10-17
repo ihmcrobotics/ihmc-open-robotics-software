@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.ui.components;
+package us.ihmc.footstepPlanning.ui.viewers;
 
 import javafx.animation.AnimationTimer;
 import javafx.scene.Node;
