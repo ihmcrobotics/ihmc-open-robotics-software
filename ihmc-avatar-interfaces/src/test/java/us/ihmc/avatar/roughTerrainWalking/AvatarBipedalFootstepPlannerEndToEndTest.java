@@ -48,6 +48,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProper
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.TwoBollardEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -64,6 +65,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -77,9 +79,9 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    private static final boolean keepSCSUp = false;
    private static final int timeout = 120000; // to easily keep scs up. unfortunately can't be set programmatically, has to be a constant
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   protected DRCSimulationTestHelper drcSimulationTestHelper;
    private DRCNetworkModuleParameters networkModuleParameters;
-   private HumanoidRobotDataReceiver humanoidRobotDataReceiver;
+   protected HumanoidRobotDataReceiver humanoidRobotDataReceiver;
 
    private FootstepPlanningToolboxModule toolboxModule;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
@@ -87,9 +89,10 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
    private RealtimeRos2Node ros2Node;
 
+   protected final TwoBollardEnvironment bollardEnvironment = new TwoBollardEnvironment(BOLLARD_DISTANCE);
    private PlanarRegionsList cinderBlockField;
    private PlanarRegionsList steppingStoneField;
-   private PlanarRegionsList bollardEnvironment;
+   private PlanarRegionsList bollardPlanarRegions;
 
    public static final double CINDER_BLOCK_START_X = 0.0;
    public static final double CINDER_BLOCK_START_Y = 0.0;
@@ -99,6 +102,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    public static final int CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS = 6;
    public static final double CINDER_BLOCK_HEIGHT_VARIATION = 0.0;
    public static final double CINDER_BLOCK_FIELD_PLATFORM_LENGTH = 0.6;
+   protected static final double BOLLARD_DISTANCE = 0.65;
 
    public static final double STEPPING_STONE_PATH_RADIUS = 3.5;
 
@@ -116,7 +120,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
                                                                             CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS, CINDER_BLOCK_HEIGHT_VARIATION);
       cinderBlockField = generator.getPlanarRegionsList();
       steppingStoneField = PlanarRegionsListExamples.generateSteppingStonesEnvironment(STEPPING_STONE_PATH_RADIUS);
-      bollardEnvironment = new TwoBollardEnvironment(0.65).getPlanarRegionsList();
+      bollardPlanarRegions = bollardEnvironment.getPlanarRegionsList();
 
       networkModuleParameters = new DRCNetworkModuleParameters();
       networkModuleParameters.enableFootstepPlanningToolbox(false);
@@ -140,6 +144,8 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       planCompleted = false;
 
       simulationTestingParameters.setKeepSCSUp(keepSCSUp && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      outputStatus = new AtomicReference<>(null);
+
       ros2Node.spin();
    }
 
@@ -179,6 +185,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, 0.0, 0.007);
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Pose3D(courseLength, 0.0, 0.0, 0.0, 0.0, 0.0));
 
+      setupSimulation(cinderBlockField, startingLocation);
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, cinderBlockField, startingLocation, goalPose);
    }
 
@@ -190,6 +197,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, 0.0, 0.007);
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Pose3D(courseLength, 0.0, 0.0, 0.0, 0.0, 0.0));
 
+      setupSimulation(cinderBlockField, startingLocation);
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, cinderBlockField, startingLocation, goalPose);
    }
 
@@ -201,6 +209,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, 0.0, 0.007);
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Pose3D(courseLength, 0.0, 0.0, 0.0, 0.0, 0.0));
 
+      setupSimulation(cinderBlockField, startingLocation);
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.PLANAR_REGION_BIPEDAL, cinderBlockField, startingLocation, goalPose);
    }
 
@@ -212,6 +221,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                              new Pose3D(STEPPING_STONE_PATH_RADIUS + 0.5, STEPPING_STONE_PATH_RADIUS, 0.0, 0.0, 0.0, 0.0));
 
+      setupSimulation(steppingStoneField, startingLocation);
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, steppingStoneField, startingLocation, goalPose);
    }
 
@@ -223,6 +233,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                              new Pose3D(STEPPING_STONE_PATH_RADIUS + 0.5, STEPPING_STONE_PATH_RADIUS, 0.0, 0.0, 0.0, 0.0));
 
+      setupSimulation(steppingStoneField, startingLocation);
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.PLANAR_REGION_BIPEDAL, steppingStoneField, startingLocation, goalPose);
    }
 
@@ -233,7 +244,10 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(-1.5, 0.0, 0.007, 0.0);
       FramePose3D goalPose = new FramePose3D();
       goalPose.setX(1.5);
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, bollardEnvironment, startingLocation, goalPose);
+      setupSimulation(steppingStoneField, startingLocation);
+      int simTicksPerCollisionCheck = (int) (0.5 / drcSimulationTestHelper.getSimulationConstructionSet().getDT());
+      drcSimulationTestHelper.getSimulationConstructionSet().addScript(getCollisionChecker(simTicksPerCollisionCheck));
+      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, bollardPlanarRegions, startingLocation, goalPose);
    }
 
    private void runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType plannerType, PlanarRegionsList planarRegionsList,
@@ -257,28 +271,23 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       }
    }
 
-   private void runEndToEndTest(FootstepPlannerType plannerType, PlanarRegionsList planarRegionsList, DRCStartingLocation startingLocation,
-                                FramePose3D goalPose) throws Exception
+   private void setupSimulation(PlanarRegionsList planarRegionsList, DRCStartingLocation startingLocation)
    {
-      outputStatus = new AtomicReference<>();
-      outputStatus.set(null);
-
-      if (drcSimulationTestHelper != null)
-      {
-         drcSimulationTestHelper.destroySimulation();
-      }
-
-      CommonAvatarEnvironmentInterface steppingStonesEnvironment = createCommonAvatarInterface(planarRegionsList);
+      CommonAvatarEnvironmentInterface simulationEnvironment = createCommonAvatarInterface(planarRegionsList);
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.setTestEnvironment(steppingStonesEnvironment);
+      drcSimulationTestHelper.setTestEnvironment(simulationEnvironment);
       drcSimulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
       drcSimulationTestHelper.setStartingLocation(startingLocation);
       drcSimulationTestHelper.createSimulation("steppingStonesTestHelper");
 
       drcSimulationTestHelper.createSubscriberFromController(RobotConfigurationData.class, humanoidRobotDataReceiver::receivedPacket);
       drcSimulationTestHelper.createSubscriberFromController(WalkingStatusMessage.class, this::listenForWalkingComplete);
+   }
 
+   private void runEndToEndTest(FootstepPlannerType plannerType, PlanarRegionsList planarRegionsList, DRCStartingLocation startingLocation,
+                                FramePose3D goalPose) throws Exception
+   {
       blockingSimulationRunner = drcSimulationTestHelper.getBlockingSimulationRunner();
       ToolboxStateMessage wakeUpMessage = MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP);
       toolboxStatePublisher.publish(wakeUpMessage);
@@ -378,5 +387,41 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    private void setOutputStatus(FootstepPlanningToolboxOutputStatus packet)
    {
       outputStatus.set(packet);
+   }
+
+   public abstract class CollisionCheckerScript implements Script
+   {
+      final int simTicksPerCollisionCheck;
+      int counter = 0;
+
+      public CollisionCheckerScript(int simTicksPerCollisionCheck)
+      {
+         this.simTicksPerCollisionCheck = simTicksPerCollisionCheck;
+      }
+
+      @Override
+      public void doScript(double t)
+      {
+         if(counter++ > simTicksPerCollisionCheck)
+         {
+            counter = 0;
+            if(collisionDetected())
+               fail();
+         }
+      }
+
+      protected abstract boolean collisionDetected();
+   }
+
+   protected CollisionCheckerScript getCollisionChecker(int simTicksPerCollisionCheck)
+   {
+      return new CollisionCheckerScript(simTicksPerCollisionCheck)
+      {
+         @Override
+         protected boolean collisionDetected()
+         {
+            return false;
+         }
+      };
    }
 }
