@@ -2,16 +2,14 @@ package us.ihmc.footstepPlanning.ui.components;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
-
 public class FootstepPlannerParametersUIController
 {
+   private static final boolean verbose = false;
    private JavaFXMessager messager;
    private final FootstepPlannerParametersProperty property = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
 
@@ -42,10 +40,13 @@ public class FootstepPlannerParametersUIController
    @FXML
    private Slider maxStepWidth;
 
+
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
    }
+
+
 
    public void bindControls()
    {
@@ -61,7 +62,9 @@ public class FootstepPlannerParametersUIController
       property.bidirectionalBindMinSurfaceIncline(minSurfaceIncline.valueProperty());
       property.bidirectionalBindMaxStepWidth(maxStepWidth.valueProperty());
 
+
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, property, createConverter(), true);
+
    }
 
    private PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters> createConverter()
@@ -82,10 +85,7 @@ public class FootstepPlannerParametersUIController
       };
    }
 
-   @FXML
-   public void computePath()
-   {
-      PrintTools.info(this, "Clicked compute path...");
-      messager.submitMessage(ComputePathTopic, true);
-   }
+
+
+
 }
