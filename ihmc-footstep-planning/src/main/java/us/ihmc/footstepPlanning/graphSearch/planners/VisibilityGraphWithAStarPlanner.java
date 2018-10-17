@@ -48,6 +48,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -63,6 +64,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoDouble timeout = new  YoDouble("timeout", registry);
 
+   private final YoBoolean hasPath = new YoBoolean("hasPath", registry);
    private final YoDouble timeSpentBeforeFootstepPlanner = new  YoDouble("timeSpentBeforeFootstepPlanner", registry);
    private final YoDouble timeSpentInFootstepPlanner = new  YoDouble("timeSpentInFootstepPlanner", registry);
    private final YoDouble planningHorizonLength = new YoDouble("planningHorizonLength", registry);
@@ -147,6 +149,8 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       bodyStartPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       footstepPlanner.setInitialStanceFoot(stanceFootPose, side);
+
+      hasPath.set(false);
    }
 
    @Override
@@ -154,6 +158,8 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    {
       AStarFootstepPlanner.checkGoalType(goal);
       bodyGoalPose.setIncludingFrame(goal.getGoalPoseBetweenFeet());
+
+      hasPath.set(false);
    }
 
    @Override
@@ -179,10 +185,12 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    public void setPlanningHorizonLength(double planningHorizon)
    {
       planningHorizonLength.set(planningHorizon);
+
+      hasPath.set(false);
    }
 
    @Override
-   public FootstepPlanningResult plan()
+   public FootstepPlanningResult planPath()
    {
       long startTime = System.currentTimeMillis();
       waypoints.clear();
@@ -264,7 +272,6 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       {
          updateBodyPathVisualization();
       }
-
       Pose2D goalPose2d = new Pose2D();
       double pathLength = bodyPath.computePathLength(0.0);
       double alpha = MathTools.clamp(planningHorizonLength.getDoubleValue() / pathLength, 0.0, 1.0);
@@ -282,11 +289,28 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
       double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
       timeSpentBeforeFootstepPlanner.set(seconds);
-      footstepPlanner.setTimeout(timeout.getDoubleValue() - seconds);
 
-      startTime = System.currentTimeMillis();
+      hasPath.set(true);
+
+      yoResult.set(FootstepPlanningResult.SUB_OPTIMAL_SOLUTION);
+      return yoResult.getEnumValue();
+   }
+
+   @Override
+   public FootstepPlanningResult plan()
+   {
+      if (!hasPath.getBooleanValue())
+      {
+         FootstepPlanningResult pathResult = planPath();
+         if (!pathResult.validForExecution())
+            return pathResult;
+      }
+
+      footstepPlanner.setTimeout(timeout.getDoubleValue() - timeSpentBeforeFootstepPlanner.getDoubleValue());
+
+      long startTime = System.currentTimeMillis();
       yoResult.set(footstepPlanner.plan());
-      seconds = (System.currentTimeMillis() - startTime) / 1000.0;
+      double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
       timeSpentInFootstepPlanner.set(seconds);
       
       if(DEBUG)
