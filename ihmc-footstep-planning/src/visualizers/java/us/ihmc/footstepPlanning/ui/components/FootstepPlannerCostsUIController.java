@@ -2,13 +2,10 @@ package us.ihmc.footstepPlanning.ui.components;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
 
 public class FootstepPlannerCostsUIController
 {
