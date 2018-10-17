@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.MomentumTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,18 +31,22 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Random;
 
 import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTestInterface
 {
-   private static final String fileName = "resources/angularMomentumData.txt";
+   private static final String fileName = "angularMomentumData.txt";
    private static final double angularMomentumRecordDT = 0.05; // sim time between data points
-   private static final boolean keepSCSUp = true;
+   private static final boolean keepSCSUp = false;
 
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -527,19 +532,17 @@ public abstract class AvatarAngularMomentumWalkingTest implements MultiRobotTest
    {
       try
       {
-         Path filePath = Paths.get(fileName);
-         File file = filePath.toFile();
-         BufferedReader reader = new BufferedReader(new FileReader(file));
-
+         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+         List<String> trajectoryDataList = (List<String>) IOUtils.readLines(classLoader.getResourceAsStream(fileName), "UTF-8");
+         
          MomentumTrajectoryMessage trajectoryMessage = new MomentumTrajectoryMessage();
          us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage> trajectoryPoints = trajectoryMessage.getAngularMomentumTrajectory().getTaskspaceTrajectoryPoints();
 
-         String currentLine;
-         while((currentLine = reader.readLine()) != null)
+         for (int i = 0; i < trajectoryDataList.size(); i++)
          {
             EuclideanTrajectoryPointMessage trajectoryPoint = trajectoryPoints.add();
 
-            String[] trajectoryPointData = currentLine.split(",");
+            String[] trajectoryPointData = trajectoryDataList.get(i).split(",");
             trajectoryPoint.setTime(Double.parseDouble(trajectoryPointData[0]));
             trajectoryPoint.getPosition().setX(Double.parseDouble(trajectoryPointData[1]));
             trajectoryPoint.getPosition().setY(Double.parseDouble(trajectoryPointData[2]));
