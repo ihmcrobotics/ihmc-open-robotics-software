@@ -3,10 +3,11 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyOrientationController;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
@@ -30,7 +31,7 @@ public class UserPelvisOrientationManager implements PelvisOrientationControlSta
       baseFrame = controllerToolbox.getReferenceFrames().getMidFootZUpGroundFrame();
       YoDouble yoTime = controllerToolbox.getYoTime();
 
-      orientationController = new RigidBodyOrientationController(pelvis, elevator, elevator, trajectoryFrames, baseFrame, yoTime, registry);
+      orientationController = new RigidBodyOrientationController(pelvis, elevator, elevator, trajectoryFrames, baseFrame, yoTime, null, registry);
       orientationController.setGains(gains);
 
       homeOrientation = new FrameQuaternion(baseFrame);
@@ -61,7 +62,7 @@ public class UserPelvisOrientationManager implements PelvisOrientationControlSta
    }
 
    @Override
-   public OrientationFeedbackControlCommand getFeedbackControlCommand()
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return orientationController.getFeedbackControlCommand();
    }
@@ -76,5 +77,10 @@ public class UserPelvisOrientationManager implements PelvisOrientationControlSta
    public void onExit()
    {
       orientationController.onExit();
+   }
+
+   public FrameQuaternionReadOnly getDesiredOrientation()
+   {
+      return orientationController.getDesiredOrientation();
    }
 }

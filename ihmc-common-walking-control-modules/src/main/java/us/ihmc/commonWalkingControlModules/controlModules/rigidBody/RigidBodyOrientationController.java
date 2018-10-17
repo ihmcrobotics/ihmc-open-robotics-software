@@ -2,11 +2,13 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import java.util.Collection;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -19,6 +21,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class RigidBodyOrientationController extends RigidBodyTaskspaceControlState
 {
+   private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
+
    private final YoBoolean usingWeightFromMessage;
 
    private final YoInteger numberOfPointsInQueue;
@@ -27,8 +31,12 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
 
    private final RigidBodyOrientationControlHelper orientationHelper;
 
+   private final YoBoolean hybridModeActive;
+   private final RigidBodyJointControlHelper jointControlHelper;
+
    public RigidBodyOrientationController(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
-                                         ReferenceFrame baseFrame, YoDouble yoTime, YoVariableRegistry parentRegistry)
+                                         ReferenceFrame baseFrame, YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper,
+                                         YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
 
@@ -45,6 +53,9 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
       MovingReferenceFrame controlFrame = bodyToControl.getBodyFixedFrame();
       orientationHelper = new RigidBodyOrientationControlHelper(prefix, bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
                                                                 useBaseFrameForControl, usingWeightFromMessage, registry);
+
+      this.jointControlHelper = jointControlHelper;
+      hybridModeActive = new YoBoolean(prefix + "HybridModeActive", registry);
    }
 
    public void setGains(PID3DGainsReadOnly gains)
@@ -114,6 +125,11 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
       numberOfPointsInGenerator.set(orientationHelper.getNumberOfPointsInGenerator());
       numberOfPoints.set(numberOfPointsInQueue.getIntegerValue() + numberOfPointsInGenerator.getIntegerValue());
 
+      if (hybridModeActive.getBooleanValue())
+      {
+         jointControlHelper.doAction(timeInTrajectory);
+      }
+
       updateGraphics();
    }
 
@@ -132,7 +148,22 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
    }
 
    @Override
-   public OrientationFeedbackControlCommand getFeedbackControlCommand()
+   public boolean handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand command, JointspaceTrajectoryCommand jointspaceCommand,
+                                                double[] initialJointPositions)
+   {
+      if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
+      {
+         hybridModeActive.set(true);
+         return true;
+      }
+
+      clear();
+      orientationHelper.clear();
+      return false;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       // TODO: this can be removed once the controller core can handle control frame orientations with orientation commands.
       if (Math.abs(orientationHelper.getFeedbackControlCommand().getBodyFixedOrientationToControl().getS()) < 1.0 - 1.0e-5)
@@ -140,7 +171,32 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
          throw new RuntimeException("Control frame orientations for orientation control only are not supported!");
       }
 
+      if (hybridModeActive.getBooleanValue())
+      {
+         feedbackControlCommandList.clear();
+         feedbackControlCommandList.addCommand(orientationHelper.getFeedbackControlCommand());
+         feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
+         return feedbackControlCommandList;
+      }
+
       return orientationHelper.getFeedbackControlCommand();
+   }
+
+   public FrameQuaternionReadOnly getDesiredOrientation()
+   {
+      return orientationHelper.getFeedbackControlCommand().getDesiredOrientation();
+   }
+
+   @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      feedbackControlCommandList.clear();
+      feedbackControlCommandList.addCommand(orientationHelper.getFeedbackControlCommand());
+      if (jointControlHelper != null)
+      {
+         feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
+      }
+      return feedbackControlCommandList;
    }
 
    @Override

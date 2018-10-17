@@ -84,7 +84,7 @@ public class RigidBodyControlManager
       if (taskspaceAngularWeight != null && taskspaceLinearWeight == null)
       {
          RigidBodyOrientationController taskspaceControlState = new RigidBodyOrientationController(bodyToControl, baseBody, elevator, trajectoryFrames,
-                                                                                                   baseFrame, yoTime, parentRegistry);
+                                                                                                   baseFrame, yoTime, jointControlHelper, parentRegistry);
          taskspaceControlState.setGains(taskspaceOrientationGains);
          taskspaceControlState.setWeights(taskspaceAngularWeight);
          this.taskspaceControlState = taskspaceControlState;
@@ -270,6 +270,21 @@ public class RigidBodyControlManager
       else
       {
          LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SE3 trajectory command.");
+         hold();
+      }
+   }
+
+   public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand)
+   {
+      computeDesiredJointPositions(initialJointPositions);
+
+      if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions))
+      {
+         requestState(taskspaceControlState.getControlMode());
+      }
+      else
+      {
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SO3 trajectory command.");
          hold();
       }
    }

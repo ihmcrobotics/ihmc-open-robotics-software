@@ -4,7 +4,6 @@ import java.util.Random;
 
 import controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandConversionTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
@@ -13,8 +12,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
       FrameBasedCommand<ChestHybridJointspaceTaskspaceTrajectoryMessage>
 {
    private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
-   private final SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SE3TrajectoryControllerCommand();
-   private final SO3TrajectoryControllerCommand tempOrientationCommand = new SO3TrajectoryControllerCommand();
+   private final SO3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SO3TrajectoryControllerCommand();
 
    public ChestHybridJointspaceTaskspaceTrajectoryCommand()
    {
@@ -25,7 +23,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    {
       super();
       this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
-      CommandConversionTools.convertToSE3(taskspaceTrajectoryCommand, this.taskspaceTrajectoryCommand);
+      this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
    }
 
    public ChestHybridJointspaceTaskspaceTrajectoryCommand(Random random)
@@ -44,16 +42,14 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    public void setFromMessage(ChestHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
-      tempOrientationCommand.setFromMessage(message.getTaskspaceTrajectoryMessage());
-      CommandConversionTools.convertToSE3(tempOrientationCommand, taskspaceTrajectoryCommand);
+      taskspaceTrajectoryCommand.setFromMessage(message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, ChestHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
-      tempOrientationCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
-      CommandConversionTools.convertToSE3(tempOrientationCommand, taskspaceTrajectoryCommand);
+      taskspaceTrajectoryCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
@@ -74,7 +70,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
       return jointspaceTrajectoryCommand;
    }
 
-   public SE3TrajectoryControllerCommand getTaskspaceTrajectoryCommand()
+   public SO3TrajectoryControllerCommand getTaskspaceTrajectoryCommand()
    {
       return taskspaceTrajectoryCommand;
    }
