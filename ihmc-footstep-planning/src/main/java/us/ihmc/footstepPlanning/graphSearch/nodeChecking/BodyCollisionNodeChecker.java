@@ -56,6 +56,9 @@ public class BodyCollisionNodeChecker implements FootstepNodeChecker
       this.planarRegionsList = planarRegions;
       planarRegionPolytopes.clear();
 
+      if (planarRegions == null)
+         return;
+
       for (PlanarRegion planarRegion : planarRegions.getPlanarRegionsAsList())
       {
          ConvexPolytope planarRegionPolytope = planarRegionPolytopes.add();
@@ -77,7 +80,7 @@ public class BodyCollisionNodeChecker implements FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      if (previousNode == null || !parameters.checkForBodyBoxCollisions())
+      if (previousNode == null || planarRegionsList == null || !parameters.checkForBodyBoxCollisions())
       {
          return true;
       }
@@ -115,7 +118,6 @@ public class BodyCollisionNodeChecker implements FootstepNodeChecker
 
    private boolean findMidStanceFrame(FootstepNode node, FootstepNode previousNode)
    {
-
       List<PlanarRegion> nodePlanes = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(node.getX(), node.getY());
       if (nodePlanes.isEmpty())
       {
