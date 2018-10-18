@@ -11,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.BodyPathHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
@@ -19,8 +18,10 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.AlwaysValidNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -148,7 +149,6 @@ public class ControllerBasedBodyPathTest
             yoSteps.put(side, poses);
          }
 
-         planner.setWeight(1.0);
          planner.setTimeout(1.0);
       }
 
@@ -273,11 +273,11 @@ public class ControllerBasedBodyPathTest
                                                               WaypointDefinedBodyPathPlan bodyPath)
       {
          FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
-         CostToGoHeuristics heuristics = new BodyPathHeuristics(registry, parameters, bodyPath);
+         CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 1.0, parameters, bodyPath);
 //         CostToGoHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters, registry);
          FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(parameters);
 //         FootstepNodeExpansion nodeExpansion = new SimpleSideBasedExpansion(parameters);
-         FootstepCost stepCostCalculator = new DistanceAndYawBasedCost(parameters);
+         FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(parameters);
          FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
          AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, nodeExpansion, stepCostCalculator, snapper, registry);
          return planner;

@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.ui.components;
 
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 
 public class SettableFootstepPlannerParameters implements FootstepPlannerParameters
 {

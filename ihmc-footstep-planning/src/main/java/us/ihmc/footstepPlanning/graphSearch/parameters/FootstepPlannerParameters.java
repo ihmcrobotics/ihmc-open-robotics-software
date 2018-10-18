@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.graphSearch;
+package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -102,7 +102,7 @@ public interface FootstepPlannerParameters
    /**
     * Minimum step yaw.
     */
-   public default double getMinimumStepYaw()
+   default double getMinimumStepYaw()
    {
       return 0.0;
    }
@@ -124,7 +124,7 @@ public interface FootstepPlannerParameters
     * it's very close to hitting it's ankle pitch joint limit
     * </p>
     */
-   public default double getMaximumStepXWhenForwardAndDown()
+   default double getMaximumStepXWhenForwardAndDown()
    {
       return Double.POSITIVE_INFINITY;
    }
@@ -267,7 +267,7 @@ public interface FootstepPlannerParameters
     * generator is capable of swinging over.
     * </p>
     */
-   public default double getCliffHeightToAvoid()
+   default double getCliffHeightToAvoid()
    {
       return Double.MAX_VALUE;
    }
@@ -283,7 +283,7 @@ public interface FootstepPlannerParameters
     * generator is capable of swinging over.
     * </p>
     */
-   public default double getMinimumDistanceFromCliffBottoms()
+   default double getMinimumDistanceFromCliffBottoms()
    {
       return 0.0;
    }
@@ -295,7 +295,7 @@ public interface FootstepPlannerParameters
     * the "best" effort plan, where the plan is at least {@link #getMinimumStepsForBestEffortPlan()} steps long
     * "best" is determined by the planner.
     */
-   public default boolean getReturnBestEffortPlan()
+   default boolean getReturnBestEffortPlan()
    {
       return false;
    }
@@ -304,28 +304,11 @@ public interface FootstepPlannerParameters
     * When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
     * contains at least this many footsteps.
     */
-   public default int getMinimumStepsForBestEffortPlan()
+   default int getMinimumStepsForBestEffortPlan()
    {
       return 3;
    }
 
-   /**
-    * When using a cost based planning approach this value defined how the yaw of a footstep will be
-    * weighted in comparison to its position.
-    */
-   public default double getYawWeight()
-   {
-      return 0.1;
-   }
-
-   /**
-    * When using a cost based planning approach this value defines the cost that is added for each step
-    * taken. Setting this value to a high number will favor plans with less steps.
-    */
-   public default double getCostPerStep()
-   {
-      return 0.15;
-   }
 
    /**
     * Some node checkers will check if the body of the robot will move through a higher planar region
@@ -333,7 +316,7 @@ public interface FootstepPlannerParameters
     * ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
     * This should be set to be slightly above cinder block height (20.3cm) for Atlas.
     */
-   public default double getBodyGroundClearance()
+   default double getBodyGroundClearance()
    {
       return 0.25;
    }
@@ -343,7 +326,7 @@ public interface FootstepPlannerParameters
     * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
     * this parameter.
     */
-   public default double getMinXClearanceFromStance()
+   default double getMinXClearanceFromStance()
    {
       return 0.0;
    }
@@ -353,8 +336,13 @@ public interface FootstepPlannerParameters
     * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
     * this parameter.
     */
-   public default double getMinYClearanceFromStance()
+   default double getMinYClearanceFromStance()
    {
       return 0.0;
+   }
+
+   default FootstepPlannerCostParameters getCostParameters()
+   {
+      return new DefaultFootstepPlannerCostParameters();
    }
 }

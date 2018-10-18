@@ -5,7 +5,7 @@ import java.util.HashSet;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
