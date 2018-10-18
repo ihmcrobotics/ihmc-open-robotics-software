@@ -113,7 +113,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<VisibilityMapHolder> StartVisibilityMap = Root.child(VisibilityGraphs).child(Start).child(Map).topic(Data);
    public static final Topic<VisibilityMapHolder> GoalVisibilityMap = Root.child(VisibilityGraphs).child(Goal).child(Map).topic(Data);
    public static final Topic<VisibilityMapHolder> InterRegionVisibilityMap = Root.child(VisibilityGraphs).child(InterRegion).child(Map).topic(Data);
-   public static final Topic<List<? extends VisibilityMapHolder>> NavigableRegionVisibilityMap = Root.child(VisibilityGraphs).child(Map).topic(Data);
 
 
    public static final Topic<Boolean> ShowClusterRawPoints = Root.child(VisibilityGraphs).child(Cluster).topic(Show);

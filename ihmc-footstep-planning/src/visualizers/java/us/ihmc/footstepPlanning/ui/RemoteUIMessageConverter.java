@@ -21,6 +21,8 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParame
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.javaFXToolkit.messager.Messager;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -125,6 +127,9 @@ public class RemoteUIMessageConverter
       ROS2Tools.createCallbackSubscription(ros2Node, BodyPathPlanMessage.class,
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> processBodyPathPlanMessage(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, BodyPathPlanStatisticsMessage.class,
+                                           FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
+                                           s -> processBodyPathPlanStatistics(s.takeNextData()));
       // we want to listen to the resulting foootstep plan from the toolbox
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class,
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
@@ -195,6 +200,20 @@ public class RemoteUIMessageConverter
 
       if (verbose)
          PrintTools.info("Received a body path planning result from the toolbox.");
+   }
+
+   private void processBodyPathPlanStatistics(BodyPathPlanStatisticsMessage packet)
+   {
+      VisibilityMapHolder startVisibilityMap = VisibilityGraphMessagesConverter.convertToVisibilityMapHolder(packet.getStartVisibilityMap());
+      VisibilityMapHolder goalVisibilityMap = VisibilityGraphMessagesConverter.convertToVisibilityMapHolder(packet.getGoalVisibilityMap());
+      VisibilityMapHolder interRegionVisibilityMap = VisibilityGraphMessagesConverter.convertToVisibilityMapHolder(packet.getInterRegionsMap());
+
+      List<NavigableRegion> navigableRegionList = VisibilityGraphMessagesConverter.convertToNavigableRegionsList(packet.getNavigableRegions());
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, startVisibilityMap);
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, goalVisibilityMap);
+      messager.submitMessage(FootstepPlannerMessagerAPI.NavigableRegionData, navigableRegionList);
+      messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, interRegionVisibilityMap);
    }
 
    private void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus packet)
