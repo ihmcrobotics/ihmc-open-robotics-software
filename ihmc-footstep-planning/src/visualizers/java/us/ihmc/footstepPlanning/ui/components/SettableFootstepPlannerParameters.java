@@ -17,6 +17,8 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minSurfaceIncline;
    private double maxStepWidth;
 
+   private final SettableFootstepPlannerCostParameters costParameters;
+
    public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlanningParameters)
    {
       this.idealFootstepWidth = footstepPlanningParameters.getIdealFootstepWidth();
@@ -30,6 +32,8 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.maxStepWidth = footstepPlanningParameters.getMaximumStepWidth();
       this.minFootholdPercent = footstepPlanningParameters.getMinimumFootholdPercent();
       this.minSurfaceIncline = footstepPlanningParameters.getMinimumSurfaceInclineRadians();
+
+      this.costParameters = new SettableFootstepPlannerCostParameters(footstepPlanningParameters.getCostParameters());
    }
 
    public void setIdealFootstepWidth(double idealFootstepLength)
@@ -82,9 +86,79 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.minFootholdPercent = minFootholdPercent;
    }
 
-   public void setMinimumSurfaceIncline(double minSurfaceIncline)
+   public void setMinimumSurfaceInclineRadians(double minSurfaceIncline)
    {
       this.minSurfaceIncline = minSurfaceIncline;
+   }
+
+   public void setYawWeight(double yawWeight)
+   {
+      costParameters.setYawWeight(yawWeight);
+   }
+
+   public void setPitchWeight(double pitchWeight)
+   {
+      costParameters.setPitchWeight(pitchWeight);
+   }
+
+   public void setRollWeight(double rollWeight)
+   {
+      costParameters.setRollWeight(rollWeight);
+   }
+
+   public void setForwardWeight(double forwardWeight)
+   {
+      costParameters.setForwardWeight(forwardWeight);
+   }
+
+   public void setLateralWeight(double lateralWeight)
+   {
+      costParameters.setLateralWeight(lateralWeight);
+   }
+
+   public void setStepUpWeight(double stepUpWeight)
+   {
+      costParameters.setStepUpWeight(stepUpWeight);
+   }
+
+   public void setStepDownWeight(double stepDownWeight)
+   {
+      costParameters.setStepDownWeight(stepDownWeight);
+   }
+
+   public void setUseQuadraticDistanceCost(boolean useQuadraticDistanceCost)
+   {
+      costParameters.setUseQuadraticDistanceCost(useQuadraticDistanceCost);
+   }
+
+   public void setUseQuadraticHeightCost(boolean useQuadraticHeightCost)
+   {
+      costParameters.setUseQuadraticHeightCost(useQuadraticHeightCost);
+   }
+
+   public void setCostPerStep(double costPerStep)
+   {
+      costParameters.setCostPerStep(costPerStep);
+   }
+
+   public void setAStarHeuristicsWeight(double heuristicsWeight)
+   {
+      costParameters.setAStarHeuristicsWeight(heuristicsWeight);
+   }
+
+   public void setVisGraphWithAStarHeuristicsWeight(double heuristicsWeight)
+   {
+      costParameters.setVisGraphWithAStarHeuristicsWeight(heuristicsWeight);
+   }
+
+   public void setDepthFirstHeuristicsWeight(double heuristicsWeight)
+   {
+      costParameters.setDepthFirstHeuristicsWeight(heuristicsWeight);
+   }
+
+   public void setBodyPathBasedHeuristicsWeight(double heuristicsWeight)
+   {
+      costParameters.setBodyPathBasedHeuristicsWeight(heuristicsWeight);
    }
 
    @Override
@@ -151,5 +225,81 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getMinimumSurfaceInclineRadians()
    {
       return minSurfaceIncline;
+   }
+
+   public boolean useQuadraticDistanceCost()
+   {
+      return costParameters.useQuadraticDistanceCost();
+   }
+
+   public boolean useQuadraticHeightCost()
+   {
+      return costParameters.useQuadraticHeightCost();
+   }
+
+   public double getYawWeight()
+   {
+      return costParameters.getYawWeight();
+   }
+
+   public double getPitchWeight()
+   {
+      return costParameters.getPitchWeight();
+   }
+
+   public double getRollWeight()
+   {
+      return costParameters.getRollWeight();
+   }
+
+   public double getForwardWeight()
+   {
+      return costParameters.getForwardWeight();
+   }
+
+   public double getLateralWeight()
+   {
+      return costParameters.getLateralWeight();
+   }
+
+   public double getStepUpWeight()
+   {
+      return costParameters.getStepUpWeight();
+   }
+
+   public double getStepDownWeight()
+   {
+      return costParameters.getStepDownWeight();
+   }
+
+   public double getCostPerStep()
+   {
+      return costParameters.getCostPerStep();
+   }
+
+   public double getAStarHeuristicsWeight()
+   {
+      return costParameters.getAStarHeuristicsWeight().getValue();
+   }
+
+   public double getVisGraphWithAStarHeuristicsWeight()
+   {
+      return costParameters.getVisGraphWithAStarHeuristicsWeight().getValue();
+   }
+
+   public double getDepthFirstHeuristicsWeight()
+   {
+      return costParameters.getDepthFirstHeuristicsWeight().getValue();
+   }
+
+   public double getBodyPathBasedHeuristicsWeight()
+   {
+      return costParameters.getBodyPathBasedHeuristicsWeight().getValue();
+   }
+
+   @Override
+   public SettableFootstepPlannerCostParameters getCostParameters()
+   {
+      return costParameters;
    }
 }

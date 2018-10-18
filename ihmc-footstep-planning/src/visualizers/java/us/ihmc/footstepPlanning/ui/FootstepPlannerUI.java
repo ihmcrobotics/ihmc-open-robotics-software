@@ -42,18 +42,16 @@ public class FootstepPlannerUI
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
-
    @FXML
    private StartGoalTabController startGoalTabController;
-
    @FXML
    private FootstepNodeCheckingUIController footstepNodeCheckingUIController;
-
    @FXML
    private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
-
    @FXML
-   private FootstepPlannerDataExporterAnchorPaneController footstepPlannerDataExporterAnchorPaneController;
+   private FootstepPlannerCostsUIController footstepPlannerCostsUIController;
+   @FXML
+   private FootstepPlannerDataExporterAnchorPaneController dataExporterAnchorPaneController;
 
    public FootstepPlannerUI(Stage primaryStage) throws Exception
    {
@@ -75,12 +73,16 @@ public class FootstepPlannerUI
       footstepPlannerMenuUIController.attachMessager(messager);
       startGoalTabController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
+      footstepPlannerCostsUIController.attachMessager(messager);
       footstepNodeCheckingUIController.attachMessager(messager);
+      dataExporterAnchorPaneController.attachMessager(messager);
+
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
       startGoalTabController.bindControls();
       footstepPlannerParametersUIController.bindControls();
+      footstepPlannerCostsUIController.bindControls();
       footstepNodeCheckingUIController.bindControls();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();

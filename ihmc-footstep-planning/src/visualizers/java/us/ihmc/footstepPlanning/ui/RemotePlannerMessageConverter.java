@@ -45,6 +45,7 @@ public class RemotePlannerMessageConverter
    private final AtomicReference<FootstepPlan> footstepPlanReference;
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Integer> sequenceIdReference;
+   private final AtomicReference<Boolean> acceptNewPlanarRegionsReference;
 
    public static RemotePlannerMessageConverter createRemoteConverter(Messager messager, String robotName)
    {
@@ -56,8 +57,7 @@ public class RemotePlannerMessageConverter
       return createConverter(messager, robotName, DomainFactory.PubSubImplementation.INTRAPROCESS);
    }
 
-   public static RemotePlannerMessageConverter createConverter(Messager messager, String robotName,
-                                                               DomainFactory.PubSubImplementation implementation)
+   public static RemotePlannerMessageConverter createConverter(Messager messager, String robotName, DomainFactory.PubSubImplementation implementation)
    {
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "ihmc_footstep_planner_ui");
       return new RemotePlannerMessageConverter(ros2Node, messager, robotName);
@@ -73,6 +73,7 @@ public class RemotePlannerMessageConverter
       footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanTopic);
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
       sequenceIdReference = messager.createInput(FootstepPlannerMessagerAPI.SequenceIdTopic);
+      acceptNewPlanarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, true);
 
       registerPubSubs(ros2Node);
 
@@ -156,7 +157,8 @@ public class RemotePlannerMessageConverter
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(packet);
       this.planarRegionsList = Optional.of(planarRegionsList);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
+      if (acceptNewPlanarRegionsReference.get())
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
    }
 
    private void publishResultingPlan()
