@@ -8,14 +8,23 @@ import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 public interface FootstepPlannerParameters
 {
    /**
+    * Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
+    * to run slower.
+    */
+   default boolean checkForBodyBoxCollisions()
+   {
+      return false;
+   }
+
+   /**
     * Returns the ideal step width for walking on flat ground.
     */
-   public abstract double getIdealFootstepWidth();
+   double getIdealFootstepWidth();
 
    /**
     * Returns the ideal step length for walking on flat ground.
     */
-   public abstract double getIdealFootstepLength();
+   double getIdealFootstepLength();
 
    /**
     * If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
@@ -32,7 +41,7 @@ public interface FootstepPlannerParameters
     * </ul>
     * </p>
     */
-   public default double getWiggleInsideDelta()
+   default double getWiggleInsideDelta()
    {
       return 0.0;
    }
@@ -49,7 +58,7 @@ public interface FootstepPlannerParameters
     * This parameter is intended to prevent accepting candidate footsteps that are near both the maximum step length and step width.
     * </p>
     */
-   public abstract double getMaximumStepReach();
+   double getMaximumStepReach();
 
    /**
     * Maximum yaw between consecutive footsteps
@@ -64,7 +73,7 @@ public interface FootstepPlannerParameters
     * its maximum reach.
     * </p>
     */
-   public abstract double getMaximumStepYaw();
+   double getMaximumStepYaw();
 
    /**
     * Minimum step width the planner will consider for candidate steps.
@@ -79,7 +88,7 @@ public interface FootstepPlannerParameters
     * on top of each other. If too high, footsteps might not be kinematically feasible.
     * </p>
     */
-   public abstract double getMinimumStepWidth();
+   double getMinimumStepWidth();
 
    /**
     * Minimum step length the planner will consider for candidate steps.
@@ -94,7 +103,7 @@ public interface FootstepPlannerParameters
     * on top of each other. If too high, footsteps might not be kinematically feasible.
     * </p>
     */
-   public default double getMinimumStepLength()
+   default double getMinimumStepLength()
    {
       return -getMaximumStepReach();
    }
@@ -146,7 +155,7 @@ public interface FootstepPlannerParameters
     * it's very close to hitting it's ankle pitch joint limit
     * </p>
     */
-   public default double getMaximumStepZWhenForwardAndDown()
+   default double getMaximumStepZWhenForwardAndDown()
    {
       return Double.POSITIVE_INFINITY;
    }
@@ -159,7 +168,7 @@ public interface FootstepPlannerParameters
     * z-up sole frame.
     * </p>
     */
-   public abstract double getMaximumStepZ();
+   double getMaximumStepZ();
 
    /**
     * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
@@ -167,7 +176,7 @@ public interface FootstepPlannerParameters
     * If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
     * </p>
     */
-   public default double getMinimumFootholdPercent()
+   default double getMinimumFootholdPercent()
    {
       return 0.9;
    }
@@ -181,7 +190,7 @@ public interface FootstepPlannerParameters
     * z-value less than cos(minimumSurfaceInclineRadians), it will be rejected.
     * </p>
     */
-   public default double getMinimumSurfaceInclineRadians()
+   default double getMinimumSurfaceInclineRadians()
    {
       return Math.toRadians(45.0);
    }
@@ -197,7 +206,7 @@ public interface FootstepPlannerParameters
     *
     * If this parameter is set to true (recommended), the second wiggle method will be used.
     */
-   public default boolean getWiggleIntoConvexHullOfPlanarRegions()
+   default boolean getWiggleIntoConvexHullOfPlanarRegions()
    {
       return true;
    }
@@ -208,7 +217,7 @@ public interface FootstepPlannerParameters
     * {@link #getMaximumXYWiggleDistance}, and {@link #getMaximumYawWiggle}. If this transform cannot be found, the
     * candidate footstep will be rejected if this method returns {@code true}.
     */
-   public default boolean getRejectIfCannotFullyWiggleInside()
+   default boolean getRejectIfCannotFullyWiggleInside()
    {
       return false;
    }
@@ -217,7 +226,7 @@ public interface FootstepPlannerParameters
     * When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
     * distance the planner will use
     */
-   public default double getMaximumXYWiggleDistance()
+   default double getMaximumXYWiggleDistance()
    {
       return FootstepNode.gridSizeXY / 2.0;
    }
@@ -226,7 +235,7 @@ public interface FootstepPlannerParameters
     * When wiggling a candidate footstep into a planar region, this is the maximum yaw
     * distance the planner will use
     */
-   public default double getMaximumYawWiggle()
+   default double getMaximumYawWiggle()
    {
       return FootstepNode.gridSizeYaw / 2.0;
    }
@@ -237,7 +246,7 @@ public interface FootstepPlannerParameters
     * is never more than maximumZPenetrationOnValleyRegions above the footstep, it won't be rejected,
     * otherwise it will.
     */
-   public default double getMaximumZPenetrationOnValleyRegions()
+   default double getMaximumZPenetrationOnValleyRegions()
    {
       return Double.POSITIVE_INFINITY;
    }
@@ -254,7 +263,7 @@ public interface FootstepPlannerParameters
     * If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
     * </p>
     */
-   public abstract double getMaximumStepWidth();
+   double getMaximumStepWidth();
 
    /**
     * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
@@ -309,7 +318,6 @@ public interface FootstepPlannerParameters
       return 3;
    }
 
-
    /**
     * Some node checkers will check if the body of the robot will move through a higher planar region
     * (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
@@ -319,6 +327,46 @@ public interface FootstepPlannerParameters
    default double getBodyGroundClearance()
    {
       return 0.25;
+   }
+
+   /**
+    * Some node checkers will check if a bounding box that describes the body of the robot will move
+    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+    * collisions, this defines the box height.
+    */
+   default double getBodyBoxHeight()
+   {
+      return 1.0;
+   }
+
+   /**
+    * Some node checkers will check if a bounding box that describes the body of the robot will move
+    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+    * collisions, this defines the box depth.
+    */
+   default double getBodyBoxDepth()
+   {
+      return 0.3;
+   }
+
+   /**
+    * Some node checkers will check if a bounding box that describes the body of the robot will move
+    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+    * collisions, this defines the box width.
+    */
+   default double getBodyBoxWidth()
+   {
+      return 0.7;
+   }
+
+   /**
+    * Some node checkers will check if a bounding box that describes the body of the robot will move
+    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+    * collisions, this defines the height of the center of the box.
+    */
+   default double getBodyBoxCenterHeight()
+   {
+      return 1.5;
    }
 
    /**
