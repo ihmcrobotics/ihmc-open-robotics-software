@@ -1,13 +1,11 @@
 package us.ihmc.footstepPlanning;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.util.List;
 
 public interface FootstepPlanner
 {
@@ -85,4 +83,9 @@ public interface FootstepPlanner
    void setPlanningHorizonLength(double planningHorizon);
 
    double getPlanningDuration();
+
+   default PlannerStatistics getPlannerStatistics()
+   {
+      return null;
+   }
 }
