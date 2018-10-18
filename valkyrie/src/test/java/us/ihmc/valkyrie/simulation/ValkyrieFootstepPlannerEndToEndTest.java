@@ -5,6 +5,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -13,6 +14,9 @@ import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -62,6 +66,8 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
       private final double shinZOffset = -0.3;
 
       private final AppearanceDefinition collisionAppearance = YoAppearance.Glass(0.4);
+      private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+      private final CollisionDetectionResult collisionDetectionResult = new CollisionDetectionResult();
 
       public ValkyrieLegCollisionDetectorScript(int simTicksPerCollisionCheck)
       {
@@ -73,27 +79,35 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
       @Override
       protected boolean collisionDetected()
       {
-         updateShapeTransform();
-         return false;
+         updateShapeTransforms();
+         collisionDetector.performCollisionDetection(collisionDetectionResult);
+         return collisionDetectionResult.getNumberOfCollisions() > 0;
       }
 
       private void setupCollisionDetector()
       {
-         shapeFactory.addShape(shapeFactory.createCylinder(thighRadius, thighLength));
-         shapeFactory.addShape(shapeFactory.createCylinder(thighRadius, thighLength));
+         shapeFactory.addShape(shapeFactory.createCylinder(shinRadius, shinLength));
+         shapeFactory.addShape(shapeFactory.createCylinder(shinRadius, shinLength));
 
-         shapeFactory.addShape(shapeFactory.createCylinder(shinRadius, shinLength));
-         shapeFactory.addShape(shapeFactory.createCylinder(shinRadius, shinLength));
+         shapeFactory.addShape(shapeFactory.createCylinder(thighRadius, thighLength));
+         shapeFactory.addShape(shapeFactory.createCylinder(thighRadius, thighLength));
 
          shapeFactory.addShape(shapeFactory.createBox(0.5 * bollardEnvironment.getBollardWidth(), 0.5 * bollardEnvironment.getBollardWidth(), bollardEnvironment.getBollardHeight()));
          shapeFactory.addShape(shapeFactory.createBox(0.5 * bollardEnvironment.getBollardWidth(), 0.5 * bollardEnvironment.getBollardWidth(), bollardEnvironment.getBollardHeight()));
 
-         collisionDetector.getCollisionObjects().get(0).setCollisionMask(0b110000);
-         collisionDetector.getCollisionObjects().get(1).setCollisionMask(0b110000);
-         collisionDetector.getCollisionObjects().get(2).setCollisionMask(0b110000);
-         collisionDetector.getCollisionObjects().get(3).setCollisionMask(0b110000);
-         collisionDetector.getCollisionObjects().get(4).setCollisionMask(0b001111);
-         collisionDetector.getCollisionObjects().get(5).setCollisionMask(0b001111);
+         tempTransform.setToZero();
+         tempTransform.setTranslation(0.5 * BOLLARD_DISTANCE, 0.0, 0.0);
+         collisionDetector.getCollisionObjects().get(4).setTransformToWorld(tempTransform);
+
+         tempTransform.setTranslation(- 0.5 * BOLLARD_DISTANCE, 0.0, 0.0);
+         collisionDetector.getCollisionObjects().get(5).setTransformToWorld(tempTransform);
+
+         collisionDetector.getCollisionObjects().get(0).setCollisionMask(1);
+         collisionDetector.getCollisionObjects().get(1).setCollisionMask(1);
+         collisionDetector.getCollisionObjects().get(2).setCollisionMask(1);
+         collisionDetector.getCollisionObjects().get(3).setCollisionMask(1);
+         collisionDetector.getCollisionObjects().get(4).setCollisionMask(0);
+         collisionDetector.getCollisionObjects().get(5).setCollisionMask(0);
 
          collisionDetector.getCollisionObjects().get(0).setCollisionGroup(0);
          collisionDetector.getCollisionObjects().get(1).setCollisionGroup(0);
@@ -103,9 +117,34 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
          collisionDetector.getCollisionObjects().get(5).setCollisionGroup(1);
       }
 
-      private void updateShapeTransform()
+      private void updateShapeTransforms()
       {
-         // TODO
+         HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
+
+         String leftKneeJointName = getRobotModel().getJointMap().getLegJointName(RobotSide.LEFT, LegJointName.KNEE_PITCH);
+         String rightKneeJointName = getRobotModel().getJointMap().getLegJointName(RobotSide.RIGHT, LegJointName.KNEE_PITCH);
+         String leftThighJointName = getRobotModel().getJointMap().getLegJointName(RobotSide.LEFT, LegJointName.HIP_PITCH);
+         String rightThighJointName = getRobotModel().getJointMap().getLegJointName(RobotSide.RIGHT, LegJointName.HIP_PITCH);
+
+         Joint leftKneeJoint = robot.getJoint(leftKneeJointName);
+         tempTransform.set(leftKneeJoint.getJointTransform3D());
+         tempTransform.prependTranslation(0.0, 0.0, shinZOffset);
+         collisionDetector.getCollisionObjects().get(0).setTransformToWorld(tempTransform);
+
+         Joint rightKneeJoint = robot.getJoint(rightKneeJointName);
+         tempTransform.set(rightKneeJoint.getJointTransform3D());
+         tempTransform.prependTranslation(0.0, 0.0, shinZOffset);
+         collisionDetector.getCollisionObjects().get(1).setTransformToWorld(tempTransform);
+
+         Joint leftThighJoint = robot.getJoint(leftThighJointName);
+         tempTransform.set(leftThighJoint.getJointTransform3D());
+         tempTransform.prependTranslation(0.0, thighYOffset, thighZOffset);
+         collisionDetector.getCollisionObjects().get(2).setTransformToWorld(tempTransform);
+
+         Joint rightThighJoint = robot.getJoint(rightThighJointName);
+         tempTransform.set(rightThighJoint.getJointTransform3D());
+         tempTransform.prependTranslation(0.0, -thighYOffset, thighZOffset);
+         collisionDetector.getCollisionObjects().get(3).setTransformToWorld(tempTransform);
       }
 
       private void setupGraphics()
