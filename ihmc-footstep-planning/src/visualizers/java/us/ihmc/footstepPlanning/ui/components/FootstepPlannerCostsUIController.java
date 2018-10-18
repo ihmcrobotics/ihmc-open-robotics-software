@@ -2,11 +2,13 @@ package us.ihmc.footstepPlanning.ui.components;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlannerCostsUIController
 {
@@ -19,6 +21,9 @@ public class FootstepPlannerCostsUIController
    @FXML
    private Slider costPerStep;
 
+   @FXML
+   private Slider heuristicsWeight;
+
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
@@ -28,6 +33,9 @@ public class FootstepPlannerCostsUIController
    {
       property.bidirectionalBindYawWeight(yawWeight.valueProperty());
       property.bidirectionalBindCostPerStep(costPerStep.valueProperty());
+
+      AtomicReference<FootstepPlannerType> plannerType = messager.createInput(FootstepPlannerMessagerAPI.PlannerTypeTopic);
+      property.bidirectionalBindHeuristicsWeight(plannerType, heuristicsWeight.valueProperty());
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, property, createConverter(), true);
    }

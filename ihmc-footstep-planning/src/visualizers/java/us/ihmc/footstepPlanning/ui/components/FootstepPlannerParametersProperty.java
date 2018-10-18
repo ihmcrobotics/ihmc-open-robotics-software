@@ -1,8 +1,11 @@
 package us.ihmc.footstepPlanning.ui.components;
 
 import javafx.beans.property.Property;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlannerParametersProperty extends ParametersProperty<SettableFootstepPlannerParameters>
 {
@@ -20,6 +23,10 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
 
    private DoubleField yawWeight = new DoubleField(SettableFootstepPlannerParameters::getYawWeight, (p, v) -> p.setYawWeight(v));
    private DoubleField costPerStep = new DoubleField(SettableFootstepPlannerParameters::getCostPerStep, (p, v) -> p.setCostPerStep(v));
+   private DoubleField aStarHeuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getAStarHeuristicsWeight, (p, v) -> p.setAStarHeuristicsWeight(v));
+   private DoubleField visGraphWithAStarHeuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getVisGraphWithAStarHeuristicsWeight, (p, v) -> p.setVisGraphWithAStarHeuristicsWeight(v));
+   private DoubleField depthFirstHeuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getDepthFirstHeuristicsWeight, (p, v) -> p.setDepthFirstHeuristicsWeight(v));
+   private DoubleField bodyPathBasedHeuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getBodyPathBasedHeuristicsWeight, (p, v) -> p.setBodyPathBasedHeuristicsWeight(v));
 
    public FootstepPlannerParametersProperty(Object bean, String name)
    {
@@ -96,4 +103,14 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    {
       bindFieldBidirectionalToNumberProperty(property, costPerStep);
    }
+
+   public void bidirectionalBindHeuristicsWeight(AtomicReference<FootstepPlannerType> plannerTypeReference, Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToConditionalNumberProperty(() -> plannerTypeReference.get().equals(FootstepPlannerType.A_STAR), property, aStarHeuristicsWeight);
+      bindFieldBidirectionalToConditionalNumberProperty(() -> plannerTypeReference.get().equals(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR), property, visGraphWithAStarHeuristicsWeight);
+      bindFieldBidirectionalToConditionalNumberProperty(() -> plannerTypeReference.get().equals(FootstepPlannerType.PLANAR_REGION_BIPEDAL), property, depthFirstHeuristicsWeight);
+      bindFieldBidirectionalToConditionalNumberProperty(() -> plannerTypeReference.get().equals(FootstepPlannerType.SIMPLE_BODY_PATH), property, bodyPathBasedHeuristicsWeight);
+   }
+
+
 }

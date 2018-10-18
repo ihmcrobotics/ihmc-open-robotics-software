@@ -101,6 +101,26 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       costParameters.setCostPerStep(costPerStep);
    }
 
+   public void setAStarHeuristicsWeight(double heuristicsWeight)
+   {
+      costParameters.setAStarHeuristicsWeight(heuristicsWeight);
+   }
+
+   public void setVisGraphWithAStarHeuristicsWeight(double heuristicsWeight)
+   {
+      costParameters.setVisGraphWithAStarHeuristicsWeight(heuristicsWeight);
+   }
+
+   public void setDepthFirstHeuristicsWeight(double heuristicsWeight)
+   {
+      costParameters.setDepthFirstHeuristicsWeight(heuristicsWeight);
+   }
+
+   public void setBodyPathBasedHeuristicsWeight(double heuristicsWeight)
+   {
+      costParameters.setBodyPathBasedHeuristicsWeight(heuristicsWeight);
+   }
+
    @Override
    public double getIdealFootstepWidth()
    {
@@ -175,6 +195,26 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getCostPerStep()
    {
       return costParameters.getCostPerStep();
+   }
+
+   public double getAStarHeuristicsWeight()
+   {
+      return costParameters.getAStarHeuristicsWeight().getValue();
+   }
+
+   public double getVisGraphWithAStarHeuristicsWeight()
+   {
+      return costParameters.getVisGraphWithAStarHeuristicsWeight().getValue();
+   }
+
+   public double getDepthFirstHeuristicsWeight()
+   {
+      return costParameters.getDepthFirstHeuristicsWeight().getValue();
+   }
+
+   public double getBodyPathBasedHeuristicsWeight()
+   {
+      return costParameters.getBodyPathBasedHeuristicsWeight().getValue();
    }
 
    @Override
