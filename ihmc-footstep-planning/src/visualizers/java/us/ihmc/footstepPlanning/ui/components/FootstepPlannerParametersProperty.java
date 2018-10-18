@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.ui.components;
 import javafx.beans.property.Property;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
+import us.ihmc.javaFXToolkit.messager.TopicListener;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -106,6 +107,9 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
 
    public void bidirectionalBindHeuristicsWeight(AtomicReference<FootstepPlannerType> plannerTypeReference, Property<? extends Number> property)
    {
+      if (plannerTypeReference.get() == null)
+         return;
+
       bindFieldBidirectionalToConditionalNumberProperty(() -> plannerTypeReference.get().equals(FootstepPlannerType.A_STAR), property, aStarHeuristicsWeight);
       bindFieldBidirectionalToConditionalNumberProperty(() -> plannerTypeReference.get().equals(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR), property, visGraphWithAStarHeuristicsWeight);
       bindFieldBidirectionalToConditionalNumberProperty(() -> plannerTypeReference.get().equals(FootstepPlannerType.PLANAR_REGION_BIPEDAL), property, depthFirstHeuristicsWeight);
