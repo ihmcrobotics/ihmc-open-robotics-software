@@ -1,6 +1,10 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+# Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
+# to run slower.
+bool check_for_body_box_collisions
+
 # Returns the ideal step width for walking on flat ground.
 # Field default value -1.0
 float64 ideal_footstep_width
@@ -185,6 +189,30 @@ uint32 minimum_steps_for_best_effort_plan
 # This should be set to be slightly above cinder block height (20.3cm) for Atlas.
 # Field default value -1.0
 float64 body_ground_clearance
+
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the box height.
+# Field default value -1.0
+float64 body_box_height
+
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the box depth.
+# Field default value -1.0
+float64 body_box_depth
+
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the box width.
+# Field default value -1.0
+float64 body_box_width
+
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the height of the center of the box.
+# Field default value -1.0
+float64 body_box_center_height
 
 # Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
 # Nodes are only added to the expanded list if they are outside the box around the stance foot defined by

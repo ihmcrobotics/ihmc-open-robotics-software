@@ -44,6 +44,7 @@ public class PlannerTestEnvironments
    public static final String box = "box";
    public static final String spiralStaircase = "spiralStaircase";
    public static final String hole = "hole";
+   public static final String corridor = "corridor";
 
    public static final PlannerTestData staircaseData = new StaircaseTestData();
    public static final PlannerTestData wallData = new WallTestData();
@@ -61,6 +62,7 @@ public class PlannerTestEnvironments
    public static final PlannerTestData boxData = new BoxTestData();
    public static final PlannerTestData spiralStaircaseData = new SpiralStaircaseTestData();
    public static final PlannerTestData holeData = new HoleTestData();
+   public static final PlannerTestData corridorData = new CorridorTestData();
 
 
    public static PlannerTestData getTestData(String test)
@@ -97,6 +99,8 @@ public class PlannerTestEnvironments
          return boxData;
       case spiralStaircase:
          return spiralStaircaseData;
+      case corridor:
+         return corridorData;
       default:
          return holeData;
       }
@@ -734,6 +738,42 @@ public class PlannerTestEnvironments
          setStartPose(initialStanceFootPose);
          setGoalPose(goalPose);
          setPlanarRegions(planarRegionsList);
+         setStartSide(initialStanceSide);
+      }
+   }
+
+   private static class CorridorTestData extends PlannerTestData
+   {
+      public CorridorTestData()
+      {
+         super(corridor);
+
+         double corridorStartDistance = 0.5;
+         double corridorWidth = 0.4;
+         double corridorHeight = 2.0;
+         double corridorLength = 0.25;
+         double blockWidth = 2.0;
+         PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+         generator.translate(5.0, 0.0, 0.0);
+         generator.addRectangle(20.0, 2.0 * blockWidth + corridorWidth);
+         generator.identity();
+         generator.translate(corridorStartDistance + corridorLength / 2.0, (blockWidth + corridorWidth) / 2.0, 0.0);
+         generator.addCubeReferencedAtBottomMiddle(corridorLength, blockWidth, corridorHeight);
+         generator.translate(0.0, -blockWidth - corridorWidth, 0.0);
+         generator.addCubeReferencedAtBottomMiddle(corridorLength, blockWidth, corridorHeight);
+         PlanarRegionsList regions = generator.getPlanarRegionsList();
+
+         FramePose3D initialStanceFootPose = new FramePose3D(worldFrame);
+         RobotSide initialStanceSide = RobotSide.LEFT;
+         initialStanceFootPose.setY(initialStanceSide.negateIfRightSide(0.15));
+         initialStanceFootPose.setX(-2.0);
+
+         FramePose3D goalPose = new FramePose3D(worldFrame);
+         goalPose.setPosition(corridorStartDistance + corridorLength + 1.0, 0.0, 0.0);
+
+         setStartPose(initialStanceFootPose);
+         setGoalPose(goalPose);
+         setPlanarRegions(regions);
          setStartSide(initialStanceSide);
       }
    }
