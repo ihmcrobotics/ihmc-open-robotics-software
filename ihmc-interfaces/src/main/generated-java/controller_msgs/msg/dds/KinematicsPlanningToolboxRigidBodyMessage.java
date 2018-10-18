@@ -10,6 +10,7 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
 {
    public long sequence_id_;
    public long end_effector_name_based_hash_code_;
+   public us.ihmc.idl.IDLSequence.Double  key_frame_times_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  key_frame_poses_;
    /**
             * The selection frames coming along with the given selection matrix are used to determine to
@@ -46,6 +47,8 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
 
    public KinematicsPlanningToolboxRigidBodyMessage()
    {
+      key_frame_times_ = new us.ihmc.idl.IDLSequence.Double (100, "type_6");
+
       key_frame_poses_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
       angular_selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
       linear_selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
@@ -72,6 +75,7 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
 
       end_effector_name_based_hash_code_ = other.end_effector_name_based_hash_code_;
 
+      key_frame_times_.set(other.key_frame_times_);
       key_frame_poses_.set(other.key_frame_poses_);
       controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.angular_selection_matrix_, angular_selection_matrix_);
       controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.linear_selection_matrix_, linear_selection_matrix_);
@@ -99,6 +103,12 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
    public long getEndEffectorNameBasedHashCode()
    {
       return end_effector_name_based_hash_code_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Double  getKeyFrameTimes()
+   {
+      return key_frame_times_;
    }
 
 
@@ -201,6 +211,8 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_effector_name_based_hash_code_, other.end_effector_name_based_hash_code_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.key_frame_times_, other.key_frame_times_, epsilon)) return false;
+
       if (this.key_frame_poses_.size() != other.key_frame_poses_.size()) { return false; }
       else
       {
@@ -235,6 +247,7 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
 
       if(this.end_effector_name_based_hash_code_ != otherMyClass.end_effector_name_based_hash_code_) return false;
 
+      if (!this.key_frame_times_.equals(otherMyClass.key_frame_times_)) return false;
       if (!this.key_frame_poses_.equals(otherMyClass.key_frame_poses_)) return false;
       if (!this.angular_selection_matrix_.equals(otherMyClass.angular_selection_matrix_)) return false;
       if (!this.linear_selection_matrix_.equals(otherMyClass.linear_selection_matrix_)) return false;
@@ -258,6 +271,8 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("end_effector_name_based_hash_code=");
       builder.append(this.end_effector_name_based_hash_code_);      builder.append(", ");
+      builder.append("key_frame_times=");
+      builder.append(this.key_frame_times_);      builder.append(", ");
       builder.append("key_frame_poses=");
       builder.append(this.key_frame_poses_);      builder.append(", ");
       builder.append("angular_selection_matrix=");
