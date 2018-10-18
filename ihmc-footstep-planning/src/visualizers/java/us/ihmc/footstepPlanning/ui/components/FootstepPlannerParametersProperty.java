@@ -22,7 +22,15 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField minSurfaceIncline = new DoubleField(SettableFootstepPlannerParameters::getMinimumSurfaceInclineRadians, (p, v) -> p.setMinimumSurfaceInclineRadians(v));
    private DoubleField maxStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepWidth, (p, v) -> p.setMaximumStepWidth(v));
 
+   private BooleanField useQuadraticDistanceCost = new BooleanField(SettableFootstepPlannerParameters::useQuadraticDistanceCost, (p, v) -> p.setUseQuadraticDistanceCost(v));
+   private BooleanField useQuadraticHeightCost = new BooleanField(SettableFootstepPlannerParameters::useQuadraticHeightCost, (p, v) -> p.setUseQuadraticHeightCost(v));
    private DoubleField yawWeight = new DoubleField(SettableFootstepPlannerParameters::getYawWeight, (p, v) -> p.setYawWeight(v));
+   private DoubleField pitchWeight = new DoubleField(SettableFootstepPlannerParameters::getPitchWeight, (p, v) -> p.setPitchWeight(v));
+   private DoubleField rollWeight = new DoubleField(SettableFootstepPlannerParameters::getRollWeight, (p, v) -> p.setRollWeight(v));
+   private DoubleField forwardWeight = new DoubleField(SettableFootstepPlannerParameters::getForwardWeight, (p, v) -> p.setForwardWeight(v));
+   private DoubleField lateralWeight = new DoubleField(SettableFootstepPlannerParameters::getLateralWeight, (p, v) -> p.setLateralWeight(v));
+   private DoubleField stepUpWeight = new DoubleField(SettableFootstepPlannerParameters::getStepUpWeight, (p, v) -> p.setStepUpWeight(v));
+   private DoubleField stepDownWeight = new DoubleField(SettableFootstepPlannerParameters::getStepDownWeight, (p, v) -> p.setStepDownWeight(v));
    private DoubleField costPerStep = new DoubleField(SettableFootstepPlannerParameters::getCostPerStep, (p, v) -> p.setCostPerStep(v));
    private DoubleField aStarHeuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getAStarHeuristicsWeight, (p, v) -> p.setAStarHeuristicsWeight(v));
    private DoubleField visGraphWithAStarHeuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getVisGraphWithAStarHeuristicsWeight, (p, v) -> p.setVisGraphWithAStarHeuristicsWeight(v));

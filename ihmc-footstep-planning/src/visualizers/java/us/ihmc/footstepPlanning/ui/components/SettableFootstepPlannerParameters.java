@@ -96,6 +96,46 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       costParameters.setYawWeight(yawWeight);
    }
 
+   public void setPitchWeight(double pitchWeight)
+   {
+      costParameters.setPitchWeight(pitchWeight);
+   }
+
+   public void setRollWeight(double rollWeight)
+   {
+      costParameters.setRollWeight(rollWeight);
+   }
+
+   public void setForwardWeight(double forwardWeight)
+   {
+      costParameters.setForwardWeight(forwardWeight);
+   }
+
+   public void setLateralWeight(double lateralWeight)
+   {
+      costParameters.setLateralWeight(lateralWeight);
+   }
+
+   public void setStepUpWeight(double stepUpWeight)
+   {
+      costParameters.setStepUpWeight(stepUpWeight);
+   }
+
+   public void setStepDownWeight(double stepDownWeight)
+   {
+      costParameters.setStepDownWeight(stepDownWeight);
+   }
+
+   public void setUseQuadraticDistanceCost(boolean useQuadraticDistanceCost)
+   {
+      costParameters.setUseQuadraticDistanceCost(useQuadraticDistanceCost);
+   }
+
+   public void setUseQuadraticHeightCost(boolean useQuadraticHeightCost)
+   {
+      costParameters.setUseQuadraticHeightCost(useQuadraticHeightCost);
+   }
+
    public void setCostPerStep(double costPerStep)
    {
       costParameters.setCostPerStep(costPerStep);
@@ -187,9 +227,49 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       return minSurfaceIncline;
    }
 
+   public boolean useQuadraticDistanceCost()
+   {
+      return costParameters.useQuadraticDistanceCost();
+   }
+
+   public boolean useQuadraticHeightCost()
+   {
+      return costParameters.useQuadraticHeightCost();
+   }
+
    public double getYawWeight()
    {
       return costParameters.getYawWeight();
+   }
+
+   public double getPitchWeight()
+   {
+      return costParameters.getPitchWeight();
+   }
+
+   public double getRollWeight()
+   {
+      return costParameters.getRollWeight();
+   }
+
+   public double getForwardWeight()
+   {
+      return costParameters.getForwardWeight();
+   }
+
+   public double getLateralWeight()
+   {
+      return costParameters.getLateralWeight();
+   }
+
+   public double getStepUpWeight()
+   {
+      return costParameters.getStepUpWeight();
+   }
+
+   public double getStepDownWeight()
+   {
+      return costParameters.getStepDownWeight();
    }
 
    public double getCostPerStep()

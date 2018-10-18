@@ -5,8 +5,17 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class SettableFootstepPlannerCostParameters implements FootstepPlannerCostParameters
 {
+   private boolean useQuadraticDistanceCost;
+   private boolean useQuadraticHeightCost;
+
    private double yawWeight;
+   private double pitchWeight;
+   private double rollWeight;
    private double costPerStep;
+   private double forwardWeight;
+   private double lateralWeight;
+   private double stepUpWeight;
+   private double stepDownWeight;
 
    private double aStarHeuristicsWeight;
    private double visGraphWithAStarHeuristicsWeight;
@@ -20,17 +29,45 @@ public class SettableFootstepPlannerCostParameters implements FootstepPlannerCos
 
    public SettableFootstepPlannerCostParameters(FootstepPlannerCostParameters parameters)
    {
+      this.useQuadraticDistanceCost = parameters.useQuadraticDistanceCost();
+      this.useQuadraticHeightCost = parameters.useQuadraticHeightCost();
+
       this.yawWeight = parameters.getYawWeight();
+      this.pitchWeight = parameters.getPitchWeight();
+      this.rollWeight = parameters.getRollWeight();
       this.costPerStep = parameters.getCostPerStep();
+      this.forwardWeight = parameters.getForwardWeight();
+      this.lateralWeight = parameters.getLateralWeight();
+
       this.aStarHeuristicsWeight = parameters.getAStarHeuristicsWeight().getValue();
       this.visGraphWithAStarHeuristicsWeight = parameters.getVisGraphWithAStarHeuristicsWeight().getValue();
       this.depthFirstHeuristicsWeight = parameters.getDepthFirstHeuristicsWeight().getValue();
       this.bodyPathBasedHeuristicsWeight = parameters.getBodyPathBasedHeuristicsWeight().getValue();
    }
 
+   public void setUseQuadraticDistanceCost(boolean useQuadraticDistanceCost)
+   {
+      this.useQuadraticDistanceCost = useQuadraticDistanceCost;
+   }
+
+   public void setUseQuadraticHeightCost(boolean useQuadraticHeightCost)
+   {
+      this.useQuadraticHeightCost = useQuadraticHeightCost;
+   }
+
    public void setYawWeight(double yawWeight)
    {
       this.yawWeight = yawWeight;
+   }
+
+   public void setPitchWeight(double pitchWeight)
+   {
+      this.pitchWeight = pitchWeight;
+   }
+
+   public void setRollWeight(double rollWeight)
+   {
+      this.rollWeight = rollWeight;
    }
 
    public void setCostPerStep(double costPerStep)
@@ -58,6 +95,38 @@ public class SettableFootstepPlannerCostParameters implements FootstepPlannerCos
       bodyPathBasedHeuristicsWeight = heuristicsWeight;
    }
 
+   public void setForwardWeight(double forwardWeight)
+   {
+      this.forwardWeight = forwardWeight;
+   }
+
+   public void setLateralWeight(double lateralWeight)
+   {
+      this.lateralWeight = lateralWeight;
+   }
+
+   public void setStepUpWeight(double stepUpWeight)
+   {
+      this.stepUpWeight = stepUpWeight;
+   }
+
+   public void setStepDownWeight(double stepDownWeight)
+   {
+      this.stepDownWeight = stepDownWeight;
+   }
+
+   @Override
+   public boolean useQuadraticDistanceCost()
+   {
+      return useQuadraticDistanceCost;
+   }
+
+   @Override
+   public boolean useQuadraticHeightCost()
+   {
+      return useQuadraticHeightCost;
+   }
+
    @Override
    public double getYawWeight()
    {
@@ -65,9 +134,45 @@ public class SettableFootstepPlannerCostParameters implements FootstepPlannerCos
    }
 
    @Override
+   public double getPitchWeight()
+   {
+      return pitchWeight;
+   }
+
+   @Override
+   public double getRollWeight()
+   {
+      return rollWeight;
+   }
+
+   @Override
    public double getCostPerStep()
    {
       return costPerStep;
+   }
+
+   @Override
+   public double getForwardWeight()
+   {
+      return forwardWeight;
+   }
+
+   @Override
+   public double getLateralWeight()
+   {
+      return lateralWeight;
+   }
+
+   @Override
+   public double getStepUpWeight()
+   {
+      return stepUpWeight;
+   }
+
+   @Override
+   public double getStepDownWeight()
+   {
+      return stepDownWeight;
    }
 
    @Override
