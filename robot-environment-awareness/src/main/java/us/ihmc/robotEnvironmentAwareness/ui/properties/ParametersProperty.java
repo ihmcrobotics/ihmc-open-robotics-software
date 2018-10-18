@@ -39,6 +39,13 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
       property.addListener(binding);
       field.addListener(binding);
    }
+
+   protected void bindFieldBidirectionalToConditionalNumberProperty(Condition condition, Property<? extends Number> property, Field field)
+   {
+      ConditionalNumberBidirectionalBind binding = new ConditionalNumberBidirectionalBind(condition, property, field);
+      property.addListener(binding);
+      field.addListener(binding);
+   }
    
    protected void bindFieldBidirectionalToBooleanProperty(Property<Boolean> property, Field field)
    {
@@ -49,7 +56,7 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
 
    protected abstract T getValueCopy(T valueToCopy);
 
-   private abstract class Field implements Observable, NumberGetter<T>, NumberSetter<T>
+   protected abstract class Field implements Observable, NumberGetter<T>, NumberSetter<T>
    {
       private NumberGetter<T> numberGetter;
       private NumberSetter<T> numberSetter;
@@ -215,13 +222,28 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
       }
    }
 
-   private class NumberBidirectionalBind implements InvalidationListener
+   protected interface Condition
    {
+      boolean checkCondition();
+   }
+
+   private class NumberBidirectionalBind extends ConditionalNumberBidirectionalBind
+   {
+      private NumberBidirectionalBind(Property<? extends Number> numberProperty, Field field)
+      {
+         super(() -> true, numberProperty, field);
+      }
+   }
+
+   private class ConditionalNumberBidirectionalBind implements InvalidationListener
+   {
+      private final Condition condition;
       private final Property<? extends Number> numberProperty;
       private final ParametersProperty<T>.Field field;
 
-      private NumberBidirectionalBind(Property<? extends Number> numberProperty, Field field)
+      private ConditionalNumberBidirectionalBind(Condition condition, Property<? extends Number> numberProperty, Field field)
       {
+         this.condition = condition;
          this.numberProperty = numberProperty;
          this.field = field;
       }
@@ -230,6 +252,9 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
       @Override
       public void invalidated(Observable observable)
       {
+         if (condition.checkCondition())
+            return;
+
          if (numberProperty.getValue().doubleValue() == field.getNumber(getValue()).doubleValue())
             return;
 
@@ -258,6 +283,8 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
          }
       }
    }
+
+
 
    private class BooleanBidirectionalBind implements InvalidationListener
    {
