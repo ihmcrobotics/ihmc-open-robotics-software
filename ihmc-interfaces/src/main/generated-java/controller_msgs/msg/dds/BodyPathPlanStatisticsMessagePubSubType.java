@@ -77,7 +77,7 @@ public class BodyPathPlanStatisticsMessagePubSubType implements us.ihmc.pubsub.T
       {
           current_alignment += controller_msgs.msg.dds.NavigableRegionMessagePubSubType.getCdrSerializedSize(data.getNavigableRegions().get(i0), current_alignment);}
 
-      current_alignment += controller_msgs.msg.dds.VisibilityMapMessagePubSubType.getCdrSerializedSize(data.getNavigableRegionsMap(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.VisibilityMapMessagePubSubType.getCdrSerializedSize(data.getInterRegionsMap(), current_alignment);
 
       current_alignment += controller_msgs.msg.dds.VisibilityMapMessagePubSubType.getCdrSerializedSize(data.getStartVisibilityMap(), current_alignment);
 
@@ -97,7 +97,7 @@ public class BodyPathPlanStatisticsMessagePubSubType implements us.ihmc.pubsub.T
       cdr.write_type_e(data.getNavigableRegions());else
           throw new RuntimeException("navigable_regions field exceeds the maximum length");
 
-      controller_msgs.msg.dds.VisibilityMapMessagePubSubType.write(data.getNavigableRegionsMap(), cdr);
+      controller_msgs.msg.dds.VisibilityMapMessagePubSubType.write(data.getInterRegionsMap(), cdr);
       controller_msgs.msg.dds.VisibilityMapMessagePubSubType.write(data.getStartVisibilityMap(), cdr);
       controller_msgs.msg.dds.VisibilityMapMessagePubSubType.write(data.getGoalVisibilityMap(), cdr);
    }
@@ -109,7 +109,7 @@ public class BodyPathPlanStatisticsMessagePubSubType implements us.ihmc.pubsub.T
       data.setPlanId(cdr.read_type_2());
       	
       cdr.read_type_e(data.getNavigableRegions());	
-      controller_msgs.msg.dds.VisibilityMapMessagePubSubType.read(data.getNavigableRegionsMap(), cdr);	
+      controller_msgs.msg.dds.VisibilityMapMessagePubSubType.read(data.getInterRegionsMap(), cdr);	
       controller_msgs.msg.dds.VisibilityMapMessagePubSubType.read(data.getStartVisibilityMap(), cdr);	
       controller_msgs.msg.dds.VisibilityMapMessagePubSubType.read(data.getGoalVisibilityMap(), cdr);	
 
@@ -121,7 +121,7 @@ public class BodyPathPlanStatisticsMessagePubSubType implements us.ihmc.pubsub.T
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_2("plan_id", data.getPlanId());
       ser.write_type_e("navigable_regions", data.getNavigableRegions());
-      ser.write_type_a("navigable_regions_map", new controller_msgs.msg.dds.VisibilityMapMessagePubSubType(), data.getNavigableRegionsMap());
+      ser.write_type_a("inter_regions_map", new controller_msgs.msg.dds.VisibilityMapMessagePubSubType(), data.getInterRegionsMap());
 
       ser.write_type_a("start_visibility_map", new controller_msgs.msg.dds.VisibilityMapMessagePubSubType(), data.getStartVisibilityMap());
 
@@ -135,7 +135,7 @@ public class BodyPathPlanStatisticsMessagePubSubType implements us.ihmc.pubsub.T
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setPlanId(ser.read_type_2("plan_id"));
       ser.read_type_e("navigable_regions", data.getNavigableRegions());
-      ser.read_type_a("navigable_regions_map", new controller_msgs.msg.dds.VisibilityMapMessagePubSubType(), data.getNavigableRegionsMap());
+      ser.read_type_a("inter_regions_map", new controller_msgs.msg.dds.VisibilityMapMessagePubSubType(), data.getInterRegionsMap());
 
       ser.read_type_a("start_visibility_map", new controller_msgs.msg.dds.VisibilityMapMessagePubSubType(), data.getStartVisibilityMap());
 

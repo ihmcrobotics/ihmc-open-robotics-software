@@ -39,7 +39,7 @@ public class NavigableRegionViewer extends AnimationTimer
    private AtomicReference<Boolean> resetRequested;
    private AtomicReference<Boolean> show;
 
-   private AtomicReference<List<? extends VisibilityMapHolder>> newRequestReference;
+   private AtomicReference<List<NavigableRegion>> newRequestReference;
 
    private final Messager messager;
 
@@ -62,11 +62,11 @@ public class NavigableRegionViewer extends AnimationTimer
       root.setMouseTransparent(true);
    }
 
-   public void setTopics(Topic<Boolean> globalResetTopic, Topic<Boolean> showNavigableRegionVisibilityMapsTopic, Topic<List<? extends VisibilityMapHolder>> navigigableRegionVisibilityMapTopic)
+   public void setTopics(Topic<Boolean> globalResetTopic, Topic<Boolean> showNavigableRegionVisibilityMapsTopic, Topic<List<NavigableRegion>> navigableRegionVisibilityMapTopic)
    {
       resetRequested = messager.createInput(globalResetTopic, false);
       show = messager.createInput(showNavigableRegionVisibilityMapsTopic, false);
-      newRequestReference = messager.createInput(navigigableRegionVisibilityMapTopic, null);
+      newRequestReference = messager.createInput(navigableRegionVisibilityMapTopic, null);
    }
 
    @Override
@@ -91,19 +91,19 @@ public class NavigableRegionViewer extends AnimationTimer
 
       if (show.get())
       {
-         List<? extends VisibilityMapHolder> newRequest = newRequestReference.getAndSet(null);
+         List<NavigableRegion> newRequest = newRequestReference.getAndSet(null);
 
          if (newRequest != null)
             processNavigableRegionsOnThread(newRequest);
       }
    }
 
-   private void processNavigableRegionsOnThread(List<? extends VisibilityMapHolder> newRequest)
+   private void processNavigableRegionsOnThread(List<NavigableRegion> newRequest)
    {
       executorService.execute(() -> processNavigableRegions(newRequest));
    }
 
-   private void processNavigableRegions(List<? extends VisibilityMapHolder> newRequest)
+   private void processNavigableRegions(List<NavigableRegion> newRequest)
    {
       Map<Integer, JavaFXMeshBuilder> meshBuilders = new HashMap<>();
       Map<Integer, Material> materials = new HashMap<>();

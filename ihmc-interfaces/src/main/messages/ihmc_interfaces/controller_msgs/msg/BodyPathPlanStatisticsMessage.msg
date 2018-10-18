@@ -9,6 +9,6 @@ int32 plan_id -1
 
 NavigableRegionMessage[] navigable_regions
 
-VisibilityMapMessage navigable_regions_map
+VisibilityMapMessage inter_regions_map
 VisibilityMapMessage start_visibility_map
 VisibilityMapMessage goal_visibility_map

@@ -26,7 +26,7 @@ module controller_msgs
         @defaultValue(value=-1)
         long plan_id;
         sequence<controller_msgs::msg::dds::NavigableRegionMessage> navigable_regions;
-        controller_msgs::msg::dds::VisibilityMapMessage navigable_regions_map;
+        controller_msgs::msg::dds::VisibilityMapMessage inter_regions_map;
         controller_msgs::msg::dds::VisibilityMapMessage start_visibility_map;
         controller_msgs::msg::dds::VisibilityMapMessage goal_visibility_map;
       };

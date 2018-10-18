@@ -8,7 +8,7 @@ int32 plan_id
 
 controller_msgs/NavigableRegionMessage[] navigable_regions
 
-controller_msgs/VisibilityMapMessage navigable_regions_map
+controller_msgs/VisibilityMapMessage inter_regions_map
 
 controller_msgs/VisibilityMapMessage start_visibility_map
 

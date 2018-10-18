@@ -17,7 +17,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowNavigableRegionVisibilityMaps;
 
 public class VisibilityGraphsRenderer
 {
@@ -53,7 +52,7 @@ public class VisibilityGraphsRenderer
       goalMapViewer.setTopics(ShowGoalVisibilityMap, GoalVisibilityMap);
 
       navigableRegionViewer = new NavigableRegionViewer(messager, executorService);
-      navigableRegionViewer.setTopics(GlobalReset, ShowNavigableRegionVisibilityMaps, NavigableRegionVisibilityMap);
+      navigableRegionViewer.setTopics(GlobalReset, ShowNavigableRegionVisibilityMaps, NavigableRegionData);
 
       interRegionConnectionsViewer = new VisibilityMapHolderViewer(messager, executorService);
       interRegionConnectionsViewer.setCustomColor(Color.CRIMSON);
