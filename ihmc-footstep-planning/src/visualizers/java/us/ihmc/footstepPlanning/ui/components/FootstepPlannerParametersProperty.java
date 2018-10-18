@@ -108,6 +108,36 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, yawWeight);
    }
 
+   public void bidirectionalBindPitchWeight(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, pitchWeight);
+   }
+
+   public void bidirectionalBindRollWeight(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, rollWeight);
+   }
+
+   public void bidirectionalBindForwardWeight(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, forwardWeight);
+   }
+
+   public void bidirectionalBindLateralWeight(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, lateralWeight);
+   }
+
+   public void bidirectionalBindStepUpWeight(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, stepUpWeight);
+   }
+
+   public void bidirectionalBindStepDownWeight(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, stepDownWeight);
+   }
+
    public void bidirectionalBindCostPerStep(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, costPerStep);
@@ -124,5 +154,13 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToConditionalNumberProperty(() -> plannerTypeReference.get().equals(FootstepPlannerType.SIMPLE_BODY_PATH), property, bodyPathBasedHeuristicsWeight);
    }
 
+   public void bidirectionalBindUseQuadraticHeightCost(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, useQuadraticHeightCost);
+   }
 
+   public void bidirectionalBindUseQuadraticDistanceCost(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, useQuadraticDistanceCost);
+   }
 }
