@@ -2,6 +2,9 @@ package us.ihmc.footstepPlanning.ui.components;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -13,9 +16,9 @@ public class FootstepPlannerParametersUIController
    private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
 
    @FXML
-   private Slider plannerTimeout;
+   private Spinner<Double> plannerTimeout;
    @FXML
-   private Slider horizonLength;
+   private Spinner<Double> horizonLength;
 
    @FXML
    private Slider maxStepLength;
@@ -44,9 +47,16 @@ public class FootstepPlannerParametersUIController
       this.messager = messager;
    }
 
+   public void setupControls()
+   {
+      plannerTimeout.setValueFactory(createTimeoutValueFactory());
+      horizonLength.setValueFactory(createHorizonValueFactory());
+   }
 
    public void bindControls()
    {
+      setupControls();
+
 //      parametersProperty.bidirectionalBindIdealFootstepWidth();
 //      parametersProperty.bidirectionalBindIdealFootstepLength();
       parametersProperty.bidirectionalBindMaxStepReach(maxStepLength.valueProperty());
@@ -60,25 +70,26 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionalBindMaxStepWidth(maxStepWidth.valueProperty());
 
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, plannerTimeout.valueProperty(), numberToDoubleConverter, true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength.valueProperty(), numberToDoubleConverter, true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, plannerTimeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
+
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
 
    }
 
-   private final PropertyToMessageTypeConverter<Double, Number> numberToDoubleConverter = new PropertyToMessageTypeConverter<Double, Number>()
+   private final PropertyToMessageTypeConverter<Double, Double> doubleToDoubleConverter = new PropertyToMessageTypeConverter<Double, Double>()
    {
       @Override
-      public Double convert(Number propertyValue)
+      public Double convert(Double propertyValue)
       {
-         return propertyValue.doubleValue();
+         return propertyValue;
       }
 
       @Override
-      public Number interpret(Double newValue)
+      public Double interpret(Double newValue)
       {
-         return new Double(newValue.doubleValue());
+         return newValue;
       }
    };
 
@@ -100,7 +111,21 @@ public class FootstepPlannerParametersUIController
       };
    }
 
+   private SpinnerValueFactory.DoubleSpinnerValueFactory createTimeoutValueFactory()
+   {
+      double min = 0.0;
+      double max = 100.0;
+      double amountToStepBy = 5;
+      return new DoubleSpinnerValueFactory(min, max, 0.0, amountToStepBy);
+   }
 
+   private SpinnerValueFactory.DoubleSpinnerValueFactory createHorizonValueFactory()
+   {
+      double min = 0.0;
+      double max = 1000.0;
+      double amountToStepBy = 0.25;
+      return new DoubleSpinnerValueFactory(min, max, 0.0, amountToStepBy);
+   }
 
 
 
