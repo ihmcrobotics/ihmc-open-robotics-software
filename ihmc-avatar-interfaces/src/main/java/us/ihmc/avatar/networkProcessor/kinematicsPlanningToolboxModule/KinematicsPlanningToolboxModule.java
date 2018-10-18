@@ -14,7 +14,6 @@ import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxRigidBodyCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -57,7 +56,7 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
       commands.add(KinematicsToolboxConfigurationCommand.class);
-      commands.add(KinematicsToolboxCenterOfMassCommand.class);
+      commands.add(KinematicsPlanningToolboxCenterOfMassCommand.class);
       commands.add(KinematicsPlanningToolboxRigidBodyCommand.class);
       return commands;
    }

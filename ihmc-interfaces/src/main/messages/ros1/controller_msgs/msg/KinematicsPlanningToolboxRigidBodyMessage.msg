@@ -2,6 +2,8 @@ uint32 sequence_id
 
 int64 end_effector_name_based_hash_code
 
+float64[] key_frame_times
+
 geometry_msgs/Pose[] key_frame_poses
 
 # The selection frames coming along with the given selection matrix are used to determine to

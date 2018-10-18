@@ -18,6 +18,7 @@ module controller_msgs
       {
         unsigned long sequence_id;
         long long end_effector_name_based_hash_code;
+        sequence<double> key_frame_times;
         sequence<geometry_msgs::msg::dds::Pose> key_frame_poses;
         /**
          * The selection frames coming along with the given selection matrix are used to determine to
