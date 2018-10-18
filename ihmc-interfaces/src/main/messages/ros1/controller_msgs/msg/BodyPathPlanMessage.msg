@@ -15,21 +15,18 @@ int32 NO_PLAN_ID=-1
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
-controller_msgs/FootstepDataListMessage footstep_data_list
-
 # Field default value 255
-int8 footstep_planning_result
+int8 path_planning_result
 
 # Field default value -1
 int32 plan_id
-
-# Field default value -1.0
-float64 time_taken
 
 controller_msgs/PlanarRegionsListMessage planar_regions_list
 
 geometry_msgs/Point[] body_path
 
-geometry_msgs/Pose low_level_planner_goal
+geometry_msgs/Pose2D path_planner_start_pose
+
+geometry_msgs/Pose2D path_planner_goal_pose
 
 

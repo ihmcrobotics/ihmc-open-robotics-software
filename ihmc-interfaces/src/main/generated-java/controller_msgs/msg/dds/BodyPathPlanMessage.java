@@ -9,7 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * This message is part of the IHMC footstep planning module.
        */
-public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanningToolboxOutputStatus> implements Settable<FootstepPlanningToolboxOutputStatus>, EpsilonComparable<FootstepPlanningToolboxOutputStatus>
+public class BodyPathPlanMessage extends Packet<BodyPathPlanMessage> implements Settable<BodyPathPlanMessage>, EpsilonComparable<BodyPathPlanMessage>
 {
    public static final byte FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION = (byte) 0;
    public static final byte FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION = (byte) 1;
@@ -22,43 +22,40 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-   public controller_msgs.msg.dds.FootstepDataListMessage footstep_data_list_;
-   public byte footstep_planning_result_ = (byte) 255;
+   public byte path_planning_result_ = (byte) 255;
    public int plan_id_ = -1;
-   public double time_taken_ = -1.0;
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  body_path_;
-   public us.ihmc.euclid.geometry.Pose3D low_level_planner_goal_;
+   public us.ihmc.euclid.geometry.Pose2D path_planner_start_pose_;
+   public us.ihmc.euclid.geometry.Pose2D path_planner_goal_pose_;
 
-   public FootstepPlanningToolboxOutputStatus()
+   public BodyPathPlanMessage()
    {
-      footstep_data_list_ = new controller_msgs.msg.dds.FootstepDataListMessage();
       planar_regions_list_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
       body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
-      low_level_planner_goal_ = new us.ihmc.euclid.geometry.Pose3D();
+      path_planner_start_pose_ = new us.ihmc.euclid.geometry.Pose2D();
+      path_planner_goal_pose_ = new us.ihmc.euclid.geometry.Pose2D();
 
    }
 
-   public FootstepPlanningToolboxOutputStatus(FootstepPlanningToolboxOutputStatus other)
+   public BodyPathPlanMessage(BodyPathPlanMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(FootstepPlanningToolboxOutputStatus other)
+   public void set(BodyPathPlanMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
-      controller_msgs.msg.dds.FootstepDataListMessagePubSubType.staticCopy(other.footstep_data_list_, footstep_data_list_);
-      footstep_planning_result_ = other.footstep_planning_result_;
+      path_planning_result_ = other.path_planning_result_;
 
       plan_id_ = other.plan_id_;
 
-      time_taken_ = other.time_taken_;
-
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_, planar_regions_list_);
       body_path_.set(other.body_path_);
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.low_level_planner_goal_, low_level_planner_goal_);
+      geometry_msgs.msg.dds.Pose2DPubSubType.staticCopy(other.path_planner_start_pose_, path_planner_start_pose_);
+      geometry_msgs.msg.dds.Pose2DPubSubType.staticCopy(other.path_planner_goal_pose_, path_planner_goal_pose_);
    }
 
    /**
@@ -76,19 +73,13 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       return sequence_id_;
    }
 
-
-   public controller_msgs.msg.dds.FootstepDataListMessage getFootstepDataList()
+   public void setPathPlanningResult(byte path_planning_result)
    {
-      return footstep_data_list_;
+      path_planning_result_ = path_planning_result;
    }
-
-   public void setFootstepPlanningResult(byte footstep_planning_result)
+   public byte getPathPlanningResult()
    {
-      footstep_planning_result_ = footstep_planning_result;
-   }
-   public byte getFootstepPlanningResult()
-   {
-      return footstep_planning_result_;
+      return path_planning_result_;
    }
 
    public void setPlanId(int plan_id)
@@ -98,15 +89,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public int getPlanId()
    {
       return plan_id_;
-   }
-
-   public void setTimeTaken(double time_taken)
-   {
-      time_taken_ = time_taken;
-   }
-   public double getTimeTaken()
-   {
-      return time_taken_;
    }
 
 
@@ -122,37 +104,40 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    }
 
 
-   public us.ihmc.euclid.geometry.Pose3D getLowLevelPlannerGoal()
+   public us.ihmc.euclid.geometry.Pose2D getPathPlannerStartPose()
    {
-      return low_level_planner_goal_;
+      return path_planner_start_pose_;
    }
 
 
-   public static Supplier<FootstepPlanningToolboxOutputStatusPubSubType> getPubSubType()
+   public us.ihmc.euclid.geometry.Pose2D getPathPlannerGoalPose()
    {
-      return FootstepPlanningToolboxOutputStatusPubSubType::new;
+      return path_planner_goal_pose_;
+   }
+
+
+   public static Supplier<BodyPathPlanMessagePubSubType> getPubSubType()
+   {
+      return BodyPathPlanMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return FootstepPlanningToolboxOutputStatusPubSubType::new;
+      return BodyPathPlanMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(FootstepPlanningToolboxOutputStatus other, double epsilon)
+   public boolean epsilonEquals(BodyPathPlanMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!this.footstep_data_list_.epsilonEquals(other.footstep_data_list_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_planning_result_, other.footstep_planning_result_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.path_planning_result_, other.path_planning_result_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.plan_id_, other.plan_id_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_taken_, other.time_taken_, epsilon)) return false;
 
       if (!this.planar_regions_list_.epsilonEquals(other.planar_regions_list_, epsilon)) return false;
       if (this.body_path_.size() != other.body_path_.size()) { return false; }
@@ -162,7 +147,8 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
          {  if (!this.body_path_.get(i).epsilonEquals(other.body_path_.get(i), epsilon)) return false; }
       }
 
-      if (!this.low_level_planner_goal_.epsilonEquals(other.low_level_planner_goal_, epsilon)) return false;
+      if (!this.path_planner_start_pose_.epsilonEquals(other.path_planner_start_pose_, epsilon)) return false;
+      if (!this.path_planner_goal_pose_.epsilonEquals(other.path_planner_goal_pose_, epsilon)) return false;
 
       return true;
    }
@@ -172,22 +158,20 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof FootstepPlanningToolboxOutputStatus)) return false;
+      if(!(other instanceof BodyPathPlanMessage)) return false;
 
-      FootstepPlanningToolboxOutputStatus otherMyClass = (FootstepPlanningToolboxOutputStatus) other;
+      BodyPathPlanMessage otherMyClass = (BodyPathPlanMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if (!this.footstep_data_list_.equals(otherMyClass.footstep_data_list_)) return false;
-      if(this.footstep_planning_result_ != otherMyClass.footstep_planning_result_) return false;
+      if(this.path_planning_result_ != otherMyClass.path_planning_result_) return false;
 
       if(this.plan_id_ != otherMyClass.plan_id_) return false;
 
-      if(this.time_taken_ != otherMyClass.time_taken_) return false;
-
       if (!this.planar_regions_list_.equals(otherMyClass.planar_regions_list_)) return false;
       if (!this.body_path_.equals(otherMyClass.body_path_)) return false;
-      if (!this.low_level_planner_goal_.equals(otherMyClass.low_level_planner_goal_)) return false;
+      if (!this.path_planner_start_pose_.equals(otherMyClass.path_planner_start_pose_)) return false;
+      if (!this.path_planner_goal_pose_.equals(otherMyClass.path_planner_goal_pose_)) return false;
 
       return true;
    }
@@ -197,23 +181,21 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("FootstepPlanningToolboxOutputStatus {");
+      builder.append("BodyPathPlanMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("footstep_data_list=");
-      builder.append(this.footstep_data_list_);      builder.append(", ");
-      builder.append("footstep_planning_result=");
-      builder.append(this.footstep_planning_result_);      builder.append(", ");
+      builder.append("path_planning_result=");
+      builder.append(this.path_planning_result_);      builder.append(", ");
       builder.append("plan_id=");
       builder.append(this.plan_id_);      builder.append(", ");
-      builder.append("time_taken=");
-      builder.append(this.time_taken_);      builder.append(", ");
       builder.append("planar_regions_list=");
       builder.append(this.planar_regions_list_);      builder.append(", ");
       builder.append("body_path=");
       builder.append(this.body_path_);      builder.append(", ");
-      builder.append("low_level_planner_goal=");
-      builder.append(this.low_level_planner_goal_);
+      builder.append("path_planner_start_pose=");
+      builder.append(this.path_planner_start_pose_);      builder.append(", ");
+      builder.append("path_planner_goal_pose=");
+      builder.append(this.path_planner_goal_pose_);
       builder.append("}");
       return builder.toString();
    }

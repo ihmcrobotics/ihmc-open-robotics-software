@@ -7,43 +7,48 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class WaypointDefinedBodyPathPlan implements BodyPathPlanner
+public class WaypointDefinedBodyPathPlanner implements BodyPathPlanner
 {
-   private List<Point2D> waypoints;
+   private List<Point2DReadOnly> waypoints;
+   private List<Point3DReadOnly> waypoints3D;
    private double[] maxAlphas;
    private double[] segmentLengths;
    private double[] segmentHeadings;
+   private final BodyPathPlan bodyPathPlan = new BodyPathPlan();
 
-   public void setWaypoints(List<Point2D> waypoints)
+   @Override
+   public void setWaypoints(List<? extends Point3DReadOnly> waypoints)
    {
       if (waypoints.size() < 2)
       {
          throw new RuntimeException("Must have at least two waypoints!");
       }
       this.waypoints = new ArrayList<>();
-      this.waypoints.addAll(waypoints);
+      this.waypoints3D = new ArrayList<>();
+      this.waypoints3D.addAll(waypoints);
+      for (int i = 0; i < waypoints.size(); i++)
+         this.waypoints.add(new Point2D(waypoints.get(i)));
       this.maxAlphas = new double[waypoints.size() - 1];
       this.segmentLengths = new double[waypoints.size() - 1];
       this.segmentHeadings = new double[waypoints.size() - 1];
    }
 
    @Override
-   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
-   {
-   }
-
-   @Override
-   public void compute(Point2D startPoint, Point2D goalPoint)
+   public BodyPathPlan compute()
    {
       double totalPathLength = 0.0;
 
       for (int i = 0; i < segmentLengths.length; i++)
       {
-         Point2D segmentStart = waypoints.get(i);
-         Point2D segmentEnd = waypoints.get(i + 1);
+         Point2DReadOnly segmentStart = waypoints.get(i);
+         Point2DReadOnly segmentEnd = waypoints.get(i + 1);
          segmentLengths[i] = segmentEnd.distance(segmentStart);
          totalPathLength = totalPathLength + segmentLengths[i];
 
@@ -56,9 +61,24 @@ public class WaypointDefinedBodyPathPlan implements BodyPathPlanner
          double previousMaxAlpha = (i == 0) ? 0.0 : maxAlphas[i - 1];
          maxAlphas[i] = previousMaxAlpha + segmentLengths[i] / totalPathLength;
       }
+
+      int startIndex = 0;
+      int endIndex = waypoints.size() - 1;
+      bodyPathPlan.clear();
+      bodyPathPlan.setStartPose(waypoints.get(startIndex), segmentHeadings[startIndex]);
+      bodyPathPlan.setGoalPose(waypoints.get(endIndex), segmentHeadings[endIndex - 1]);
+      bodyPathPlan.addWaypoints(waypoints3D);
+
+      return bodyPathPlan;
    }
 
-   private static double calculateHeading(Point2DBasics startPose, Point2DBasics endPoint)
+   @Override
+   public BodyPathPlan getPlan()
+   {
+      return bodyPathPlan;
+   }
+
+   private static double calculateHeading(Point2DReadOnly startPose, Point2DReadOnly endPoint)
    {
       double deltaX = endPoint.getX() - startPose.getX();
       double deltaY = endPoint.getY() - startPose.getY();
@@ -75,8 +95,8 @@ public class WaypointDefinedBodyPathPlan implements BodyPathPlanner
    public void getPointAlongPath(double alpha, Pose2D poseToPack)
    {
       int segmentIndex = getRegionIndexFromAlpha(alpha);
-      Point2D firstPoint = waypoints.get(segmentIndex);
-      Point2D secondPoint = waypoints.get(segmentIndex + 1);
+      Point2DReadOnly firstPoint = waypoints.get(segmentIndex);
+      Point2DReadOnly secondPoint = waypoints.get(segmentIndex + 1);
 
       double alphaInSegment = getPercentInSegment(segmentIndex, alpha);
 
@@ -95,8 +115,8 @@ public class WaypointDefinedBodyPathPlan implements BodyPathPlanner
 
       for (int i = 0; i < segmentLengths.length; i++)
       {
-         Point2D segmentStart = waypoints.get(i);
-         Point2D segmentEnd = waypoints.get(i + 1);
+         Point2DReadOnly segmentStart = waypoints.get(i);
+         Point2DReadOnly segmentEnd = waypoints.get(i + 1);
          EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(point, segmentStart, segmentEnd, tempClosestPoint);
 
          double distance = tempClosestPoint.distance(point);
