@@ -1,9 +1,11 @@
 package us.ihmc.footstepPlanning.ui.components;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.ToggleButton;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -19,11 +21,30 @@ public class FootstepPlannerCostsUIController
    private final FootstepPlannerParametersProperty property = new FootstepPlannerParametersProperty(this, "footstepPlannerCostParametersProperty");
 
    @FXML
-   private Spinner<Double> yawWeight;
+   private ToggleButton useQuadraticHeightCost;
+   @FXML
+   private ToggleButton useQuadraticDistanceCost;
+
    @FXML
    private Spinner<Double> costPerStep;
    @FXML
    private Spinner<Double> heuristicsWeight;
+
+   @FXML
+   private Spinner<Double> yawWeight;
+   @FXML
+   private Spinner<Double> pitchWeight;
+   @FXML
+   private Spinner<Double> rollWeight;
+
+   @FXML
+   private Spinner<Double> forwardWeight;
+   @FXML
+   private Spinner<Double> lateralWeight;
+   @FXML
+   private Spinner<Double> stepUpWeight;
+   @FXML
+   private Spinner<Double> stepDownWeight;
 
    private SpinnerValueFactory<Double> heuristicsWeightValueFactory;
 
@@ -34,9 +55,17 @@ public class FootstepPlannerCostsUIController
 
    public void setupControls()
    {
-      yawWeight.setValueFactory(createLowWeightValueFactory());
       costPerStep.setValueFactory(createLowWeightValueFactory());
       heuristicsWeight.setValueFactory(createHighWeightValueFactory());
+
+      yawWeight.setValueFactory(createLowWeightValueFactory());
+      pitchWeight.setValueFactory(createLowWeightValueFactory());
+      rollWeight.setValueFactory(createLowWeightValueFactory());
+
+      forwardWeight.setValueFactory(createLowWeightValueFactory());
+      lateralWeight.setValueFactory(createLowWeightValueFactory());
+      stepUpWeight.setValueFactory(createLowWeightValueFactory());
+      stepDownWeight.setValueFactory(createLowWeightValueFactory());
    }
 
    public void bindControls()
@@ -50,11 +79,21 @@ public class FootstepPlannerCostsUIController
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerTypeTopic, createPlannerTypeChangeListener(plannerType, plannerParameters));
 
-      property.bidirectionalBindYawWeight(yawWeight.getValueFactory().valueProperty());
-      property.bidirectionalBindCostPerStep(costPerStep.getValueFactory().valueProperty());
+      property.bidirectionalBindUseQuadraticDistanceCost(useQuadraticDistanceCost.selectedProperty());
+      property.bidirectionalBindUseQuadraticHeightCost(useQuadraticHeightCost.selectedProperty());
 
+      property.bidirectionalBindCostPerStep(costPerStep.getValueFactory().valueProperty());
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerTypeTopic, createPlannerTypeChangeListener(plannerType, plannerParameters));
       property.bidirectionalBindHeuristicsWeight(plannerType, heuristicsWeightValueFactory.valueProperty());
+
+      property.bidirectionalBindYawWeight(yawWeight.getValueFactory().valueProperty());
+      property.bidirectionalBindPitchWeight(pitchWeight.getValueFactory().valueProperty());
+      property.bidirectionalBindRollWeight(rollWeight.getValueFactory().valueProperty());
+
+      property.bidirectionalBindForwardWeight(forwardWeight.getValueFactory().valueProperty());
+      property.bidirectionalBindLateralWeight(lateralWeight.getValueFactory().valueProperty());
+      property.bidirectionalBindStepUpWeight(stepUpWeight.getValueFactory().valueProperty());
+      property.bidirectionalBindStepDownWeight(stepDownWeight.getValueFactory().valueProperty());
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, property, createConverter(), true);
    }
