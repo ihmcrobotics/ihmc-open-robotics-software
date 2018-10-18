@@ -61,6 +61,7 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Integer> plannerSequenceIdReference;
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Double> plannerHorizonLengthReference;
+   private final AtomicReference<Boolean> acceptNewPlanarRegionsReference;
 
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
@@ -99,6 +100,7 @@ public class RemoteUIMessageConverter
       plannerSequenceIdReference = messager.createInput(FootstepPlannerMessagerAPI.SequenceIdTopic);
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
       plannerHorizonLengthReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic);
+      acceptNewPlanarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, true);
 
       registerPubSubs(ros2Node);
 
@@ -187,6 +189,7 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.SequenceIdTopic, sequenceId);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResultTopic, result);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, packet.getTimeTaken());
 
       if (verbose)
          PrintTools.info("Received a footstep planning result from the toolbox.");
@@ -197,10 +200,13 @@ public class RemoteUIMessageConverter
 
    private void processIncomingPlanarRegionMessage(PlanarRegionsListMessage packet)
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, PlanarRegionMessageConverter.convertToPlanarRegionsList(packet));
+      if (acceptNewPlanarRegionsReference.get())
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, PlanarRegionMessageConverter.convertToPlanarRegionsList(packet));
 
-      if (verbose)
-         PrintTools.info("Received updated planner regions.");
+         if (verbose)
+            PrintTools.info("Received updated planner regions.");
+      }
    }
 
    private void requestNewPlan()

@@ -270,6 +270,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
       result.setPlanId(planId.getIntegerValue());
       result.setFootstepPlanningResult(status.toByte());
+      result.setTimeTaken(plannerMap.get(activePlanner.getEnumValue()).getPlanningDuration());
       return result;
    }
 

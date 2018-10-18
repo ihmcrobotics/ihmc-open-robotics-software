@@ -22,11 +22,20 @@
                     </content>
                 </Tab>
 
-                <Tab text="Planner">
+                <Tab text="Footstep Parameters">
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                         <children>
                             <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml" />
+                        </children>
+                    </content>
+                </Tab>
+
+                <Tab text="Footstep Costs">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <children>
+                            <fx:include fx:id="footstepPlannerCostsUI" source="FootstepPlannerCostsUI.fxml" />
                         </children>
                     </content>
                 </Tab>
@@ -40,7 +49,14 @@
                     </content>
                 </Tab>
 
-
+                <Tab text="Unit Test Exporter">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <children>
+                            <fx:include fx:id="dataExporterAnchorPane" source="FootstepPlannerDataExporterAnchorPane.fxml" />
+                        </children>
+                    </content>
+                </Tab>
             </tabs>
         </TabPane>
     </bottom>
