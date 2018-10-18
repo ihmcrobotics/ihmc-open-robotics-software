@@ -94,13 +94,28 @@ public class StartGoalTabController
       plannerTypeComboBox.setValue(FootstepPlannerType.A_STAR);
    }
 
+   private class TextViewerListener implements TopicListener<Integer>
+   {
+      private final TextField textField;
+      public TextViewerListener(TextField textField)
+      {
+         this.textField = textField;
+      }
+
+      public void receivedMessageForTopic(Integer messageContent)
+      {
+         if (messageContent != null)
+            textField.promptTextProperty().setValue(messageContent.toString());
+      }
+   }
+
    public void bindControls()
    {
       setupControls();
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTypeTopic, plannerTypeComboBox.valueProperty(), true);
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, v -> requestID.promptTextProperty().setValue(v.toString()));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.SequenceIdTopic, v -> sequenceID.promptTextProperty().setValue(v.toString()));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, new TextViewerListener(requestID));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.SequenceIdTopic, new TextViewerListener(sequenceID));
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, startPositionToggleButton.selectedProperty(), false);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, goalPositionToggleButton.selectedProperty(), false);
