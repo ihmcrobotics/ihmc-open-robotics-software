@@ -23,6 +23,9 @@ int8 footstep_planning_result
 # Field default value -1
 int32 plan_id
 
+# Field default value -1.0
+float64 time_taken
+
 controller_msgs/PlanarRegionsListMessage planar_regions_list
 
 geometry_msgs/Point[] body_path

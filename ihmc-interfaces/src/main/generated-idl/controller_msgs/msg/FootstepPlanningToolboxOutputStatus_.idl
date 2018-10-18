@@ -48,6 +48,8 @@ module controller_msgs
         octet footstep_planning_result;
         @defaultValue(value=-1)
         long plan_id;
+        @defaultValue(value=-1.0)
+        double time_taken;
         controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list;
         sequence<geometry_msgs::msg::dds::Point> body_path;
         geometry_msgs::msg::dds::Pose2D low_level_planner_goal;

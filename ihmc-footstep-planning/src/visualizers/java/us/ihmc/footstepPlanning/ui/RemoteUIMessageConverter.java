@@ -187,6 +187,7 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.SequenceIdTopic, sequenceId);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResultTopic, result);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, packet.getTimeTaken());
 
       if (verbose)
          PrintTools.info("Received a footstep planning result from the toolbox.");

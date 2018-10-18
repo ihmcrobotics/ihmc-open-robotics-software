@@ -36,6 +36,7 @@ public class FootstepPlannerMessagerAPI
    private static final TypedTopicTheme<Quaternion> Orientation = apiFactory.createTypedTopicTheme("Orientation");
    private static final TypedTopicTheme<Boolean> ComputePath = apiFactory.createTypedTopicTheme("ComputePath");
    private static final TypedTopicTheme<Double> PlannerTimeout = apiFactory.createTypedTopicTheme("PlannerTimeout");
+   private static final TypedTopicTheme<Double> PlannerTimeTaken = apiFactory.createTypedTopicTheme("PlannerTimeTaken");
    private static final TypedTopicTheme<Double> PlannerHorizonLength = apiFactory.createTypedTopicTheme("PlannerHorizonLength");
    private static final TypedTopicTheme<Integer> PlannerRequestId = apiFactory.createTypedTopicTheme("PlannerRequestId");
    private static final TypedTopicTheme<Integer> SequenceId = apiFactory.createTypedTopicTheme("SequenceId");
@@ -58,6 +59,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ComputePathTopic = Root.child(FootstepPlan).topic(ComputePath);
    public static final Topic<FootstepPlannerParameters> PlannerParametersTopic = Root.child(Parameters).topic(FootstepPlannerParameters);
    public static final Topic<Double> PlannerTimeoutTopic = Root.child(FootstepPlan).topic(PlannerTimeout);
+   public static final Topic<Double> PlannerTimeTakenTopic = Root.child(FootstepPlan).topic(PlannerTimeTaken);
    public static final Topic<Double> PlannerHorizonLengthTopic = Root.child(FootstepPlan).topic(PlannerHorizonLength);
    public static final Topic<FootstepPlannerType> PlannerTypeTopic = Root.child(FootstepPlan).topic(FootstepPlannerType);
    public static final Topic<FootstepPlanningResult> PlanningResultTopic = Root.child(FootstepPlan).topic(FootstepPlannerResult);

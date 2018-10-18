@@ -48,6 +48,8 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
@@ -79,6 +81,9 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getPlanarRegionsList(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -101,6 +106,8 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       cdr.write_type_2(data.getPlanId());
 
+      cdr.write_type_6(data.getTimeTaken());
+
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsList(), cdr);
       if(data.getBodyPath().size() <= 100)
       cdr.write_type_e(data.getBodyPath());else
@@ -118,6 +125,8 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       	
       data.setPlanId(cdr.read_type_2());
       	
+      data.setTimeTaken(cdr.read_type_6());
+      	
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsList(), cdr);	
       cdr.read_type_e(data.getBodyPath());	
       geometry_msgs.msg.dds.Pose2DPubSubType.read(data.getLowLevelPlannerGoal(), cdr);	
@@ -132,6 +141,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       ser.write_type_9("footstep_planning_result", data.getFootstepPlanningResult());
       ser.write_type_2("plan_id", data.getPlanId());
+      ser.write_type_6("time_taken", data.getTimeTaken());
       ser.write_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
 
       ser.write_type_e("body_path", data.getBodyPath());
@@ -147,6 +157,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       data.setFootstepPlanningResult(ser.read_type_9("footstep_planning_result"));
       data.setPlanId(ser.read_type_2("plan_id"));
+      data.setTimeTaken(ser.read_type_6("time_taken"));
       ser.read_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
 
       ser.read_type_e("body_path", data.getBodyPath());
