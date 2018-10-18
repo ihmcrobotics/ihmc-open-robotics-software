@@ -8,8 +8,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
 {
    private final boolean runningOnRealRobot;
-   private final boolean useAngularMomentum = true;
-   private final boolean useStepAdjustment = true;
+   private final boolean useAngularMomentum = false;
+   private final boolean useStepAdjustment = false;
 
    public ValkyrieICPOptimizationParameters(boolean runningOnRealRobot)
    {
