@@ -25,6 +25,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -432,6 +433,9 @@ public class RemoteFootstepPlannerUIMessagingTest
       AtomicReference<Integer> plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
       AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResultTopic);
       AtomicReference<Double> timeTakenReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic);
+      AtomicReference<List<? extends Point3DReadOnly>> bodyPathReference = messager.createInput(FootstepPlannerMessagerAPI.BodyPathDataTopic);
+      AtomicReference<Point3D> lowLevelPositionGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic);
+      AtomicReference<Quaternion> lowLevelOrientationGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -445,6 +449,11 @@ public class RemoteFootstepPlannerUIMessagingTest
          int planId = RandomNumbers.nextInt(random, 0, 100);
          FootstepPlanningResult result = FootstepPlanningResult.generateRandomResult(random);
          double timeTaken = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+         List<Point3D> bodyPath = new ArrayList<>();
+         for (int i = 2; i < RandomNumbers.nextInt(random, 2, 100); i++)
+            bodyPath.add(EuclidCoreRandomTools.nextPoint3D(random, 100.0));
+         Point3D lowLevelGoalPosition = EuclidCoreRandomTools.nextPoint3D(random, 100.0);
+         Quaternion lowLevelGoalOrientation = EuclidCoreRandomTools.nextQuaternion(random, 100.0);
 
          FootstepPlanningToolboxOutputStatus outputPacket = new FootstepPlanningToolboxOutputStatus();
          outputPacket.getLowLevelPlannerGoal().set(goalPose);
@@ -454,6 +463,10 @@ public class RemoteFootstepPlannerUIMessagingTest
          outputPacket.setSequenceId(sequenceId);
          outputPacket.setFootstepPlanningResult(result.toByte());
          outputPacket.setTimeTaken(timeTaken);
+         for (int i = 0; i < bodyPath.size(); i++)
+            outputPacket.getBodyPath().add().set(bodyPath.get(i));
+         outputPacket.getLowLevelPlannerGoal().getPosition().set(lowLevelGoalPosition);
+         outputPacket.getLowLevelPlannerGoal().getOrientation().set(lowLevelGoalOrientation);
 
          footstepOutputStatusPublisher.publish(outputPacket);
 
@@ -470,6 +483,14 @@ public class RemoteFootstepPlannerUIMessagingTest
          assertEquals("Planner Ids aren't equal.", planId, plannerRequestIdReference.getAndSet(null), epsilon);
          assertEquals("Sequence Ids aren't equal.", sequenceId, sequenceIdReference.getAndSet(null), epsilon);
          assertEquals("Planner results aren't equal.", result, plannerResultReference.getAndSet(null));
+         assertEquals("Time taken results aren't equal.", timeTaken, timeTakenReference.getAndSet(null));
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Low level goal position results aren't equal.", lowLevelGoalPosition, lowLevelPositionGoalReference.getAndSet(null), epsilon);
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Low level goal orientation results aren't equal.", lowLevelGoalOrientation, lowLevelOrientationGoalReference.getAndSet(null), epsilon);
+         List<? extends Point3DReadOnly> bodyPathResult = bodyPathReference.getAndSet(null);
+         assertEquals("Body path size results aren't equal.", bodyPath.size(), bodyPathResult.size());
+         for (int i = 0; i < bodyPath.size(); i++)
+            EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Body path waypoint " + i + " results aren't equal.", bodyPath.get(i), bodyPathResult.get(i), epsilon);
+
 
          for (int i = 0; i < 100; i++)
             ThreadTools.sleep(10);

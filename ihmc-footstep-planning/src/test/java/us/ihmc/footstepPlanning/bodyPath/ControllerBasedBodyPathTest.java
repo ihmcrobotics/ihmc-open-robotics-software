@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.BodyPathHeuristics;
@@ -30,7 +31,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -107,8 +108,8 @@ public class ControllerBasedBodyPathTest
       private static final int numberOfPoints = 5;
       private final List<YoFramePoint3D> points = new ArrayList<>();
 
-      private final List<Point2D> waypoints = new ArrayList<>();
-      private final WaypointDefinedBodyPathPlan bodyPath = new WaypointDefinedBodyPathPlan();
+      private final List<Point3D> waypoints = new ArrayList<>();
+      private final WaypointDefinedBodyPathPlanner bodyPath = new WaypointDefinedBodyPathPlanner();
 
       private final FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
       private final AStarFootstepPlanner planner = createBodyPathBasedPlanner(registry, parameters, bodyPath);
@@ -189,12 +190,12 @@ public class ControllerBasedBodyPathTest
                double percent = (double) i / (double) (numberOfPoints - 1);
                xPoly.compute(percent);
                yPoly.compute(percent);
-               Point2D point2d = new Point2D(xPoly.getPosition(), yPoly.getPosition());
+               Point3D point2d = new Point3D(xPoly.getPosition(), yPoly.getPosition(), 0.0);
                waypoints.add(point2d);
             }
 
             bodyPath.setWaypoints(waypoints);
-            bodyPath.compute(null, null);
+            bodyPath.compute();
 
             Pose2D pose = new Pose2D();
             for (int i = 0; i < numberOfPoints; i++)
@@ -270,7 +271,7 @@ public class ControllerBasedBodyPathTest
       }
 
       private AStarFootstepPlanner createBodyPathBasedPlanner(YoVariableRegistry registry, FootstepPlannerParameters parameters,
-                                                              WaypointDefinedBodyPathPlan bodyPath)
+                                                              WaypointDefinedBodyPathPlanner bodyPath)
       {
          FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
          CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 1.0, parameters, bodyPath);

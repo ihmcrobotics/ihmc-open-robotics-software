@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -28,7 +29,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpa
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -44,16 +45,17 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
    private final FootstepPlannerParameters parameters;
-   private final WaypointDefinedBodyPathPlan bodyPath;
+   private final WaypointDefinedBodyPathPlanner bodyPath;
    private final FootstepPlanner footstepPlanner;
 
    private final FramePose3D bodyStart = new FramePose3D();
    private final FramePose3D bodyGoal = new FramePose3D();
 
    private static final int numberOfPoints = 5;
-   private final List<Point2D> waypoints = new ArrayList<>();
+   private final List<Point3D> waypoints = new ArrayList<>();
    private final YoPolynomial xPoly;
    private final YoPolynomial yPoly;
+   private final YoPolynomial zPoly;
 
    private final YoDouble planningHorizonLength;
 
@@ -64,8 +66,9 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
       this.parameters = parameters;
       xPoly = new YoPolynomial("xPoly", 4, registry);
       yPoly = new YoPolynomial("yPoly", 4, registry);
+      zPoly = new YoPolynomial("zPoly", 4, registry);
 
-      bodyPath = new WaypointDefinedBodyPathPlan();
+      bodyPath = new WaypointDefinedBodyPathPlanner();
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
@@ -152,16 +155,18 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
       double yaw = bodyStart.getYaw();
       xPoly.setQuadratic(0.0, 1.0, bodyStart.getX(), Math.cos(yaw) * 0.2, bodyGoal.getX());
       yPoly.setQuadratic(0.0, 1.0, bodyStart.getY(), Math.sin(yaw) * 0.2, bodyGoal.getY());
+      zPoly.setQuadratic(0.0, 1.0, bodyStart.getZ(), Math.sin(yaw) * 0.2, bodyGoal.getZ());
       for (int i = 0; i < numberOfPoints; i++)
       {
          double percent = i / (double) (numberOfPoints - 1);
          xPoly.compute(percent);
          yPoly.compute(percent);
-         Point2D point2d = new Point2D(xPoly.getPosition(), yPoly.getPosition());
-         waypoints.add(point2d);
+         zPoly.compute(percent);
+         Point3D point = new Point3D(xPoly.getPosition(), yPoly.getPosition(), zPoly.getPosition());
+         waypoints.add(point);
       }
       bodyPath.setWaypoints(waypoints);
-      bodyPath.compute(null, null);
+      bodyPath.compute();
 
       Pose2D goalPose2d = new Pose2D();
       double pathLength = bodyPath.computePathLength(0.0);

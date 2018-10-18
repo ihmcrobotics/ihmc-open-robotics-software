@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -18,6 +15,7 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
@@ -76,6 +74,8 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    {
       List<Class<? extends Settable<?>>> status = new ArrayList<>();
       status.add(FootstepPlanningToolboxOutputStatus.class);
+      status.add(FootstepPlannerStatusMessage.class);
+      status.add(BodyPathPlanMessage.class);
       return status;
    }
 

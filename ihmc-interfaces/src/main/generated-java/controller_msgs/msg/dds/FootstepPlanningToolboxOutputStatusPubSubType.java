@@ -55,7 +55,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += geometry_msgs.msg.dds.Pose2DPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -91,7 +91,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBodyPath().get(i0), current_alignment);}
 
-      current_alignment += geometry_msgs.msg.dds.Pose2DPubSubType.getCdrSerializedSize(data.getLowLevelPlannerGoal(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getLowLevelPlannerGoal(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -113,7 +113,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       cdr.write_type_e(data.getBodyPath());else
           throw new RuntimeException("body_path field exceeds the maximum length");
 
-      geometry_msgs.msg.dds.Pose2DPubSubType.write(data.getLowLevelPlannerGoal(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getLowLevelPlannerGoal(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
@@ -129,7 +129,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       	
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsList(), cdr);	
       cdr.read_type_e(data.getBodyPath());	
-      geometry_msgs.msg.dds.Pose2DPubSubType.read(data.getLowLevelPlannerGoal(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getLowLevelPlannerGoal(), cdr);	
 
    }
 
@@ -145,7 +145,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       ser.write_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
 
       ser.write_type_e("body_path", data.getBodyPath());
-      ser.write_type_a("low_level_planner_goal", new geometry_msgs.msg.dds.Pose2DPubSubType(), data.getLowLevelPlannerGoal());
+      ser.write_type_a("low_level_planner_goal", new geometry_msgs.msg.dds.PosePubSubType(), data.getLowLevelPlannerGoal());
 
    }
 
@@ -161,7 +161,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       ser.read_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
 
       ser.read_type_e("body_path", data.getBodyPath());
-      ser.read_type_a("low_level_planner_goal", new geometry_msgs.msg.dds.Pose2DPubSubType(), data.getLowLevelPlannerGoal());
+      ser.read_type_a("low_level_planner_goal", new geometry_msgs.msg.dds.PosePubSubType(), data.getLowLevelPlannerGoal());
 
    }
 

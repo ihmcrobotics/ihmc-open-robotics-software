@@ -16,11 +16,11 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedFootstepPlanner;
@@ -32,6 +32,7 @@ import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -123,6 +124,14 @@ public class FootstepPlanningToolboxController extends ToolboxController
       return footstepPlanner;
    }
 
+   private FootstepPlannerStatusMessage packStatus(FootstepPlannerStatus status)
+   {
+      FootstepPlannerStatusMessage message = new FootstepPlannerStatusMessage();
+      message.setPlanningStatus(status.toByte());
+
+      return message;
+   }
+
    @Override
    protected void updateInternal()
    {
@@ -131,7 +140,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       {
          if (debug)
             PrintTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
-         reportMessage(packResult(null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
+         reportMessage(packStepResult(null, null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
          isDone.set(true);
          return;
       }
@@ -152,12 +161,27 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       sendMessageToUI("Starting To Plan: " + planId.getIntegerValue() + ", " + activePlanner.getEnumValue().toString());
 
-      FootstepPlanningResult status = planner.plan();
+      reportMessage(packStatus(FootstepPlannerStatus.PLANNING_PATH));
+
+      FootstepPlanningResult status = planner.planPath();
+
+      BodyPathPlan bodyPathPlan = null;
+      if (status.validForExecution())
+      {
+         bodyPathPlan = planner.getPathPlan();
+         reportMessage(packStatus(FootstepPlannerStatus.PLANNING_STEPS));
+         reportMessage(packPathResult(bodyPathPlan, status));
+
+         status = planner.plan();
+      }
+
       FootstepPlan footstepPlan = planner.getPlan();
 
       sendMessageToUI("Result: " + planId.getIntegerValue() + ", " + status.toString());
 
-      reportMessage(packResult(footstepPlan, status));
+      reportMessage(packStepResult(footstepPlan, bodyPathPlan, status));
+      reportMessage(packStatus(FootstepPlannerStatus.IDLE));
+
       isDone.set(true);
    }
 
@@ -250,7 +274,30 @@ public class FootstepPlanningToolboxController extends ToolboxController
       return isDone.getBooleanValue();
    }
 
-   private FootstepPlanningToolboxOutputStatus packResult(FootstepPlan footstepPlan, FootstepPlanningResult status)
+   private BodyPathPlanMessage packPathResult(BodyPathPlan bodyPathPlan, FootstepPlanningResult status)
+   {
+      if (debug)
+      {
+         PrintTools.info("Finished planning path. Result: " + status);
+      }
+
+      BodyPathPlanMessage result = new BodyPathPlanMessage();
+      if (bodyPathPlan != null)
+      {
+         for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
+            result.getBodyPath().add().set(bodyPathPlan.getWaypoint(i));
+
+         result.getPathPlannerStartPose().set(bodyPathPlan.getStartPose());
+         result.getPathPlannerGoalPose().set(bodyPathPlan.getGoalPose());
+      }
+
+      planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
+      result.setPlanId(planId.getIntegerValue());
+      result.setPathPlanningResult(status.toByte());
+      return result;
+   }
+
+   private FootstepPlanningToolboxOutputStatus packStepResult(FootstepPlan footstepPlan, BodyPathPlan bodyPathPlan, FootstepPlanningResult status)
    {
       if (debug)
       {
@@ -265,6 +312,17 @@ public class FootstepPlanningToolboxController extends ToolboxController
       else
       {
          result.getFootstepDataList().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE));
+
+         if (footstepPlan.hasLowLevelPlanGoal())
+         {
+            result.getLowLevelPlannerGoal().set(footstepPlan.getLowLevelPlanGoal());
+         }
+      }
+
+      if (bodyPathPlan != null)
+      {
+         for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
+            result.getBodyPath().add().set(bodyPathPlan.getWaypoint(i));
       }
 
       planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));

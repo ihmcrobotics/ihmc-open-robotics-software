@@ -54,6 +54,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private FootstepNode startNode;
    private FootstepNode endNode;
 
+   private final FramePose3D goalPoseInWorld = new FramePose3D();
+
    private final FootstepGraph graph;
    private final FootstepNodeChecker nodeChecker;
    private final GraphVisualization visualization;
@@ -126,6 +128,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
       ReferenceFrame goalFrame = new PoseReferenceFrame("GoalFrame", goalPose);
       goalNodes = new SideDependentList<FootstepNode>();
 
+      SideDependentList<FramePose3D> goalPoses = new SideDependentList<>();
+
       for (RobotSide side : RobotSide.values)
       {
          FramePose3D goalNodePose = new FramePose3D(goalFrame);
@@ -133,7 +137,12 @@ public class AStarFootstepPlanner implements FootstepPlanner
          goalNodePose.changeFrame(goalPose.getReferenceFrame());
          FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
          goalNodes.put(side, goalNode);
+
+         goalNodePose.changeFrame(ReferenceFrame.getWorldFrame());
+         goalPoses.put(side, goalNodePose);
       }
+
+      goalPoseInWorld.interpolate(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT), 0.5);
    }
 
    @Override
@@ -190,6 +199,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
          if (!foothold.isEmpty())
             plan.getFootstep(i - 1).setFoothold(foothold);
       }
+
+      plan.setLowLevelPlanGoal(goalPoseInWorld);
 
       return plan;
    }
