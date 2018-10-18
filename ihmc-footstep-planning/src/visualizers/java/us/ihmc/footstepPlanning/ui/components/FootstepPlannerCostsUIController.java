@@ -1,7 +1,9 @@
 package us.ihmc.footstepPlanning.ui.components;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Slider;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -17,32 +19,42 @@ public class FootstepPlannerCostsUIController
    private final FootstepPlannerParametersProperty property = new FootstepPlannerParametersProperty(this, "footstepPlannerCostParametersProperty");
 
    @FXML
-   private Slider yawWeight;
-
+   private Spinner<Double> yawWeight;
    @FXML
-   private Slider costPerStep;
-
+   private Spinner<Double> costPerStep;
    @FXML
-   private Slider heuristicsWeight;
+   private Spinner<Double> heuristicsWeight;
 
+   private SpinnerValueFactory<Double> heuristicsWeightValueFactory;
 
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
    }
 
+   public void setupControls()
+   {
+      yawWeight.setValueFactory(createLowWeightValueFactory());
+      costPerStep.setValueFactory(createLowWeightValueFactory());
+      heuristicsWeight.setValueFactory(createHighWeightValueFactory());
+   }
+
    public void bindControls()
    {
+      setupControls();
+
+      heuristicsWeightValueFactory = heuristicsWeight.getValueFactory();
+
       AtomicReference<FootstepPlannerType> plannerType = messager.createInput(FootstepPlannerMessagerAPI.PlannerTypeTopic);
       AtomicReference<FootstepPlannerParameters> plannerParameters = messager.createInput(FootstepPlannerMessagerAPI.PlannerParametersTopic);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerTypeTopic, createPlannerTypeChangeListener(plannerType, plannerParameters));
 
-      property.bidirectionalBindYawWeight(yawWeight.valueProperty());
-      property.bidirectionalBindCostPerStep(costPerStep.valueProperty());
+      property.bidirectionalBindYawWeight(yawWeight.getValueFactory().valueProperty());
+      property.bidirectionalBindCostPerStep(costPerStep.getValueFactory().valueProperty());
 
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerTypeTopic, createPlannerTypeChangeListener(plannerType, plannerParameters));
-      property.bidirectionalBindHeuristicsWeight(plannerType, heuristicsWeight.valueProperty());
+      property.bidirectionalBindHeuristicsWeight(plannerType, heuristicsWeightValueFactory.valueProperty());
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, property, createConverter(), true);
    }
@@ -96,8 +108,24 @@ public class FootstepPlannerCostsUIController
                break;
             }
 
-            heuristicsWeight.setValue(weight);
+            heuristicsWeightValueFactory.setValue(weight);
          }
       };
+   }
+
+   private SpinnerValueFactory.DoubleSpinnerValueFactory createLowWeightValueFactory()
+   {
+      double min = 0.0;
+      double max = 10.0;
+      double amountToStepBy = 0.1;
+      return new DoubleSpinnerValueFactory(min, max, 0.0, amountToStepBy);
+   }
+
+   private SpinnerValueFactory.DoubleSpinnerValueFactory createHighWeightValueFactory()
+   {
+      double min = 0.0;
+      double max = 100.0;
+      double amountToStepBy = 0.1;
+      return new DoubleSpinnerValueFactory(min, max, 0.0, amountToStepBy);
    }
 }
