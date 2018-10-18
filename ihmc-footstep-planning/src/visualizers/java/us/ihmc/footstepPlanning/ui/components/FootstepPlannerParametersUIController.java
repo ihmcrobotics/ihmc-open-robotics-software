@@ -10,7 +10,7 @@ import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMess
 public class FootstepPlannerParametersUIController
 {
    private JavaFXMessager messager;
-   private final FootstepPlannerParametersProperty property = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
+   private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
 
    @FXML
    private Slider plannerTimeout;
@@ -47,23 +47,23 @@ public class FootstepPlannerParametersUIController
 
    public void bindControls()
    {
-//      property.bidirectionalBindIdealFootstepWidth();
-//      property.bidirectionalBindIdealFootstepLength();
-      property.bidirectionalBindMaxStepReach(maxStepLength.valueProperty());
-      property.bidirectionalBindMaxStepYaw(maxStepYaw.valueProperty());
-      property.bidirectionalBindMinStepWidth(minStepWidth.valueProperty());
-      property.bidirectionalBindMinStepLength(minStepLength.valueProperty());
-      property.bidirectionalBindMinStepYaw(minStepYaw.valueProperty());
-      property.bidirectionalBindMaxStepZ(maxStepZ.valueProperty());
-      property.bidirectionalBindMinFootholdPercent(minFootholdPercent.valueProperty());
-      property.bidirectionalBindMinSurfaceIncline(minSurfaceIncline.valueProperty());
-      property.bidirectionalBindMaxStepWidth(maxStepWidth.valueProperty());
+//      parametersProperty.bidirectionalBindIdealFootstepWidth();
+//      parametersProperty.bidirectionalBindIdealFootstepLength();
+      parametersProperty.bidirectionalBindMaxStepReach(maxStepLength.valueProperty());
+      parametersProperty.bidirectionalBindMaxStepYaw(maxStepYaw.valueProperty());
+      parametersProperty.bidirectionalBindMinStepWidth(minStepWidth.valueProperty());
+      parametersProperty.bidirectionalBindMinStepLength(minStepLength.valueProperty());
+      parametersProperty.bidirectionalBindMinStepYaw(minStepYaw.valueProperty());
+      parametersProperty.bidirectionalBindMaxStepZ(maxStepZ.valueProperty());
+      parametersProperty.bidirectionalBindMinFootholdPercent(minFootholdPercent.valueProperty());
+      parametersProperty.bidirectionalBindMinSurfaceIncline(minSurfaceIncline.valueProperty());
+      parametersProperty.bidirectionalBindMaxStepWidth(maxStepWidth.valueProperty());
 
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, plannerTimeout.valueProperty(), numberToDoubleConverter, true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength.valueProperty(), numberToDoubleConverter, true);
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, property, createConverter(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
 
    }
 

@@ -17,8 +17,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minSurfaceIncline;
    private double maxStepWidth;
 
-   private double yawWeight;
-   private double costPerStep;
+   private final SettableFootstepPlannerCostParameters costParameters;
 
    public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlanningParameters)
    {
@@ -34,8 +33,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.minFootholdPercent = footstepPlanningParameters.getMinimumFootholdPercent();
       this.minSurfaceIncline = footstepPlanningParameters.getMinimumSurfaceInclineRadians();
 
-      this.yawWeight = footstepPlanningParameters.getCostParameters().getYawWeight();
-      this.costPerStep = footstepPlanningParameters.getCostParameters().getCostPerStep();
+      this.costParameters = new SettableFootstepPlannerCostParameters(footstepPlanningParameters.getCostParameters());
    }
 
    public void setIdealFootstepWidth(double idealFootstepLength)
@@ -95,12 +93,12 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    public void setYawWeight(double yawWeight)
    {
-      this.yawWeight = yawWeight;
+      costParameters.setYawWeight(yawWeight);
    }
 
    public void setCostPerStep(double costPerStep)
    {
-      this.costPerStep = costPerStep;
+      costParameters.setCostPerStep(costPerStep);
    }
 
    @Override
@@ -169,15 +167,19 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       return minSurfaceIncline;
    }
 
-   @Override
    public double getYawWeight()
    {
-      return yawWeight;
+      return costParameters.getYawWeight();
+   }
+
+   public double getCostPerStep()
+   {
+      return costParameters.getCostPerStep();
    }
 
    @Override
-   public double getCostPerStep()
+   public SettableFootstepPlannerCostParameters getCostParameters()
    {
-      return costPerStep;
+      return costParameters;
    }
 }
