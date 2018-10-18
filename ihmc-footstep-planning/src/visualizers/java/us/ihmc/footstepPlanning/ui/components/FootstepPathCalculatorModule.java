@@ -150,6 +150,7 @@ public class FootstepPathCalculatorModule
          }
 
          messager.submitMessage(PlanningResultTopic, planningResult);
+         messager.submitMessage(PlannerTimeTakenTopic, planner.getPlanningDuration());
 
          if (planningResult.validForExecution())
             messager.submitMessage(FootstepPlanTopic, planner.getPlan());

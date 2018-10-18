@@ -25,6 +25,8 @@ public class StartGoalTabController
    private TextField requestID;
    @FXML
    private TextField sequenceID;
+   @FXML
+   private TextField timeTaken;
 
 
    @FXML
@@ -94,7 +96,7 @@ public class StartGoalTabController
       plannerTypeComboBox.setValue(FootstepPlannerType.A_STAR);
    }
 
-   private class TextViewerListener implements TopicListener<Integer>
+   private class TextViewerListener<T> implements TopicListener<T>
    {
       private final TextField textField;
       public TextViewerListener(TextField textField)
@@ -102,7 +104,7 @@ public class StartGoalTabController
          this.textField = textField;
       }
 
-      public void receivedMessageForTopic(Integer messageContent)
+      public void receivedMessageForTopic(T messageContent)
       {
          if (messageContent != null)
             textField.promptTextProperty().setValue(messageContent.toString());
@@ -114,8 +116,9 @@ public class StartGoalTabController
       setupControls();
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTypeTopic, plannerTypeComboBox.valueProperty(), true);
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, new TextViewerListener(requestID));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.SequenceIdTopic, new TextViewerListener(sequenceID));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, new TextViewerListener<Integer>(requestID));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.SequenceIdTopic, new TextViewerListener<Integer>(sequenceID));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, new TextViewerListener<Double>(timeTaken));
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic, startPositionToggleButton.selectedProperty(), false);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, goalPositionToggleButton.selectedProperty(), false);

@@ -431,6 +431,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       AtomicReference<Integer> sequenceIdReference = messager.createInput(FootstepPlannerMessagerAPI.SequenceIdTopic);
       AtomicReference<Integer> plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
       AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResultTopic);
+      AtomicReference<Double> timeTakenReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -443,6 +444,7 @@ public class RemoteFootstepPlannerUIMessagingTest
          int sequenceId = RandomNumbers.nextInt(random, 0, 100);
          int planId = RandomNumbers.nextInt(random, 0, 100);
          FootstepPlanningResult result = FootstepPlanningResult.generateRandomResult(random);
+         double timeTaken = RandomNumbers.nextDouble(random, 0.0, 1000.0);
 
          FootstepPlanningToolboxOutputStatus outputPacket = new FootstepPlanningToolboxOutputStatus();
          outputPacket.getLowLevelPlannerGoal().set(goalPose);
@@ -451,6 +453,7 @@ public class RemoteFootstepPlannerUIMessagingTest
          outputPacket.setPlanId(planId);
          outputPacket.setSequenceId(sequenceId);
          outputPacket.setFootstepPlanningResult(result.toByte());
+         outputPacket.setTimeTaken(timeTaken);
 
          footstepOutputStatusPublisher.publish(outputPacket);
 
