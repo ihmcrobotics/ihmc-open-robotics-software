@@ -4,12 +4,12 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParame
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 
-public class EuclideanBasedCost implements FootstepCost
+public class PerStepCost implements FootstepCost
 {
    private final FootstepPlannerParameters parameters;
    private final FootstepPlannerCostParameters costParameters;
 
-   public EuclideanBasedCost(FootstepPlannerParameters parameters)
+   public PerStepCost(FootstepPlannerParameters parameters)
    {
       this.parameters = parameters;
       this.costParameters = parameters.getCostParameters();
@@ -18,6 +18,6 @@ public class EuclideanBasedCost implements FootstepCost
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
-      return startNode.euclideanDistance(endNode) + costParameters.getCostPerStep();
+      return costParameters.getCostPerStep();
    }
 }

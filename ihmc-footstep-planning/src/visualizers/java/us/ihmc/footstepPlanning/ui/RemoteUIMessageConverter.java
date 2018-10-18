@@ -15,7 +15,8 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
@@ -241,11 +242,28 @@ public class RemoteUIMessageConverter
       packet.setCliffHeightToAvoid(parameters.getCliffHeightToAvoid());
       packet.setReturnBestEffortPlan(parameters.getReturnBestEffortPlan());
       packet.setMinimumStepsForBestEffortPlan(parameters.getMinimumStepsForBestEffortPlan());
-      packet.setYawWeight(parameters.getYawWeight());
-      packet.setCostPerStep(parameters.getCostPerStep());
       packet.setBodyGroundClearance(parameters.getBodyGroundClearance());
       packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
+
+      FootstepPlannerCostParameters costParameters = parameters.getCostParameters();
+
+      packet.getCostParameters().setUseQuadraticDistanceCost(costParameters.useQuadraticDistanceCost());
+      packet.getCostParameters().setUseQuadraticHeightCost(costParameters.useQuadraticHeightCost());
+
+      packet.getCostParameters().setAStarHeuristicsWeight(costParameters.getAStarHeuristicsWeight().getValue());
+      packet.getCostParameters().setVisGraphWithAStarHeuristicsWeight(costParameters.getVisGraphWithAStarHeuristicsWeight().getValue());
+      packet.getCostParameters().setDepthFirstHeuristicsWeight(costParameters.getDepthFirstHeuristicsWeight().getValue());
+      packet.getCostParameters().setBodyPathBasedHeuristicsWeight(costParameters.getBodyPathBasedHeuristicsWeight().getValue());
+
+      packet.getCostParameters().setYawWeight(costParameters.getYawWeight());
+      packet.getCostParameters().setPitchWeight(costParameters.getPitchWeight());
+      packet.getCostParameters().setRollWeight(costParameters.getRollWeight());
+      packet.getCostParameters().setStepUpWeight(costParameters.getStepUpWeight());
+      packet.getCostParameters().setStepDownWeight(costParameters.getStepDownWeight());
+      packet.getCostParameters().setForwardWeight(costParameters.getForwardWeight());
+      packet.getCostParameters().setLateralWeight(costParameters.getLateralWeight());
+      packet.getCostParameters().setCostPerStep(costParameters.getCostPerStep());
 
       plannerParametersPublisher.publish(packet);
    }

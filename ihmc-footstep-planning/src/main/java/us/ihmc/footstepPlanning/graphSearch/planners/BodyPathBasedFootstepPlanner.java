@@ -15,7 +15,7 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
@@ -25,8 +25,9 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -68,13 +69,19 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
-      CostToGoHeuristics heuristics = new BodyPathHeuristics(registry, parameters, bodyPath);
+      CostToGoHeuristics heuristics = new BodyPathHeuristics(parameters.getCostParameters().getBodyPathBasedHeuristicsWeight(), parameters, bodyPath);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
-      FootstepCost stepCostCalculator = new DistanceAndYawBasedCost(parameters);
+
+      FootstepCostBuilder costBuilder = new FootstepCostBuilder();
+      costBuilder.setFootstepPlannerParameters(parameters);
+      costBuilder.setIncludeHeightCost(false);
+      costBuilder.setIncludePitchAndRollCost(false);
+
+      FootstepCost footstepCost = costBuilder.buildCost();
+
       FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
 
-      heuristics.setWeight(weight);
-      footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, postProcessingSnapper, registry);
+      footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, registry);
 
       planningHorizonLength = new YoDouble("planningHorizonLength", registry);
       planningHorizonLength.set(1.0);

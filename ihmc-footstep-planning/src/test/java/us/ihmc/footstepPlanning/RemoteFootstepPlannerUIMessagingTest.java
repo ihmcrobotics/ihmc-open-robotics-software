@@ -26,7 +26,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -39,6 +40,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -357,7 +359,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          for (int i = 0; i < 100; i++)
             ThreadTools.sleep(10);
       }
-
    }
 
    private void runPlannerParametersPacket()
@@ -739,22 +740,6 @@ public class RemoteFootstepPlannerUIMessagingTest
             return minSteps;
          }
 
-         private final double yawWeight = RandomNumbers.nextDouble(random, 0.0, 10.0);
-
-         @Override
-         public double getYawWeight()
-         {
-            return yawWeight;
-         }
-
-         private final double costPerStep = RandomNumbers.nextDouble(random, 0.0, 10.0);
-
-         @Override
-         public double getCostPerStep()
-         {
-            return costPerStep;
-         }
-
          private final double bodyGroundClearance = RandomNumbers.nextDouble(random, 0.1, 0.5);
 
          @Override
@@ -778,6 +763,124 @@ public class RemoteFootstepPlannerUIMessagingTest
          {
             return minYClearance;
          }
+
+         @Override
+         public FootstepPlannerCostParameters getCostParameters()
+         {
+            return costParameters;
+         }
+
+         private final FootstepPlannerCostParameters costParameters = new FootstepPlannerCostParameters()
+         {
+            private final boolean useQuadraticDistanceCost = RandomNumbers.nextBoolean(random, 0.5);
+
+            @Override
+            public boolean useQuadraticDistanceCost()
+            {
+               return useQuadraticDistanceCost;
+            }
+
+            private final boolean useQuadraticHeightCost = RandomNumbers.nextBoolean(random, 0.5);
+
+            @Override
+            public boolean useQuadraticHeightCost()
+            {
+               return useQuadraticHeightCost;
+            }
+
+            private final double aStarHeuristicsWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+            private final double visGraphWithAStarHeuristicsWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+            private final double depthFirstHeuristicsWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+            private final double bodyPathBasedHeuristicsWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+            @Override
+            public DoubleProvider getAStarHeuristicsWeight()
+            {
+               return () -> aStarHeuristicsWeight;
+            }
+
+            @Override
+            public DoubleProvider getVisGraphWithAStarHeuristicsWeight()
+            {
+               return () -> visGraphWithAStarHeuristicsWeight;
+            }
+
+            @Override
+            public DoubleProvider getDepthFirstHeuristicsWeight()
+            {
+               return () -> depthFirstHeuristicsWeight;
+            }
+
+            @Override
+            public DoubleProvider getBodyPathBasedHeuristicsWeight()
+            {
+               return () -> bodyPathBasedHeuristicsWeight;
+            }
+
+            private final double yawWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+            @Override
+            public double getYawWeight()
+            {
+               return yawWeight;
+            }
+
+            private final double forwardWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+            @Override
+            public double getForwardWeight()
+            {
+               return forwardWeight;
+            }
+
+            private final double lateralWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+            @Override
+            public double getLateralWeight()
+            {
+               return lateralWeight;
+            }
+
+            private final double costPerStep = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+            @Override
+            public double getCostPerStep()
+            {
+               return costPerStep;
+            }
+
+            private final double stepUpWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+            @Override
+            public double getStepUpWeight()
+            {
+               return stepUpWeight;
+            }
+
+            private final double stepDownWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+            @Override
+            public double getStepDownWeight()
+            {
+               return stepDownWeight;
+            }
+
+            private final double rollWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+            @Override
+            public double getRollWeight()
+            {
+               return rollWeight;
+            }
+
+            private final double pitchWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+            @Override
+            public double getPitchWeight()
+            {
+               return pitchWeight;
+            }
+         };
       };
 
       return parameters;
@@ -801,7 +904,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          }
          assertFalse("Unable to find equivalent planar region", planarRegionB == null);
          checkPlanarRegionsEqual(i, planarRegionA, planarRegionB);
-
       }
    }
 
@@ -842,7 +944,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       {
          checkFootstepsAreEqual(i, footstepsList.get(i), footstepPlan.getFootstep(i));
       }
-
    }
 
    private static void checkFootstepsAreEqual(int stepNumber, FootstepDataMessage footstepMessage, SimpleFootstep footstep)
@@ -877,9 +978,9 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Max step z isn't equal.", parameters.getMaximumStepZ(), packet.getMaximumStepZ(), epsilon);
       assertEquals("Min foothold percent aren't equal.", parameters.getMinimumFootholdPercent(), packet.getMinimumFootholdPercent(), epsilon);
       assertEquals("Min surface incline aren't equal.", parameters.getMinimumSurfaceInclineRadians(), packet.getMinimumSurfaceInclineRadians(), epsilon);
-      assertTrue("Wiggle into convex hull isn't equal.",
-                 parameters.getWiggleIntoConvexHullOfPlanarRegions() == packet.getWiggleIntoConvexHullOfPlanarRegions());
-      assertTrue("Reject if cannot wiggle isn't equal.", parameters.getRejectIfCannotFullyWiggleInside() == packet.getRejectIfCannotFullyWiggleInside());
+      assertEquals("Wiggle into convex hull isn't equal.", parameters.getWiggleIntoConvexHullOfPlanarRegions(),
+                   packet.getWiggleIntoConvexHullOfPlanarRegions());
+      assertEquals("Reject if cannot wiggle isn't equal.", parameters.getRejectIfCannotFullyWiggleInside(), packet.getRejectIfCannotFullyWiggleInside());
       assertEquals("Max XY wiggle distance isn't equal.", parameters.getMaximumXYWiggleDistance(), packet.getMaximumXyWiggleDistance(), epsilon);
       assertEquals("Max yaw wiggle isn't equal.", parameters.getMaximumYawWiggle(), packet.getMaximumYawWiggle(), epsilon);
       assertEquals("Max Z penetration isn't equal.", parameters.getMaximumZPenetrationOnValleyRegions(), packet.getMaximumZPenetrationOnValleyRegions(),
@@ -888,14 +989,37 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Cliff height to avoid isn't equal.", parameters.getCliffHeightToAvoid(), packet.getCliffHeightToAvoid(), epsilon);
       assertEquals("Minimum distance from cliff bottoms isn't equal.", parameters.getMinimumDistanceFromCliffBottoms(),
                    packet.getMinimumDistanceFromCliffBottoms(), epsilon);
-      assertTrue("Return best effort isn't equal.", parameters.getReturnBestEffortPlan() == packet.getReturnBestEffortPlan());
+      assertEquals("Return best effort isn't equal.", parameters.getReturnBestEffortPlan(), packet.getReturnBestEffortPlan());
       assertEquals("Min steps for best effort aren't equal.", parameters.getMinimumStepsForBestEffortPlan(), packet.getMinimumStepsForBestEffortPlan(),
                    epsilon);
-      assertEquals("Yaw weights aren't equal.", parameters.getYawWeight(), packet.getYawWeight(), epsilon);
-      assertEquals("Cost per step isn't equal.", parameters.getCostPerStep(), packet.getCostPerStep(), epsilon);
       assertEquals("Body ground clearance isn't equal.", parameters.getBodyGroundClearance(), packet.getBodyGroundClearance(), epsilon);
       assertEquals("Min X clearance from stance isn't equal.", parameters.getMinXClearanceFromStance(), packet.getMinXClearanceFromStance(), epsilon);
       assertEquals("Min Y clearance from stance isn't equal.", parameters.getMinYClearanceFromStance(), packet.getMinYClearanceFromStance(), epsilon);
+
+      checkFootstepPlannerCostParameters(parameters.getCostParameters(), packet.getCostParameters());
+   }
+
+   private static void checkFootstepPlannerCostParameters(FootstepPlannerCostParameters parameters, FootstepPlannerCostParametersPacket packet)
+   {
+      assertEquals("Use quadratic distance cost flags aren't equal.", parameters.useQuadraticDistanceCost(), packet.getUseQuadraticDistanceCost());
+      assertEquals("Use quadratic height cost flags aren't equal.", parameters.useQuadraticHeightCost(), packet.getUseQuadraticHeightCost());
+
+      assertEquals("A star heuristics weights aren't equal.", parameters.getAStarHeuristicsWeight().getValue(), packet.getAStarHeuristicsWeight(), epsilon);
+      assertEquals("Vis graph with A star heuristics weights aren't equal.", parameters.getVisGraphWithAStarHeuristicsWeight().getValue(),
+                   packet.getVisGraphWithAStarHeuristicsWeight(), epsilon);
+      assertEquals("Depth first heuristics weights aren't equal.", parameters.getDepthFirstHeuristicsWeight().getValue(),
+                   packet.getDepthFirstHeuristicsWeight(), epsilon);
+      assertEquals("Body path based heuristics weights aren't equal.", parameters.getBodyPathBasedHeuristicsWeight().getValue(),
+                   packet.getBodyPathBasedHeuristicsWeight(), epsilon);
+
+      assertEquals("Yaw weights aren't equal.", parameters.getYawWeight(), packet.getYawWeight(), epsilon);
+      assertEquals("Roll weights aren't equal.", parameters.getRollWeight(), packet.getRollWeight(), epsilon);
+      assertEquals("Pitch weights aren't equal.", parameters.getPitchWeight(), packet.getPitchWeight(), epsilon);
+      assertEquals("Forward weights aren't equal.", parameters.getForwardWeight(), packet.getForwardWeight(), epsilon);
+      assertEquals("Lateral weights aren't equal.", parameters.getLateralWeight(), packet.getLateralWeight(), epsilon);
+      assertEquals("Step up weights aren't equal.", parameters.getStepUpWeight(), packet.getStepUpWeight(), epsilon);
+      assertEquals("Step down weights aren't equal.", parameters.getStepDownWeight(), packet.getStepDownWeight(), epsilon);
+      assertEquals("Cost per step isn't equal.", parameters.getCostPerStep(), packet.getCostPerStep(), epsilon);
    }
 }
 

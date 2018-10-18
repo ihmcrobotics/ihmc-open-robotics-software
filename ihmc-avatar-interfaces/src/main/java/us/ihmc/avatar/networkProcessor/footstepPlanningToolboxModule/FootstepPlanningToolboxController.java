@@ -1,14 +1,8 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -21,18 +15,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
+import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
@@ -53,6 +42,11 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlanningToolboxController extends ToolboxController
 {

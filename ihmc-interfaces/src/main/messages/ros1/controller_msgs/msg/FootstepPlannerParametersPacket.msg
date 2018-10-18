@@ -179,16 +179,6 @@ bool return_best_effort_plan
 # contains at least this many footsteps.
 uint32 minimum_steps_for_best_effort_plan
 
-# When using a cost based planning approach this value defined how the yaw of a footstep will be
-# weighted in comparison to its position.
-# Field default value -1.0
-float64 yaw_weight
-
-# When using a cost based planning approach this value defines the cost that is added for each step
-# taken. Setting this value to a high number will favor plans with less steps.
-# Field default value -1.0
-float64 cost_per_step
-
 # Some node checkers will check if the body of the robot will move through a higher planar region
 # (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
 # ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
@@ -207,5 +197,8 @@ float64 min_x_clearance_from_stance
 # this parameter.
 # Field default value -1.0
 float64 min_y_clearance_from_stance
+
+# When using a cost based planning approach this value defines the weighting parameters to be used
+controller_msgs/FootstepPlannerCostParametersPacket cost_parameters
 
 
