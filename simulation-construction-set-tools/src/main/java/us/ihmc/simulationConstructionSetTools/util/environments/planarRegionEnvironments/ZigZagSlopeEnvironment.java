@@ -1,6 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments;
 
 import us.ihmc.euclid.Axis;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 public class ZigZagSlopeEnvironment extends PlanarRegionEnvironmentInterface
 {
@@ -18,5 +19,7 @@ public class ZigZagSlopeEnvironment extends PlanarRegionEnvironmentInterface
          generator.addRectangle(rampLength, 1.0);
          slopeSign *= -1.0;
       }
+
+      addPlanarRegionsToTerrain(YoAppearance.Grey());
    }
 }

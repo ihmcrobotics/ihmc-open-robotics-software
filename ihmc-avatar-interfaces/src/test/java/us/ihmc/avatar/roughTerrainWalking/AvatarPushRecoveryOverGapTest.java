@@ -23,6 +23,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -243,8 +244,8 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
          double distanceToCenter = 0.5 * sideLength - 0.5 * platform1Length;
          generator.translate(-platform2Center + distanceToCenter, 0.5 * platformWidth  + sideGapSize + 0.5 * sideWidth, 0.0);
          generator.addCubeReferencedAtBottomMiddle(sideLength, sideWidth, 0.01); // ground
+         addPlanarRegionsToTerrain(YoAppearance.Grey());
       }
-
    }
 
    private class SingleSupportStartCondition implements StateTransitionCondition

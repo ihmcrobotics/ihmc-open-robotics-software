@@ -2,6 +2,7 @@ package us.ihmc.simulationConstructionSetTools.util.environments;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
@@ -22,9 +23,14 @@ public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironm
    private final PlanarRegionsList[] planarRegionsLists;
    private final AppearanceDefinition[] appearances;
 
-   public PlanarRegionsListDefinedEnvironment(String environmentName, PlanarRegionsList planarRegionsList, double allowablePenetrationThickness, boolean generateGroundPlane)
+   public PlanarRegionsListDefinedEnvironment(PlanarRegionsList planarRegionsList, double allowablePenetrationThickness, boolean generateGroundPlane)
    {
-      this(environmentName, new PlanarRegionsList[]{planarRegionsList}, null, allowablePenetrationThickness, generateGroundPlane);
+      this(PlanarRegionsListDefinedEnvironment.class.getSimpleName(), planarRegionsList, allowablePenetrationThickness, generateGroundPlane);
+   }
+
+   public PlanarRegionsListDefinedEnvironment(String name, PlanarRegionsList planarRegionsList, double allowablePenetrationThickness, boolean generateGroundPlane)
+   {
+      this(name, new PlanarRegionsList[]{planarRegionsList}, null, allowablePenetrationThickness, generateGroundPlane);
    }
 
    public PlanarRegionsListDefinedEnvironment(String environmentName, PlanarRegionsList[] planarRegionsList, AppearanceDefinition[] appearances, double allowablePenetrationThickness, boolean generateGroundPlane)
@@ -47,21 +53,6 @@ public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironm
       {
          combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
       }
-   }
-
-   public PlanarRegionsListDefinedEnvironment(PlanarRegionsList planarRegionsList, double allowablePenetrationThickness, boolean generateGroundPlane)
-   {
-      this(PlanarRegionsListDefinedEnvironment.class.getSimpleName(), planarRegionsList, allowablePenetrationThickness, generateGroundPlane);
-   }
-
-   public PlanarRegionsListDefinedEnvironment(String environmentName, PlanarRegionsList planarRegionsList, double allowablePenetrationThickness)
-   {
-      this(environmentName, planarRegionsList, allowablePenetrationThickness,  true);
-   }
-
-   public PlanarRegionsListDefinedEnvironment(PlanarRegionsList planarRegionsList, double allowablePenetrationThickness)
-   {
-      this(planarRegionsList, allowablePenetrationThickness, true);
    }
 
    private CombinedTerrainObject3D createCombinedTerrainObjectFromPlanarRegionsList(String environmentName, double allowablePenetrationThickness)

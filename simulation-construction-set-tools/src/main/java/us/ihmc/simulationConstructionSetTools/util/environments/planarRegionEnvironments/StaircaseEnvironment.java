@@ -1,5 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments;
 
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+
 public class StaircaseEnvironment extends PlanarRegionEnvironmentInterface
 {
    public StaircaseEnvironment(int numberOfSteps, double stepHeight, double stepLength)
@@ -36,5 +38,7 @@ public class StaircaseEnvironment extends PlanarRegionEnvironmentInterface
 
       generator.translate(0.5 * (startingBlockLength + stepLength), 0.0, 0.0);
       generator.addRectangle(startingBlockLength, 1.75);
+
+      addPlanarRegionsToTerrain(YoAppearance.Grey());
    }
 }

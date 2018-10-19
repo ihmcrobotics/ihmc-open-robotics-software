@@ -1,7 +1,9 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -16,9 +18,12 @@ public abstract class PlanarRegionEnvironmentInterface implements CommonAvatarEn
 {
    protected PlanarRegionsListDefinedEnvironment environment;
    protected final PlanarRegionsListGenerator generator;
-   
+
    protected boolean hasBeenGenerated;
-   
+
+   private final ArrayList<PlanarRegionsList> planarRegionsLists = new ArrayList<>();
+   private final ArrayList<AppearanceDefinition> appearances = new ArrayList<>();
+
    public PlanarRegionEnvironmentInterface()
    {
       hasBeenGenerated = false;
@@ -26,10 +31,28 @@ public abstract class PlanarRegionEnvironmentInterface implements CommonAvatarEn
    }
    
    public void generateEnvironment()
-   {      
-      environment = new PlanarRegionsListDefinedEnvironment(generator.getPlanarRegionsList(), 1e-2, false);
+   {
+      String name = getClass().getSimpleName();
+      PlanarRegionsList[] planarRegionsLists = new PlanarRegionsList[this.planarRegionsLists.size()];
+      AppearanceDefinition[] appearances = new AppearanceDefinition[this.appearances.size()];
+
+      for (int i = 0; i < planarRegionsLists.length; i++)
+      {
+         planarRegionsLists[i] = this.planarRegionsLists.get(i);
+         appearances[i] = this.appearances.get(i);
+      }
+
+      environment = new PlanarRegionsListDefinedEnvironment(name, planarRegionsLists, appearances, 1e-2, false);
       hasBeenGenerated = true;
    }
+
+   protected void addPlanarRegionsToTerrain(AppearanceDefinition appearance)
+   {
+      planarRegionsLists.add(generator.getPlanarRegionsList().copy());
+      appearances.add(appearance);
+      generator.reset();
+   }
+
 
    public CombinedTerrainObject3D getCombinedTerrainObject3D()
    {
@@ -41,10 +64,16 @@ public abstract class PlanarRegionEnvironmentInterface implements CommonAvatarEn
    public PlanarRegionsList getPlanarRegionsList()
    {
       ensureHasBeenGenerated();
-      
-      return generator.getPlanarRegionsList();
+
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+      for (int i = 0; i < planarRegionsLists.size(); i++)
+      {
+         planarRegionsList.getPlanarRegionsAsList().addAll(planarRegionsLists.get(i).getPlanarRegionsAsList());
+      }
+
+      return planarRegionsList;
    }
-   
+
    @Override
    public TerrainObject3D getTerrainObject3D()
    {
