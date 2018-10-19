@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
@@ -14,7 +15,6 @@ import controller_msgs.msg.dds.MessageCollectionNotification;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollectionMessenger;
@@ -170,7 +170,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       String footName = fullRobotModel.getFoot(footSide).getName();
       humanoidReferenceFrames.updateFrames();
       desiredChestOrientation.changeFrame(worldFrame);
-      EndToEndChestTrajectoryMessageTest.assertSingleWaypointExecuted(desiredChestOrientation, scs, chest);
+      EndToEndChestTrajectoryMessageTest.assertSingleWaypointExecuted(desiredChestOrientation, scs, chest, "Orientation");
       //      EndToEndPelvisTrajectoryMessageTest.assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
       EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(footName, desiredFootPose.getPosition(), desiredFootPose.getOrientation(), scs);
       for (RobotSide robotSide : RobotSide.values)
@@ -294,7 +294,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       String footName = fullRobotModel.getFoot(footSide).getName();
       humanoidReferenceFrames.updateFrames();
       desiredChestOrientation.changeFrame(worldFrame);
-      EndToEndChestTrajectoryMessageTest.assertSingleWaypointExecuted(desiredChestOrientation, scs, chest);
+      EndToEndChestTrajectoryMessageTest.assertSingleWaypointExecuted(desiredChestOrientation, scs, chest, "Orientation");
       //      EndToEndPelvisTrajectoryMessageTest.assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
       EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(footName, desiredFootPose.getPosition(), desiredFootPose.getOrientation(), scs);
       for (RobotSide robotSide : RobotSide.values)
@@ -419,7 +419,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       String footName = fullRobotModel.getFoot(footSide).getName();
       humanoidReferenceFrames.updateFrames();
       desiredChestOrientation.changeFrame(worldFrame);
-      EndToEndChestTrajectoryMessageTest.assertSingleWaypointExecuted(desiredChestOrientation, scs, chest);
+      EndToEndChestTrajectoryMessageTest.assertSingleWaypointExecuted(desiredChestOrientation, scs, chest, "Orientation");
       //      EndToEndPelvisTrajectoryMessageTest.assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
       EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(footName, desiredFootPose.getPosition(), desiredFootPose.getOrientation(), scs);
 

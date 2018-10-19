@@ -23,6 +23,13 @@ public class FrameEuclideanTrajectoryPointList extends FrameTrajectoryPointList<
       newTrajectoryPoint.set(trajectoryPoint);
    }
 
+   public void setIncludingFrame(FrameSE3TrajectoryPointList trajectoryPointList)
+   {
+      clear(trajectoryPointList.getReferenceFrame());
+      for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
+         addTrajectoryPoint(trajectoryPointList.getTrajectoryPoint(i));
+   }
+
    @Override
    public String toString()
    {

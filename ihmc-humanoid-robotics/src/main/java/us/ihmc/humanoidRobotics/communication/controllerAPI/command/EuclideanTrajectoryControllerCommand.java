@@ -172,6 +172,16 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
       this.selectionMatrix.set(selectionMatrix);
    }
 
+   public void setUseCustomControlFrame(boolean useCustomControlFrame)
+   {
+      this.useCustomControlFrame = useCustomControlFrame;
+   }
+
+   public void setControlFramePose(RigidBodyTransform controlFramePose)
+   {
+      this.controlFramePoseInBodyFrame.set(controlFramePose);
+   }
+
    public FrameEuclideanTrajectoryPointList getTrajectoryPointList()
    {
       return trajectoryPointList;
@@ -279,6 +289,11 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    public void setTrajectoryFrame(ReferenceFrame trajectoryFrame)
    {
       this.trajectoryFrame = trajectoryFrame;
+   }
+
+   public RigidBodyTransform getControlFramePose()
+   {
+      return controlFramePoseInBodyFrame;
    }
 
    public void getControlFramePose(RigidBodyTransform transformToPack)

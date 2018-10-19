@@ -1,7 +1,12 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
-import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findPoint2d;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findPoint3d;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findQuat4d;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findVector3d;
 
 import java.util.Random;
 
@@ -9,13 +14,13 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
-import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -444,7 +449,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       String suffix = "AtWaypoint" + trajectoryPointIndex;
       SimpleSE3TrajectoryPoint simpleSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint();
 
-      String pelvisZPrefix = rigidBody.getName() + "Height";
+      String pelvisZPrefix = rigidBody.getName();
       String positionZTrajectoryName = pelvisZPrefix + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
       String positionZName = pelvisZPrefix + "Position";
       String linearVelocityZName = pelvisZPrefix + "LinearVelocity";
@@ -1255,8 +1260,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       //      String offsetHeightTrajectoryName = pelvisPrefix + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
       //      String numberOfWaypointsVarName = pelvisPrefix + "NumberOfWaypoints";
       String bodyName = rigidBody.getName();
-      YoInteger pelvisHeightTaskspaceNumberOfPoints = (YoInteger) scs.getVariable(bodyName + "HeightTaskspaceControlModule",
-                                                                                  bodyName + "HeightTaskspaceNumberOfPoints");
+      YoInteger pelvisHeightTaskspaceNumberOfPoints = (YoInteger) scs.getVariable(bodyName + "TaskspaceControlModule",
+                                                                                  bodyName + "PositionTaskspaceNumberOfPoints");
       int numberOfWaypoints = pelvisHeightTaskspaceNumberOfPoints.getIntegerValue();
       return numberOfWaypoints;
    }
@@ -1264,9 +1269,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    public static int findControllerNumberOfWaypointsInQueueForHeight(SimulationConstructionSet scs, RigidBody rigidBody)
    {
       String bodyName = rigidBody.getName();
-      String pelvisPrefix = bodyName + "Height";
-      String offsetHeightTrajectoryName = pelvisPrefix + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
-      String numberOfWaypointsVarName = pelvisPrefix + "NumberOfWaypoints";
+      String offsetHeightTrajectoryName = bodyName + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
+      String numberOfWaypointsVarName = bodyName + "NumberOfWaypoints";
       int numberOfWaypoints = ((YoInteger) scs.getVariable(offsetHeightTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
       return numberOfWaypoints;
    }
@@ -1291,10 +1295,9 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       if (trajectoryPointIndex < RigidBodyTaskspaceControlState.maxPointsInGenerator)
       {
-         String pelvisZPrefix = bodyName + "Height";
-         String positionZTrajectoryName = pelvisZPrefix + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
-         String positionZName = pelvisZPrefix + "Position";
-         String linearVelocityZName = pelvisZPrefix + "LinearVelocity";
+         String positionZTrajectoryName = bodyName + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
+         String positionZName = bodyName + "Position";
+         String linearVelocityZName = bodyName + "LinearVelocity";
 
          Point3D pelvisHeightPoint = findPoint3d(positionZTrajectoryName, positionZName, suffix, scs);
          double zHeight = pelvisHeightPoint.getZ();
@@ -1303,9 +1306,9 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          double zLinearVelocity = findVector3d(positionZTrajectoryName, linearVelocityZName, suffix, scs).getZ();
          linearVelocity.setZ(zLinearVelocity);
 
-         String orientationTrajectoryName = bodyName + "Orientation" + MultipleWaypointsOrientationTrajectoryGenerator.class.getSimpleName();
-         String orientationName = bodyName + "Orientation" + "Orientation";
-         String angularVelocityName = bodyName + "Orientation" + "AngularVelocity";
+         String orientationTrajectoryName = bodyName + MultipleWaypointsOrientationTrajectoryGenerator.class.getSimpleName();
+         String orientationName = bodyName + "Orientation";
+         String angularVelocityName = bodyName + "AngularVelocity";
 
          simpleSE3TrajectoryPoint.setOrientation(findQuat4d(orientationTrajectoryName, orientationName, suffix, scs));
          simpleSE3TrajectoryPoint.setAngularVelocity(findVector3d(orientationTrajectoryName, angularVelocityName, suffix, scs));

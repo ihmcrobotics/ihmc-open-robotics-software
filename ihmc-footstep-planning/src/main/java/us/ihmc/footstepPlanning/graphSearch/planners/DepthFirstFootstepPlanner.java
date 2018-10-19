@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,7 +18,7 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
@@ -40,12 +41,16 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 public class DepthFirstFootstepPlanner implements FootstepPlanner
 {
+   private static final boolean debug = false;
+   private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
+
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final FootstepPlannerParameters parameters;
    private final YoInteger maximumNumberOfNodesToExpand = new YoInteger("maximumNumberOfNodesToExpand", registry);
    private final YoDouble timeout = new YoDouble("Timeout", registry);
+   private final YoDouble planningDuration = new YoDouble("planningDuration", registry);
    private final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
 
    private final FootstepGraph footstepGraph;
@@ -65,8 +70,8 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    private final YoInteger numberOfNodesExpanded = new YoInteger("numberOfNodesExpanded", registry);
    private final YoLong planningStartTime = new YoLong("planningStartTime", registry);
 
-   public DepthFirstFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper,
-                                    FootstepNodeChecker checker, FootstepCost stepCostCalculator, YoVariableRegistry parentRegistry)
+   public DepthFirstFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper, FootstepNodeChecker checker,
+                                    FootstepCost stepCostCalculator, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.parameters = parameters;
@@ -76,12 +81,12 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
       this.stepCostCalculator = stepCostCalculator;
       nodeExpansion = new ParameterBasedNodeExpansion(parameters);
 
-      DistanceAndYawBasedHeuristics costToGoHeuristics = new DistanceAndYawBasedHeuristics(parameters, registry);
-      this.nodeComparator = (node1, node2) ->
-      {
+      DistanceAndYawBasedHeuristics costToGoHeuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getDepthFirstHeuristicsWeight(), parameters);
+      this.nodeComparator = (node1, node2) -> {
          double cost1 = costToGoHeuristics.compute(node1, goalNodes.get(node1.getRobotSide()));
          double cost2 = costToGoHeuristics.compute(node2, goalNodes.get(node2.getRobotSide()));
-         if (cost1 == cost2) return 0;
+         if (cost1 == cost2)
+            return 0;
          return cost1 > cost2 ? -1 : 1;
       };
 
@@ -103,6 +108,17 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    public void setTimeout(double timeoutInSeconds)
    {
       this.timeout.set(timeoutInSeconds);
+   }
+
+   @Override
+   public double getPlanningDuration()
+   {
+      return planningDuration.getDoubleValue();
+   }
+
+   @Override
+   public void setPlanningHorizonLength(double planningHorizonLength)
+   {
    }
 
    public void setExitAfterInitialSolution(boolean exitAfterInitialSolution)
@@ -128,6 +144,14 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    @Override
    public final void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide initialSide)
    {
+      if (initialSide == null)
+      {
+         if (debug)
+            PrintTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
+
+         initialSide = defaultStartNodeSide;
+      }
+
       stanceFootPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), initialSide);
       RigidBodyTransform startNodeSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, stanceFootPose);
@@ -166,7 +190,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    {
       checker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
-      if(listener != null)
+      if (listener != null)
          listener.planarRegionsListSet(planarRegionsList);
    }
 
@@ -190,7 +214,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
          footstepPose.setTranslationY(path.get(i).getY());
 
          RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i)).getSnapTransform();
-         if(!snapTransform.containsNaN())
+         if (!snapTransform.containsNaN())
             snapTransform.transform(footstepPose);
 
          plan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
@@ -222,7 +246,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
          numberOfNodesExpanded.increment();
 
          FootstepNode nodeToExpand;
-         if(bestGoalNode == null)
+         if (bestGoalNode == null)
             nodeToExpand = stack.pollFirst();
          else
             nodeToExpand = stack.pollLast();
@@ -262,18 +286,34 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
 
          long timeInNano = System.nanoTime();
          if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime.getLongValue()) > timeout.getDoubleValue())
+         {
+            planningDuration.set(-1.0);
             break;
+         }
       }
 
       if (bestGoalNode == null)
       {
          notifyListenerSolutionWasNotFound();
+         planningDuration.set(-1.0);
          return FootstepPlanningResult.NO_PATH_EXISTS;
       }
 
+      planningDuration.set(Conversions.nanosecondsToSeconds(System.nanoTime() - planningStartTime.getLongValue()));
+
+      FootstepPlanningResult result;
       if (stack.isEmpty())
-         return FootstepPlanningResult.OPTIMAL_SOLUTION;
-      return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
+         result = FootstepPlanningResult.OPTIMAL_SOLUTION;
+      else
+         result = FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
+
+      if (debug)
+      {
+         PrintTools.info("Time taken = " + planningDuration.getDoubleValue());
+         PrintTools.info("Result = " + result);
+      }
+
+      return result;
    }
 
    private ArrayList<FootstepNode> getSortedNodeList(HashSet<FootstepNode> nodeSet)
@@ -302,7 +342,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
             footstepPose.setTranslationY(path.get(i).getY());
 
             RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i)).getSnapTransform();
-            if(!snapTransform.containsNaN())
+            if (!snapTransform.containsNaN())
                snapTransform.transform(footstepPose);
 
             plan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));

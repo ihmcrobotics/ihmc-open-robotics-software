@@ -1,43 +1,37 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
-
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.tools.AxisAngleTools;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
+import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.Random;
+
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
 public class PlanarRegionBaseOfCliffAvoiderTest
@@ -83,7 +77,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
 
       double footLength = 0.2;
       double footWidth = 0.1;
-      SideDependentList<ConvexPolygon2D> footPolygons = PlanningTestTools.createFootPolygons(footLength, footWidth);
+      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       PlanarRegionBaseOfCliffAvoider avoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
       avoider.setPlanarRegions(planarRegionsList);
@@ -96,7 +90,8 @@ public class PlanarRegionBaseOfCliffAvoiderTest
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
          Graphics3DObject staticLinkGraphics = new Graphics3DObject();
          staticLinkGraphics.addCoordinateSystem(1.0);
-         Graphics3DObjectTools.addPlanarRegionsList(staticLinkGraphics, planarRegionsList, YoAppearance.Green(), YoAppearance.Beige(), YoAppearance.Yellow(), YoAppearance.Orange());
+         Graphics3DObjectTools.addPlanarRegionsList(staticLinkGraphics, planarRegionsList, YoAppearance.Green(), YoAppearance.Beige(), YoAppearance.Yellow(),
+                                                    YoAppearance.Orange());
          scs.addStaticLinkGraphics(staticLinkGraphics);
          scs.startOnAThread();
          ThreadTools.sleepForever();
@@ -144,7 +139,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
          }
       });
 
-      SideDependentList<ConvexPolygon2D> footPolygons = PlanningTestTools.createFootPolygons(footLength, footWidth);
+      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
 
@@ -180,7 +175,8 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       sideNearNodeOffset.add(centerX, centerY);
       sideFarNodeOffset.add(centerX, centerY);
 
-      FootstepNode frontNearNode = new FootstepNode(frontNearNodeOffset.getX(), frontNearNodeOffset.getY(), rotation, RobotSide.generateRandomRobotSide(random));
+      FootstepNode frontNearNode = new FootstepNode(frontNearNodeOffset.getX(), frontNearNodeOffset.getY(), rotation,
+                                                    RobotSide.generateRandomRobotSide(random));
       FootstepNode frontFarNode = new FootstepNode(frontFarNodeOffset.getX(), frontFarNodeOffset.getY(), rotation, RobotSide.generateRandomRobotSide(random));
       FootstepNode sideNearNode = new FootstepNode(sideNearNodeOffset.getX(), sideNearNodeOffset.getY(), rotation, RobotSide.generateRandomRobotSide(random));
       FootstepNode sideFarNode = new FootstepNode(sideFarNodeOffset.getX(), sideFarNodeOffset.getY(), rotation, RobotSide.generateRandomRobotSide(random));
@@ -191,7 +187,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       assertTrue(cliffAvoider.isNodeValid(sideFarNode, null));
    }
 
-      public static void main(String[] args)
+   public static void main(String[] args)
    {
       MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegionBaseOfCliffAvoider.class, PlanarRegionBaseOfCliffAvoiderTest.class);
    }

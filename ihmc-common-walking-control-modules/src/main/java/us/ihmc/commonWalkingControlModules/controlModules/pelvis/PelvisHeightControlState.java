@@ -4,21 +4,15 @@ import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPositionController;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -28,6 +22,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTra
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandConversionTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.AbstractPDController;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
@@ -37,10 +32,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
-import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -53,16 +45,13 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    /** We take the spatialFeedback command from the RigidBodyTaskspaceControlState and pack it into a point feedback command and set the selection matrix to Z only**/
-   private final PointFeedbackControlCommand pointFeedbackCommand = new PointFeedbackControlCommand();
-   private final SelectionMatrix6D linearZSelectionMatrix = new SelectionMatrix6D();
    private final SelectionMatrix3D temp3DSelection = new SelectionMatrix3D();
-   private final WeightMatrix6D linearZWeightMatrix = new WeightMatrix6D();
 
    /** When we handle the PelvisTrajectoryCommand we pull out the z component and pack it into another PelvisTrajectoryCommand**/
-   private final PelvisTrajectoryCommand tempPelvisTrajectoryCommand = new PelvisTrajectoryCommand();
+   private final EuclideanTrajectoryControllerCommand euclideanCommand = new EuclideanTrajectoryControllerCommand();
 
    /** handles the trajectory and the queuing**/
-   private final RigidBodyTaskspaceControlState taskspaceControlState;
+   private final RigidBodyPositionController positionController;
 
    private final RigidBody pelvis;
    private final MovingReferenceFrame pelvisFrame;
@@ -75,9 +64,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    private final DoubleProvider offsetTrajectoryTime;
    private double previousOffset = 0.0;
 
-   private final FramePose3D tempPose = new FramePose3D();
-   private final Point3D tempPoint = new Point3D();
-   private final RigidBodyTransform controlFrame = new RigidBodyTransform();
+   private final FramePoint3D tempPosition = new FramePoint3D();
 
    private final AbstractPDController linearMomentumZPDController;
    private final YoSE3OffsetFrame yoControlFrame;
@@ -127,7 +114,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
                                                                             derivativeGain, () -> 0.0, registry);
       yoControlFrame = new YoSE3OffsetFrame(pelvis.getName() + "HeightBodyFixedControlFrame", pelvis.getBodyFixedFrame(), registry);
 
-      taskspaceControlState = new RigidBodyTaskspaceControlState("Height", pelvis, elevator, elevator, trajectoryFrames, pelvisFrame, baseFrame, true, false, yoTime, null, graphicsListRegistry, registry);
+      positionController = new RigidBodyPositionController(pelvis, elevator, elevator, trajectoryFrames, pelvisFrame, baseFrame, yoTime, registry, graphicsListRegistry);
 
       defaultHeight = new DoubleParameter(getClass().getSimpleName() + "DefaultHeight", registry);
       minHeight = new DoubleParameter(getClass().getSimpleName() + "MinHeight", registry, 0.0);
@@ -150,7 +137,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    public void setGains(PIDGainsReadOnly gains)
    {
       symmetric3DGains.setGains(gains);
-      taskspaceControlState.setGains(null, symmetric3DGains);
+      positionController.setGains(symmetric3DGains);
    }
 
    public void step(Point3DReadOnly stanceFootPosition, Point3DReadOnly touchdownPosition, double swingTime, RobotSide swingSide, double toeOffHeight)
@@ -203,15 +190,10 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       command.clear();
       trajectoryPoint.setToZero();
 
-      taskspaceControlState.getDesiredPose(tempPose);
-      tempPose.changeFrame(ReferenceFrame.getWorldFrame());
-      trajectoryPoint.setZ(tempPose.getZ());
-      command.addTrajectoryPoint(0.0, trajectoryPoint, zeroVelocity);
       trajectoryPoint.setZ(adjustedDesiredHeight);
       command.addTrajectoryPoint(time, trajectoryPoint, zeroVelocity);
 
-      taskspaceControlState.setDefaultControlFrame();
-      taskspaceControlState.handleEuclideanTrajectoryCommand(command, tempPose);
+      positionController.handleTrajectoryCommand(command);
    }
 
    private double avoidSingularities(double height)
@@ -257,7 +239,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
     */
    public void setWeights(Vector3DReadOnly linearWeight)
    {
-      taskspaceControlState.setWeights(null, linearWeight);
+      positionController.setWeights(linearWeight);
    }
 
    @Override
@@ -266,44 +248,24 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       // This is to avoid a variable changed listener that would fire when using the SCS playback.
       if (offset.getValue() != previousOffset)
       {
-         taskspaceControlState.getDesiredPose(tempPose);
-         tempPose.changeFrame(ReferenceFrame.getWorldFrame());
-         double currentDesired = tempPose.getZ() + adjustmentAmount.getValue();
+         double desiredZInworld = positionController.getFeedbackControlCommand().getDesiredPosition().getZ();
+         double currentDesired = desiredZInworld + adjustmentAmount.getValue();
          goToHeight(currentDesired - previousOffset, offsetTrajectoryTime.getValue());
       }
       previousOffset = offset.getValue();
 
-      taskspaceControlState.doAction(Double.NaN);
+      positionController.doAction(Double.NaN);
    }
 
-   private final FramePoint3D oldControlFramePosition = new FramePoint3D();
-   private final FramePoint3D newControlFramePosition = new FramePoint3D();
-   private final FrameVector3D changeInControlFrame = new FrameVector3D();
-
-   public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command, FramePose3D initialPose)
+   public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
-      initialPose.changeFrame(pelvis.getBodyFixedFrame());
-      oldControlFramePosition.setToZero(taskspaceControlState.getControlFrame());
-      oldControlFramePosition.changeFrame(pelvis.getBodyFixedFrame());
-
-      if (command.getEuclideanTrajectory().useCustomControlFrame())
+      if (positionController.handleTrajectoryCommand(command.getEuclideanTrajectory()))
       {
-         command.getEuclideanTrajectory().getControlFramePose(controlFrame);
-         taskspaceControlState.setControlFramePose(controlFrame);
-      }
-      else
-      {
-         taskspaceControlState.setDefaultControlFrame();
+         return true;
       }
 
-      newControlFramePosition.setToZero(taskspaceControlState.getControlFrame());
-      newControlFramePosition.changeFrame(pelvis.getBodyFixedFrame());
-      changeInControlFrame.setToZero(pelvis.getBodyFixedFrame());
-      changeInControlFrame.sub(newControlFramePosition, oldControlFramePosition);
-
-      initialPose.prependTranslation(changeInControlFrame);
-
-      return taskspaceControlState.handleEuclideanTrajectoryCommand(command.getEuclideanTrajectory(), initialPose);
+      initializeDesiredHeightToCurrent();
+      return false;
    }
 
    /**
@@ -312,121 +274,51 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
     * @param initialPose the initial pelvis position
     * @return whether the command passed validation and was queued
     */
-   public boolean handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command, FramePose3D initialPose)
+   public boolean handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      // We have to remove the orientation and xy components of the command, and adjust the selection matrix;
-      // We do this to break up the pelvis control, it reduces the complexity of each manager at the expense of these little hacks.
-      tempPelvisTrajectoryCommand.set(command);
+      CommandConversionTools.convertToEuclidean(command.getSE3Trajectory(), euclideanCommand);
 
-      //set the selection matrix to z only
-      SelectionMatrix6D commandSelectionMatrix = tempPelvisTrajectoryCommand.getSE3Trajectory().getSelectionMatrix();
-      if (commandSelectionMatrix != null)
+      ReferenceFrame selectionFrame = euclideanCommand.getSelectionMatrix().getSelectionFrame();
+      if (selectionFrame != null && !selectionFrame.isZupFrame())
       {
-         linearZSelectionMatrix.set(commandSelectionMatrix);
-         ReferenceFrame linearSelectionFrame = linearZSelectionMatrix.getLinearSelectionFrame();
-         if (linearSelectionFrame != null && !linearSelectionFrame.isZupFrame())
-         {
-            PrintTools.warn("Selection Matrix Linear Frame was not Z up, PelvisTrajectoryCommand can only handle Selection matrix linear components with Z up frames.");
-            return false;
-         }
-      }
-      else
-      {
-         linearZSelectionMatrix.clearLinearSelection();
-      }
-
-      linearZSelectionMatrix.clearAngularSelection();
-      linearZSelectionMatrix.setLinearAxisSelection(false, false, true);
-      linearZSelectionMatrix.setSelectionFrame(ReferenceFrame.getWorldFrame());
-      tempPelvisTrajectoryCommand.getSE3Trajectory().setSelectionMatrix(linearZSelectionMatrix);
-
-      //set the weight matrix to z only
-      WeightMatrix6D commanedWeightMatrix = tempPelvisTrajectoryCommand.getSE3Trajectory().getWeightMatrix();
-      if (commanedWeightMatrix != null)
-      {
-         linearZWeightMatrix.set(commanedWeightMatrix);
-         ReferenceFrame linearWeightFrame = linearZWeightMatrix.getLinearWeightFrame();
-         if (linearWeightFrame != null && !linearWeightFrame.isZupFrame())
-         {
-            PrintTools.warn("Weight Matrix Linear Frame was not Z up, PelvisTrajectoryCommand can only handle weight matrix linear components with Z up frames.");
-            return false;
-         }
-      }
-      else
-      {
-         linearZWeightMatrix.clearLinearWeights();
-      }
-      linearZWeightMatrix.clearAngularWeights();
-      WeightMatrix3D weightLinearPart = linearZWeightMatrix.getLinearPart();
-      linearZWeightMatrix.setLinearWeights(0.0, 0.0, weightLinearPart.getZAxisWeight());
-      linearZWeightMatrix.setWeightFrame(ReferenceFrame.getWorldFrame());
-      tempPelvisTrajectoryCommand.getSE3Trajectory().setWeightMatrix(linearZWeightMatrix);
-
-      if (command.getSE3Trajectory().useCustomControlFrame())
-      {
-         tempPelvisTrajectoryCommand.getSE3Trajectory().getControlFramePose(controlFrame);
-         taskspaceControlState.setControlFramePose(controlFrame);
-      }
-      else
-      {
-         taskspaceControlState.setDefaultControlFrame();
-      }
-
-      // Convert the initial point to be consistent with the control frame
-      ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
-      tempPose.setToZero(pelvisFrame);
-      tempPose.changeFrame(controlFrame);
-      tempPoint.set(tempPose.getPosition());
-
-      initialPose.prependTranslation(tempPoint);
-
-      if (!taskspaceControlState.handlePoseTrajectoryCommand(tempPelvisTrajectoryCommand.getSE3Trajectory(), initialPose))
-      {
-         taskspaceControlState.clear();
+         PrintTools.warn("Pelvis linear selection matrix must be z-up!");
          return false;
       }
-      return true;
-   }
+      euclideanCommand.getSelectionMatrix().selectXAxis(false);
+      euclideanCommand.getSelectionMatrix().selectYAxis(false);
+      euclideanCommand.getSelectionMatrix().setSelectionFrame(ReferenceFrame.getWorldFrame());
 
-   /**
-    * returns the control frame which is fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
-    * @return
-    */
-   public ReferenceFrame getControlFrame()
-   {
-      return taskspaceControlState.getControlFrame();
-   }
+      ReferenceFrame weightFrame = euclideanCommand.getWeightMatrix().getWeightFrame();
+      if (weightFrame != null && !weightFrame.isZupFrame())
+      {
+         PrintTools.warn("Pelvis linear weight matrix must be z-up!");
+         return false;
+      }
+      euclideanCommand.getWeightMatrix().setXAxisWeight(0.0);
+      euclideanCommand.getWeightMatrix().setYAxisWeight(0.0);
+      euclideanCommand.getWeightMatrix().setWeightFrame(ReferenceFrame.getWorldFrame());
 
-   /**
-    * Packs positionToPack with the current desired height, The parameter's frame will be set to the trajectory frame
-    */
-   @Override
-   public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint3D positionToPack)
-   {
-      taskspaceControlState.getDesiredPose(tempPose);
-      positionToPack.setIncludingFrame(tempPose.getPosition());
+      if (positionController.handleTrajectoryCommand(euclideanCommand))
+      {
+         return true;
+      }
 
-      ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
-      tempPose.setToZero(controlFrame);
-      tempPose.changeFrame(pelvisFrame);
-      tempPoint.set(tempPose.getPosition());
-
-      positionToPack.add(tempPoint);
+      initializeDesiredHeightToCurrent();
+      return false;
    }
 
    @Override
    public void initializeDesiredHeightToCurrent()
    {
-      taskspaceControlState.holdCurrent();
+      positionController.holdCurrent();
    }
 
    @Override
    public void goHome(double trajectoryTime)
    {
-      tempPose.setToZero(baseFrame);
-      tempPose.setZ(defaultHeight.getValue());
-      taskspaceControlState.setDefaultControlFrame();
-      taskspaceControlState.goToPoseFromCurrent(tempPose, trajectoryTime);
+      tempPosition.setToZero(baseFrame);
+      tempPosition.setZ(defaultHeight.getValue());
+      positionController.goToPositionFromCurrent(tempPosition, trajectoryTime);
    }
 
    /**
@@ -442,9 +334,6 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    }
 
    private final FramePoint3D controlPosition = new FramePoint3D();
-   private final FrameQuaternion controlOrientation = new FrameQuaternion();
-   private final FramePoint3D desiredPosition = new FramePoint3D();
-   private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
    private final FrameVector3D currentLinearVelocity = new FrameVector3D();
    private final Twist twist = new Twist();
@@ -453,63 +342,45 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
     * returns the point feedback command for the z height of the pelvis
     */
    @Override
-   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   public PointFeedbackControlCommand getFeedbackControlCommand()
    {
-      //We have to do some nasty copying, because the taskspaceControlState returns a spatial feedback command, but the controller core doesn't like
-      //when you send two overlapping commands (pelvis orientation uses orientation feedback comand)
-      SpatialFeedbackControlCommand spatialFeedbackControlCommand = taskspaceControlState.getSpatialFeedbackControlCommand();
-
-      SpatialAccelerationCommand spcatialAccelerationCommand = spatialFeedbackControlCommand.getSpatialAccelerationCommand();
-      pointFeedbackCommand.getSpatialAccelerationCommand().set(spcatialAccelerationCommand);
-      pointFeedbackCommand.setControlBaseFrame(spatialFeedbackControlCommand.getControlBaseFrame());
-      pointFeedbackCommand.set(spatialFeedbackControlCommand.getBase(), spatialFeedbackControlCommand.getEndEffector());
-      spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
-      spatialFeedbackControlCommand.getFeedForwardLinearActionIncludingFrame(feedForwardLinearAcceleration);
+      PointFeedbackControlCommand feedbackCommand = positionController.getFeedbackControlCommand();
 
       // TODO: for some reason this is needed to avoid robot-blow up. It should be selected out by the selection matrix!
+      feedbackCommand.getFeedForwardActionIncludingFrame(feedForwardLinearAcceleration);
       feedForwardLinearAcceleration.setX(0.0);
       feedForwardLinearAcceleration.setY(0.0);
-
-      pointFeedbackCommand.set(desiredPosition, desiredLinearVelocity);
-      pointFeedbackCommand.setFeedForwardAction(feedForwardLinearAcceleration);
-      pointFeedbackCommand.setControlBaseFrame(spatialFeedbackControlCommand.getControlBaseFrame());
-      pointFeedbackCommand.setGains(spatialFeedbackControlCommand.getGains().getPositionGains());
-      pointFeedbackCommand.setGainsFrame(baseFrame);
-      spatialFeedbackControlCommand.getControlFramePoseIncludingFrame(controlPosition, controlOrientation);
-      pointFeedbackCommand.setBodyFixedPointToControl(controlPosition);
+      feedbackCommand.setFeedForwardAction(feedForwardLinearAcceleration);
 
       temp3DSelection.clearSelection();
       temp3DSelection.setSelectionFrame(ReferenceFrame.getWorldFrame());
       temp3DSelection.selectZAxis(true);
-      pointFeedbackCommand.setSelectionMatrix(temp3DSelection);
+      feedbackCommand.setSelectionMatrix(temp3DSelection);
 
-      return pointFeedbackCommand;
+      return feedbackCommand;
    }
 
    @Override
    public double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
                                                      FeetManager feetManager)
    {
-      SpatialFeedbackControlCommand spatialFeedbackControlCommand = taskspaceControlState.getSpatialFeedbackControlCommand();
-      spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
-      spatialFeedbackControlCommand.getFeedForwardLinearActionIncludingFrame(feedForwardLinearAcceleration);
-      spatialFeedbackControlCommand.getControlFramePoseIncludingFrame(controlPosition, controlOrientation);
-      controlPosition.changeFrame(pelvis.getBodyFixedFrame());
+      PointFeedbackControlCommand feedbackCommand = positionController.getFeedbackControlCommand();
 
+      controlPosition.setIncludingFrame(feedbackCommand.getBodyFixedPointToControl());
+      controlPosition.changeFrame(pelvis.getBodyFixedFrame());
       yoControlFrame.setOffsetToParentToTranslationOnly(controlPosition);
       yoControlFrame.getTwistRelativeToOther(baseFrame, twist);
       twist.getLinearPart(currentLinearVelocity);
-      currentLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
 
+      currentLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       controlPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       currentPelvisHeightInWorld.set(controlPosition.getZ());
-      desiredPelvisHeightInWorld.set(desiredPosition.getZ());
-      desiredPelvisVelocityInWorld.set(desiredLinearVelocity.getZ());
+      desiredPelvisHeightInWorld.set(feedbackCommand.getDesiredPosition().getZ());
       currentPelvisVelocityInWorld.set(currentLinearVelocity.getZ());
+      desiredPelvisVelocityInWorld.set(feedbackCommand.getDesiredLinearVelocity().getZ());
 
-      double acceleration = linearMomentumZPDController.compute(controlPosition.getZ(), desiredPosition.getZ(), currentLinearVelocity.getZ(),
-                                                                desiredLinearVelocity.getZ());
-      return acceleration;
+      return linearMomentumZPDController.compute(currentPelvisHeightInWorld.getValue(), desiredPelvisHeightInWorld.getValue(),
+                                                 currentPelvisVelocityInWorld.getValue(), desiredPelvisVelocityInWorld.getValue());
    }
 }

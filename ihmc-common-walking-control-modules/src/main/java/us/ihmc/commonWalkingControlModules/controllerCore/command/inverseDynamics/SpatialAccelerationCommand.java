@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -746,6 +747,16 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    public void getControlFramePoseIncludingFrame(FramePose3D controlFramePoseToPack)
    {
       controlFramePoseToPack.setIncludingFrame(controlFramePose);
+   }
+
+   /**
+    * Gets a read only view of the pose of the control frame expressed in {@code endEffector.getBodyFixedFrame()}.
+    *
+    * @return the pose of the control frame.
+    */
+   public FramePose3DReadOnly getControlFramePose()
+   {
+      return controlFramePose;
    }
 
    /**
