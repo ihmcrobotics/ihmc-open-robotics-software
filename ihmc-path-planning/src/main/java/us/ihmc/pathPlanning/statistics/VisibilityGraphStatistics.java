@@ -68,4 +68,43 @@ public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGr
       navigableRegions.add(navigableRegion);
    }
 
+   public VisibilityMap getGoalVisibilityMap()
+   {
+      return goalMap;
+   }
+
+   public VisibilityMap getStartVisibilityMap()
+   {
+      return startMap;
+   }
+
+   public VisibilityMap getInterRegionsVisibilityMap()
+   {
+      return interRegionsMap;
+   }
+
+   public int getGoalMapId()
+   {
+      return goalMapId;
+   }
+
+   public int getStartMapId()
+   {
+      return startMapId;
+   }
+
+   public int getInterRegionsMapId()
+   {
+      return interRegionsMapId;
+   }
+
+   public int getNumberOfNavigableRegions()
+   {
+      return navigableRegions.size();
+   }
+
+   public NavigableRegion getNavigableRegion(int regionNumber)
+   {
+      return navigableRegions.get(regionNumber);
+   }
 }

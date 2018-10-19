@@ -23,10 +23,12 @@ module controller_msgs
          * start point for the connection
          */
         sequence<geometry_msgs::msg::dds::Point> source_points;
+        sequence<unsigned long> source_region_ids;
         /**
          * target point for the connection
          */
         sequence<geometry_msgs::msg::dds::Point> target_points;
+        sequence<unsigned long> target_region_ids;
       };
     };
   };

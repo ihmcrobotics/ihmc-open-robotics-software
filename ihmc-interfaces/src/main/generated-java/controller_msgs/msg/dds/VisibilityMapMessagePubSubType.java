@@ -45,9 +45,13 @@ public class VisibilityMapMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -70,9 +74,17 @@ public class VisibilityMapMessagePubSubType implements us.ihmc.pubsub.TopicDataT
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getSourcePoints().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getSourceRegionIds().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getTargetPoints().size(); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getTargetPoints().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getTargetRegionIds().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       return current_alignment - initial_alignment;
@@ -86,9 +98,17 @@ public class VisibilityMapMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       cdr.write_type_e(data.getSourcePoints());else
           throw new RuntimeException("source_points field exceeds the maximum length");
 
+      if(data.getSourceRegionIds().size() <= 100)
+      cdr.write_type_e(data.getSourceRegionIds());else
+          throw new RuntimeException("source_region_ids field exceeds the maximum length");
+
       if(data.getTargetPoints().size() <= 100)
       cdr.write_type_e(data.getTargetPoints());else
           throw new RuntimeException("target_points field exceeds the maximum length");
+
+      if(data.getTargetRegionIds().size() <= 100)
+      cdr.write_type_e(data.getTargetRegionIds());else
+          throw new RuntimeException("target_region_ids field exceeds the maximum length");
 
    }
 
@@ -97,7 +117,9 @@ public class VisibilityMapMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       data.setMapId(cdr.read_type_4());
       	
       cdr.read_type_e(data.getSourcePoints());	
+      cdr.read_type_e(data.getSourceRegionIds());	
       cdr.read_type_e(data.getTargetPoints());	
+      cdr.read_type_e(data.getTargetRegionIds());	
 
    }
 
@@ -106,7 +128,9 @@ public class VisibilityMapMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       ser.write_type_4("map_id", data.getMapId());
       ser.write_type_e("source_points", data.getSourcePoints());
+      ser.write_type_e("source_region_ids", data.getSourceRegionIds());
       ser.write_type_e("target_points", data.getTargetPoints());
+      ser.write_type_e("target_region_ids", data.getTargetRegionIds());
    }
 
    @Override
@@ -114,7 +138,9 @@ public class VisibilityMapMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       data.setMapId(ser.read_type_4("map_id"));
       ser.read_type_e("source_points", data.getSourcePoints());
+      ser.read_type_e("source_region_ids", data.getSourceRegionIds());
       ser.read_type_e("target_points", data.getTargetPoints());
+      ser.read_type_e("target_region_ids", data.getTargetRegionIds());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.VisibilityMapMessage src, controller_msgs.msg.dds.VisibilityMapMessage dest)
