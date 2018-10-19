@@ -429,9 +429,12 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
                                                                          RealtimeRos2Node realtimeRos2Node,
                                                                          CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
-      return new SimulatedValkyrieFingerController(simulatedRobot, threadDataSynchronizer, realtimeRos2Node, closeableAndDisposableRegistry, this,
-                                                   ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
-                                                   ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
+      if (!ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
+         return null;
+      else
+         return new SimulatedValkyrieFingerController(simulatedRobot, threadDataSynchronizer, realtimeRos2Node, closeableAndDisposableRegistry, this,
+                                                      ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
+                                                      ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
    }
 
    @Override
