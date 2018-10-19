@@ -80,7 +80,7 @@ public class BodyCollisionNodeChecker implements FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      if (previousNode == null || planarRegionsList == null || !parameters.checkForBodyBoxCollisions())
+      if (previousNode == null || planarRegionsList == null || !parameters.checkForBodyBoxCollisions() || planarRegionsList.isEmpty())
       {
          return true;
       }
