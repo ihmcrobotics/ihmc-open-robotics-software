@@ -217,6 +217,11 @@ public class Cluster
       navigableExtrusionsInLocal.add(new Point2D(navigableExtrusionInLocal));
    }
 
+   public void addNavigableExtrusionInLocal3D(Point3DReadOnly navigableExtrusionInLocal)
+   {
+      navigableExtrusionsInLocal.add(new Point2D(navigableExtrusionInLocal));
+   }
+
    public void addNavigableExtrusionInWorld3D(Point3DReadOnly navigableExtrusionInWorld)
    {
       navigableExtrusionsInLocal.add(toLocal2D(navigableExtrusionInWorld));
@@ -225,6 +230,11 @@ public class Cluster
    public void addNavigableExtrusionsInLocal2D(List<? extends Point2DReadOnly> navigableExtrusionInLocal)
    {
       navigableExtrusionInLocal.forEach(this::addNavigableExtrusionInLocal2D);
+   }
+
+   public void addNavigableExtrusionsInLocal3D(List<? extends Point3DReadOnly> navigableExtrusionInLocal)
+   {
+      navigableExtrusionInLocal.forEach(this::addNavigableExtrusionInLocal3D);
    }
 
    public void addNavigableExtrusionsInWorld3D(List<? extends Point3DReadOnly> navigableExtrusionInWorld)
@@ -255,6 +265,11 @@ public class Cluster
    public void addNonNavigableExtrusionsInLocal2D(List<? extends Point2DReadOnly> nonNavigableExtrusionInLocal)
    {
       nonNavigableExtrusionInLocal.forEach(this::addNonNavigableExtrusionInLocal2D);
+   }
+
+   public void addNonNavigableExtrusionsInLocal3D(List<? extends Point3DReadOnly> nonNavigableExtrusionInLocal)
+   {
+      nonNavigableExtrusionInLocal.forEach(this::addNonNavigableExtrusionInLocal3D);
    }
 
    public void addNonNavigableExtrusionsInWorld3D(List<? extends Point3DReadOnly> nonNavigableExtrusionInWorld)

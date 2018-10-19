@@ -204,9 +204,9 @@ public class RemoteUIMessageConverter
 
    private void processBodyPathPlanStatistics(BodyPathPlanStatisticsMessage packet)
    {
-      VisibilityMapHolder startVisibilityMap = VisibilityGraphMessagesConverter.convertToVisibilityMapHolder(packet.getStartVisibilityMap());
-      VisibilityMapHolder goalVisibilityMap = VisibilityGraphMessagesConverter.convertToVisibilityMapHolder(packet.getGoalVisibilityMap());
-      VisibilityMapHolder interRegionVisibilityMap = VisibilityGraphMessagesConverter.convertToVisibilityMapHolder(packet.getInterRegionsMap());
+      VisibilityMapHolder startVisibilityMap = VisibilityGraphMessagesConverter.convertToSingleSourceVisibilityMap(packet.getStartVisibilityMap());
+      VisibilityMapHolder goalVisibilityMap = VisibilityGraphMessagesConverter.convertToSingleSourceVisibilityMap(packet.getGoalVisibilityMap());
+      VisibilityMapHolder interRegionVisibilityMap = VisibilityGraphMessagesConverter.convertToInterRegionsVisibilityMap(packet.getInterRegionsMap());
 
       List<NavigableRegion> navigableRegionList = VisibilityGraphMessagesConverter.convertToNavigableRegionsList(packet.getNavigableRegions());
 

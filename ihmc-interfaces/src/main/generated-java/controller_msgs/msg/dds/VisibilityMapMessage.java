@@ -19,15 +19,21 @@ public class VisibilityMapMessage extends Packet<VisibilityMapMessage> implement
             * start point for the connection
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  source_points_;
+   public us.ihmc.idl.IDLSequence.Long  source_region_ids_;
    /**
             * target point for the connection
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  target_points_;
+   public us.ihmc.idl.IDLSequence.Long  target_region_ids_;
 
    public VisibilityMapMessage()
    {
       source_points_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
+      source_region_ids_ = new us.ihmc.idl.IDLSequence.Long (100, "type_4");
+
       target_points_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
+      target_region_ids_ = new us.ihmc.idl.IDLSequence.Long (100, "type_4");
+
 
    }
 
@@ -42,7 +48,9 @@ public class VisibilityMapMessage extends Packet<VisibilityMapMessage> implement
       map_id_ = other.map_id_;
 
       source_points_.set(other.source_points_);
+      source_region_ids_.set(other.source_region_ids_);
       target_points_.set(other.target_points_);
+      target_region_ids_.set(other.target_region_ids_);
    }
 
    /**
@@ -70,12 +78,24 @@ public class VisibilityMapMessage extends Packet<VisibilityMapMessage> implement
    }
 
 
+   public us.ihmc.idl.IDLSequence.Long  getSourceRegionIds()
+   {
+      return source_region_ids_;
+   }
+
+
    /**
             * target point for the connection
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getTargetPoints()
    {
       return target_points_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Long  getTargetRegionIds()
+   {
+      return target_region_ids_;
    }
 
 
@@ -105,12 +125,16 @@ public class VisibilityMapMessage extends Packet<VisibilityMapMessage> implement
          {  if (!this.source_points_.get(i).epsilonEquals(other.source_points_.get(i), epsilon)) return false; }
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.source_region_ids_, other.source_region_ids_, epsilon)) return false;
+
       if (this.target_points_.size() != other.target_points_.size()) { return false; }
       else
       {
          for (int i = 0; i < this.target_points_.size(); i++)
          {  if (!this.target_points_.get(i).epsilonEquals(other.target_points_.get(i), epsilon)) return false; }
       }
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.target_region_ids_, other.target_region_ids_, epsilon)) return false;
 
 
       return true;
@@ -128,7 +152,9 @@ public class VisibilityMapMessage extends Packet<VisibilityMapMessage> implement
       if(this.map_id_ != otherMyClass.map_id_) return false;
 
       if (!this.source_points_.equals(otherMyClass.source_points_)) return false;
+      if (!this.source_region_ids_.equals(otherMyClass.source_region_ids_)) return false;
       if (!this.target_points_.equals(otherMyClass.target_points_)) return false;
+      if (!this.target_region_ids_.equals(otherMyClass.target_region_ids_)) return false;
 
       return true;
    }
@@ -143,8 +169,12 @@ public class VisibilityMapMessage extends Packet<VisibilityMapMessage> implement
       builder.append(this.map_id_);      builder.append(", ");
       builder.append("source_points=");
       builder.append(this.source_points_);      builder.append(", ");
+      builder.append("source_region_ids=");
+      builder.append(this.source_region_ids_);      builder.append(", ");
       builder.append("target_points=");
-      builder.append(this.target_points_);
+      builder.append(this.target_points_);      builder.append(", ");
+      builder.append("target_region_ids=");
+      builder.append(this.target_region_ids_);
       builder.append("}");
       return builder.toString();
    }
