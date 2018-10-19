@@ -110,8 +110,7 @@ public class PelvisOrientationManager
          return;
       }
 
-      userManager.getCurrentDesiredOrientation(tempOrientation);
-      walkingManager.setOffset(tempOrientation);
+      walkingManager.setOffset(userManager.getDesiredOrientation());
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()
@@ -207,8 +206,7 @@ public class PelvisOrientationManager
          return false;
       }
       enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
-      stateMachine.getCurrentState().getCurrentDesiredOrientation(tempOrientation);
-      if (userManager.handlePelvisOrientationTrajectoryCommands(command, tempOrientation))
+      if (userManager.handlePelvisOrientationTrajectoryCommands(command))
       {
          requestState(PelvisOrientationControlMode.USER);
          return true;

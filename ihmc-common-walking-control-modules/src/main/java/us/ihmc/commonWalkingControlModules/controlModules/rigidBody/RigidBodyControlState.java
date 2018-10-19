@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -16,7 +17,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -111,11 +111,20 @@ public abstract class RigidBodyControlState implements State
       return false;
    }
 
-   public abstract InverseDynamicsCommand<?> getInverseDynamicsCommand();
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return null;
+   }
 
-   public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return null;
+   }
 
-   public abstract FeedbackControlCommand<?> createFeedbackControlTemplate();
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return getFeedbackControlCommand();
+   }
 
    public abstract boolean isEmpty();
 

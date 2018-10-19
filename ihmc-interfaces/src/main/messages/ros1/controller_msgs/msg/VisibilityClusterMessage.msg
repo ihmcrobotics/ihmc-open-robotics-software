@@ -1,0 +1,9 @@
+geometry_msgs/Transform transform_to_world
+
+geometry_msgs/Point[] raw_points_in_local
+
+geometry_msgs/Point[] navigable_extrusions_in_local
+
+geometry_msgs/Point[] non_navigable_extrusions_in_local
+
+

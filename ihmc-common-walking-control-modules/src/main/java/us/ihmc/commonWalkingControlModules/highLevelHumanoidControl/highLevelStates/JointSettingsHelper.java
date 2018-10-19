@@ -116,7 +116,7 @@ public class JointSettingsHelper
          {
             jointsLoaded[jointIdx] = null;
          }
-         else if (integrationParametersLoaded == null && desiredBehaviorLoaded == null)
+         else
          {
             jointsLoaded[jointIdx] = new YoBoolean(jointName + "_isUnderLoad", registry);
          }

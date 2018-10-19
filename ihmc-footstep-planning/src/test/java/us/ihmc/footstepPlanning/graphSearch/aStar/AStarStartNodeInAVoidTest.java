@@ -12,8 +12,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.FlatGroundPlanningUtils;
@@ -37,7 +38,7 @@ public class AStarStartNodeInAVoidTest
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
       DefaultFootstepPlanningParameters parameters = new DefaultFootstepPlanningParameters();
-      SideDependentList<ConvexPolygon2D> footPolygons = PlanningTestTools.createDefaultFootPolygons();
+      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
       planner = AStarFootstepPlanner.createRoughTerrainPlanner(parameters, null, footPolygons, expansion, registry);
    }
@@ -71,7 +72,7 @@ public class AStarStartNodeInAVoidTest
       FramePose3D initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
       FramePose3D goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlan footstepPlan =
-            PlanningTestTools.runPlanner(planner, initialStanceFootPose3d, initialStanceFootSide, goalPose3d, planarRegionsList, !visualize);
+            PlannerTools.runPlanner(planner, initialStanceFootPose3d, initialStanceFootSide, goalPose3d, planarRegionsList, !visualize);
 
       if (visualize)
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose3d);

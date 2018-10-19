@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 
 public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParameters
 {
