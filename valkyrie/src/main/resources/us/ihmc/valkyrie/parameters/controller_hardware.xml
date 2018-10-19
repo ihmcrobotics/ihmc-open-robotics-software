@@ -41,6 +41,13 @@
                         <parameter name="LoadedAnklePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0"/>
                         <parameter name="LoadedAnkleRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0"/>
                     </registry>
+                    <registry name="WholeBodyControllerCore">
+                        <registry name="WholeBodyFeedbackController">
+                            <registry name="FeedbackControllerToolbox">
+<parameter name="torsoErrorVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="16.0"/>
+                            </registry>
+                        </registry>
+                    </registry>
                 </registry>
             </registry>
         </registry>
