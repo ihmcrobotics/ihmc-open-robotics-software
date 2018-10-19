@@ -25,14 +25,42 @@ public class Cluster
 
    public enum ExtrusionSide
    {
-      INSIDE, OUTSIDE
+      INSIDE, OUTSIDE;
+
+      public static ExtrusionSide[] values = values();
+
+      public byte toByte()
+      {
+         return (byte) ordinal();
+      }
+
+      public static ExtrusionSide fromByte(byte enumAsByte)
+      {
+         if (enumAsByte == -1)
+            return null;
+         return values[enumAsByte];
+      }
    };
 
    private ExtrusionSide extrusionSide = ExtrusionSide.OUTSIDE;
 
    public enum Type
    {
-      LINE, MULTI_LINE, POLYGON
+      LINE, MULTI_LINE, POLYGON;
+
+      public static Type[] values = values();
+
+      public byte toByte()
+      {
+         return (byte) ordinal();
+      }
+
+      public static Type fromByte(byte enumAsByte)
+      {
+         if (enumAsByte == -1)
+            return null;
+         return values[enumAsByte];
+      }
    };
 
    private Type type = Type.POLYGON;

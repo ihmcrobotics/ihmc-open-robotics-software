@@ -79,9 +79,9 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
           current_alignment += controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.getCdrSerializedSize(data.getObstacleClusters().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getAllClusters().size(); ++i0)
+      for(int i0 = 0; i0 < data.getNonObstacleClusters().size(); ++i0)
       {
-          current_alignment += controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.getCdrSerializedSize(data.getAllClusters().get(i0), current_alignment);}
+          current_alignment += controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.getCdrSerializedSize(data.getNonObstacleClusters().get(i0), current_alignment);}
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPoseInWorld(), current_alignment);
 
@@ -98,9 +98,9 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       cdr.write_type_e(data.getObstacleClusters());else
           throw new RuntimeException("obstacle_clusters field exceeds the maximum length");
 
-      if(data.getAllClusters().size() <= 100)
-      cdr.write_type_e(data.getAllClusters());else
-          throw new RuntimeException("all_clusters field exceeds the maximum length");
+      if(data.getNonObstacleClusters().size() <= 100)
+      cdr.write_type_e(data.getNonObstacleClusters());else
+          throw new RuntimeException("non_obstacle_clusters field exceeds the maximum length");
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPoseInWorld(), cdr);
    }
@@ -111,7 +111,7 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.read(data.getHomeRegionCluster(), cdr);	
       controller_msgs.msg.dds.VisibilityMapMessagePubSubType.read(data.getVisibilityMapInWorld(), cdr);	
       cdr.read_type_e(data.getObstacleClusters());	
-      cdr.read_type_e(data.getAllClusters());	
+      cdr.read_type_e(data.getNonObstacleClusters());	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getPoseInWorld(), cdr);	
 
    }
@@ -126,7 +126,7 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ser.write_type_a("visibility_map_in_world", new controller_msgs.msg.dds.VisibilityMapMessagePubSubType(), data.getVisibilityMapInWorld());
 
       ser.write_type_e("obstacle_clusters", data.getObstacleClusters());
-      ser.write_type_e("all_clusters", data.getAllClusters());
+      ser.write_type_e("non_obstacle_clusters", data.getNonObstacleClusters());
       ser.write_type_a("pose_in_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getPoseInWorld());
 
    }
@@ -141,7 +141,7 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ser.read_type_a("visibility_map_in_world", new controller_msgs.msg.dds.VisibilityMapMessagePubSubType(), data.getVisibilityMapInWorld());
 
       ser.read_type_e("obstacle_clusters", data.getObstacleClusters());
-      ser.read_type_e("all_clusters", data.getAllClusters());
+      ser.read_type_e("non_obstacle_clusters", data.getNonObstacleClusters());
       ser.read_type_a("pose_in_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getPoseInWorld());
 
    }
