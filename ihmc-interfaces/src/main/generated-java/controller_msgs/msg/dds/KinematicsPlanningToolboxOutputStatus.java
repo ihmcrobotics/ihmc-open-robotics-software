@@ -9,10 +9,18 @@ import us.ihmc.pubsub.TopicDataType;
 public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlanningToolboxOutputStatus> implements Settable<KinematicsPlanningToolboxOutputStatus>, EpsilonComparable<KinematicsPlanningToolboxOutputStatus>
 {
    /**
+            * This output status will be converted into the WholeBodyTrajectoryMessage.
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   /**
+            * List of times for each key frames.
+            * The length of this should be same with the length of the configurations.
+            */
    public us.ihmc.idl.IDLSequence.Double  key_frame_times_;
+   /**
+            * List of configurations for each key frames.
+            */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>  robot_configurations_;
 
    public KinematicsPlanningToolboxOutputStatus()
@@ -38,6 +46,7 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
    }
 
    /**
+            * This output status will be converted into the WholeBodyTrajectoryMessage.
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public void setSequenceId(long sequence_id)
@@ -45,6 +54,7 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
       sequence_id_ = sequence_id;
    }
    /**
+            * This output status will be converted into the WholeBodyTrajectoryMessage.
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long getSequenceId()
@@ -53,12 +63,19 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
    }
 
 
+   /**
+            * List of times for each key frames.
+            * The length of this should be same with the length of the configurations.
+            */
    public us.ihmc.idl.IDLSequence.Double  getKeyFrameTimes()
    {
       return key_frame_times_;
    }
 
 
+   /**
+            * List of configurations for each key frames.
+            */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>  getRobotConfigurations()
    {
       return robot_configurations_;

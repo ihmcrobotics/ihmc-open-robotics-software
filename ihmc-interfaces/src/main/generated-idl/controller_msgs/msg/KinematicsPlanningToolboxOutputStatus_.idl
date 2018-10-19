@@ -13,10 +13,18 @@ module controller_msgs
       struct KinematicsPlanningToolboxOutputStatus
       {
         /**
+         * This output status will be converted into the WholeBodyTrajectoryMessage.
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
+        /**
+         * List of times for each key frames.
+         * The length of this should be same with the length of the configurations.
+         */
         sequence<double> key_frame_times;
+        /**
+         * List of configurations for each key frames.
+         */
         sequence<controller_msgs::msg::dds::KinematicsToolboxOutputStatus> robot_configurations;
       };
     };
