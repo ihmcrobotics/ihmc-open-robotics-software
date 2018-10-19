@@ -81,6 +81,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    private PlanarRegionsList cinderBlockField;
    private PlanarRegionsList steppingStoneField;
    private PlanarRegionsList bollardPlanarRegions;
+   private PlanarRegionsList flatGround;
 
    public static final double CINDER_BLOCK_START_X = 0.0;
    public static final double CINDER_BLOCK_START_Y = 0.0;
@@ -109,6 +110,10 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       cinderBlockField = generator.getPlanarRegionsList();
       steppingStoneField = PlanarRegionsListExamples.generateSteppingStonesEnvironment(STEPPING_STONE_PATH_RADIUS);
       bollardPlanarRegions = bollardEnvironment.getPlanarRegionsList();
+
+      generator.reset();
+      generator.addRectangle(5.0, 5.0);
+      flatGround = generator.getPlanarRegionsList();
 
       networkModuleParameters = new DRCNetworkModuleParameters();
       networkModuleParameters.enableFootstepPlanningToolbox(false);
@@ -232,6 +237,18 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = timeout)
+   public void testWalkingOnFlatGround()
+   {
+      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(-1.0, 0.0, 0.007, 0.0);
+      FramePose3D goalPose = new FramePose3D();
+      goalPose.setX(1.0);
+      setupSimulation(flatGround, startingLocation);
+      drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
+      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, null, goalPose);
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = timeout)
    public void testWalkingBetweenBollardsAStarPlanner()
    {
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(-1.5, 0.0, 0.007, 0.0);
@@ -299,8 +316,12 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
       FootstepPlanningRequestPacket requestPacket = HumanoidMessageTools.createFootstepPlanningRequestPacket(initialStancePose, initialStanceSide, goalPose,
                                                                                                              plannerType);
-      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
-      requestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
+      if(planarRegionsList != null)
+      {
+         PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
+         requestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
+      }
+
       footstepPlanningRequestPublisher.publish(requestPacket);
 
       while (outputStatus.get() == null)
