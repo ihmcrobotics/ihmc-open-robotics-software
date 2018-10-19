@@ -259,6 +259,7 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
       uiReceivedResult.set(false);
       uiReceivedPlan.set(false);
       plannerReceivedPlan.set(false);
+      plannerReceivedResult.set(false);
 
       errorMessage += assertPlansAreValid(datasetName, expectedResult, actualResult, expectedPlan, actualPlan, dataset.getGoal());
 

@@ -49,9 +49,10 @@ public abstract class FootstepPlannerDataSetTest
    protected FootstepPlannerUI ui = null;
    protected Messager messager = null;
 
-   protected final AtomicReference<FootstepPlan> plannerPlanReference = new AtomicReference<>(null);
-   protected final AtomicReference<FootstepPlanningResult> plannerResultReference = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlan> plannerPlanReference = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlanningResult> plannerResultReference = new AtomicReference<>(null);
    protected final AtomicReference<Boolean> plannerReceivedPlan = new AtomicReference<>(false);
+   protected final AtomicReference<Boolean> plannerReceivedResult = new AtomicReference<>(false);
 
    protected AtomicReference<FootstepPlan> uiFootstepPlanReference;
    protected AtomicReference<FootstepPlanningResult> uiPlanningResultReference;
@@ -104,6 +105,7 @@ public abstract class FootstepPlannerDataSetTest
       plannerPlanReference.set(null);
       plannerResultReference.set(null);
       plannerReceivedPlan.set(false);
+      plannerReceivedResult.set(false);
 
       if (uiFootstepPlanReference != null)
          uiFootstepPlanReference.set(null);
@@ -293,6 +295,7 @@ public abstract class FootstepPlannerDataSetTest
       plannerResultReference.set(FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult()));
       plannerPlanReference.set(convertToFootstepPlan(packet.getFootstepDataList()));
       plannerReceivedPlan.set(true);
+      plannerReceivedResult.set(true);
    }
 
    private static FootstepPlan convertToFootstepPlan(FootstepDataListMessage footstepDataListMessage)
@@ -502,14 +505,16 @@ public abstract class FootstepPlannerDataSetTest
       {
          if (DEBUG)
             PrintTools.info("Received a plan from the UI.");
-         actualPlan.set(uiFootstepPlanReference.get());
+         actualPlan.set(uiFootstepPlanReference.getAndSet(null));
+         uiReceivedPlan.set(false);
       }
 
-      if (uiReceivedResult.get() && uiPlanningResultReference.get() != null && actualResult.get() == null)
+      if (uiReceivedResult.get() && uiPlanningResultReference.get() != null )
       {
          if (DEBUG)
             PrintTools.info("Received a result " + uiPlanningResultReference.get() + " from the UI.");
-         actualResult.set(uiPlanningResultReference.get());
+         actualResult.set(uiPlanningResultReference.getAndSet(null));
+         uiReceivedResult.set(false);
       }
    }
 
@@ -519,14 +524,16 @@ public abstract class FootstepPlannerDataSetTest
       {
          if (DEBUG)
             PrintTools.info("Received a plan from the planner.");
-         expectedPlan.set(plannerPlanReference.get());
+         expectedPlan.set(plannerPlanReference.getAndSet(null));
+         plannerReceivedPlan.set(false);
       }
 
-      if (plannerReceivedPlan.get() && plannerResultReference.get() != null && expectedResult.get() == null)
+      if (plannerReceivedResult.get() && plannerResultReference.get() != null)
       {
          if (DEBUG)
             PrintTools.info("Received a result " + plannerResultReference.get() + " from the planner.");
-         expectedResult.set(plannerResultReference.get());
+         expectedResult.set(plannerResultReference.getAndSet(null));
+         plannerReceivedResult.set(false);
       }
    }
 
