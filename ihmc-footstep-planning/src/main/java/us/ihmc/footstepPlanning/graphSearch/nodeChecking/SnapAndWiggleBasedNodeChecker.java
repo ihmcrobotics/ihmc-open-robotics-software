@@ -63,6 +63,9 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode nodeToExpand, FootstepNode previousNode)
    {
+      if(planarRegionsList == null || planarRegionsList.isEmpty())
+         return true;
+
       FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(nodeToExpand);
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
 

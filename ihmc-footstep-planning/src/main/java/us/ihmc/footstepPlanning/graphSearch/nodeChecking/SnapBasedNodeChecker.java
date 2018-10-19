@@ -51,6 +51,9 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
+      if(planarRegions == null || planarRegions.isEmpty())
+         return true;
+
       if (previousNode != null && node.equals(previousNode))
       {
          throw new RuntimeException("Checking node assuming it is follwoing itself.");
