@@ -15,7 +15,7 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
    public controller_msgs.msg.dds.VisibilityClusterMessage home_region_cluster_;
    public controller_msgs.msg.dds.VisibilityMapMessage visibility_map_in_world_;
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage>  obstacle_clusters_;
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage>  all_clusters_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage>  non_obstacle_clusters_;
    public us.ihmc.euclid.geometry.Pose3D pose_in_world_;
 
    public NavigableRegionMessage()
@@ -24,7 +24,7 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
       home_region_cluster_ = new controller_msgs.msg.dds.VisibilityClusterMessage();
       visibility_map_in_world_ = new controller_msgs.msg.dds.VisibilityMapMessage();
       obstacle_clusters_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage> (100, new controller_msgs.msg.dds.VisibilityClusterMessagePubSubType());
-      all_clusters_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage> (100, new controller_msgs.msg.dds.VisibilityClusterMessagePubSubType());
+      non_obstacle_clusters_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage> (100, new controller_msgs.msg.dds.VisibilityClusterMessagePubSubType());
       pose_in_world_ = new us.ihmc.euclid.geometry.Pose3D();
 
    }
@@ -41,7 +41,7 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
       controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.staticCopy(other.home_region_cluster_, home_region_cluster_);
       controller_msgs.msg.dds.VisibilityMapMessagePubSubType.staticCopy(other.visibility_map_in_world_, visibility_map_in_world_);
       obstacle_clusters_.set(other.obstacle_clusters_);
-      all_clusters_.set(other.all_clusters_);
+      non_obstacle_clusters_.set(other.non_obstacle_clusters_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_in_world_, pose_in_world_);
    }
 
@@ -70,9 +70,9 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage>  getAllClusters()
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage>  getNonObstacleClusters()
    {
-      return all_clusters_;
+      return non_obstacle_clusters_;
    }
 
 
@@ -109,11 +109,11 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
          {  if (!this.obstacle_clusters_.get(i).epsilonEquals(other.obstacle_clusters_.get(i), epsilon)) return false; }
       }
 
-      if (this.all_clusters_.size() != other.all_clusters_.size()) { return false; }
+      if (this.non_obstacle_clusters_.size() != other.non_obstacle_clusters_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.all_clusters_.size(); i++)
-         {  if (!this.all_clusters_.get(i).epsilonEquals(other.all_clusters_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.non_obstacle_clusters_.size(); i++)
+         {  if (!this.non_obstacle_clusters_.get(i).epsilonEquals(other.non_obstacle_clusters_.get(i), epsilon)) return false; }
       }
 
       if (!this.pose_in_world_.epsilonEquals(other.pose_in_world_, epsilon)) return false;
@@ -134,7 +134,7 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
       if (!this.home_region_cluster_.equals(otherMyClass.home_region_cluster_)) return false;
       if (!this.visibility_map_in_world_.equals(otherMyClass.visibility_map_in_world_)) return false;
       if (!this.obstacle_clusters_.equals(otherMyClass.obstacle_clusters_)) return false;
-      if (!this.all_clusters_.equals(otherMyClass.all_clusters_)) return false;
+      if (!this.non_obstacle_clusters_.equals(otherMyClass.non_obstacle_clusters_)) return false;
       if (!this.pose_in_world_.equals(otherMyClass.pose_in_world_)) return false;
 
       return true;
@@ -154,8 +154,8 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
       builder.append(this.visibility_map_in_world_);      builder.append(", ");
       builder.append("obstacle_clusters=");
       builder.append(this.obstacle_clusters_);      builder.append(", ");
-      builder.append("all_clusters=");
-      builder.append(this.all_clusters_);      builder.append(", ");
+      builder.append("non_obstacle_clusters=");
+      builder.append(this.non_obstacle_clusters_);      builder.append(", ");
       builder.append("pose_in_world=");
       builder.append(this.pose_in_world_);
       builder.append("}");
