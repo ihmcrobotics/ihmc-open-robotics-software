@@ -12,17 +12,14 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMessage> implements Settable<FootstepPlannerStatusMessage>, EpsilonComparable<FootstepPlannerStatusMessage>
 {
-   public static final byte IDLE = (byte) 0;
-   public static final byte PLANNING_PATH = (byte) 1;
-   public static final byte PLANNING_STEP = (byte) 2;
+   public static final byte FOOTSTEP_PLANNER_STATUS_IDLE = (byte) 0;
+   public static final byte FOOTSTEP_PLANNER_STATUS_PLANNING_PATH = (byte) 1;
+   public static final byte FOOTSTEP_PLANNER_STATUS_PLANNING_STEPS = (byte) 2;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-   /**
-            * Status of planning.
-            */
-   public byte planning_status_ = (byte) 255;
+   public byte footstep_planner_status_ = (byte) 255;
 
    public FootstepPlannerStatusMessage()
    {
@@ -38,7 +35,7 @@ public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMe
    {
       sequence_id_ = other.sequence_id_;
 
-      planning_status_ = other.planning_status_;
+      footstep_planner_status_ = other.footstep_planner_status_;
 
    }
 
@@ -57,19 +54,13 @@ public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMe
       return sequence_id_;
    }
 
-   /**
-            * Status of planning.
-            */
-   public void setPlanningStatus(byte planning_status)
+   public void setFootstepPlannerStatus(byte footstep_planner_status)
    {
-      planning_status_ = planning_status;
+      footstep_planner_status_ = footstep_planner_status;
    }
-   /**
-            * Status of planning.
-            */
-   public byte getPlanningStatus()
+   public byte getFootstepPlannerStatus()
    {
-      return planning_status_;
+      return footstep_planner_status_;
    }
 
 
@@ -92,7 +83,7 @@ public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planning_status_, other.planning_status_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_planner_status_, other.footstep_planner_status_, epsilon)) return false;
 
 
       return true;
@@ -109,7 +100,7 @@ public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMe
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.planning_status_ != otherMyClass.planning_status_) return false;
+      if(this.footstep_planner_status_ != otherMyClass.footstep_planner_status_) return false;
 
 
       return true;
@@ -123,8 +114,8 @@ public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMe
       builder.append("FootstepPlannerStatusMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("planning_status=");
-      builder.append(this.planning_status_);
+      builder.append("footstep_planner_status=");
+      builder.append(this.footstep_planner_status_);
       builder.append("}");
       return builder.toString();
    }

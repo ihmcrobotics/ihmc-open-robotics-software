@@ -7,13 +7,13 @@ module controller_msgs
   {
     module dds
     {
-      const octet IDLE =
+      const octet FOOTSTEP_PLANNER_STATUS_IDLE =
       0;
 
-      const octet PLANNING_PATH =
+      const octet FOOTSTEP_PLANNER_STATUS_PLANNING_PATH =
       1;
 
-      const octet PLANNING_STEP =
+      const octet FOOTSTEP_PLANNER_STATUS_PLANNING_STEPS =
       2;
 
 
@@ -28,11 +28,8 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
-        /**
-         * Status of planning.
-         */
         @defaultValue(value=255)
-        octet planning_status;
+        octet footstep_planner_status;
       };
     };
   };
