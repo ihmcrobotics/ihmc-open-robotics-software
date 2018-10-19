@@ -151,9 +151,12 @@ public class ValkyrieRosControlLowLevelController
 
                if (statusMessage.getInitialHighLevelControllerName() == HighLevelControllerName.CALIBRATION.toByte())
                   writeTorqueOffsets();
-               
-               if (statusMessage.getEndHighLevelControllerName() == HighLevelControllerName.CALIBRATION.toByte())
-                  fingerController.goToInitialConfiguration();
+
+               if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
+               {
+                  if (statusMessage.getEndHighLevelControllerName() == HighLevelControllerName.CALIBRATION.toByte())
+                     fingerController.goToInitialConfiguration();
+               }
             }
          }
       };
