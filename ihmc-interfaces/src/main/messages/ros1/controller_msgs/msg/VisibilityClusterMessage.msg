@@ -1,4 +1,4 @@
-geometry_msgs/Transform transform_to_world
+geometry_msgs/Pose pose_in_world
 
 geometry_msgs/Point[] raw_points_in_local
 

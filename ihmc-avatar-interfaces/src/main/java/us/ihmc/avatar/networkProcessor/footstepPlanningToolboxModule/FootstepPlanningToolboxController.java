@@ -127,7 +127,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private FootstepPlannerStatusMessage packStatus(FootstepPlannerStatus status)
    {
       FootstepPlannerStatusMessage message = new FootstepPlannerStatusMessage();
-      message.setPlanningStatus(status.toByte());
+      message.setFootstepPlannerStatus(status.toByte());
 
       return message;
    }
@@ -293,7 +293,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
       result.setPlanId(planId.getIntegerValue());
-      result.setPathPlanningResult(status.toByte());
+      result.setFootstepPlanningResult(status.toByte());
       return result;
    }
 

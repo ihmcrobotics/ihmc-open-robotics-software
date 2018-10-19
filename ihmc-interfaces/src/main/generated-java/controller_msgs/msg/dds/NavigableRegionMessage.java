@@ -16,7 +16,7 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
    public controller_msgs.msg.dds.VisibilityMapMessage visibility_map_in_world_;
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage>  obstacle_clusters_;
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage>  all_clusters_;
-   public us.ihmc.euclid.transform.QuaternionBasedTransform transform_to_world_;
+   public us.ihmc.euclid.geometry.Pose3D pose_in_world_;
 
    public NavigableRegionMessage()
    {
@@ -25,7 +25,7 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
       visibility_map_in_world_ = new controller_msgs.msg.dds.VisibilityMapMessage();
       obstacle_clusters_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage> (100, new controller_msgs.msg.dds.VisibilityClusterMessagePubSubType());
       all_clusters_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage> (100, new controller_msgs.msg.dds.VisibilityClusterMessagePubSubType());
-      transform_to_world_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
+      pose_in_world_ = new us.ihmc.euclid.geometry.Pose3D();
 
    }
 
@@ -42,7 +42,7 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
       controller_msgs.msg.dds.VisibilityMapMessagePubSubType.staticCopy(other.visibility_map_in_world_, visibility_map_in_world_);
       obstacle_clusters_.set(other.obstacle_clusters_);
       all_clusters_.set(other.all_clusters_);
-      geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_in_world_, pose_in_world_);
    }
 
 
@@ -76,9 +76,9 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
    }
 
 
-   public us.ihmc.euclid.transform.QuaternionBasedTransform getTransformToWorld()
+   public us.ihmc.euclid.geometry.Pose3D getPoseInWorld()
    {
-      return transform_to_world_;
+      return pose_in_world_;
    }
 
 
@@ -116,7 +116,7 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
          {  if (!this.all_clusters_.get(i).epsilonEquals(other.all_clusters_.get(i), epsilon)) return false; }
       }
 
-      if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
+      if (!this.pose_in_world_.epsilonEquals(other.pose_in_world_, epsilon)) return false;
 
       return true;
    }
@@ -135,7 +135,7 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
       if (!this.visibility_map_in_world_.equals(otherMyClass.visibility_map_in_world_)) return false;
       if (!this.obstacle_clusters_.equals(otherMyClass.obstacle_clusters_)) return false;
       if (!this.all_clusters_.equals(otherMyClass.all_clusters_)) return false;
-      if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
+      if (!this.pose_in_world_.equals(otherMyClass.pose_in_world_)) return false;
 
       return true;
    }
@@ -156,8 +156,8 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
       builder.append(this.obstacle_clusters_);      builder.append(", ");
       builder.append("all_clusters=");
       builder.append(this.all_clusters_);      builder.append(", ");
-      builder.append("transform_to_world=");
-      builder.append(this.transform_to_world_);
+      builder.append("pose_in_world=");
+      builder.append(this.pose_in_world_);
       builder.append("}");
       return builder.toString();
    }
