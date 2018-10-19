@@ -10,7 +10,13 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
 {
    public long sequence_id_;
    public long end_effector_name_based_hash_code_;
+   /**
+            * This is the list of desired times for each key frames.
+            */
    public us.ihmc.idl.IDLSequence.Double  key_frame_times_;
+   /**
+            * This is the list of desired key frames for end effector.
+            */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  key_frame_poses_;
    /**
             * The selection frames coming along with the given selection matrix are used to determine to
@@ -40,9 +46,26 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
             * Weight matrix used to define the priority of controlling the translation around each axis on the solver side.
             */
    public controller_msgs.msg.dds.WeightMatrix3DMessage linear_weight_matrix_;
+   /**
+            * This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
+            * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
+            * The control frame is rigidly attached to the end-effector.
+            */
    public us.ihmc.euclid.tuple3D.Point3D control_frame_position_in_end_effector_;
+   /**
+            * This is the orientation of the control frame expressed in endEffector.getBodyFixedFrame().
+            * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
+            */
    public us.ihmc.euclid.tuple4D.Quaternion control_frame_orientation_in_end_effector_;
+   /**
+            * This is the list of allowable displacement for position when the trajectory is modified.
+            * The unit is meter and will be applied samely on x-y-z.
+            */
    public us.ihmc.idl.IDLSequence.Double  allowable_position_displacement_;
+   /**
+            * This is the list of allowable displacement for orientation when the trajectory is modified.
+            * The unit is radian.
+            */
    public us.ihmc.idl.IDLSequence.Double  allowable_orientation_displacement_;
 
    public KinematicsPlanningToolboxRigidBodyMessage()
@@ -106,12 +129,18 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
    }
 
 
+   /**
+            * This is the list of desired times for each key frames.
+            */
    public us.ihmc.idl.IDLSequence.Double  getKeyFrameTimes()
    {
       return key_frame_times_;
    }
 
 
+   /**
+            * This is the list of desired key frames for end effector.
+            */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getKeyFramePoses()
    {
       return key_frame_poses_;
@@ -166,24 +195,41 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
    }
 
 
+   /**
+            * This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
+            * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
+            * The control frame is rigidly attached to the end-effector.
+            */
    public us.ihmc.euclid.tuple3D.Point3D getControlFramePositionInEndEffector()
    {
       return control_frame_position_in_end_effector_;
    }
 
 
+   /**
+            * This is the orientation of the control frame expressed in endEffector.getBodyFixedFrame().
+            * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
+            */
    public us.ihmc.euclid.tuple4D.Quaternion getControlFrameOrientationInEndEffector()
    {
       return control_frame_orientation_in_end_effector_;
    }
 
 
+   /**
+            * This is the list of allowable displacement for position when the trajectory is modified.
+            * The unit is meter and will be applied samely on x-y-z.
+            */
    public us.ihmc.idl.IDLSequence.Double  getAllowablePositionDisplacement()
    {
       return allowable_position_displacement_;
    }
 
 
+   /**
+            * This is the list of allowable displacement for orientation when the trajectory is modified.
+            * The unit is radian.
+            */
    public us.ihmc.idl.IDLSequence.Double  getAllowableOrientationDisplacement()
    {
       return allowable_orientation_displacement_;
