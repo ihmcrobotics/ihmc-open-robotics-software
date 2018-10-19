@@ -8,6 +8,6 @@ controller_msgs/VisibilityClusterMessage[] obstacle_clusters
 
 controller_msgs/VisibilityClusterMessage[] all_clusters
 
-geometry_msgs/Transform transform_to_world
+geometry_msgs/Pose pose_in_world
 
 
