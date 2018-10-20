@@ -367,7 +367,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       }
    }
 
-   public Point3D[][] getNavigableRegions()
+   public Point3DReadOnly[][] getNavigableRegions()
    {
       return navigableRegionsManager.getNavigableExtrusions();
    }
