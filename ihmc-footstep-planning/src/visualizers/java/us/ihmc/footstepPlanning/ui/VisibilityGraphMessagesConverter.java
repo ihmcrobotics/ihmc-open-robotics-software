@@ -5,17 +5,16 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class VisibilityGraphMessagesConverter
 {
@@ -68,21 +67,11 @@ public class VisibilityGraphMessagesConverter
       message.getHomeRegion().set(PlanarRegionMessageConverter.convertToPlanarRegionMessage(navigableRegion.getHomeRegion()));
       message.getHomeRegionCluster().set(convertToVisibilityClusterMessage(navigableRegion.getHomeRegionCluster()));
       message.getVisibilityMapInWorld().set(convertToVisibilityMapMessage(navigableRegion.getMapId(), navigableRegion.getVisibilityMapInWorld()));
-      message.getPoseInWorld().set(navigableRegion.getTransformToWorld());
 
       List<Cluster> obstacleClusters = navigableRegion.getObstacleClusters();
-      List<Cluster> allClusters = navigableRegion.getAllClusters();
 
       for (int i = 0; i < obstacleClusters.size(); i++)
          message.getObstacleClusters().add().set(convertToVisibilityClusterMessage(obstacleClusters.get(i)));
-      for (int i = 0; i < allClusters.size(); i++)
-      {
-         Cluster otherCluster = allClusters.get(i);
-         if (obstacleClusters.contains(otherCluster))
-            continue;
-         else
-            message.getNonObstacleClusters().add().set(convertToVisibilityClusterMessage(otherCluster));
-      }
 
       return message;
    }
@@ -91,9 +80,9 @@ public class VisibilityGraphMessagesConverter
    {
       VisibilityClusterMessage message = new VisibilityClusterMessage();
 
-      List<Point3D> rawPointsInLocal = cluster.getRawPointsInLocal3D();
-      List<Point2D> navigableExtrusionsInLocal = cluster.getNavigableExtrusionsInLocal2D();
-      List<Point2D> nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal2D();
+      List<? extends Point3DReadOnly> rawPointsInLocal = cluster.getRawPointsInLocal3D();
+      List<Point2DReadOnly> navigableExtrusionsInLocal = cluster.getNavigableExtrusionsInLocal();
+      List<Point2DReadOnly> nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
 
       message.setExtrusionSide(cluster.getExtrusionSide().toByte());
       message.setType(cluster.getType().toByte());
@@ -102,7 +91,7 @@ public class VisibilityGraphMessagesConverter
          message.getRawPointsInLocal().add().set(rawPointsInLocal.get(i));
       for (int i = 0; i < navigableExtrusionsInLocal.size(); i++)
          message.getNavigableExtrusionsInLocal().add().set(navigableExtrusionsInLocal.get(i));
-      for (int i = 0; i < rawPointsInLocal.size(); i++)
+      for (int i = 0; i < nonNavigableExtrusionsInLocal.size(); i++)
          message.getNonNavigableExtrusionsInLocal().add().set(nonNavigableExtrusionsInLocal.get(i));
 
       return message;
@@ -194,8 +183,10 @@ public class VisibilityGraphMessagesConverter
 
       cluster.setTransformToWorld(transform);
       cluster.addRawPointsInLocal3D(rawPointsInLocal);
-      cluster.addNavigableExtrusionsInLocal3D(navigableExtrusionsInLocal);
-      cluster.addNonNavigableExtrusionsInLocal3D(nonNavigableExtrusionsInLocal);
+      for (int i = 0; i < navigableExtrusionsInLocal.size(); i++)
+         cluster.addNavigableExtrusionInLocal(navigableExtrusionsInLocal.get(i));
+      for (int i = 0; i < nonNavigableExtrusionsInLocal.size(); i++)
+         cluster.addNonNavigableExtrusionInLocal(nonNavigableExtrusionsInLocal.get(i));
 
       return cluster;
    }

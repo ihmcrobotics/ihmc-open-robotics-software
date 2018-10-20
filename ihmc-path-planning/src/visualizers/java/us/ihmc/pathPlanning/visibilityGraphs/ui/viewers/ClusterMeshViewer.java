@@ -15,14 +15,13 @@ import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 
 public class ClusterMeshViewer extends AnimationTimer
 {
@@ -151,12 +150,12 @@ public class ClusterMeshViewer extends AnimationTimer
          List<Cluster> clusters = navigableRegionLocalPlanner.getAllClusters();
          for (Cluster cluster : clusters)
          {
-            for (Point3D rawPoint : cluster.getRawPointsInWorld3D())
+            for (Point3DReadOnly rawPoint : cluster.getRawPointsInWorld())
                rawPointsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_RAWPOINT_SIZE, rawPoint);
             navigableExtrusionsMeshBuilder
-                  .addMultiLine(cluster.getNavigableExtrusionsInWorld3D(), VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS, false);
+                  .addMultiLine(cluster.getNavigableExtrusionsInWorld(), VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS, false);
             nonNavigableExtrusionsMeshBuilder
-                  .addMultiLine(cluster.getNonNavigableExtrusionsInWorld3D(), VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, false);
+                  .addMultiLine(cluster.getNonNavigableExtrusionsInWorld(), VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, false);
          }
 
          materials.put(regionId, new PhongMaterial(getLineColor(regionId)));
