@@ -10,33 +10,44 @@ import us.ihmc.euclid.transform.interfaces.Transform;
 
 public class VisibilityMap implements Transformable, Iterable<Connection>
 {
-   private Set<Connection> connections;
-   private Set<ConnectionPoint3D> vertices;
+   private final Set<Connection> connections;
+   private final Set<ConnectionPoint3D> vertices;
 
    public VisibilityMap()
    {
       connections = new HashSet<>();
+      vertices = new HashSet<>();
    }
 
    public VisibilityMap(Set<Connection> connections)
    {
-      this.connections = connections;
+      this();
+      setConnections(connections);
+      computeVertices();
    }
 
    public VisibilityMap(VisibilityMap other)
    {
-      this.connections = new HashSet<>(other.connections);
+      this();
+      set(other);
+   }
+
+   public void set(VisibilityMap other)
+   {
+      setConnections(other.connections);
       computeVertices();
    }
 
    public void setConnections(Collection<Connection> connections)
    {
-      this.connections = new HashSet<>(connections);
+      this.connections.clear();
+      this.connections.addAll(connections);
    }
 
    public void setConnections(Set<Connection> connections)
    {
-      this.connections = connections;
+      this.connections.clear();
+      this.connections.addAll(connections);
    }
 
    public void addConnection(Connection connection)
@@ -51,7 +62,7 @@ public class VisibilityMap implements Transformable, Iterable<Connection>
 
    public void computeVertices()
    {
-      vertices = new HashSet<>();
+      vertices.clear();
       for (Connection connection : connections)
       {
          vertices.add(connection.getSourcePoint());
