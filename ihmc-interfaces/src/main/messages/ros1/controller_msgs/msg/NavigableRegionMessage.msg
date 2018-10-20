@@ -6,8 +6,4 @@ controller_msgs/VisibilityMapMessage visibility_map_in_world
 
 controller_msgs/VisibilityClusterMessage[] obstacle_clusters
 
-controller_msgs/VisibilityClusterMessage[] non_obstacle_clusters
-
-geometry_msgs/Pose pose_in_world
-
 

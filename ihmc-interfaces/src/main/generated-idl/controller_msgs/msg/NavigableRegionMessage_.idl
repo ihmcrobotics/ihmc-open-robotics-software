@@ -4,7 +4,6 @@
 #include "controller_msgs/msg/./PlanarRegionMessage_.idl"
 #include "controller_msgs/msg/./VisibilityClusterMessage_.idl"
 #include "controller_msgs/msg/./VisibilityMapMessage_.idl"
-#include "geometry_msgs/msg/./Pose_.idl"
 module controller_msgs
 {
   module msg
@@ -22,8 +21,6 @@ module controller_msgs
         controller_msgs::msg::dds::VisibilityClusterMessage home_region_cluster;
         controller_msgs::msg::dds::VisibilityMapMessage visibility_map_in_world;
         sequence<controller_msgs::msg::dds::VisibilityClusterMessage> obstacle_clusters;
-        sequence<controller_msgs::msg::dds::VisibilityClusterMessage> non_obstacle_clusters;
-        geometry_msgs::msg::dds::Pose pose_in_world;
       };
     };
   };
