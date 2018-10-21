@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning;
 
+import controller_msgs.msg.dds.BodyPathPlanStatisticsMessage;
+import controller_msgs.msg.dds.NavigableRegionMessage;
 import controller_msgs.msg.dds.VisibilityClusterMessage;
 import controller_msgs.msg.dds.VisibilityMapMessage;
 import org.junit.Test;
@@ -11,10 +13,13 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.ui.VisibilityGraphMessagesConverter;
+import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 
 import java.util.ArrayList;
@@ -22,6 +27,8 @@ import java.util.List;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
+import static us.ihmc.footstepPlanning.VisibilityGraphTestTools.assertConnectionPointsEqual;
+import static us.ihmc.footstepPlanning.VisibilityGraphTestTools.assertConnectionsEqual;
 
 public class VisibilityGraphMessagesConverterTest
 {
@@ -118,7 +125,7 @@ public class VisibilityGraphMessagesConverterTest
                   .assertPoint2DGeometricallyEquals(nonNavigableExtrusionsInLocalExpected.get(i), convertedCluster.getNonNavigableExtrusionInLocal(i), epsilon);
          }
 
-         assertClustersEqual(clusterToConvert, convertedCluster, epsilon);
+         VisibilityGraphTestTools.assertClustersEqual(clusterToConvert, convertedCluster, epsilon);
       }
    }
 
@@ -128,172 +135,76 @@ public class VisibilityGraphMessagesConverterTest
       Random random = new Random(1738L);
       for (int iter = 0; iter < iters; iter++)
       {
-         VisibilityMapHolder mapToConvert = new InterRegionVisibilityMap();
-
-         int numberOfConnections = RandomNumbers.nextInt(random, 2, 10000);
-
-         for (int i = 0; i < numberOfConnections; i++)
-            ((InterRegionVisibilityMap) mapToConvert).addConnection(getRandomConnection(random));
+         VisibilityMapHolder mapToConvert = VisibilityGraphRandomTools.getRandomInterRegionVisibilityMap(random);
 
          VisibilityMapMessage visibilityMapMessage = VisibilityGraphMessagesConverter.convertToVisibilityMapMessage(mapToConvert);
          VisibilityMapHolder convertedMap = VisibilityGraphMessagesConverter.convertToInterRegionsVisibilityMap(visibilityMapMessage);
 
-         assertVisibilityMapHoldersEqual(mapToConvert, convertedMap, epsilon);
+         VisibilityGraphTestTools.assertVisibilityMapHoldersEqual(mapToConvert, convertedMap, epsilon);
       }
    }
 
-   private static VisibilityMap getRandomVisibilityMap(Random random)
+   @Test(timeout = 30000)
+   public void testConvertSingleSourceVisibilityMap()
    {
-      VisibilityMap visibilityMap = new VisibilityMap();
-      int numberOfConnections = RandomNumbers.nextInt(random, 2, 10000);
-
-      for (int i = 0; i < numberOfConnections; i++)
-         visibilityMap.addConnection(getRandomConnection(random));
-
-      visibilityMap.computeVertices();
-
-      return visibilityMap;
-   }
-
-   private static Connection getRandomConnection(Random random)
-   {
-      int startId = RandomNumbers.nextInt(random, 0, 1000);
-      int targetId = RandomNumbers.nextInt(random, 0, 1000);
-      Point3DReadOnly startPoint = EuclidCoreRandomTools.nextPoint3D(random, 100);
-      Point3DReadOnly targetPoint = EuclidCoreRandomTools.nextPoint3D(random, 100);
-
-      return new Connection(startPoint, startId, targetPoint, targetId);
-   }
-
-   private static void assertVisibilityMapHoldersEqual(VisibilityMapHolder holderExpected, VisibilityMapHolder holderActual, double epsilon)
-   {
-      assertEquals(holderExpected.getMapId(), holderActual.getMapId());
-      assertVisibilityMapsEqual(holderExpected.getVisibilityMapInWorld(), holderActual.getVisibilityMapInWorld(), epsilon);
-      assertVisibilityMapsEqual(holderExpected.getVisibilityMapInLocal(), holderActual.getVisibilityMapInLocal(), epsilon);
-
-      for (Connection connection : holderExpected.getVisibilityMapInWorld().getConnections())
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < iters; iter++)
       {
-         assertEquals(holderExpected.getConnectionWeight(connection), holderActual.getConnectionWeight(connection), epsilon);
-      }
+         int numberOfConnections = RandomNumbers.nextInt(random, 2, 10000);
 
-      for (Connection connection : holderExpected.getVisibilityMapInLocal().getConnections())
-      {
-         assertEquals(holderExpected.getConnectionWeight(connection), holderActual.getConnectionWeight(connection), epsilon);
+         List<Connection> connections = new ArrayList<>();
+         for (int i = 0; i < numberOfConnections; i++)
+            connections.add(VisibilityGraphRandomTools.getRandomConnection(random));
+
+         VisibilityMapHolder mapToConvert = new SingleSourceVisibilityMap(EuclidCoreRandomTools.nextPoint3D(random, 100.0),
+                                                                          RandomNumbers.nextInt(random, -100, 100), connections);
+
+         VisibilityMapMessage visibilityMapMessage = VisibilityGraphMessagesConverter.convertToVisibilityMapMessage(mapToConvert);
+         VisibilityMapHolder convertedMap = VisibilityGraphMessagesConverter.convertToSingleSourceVisibilityMap(visibilityMapMessage);
+
+         VisibilityGraphTestTools.assertSingleSourceVisibilityMapHoldersEqual(mapToConvert, convertedMap, epsilon);
       }
    }
 
-   private static void assertVisibilityMapsEqual(VisibilityMap mapExpected, VisibilityMap mapActual, double epsilon)
+   @Test(timeout = 30000)
+   public void testConvertNavigableRegion()
    {
-      assertEquals(mapExpected.getConnections().size(), mapActual.getConnections().size());
-      assertEquals(mapExpected.getVertices().size(), mapActual.getVertices().size());
-
-      Connection[] expectedConnections = mapExpected.getConnections().toArray(new Connection[]{});
-      Connection[] actualConnections = mapActual.getConnections().toArray(new Connection[]{});
-      ConnectionPoint3D[] expectedVertices = mapExpected.getVertices().toArray(new ConnectionPoint3D[]{});
-      ConnectionPoint3D[] actualVertices = mapActual.getVertices().toArray(new ConnectionPoint3D[]{});
-      for (int i = 0; i < mapExpected.getConnections().size(); i++)
-         assertConnectionsEqual(expectedConnections[i], actualConnections[i], epsilon);
-      for (int i = 0; i < mapExpected.getVertices().size(); i++)
-         assertConnectionPointsEqual(expectedVertices[i], actualVertices[i], epsilon);
-   }
-
-   private static void assertConnectionsEqual(Connection connectionExpected, Connection connectionActual, double epsilon)
-   {
-      assertConnectionPointsEqual(connectionExpected.getSourcePoint(), connectionActual.getSourcePoint(), epsilon);
-      assertConnectionPointsEqual(connectionExpected.getTargetPoint(), connectionActual.getTargetPoint(), epsilon);
-   }
-
-   private static void assertConnectionPointsEqual(ConnectionPoint3D pointExpected, ConnectionPoint3D pointActual, double epsilon)
-   {
-      assertEquals(pointExpected.getRegionId(), pointActual.getRegionId());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(pointExpected, pointActual, epsilon);
-   }
-
-   private static void assertClustersEqual(Cluster clusterExpected, Cluster clusterActual, double epsilon)
-   {
-      assertEquals(clusterExpected.getExtrusionSide(), clusterActual.getExtrusionSide());
-      assertEquals(clusterExpected.getType(), clusterActual.getType());
-
-      RigidBodyTransform transformExpected = clusterExpected.getTransformToWorld();
-      ReferenceFrame localFrame = new ReferenceFrame("localFrame", worldFrame)
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < iters; iter++)
       {
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            transformToParent.set(transformExpected);
-         }
-      };
-      localFrame.update();
-      EuclidCoreTestTools.assertRigidBodyTransformGeometricallyEquals(transformExpected, clusterActual.getTransformToWorld(), epsilon);
+         NavigableRegion navigableRegionToConvert = VisibilityGraphRandomTools.getRandomNavigableRegion(random);
+         NavigableRegionMessage message = VisibilityGraphMessagesConverter.convertToNavigableRegionMessage(navigableRegionToConvert);
+         NavigableRegion convertedNavigableRegion = VisibilityGraphMessagesConverter.convertToNavigableRegion(message);
 
-      int numberOfRawPoints = clusterExpected.getRawPointsInLocal2D().size();
-      assertEquals(numberOfRawPoints, clusterActual.getNumberOfRawPoints());
-      assertEquals(numberOfRawPoints, clusterExpected.getNumberOfRawPoints());
-      assertEquals(numberOfRawPoints, clusterExpected.getRawPointsInLocal2D().size());
-      assertEquals(numberOfRawPoints, clusterExpected.getRawPointsInWorld().size());
-      assertEquals(numberOfRawPoints, clusterExpected.getRawPointsInLocal3D().size());
-      assertEquals(numberOfRawPoints, clusterActual.getRawPointsInLocal2D().size());
-      assertEquals(numberOfRawPoints, clusterActual.getRawPointsInWorld().size());
-      assertEquals(numberOfRawPoints, clusterActual.getRawPointsInLocal3D().size());
-
-      for (int i = 0; i < numberOfRawPoints; i++)
-      {
-         EuclidCoreTestTools
-               .assertPoint3DGeometricallyEquals("Point " + i + " failed.", clusterExpected.getRawPointInLocal(i), clusterActual.getRawPointInLocal(i),
-                                                 epsilon);
-         EuclidCoreTestTools
-               .assertPoint3DGeometricallyEquals("Point " + i + " failed.", clusterExpected.getRawPointInWorld(i), clusterActual.getRawPointInWorld(i),
-                                                 epsilon);
-
-         FramePoint3D point = new FramePoint3D(localFrame, clusterExpected.getRawPointInLocal(i));
-         point.changeFrame(worldFrame);
-
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Point " + i + " failed.", point, clusterExpected.getRawPointInWorld(i), epsilon);
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Point " + i + " failed.", point, clusterActual.getRawPointInWorld(i), epsilon);
-      }
-
-      int numberOfNavigableExtrusions = clusterExpected.getNumberOfNavigableExtrusions();
-      assertEquals(numberOfNavigableExtrusions, clusterActual.getNumberOfNavigableExtrusions());
-      assertEquals(numberOfNavigableExtrusions, clusterExpected.getNavigableExtrusionsInLocal().size());
-      assertEquals(numberOfNavigableExtrusions, clusterExpected.getNavigableExtrusionsInWorld().size());
-      assertEquals(numberOfNavigableExtrusions, clusterActual.getNavigableExtrusionsInLocal().size());
-      assertEquals(numberOfNavigableExtrusions, clusterActual.getNavigableExtrusionsInWorld().size());
-
-      for (int i = 0; i < numberOfNavigableExtrusions; i++)
-      {
-         EuclidCoreTestTools
-               .assertPoint2DGeometricallyEquals(clusterExpected.getNavigableExtrusionInLocal(i), clusterActual.getNavigableExtrusionInLocal(i), epsilon);
-         EuclidCoreTestTools
-               .assertPoint3DGeometricallyEquals(clusterExpected.getNavigableExtrusionInWorld(i), clusterActual.getNavigableExtrusionInWorld(i), epsilon);
-
-         FramePoint3D framePoint = new FramePoint3D(localFrame, clusterExpected.getNavigableExtrusionInLocal(i));
-         framePoint.changeFrame(worldFrame);
-
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(framePoint, clusterExpected.getNavigableExtrusionInWorld(i), epsilon);
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(framePoint, clusterActual.getNavigableExtrusionInWorld(i), epsilon);
-      }
-
-      int numberOfNonNavigableExtrusions = clusterExpected.getNumberOfNonNavigableExtrusions();
-      assertEquals(numberOfNonNavigableExtrusions, clusterActual.getNumberOfNonNavigableExtrusions());
-      assertEquals(numberOfNonNavigableExtrusions, clusterExpected.getNonNavigableExtrusionsInWorld().size());
-      assertEquals(numberOfNonNavigableExtrusions, clusterExpected.getNonNavigableExtrusionsInLocal().size());
-      assertEquals(numberOfNonNavigableExtrusions, clusterActual.getNonNavigableExtrusionsInWorld().size());
-      assertEquals(numberOfNonNavigableExtrusions, clusterActual.getNonNavigableExtrusionsInLocal().size());
-
-      for (int i = 0; i < numberOfNonNavigableExtrusions; i++)
-      {
-         EuclidCoreTestTools
-               .assertPoint2DGeometricallyEquals(clusterExpected.getNonNavigableExtrusionInLocal(i), clusterActual.getNonNavigableExtrusionInLocal(i), epsilon);
-         EuclidCoreTestTools
-               .assertPoint3DGeometricallyEquals(clusterExpected.getNonNavigableExtrusionInWorld(i), clusterActual.getNonNavigableExtrusionInWorld(i), epsilon);
-
-         FramePoint3D framePoint = new FramePoint3D(localFrame, clusterExpected.getNonNavigableExtrusionInLocal(i));
-         framePoint.changeFrame(worldFrame);
-
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(framePoint, clusterExpected.getNonNavigableExtrusionInWorld(i), epsilon);
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(framePoint, clusterActual.getNonNavigableExtrusionInWorld(i), epsilon);
-
+         VisibilityGraphTestTools.assertNavigableRegionsEqual(navigableRegionToConvert, convertedNavigableRegion, epsilon);
       }
    }
 
+   @Test(timeout = 30000)
+   public void testConvertBodyPathPlanStatistics()
+   {
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < iters; iter++)
+      {
+         VisibilityMapHolder startMap = VisibilityGraphRandomTools.getRandomSingleSourceVisibilityMap(random);
+         VisibilityMapHolder goalMap = VisibilityGraphRandomTools.getRandomSingleSourceVisibilityMap(random);
+         VisibilityMapHolder interRegionsMap = VisibilityGraphRandomTools.getRandomInterRegionVisibilityMap(random);
+
+         List<NavigableRegion> navigableRegions = new ArrayList<>();
+         int planId = RandomNumbers.nextInt(random, 0, 1000);
+         int numberOfNavigableRegions = RandomNumbers.nextInt(random, 2, 10);
+         for (int i = 0; i < numberOfNavigableRegions; i++)
+            navigableRegions.add(VisibilityGraphRandomTools.getRandomNavigableRegion(random));
+
+         VisibilityGraphStatistics statisticsToConvert = new VisibilityGraphStatistics();
+         statisticsToConvert.setGoalVisibilityMapInWorld(goalMap.getMapId(), goalMap.getVisibilityMapInWorld());
+         statisticsToConvert.setStartVisibilityMapInWorld(startMap.getMapId(), startMap.getVisibilityMapInWorld());
+         statisticsToConvert.setInterRegionsVisibilityMapInWorld(interRegionsMap.getMapId(), interRegionsMap.getVisibilityMapInWorld());
+         statisticsToConvert.setNavigableRegions(navigableRegions);
+
+         BodyPathPlanStatisticsMessage message = VisibilityGraphMessagesConverter.convertToBodyPathPlanStatisticsMessage(planId, statisticsToConvert);
+         VisibilityGraphStatistics convertedStatistics = VisibilityGraphMessagesConverter.convertToVisibilityGraphStatistics(message);
+         VisibilityGraphTestTools.assertVisibilityGraphStatisticsEqual(statisticsToConvert, convertedStatistics, epsilon);
+      }
+   }
 }

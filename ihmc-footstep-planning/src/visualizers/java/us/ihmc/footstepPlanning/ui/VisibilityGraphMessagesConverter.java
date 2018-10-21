@@ -38,6 +38,7 @@ public class VisibilityGraphMessagesConverter
       return message;
    }
 
+
    public static VisibilityMapMessage convertToVisibilityMapMessage(VisibilityMapHolder visibilityMapHolder)
    {
       return convertToVisibilityMapMessage(visibilityMapHolder.getMapId(), visibilityMapHolder.getVisibilityMapInWorld());
@@ -105,6 +106,7 @@ public class VisibilityGraphMessagesConverter
          visibilityMapHolder.addConnection(
                new Connection(message.getSourcePoints().get(i), (int) message.getSourceRegionIds().get(i), message.getTargetPoints().get(i),
                               (int) message.getTargetRegionIds().get(i)));
+      visibilityMapHolder.getVisibilityMapInWorld().computeVertices();
 
       return visibilityMapHolder;
    }
@@ -117,6 +119,7 @@ public class VisibilityGraphMessagesConverter
          visibilityMap.addConnection(
                new Connection(message.getSourcePoints().get(i), (int) message.getSourceRegionIds().get(i), message.getTargetPoints().get(i),
                               (int) message.getTargetRegionIds().get(i)));
+      visibilityMap.computeVertices();
       VisibilityMapHolder mapHolder = new VisibilityMapHolder()
       {
          @Override
@@ -128,7 +131,7 @@ public class VisibilityGraphMessagesConverter
          @Override
          public VisibilityMap getVisibilityMapInLocal()
          {
-            return visibilityMap;
+            throw new RuntimeException("This is not able to be returned as we have no knowledge of the local region.");
          }
 
          @Override
@@ -190,4 +193,24 @@ public class VisibilityGraphMessagesConverter
 
       return cluster;
    }
+
+   public static VisibilityGraphStatistics convertToVisibilityGraphStatistics(BodyPathPlanStatisticsMessage message)
+   {
+      VisibilityGraphStatistics statistics = new VisibilityGraphStatistics();
+
+      VisibilityMapHolder startMap = convertToSingleSourceVisibilityMap(message.getStartVisibilityMap());
+      VisibilityMapHolder goalMap = convertToSingleSourceVisibilityMap(message.getGoalVisibilityMap());
+      VisibilityMapHolder interRegionsMap = convertToInterRegionsVisibilityMap(message.getInterRegionsMap());
+
+      statistics.setStartVisibilityMapInWorld(startMap.getMapId(), startMap.getVisibilityMapInWorld());
+      statistics.setGoalVisibilityMapInWorld(goalMap.getMapId(), goalMap.getVisibilityMapInWorld());
+      statistics.setInterRegionsVisibilityMapInWorld(interRegionsMap.getMapId(), interRegionsMap.getVisibilityMapInWorld());
+      List<NavigableRegionMessage> navigableRegions = message.getNavigableRegions();
+      for (int i = 0; i < navigableRegions.size(); i++)
+         statistics.addNavigableRegion(convertToNavigableRegion(navigableRegions.get(i)));
+
+      return statistics;
+   }
+
+
 }

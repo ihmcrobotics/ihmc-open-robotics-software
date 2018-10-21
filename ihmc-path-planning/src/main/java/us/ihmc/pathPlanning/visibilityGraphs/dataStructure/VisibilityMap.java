@@ -16,7 +16,7 @@ public class VisibilityMap implements Transformable, Iterable<Connection>
       vertices = new HashSet<>();
    }
 
-   public VisibilityMap(Set<Connection> connections)
+   public VisibilityMap(Collection<Connection> connections)
    {
       this();
       setConnections(connections);
