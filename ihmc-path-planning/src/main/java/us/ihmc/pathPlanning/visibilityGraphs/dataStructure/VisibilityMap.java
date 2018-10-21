@@ -1,25 +1,22 @@
 package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
 
 public class VisibilityMap implements Transformable, Iterable<Connection>
 {
-   private final Set<Connection> connections;
-   private final Set<ConnectionPoint3D> vertices;
+   private final List<Connection> connections;
+   private final List<ConnectionPoint3D> vertices;
 
    public VisibilityMap()
    {
-      connections = new HashSet<>();
-      vertices = new HashSet<>();
+      connections = new ArrayList<>();
+      vertices = new ArrayList<>();
    }
 
-   public VisibilityMap(Set<Connection> connections)
+   public VisibilityMap(Collection<Connection> connections)
    {
       this();
       setConnections(connections);
@@ -70,12 +67,12 @@ public class VisibilityMap implements Transformable, Iterable<Connection>
       }
    }
 
-   public Set<ConnectionPoint3D> getVertices()
+   public List<ConnectionPoint3D> getVertices()
    {
       return vertices;
    }
 
-   public Set<Connection> getConnections()
+   public List<Connection> getConnections()
    {
       return connections;
    }
