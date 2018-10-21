@@ -18,12 +18,12 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTestTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class PlanarRegionMessageConverterTest
@@ -45,7 +45,7 @@ public class PlanarRegionMessageConverterTest
 
          PlanarRegion actual = PlanarRegionMessageConverter.convertToPlanarRegion(message);
 
-         assertPlanarRegionEquals(expected, actual);
+         PlanarRegionTestTools.assertPlanarRegionsEqual(expected, actual, EPSILON);
       }
    }
 
@@ -69,7 +69,7 @@ public class PlanarRegionMessageConverterTest
             PlanarRegion expectedPlanarRegion = expected.getPlanarRegion(j);
             PlanarRegion actualPlanarRegion = actual.getPlanarRegion(j);
 
-            assertPlanarRegionEquals(expectedPlanarRegion, actualPlanarRegion);
+            PlanarRegionTestTools.assertPlanarRegionsEqual(expectedPlanarRegion, actualPlanarRegion, EPSILON);
          }
       }
 
@@ -91,36 +91,11 @@ public class PlanarRegionMessageConverterTest
             PlanarRegion expectedPlanarRegion = expected.getPlanarRegion(j);
             PlanarRegion actualPlanarRegion = actual.getPlanarRegion(j);
 
-            assertPlanarRegionEquals(expectedPlanarRegion, actualPlanarRegion);
+            PlanarRegionTestTools.assertPlanarRegionsEqual(expectedPlanarRegion, actualPlanarRegion, EPSILON);
          }
       }
    }
 
-   private void assertPlanarRegionEquals(PlanarRegion expected, PlanarRegion actual)
-   {
-      RigidBodyTransform expectedTransform = new RigidBodyTransform();
-      RigidBodyTransform actualTransform = new RigidBodyTransform();
-      expected.getTransformToWorld(expectedTransform);
-      actual.getTransformToWorld(actualTransform);
-      EuclidCoreTestTools.assertRigidBodyTransformGeometricallyEquals(expectedTransform, actualTransform, EPSILON);
-
-      assertEquals(expected.getConcaveHullSize(), actual.getConcaveHullSize());
-
-      for (int i = 0; i < expected.getConcaveHullSize(); i++)
-      {
-         EuclidCoreTestTools.assertTuple2DEquals(expected.getConcaveHullVertex(i), actual.getConcaveHullVertex(i), EPSILON);
-      }
-
-      assertEquals(expected.getNumberOfConvexPolygons(), actual.getNumberOfConvexPolygons());
-
-      for (int i = 0; i < expected.getNumberOfConvexPolygons(); i++)
-      {
-         ConvexPolygon2D expectedConvexPolygon = expected.getConvexPolygon(i);
-         ConvexPolygon2D actualConvexPolygon = actual.getConvexPolygon(i);
-         assertEquals(expectedConvexPolygon.getNumberOfVertices(), actualConvexPolygon.getNumberOfVertices());
-         assertTrue(expectedConvexPolygon.epsilonEquals(actualConvexPolygon, EPSILON));
-      }
-   }
 
    private static PlanarRegionsList nextPlanarRegionsList(Random random)
    {
