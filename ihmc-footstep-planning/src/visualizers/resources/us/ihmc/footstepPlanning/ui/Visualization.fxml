@@ -6,6 +6,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
+<?import javafx.scene.control.Button?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="152.0" prefWidth="713.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.VisualizationController">
    <children>
       <GridPane hgap="10.0" layoutX="23.0" layoutY="24.0">
@@ -22,15 +23,21 @@
             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <ToggleButton fx:id="showInnerRegionMapsToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show inner-region maps" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
-            <ToggleButton fx:id="showBodyPathToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Show body path" GridPane.rowIndex="2" />
-            <ToggleButton fx:id="showInterRegionMapToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show inter-region map" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-            <ToggleButton fx:id="showPlanarRegionsToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Show planar regions" GridPane.columnIndex="1" />
-            <ToggleButton fx:id="showClusterRawPointsToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show cluster raw points" GridPane.columnIndex="2" />
-            <ToggleButton fx:id="showClusterNavigableExtrusionsToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show navigable extrusions" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <ToggleButton fx:id="showClusterNonNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show non-navigable extrusions" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <ToggleButton fx:id="showStartMapToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show start map" GridPane.columnIndex="3" />
-            <ToggleButton fx:id="showGoalMapToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show goal map" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            <Button mnemonicParsing="false" onAction="#requestStatistics" text="Request Statistics" />
+            <ToggleButton fx:id="showBodyPathToggleButton" mnemonicParsing="false" selected="true" text="Show body path" GridPane.rowIndex="2" />
+
+            <ToggleButton fx:id="showPlanarRegionsToggleButton" mnemonicParsing="false" selected="true" text="Show planar regions" GridPane.columnIndex="2" />
+            <ToggleButton fx:id="showClusterNavigableExtrusionsToggleButton" text="Show navigable extrusions" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <ToggleButton fx:id="showClusterNonNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show non-navigable extrusions" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+            <ToggleButton fx:id="showClusterRawPointsToggleButton" mnemonicParsing="false" text="Show cluster raw points" GridPane.columnIndex="2" GridPane.rowIndex="4"/>
+
+            <ToggleButton fx:id="showGoalMapToggleButton" mnemonicParsing="false" text="Show goal map" GridPane.columnIndex="3"  />
+            <ToggleButton fx:id="showStartMapToggleButton"  mnemonicParsing="false" text="Show start map" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+
+            <ToggleButton fx:id="showInterRegionMapToggleButton" mnemonicParsing="false" text="Show inter-region map" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+            <ToggleButton fx:id="showInnerRegionMapsToggleButton"  mnemonicParsing="false" text="Show inner-region maps" GridPane.columnIndex="3" GridPane.rowIndex="4"/>
+
+
          </children>
       </GridPane>
    </children>
