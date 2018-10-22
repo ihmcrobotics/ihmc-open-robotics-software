@@ -45,7 +45,7 @@ public class AStarBestEffortTest
       FootstepPlannerParameters parameters = new BestEffortPlannerParameters(3);
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
-      this.planner = AStarFootstepPlanner.createRoughTerrainPlanner(parameters, null, footPolygons, expansion, registry);
+      this.planner = AStarFootstepPlanner.createPlanner(parameters, null, footPolygons, expansion, registry);
       planner.setTimeout(5.0);
    }
 
