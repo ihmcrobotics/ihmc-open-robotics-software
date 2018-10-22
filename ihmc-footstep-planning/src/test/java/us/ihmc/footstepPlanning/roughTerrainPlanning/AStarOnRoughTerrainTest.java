@@ -34,7 +34,7 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 2.5)
-   @Test(timeout = 100000)
+   @Test(timeout = 1000000)
    public void testDownCorridor()
    {
       setCheckForBodyBoxCollision(true);
