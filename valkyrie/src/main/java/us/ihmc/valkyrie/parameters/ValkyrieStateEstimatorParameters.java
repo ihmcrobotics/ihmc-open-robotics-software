@@ -90,24 +90,24 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       armJointPositionFilterFrequencyHz = Double.POSITIVE_INFINITY;
       jointOutputEncoderVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
       lowerBodyJointPositionFilterFrequencyHz = Double.POSITIVE_INFINITY;
-      lowerBodyJointVelocityFilterFrequencyHz = runningOnRealRobot ? 50.0 : Double.POSITIVE_INFINITY;
+      lowerBodyJointVelocityFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
       fingerPositionFilterFrequencyHz = runningOnRealRobot ? 2.5 : Double.POSITIVE_INFINITY;
 
       // Somehow it's less shaky when these are low especially when pitching the chest forward. I still don't quite get it. Sylvain
       // Update (2018-09-12): Tried 50Hz for IMU filters, it looks like 25Hz reduces shakies in single support while using 50Hz for joint filters.
-      orientationFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
-      angularVelocityFilterFrequencyHz = runningOnRealRobot ? 40.0 : Double.POSITIVE_INFINITY;
-      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 40.0 : Double.POSITIVE_INFINITY;
-
-      lowerBodyJointVelocityBacklashSlopTime = 0.0;
-      armJointVelocityBacklashSlopTime = 0.0;
+      orientationFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
+      angularVelocityFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
+      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      
+      lowerBodyJointVelocityBacklashSlopTime = 0.03;
+      armJointVelocityBacklashSlopTime = 0.03;
 
       doElasticityCompensation = runningOnRealRobot;
       jointElasticityFilterFrequencyHz = 20.0;
       maximumDeflection = 0.10;
       defaultJointStiffness = 10000.0;
       for (RobotSide robotSide : RobotSide.values)
-         jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 9500.0);
+         jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 8000.0);
 
       kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
    }
@@ -300,7 +300,8 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public double getIMUJointVelocityEstimationBacklashSlopTime()
    {
-      return 0.0;
+	   //return 0.0;
+	   return lowerBodyJointVelocityBacklashSlopTime;
    }
 
    @Override
