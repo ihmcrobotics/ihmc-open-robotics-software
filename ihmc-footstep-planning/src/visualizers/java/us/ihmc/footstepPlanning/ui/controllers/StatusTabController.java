@@ -27,6 +27,11 @@ public class StatusTabController
    private TextField sequenceID;
    @FXML
    private TextField timeTaken;
+   @FXML
+   private TextField plannerStatus;
+   @FXML
+   private TextField planningResult;
+
 
    @FXML
    public void computePath()
@@ -38,11 +43,7 @@ public class StatusTabController
    }
 
    private JavaFXMessager messager;
-   private final Point3DProperty startPositionProperty = new Point3DProperty(this, "startPositionProperty", new Point3D());
-   private final Point3DProperty goalPositionProperty = new Point3DProperty(this, "goalPositionProperty", new Point3D());
 
-   private final YawProperty startRotationProperty = new YawProperty(this, "startRotationProperty", 0.0);
-   private final YawProperty goalRotationProperty = new YawProperty(this, "goalRotationProperty", 0.0);
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -76,9 +77,11 @@ public class StatusTabController
       setupControls();
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTypeTopic, plannerTypeComboBox.valueProperty(), true);
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, new TextViewerListener<Integer>(requestID));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.SequenceIdTopic, new TextViewerListener<Integer>(sequenceID));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, new TextViewerListener<Double>(timeTaken));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, new TextViewerListener<>(requestID));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.SequenceIdTopic, new TextViewerListener<>(sequenceID));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, new TextViewerListener<>(timeTaken));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlanningResultTopic, new TextViewerListener<>(planningResult));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerStatusTopic, new TextViewerListener<>(plannerStatus));
    }
 
 
