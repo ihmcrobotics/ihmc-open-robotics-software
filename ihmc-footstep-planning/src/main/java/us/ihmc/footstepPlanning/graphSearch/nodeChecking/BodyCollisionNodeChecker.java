@@ -22,10 +22,9 @@ import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 
 import java.util.List;
 
-public class BodyCollisionNodeChecker implements FootstepNodeChecker
+public class BodyCollisionNodeChecker extends FootstepNodeChecker
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private PlanarRegionsList planarRegionsList;
    private final PoseReferenceFrame midStanceFrame = new PoseReferenceFrame("midStanceFrame", worldFrame);
    private final TranslationReferenceFrame bodyCollisionFrame = new TranslationReferenceFrame("bodyCollisionFrame", midStanceFrame);
    private final Box3D bodyCollisionBox;
@@ -53,11 +52,11 @@ public class BodyCollisionNodeChecker implements FootstepNodeChecker
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
-      this.planarRegionsList = planarRegions;
-      planarRegionPolytopes.clear();
-
-      if (planarRegions == null)
+      super.setPlanarRegions(planarRegions);
+      if(!hasPlanarRegions())
          return;
+
+      planarRegionPolytopes.clear();
 
       for (PlanarRegion planarRegion : planarRegions.getPlanarRegionsAsList())
       {
@@ -80,7 +79,7 @@ public class BodyCollisionNodeChecker implements FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      if (previousNode == null || planarRegionsList == null || !parameters.checkForBodyBoxCollisions() || planarRegionsList.isEmpty())
+      if (!hasPlanarRegions() || previousNode == null || !parameters.checkForBodyBoxCollisions())
       {
          return true;
       }

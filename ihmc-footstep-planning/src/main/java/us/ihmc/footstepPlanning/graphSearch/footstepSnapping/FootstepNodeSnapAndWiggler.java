@@ -39,6 +39,11 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    @Override
    public FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
    {
+      if(planarRegionsList == null || planarRegionsList.isEmpty())
+      {
+         return FootstepNodeSnapData.identityData();
+      }
+
       FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(footstepNode.getRobotSide()), footPolygon);
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, planarRegionToPack);
 
