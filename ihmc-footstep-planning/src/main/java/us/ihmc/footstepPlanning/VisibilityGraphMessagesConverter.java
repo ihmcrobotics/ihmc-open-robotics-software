@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.ui;
+package us.ihmc.footstepPlanning;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
