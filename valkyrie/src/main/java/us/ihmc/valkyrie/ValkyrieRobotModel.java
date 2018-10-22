@@ -201,11 +201,10 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
          }
       }
 
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
       planarRegionFootstepPlanningParameters = new ValkyriePlanarRegionFootstepPlannerParameters();
       capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(target);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, target);
-      stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
+      stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(target, getEstimatorDT(), sensorInformation, jointMap);
       collisionMeshDefinitionDataHolder = new ValkyrieCollisionMeshDefinitionDataHolder(jointMap);
 
       this.useShapeCollision = useShapeCollision;
