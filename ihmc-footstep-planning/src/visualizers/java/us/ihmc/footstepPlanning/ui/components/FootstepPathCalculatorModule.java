@@ -6,6 +6,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
@@ -24,11 +25,14 @@ import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
@@ -140,7 +144,25 @@ public class FootstepPathCalculatorModule
          plannerGoal.setGoalPoseBetweenFeet(new FramePose3D(ReferenceFrame.getWorldFrame(), goal, goalOrientationReference.get()));
          planner.setGoal(plannerGoal);
 
-         FootstepPlanningResult planningResult = planner.plan();
+         messager.submitMessage(PlannerStatusTopic, FootstepPlannerStatus.PLANNING_PATH);
+
+         FootstepPlanningResult planningResult = planner.planPath();
+         BodyPathPlan bodyPathPlan = null;
+         if (planningResult.validForExecution())
+         {
+            bodyPathPlan = planner.getPathPlan();
+            messager.submitMessage(PlannerStatusTopic, FootstepPlannerStatus.PLANNING_STEPS);
+
+            List<Point3DReadOnly> bodyPath = new ArrayList<>();
+            for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
+               bodyPath.add(bodyPathPlan.getWaypoint(i));
+            messager.submitMessage(BodyPathDataTopic, bodyPath);
+            messager.submitMessage(PlanningResultTopic, planningResult);
+
+            planningResult = planner.plan();
+         }
+
+         FootstepPlan footstepPlan  = planner.getPlan();
 
          if (VERBOSE)
          {
@@ -151,9 +173,15 @@ public class FootstepPathCalculatorModule
 
          messager.submitMessage(PlanningResultTopic, planningResult);
          messager.submitMessage(PlannerTimeTakenTopic, planner.getPlanningDuration());
+         messager.submitMessage(PlannerStatusTopic, FootstepPlannerStatus.IDLE);
+
 
          if (planningResult.validForExecution())
-            messager.submitMessage(FootstepPlanTopic, planner.getPlan());
+         {
+            messager.submitMessage(FootstepPlanTopic, footstepPlan);
+            messager.submitMessage(LowLevelGoalPositionTopic, new Point3D(footstepPlan.getLowLevelPlanGoal().getPosition()));
+            messager.submitMessage(LowLevelGoalOrientationTopic, new Quaternion(footstepPlan.getLowLevelPlanGoal().getOrientation()));
+         }
       }
       catch (Exception e)
       {
