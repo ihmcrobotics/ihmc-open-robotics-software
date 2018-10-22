@@ -18,7 +18,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class SnapBasedNodeChecker implements FootstepNodeChecker
+public class SnapBasedNodeChecker extends FootstepNodeChecker
 {
    private static final boolean DEBUG = false;
 
@@ -26,7 +26,6 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepNodeSnapper snapper;
 
-   private PlanarRegionsList planarRegions;
    private BipedalFootstepPlannerListener listener;
 
    public SnapBasedNodeChecker(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper)
@@ -44,14 +43,14 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
+      super.setPlanarRegions(planarRegions);
       snapper.setPlanarRegions(planarRegions);
-      this.planarRegions = planarRegions;
    }
 
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      if(planarRegions == null || planarRegions.isEmpty())
+      if(!hasPlanarRegions())
          return true;
 
       if (previousNode != null && node.equals(previousNode))
@@ -107,7 +106,7 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
          return false;
       }
 
-      if (planarRegions != null && isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegions, parameters.getBodyGroundClearance()))
+      if (isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegionsList, parameters.getBodyGroundClearance()))
       {
          if (DEBUG)
          {

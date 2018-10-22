@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
+package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
@@ -20,7 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class PlanarRegionBaseOfCliffAvoider implements FootstepNodeChecker
+public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
 {
    private final FootstepPlannerParameters parameters;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
@@ -37,12 +38,6 @@ public class PlanarRegionBaseOfCliffAvoider implements FootstepNodeChecker
    }
 
    @Override
-   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
-   {
-      this.planarRegionsList = planarRegionsList;
-   }
-
-   @Override
    public void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform)
    {
       this.startNode = startNode;
@@ -53,7 +48,7 @@ public class PlanarRegionBaseOfCliffAvoider implements FootstepNodeChecker
       if(startNode != null && startNode.equals(node))
          return true;
 
-      if(planarRegionsList == null)
+      if(!hasPlanarRegions())
          return true;
 
       if(parameters.getMinimumDistanceFromCliffBottoms() <= 0.0 || Double.isInfinite(parameters.getCliffHeightToAvoid()))

@@ -19,12 +19,11 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
+public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private BipedalFootstepPlannerListener listener;
-   private PlanarRegionsList planarRegionsList;
    private FootstepNodeSnapAndWiggler snapAndWiggler;
    private FootstepPlannerParameters parameters;
    private SideDependentList<ConvexPolygon2D> controllerPolygonsInSoleFrame;
@@ -51,7 +50,7 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      this.planarRegionsList = planarRegionsList;
+      super.setPlanarRegions(planarRegionsList);
       this.snapAndWiggler.setPlanarRegions(planarRegionsList);
 
       if (listener != null)
@@ -63,7 +62,7 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode nodeToExpand, FootstepNode previousNode)
    {
-      if(planarRegionsList == null || planarRegionsList.isEmpty())
+      if(!hasPlanarRegions())
          return true;
 
       FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(nodeToExpand);
