@@ -59,7 +59,7 @@ public class VisibilityGraphRandomTools
 
    public static NavigableRegion getRandomNavigableRegion(Random random)
    {
-      int numberOfObstacleClusters = RandomNumbers.nextInt(random, 1, 100);
+      int numberOfObstacleClusters = RandomNumbers.nextInt(random, 1, 50);
       PlanarRegion homeRegion = nextPlanarRegion(random);
       Cluster homeCluster = getRandomCluster(random);
 
@@ -76,17 +76,17 @@ public class VisibilityGraphRandomTools
 
    public static Connection getRandomConnection(Random random)
    {
-      int startId = RandomNumbers.nextInt(random, 0, 1000);
-      int targetId = RandomNumbers.nextInt(random, 0, 1000);
-      Point3DReadOnly startPoint = EuclidCoreRandomTools.nextPoint3D(random, 100);
-      Point3DReadOnly targetPoint = EuclidCoreRandomTools.nextPoint3D(random, 100);
+      int startId = RandomNumbers.nextInt(random, 0, 100);
+      int targetId = RandomNumbers.nextInt(random, 0, 100);
+      Point3DReadOnly startPoint = EuclidCoreRandomTools.nextPoint3D(random, 50);
+      Point3DReadOnly targetPoint = EuclidCoreRandomTools.nextPoint3D(random, 50);
 
       return new Connection(startPoint, startId, targetPoint, targetId);
    }
 
    public static VisibilityMapHolder getRandomSingleSourceVisibilityMap(Random random)
    {
-      int numberOfConnections = RandomNumbers.nextInt(random, 2, 10000);
+      int numberOfConnections = RandomNumbers.nextInt(random, 2, 50);
 
       Set<Connection> connections = new HashSet<>();
       for (int i = 0; i < numberOfConnections; i++)
@@ -103,9 +103,9 @@ public class VisibilityGraphRandomTools
    {
       InterRegionVisibilityMap map = new InterRegionVisibilityMap();
 
-      int numberOfConnections = RandomNumbers.nextInt(random, 2, 10000);
+      int numberOfConnections = RandomNumbers.nextInt(random, 2, 100);
 
-      List<Connection> connections = new ArrayList<>();
+      Set<Connection> connections = new HashSet<>();
       for (int i = 0; i < numberOfConnections; i++)
          connections.add((VisibilityGraphRandomTools.getRandomConnection(random)));
       map.addConnections(connections);
@@ -117,13 +117,13 @@ public class VisibilityGraphRandomTools
 
    public static VisibilityMap getRandomVisibilityMap(Random random)
    {
-      int numberOfConnections = RandomNumbers.nextInt(random, 2, 10000);
+      int numberOfConnections = RandomNumbers.nextInt(random, 2, 100);
 
-      List<Connection> connections = new ArrayList<>();
+      Set<Connection> connections = new HashSet<>();
       for (int i = 0; i < numberOfConnections; i++)
          connections.add(VisibilityGraphRandomTools.getRandomConnection(random));
 
-      VisibilityMap map =  new VisibilityMap(connections);
+      VisibilityMap map = new VisibilityMap(connections);
 
       return map;
    }

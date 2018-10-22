@@ -13,6 +13,9 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegionTestTools;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -64,22 +67,125 @@ public class VisibilityGraphTestTools
       }
    }
 
-
-
    public static void assertVisibilityMapsEqual(VisibilityMap mapExpected, VisibilityMap mapActual, double epsilon)
    {
       assertEquals(mapExpected.getConnections().size(), mapActual.getConnections().size());
       assertEquals(mapExpected.getVertices().size(), mapActual.getVertices().size());
       Connection[] expectedConnections = mapExpected.getConnections().toArray(new Connection[0]);
       Connection[] actualConnections = mapActual.getConnections().toArray(new Connection[0]);
+
+      Comparator<Connection> connectionComparator = new Comparator<Connection>()
+      {
+         @Override
+         public int compare(Connection connectionPoint3D, Connection t1)
+         {
+            if (connectionPoint3D.getSourcePoint().getRegionId() < t1.getSourcePoint().getRegionId())
+               return -1;
+            else if (connectionPoint3D.getSourcePoint().getRegionId() > t1.getSourcePoint().getRegionId())
+               return 1;
+            else
+            {
+               if (connectionPoint3D.getTargetPoint().getRegionId() < t1.getTargetPoint().getRegionId())
+                  return -1;
+               else if (connectionPoint3D.getTargetPoint().getRegionId() > t1.getTargetPoint().getRegionId())
+                  return 1;
+               else
+               {
+                  if (connectionPoint3D.getSourcePoint().getX() < t1.getSourcePoint().getX())
+                     return -1;
+                  else if (connectionPoint3D.getSourcePoint().getX() > t1.getSourcePoint().getX())
+                     return 1;
+                  else
+                  {
+                     if (connectionPoint3D.getTargetPoint().getX() < t1.getTargetPoint().getX())
+                        return -1;
+                     else if (connectionPoint3D.getTargetPoint().getX() > t1.getTargetPoint().getX())
+                        return 1;
+                     else
+                     {
+                        if (connectionPoint3D.getSourcePoint().getY() < t1.getSourcePoint().getY())
+                           return -1;
+                        else if (connectionPoint3D.getSourcePoint().getY() > t1.getSourcePoint().getY())
+                           return 1;
+                        else
+                        {
+                           if (connectionPoint3D.getTargetPoint().getY() < t1.getTargetPoint().getY())
+                              return -1;
+                           else if (connectionPoint3D.getTargetPoint().getY() > t1.getTargetPoint().getY())
+                              return 1;
+                           else
+                           {
+                              if (connectionPoint3D.getSourcePoint().getZ() < t1.getSourcePoint().getZ())
+                                 return -1;
+                              else if (connectionPoint3D.getSourcePoint().getZ() > t1.getTargetPoint().getZ())
+                                 return 1;
+                              else
+                              {
+                                 if (connectionPoint3D.getTargetPoint().getZ() < t1.getTargetPoint().getZ())
+                                    return -1;
+                                 else if (connectionPoint3D.getTargetPoint().getZ() > t1.getTargetPoint().getZ())
+                                    return 1;
+                                 else
+                                    return 0;
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      };
+
+      Arrays.sort(expectedConnections, connectionComparator);
+      Arrays.sort(actualConnections, connectionComparator);
+
       ConnectionPoint3D[] expectedVertices = mapExpected.getVertices().toArray(new ConnectionPoint3D[0]);
       ConnectionPoint3D[] actualVertices = mapActual.getVertices().toArray(new ConnectionPoint3D[0]);
 
-      for (int i = 0; i < mapExpected.getConnections().size(); i++)
-         assertConnectionsEqual(expectedConnections[i], actualConnections[i], epsilon);
+      Comparator<ConnectionPoint3D> pointComparator = new Comparator<ConnectionPoint3D>()
+      {
+         @Override
+         public int compare(ConnectionPoint3D connectionPoint3D, ConnectionPoint3D t1)
+         {
+            if (connectionPoint3D.getRegionId() < t1.getRegionId())
+               return -1;
+            else if (connectionPoint3D.getRegionId() > t1.getRegionId())
+               return 1;
+            else
+            {
+               if (connectionPoint3D.getX() < t1.getX())
+                  return -1;
+               else if (connectionPoint3D.getX() > t1.getX())
+                  return 1;
+               else
+               {
+                  if (connectionPoint3D.getY() < t1.getY())
+                     return -1;
+                  else if (connectionPoint3D.getY() > t1.getY())
+                     return 1;
+                  else
+                  {
+                     if (connectionPoint3D.getZ() < t1.getZ())
+                        return -1;
+                     else if (connectionPoint3D.getZ() > t1.getZ())
+                        return 1;
+                     else
+                     {
+                        return 0;
+                     }
+                  }
+               }
+            }
+         }
+      };
+      Arrays.sort(expectedVertices, pointComparator);
+      Arrays.sort(actualVertices, pointComparator);
+
       for (int i = 0; i < mapExpected.getVertices().size(); i++)
          assertConnectionPointsEqual(expectedVertices[i], actualVertices[i], epsilon);
-
+      for (int i = 0; i < mapExpected.getConnections().size(); i++)
+         assertConnectionsEqual(expectedConnections[i], actualConnections[i], epsilon);
    }
 
    public static void assertConnectionsEqual(Connection connectionExpected, Connection connectionActual, double epsilon)
@@ -177,7 +283,6 @@ public class VisibilityGraphTestTools
 
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals(framePoint, clusterExpected.getNonNavigableExtrusionInWorld(i), epsilon);
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals(framePoint, clusterActual.getNonNavigableExtrusionInWorld(i), epsilon);
-
       }
    }
 
@@ -197,5 +302,4 @@ public class VisibilityGraphTestTools
       assertVisibilityMapsEqual(expected.getVisibilityMapInLocal(), actual.getVisibilityMapInLocal(), epsilon);
       assertVisibilityMapsEqual(expected.getVisibilityMapInWorld(), actual.getVisibilityMapInWorld(), epsilon);
    }
-
 }

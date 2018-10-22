@@ -151,7 +151,7 @@ public class VisibilityGraphMessagesConverterTest
       Random random = new Random(1738L);
       for (int iter = 0; iter < iters; iter++)
       {
-         int numberOfConnections = RandomNumbers.nextInt(random, 2, 10000);
+         int numberOfConnections = RandomNumbers.nextInt(random, 2, 100);
 
          List<Connection> connections = new ArrayList<>();
          for (int i = 0; i < numberOfConnections; i++)
