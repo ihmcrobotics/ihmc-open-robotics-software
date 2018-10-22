@@ -38,6 +38,9 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme Map = apiFactory.createCategoryTheme("Map");
    private static final CategoryTheme InterRegion = apiFactory.createCategoryTheme("InterRegion");
    private static final CategoryTheme Statistics = apiFactory.createCategoryTheme("Statistics");
+   private static final CategoryTheme Raw = apiFactory.createCategoryTheme("Raw");
+   private static final CategoryTheme Navigable = apiFactory.createCategoryTheme("Navigable");
+   private static final CategoryTheme NonNavigable = apiFactory.createCategoryTheme("NonNavigable");
 
    private static final CategoryTheme Parameters = apiFactory.createCategoryTheme("Parameters");
 
@@ -120,9 +123,9 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<VisibilityMapHolder> InterRegionVisibilityMap = Root.child(VisibilityGraphs).child(InterRegion).child(Map).topic(Data);
 
 
-   public static final Topic<Boolean> ShowClusterRawPoints = Root.child(VisibilityGraphs).child(Cluster).topic(Show);
-   public static final Topic<Boolean> ShowClusterNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).topic(Show);
-   public static final Topic<Boolean> ShowClusterNonNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).topic(Show);
+   public static final Topic<Boolean> ShowClusterRawPoints = Root.child(VisibilityGraphs).child(Cluster).child(Raw).topic(Show);
+   public static final Topic<Boolean> ShowClusterNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(Navigable).topic(Show);
+   public static final Topic<Boolean> ShowClusterNonNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(NonNavigable).topic(Show);
 
    public static final Topic<Boolean> ShowStartVisibilityMap = Root.child(VisibilityGraphs).child(Start).child(Map).topic(Show);
    public static final Topic<Boolean> ShowGoalVisibilityMap = Root.child(VisibilityGraphs).child(Goal).child(Map).topic(Show);

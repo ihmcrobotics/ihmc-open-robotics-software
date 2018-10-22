@@ -54,7 +54,7 @@ public class VisGraphAStarPlannerToolboxTest extends FootstepPlannerToolboxTest
       VISUALIZE = true;
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171216_111326_CrossoverPlatforms");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
       PrintTools.info("Test passed.");
 //      test.tearDown();
    }
