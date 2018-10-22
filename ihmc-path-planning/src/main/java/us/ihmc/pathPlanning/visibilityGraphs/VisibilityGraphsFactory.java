@@ -274,7 +274,7 @@ public class VisibilityGraphsFactory
       for (int i = 0; i < navigableRegions.size(); i++)
       {
          VisibilityMap targetMap = navigableRegions.get(i).getVisibilityMapInWorld();
-         List<ConnectionPoint3D> targetPoints = targetMap.getVertices();
+         Set<ConnectionPoint3D> targetPoints = targetMap.getVertices();
 
          for (ConnectionPoint3D targetPoint : targetPoints)
          {
@@ -303,7 +303,7 @@ public class VisibilityGraphsFactory
       for (int sourceMapIndex = 0; sourceMapIndex < navigableRegions.size(); sourceMapIndex++)
       {
          VisibilityMap sourceMap = navigableRegions.get(sourceMapIndex).getVisibilityMapInWorld();
-         List<ConnectionPoint3D> sourcePoints = sourceMap.getVertices();
+         Set<ConnectionPoint3D> sourcePoints = sourceMap.getVertices();
 
          for (ConnectionPoint3D source : sourcePoints)
          {
@@ -311,7 +311,7 @@ public class VisibilityGraphsFactory
             {
                VisibilityMap targetMap = navigableRegions.get(targetMapIndex).getVisibilityMapInWorld();
 
-               List<ConnectionPoint3D> targetPoints = targetMap.getVertices();
+               Set<ConnectionPoint3D> targetPoints = targetMap.getVertices();
 
                for (ConnectionPoint3D target : targetPoints)
                {
