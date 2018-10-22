@@ -6,7 +6,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.List;
 
-public class FootstepNodeCheckerOfCheckers implements FootstepNodeChecker
+public class FootstepNodeCheckerOfCheckers extends FootstepNodeChecker
 {
    private final List<FootstepNodeChecker> nodeCheckers;
 
