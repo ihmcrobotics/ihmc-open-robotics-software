@@ -31,7 +31,8 @@ public class StatusTabController
    private TextField plannerStatus;
    @FXML
    private TextField planningResult;
-
+   @FXML
+   private ToggleButton acceptNewPlanarRegions;
 
    @FXML
    public void computePath()
@@ -82,6 +83,9 @@ public class StatusTabController
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, new TextViewerListener<>(timeTaken));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlanningResultTopic, new TextViewerListener<>(planningResult));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerStatusTopic, new TextViewerListener<>(plannerStatus));
+
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, acceptNewPlanarRegions.selectedProperty(), true);
+
    }
 
 
