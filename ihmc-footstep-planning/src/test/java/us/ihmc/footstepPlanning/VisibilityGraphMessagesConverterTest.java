@@ -1,11 +1,9 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.BodyPathPlanStatisticsMessage;
-import controller_msgs.msg.dds.NavigableRegionMessage;
-import controller_msgs.msg.dds.VisibilityClusterMessage;
-import controller_msgs.msg.dds.VisibilityMapMessage;
+import controller_msgs.msg.dds.*;
 import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -15,11 +13,14 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.ui.VisibilityGraphMessagesConverter;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
+import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphRandomTools;
+import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphTestTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 
 import java.util.ArrayList;
@@ -27,15 +28,14 @@ import java.util.List;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
-import static us.ihmc.footstepPlanning.VisibilityGraphTestTools.assertConnectionPointsEqual;
-import static us.ihmc.footstepPlanning.VisibilityGraphTestTools.assertConnectionsEqual;
 
 public class VisibilityGraphMessagesConverterTest
 {
-   private static final int iters = 1;
+   private static final int iters = 1000;
    private static final double epsilon = 1e-9;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration =  1.0)
    @Test(timeout = 30000)
    public void testConvertToCluster()
    {
@@ -129,6 +129,7 @@ public class VisibilityGraphMessagesConverterTest
       }
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration =  2.6)
    @Test(timeout = 30000)
    public void testConvertInterRegionsVisibilityMap()
    {
@@ -144,6 +145,7 @@ public class VisibilityGraphMessagesConverterTest
       }
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration =  1.8)
    @Test(timeout = 30000)
    public void testConvertSingleSourceVisibilityMap()
    {
@@ -166,6 +168,7 @@ public class VisibilityGraphMessagesConverterTest
       }
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration =  14.8)
    @Test(timeout = 30000)
    public void testConvertNavigableRegion()
    {
@@ -174,13 +177,31 @@ public class VisibilityGraphMessagesConverterTest
       {
          NavigableRegion navigableRegionToConvert = VisibilityGraphRandomTools.getRandomNavigableRegion(random);
          NavigableRegionMessage message = VisibilityGraphMessagesConverter.convertToNavigableRegionMessage(navigableRegionToConvert);
+
          NavigableRegion convertedNavigableRegion = VisibilityGraphMessagesConverter.convertToNavigableRegion(message);
 
          VisibilityGraphTestTools.assertNavigableRegionsEqual(navigableRegionToConvert, convertedNavigableRegion, epsilon);
       }
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration =  1.8)
    @Test(timeout = 30000)
+   public void testConvertVisibilityMap()
+   {
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < iters; iter++)
+      {
+         VisibilityMap mapToConvert = VisibilityGraphRandomTools.getRandomVisibilityMap(random);
+         VisibilityMapMessage message = VisibilityGraphMessagesConverter.convertToVisibilityMapMessage(mapToConvert);
+         VisibilityMap convertedMap = VisibilityGraphMessagesConverter.convertToVisibilityMap(message);
+
+         VisibilityGraphTestTools.assertVisibilityMapsEqual(mapToConvert, convertedMap, epsilon);
+      }
+   }
+
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration =  135.9)
+   @Test(timeout = 600000)
    public void testConvertBodyPathPlanStatistics()
    {
       Random random = new Random(1738L);

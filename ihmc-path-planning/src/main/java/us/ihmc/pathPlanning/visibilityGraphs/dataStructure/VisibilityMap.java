@@ -35,6 +35,19 @@ public class VisibilityMap implements Transformable, Iterable<Connection>
       computeVertices();
    }
 
+   public void copy(VisibilityMap other)
+   {
+      copyConnections(other.connections);
+      computeVertices();
+   }
+
+   public void copyConnections(Collection<Connection> connections)
+   {
+      this.connections.clear();
+      for (Connection connection : connections)
+         this.connections.add(connection.getCopy());
+   }
+
    public void setConnections(Collection<Connection> connections)
    {
       this.connections.clear();

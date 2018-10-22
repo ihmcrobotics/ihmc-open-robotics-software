@@ -38,15 +38,23 @@ public class VisibilityGraphMessagesConverter
       return message;
    }
 
-
    public static VisibilityMapMessage convertToVisibilityMapMessage(VisibilityMapHolder visibilityMapHolder)
    {
       return convertToVisibilityMapMessage(visibilityMapHolder.getMapId(), visibilityMapHolder.getVisibilityMapInWorld());
    }
 
+   public static VisibilityMapMessage convertToVisibilityMapMessage(VisibilityMap visibilityMap)
+   {
+      return convertToVisibilityMapMessage(-1, visibilityMap);
+   }
+
+
    public static VisibilityMapMessage convertToVisibilityMapMessage(int mapId, VisibilityMap visibilityMap)
    {
       VisibilityMapMessage message = new VisibilityMapMessage();
+
+      if (visibilityMap == null)
+         return message;
 
       for (Connection connection : visibilityMap.getConnections())
       {
@@ -80,6 +88,9 @@ public class VisibilityGraphMessagesConverter
    public static VisibilityClusterMessage convertToVisibilityClusterMessage(Cluster cluster)
    {
       VisibilityClusterMessage message = new VisibilityClusterMessage();
+
+      if (cluster == null)
+         return message;
 
       List<? extends Point3DReadOnly> rawPointsInLocal = cluster.getRawPointsInLocal3D();
       List<Point2DReadOnly> navigableExtrusionsInLocal = cluster.getNavigableExtrusionsInLocal();
@@ -159,13 +170,27 @@ public class VisibilityGraphMessagesConverter
       NavigableRegion navigableRegion = new NavigableRegion(PlanarRegionMessageConverter.convertToPlanarRegion(message.getHomeRegion()));
 
       navigableRegion.setHomeRegionCluster(convertToCluster(message.getHomeRegionCluster()));
-      navigableRegion.setVisibilityMapInWorld(convertToSingleSourceVisibilityMap(message.getVisibilityMapInWorld()).getVisibilityMapInWorld());
+      navigableRegion.setVisibilityMapInWorld(convertToVisibilityMap(message.getVisibilityMapInWorld()));
 
       List<VisibilityClusterMessage> obstacleClusterMessages = message.getObstacleClusters();
       for (int i = 0; i < obstacleClusterMessages.size(); i++)
          navigableRegion.addObstacleCluster(convertToCluster(obstacleClusterMessages.get(i)));
 
       return navigableRegion;
+   }
+
+   public static VisibilityMap convertToVisibilityMap(VisibilityMapMessage message)
+   {
+      VisibilityMap visibilityMap = new VisibilityMap();
+      for (int i = 0; i < message.getSourcePoints().size(); i++)
+      {
+         visibilityMap.addConnection(
+               new Connection(message.getSourcePoints().get(i), (int) message.getSourceRegionIds().get(i), message.getTargetPoints().get(i),
+                              (int) message.getTargetRegionIds().get(i)));
+      }
+      visibilityMap.computeVertices();
+
+      return visibilityMap;
    }
 
    public static Cluster convertToCluster(VisibilityClusterMessage message)
@@ -211,6 +236,5 @@ public class VisibilityGraphMessagesConverter
 
       return statistics;
    }
-
 
 }

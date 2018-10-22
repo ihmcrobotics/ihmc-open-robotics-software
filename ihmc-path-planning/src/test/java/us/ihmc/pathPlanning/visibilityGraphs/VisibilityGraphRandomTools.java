@@ -1,10 +1,14 @@
-package us.ihmc.footstepPlanning;
+package us.ihmc.pathPlanning.visibilityGraphs;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
@@ -12,6 +16,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class VisibilityGraphRandomTools
 {
@@ -20,9 +26,9 @@ public class VisibilityGraphRandomTools
       byte typeByte = (byte) RandomNumbers.nextInt(random, 0, Cluster.Type.values.length - 1);
       byte extrusionSideByte = (byte) RandomNumbers.nextInt(random, 0, Cluster.ExtrusionSide.values.length - 1);
 
-      int numberOfRawPoints = RandomNumbers.nextInt(random, 1, 1000);
-      int numberOfNavigableExtrusions = RandomNumbers.nextInt(random, 1, 1000);
-      int numberOfNonNavigableExtrusions = RandomNumbers.nextInt(random, 1, 1000);
+      int numberOfRawPoints = RandomNumbers.nextInt(random, 1, 100);
+      int numberOfNavigableExtrusions = RandomNumbers.nextInt(random, 1, 100);
+      int numberOfNonNavigableExtrusions = RandomNumbers.nextInt(random, 1, 100);
       RigidBodyTransform transformToWorld = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<Point3D> rawPointsInLocalExpected = new ArrayList<>();
@@ -53,33 +59,20 @@ public class VisibilityGraphRandomTools
 
    public static NavigableRegion getRandomNavigableRegion(Random random)
    {
-      int numberOfPolygons = RandomNumbers.nextInt(random, 1, 100);
-      int numberOfPoints = RandomNumbers.nextInt(random, 1, 100);
       int numberOfObstacleClusters = RandomNumbers.nextInt(random, 1, 100);
-      PlanarRegion homeRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, numberOfPolygons, 1000.0, numberOfPoints);
+      PlanarRegion homeRegion = nextPlanarRegion(random);
       Cluster homeCluster = getRandomCluster(random);
 
       NavigableRegion navigableRegion = new NavigableRegion(homeRegion);
       navigableRegion.setHomeRegionCluster(homeCluster);
       for (int i = 0; i < numberOfObstacleClusters; i++)
          navigableRegion.addObstacleCluster(getRandomCluster(random));
-      navigableRegion.setVisibilityMapInLocal(getRandomVisibilityMap(random));
+
+      navigableRegion.setVisibilityMapInLocal(getRandomSingleSourceVisibilityMap(random).getVisibilityMapInLocal());
 
       return navigableRegion;
    }
 
-   public static VisibilityMap getRandomVisibilityMap(Random random)
-   {
-      VisibilityMap visibilityMap = new VisibilityMap();
-      int numberOfConnections = RandomNumbers.nextInt(random, 2, 10000);
-
-      for (int i = 0; i < numberOfConnections; i++)
-         visibilityMap.addConnection(getRandomConnection(random));
-
-      visibilityMap.computeVertices();
-
-      return visibilityMap;
-   }
 
    public static Connection getRandomConnection(Random random)
    {
@@ -120,5 +113,47 @@ public class VisibilityGraphRandomTools
       map.getVisibilityMapInLocal().computeVertices();
 
       return map;
+   }
+
+   public static VisibilityMap getRandomVisibilityMap(Random random)
+   {
+      int numberOfConnections = RandomNumbers.nextInt(random, 2, 10000);
+
+      List<Connection> connections = new ArrayList<>();
+      for (int i = 0; i < numberOfConnections; i++)
+         connections.add(VisibilityGraphRandomTools.getRandomConnection(random));
+
+      VisibilityMap map =  new VisibilityMap(connections);
+
+      return map;
+   }
+
+   private static PlanarRegion nextPlanarRegion(Random random)
+   {
+      RigidBodyTransform transformToWorld = nextRegionTransform(random);
+      Point2D[] concaveHullVertices = nextPoint2DArray(random);
+      List<ConvexPolygon2D> convexPolygons = nextConvexPolygon2Ds(random);
+      PlanarRegion next = new PlanarRegion(transformToWorld, concaveHullVertices, convexPolygons);
+      next.setRegionId(random.nextInt());
+      return next;
+   }
+
+   private static RigidBodyTransform nextRegionTransform(Random random)
+   {
+      Vector3D regionNormal = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
+      Point3D regionOrigin = EuclidCoreRandomTools.nextPoint3D(random);
+      return new RigidBodyTransform(EuclidGeometryTools.axisAngleFromZUpToVector3D(regionNormal), regionOrigin);
+   }
+
+   private static List<ConvexPolygon2D> nextConvexPolygon2Ds(Random random)
+   {
+      int size = random.nextInt(100);
+      return IntStream.range(0, size).mapToObj(i -> EuclidGeometryRandomTools.nextConvexPolygon2D(random, 10.0, 100)).collect(Collectors.toList());
+   }
+
+   private static Point2D[] nextPoint2DArray(Random random)
+   {
+      int size = random.nextInt(500);
+      return IntStream.range(0, size).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).toArray(Point2D[]::new);
    }
 }

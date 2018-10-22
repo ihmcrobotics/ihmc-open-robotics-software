@@ -20,8 +20,7 @@ public class NavigableRegion implements VisibilityMapHolder
    private Cluster homeRegionCluster = null;
    private List<Cluster> obstacleClusters = new ArrayList<>();
    private List<Cluster> allClusters = new ArrayList<>();
-   private VisibilityMap visibilityMapInLocal = null;
-   private VisibilityMap visibilityMapInWorld = null;
+   private final VisibilityMap visibilityMapInLocal = new VisibilityMap();
 
    public NavigableRegion(PlanarRegion homeRegion)
    {
@@ -48,32 +47,12 @@ public class NavigableRegion implements VisibilityMapHolder
 
    public void setVisibilityMapInLocal(VisibilityMap visibilityMap)
    {
-      visibilityMapInLocal = visibilityMap;
-
-      if (visibilityMapInWorld == null)
-      {
-         visibilityMapInWorld = new VisibilityMap(visibilityMapInLocal.getConnections());
-      }
-      else
-      {
-         visibilityMapInWorld.setConnections(visibilityMapInLocal.getConnections());
-      }
-
-      transformFromLocalToWorld(visibilityMapInWorld);
-      visibilityMapInWorld.computeVertices();
+      visibilityMapInLocal.copy(visibilityMap);
    }
 
    public void setVisibilityMapInWorld(VisibilityMap visibilityMap)
    {
-      visibilityMapInWorld = visibilityMap;
-      if (visibilityMapInLocal == null)
-      {
-         visibilityMapInLocal = new VisibilityMap(visibilityMapInWorld.getConnections());
-      }
-      else
-      {
-         visibilityMapInLocal.setConnections(visibilityMapInWorld.getConnections());
-      }
+      visibilityMapInLocal.copy(visibilityMap);
       transformFromWorldToLocal(visibilityMapInLocal);
       visibilityMapInLocal.computeVertices();
    }
@@ -128,12 +107,10 @@ public class NavigableRegion implements VisibilityMapHolder
    @Override
    public VisibilityMap getVisibilityMapInWorld()
    {
-      if (visibilityMapInWorld == null)
-      {
-         visibilityMapInWorld = new VisibilityMap(visibilityMapInLocal.getConnections());
-         transformFromLocalToWorld(visibilityMapInWorld);
-         visibilityMapInWorld.computeVertices();
-      }
+      VisibilityMap visibilityMapInWorld = new VisibilityMap();
+      visibilityMapInWorld.copy(visibilityMapInLocal);
+      transformFromLocalToWorld(visibilityMapInWorld);
+      visibilityMapInWorld.computeVertices();
 
       return visibilityMapInWorld;
    }
