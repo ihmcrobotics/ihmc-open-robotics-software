@@ -186,11 +186,15 @@ public class VisibilityGraphMessagesConverterTest
    {
       assertEquals(mapExpected.getConnections().size(), mapActual.getConnections().size());
       assertEquals(mapExpected.getVertices().size(), mapActual.getVertices().size());
-      for (int i = 0; i < mapExpected.getConnections().size(); i++)
-         assertConnectionsEqual(mapExpected.getConnections().get(i), mapActual.getConnections().get(i), epsilon);
-      for (int i = 0; i < mapExpected.getVertices().size(); i++)
-         assertConnectionPointsEqual(mapExpected.getVertices().get(i), mapActual.getVertices().get(i), epsilon);
 
+      Connection[] expectedConnections = mapExpected.getConnections().toArray(new Connection[]{});
+      Connection[] actualConnections = mapActual.getConnections().toArray(new Connection[]{});
+      ConnectionPoint3D[] expectedVertices = mapExpected.getVertices().toArray(new ConnectionPoint3D[]{});
+      ConnectionPoint3D[] actualVertices = mapActual.getVertices().toArray(new ConnectionPoint3D[]{});
+      for (int i = 0; i < mapExpected.getConnections().size(); i++)
+         assertConnectionsEqual(expectedConnections[i], actualConnections[i], epsilon);
+      for (int i = 0; i < mapExpected.getVertices().size(); i++)
+         assertConnectionPointsEqual(expectedVertices[i], actualVertices[i], epsilon);
    }
 
    private static void assertConnectionsEqual(Connection connectionExpected, Connection connectionActual, double epsilon)
