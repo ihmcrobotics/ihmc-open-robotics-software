@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.regexp.RE;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
@@ -24,14 +26,13 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieHighLevelControllerParameters implements HighLevelControllerParameters
 {
+   private final RobotTarget target;
    private final ValkyrieJointMap jointMap;
    private final ValkyrieStandPrepParameters standPrepParameters;
 
-   private final boolean runningOnRealRobot;
-
-   public ValkyrieHighLevelControllerParameters(boolean runningOnRealRobot, ValkyrieJointMap jointMap)
+   public ValkyrieHighLevelControllerParameters(RobotTarget target, ValkyrieJointMap jointMap)
    {
-      this.runningOnRealRobot = runningOnRealRobot;
+      this.target = target;
       this.jointMap = jointMap;
       standPrepParameters = new ValkyrieStandPrepParameters(jointMap);
    }
@@ -64,7 +65,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    private List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForWalking()
    {
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
-      if (runningOnRealRobot)
+      if (target == RobotTarget.REAL_ROBOT)
       {
          // Can go up to kp = 30.0, kd = 3.0
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 15.0, 1.5);
@@ -145,7 +146,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, JointDesiredControlMode.EFFORT, 180.0, 12.0);
 
       // position controlled on the real robot:
-      JointDesiredControlMode controlMode = runningOnRealRobot ? JointDesiredControlMode.POSITION : JointDesiredControlMode.EFFORT;
+      JointDesiredControlMode controlMode = (target == RobotTarget.REAL_ROBOT) ? JointDesiredControlMode.POSITION : JointDesiredControlMode.EFFORT;
 
       configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, controlMode, 15.0, 0.0);
       configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, controlMode, 6.0, 0.3);
@@ -213,19 +214,21 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    @Override
    public HighLevelControllerName getDefaultInitialControllerState()
    {
-      return runningOnRealRobot ? HighLevelControllerName.STAND_PREP_STATE : HighLevelControllerName.WALKING;
+      boolean shouldUseStandPrep = (target == RobotTarget.REAL_ROBOT) || (target == RobotTarget.GAZEBO);
+      return shouldUseStandPrep ? HighLevelControllerName.STAND_PREP_STATE : HighLevelControllerName.WALKING;
    }
 
    @Override
    public HighLevelControllerName getFallbackControllerState()
    {
-      return runningOnRealRobot ? HighLevelControllerName.STAND_PREP_STATE : HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+      boolean shouldUseStandPrep = (target == RobotTarget.REAL_ROBOT) || (target == RobotTarget.GAZEBO);
+      return shouldUseStandPrep ? HighLevelControllerName.STAND_PREP_STATE : HighLevelControllerName.DO_NOTHING_BEHAVIOR;
    }
 
    @Override
    public boolean automaticallyTransitionToWalkingWhenReady()
    {
-      return runningOnRealRobot;
+      return (target == RobotTarget.REAL_ROBOT) || (target == RobotTarget.GAZEBO);
    }
 
    @Override
