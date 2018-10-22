@@ -29,6 +29,11 @@ public class SettableFootstepPlannerCostParameters implements FootstepPlannerCos
 
    public SettableFootstepPlannerCostParameters(FootstepPlannerCostParameters parameters)
    {
+      set(parameters);
+   }
+
+   public void set(FootstepPlannerCostParameters parameters)
+   {
       this.useQuadraticDistanceCost = parameters.useQuadraticDistanceCost();
       this.useQuadraticHeightCost = parameters.useQuadraticHeightCost();
 
