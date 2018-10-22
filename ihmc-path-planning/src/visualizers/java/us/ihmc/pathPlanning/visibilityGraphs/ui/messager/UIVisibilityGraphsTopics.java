@@ -86,7 +86,7 @@ public class UIVisibilityGraphsTopics
    public static final Topic<Boolean> ShowGoalVisibilityMap = Root.child(VisibilityGraphs).child(Goal).child(Map).topic(Show);
 
    public static final Topic<List<NavigableRegion>> NavigableRegionData = Root.child(VisibilityGraphs).child(NavigableRegion).topic(Data);
-   public static final Topic<List<? extends VisibilityMapHolder>> NavigableRegionVisibilityMap = Root.child(VisibilityGraphs).child(NavigableRegion).child(Map).topic(Data);
+   public static final Topic<List<NavigableRegion>> NavigableRegionVisibilityMap = Root.child(VisibilityGraphs).child(NavigableRegion).child(Map).topic(Data);
    public static final Topic<VisibilityMapHolder> InterRegionVisibilityMap = Root.child(VisibilityGraphs).child(InterRegion).child(Map).topic(Data);
    public static final Topic<VisibilityMapHolder> StartVisibilityMap = Root.child(VisibilityGraphs).child(Start).child(Map).topic(Data);
    public static final Topic<VisibilityMapHolder> GoalVisibilityMap = Root.child(VisibilityGraphs).child(Goal).child(Map).topic(Data);

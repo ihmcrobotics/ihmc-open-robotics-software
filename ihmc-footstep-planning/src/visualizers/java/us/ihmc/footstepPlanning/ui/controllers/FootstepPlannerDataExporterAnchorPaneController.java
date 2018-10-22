@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.ui.components;
+package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;

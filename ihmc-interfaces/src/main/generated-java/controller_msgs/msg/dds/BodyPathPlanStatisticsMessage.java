@@ -18,14 +18,14 @@ public class BodyPathPlanStatisticsMessage extends Packet<BodyPathPlanStatistics
    public long sequence_id_;
    public int plan_id_ = -1;
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.NavigableRegionMessage>  navigable_regions_;
-   public controller_msgs.msg.dds.VisibilityMapMessage navigable_regions_map_;
+   public controller_msgs.msg.dds.VisibilityMapMessage inter_regions_map_;
    public controller_msgs.msg.dds.VisibilityMapMessage start_visibility_map_;
    public controller_msgs.msg.dds.VisibilityMapMessage goal_visibility_map_;
 
    public BodyPathPlanStatisticsMessage()
    {
       navigable_regions_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.NavigableRegionMessage> (100, new controller_msgs.msg.dds.NavigableRegionMessagePubSubType());
-      navigable_regions_map_ = new controller_msgs.msg.dds.VisibilityMapMessage();
+      inter_regions_map_ = new controller_msgs.msg.dds.VisibilityMapMessage();
       start_visibility_map_ = new controller_msgs.msg.dds.VisibilityMapMessage();
       goal_visibility_map_ = new controller_msgs.msg.dds.VisibilityMapMessage();
 
@@ -44,7 +44,7 @@ public class BodyPathPlanStatisticsMessage extends Packet<BodyPathPlanStatistics
       plan_id_ = other.plan_id_;
 
       navigable_regions_.set(other.navigable_regions_);
-      controller_msgs.msg.dds.VisibilityMapMessagePubSubType.staticCopy(other.navigable_regions_map_, navigable_regions_map_);
+      controller_msgs.msg.dds.VisibilityMapMessagePubSubType.staticCopy(other.inter_regions_map_, inter_regions_map_);
       controller_msgs.msg.dds.VisibilityMapMessagePubSubType.staticCopy(other.start_visibility_map_, start_visibility_map_);
       controller_msgs.msg.dds.VisibilityMapMessagePubSubType.staticCopy(other.goal_visibility_map_, goal_visibility_map_);
    }
@@ -80,9 +80,9 @@ public class BodyPathPlanStatisticsMessage extends Packet<BodyPathPlanStatistics
    }
 
 
-   public controller_msgs.msg.dds.VisibilityMapMessage getNavigableRegionsMap()
+   public controller_msgs.msg.dds.VisibilityMapMessage getInterRegionsMap()
    {
-      return navigable_regions_map_;
+      return inter_regions_map_;
    }
 
 
@@ -126,7 +126,7 @@ public class BodyPathPlanStatisticsMessage extends Packet<BodyPathPlanStatistics
          {  if (!this.navigable_regions_.get(i).epsilonEquals(other.navigable_regions_.get(i), epsilon)) return false; }
       }
 
-      if (!this.navigable_regions_map_.epsilonEquals(other.navigable_regions_map_, epsilon)) return false;
+      if (!this.inter_regions_map_.epsilonEquals(other.inter_regions_map_, epsilon)) return false;
       if (!this.start_visibility_map_.epsilonEquals(other.start_visibility_map_, epsilon)) return false;
       if (!this.goal_visibility_map_.epsilonEquals(other.goal_visibility_map_, epsilon)) return false;
 
@@ -147,7 +147,7 @@ public class BodyPathPlanStatisticsMessage extends Packet<BodyPathPlanStatistics
       if(this.plan_id_ != otherMyClass.plan_id_) return false;
 
       if (!this.navigable_regions_.equals(otherMyClass.navigable_regions_)) return false;
-      if (!this.navigable_regions_map_.equals(otherMyClass.navigable_regions_map_)) return false;
+      if (!this.inter_regions_map_.equals(otherMyClass.inter_regions_map_)) return false;
       if (!this.start_visibility_map_.equals(otherMyClass.start_visibility_map_)) return false;
       if (!this.goal_visibility_map_.equals(otherMyClass.goal_visibility_map_)) return false;
 
@@ -166,8 +166,8 @@ public class BodyPathPlanStatisticsMessage extends Packet<BodyPathPlanStatistics
       builder.append(this.plan_id_);      builder.append(", ");
       builder.append("navigable_regions=");
       builder.append(this.navigable_regions_);      builder.append(", ");
-      builder.append("navigable_regions_map=");
-      builder.append(this.navigable_regions_map_);      builder.append(", ");
+      builder.append("inter_regions_map=");
+      builder.append(this.inter_regions_map_);      builder.append(", ");
       builder.append("start_visibility_map=");
       builder.append(this.start_visibility_map_);      builder.append(", ");
       builder.append("goal_visibility_map=");

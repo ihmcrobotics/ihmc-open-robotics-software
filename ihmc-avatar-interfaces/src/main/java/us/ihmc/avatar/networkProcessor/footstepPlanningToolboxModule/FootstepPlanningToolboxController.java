@@ -32,6 +32,9 @@ import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
+import us.ihmc.pathPlanning.statistics.ListOfStatistics;
+import us.ihmc.pathPlanning.statistics.PlannerStatistics;
+import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
@@ -354,6 +357,32 @@ public class FootstepPlanningToolboxController extends ToolboxController
    {
       latestParametersReference.set(parameters);
    }
+
+   public void processPlanningStatisticsRequest()
+   {
+      FootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
+      sendPlannerStatistics(planner.getPlannerStatistics());
+   }
+
+   private void sendPlannerStatistics(PlannerStatistics plannerStatistics)
+   {
+      switch (plannerStatistics.getStatisticsType())
+      {
+      case LIST:
+         sendListOfStatistics((ListOfStatistics) plannerStatistics);
+         break;
+      case VISIBILITY_GRAPH:
+         reportMessage(VisibilityGraphMessagesConverter.convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(), (VisibilityGraphStatistics) plannerStatistics));
+         break;
+      }
+   }
+
+   private void sendListOfStatistics(ListOfStatistics listOfStatistics)
+   {
+      while (listOfStatistics.getNumberOfStatistics() > 0)
+         sendPlannerStatistics(listOfStatistics.pollStatistics());
+   }
+
 
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> publisher)
    {

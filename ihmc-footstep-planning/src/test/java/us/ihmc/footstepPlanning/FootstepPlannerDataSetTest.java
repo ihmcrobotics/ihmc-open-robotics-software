@@ -158,6 +158,9 @@ public abstract class FootstepPlannerDataSetTest
    {
       FootstepPlannerUnitTestDataset dataset = FootstepPlannerIOTools.loadDataset(FootstepPlannerDataExporter.class, datasetName);
 
+      Random random = new Random(324);
+      dataset.getPlanarRegionsList().getPlanarRegionsAsList().forEach(region -> region.setRegionId(random.nextInt()));
+
       resetAllAtomics();
       String errorMessages = datasetTestRunner.testDataset(dataset);
       Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
@@ -346,8 +349,9 @@ public abstract class FootstepPlannerDataSetTest
 
       if (result.validForExecution())
       {
-         errorMessage += assertTrue(datasetName, datasetName + " did not reach goal. Made it to " + PlannerTools.getEndPosition(plan) + ", trying to get to " +
-               goal, PlannerTools.isGoalNextToLastStep(goal, plan));
+         errorMessage += assertTrue(datasetName,
+                                    datasetName + " did not reach goal. Made it to " + PlannerTools.getEndPosition(plan) + ", trying to get to " + goal,
+                                    PlannerTools.isGoalNextToLastStep(goal, plan));
       }
 
       return errorMessage;
@@ -509,7 +513,7 @@ public abstract class FootstepPlannerDataSetTest
          uiReceivedPlan.set(false);
       }
 
-      if (uiReceivedResult.get() && uiPlanningResultReference.get() != null )
+      if (uiReceivedResult.get() && uiPlanningResultReference.get() != null)
       {
          if (DEBUG)
             PrintTools.info("Received a result " + uiPlanningResultReference.get() + " from the UI.");

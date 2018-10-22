@@ -60,6 +60,7 @@ public class WaypointDefinedBodyPathPlanTest
       waypoints.add(new Point3D(0.0, 0.0, 0.0));
       waypoints.add(new Point3D(0.5, 0.0, 0.0));
       waypoints.add(new Point3D(1.0, 1.0, 0.0));
+
       plan.setWaypoints(waypoints);
       plan.compute();
 
