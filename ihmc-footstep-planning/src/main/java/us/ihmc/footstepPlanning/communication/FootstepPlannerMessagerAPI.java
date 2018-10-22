@@ -37,6 +37,7 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme Cluster = apiFactory.createCategoryTheme("Cluster");
    private static final CategoryTheme Map = apiFactory.createCategoryTheme("Map");
    private static final CategoryTheme InterRegion = apiFactory.createCategoryTheme("InterRegion");
+   private static final CategoryTheme Statistics = apiFactory.createCategoryTheme("Statistics");
 
    private static final CategoryTheme Parameters = apiFactory.createCategoryTheme("Parameters");
 
@@ -73,6 +74,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepPlan> FootstepPlanTopic = Root.child(FootstepPlan).topic(Data);
 
    public static final Topic<Boolean> ComputePathTopic = Root.child(FootstepPlan).topic(ComputePath);
+   public static final Topic<Boolean> RequestPlannerStatistics = Root.child(Statistics).topic(Show);
    public static final Topic<FootstepPlannerParameters> PlannerParametersTopic = Root.child(Parameters).topic(FootstepPlannerParameters);
    public static final Topic<Double> PlannerTimeoutTopic = Root.child(FootstepPlan).topic(PlannerTimeout);
    public static final Topic<Double> PlannerTimeTakenTopic = Root.child(FootstepPlan).topic(PlannerTimeTaken);
