@@ -66,7 +66,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
       legConfigurationParameters = new ValkyrieLegConfigurationParameters(runningOnRealRobot);
-      toeOffParameters = new ValkyrieToeOffParameters(runningOnRealRobot);
+      toeOffParameters = new ValkyrieToeOffParameters(target);
       swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
       steppingParameters = new ValkyrieSteppingParameters(target);
       icpOptimizationParameters = new ValkyrieICPOptimizationParameters(runningOnRealRobot);
