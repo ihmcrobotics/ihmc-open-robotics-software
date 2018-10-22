@@ -59,6 +59,7 @@
                 <TextField fx:id="timeTaken" editable="false" GridPane.columnIndex="6" GridPane.rowIndex="2"/>
                 <TextField fx:id="planningResult" editable="false" GridPane.columnIndex="6" GridPane.rowIndex="3"/>
 
+                <ToggleButton fx:id="acceptNewPlanarRegions" mnemonicParsing="false" selected="true" text="Accept new planar regions" GridPane.columnIndex="7" GridPane.rowIndex="2"/>
 
             </children>
         </GridPane>
