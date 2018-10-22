@@ -14,25 +14,25 @@ public class VisibilityMapMessage extends Packet<VisibilityMapMessage> implement
    /**
             * unique id of the map
             */
-   public long map_id_;
+   public int map_id_;
    /**
             * start point for the connection
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  source_points_;
-   public us.ihmc.idl.IDLSequence.Long  source_region_ids_;
+   public us.ihmc.idl.IDLSequence.Integer  source_region_ids_;
    /**
             * target point for the connection
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  target_points_;
-   public us.ihmc.idl.IDLSequence.Long  target_region_ids_;
+   public us.ihmc.idl.IDLSequence.Integer  target_region_ids_;
 
    public VisibilityMapMessage()
    {
       source_points_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
-      source_region_ids_ = new us.ihmc.idl.IDLSequence.Long (100, "type_4");
+      source_region_ids_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
 
       target_points_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
-      target_region_ids_ = new us.ihmc.idl.IDLSequence.Long (100, "type_4");
+      target_region_ids_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
 
 
    }
@@ -56,14 +56,14 @@ public class VisibilityMapMessage extends Packet<VisibilityMapMessage> implement
    /**
             * unique id of the map
             */
-   public void setMapId(long map_id)
+   public void setMapId(int map_id)
    {
       map_id_ = map_id;
    }
    /**
             * unique id of the map
             */
-   public long getMapId()
+   public int getMapId()
    {
       return map_id_;
    }
@@ -78,7 +78,7 @@ public class VisibilityMapMessage extends Packet<VisibilityMapMessage> implement
    }
 
 
-   public us.ihmc.idl.IDLSequence.Long  getSourceRegionIds()
+   public us.ihmc.idl.IDLSequence.Integer  getSourceRegionIds()
    {
       return source_region_ids_;
    }
@@ -93,7 +93,7 @@ public class VisibilityMapMessage extends Packet<VisibilityMapMessage> implement
    }
 
 
-   public us.ihmc.idl.IDLSequence.Long  getTargetRegionIds()
+   public us.ihmc.idl.IDLSequence.Integer  getTargetRegionIds()
    {
       return target_region_ids_;
    }
@@ -125,7 +125,7 @@ public class VisibilityMapMessage extends Packet<VisibilityMapMessage> implement
          {  if (!this.source_points_.get(i).epsilonEquals(other.source_points_.get(i), epsilon)) return false; }
       }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.source_region_ids_, other.source_region_ids_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.source_region_ids_, other.source_region_ids_, epsilon)) return false;
 
       if (this.target_points_.size() != other.target_points_.size()) { return false; }
       else
@@ -134,7 +134,7 @@ public class VisibilityMapMessage extends Packet<VisibilityMapMessage> implement
          {  if (!this.target_points_.get(i).epsilonEquals(other.target_points_.get(i), epsilon)) return false; }
       }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.target_region_ids_, other.target_region_ids_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.target_region_ids_, other.target_region_ids_, epsilon)) return false;
 
 
       return true;

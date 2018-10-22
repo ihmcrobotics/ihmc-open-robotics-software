@@ -48,7 +48,6 @@ public class VisibilityGraphMessagesConverter
       return convertToVisibilityMapMessage(-1, visibilityMap);
    }
 
-
    public static VisibilityMapMessage convertToVisibilityMapMessage(int mapId, VisibilityMap visibilityMap)
    {
       VisibilityMapMessage message = new VisibilityMapMessage();
@@ -58,10 +57,12 @@ public class VisibilityGraphMessagesConverter
 
       for (Connection connection : visibilityMap.getConnections())
       {
-         message.getSourcePoints().add().set(connection.getSourcePoint());
-         message.getTargetPoints().add().set(connection.getTargetPoint());
-         message.getSourceRegionIds().add(connection.getSourcePoint().getRegionId());
-         message.getTargetRegionIds().add(connection.getTargetPoint().getRegionId());
+         ConnectionPoint3D sourcePoint = connection.getSourcePoint();
+         ConnectionPoint3D targetPoint = connection.getTargetPoint();
+         message.getSourcePoints().add().set(sourcePoint);
+         message.getTargetPoints().add().set(targetPoint);
+         message.getSourceRegionIds().add(sourcePoint.getRegionId());
+         message.getTargetRegionIds().add(targetPoint.getRegionId());
       }
 
       message.setMapId(mapId);
@@ -114,9 +115,13 @@ public class VisibilityGraphMessagesConverter
       InterRegionVisibilityMap visibilityMapHolder = new InterRegionVisibilityMap();
 
       for (int i = 0; i < message.getSourcePoints().size(); i++)
-         visibilityMapHolder.addConnection(
-               new Connection(message.getSourcePoints().get(i), (int) message.getSourceRegionIds().get(i), message.getTargetPoints().get(i),
-                              (int) message.getTargetRegionIds().get(i)));
+      {
+         Point3D source = message.getSourcePoints().get(i);
+         Point3D target = message.getTargetPoints().get(i);
+         int sourceId = message.getSourceRegionIds().get(i);
+         int targetId = message.getTargetRegionIds().get(i);
+         visibilityMapHolder.addConnection(new Connection(source, sourceId, target, targetId));
+      }
       visibilityMapHolder.getVisibilityMapInWorld().computeVertices();
 
       return visibilityMapHolder;
@@ -127,16 +132,20 @@ public class VisibilityGraphMessagesConverter
       VisibilityMap visibilityMap = new VisibilityMap();
 
       for (int i = 0; i < message.getSourcePoints().size(); i++)
-         visibilityMap.addConnection(
-               new Connection(message.getSourcePoints().get(i), (int) message.getSourceRegionIds().get(i), message.getTargetPoints().get(i),
-                              (int) message.getTargetRegionIds().get(i)));
+      {
+         Point3D source = message.getSourcePoints().get(i);
+         Point3D target = message.getTargetPoints().get(i);
+         int sourceId = message.getSourceRegionIds().get(i);
+         int targetId = message.getTargetRegionIds().get(i);
+         visibilityMap.addConnection(new Connection(source, sourceId, target, targetId));
+      }
       visibilityMap.computeVertices();
       VisibilityMapHolder mapHolder = new VisibilityMapHolder()
       {
          @Override
          public int getMapId()
          {
-            return (int) message.getMapId();
+            return message.getMapId();
          }
 
          @Override
@@ -236,5 +245,4 @@ public class VisibilityGraphMessagesConverter
 
       return statistics;
    }
-
 }

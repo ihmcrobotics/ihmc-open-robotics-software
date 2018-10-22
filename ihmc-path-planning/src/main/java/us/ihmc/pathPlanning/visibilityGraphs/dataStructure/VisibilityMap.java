@@ -7,8 +7,8 @@ import us.ihmc.euclid.transform.interfaces.Transform;
 
 public class VisibilityMap implements Transformable, Iterable<Connection>
 {
-   private final Set<Connection> connections;
-   private final Set<ConnectionPoint3D> vertices;
+   private final HashSet<Connection> connections;
+   private final HashSet<ConnectionPoint3D> vertices;
 
    public VisibilityMap()
    {
@@ -74,12 +74,12 @@ public class VisibilityMap implements Transformable, Iterable<Connection>
       }
    }
 
-   public Set<ConnectionPoint3D> getVertices()
+   public HashSet<ConnectionPoint3D> getVertices()
    {
       return vertices;
    }
 
-   public Set<Connection> getConnections()
+   public HashSet<Connection> getConnections()
    {
       return connections;
    }

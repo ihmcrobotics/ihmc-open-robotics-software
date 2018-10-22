@@ -92,7 +92,7 @@ public class VisibilityMapMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(controller_msgs.msg.dds.VisibilityMapMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getMapId());
+      cdr.write_type_2(data.getMapId());
 
       if(data.getSourcePoints().size() <= 100)
       cdr.write_type_e(data.getSourcePoints());else
@@ -114,7 +114,7 @@ public class VisibilityMapMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void read(controller_msgs.msg.dds.VisibilityMapMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setMapId(cdr.read_type_4());
+      data.setMapId(cdr.read_type_2());
       	
       cdr.read_type_e(data.getSourcePoints());	
       cdr.read_type_e(data.getSourceRegionIds());	
@@ -126,7 +126,7 @@ public class VisibilityMapMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(controller_msgs.msg.dds.VisibilityMapMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("map_id", data.getMapId());
+      ser.write_type_2("map_id", data.getMapId());
       ser.write_type_e("source_points", data.getSourcePoints());
       ser.write_type_e("source_region_ids", data.getSourceRegionIds());
       ser.write_type_e("target_points", data.getTargetPoints());
@@ -136,7 +136,7 @@ public class VisibilityMapMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.VisibilityMapMessage data)
    {
-      data.setMapId(ser.read_type_4("map_id"));
+      data.setMapId(ser.read_type_2("map_id"));
       ser.read_type_e("source_points", data.getSourcePoints());
       ser.read_type_e("source_region_ids", data.getSourceRegionIds());
       ser.read_type_e("target_points", data.getTargetPoints());
