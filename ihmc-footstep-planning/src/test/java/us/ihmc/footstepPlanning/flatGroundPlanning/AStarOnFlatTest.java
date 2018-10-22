@@ -40,7 +40,7 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
       SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion(parameters);
-      planner = AStarFootstepPlanner.createFlatGroundPlanner(parameters, visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
+      planner = AStarFootstepPlanner.createPlanner(parameters, visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
    }
 
    @After
