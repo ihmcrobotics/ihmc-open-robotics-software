@@ -93,7 +93,7 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(getPlannerParameters());
       planner = AStarFootstepPlanner
-            .createRoughTerrainPlanner(getPlannerParameters(), visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
+            .createPlanner(getPlannerParameters(), visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
    }
 
    @Override

@@ -43,6 +43,14 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 120000)
+   public void testWalkingOnFlatGround()
+   {
+      super.testWalkingOnFlatGround();
+   }
+
+   @Override
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 120000)
    public void testWalkingBetweenBollardsAStarPlanner()
    {
       super.testWalkingBetweenBollardsAStarPlanner();

@@ -22,11 +22,9 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       {
          return snapDataHolder.get(footstepNode);
       }
-      else if (planarRegionsList == null)
+      else if (planarRegionsList == null || planarRegionsList.isEmpty())
       {
-         FootstepNodeSnapData identityData = FootstepNodeSnapData.identityData();
-         addSnapData(footstepNode, identityData);
-         return identityData;
+         return FootstepNodeSnapData.identityData();
       }
       else
       {

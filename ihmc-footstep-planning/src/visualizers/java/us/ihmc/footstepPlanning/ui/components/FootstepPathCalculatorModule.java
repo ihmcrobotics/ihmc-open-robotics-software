@@ -188,7 +188,7 @@ public class FootstepPathCalculatorModule
    private FootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry registry)
    {
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters.get());
-      return AStarFootstepPlanner.createRoughTerrainPlanner(parameters.get(), null, footPolygons, expansion, registry);
+      return AStarFootstepPlanner.createPlanner(parameters.get(), null, footPolygons, expansion, registry);
    }
 
    private FootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, YoVariableRegistry registry)
