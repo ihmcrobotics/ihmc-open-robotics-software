@@ -49,6 +49,11 @@ public class FootstepPlannerParametersUIController
       this.messager = messager;
    }
 
+   public void setPlannerParameters(FootstepPlannerParameters parameters)
+   {
+      parametersProperty.setPlannerParameters(parameters);
+   }
+
    public void setupControls()
    {
       plannerTimeout.setValueFactory(createTimeoutValueFactory());
