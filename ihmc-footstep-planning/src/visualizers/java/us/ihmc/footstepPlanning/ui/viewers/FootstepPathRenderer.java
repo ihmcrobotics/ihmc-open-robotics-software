@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.ui.components;
+package us.ihmc.footstepPlanning.ui.viewers;
 
 import javafx.scene.Group;
 import javafx.scene.Node;

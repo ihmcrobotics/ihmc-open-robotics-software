@@ -38,9 +38,14 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.statistics.ListOfStatistics;
+import us.ihmc.pathPlanning.statistics.PlannerStatistics;
+import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -56,7 +61,7 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
    private static final double defaultHeuristicWeight = 15.0;
@@ -85,6 +90,9 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    private final boolean visualizing;
    private static final int bodyPathPointsForVisualization = 100;
    private final List<YoFramePoint3D> bodyPathPoints = new ArrayList<>();
+
+   private final ListOfStatistics listOfStatistics = new ListOfStatistics();
+   private final VisibilityGraphStatistics visibilityGraphStatistics = new VisibilityGraphStatistics();
 
    public VisibilityGraphWithAStarPlanner(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons,
                                           YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -359,7 +367,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       }
    }
 
-   public Point3D[][] getNavigableRegions()
+   public Point3DReadOnly[][] getNavigableRegions()
    {
       return navigableRegionsManager.getNavigableExtrusions();
    }
@@ -393,6 +401,31 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    public BodyPathPlan getPathPlan()
    {
       return bodyPathPlanner.getPlan();
+   }
+
+   @Override
+   public ListOfStatistics getPlannerStatistics()
+   {
+      listOfStatistics.clear();
+
+      packVisibilityGraphStatistics(visibilityGraphStatistics);
+
+      listOfStatistics.addStatistics(visibilityGraphStatistics);
+
+      return listOfStatistics;
+   }
+
+   private void packVisibilityGraphStatistics(VisibilityGraphStatistics statistics)
+   {
+      VisibilityMapHolder startMap = navigableRegionsManager.getStartMap();
+      VisibilityMapHolder goalMap = navigableRegionsManager.getGoalMap();
+      VisibilityMapHolder interRegionsMap = navigableRegionsManager.getInterRegionConnections();
+      List<NavigableRegion> navigableRegions = navigableRegionsManager.getNavigableRegions();
+
+      statistics.setStartVisibilityMapInWorld(startMap.getMapId(), startMap.getVisibilityMapInWorld());
+      statistics.setGoalVisibilityMapInWorld(goalMap.getMapId(), goalMap.getVisibilityMapInWorld());
+      statistics.setInterRegionsVisibilityMapInWorld(interRegionsMap.getMapId(), interRegionsMap.getVisibilityMapInWorld());
+      statistics.addNavigableRegions(navigableRegions);
    }
 
 }

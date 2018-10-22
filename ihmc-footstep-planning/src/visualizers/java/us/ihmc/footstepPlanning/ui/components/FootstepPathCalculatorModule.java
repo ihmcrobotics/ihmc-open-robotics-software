@@ -6,8 +6,10 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
@@ -24,11 +26,22 @@ import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
+import us.ihmc.pathPlanning.statistics.ListOfStatistics;
+import us.ihmc.pathPlanning.statistics.PlannerStatistics;
+import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
@@ -56,6 +69,8 @@ public class FootstepPathCalculatorModule
 
    private final Messager messager;
 
+   private FootstepPlanner planner;
+
    public FootstepPathCalculatorModule(Messager messager)
    {
       this.messager = messager;
@@ -72,6 +87,7 @@ public class FootstepPathCalculatorModule
       plannerHorizonLengthReference = messager.createInput(PlannerHorizonLengthTopic, 1.0);
 
       messager.registerTopicListener(ComputePathTopic, request -> computePathOnThread());
+      messager.registerTopicListener(RequestPlannerStatistics, request -> sendPlannerStatistics());
    }
 
    public void clear()
@@ -127,20 +143,41 @@ public class FootstepPathCalculatorModule
 
       try
       {
-         FootstepPlanner planner = createPlanner();
+         planner = createPlanner();
 
          planner.setPlanarRegions(planarRegionsList);
          planner.setTimeout(plannerTimeoutReference.get());
          planner.setPlanningHorizonLength(plannerHorizonLengthReference.get());
 
-         planner.setInitialStanceFoot(new FramePose3D(ReferenceFrame.getWorldFrame(), start, startOrientationReference.get()), initialStanceSideReference.get());
+         planner
+               .setInitialStanceFoot(new FramePose3D(ReferenceFrame.getWorldFrame(), start, startOrientationReference.get()), initialStanceSideReference.get());
 
          FootstepPlannerGoal plannerGoal = new FootstepPlannerGoal();
          plannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
          plannerGoal.setGoalPoseBetweenFeet(new FramePose3D(ReferenceFrame.getWorldFrame(), goal, goalOrientationReference.get()));
          planner.setGoal(plannerGoal);
 
-         FootstepPlanningResult planningResult = planner.plan();
+         messager.submitMessage(PlannerStatusTopic, FootstepPlannerStatus.PLANNING_PATH);
+
+         FootstepPlanningResult planningResult = planner.planPath();
+         if (planningResult.validForExecution())
+         {
+            BodyPathPlan bodyPathPlan = planner.getPathPlan();
+            messager.submitMessage(PlannerStatusTopic, FootstepPlannerStatus.PLANNING_STEPS);
+
+            if (bodyPathPlan != null)
+            {
+               List<Point3DReadOnly> bodyPath = new ArrayList<>();
+               for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
+                  bodyPath.add(bodyPathPlan.getWaypoint(i));
+               messager.submitMessage(BodyPathDataTopic, bodyPath);
+            }
+            messager.submitMessage(PlanningResultTopic, planningResult);
+
+            planningResult = planner.plan();
+         }
+
+         FootstepPlan footstepPlan = planner.getPlan();
 
          if (VERBOSE)
          {
@@ -151,16 +188,100 @@ public class FootstepPathCalculatorModule
 
          messager.submitMessage(PlanningResultTopic, planningResult);
          messager.submitMessage(PlannerTimeTakenTopic, planner.getPlanningDuration());
+         messager.submitMessage(PlannerStatusTopic, FootstepPlannerStatus.IDLE);
 
          if (planningResult.validForExecution())
-            messager.submitMessage(FootstepPlanTopic, planner.getPlan());
+         {
+            messager.submitMessage(FootstepPlanTopic, footstepPlan);
+            if (footstepPlan.getLowLevelPlanGoal() != null)
+            {
+               messager.submitMessage(LowLevelGoalPositionTopic, new Point3D(footstepPlan.getLowLevelPlanGoal().getPosition()));
+               messager.submitMessage(LowLevelGoalOrientationTopic, new Quaternion(footstepPlan.getLowLevelPlanGoal().getOrientation()));
+            }
+         }
       }
       catch (Exception e)
       {
          PrintTools.error(this, e.getMessage());
          e.printStackTrace();
       }
+   }
 
+   private void sendPlannerStatistics()
+   {
+      if (planner == null)
+         return;
+
+      PlannerStatistics<?> plannerStatistics = planner.getPlannerStatistics();
+      sendPlannerStatisticsMessages(plannerStatistics);
+   }
+
+   private void sendPlannerStatisticsMessages(PlannerStatistics plannerStatistics)
+   {
+      switch (plannerStatistics.getStatisticsType())
+      {
+      case LIST:
+         sendListOfStatisticsMessages((ListOfStatistics) plannerStatistics);
+         break;
+      case VISIBILITY_GRAPH:
+         sendVisibilityGraphStatisticsMessages((VisibilityGraphStatistics) plannerStatistics);
+         break;
+      }
+   }
+
+   private void sendListOfStatisticsMessages(ListOfStatistics listOfStatistics)
+   {
+      while (listOfStatistics.getNumberOfStatistics() > 0)
+         sendPlannerStatisticsMessages(listOfStatistics.pollStatistics());
+   }
+
+   private void sendVisibilityGraphStatisticsMessages(VisibilityGraphStatistics statistics)
+   {
+      VisibilityMapHolder startMap = new VisibilityMapHolder()
+      {
+         public int getMapId()
+         {
+            return statistics.getStartMapId();
+         }
+
+         public VisibilityMap getVisibilityMapInLocal()
+         {
+            return statistics.getStartVisibilityMap();
+         }
+
+         public VisibilityMap getVisibilityMapInWorld()
+         {
+            return statistics.getStartVisibilityMap();
+         }
+      };
+      VisibilityMapHolder goalMap = new VisibilityMapHolder()
+      {
+         public int getMapId()
+         {
+            return statistics.getGoalMapId();
+         }
+
+         public VisibilityMap getVisibilityMapInLocal()
+         {
+            return statistics.getGoalVisibilityMap();
+         }
+
+         public VisibilityMap getVisibilityMapInWorld()
+         {
+            return statistics.getGoalVisibilityMap();
+         }
+      };
+      InterRegionVisibilityMap interRegionVisibilityMap = new InterRegionVisibilityMap();
+      interRegionVisibilityMap.addConnections(statistics.getInterRegionsVisibilityMap().getConnections());
+
+      List<NavigableRegion> navigableRegionList = new ArrayList<>();
+      for (int i = 0; i < statistics.getNumberOfNavigableRegions(); i++)
+         navigableRegionList.add(statistics.getNavigableRegion(i));
+
+      messager.submitMessage(StartVisibilityMap, startMap);
+      messager.submitMessage(GoalVisibilityMap, goalMap);
+      messager.submitMessage(NavigableRegionData, navigableRegionList);
+      messager.submitMessage(InterRegionVisibilityMap, interRegionVisibilityMap);
    }
 
    private FootstepPlanner createPlanner()

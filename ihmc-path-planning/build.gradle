@@ -53,4 +53,5 @@ testDependencies {
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.24.0"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.6"
    compile group: 'us.ihmc', name: 'robot-environment-awareness-application', version: "source"
+   compile group: 'us.ihmc', name: 'ihmc-robotics-toolkit-test', version: "source"
 }
