@@ -138,7 +138,8 @@ public class ClusterMeshViewer extends AnimationTimer
       Map<Integer, JavaFXMeshBuilder> rawPointsMeshBuilders = new HashMap<>();
       Map<Integer, JavaFXMeshBuilder> navigableExtrusionsMeshBuilders = new HashMap<>();
       Map<Integer, JavaFXMeshBuilder> nonNavigableExtrusionsMeshBuilders = new HashMap<>();
-      Map<Integer, Material> materials = new HashMap<>();
+      Map<Integer, Material> navigableMaterials = new HashMap<>();
+      Map<Integer, Material> nonNavigableMaterials = new HashMap<>();
 
       for (NavigableRegion navigableRegionLocalPlanner : navigableRegionLocalPlanners)
       {
@@ -158,7 +159,8 @@ public class ClusterMeshViewer extends AnimationTimer
                   .addMultiLine(cluster.getNonNavigableExtrusionsInWorld(), VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, false);
          }
 
-         materials.put(regionId, new PhongMaterial(getLineColor(regionId)));
+         navigableMaterials.put(regionId, new PhongMaterial(getNavigableLineColor(regionId)));
+         nonNavigableMaterials.put(regionId, new PhongMaterial(getNonNavigableLineColor(regionId)));
       }
 
       HashMap<Integer, MeshView> rawPointsMapToRender = new HashMap<>();
@@ -168,15 +170,15 @@ public class ClusterMeshViewer extends AnimationTimer
       for (Integer id : rawPointsMeshBuilders.keySet())
       {
          MeshView rawPointsMeshView = new MeshView(rawPointsMeshBuilders.get(id).generateMesh());
-         rawPointsMeshView.setMaterial(materials.get(id));
+         rawPointsMeshView.setMaterial(nonNavigableMaterials.get(id));
          rawPointsMapToRender.put(id, rawPointsMeshView);
 
          MeshView navigableExtrusionsMeshView = new MeshView(navigableExtrusionsMeshBuilders.get(id).generateMesh());
-         navigableExtrusionsMeshView.setMaterial(materials.get(id));
+         navigableExtrusionsMeshView.setMaterial(navigableMaterials.get(id));
          navigableExtrusionsMapToRender.put(id, navigableExtrusionsMeshView);
 
          MeshView nonNavigableExtrusionsMeshView = new MeshView(nonNavigableExtrusionsMeshBuilders.get(id).generateMesh());
-         nonNavigableExtrusionsMeshView.setMaterial(materials.get(id));
+         nonNavigableExtrusionsMeshView.setMaterial(nonNavigableMaterials.get(id));
          nonNavigableExtrusionsMapToRender.put(id, nonNavigableExtrusionsMeshView);
       }
 
@@ -196,9 +198,14 @@ public class ClusterMeshViewer extends AnimationTimer
       return meshBuilder;
    }
 
-   private Color getLineColor(int regionId)
+   private Color getNonNavigableLineColor(int regionId)
    {
       return PlanarRegionViewer.getRegionColor(regionId).darker();
+   }
+
+   private Color getNavigableLineColor(int regionId)
+   {
+      return PlanarRegionViewer.getRegionColor(regionId).brighter();
    }
 
    @Override
