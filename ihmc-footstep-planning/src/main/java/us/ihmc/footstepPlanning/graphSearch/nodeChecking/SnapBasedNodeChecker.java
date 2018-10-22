@@ -50,9 +50,6 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      if(!hasPlanarRegions())
-         return true;
-
       if (previousNode != null && node.equals(previousNode))
       {
          throw new RuntimeException("Checking node assuming it is follwoing itself.");
@@ -106,7 +103,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          return false;
       }
 
-      if (isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegionsList, parameters.getBodyGroundClearance()))
+      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegionsList, parameters.getBodyGroundClearance()))
       {
          if (DEBUG)
          {
