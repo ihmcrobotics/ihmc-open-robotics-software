@@ -36,6 +36,7 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
    protected void bindFieldBidirectionalToNumberProperty(Property<? extends Number> property, Field field)
    {
       NumberBidirectionalBind binding = new NumberBidirectionalBind(property, field);
+      setNumberValue(property, field);
       property.addListener(binding);
       field.addListener(binding);
    }
@@ -43,6 +44,7 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
    protected void bindFieldBidirectionalToConditionalNumberProperty(Condition condition, Property<? extends Number> property, Field field)
    {
       ConditionalNumberBidirectionalBind binding = new ConditionalNumberBidirectionalBind(condition, property, field);
+      setNumberValue(property, field);
       property.addListener(binding);
       field.addListener(binding);
    }
@@ -266,24 +268,28 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
          }
          else
          {
-            if (numberProperty.getValue() instanceof Double)
-               ((Property<Double>) numberProperty).setValue(new Double(field.getNumber(getValue()).doubleValue()));
-            else if (numberProperty.getValue() instanceof Integer)
-               ((Property<Integer>) numberProperty).setValue(new Integer(field.getNumber(getValue()).intValue()));
-            else if (numberProperty.getValue() instanceof Float)
-               ((Property<Float>) numberProperty).setValue(new Float(field.getNumber(getValue()).floatValue()));
-            else if (numberProperty.getValue() instanceof Long)
-               ((Property<Long>) numberProperty).setValue(new Long(field.getNumber(getValue()).longValue()));
-            else if (numberProperty.getValue() instanceof Short)
-               ((Property<Short>) numberProperty).setValue(new Short(field.getNumber(getValue()).shortValue()));
-            else if (numberProperty.getValue() instanceof Byte)
-               ((Property<Byte>) numberProperty).setValue(new Byte(field.getNumber(getValue()).byteValue()));
-            else
-               throw new RuntimeException("Unhandled instance of Number: " + numberProperty.getValue().getClass().getSimpleName());
+            setNumberValue(numberProperty, field);
          }
       }
    }
 
+   private void setNumberValue(Property<? extends Number> numberProperty, Field field)
+   {
+      if (numberProperty.getValue() instanceof Double)
+         ((Property<Double>) numberProperty).setValue(new Double(field.getNumber(getValue()).doubleValue()));
+      else if (numberProperty.getValue() instanceof Integer)
+         ((Property<Integer>) numberProperty).setValue(new Integer(field.getNumber(getValue()).intValue()));
+      else if (numberProperty.getValue() instanceof Float)
+         ((Property<Float>) numberProperty).setValue(new Float(field.getNumber(getValue()).floatValue()));
+      else if (numberProperty.getValue() instanceof Long)
+         ((Property<Long>) numberProperty).setValue(new Long(field.getNumber(getValue()).longValue()));
+      else if (numberProperty.getValue() instanceof Short)
+         ((Property<Short>) numberProperty).setValue(new Short(field.getNumber(getValue()).shortValue()));
+      else if (numberProperty.getValue() instanceof Byte)
+         ((Property<Byte>) numberProperty).setValue(new Byte(field.getNumber(getValue()).byteValue()));
+      else
+         throw new RuntimeException("Unhandled instance of Number: " + numberProperty.getValue().getClass().getSimpleName());
+   }
 
 
    private class BooleanBidirectionalBind implements InvalidationListener

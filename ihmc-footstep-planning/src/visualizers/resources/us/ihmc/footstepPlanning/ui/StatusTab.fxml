@@ -19,7 +19,7 @@
     <children>
         <GridPane hgap="5.0" layoutX="25.0" layoutY="27.0">
             <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0"/>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="6.0"/>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="6.0"/>
@@ -40,7 +40,7 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
             </rowConstraints>
             <children>
-                <Button mnemonicParsing="false" onAction="#computePath" text="Compute path" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Button mnemonicParsing="false" onAction="#computePath" text="Compute path" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                 <Label text="Planner Type" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                 <Label text="Planner Status" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 

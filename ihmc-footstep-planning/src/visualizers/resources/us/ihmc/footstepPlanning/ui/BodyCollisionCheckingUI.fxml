@@ -7,10 +7,10 @@
     <children>
         <GridPane hgap="0.0" layoutX="15.0" layoutY="17.0">
             <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0"/>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="200.0"/>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0"/>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="200.0"/>
             </columnConstraints>
             <rowConstraints>
@@ -29,15 +29,19 @@
                 <Label text="Body Box Center Height" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
 
 
-                <Slider fx:id="bodyWidth" blockIncrement="0.05" majorTickUnit="0.05" max="1.5" min="0.25" minorTickCount="4" prefHeight="38.0" prefWidth="77.0"
+                <Slider fx:id="bodyWidth" GridPane.halignment="CENTER" blockIncrement="0.05" majorTickUnit="0.05" max="1.5" min="0.25" minorTickCount="4"
+                        prefHeight="38.0" prefWidth="175.0"
                         showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.01" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-                <Slider fx:id="bodyDepth" blockIncrement="0.05" majorTickUnit="0.05" max="1.0" min="0.25" minorTickCount="4" prefHeight="38.0" prefWidth="77.0"
+                <Slider fx:id="bodyDepth" GridPane.halignment="CENTER" blockIncrement="0.05" majorTickUnit="0.05" max="1.0" min="0.25" minorTickCount="4"
+                        prefHeight="38.0" prefWidth="175.0"
                         showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.01" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
 
-                <Slider fx:id="bodyHeight" blockIncrement="0.1" majorTickUnit="0.1" max="2.0" min="0.5" minorTickCount="4" prefHeight="38.0" prefWidth="77.0"
+                <Slider fx:id="bodyHeight" GridPane.halignment="CENTER" blockIncrement="0.1" majorTickUnit="0.1" max="2.0" min="0.5" minorTickCount="4"
+                        prefHeight="38.0" prefWidth="175.0"
                         showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.01" GridPane.columnIndex="5" GridPane.rowIndex="2"/>
-                <Slider fx:id="bodyCenterHeight" blockIncrement="0.1" majorTickUnit="0.1" max="1.5" min="0.5" minorTickCount="4" prefHeight="38.0"
-                        prefWidth="77.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.01" GridPane.columnIndex="5"
+                <Slider fx:id="bodyCenterHeight" GridPane.halignment="CENTER" blockIncrement="0.1" majorTickUnit="0.1" max="1.5" min="0.5" minorTickCount="4"
+                        prefHeight="38.0"
+                        prefWidth="175.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.01" GridPane.columnIndex="5"
                         GridPane.rowIndex="3"/>
 
 

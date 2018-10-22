@@ -7,12 +7,12 @@
     <children>
         <GridPane hgap="15.0" layoutX="15.0" layoutY="17.0">
             <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="200.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="250.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="75.0"/>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="150.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="75.0"/>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="150.0"/>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="150.0"/>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="150.0"/>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="150.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="100.0"/>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="150.0"/>
             </columnConstraints>
             <rowConstraints>
@@ -31,21 +31,21 @@
                 <Label text="Cost per step" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
                 <Label text="Heuristics weight" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
 
-                <Spinner fx:id="costPerStep" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-                <Spinner fx:id="heuristicsWeight" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
+                <Spinner fx:id="costPerStep" GridPane.halignment="RIGHT" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+                <Spinner fx:id="heuristicsWeight" GridPane.halignment="RIGHT" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
 
-                <Label text="Yaw weight" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
-                <Label text="Pitch weight" GridPane.columnIndex="4" GridPane.rowIndex="2"/>
-                <Label text="Roll weight" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
+                <Label text="Yaw weight" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
+                <Label text="Pitch weight" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="2"/>
+                <Label text="Roll weight" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
 
                 <Spinner fx:id="yawWeight" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="1"/>
                 <Spinner fx:id="pitchWeight" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="2"/>
                 <Spinner fx:id="rollWeight" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="3"/>
 
-                <Label text="Forward weight" GridPane.columnIndex="6" GridPane.rowIndex="1"/>
-                <Label text="Lateral weight" GridPane.columnIndex="6" GridPane.rowIndex="2"/>
-                <Label text="Step Up weight" GridPane.columnIndex="6" GridPane.rowIndex="3"/>
-                <Label text="Step Down weight" GridPane.columnIndex="6" GridPane.rowIndex="4"/>
+                <Label text="Forward weight" GridPane.halignment="RIGHT" GridPane.columnIndex="6" GridPane.rowIndex="1"/>
+                <Label text="Lateral weight" GridPane.halignment="RIGHT" GridPane.columnIndex="6" GridPane.rowIndex="2"/>
+                <Label text="Step Up weight" GridPane.halignment="RIGHT" GridPane.columnIndex="6" GridPane.rowIndex="3"/>
+                <Label text="Step Down weight" GridPane.halignment="RIGHT" GridPane.columnIndex="6" GridPane.rowIndex="4"/>
 
                 <Spinner fx:id="forwardWeight" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="1"/>
                 <Spinner fx:id="lateralWeight" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="2"/>
