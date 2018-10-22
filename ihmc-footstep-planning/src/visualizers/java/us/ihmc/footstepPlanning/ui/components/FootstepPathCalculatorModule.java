@@ -160,16 +160,18 @@ public class FootstepPathCalculatorModule
          messager.submitMessage(PlannerStatusTopic, FootstepPlannerStatus.PLANNING_PATH);
 
          FootstepPlanningResult planningResult = planner.planPath();
-         BodyPathPlan bodyPathPlan = null;
          if (planningResult.validForExecution())
          {
-            bodyPathPlan = planner.getPathPlan();
+            BodyPathPlan bodyPathPlan = planner.getPathPlan();
             messager.submitMessage(PlannerStatusTopic, FootstepPlannerStatus.PLANNING_STEPS);
 
-            List<Point3DReadOnly> bodyPath = new ArrayList<>();
-            for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
-               bodyPath.add(bodyPathPlan.getWaypoint(i));
-            messager.submitMessage(BodyPathDataTopic, bodyPath);
+            if (bodyPathPlan != null)
+            {
+               List<Point3DReadOnly> bodyPath = new ArrayList<>();
+               for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
+                  bodyPath.add(bodyPathPlan.getWaypoint(i));
+               messager.submitMessage(BodyPathDataTopic, bodyPath);
+            }
             messager.submitMessage(PlanningResultTopic, planningResult);
 
             planningResult = planner.plan();
@@ -191,8 +193,11 @@ public class FootstepPathCalculatorModule
          if (planningResult.validForExecution())
          {
             messager.submitMessage(FootstepPlanTopic, footstepPlan);
-            messager.submitMessage(LowLevelGoalPositionTopic, new Point3D(footstepPlan.getLowLevelPlanGoal().getPosition()));
-            messager.submitMessage(LowLevelGoalOrientationTopic, new Quaternion(footstepPlan.getLowLevelPlanGoal().getOrientation()));
+            if (footstepPlan.getLowLevelPlanGoal() != null)
+            {
+               messager.submitMessage(LowLevelGoalPositionTopic, new Point3D(footstepPlan.getLowLevelPlanGoal().getPosition()));
+               messager.submitMessage(LowLevelGoalOrientationTopic, new Quaternion(footstepPlan.getLowLevelPlanGoal().getOrientation()));
+            }
          }
       }
       catch (Exception e)
@@ -229,7 +234,6 @@ public class FootstepPathCalculatorModule
       while (listOfStatistics.getNumberOfStatistics() > 0)
          sendPlannerStatisticsMessages(listOfStatistics.pollStatistics());
    }
-
 
    private void sendVisibilityGraphStatisticsMessages(VisibilityGraphStatistics statistics)
    {
