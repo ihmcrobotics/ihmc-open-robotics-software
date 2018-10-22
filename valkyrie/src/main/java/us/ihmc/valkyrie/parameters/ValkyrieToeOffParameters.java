@@ -1,14 +1,15 @@
 package us.ihmc.valkyrie.parameters;
 
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 
 public class ValkyrieToeOffParameters extends ToeOffParameters
 {
-   private final boolean runningOnRealRobot;
+   private final RobotTarget target;
 
-   public ValkyrieToeOffParameters(boolean runningOnRealRobot)
+   public ValkyrieToeOffParameters(RobotTarget target)
    {
-      this.runningOnRealRobot = runningOnRealRobot;
+      this.target = target;
    }
 
    @Override
@@ -35,7 +36,7 @@ public class ValkyrieToeOffParameters extends ToeOffParameters
    @Override
    public double getECMPProximityForToeOff()
    {
-      return runningOnRealRobot ? 0.02 : 0.04;
+      return (target == RobotTarget.REAL_ROBOT) ? 0.02 : 0.04;
    }
 
 
