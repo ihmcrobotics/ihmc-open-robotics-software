@@ -1,7 +1,5 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.signedDistanceFromPoint3DToPlane3D;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +11,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -29,6 +28,9 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
+
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D;
 
 public class PlanarRegionTools
 {
@@ -590,6 +592,55 @@ public class PlanarRegionTools
 
       return Arrays.stream(query.getConcaveHull()).map(vertex -> applyTransform(transformToWorld, vertex))
                    .anyMatch(vertex -> capsuleSegment.distance(vertex) <= capsuleRadius);
+
+
+//      return query.getConvexPolygons().stream().anyMatch(polygon -> signedDistanceFromLineSegment2DToConvexPolygon2D(capsuleSegment.getFirstEndpoint(),
+//                                                                                                              capsuleSegment.getSecondEndpoint(),
+//                                                                                                              polygon.getVertexBufferView(),
+//                                                                                                              polygon.getNumberOfVertices(),
+//                                                                                                              polygon.isClockwiseOrdered()) <= capsuleRadius);
+   }
+
+   private static double signedDistanceFromLineSegment2DToConvexPolygon2D(Point3DReadOnly startPoint, Point3DReadOnly endPoint,
+                                                                          List<? extends Point2DReadOnly> convexPolygon2D, int numberOfVertices,
+                                                                          boolean clockwiseOrdered)
+   {
+      if (numberOfVertices < 0 || numberOfVertices > convexPolygon2D.size())
+         throw new IllegalArgumentException("Illegal numberOfVertices: " + numberOfVertices + ", expected a value in ] 0, " + convexPolygon2D.size() + "].");
+
+      List<Point3D> convexPolygon3D = new ArrayList<>();
+      convexPolygon2D.forEach(vertex -> convexPolygon3D.add(new Point3D(vertex)));
+      Point2DReadOnly startPoint2D = new Point2D(startPoint);
+      Point2DReadOnly endPoint2D = new Point2D(endPoint);
+
+      if (numberOfVertices == 0)
+         return Double.NaN;
+
+      if (numberOfVertices == 1)
+         return distanceFromPoint2DToLineSegment2D(convexPolygon2D.get(0), startPoint2D, endPoint2D);
+
+      if (numberOfVertices == 2)
+         return distanceBetweenTwoLineSegment3Ds(startPoint, endPoint, convexPolygon3D.get(0), convexPolygon3D.get(1));
+
+      boolean isQueryOutsidePolygon = false;
+      double minDistance = Double.POSITIVE_INFINITY;
+
+      for (int index = 0; index < numberOfVertices; index++)
+      {
+         Point3DReadOnly edgeStart = convexPolygon3D.get(index);
+         Point2DReadOnly edgeStart2D = convexPolygon2D.get(index);
+         Point3DReadOnly edgeEnd = convexPolygon3D.get(EuclidGeometryPolygonTools.next(index, numberOfVertices));
+         Point2DReadOnly edgeEnd2D = convexPolygon2D.get(EuclidGeometryPolygonTools.next(index, numberOfVertices));
+
+         isQueryOutsidePolygon |=
+               isPoint2DOnSideOfLine2D(startPoint2D, edgeStart2D, edgeEnd2D, clockwiseOrdered) && isPoint2DOnSideOfLine2D(endPoint2D, edgeStart2D, edgeEnd2D,
+                                                                                                                          clockwiseOrdered);
+         minDistance = Math.min(minDistance, distanceBetweenTwoLineSegment3Ds(startPoint, endPoint, edgeStart, edgeEnd));
+      }
+
+      if (!isQueryOutsidePolygon)
+         minDistance = -minDistance;
+      return minDistance;
    }
 
    public static boolean isPlanarRegionIntersectingWithCircle(Point2DReadOnly circleOrigin, double circleRadius, PlanarRegion query)
@@ -597,8 +648,10 @@ public class PlanarRegionTools
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       query.getTransformToWorld(transformToWorld);
 
-      return Arrays.stream(query.getConcaveHull()).map(vertex -> applyTransform(transformToWorld, vertex))
-                   .anyMatch(vertex -> circleOrigin.distanceXY(vertex) <= circleRadius);
+      Point2D originInLocal = new Point2D(circleOrigin);
+      originInLocal.applyInverseTransform(transformToWorld, false);
+
+      return query.getConvexPolygons().stream().anyMatch(polygon -> polygon.signedDistance(originInLocal) <= circleRadius);
    }
 
    private static Point3D applyTransform(RigidBodyTransform transform, Point2D point2D)
