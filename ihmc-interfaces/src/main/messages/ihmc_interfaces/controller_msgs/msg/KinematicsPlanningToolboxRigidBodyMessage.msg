@@ -1,3 +1,5 @@
+# This message is part of the IHMC whole-body inverse kinematics module.
+# Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 int64 end_effector_name_based_hash_code
 
@@ -36,9 +38,11 @@ geometry_msgs/Point control_frame_position_in_end_effector
 # By default, the control frame is coincident to endEffector.getBodyFixedFrame().
 geometry_msgs/Quaternion control_frame_orientation_in_end_effector
 
-# This is the list of allowable displacement for position when the trajectory is modified.
-# The unit is meter and will be applied samely on x-y-z.
+# This is the allowable displacement of the position for each key frame.
+# By default, the solver will try to find a solution without modifying the position of the key frames.
+# When a positive value is provided, the solver may adjust a key frame to improve the overall solution quality.
 float64[] allowable_position_displacement
-# This is the list of allowable displacement for orientation when the trajectory is modified.
-# The unit is radian.
+# This is the allowable displacement of the orientation for each key frame.
+# By default, the solver will try to find a solution without modifying the orientation of the key frames.
+# When a positive value is provided, the solver may adjust a key frame to improve the overall solution quality.
 float64[] allowable_orientation_displacement

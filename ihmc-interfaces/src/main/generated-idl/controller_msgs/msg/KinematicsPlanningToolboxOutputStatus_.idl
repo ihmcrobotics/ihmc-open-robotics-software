@@ -13,6 +13,7 @@ module controller_msgs
       struct KinematicsPlanningToolboxOutputStatus
       {
         /**
+         * This message is part of the IHMC whole-body inverse kinematics module.
          * This output status will be converted into the WholeBodyTrajectoryMessage.
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
@@ -26,6 +27,12 @@ module controller_msgs
          * List of configurations for each key frames.
          */
         sequence<controller_msgs::msg::dds::KinematicsToolboxOutputStatus> robot_configurations;
+        /**
+         * Solution quality.
+         * The total summation of the all solution quality for each key frames.
+         */
+        @defaultValue(value=-1.0)
+        double solution_quality;
       };
     };
   };

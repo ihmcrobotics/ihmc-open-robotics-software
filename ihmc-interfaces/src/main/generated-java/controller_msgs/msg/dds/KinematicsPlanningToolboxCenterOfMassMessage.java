@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC hole-body inverse kinematics module.
+       * This message is part of the IHMC whole-body inverse kinematics module.
        * It holds all the information needed for detailing the type of constraint to apply to the center of mass.
        */
 public class KinematicsPlanningToolboxCenterOfMassMessage extends Packet<KinematicsPlanningToolboxCenterOfMassMessage> implements Settable<KinematicsPlanningToolboxCenterOfMassMessage>, EpsilonComparable<KinematicsPlanningToolboxCenterOfMassMessage>
@@ -16,6 +16,9 @@ public class KinematicsPlanningToolboxCenterOfMassMessage extends Packet<Kinemat
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   /**
+            * This is the list of desired times for each key frames.
+            */
    public us.ihmc.idl.IDLSequence.Double  way_point_times_;
    /**
             * Specifies the desired center of mass position.
@@ -27,10 +30,9 @@ public class KinematicsPlanningToolboxCenterOfMassMessage extends Packet<Kinemat
             * should be controlled.
             * The selection frame coming along with the given selection matrix is used to determine to what
             * reference frame the selected axes are referring to. For instance, if only the hand height in
-            * world should be controlled on the linear z component of the selection matrix should be
+            * world should be controlled only the linear z component of the selection matrix should be
             * selected and the reference frame should world frame. When no reference frame is provided with
-            * the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed frame
-            * if not defined otherwise.
+            * the selection matrix, it will be used as it is in the center of mass frame which is aligned with the world axes.
             */
    public controller_msgs.msg.dds.SelectionMatrix3DMessage selection_matrix_;
    /**
@@ -82,6 +84,9 @@ public class KinematicsPlanningToolboxCenterOfMassMessage extends Packet<Kinemat
    }
 
 
+   /**
+            * This is the list of desired times for each key frames.
+            */
    public us.ihmc.idl.IDLSequence.Double  getWayPointTimes()
    {
       return way_point_times_;
@@ -103,10 +108,9 @@ public class KinematicsPlanningToolboxCenterOfMassMessage extends Packet<Kinemat
             * should be controlled.
             * The selection frame coming along with the given selection matrix is used to determine to what
             * reference frame the selected axes are referring to. For instance, if only the hand height in
-            * world should be controlled on the linear z component of the selection matrix should be
+            * world should be controlled only the linear z component of the selection matrix should be
             * selected and the reference frame should world frame. When no reference frame is provided with
-            * the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed frame
-            * if not defined otherwise.
+            * the selection matrix, it will be used as it is in the center of mass frame which is aligned with the world axes.
             */
    public controller_msgs.msg.dds.SelectionMatrix3DMessage getSelectionMatrix()
    {

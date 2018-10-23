@@ -8,6 +8,10 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<KinematicsPlanningToolboxRigidBodyMessage> implements Settable<KinematicsPlanningToolboxRigidBodyMessage>, EpsilonComparable<KinematicsPlanningToolboxRigidBodyMessage>
 {
+   /**
+            * This message is part of the IHMC whole-body inverse kinematics module.
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
    public long end_effector_name_based_hash_code_;
    /**
@@ -58,13 +62,15 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
             */
    public us.ihmc.euclid.tuple4D.Quaternion control_frame_orientation_in_end_effector_;
    /**
-            * This is the list of allowable displacement for position when the trajectory is modified.
-            * The unit is meter and will be applied samely on x-y-z.
+            * This is the allowable displacement of the position for each key frame.
+            * By default, the solver will try to find a solution without modifying the position of the key frames.
+            * When a positive value is provided, the solver may adjust a key frame to improve the overall solution quality.
             */
    public us.ihmc.idl.IDLSequence.Double  allowable_position_displacement_;
    /**
-            * This is the list of allowable displacement for orientation when the trajectory is modified.
-            * The unit is radian.
+            * This is the allowable displacement of the orientation for each key frame.
+            * By default, the solver will try to find a solution without modifying the orientation of the key frames.
+            * When a positive value is provided, the solver may adjust a key frame to improve the overall solution quality.
             */
    public us.ihmc.idl.IDLSequence.Double  allowable_orientation_displacement_;
 
@@ -110,10 +116,18 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
       allowable_orientation_displacement_.set(other.allowable_orientation_displacement_);
    }
 
+   /**
+            * This message is part of the IHMC whole-body inverse kinematics module.
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
+   /**
+            * This message is part of the IHMC whole-body inverse kinematics module.
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -217,8 +231,9 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
 
 
    /**
-            * This is the list of allowable displacement for position when the trajectory is modified.
-            * The unit is meter and will be applied samely on x-y-z.
+            * This is the allowable displacement of the position for each key frame.
+            * By default, the solver will try to find a solution without modifying the position of the key frames.
+            * When a positive value is provided, the solver may adjust a key frame to improve the overall solution quality.
             */
    public us.ihmc.idl.IDLSequence.Double  getAllowablePositionDisplacement()
    {
@@ -227,8 +242,9 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
 
 
    /**
-            * This is the list of allowable displacement for orientation when the trajectory is modified.
-            * The unit is radian.
+            * This is the allowable displacement of the orientation for each key frame.
+            * By default, the solver will try to find a solution without modifying the orientation of the key frames.
+            * When a positive value is provided, the solver may adjust a key frame to improve the overall solution quality.
             */
    public us.ihmc.idl.IDLSequence.Double  getAllowableOrientationDisplacement()
    {
