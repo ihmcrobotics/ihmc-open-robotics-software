@@ -10,6 +10,9 @@ import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.DetectedFacesPacket;
 import controller_msgs.msg.dds.HeatMapPacket;
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
+import controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
+import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
@@ -34,6 +37,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -285,6 +289,73 @@ public class MessageTools
       return message;
    }
 
+   public static KinematicsPlanningToolboxRigidBodyMessage createKinematicsPlanningToolboxRigidBodyMessage(RigidBody endEffector)
+   {
+      KinematicsPlanningToolboxRigidBodyMessage message = new KinematicsPlanningToolboxRigidBodyMessage();
+      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
+      return message;
+   }
+
+   public static KinematicsPlanningToolboxRigidBodyMessage createKinematicsPlanningToolboxRigidBodyMessage(RigidBody endEffector,
+                                                                                                           TDoubleArrayList keyFrameTimes,
+                                                                                                           List<Pose3DReadOnly> keyFramePoses)
+   {
+      KinematicsPlanningToolboxRigidBodyMessage message = new KinematicsPlanningToolboxRigidBodyMessage();
+      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
+
+      if (keyFrameTimes.size() != keyFramePoses.size())
+         throw new RuntimeException("Inconsistent list lengths: keyFrameTimes.size() = " + keyFrameTimes.size() + ", keyFramePoses.size() = "
+               + keyFramePoses.size());
+
+      for (int i = 0; i < keyFrameTimes.size(); i++)
+      {
+         message.getKeyFrameTimes().add(keyFrameTimes.get(i));
+         message.getKeyFramePoses().add().set(keyFramePoses.get(i));
+      }
+
+      return message;
+   }
+
+   public static KinematicsPlanningToolboxRigidBodyMessage createKinematicsPlanningToolboxRigidBodyMessage(RigidBody endEffector, ReferenceFrame controlFrame,
+                                                                                                           TDoubleArrayList keyFrameTimes,
+                                                                                                           List<Pose3DReadOnly> keyFramePoses)
+   {
+      KinematicsPlanningToolboxRigidBodyMessage message = new KinematicsPlanningToolboxRigidBodyMessage();
+      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
+
+      RigidBodyTransform transformToBodyFixedFrame = new RigidBodyTransform();
+      controlFrame.getTransformToDesiredFrame(transformToBodyFixedFrame, endEffector.getBodyFixedFrame());
+      message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslationVector());
+      message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotationMatrix());
+
+      if (keyFrameTimes.size() != keyFramePoses.size())
+         throw new RuntimeException("Inconsistent list lengths: keyFrameTimes.size() = " + keyFrameTimes.size() + ", keyFramePoses.size() = "
+               + keyFramePoses.size());
+
+      for (int i = 0; i < keyFrameTimes.size(); i++)
+      {
+         message.getKeyFrameTimes().add(keyFrameTimes.get(i));
+         message.getKeyFramePoses().add().set(keyFramePoses.get(i));
+      }
+
+      return message;
+   }
+
+   public static KinematicsPlanningToolboxCenterOfMassMessage createKinematicsPlanningToolboxCenterOfMassMessage(TDoubleArrayList keyFrameTimes,
+                                                                                                                 List<Point3DReadOnly> keyFramePoints)
+   {
+      KinematicsPlanningToolboxCenterOfMassMessage message = new KinematicsPlanningToolboxCenterOfMassMessage();
+      if (keyFrameTimes.size() != keyFramePoints.size())
+         throw new RuntimeException("Inconsistent list lengths: keyFrameTimes.size() = " + keyFrameTimes.size() + ", keyFramePoints.size() = "
+               + keyFramePoints.size());
+      for (int i = 0; i < keyFrameTimes.size(); i++)
+      {
+         message.getWayPointTimes().add(keyFrameTimes.get(i));
+         message.getDesiredWayPointPositionsInWorld().add().set(keyFramePoints.get(i));
+      }
+      return message;
+   }
+
    /**
     * Copy constructor.
     * 
@@ -333,6 +404,12 @@ public class MessageTools
       KinematicsToolboxOutputStatus message = new KinematicsToolboxOutputStatus();
       message.setJointNameHash((int) NameBasedHashCodeTools.computeArrayHashCode(newJointData));
       MessageTools.packDesiredJointState(message, rootJoint, newJointData, useQDesired);
+      return message;
+   }
+   
+   public static KinematicsPlanningToolboxOutputStatus createKinematicsPlanningToolboxOutputStatus()
+   {
+      KinematicsPlanningToolboxOutputStatus message = new KinematicsPlanningToolboxOutputStatus();
       return message;
    }
 
@@ -416,8 +493,9 @@ public class MessageTools
 
    public static LidarScanParameters toLidarScanParameters(LidarScanParametersMessage message)
    {
-      return new LidarScanParameters(message.getPointsPerSweep(), message.getScanHeight(), message.getSweepYawMin(), message.getSweepYawMax(), message.getHeightPitchMin(),
-                                     message.getHeightPitchMax(), message.getTimeIncrement(), message.getMinRange(), message.getMaxRange(), message.getScanTime(), message.getTimestamp());
+      return new LidarScanParameters(message.getPointsPerSweep(), message.getScanHeight(), message.getSweepYawMin(), message.getSweepYawMax(),
+                                     message.getHeightPitchMin(), message.getHeightPitchMax(), message.getTimeIncrement(), message.getMinRange(),
+                                     message.getMaxRange(), message.getScanTime(), message.getTimestamp());
    }
 
    /**
