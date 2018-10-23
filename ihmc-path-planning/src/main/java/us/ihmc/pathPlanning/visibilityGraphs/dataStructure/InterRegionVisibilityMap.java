@@ -17,7 +17,6 @@ public class InterRegionVisibilityMap implements VisibilityMapHolder
    public void addConnections(Iterable<Connection> connections)
    {
       connections.forEach(this::addConnection);
-      visibilityMap.computeVertices();
    }
 
    public void addConnection(Connection connection)
