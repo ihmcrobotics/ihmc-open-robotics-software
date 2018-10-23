@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
 {
-   private static final double proximityForPlanarRegions = 2.5;
+   private static final double proximityForPlanarRegions = 1.25;
 
    private final HashMap<FootstepNode, FootstepNodeSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
@@ -43,6 +43,11 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       snapDataHolder.clear();
    }
 
+   public TIntObjectMap<List<PlanarRegion>> getNearbyPlanarRegions()
+   {
+      return nearbyPlanarRegions;
+   }
+
    public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode)
    {
       if (snapDataHolder.containsKey(footstepNode))
@@ -55,25 +60,34 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       }
       else
       {
-         if (!nearbyPlanarRegions.containsKey(footstepNode.getPlanarRegionsHashCode()))
-         {
-            Point2DReadOnly roundedPoint = new Point2D(footstepNode.getRoundedX(), footstepNode.getRoundedY());
-            List<PlanarRegion> nearbyRegions = PlanarRegionTools
-                  .filterPlanarRegionsWithBoundingCircle(roundedPoint, proximityForPlanarRegions, planarRegionsList.getPlanarRegionsAsList());
-            nearbyPlanarRegions.put(footstepNode.getPlanarRegionsHashCode(), nearbyRegions);
-
-            if (parameters != null)
-            {
-               List<PlanarRegion> navigableRegions = nearbyRegions.stream().filter(
-                     region -> parameters.getNavigableRegionFilter().isPlanarRegionNavigable(region, nearbyRegions)).collect(Collectors.toList());
-               nearbyNavigablePlanarRegions.put(footstepNode.getPlanarRegionsHashCode(), navigableRegions);
-            }
-         }
+         checkAndAddNearbyRegions(footstepNode.getRoundedX(), footstepNode.getRoundedY());
 
          FootstepNodeSnapData snapData = snapInternal(footstepNode);
          addSnapData(footstepNode, snapData);
          return snapData;
       }
+   }
+
+   public List<PlanarRegion> checkAndAddNearbyRegions(double x, double y)
+   {
+      int hashcode = FootstepNode.computePlanarRegionsHashCode(x, y);
+      if (nearbyPlanarRegions.containsKey(hashcode))
+         return nearbyPlanarRegions.get(hashcode);
+
+
+      Point2DReadOnly roundedPoint = new Point2D(x, y);
+      List<PlanarRegion> nearbyRegions = PlanarRegionTools
+            .filterPlanarRegionsWithBoundingCircle(roundedPoint, proximityForPlanarRegions, planarRegionsList.getPlanarRegionsAsList());
+      nearbyPlanarRegions.put(hashcode, nearbyRegions);
+
+      if (parameters != null)
+      {
+         List<PlanarRegion> navigableRegions = nearbyRegions.stream().filter(
+               region -> parameters.getNavigableRegionFilter().isPlanarRegionNavigable(region, nearbyRegions)).collect(Collectors.toList());
+         nearbyNavigablePlanarRegions.put(FootstepNode.computePlanarRegionsHashCode(roundedPoint), navigableRegions);
+      }
+
+      return nearbyRegions;
    }
 
    /**

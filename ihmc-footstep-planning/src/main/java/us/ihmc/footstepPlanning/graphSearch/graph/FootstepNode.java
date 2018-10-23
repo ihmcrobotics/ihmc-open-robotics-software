@@ -4,6 +4,7 @@ import java.util.Random;
 
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -12,8 +13,8 @@ public class FootstepNode
    public static final double gridSizeXY = 0.05;
    public static final double gridSizeYaw = Math.PI / 18.0;
 
-   public static final double PRECISION     = 1.0e-4;
-   public static final double INV_PRECISION = 1.0e+4;
+   public static final double PRECISION     = 0.1;
+   public static final double INV_PRECISION = 1.0 / PRECISION;
 
    private final int xIndex;
    private final int yIndex;
@@ -125,14 +126,24 @@ public class FootstepNode
 
    private static int computePlanarRegionsHashCode(FootstepNode node)
    {
+      return computePlanarRegionsHashCode(node.getRoundedX(), node.getRoundedY());
+   }
+
+   public static int computePlanarRegionsHashCode(Point2DReadOnly point)
+   {
+      return computePlanarRegionsHashCode(point.getX(), point.getY());
+   }
+
+   public static int computePlanarRegionsHashCode(double x, double y)
+   {
       final long prime = 31L;
       long bits = 1L;
-      bits = prime * bits + Double.doubleToLongBits(node.getRoundedX());
-      bits = prime * bits + Double.doubleToLongBits(node.getRoundedY());
+      bits = prime * bits + Double.doubleToLongBits(x);
+      bits = prime * bits + Double.doubleToLongBits(y);
       return (int) (bits ^ bits >> 32);
    }
 
-   static double round(double value)
+   public static double round(double value)
    {
       return Math.round(value * INV_PRECISION) * PRECISION;
    }
