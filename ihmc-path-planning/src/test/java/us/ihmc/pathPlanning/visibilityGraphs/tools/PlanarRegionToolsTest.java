@@ -11,12 +11,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
@@ -133,7 +136,6 @@ public class PlanarRegionToolsTest
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testProjectPointToPlanesVertically()
    {
-
       Random random = new Random(1738L);
 
       // first test stacked regions
@@ -154,7 +156,6 @@ public class PlanarRegionToolsTest
          listOfPlanarRegions.add(planarRegion);
       }
 
-
       // test with point at centroid
       Point3DReadOnly pointToProject = new Point3D(polygon.getCentroid());
 
@@ -169,7 +170,6 @@ public class PlanarRegionToolsTest
 
       projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(pointToProject, listOfPlanarRegions);
       assertEquals(null, projectedPoint);
-
 
       // test two slightly overlapping regions
       ConvexPolygon2D polygonA = new ConvexPolygon2D();
@@ -218,4 +218,195 @@ public class PlanarRegionToolsTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-0.2, 0.0, 0.1), projectedPoint, 1e-6);
    }
 
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testFilterPlanarRegionsWithBoundingCircle()
+   {
+      Random random = new Random(1738L);
+
+      for (int iter = 0; iter < 100; iter++)
+      {
+         double maxRegionDimension = 5.0;
+         double maxRegionDistanceForGuaranteedOutOfBounds = Math.sqrt(2.0 * maxRegionDimension * maxRegionDimension);
+
+         int numberOfPoints = 5;
+         ConvexPolygon2D planarRegionPolygonA = new ConvexPolygon2D();
+         ConvexPolygon2D planarRegionPolygonB = new ConvexPolygon2D();
+         Point2D[] concaveHull = new Point2D[2 * numberOfPoints];
+         for (int i = 0; i < numberOfPoints; i++)
+         {
+            Point2D pointA = EuclidCoreRandomTools.nextPoint2D(random, maxRegionDimension);
+            Point2D pointB = EuclidCoreRandomTools.nextPoint2D(random, maxRegionDimension);
+            planarRegionPolygonA.addVertex(pointA);
+            planarRegionPolygonB.addVertex(pointB);
+
+            concaveHull[2 * i] = pointA;
+            concaveHull[2 * i + 1] = pointB;
+         }
+         planarRegionPolygonA.update();
+         planarRegionPolygonB.update();
+
+         double maxRegionDistance = Math.max(findFurthestPointFromOrigin(planarRegionPolygonA), findFurthestPointFromOrigin(planarRegionPolygonB));
+
+         List<ConvexPolygon2D> polygons = new ArrayList<>();
+         polygons.add(planarRegionPolygonA);
+         polygons.add(planarRegionPolygonB);
+
+         int numberOfRegionsWithinDistance = random.nextInt(10);
+         int numberOfRegionsOutsideOfDistance = random.nextInt(20);
+
+         Point3D randomOrigin = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
+
+         List<PlanarRegion> regionsWithinDistanceExpected = new ArrayList<>();
+         List<PlanarRegion> regionsOutsideDistance = new ArrayList<>();
+         List<PlanarRegion> allRegions = new ArrayList<>();
+         for (int i = 0; i < numberOfRegionsWithinDistance; i++)
+         {
+            RigidBodyTransform transform = new RigidBodyTransform();
+            Vector3D translation = EuclidCoreRandomTools.nextVector3D(random, -0.2 * maxRegionDistance, 0.2 * maxRegionDistance);
+            translation.add(randomOrigin);
+            transform.setTranslation(translation);
+            PlanarRegion planarRegion = new PlanarRegion(transform, concaveHull, polygons);
+            regionsWithinDistanceExpected.add(planarRegion);
+            allRegions.add(planarRegion);
+         }
+
+         for (int i = 0; i < numberOfRegionsOutsideOfDistance; i++)
+         {
+            RigidBodyTransform transform = new RigidBodyTransform();
+            double xSign = RandomNumbers.nextBoolean(random, 0.5) ? 1.0 : -1.0;
+            double ySign = RandomNumbers.nextBoolean(random, 0.5) ? 1.0 : -1.0;
+            double zSign = RandomNumbers.nextBoolean(random, 0.5) ? 1.0 : -1.0;
+
+            double xTranslation = xSign * RandomNumbers.nextDouble(random, maxRegionDistanceForGuaranteedOutOfBounds, 1e5);
+            double yTranslation = ySign * RandomNumbers.nextDouble(random, maxRegionDistanceForGuaranteedOutOfBounds, 1e5);
+            double zTranslation = zSign * RandomNumbers.nextDouble(random, maxRegionDistanceForGuaranteedOutOfBounds, 1e5);
+            Vector3D translation = new Vector3D(xTranslation, yTranslation, zTranslation);
+            translation.add(randomOrigin);
+
+            transform.setTranslation(translation);
+
+            PlanarRegion planarRegion = new PlanarRegion(transform, concaveHull, polygons);
+            regionsOutsideDistance.add(planarRegion);
+            allRegions.add(planarRegion);
+         }
+
+         List<PlanarRegion> regionsWithinDistance = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(randomOrigin, maxRegionDistance, allRegions);
+
+         assertEquals(regionsWithinDistanceExpected.size(), regionsWithinDistance.size());
+         for (int i = 0; i < regionsWithinDistance.size(); i++)
+         {
+            assertTrue(regionsWithinDistanceExpected.contains(regionsWithinDistance.get(i)));
+            assertFalse(regionsOutsideDistance.contains(regionsWithinDistance.get(i)));
+         }
+      }
+   }
+
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testFilterPlanarRegionsWithBoundingCapsule()
+   {
+      Random random = new Random(1738L);
+
+      for (int iter = 0; iter < 100; iter++)
+      {
+         double maxRegionDimension = 5.0;
+         double maxRegionDistanceForGuaranteedOutOfBounds = Math.sqrt(2.0 * maxRegionDimension * maxRegionDimension);
+
+         int numberOfPoints = 5;
+         ConvexPolygon2D planarRegionPolygonA = new ConvexPolygon2D();
+         ConvexPolygon2D planarRegionPolygonB = new ConvexPolygon2D();
+         Point2D[] concaveHull = new Point2D[2 * numberOfPoints];
+         for (int i = 0; i < numberOfPoints; i++)
+         {
+            Point2D pointA = EuclidCoreRandomTools.nextPoint2D(random, maxRegionDimension);
+            Point2D pointB = EuclidCoreRandomTools.nextPoint2D(random, maxRegionDimension);
+            planarRegionPolygonA.addVertex(pointA);
+            planarRegionPolygonB.addVertex(pointB);
+
+            concaveHull[2 * i] = pointA;
+            concaveHull[2 * i + 1] = pointB;
+         }
+         planarRegionPolygonA.update();
+         planarRegionPolygonB.update();
+
+         double maxRegionDistance = Math.max(findFurthestPointFromOrigin(planarRegionPolygonA), findFurthestPointFromOrigin(planarRegionPolygonB));
+
+         List<ConvexPolygon2D> polygons = new ArrayList<>();
+         polygons.add(planarRegionPolygonA);
+         polygons.add(planarRegionPolygonB);
+
+         int numberOfRegionsWithinDistance = random.nextInt(10);
+         int numberOfRegionsOutsideOfDistance = random.nextInt(20);
+
+         Point3D randomOriginStart = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
+         Point3D randomOriginEnd = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
+         LineSegment3D randomSegment = new LineSegment3D(randomOriginStart, randomOriginEnd);
+         Point3D midpoint = new Point3D();
+         midpoint.interpolate(randomOriginStart, randomOriginEnd, 0.5);
+
+         List<PlanarRegion> regionsWithinDistanceExpected = new ArrayList<>();
+         List<PlanarRegion> regionsOutsideDistance = new ArrayList<>();
+         List<PlanarRegion> allRegions = new ArrayList<>();
+         for (int i = 0; i < numberOfRegionsWithinDistance; i++)
+         {
+            RigidBodyTransform transform = new RigidBodyTransform();
+            Vector3D translation = EuclidCoreRandomTools.nextVector3D(random, -0.2 * maxRegionDistance, 0.2 * maxRegionDistance);
+            translation.add(midpoint);
+            transform.setTranslation(translation);
+            PlanarRegion planarRegion = new PlanarRegion(transform, concaveHull, polygons);
+            regionsWithinDistanceExpected.add(planarRegion);
+            allRegions.add(planarRegion);
+         }
+
+         for (int i = 0; i < numberOfRegionsOutsideOfDistance; i++)
+         {
+            RigidBodyTransform transform = new RigidBodyTransform();
+            double xSign = RandomNumbers.nextBoolean(random, 0.5) ? 1.0 : -1.0;
+            double ySign = RandomNumbers.nextBoolean(random, 0.5) ? 1.0 : -1.0;
+            double zSign = RandomNumbers.nextBoolean(random, 0.5) ? 1.0 : -1.0;
+
+            double xTranslation = xSign * RandomNumbers.nextDouble(random, maxRegionDistanceForGuaranteedOutOfBounds, 1e5);
+            double yTranslation = ySign * RandomNumbers.nextDouble(random, maxRegionDistanceForGuaranteedOutOfBounds, 1e5);
+            double zTranslation = zSign * RandomNumbers.nextDouble(random, maxRegionDistanceForGuaranteedOutOfBounds, 1e5);
+            Vector3D translation = new Vector3D(xTranslation, yTranslation, zTranslation);
+            double distanceStart = randomOriginStart.distance(new Point3D(translation));
+            double distanceEnd = randomOriginStart.distance(new Point3D(translation));
+
+            if (distanceStart < distanceEnd)
+               translation.add(randomOriginStart);
+            else
+               translation.add(randomOriginEnd);
+
+            transform.setTranslation(translation);
+
+            PlanarRegion planarRegion = new PlanarRegion(transform, concaveHull, polygons);
+            regionsOutsideDistance.add(planarRegion);
+            allRegions.add(planarRegion);
+         }
+
+         List<PlanarRegion> regionsWithinDistance = PlanarRegionTools.filterPlanarRegionsWithBoundingCapsule(randomSegment, maxRegionDistance, allRegions);
+
+         assertEquals(regionsWithinDistanceExpected.size(), regionsWithinDistance.size());
+         for (int i = 0; i < regionsWithinDistance.size(); i++)
+         {
+            assertTrue(regionsWithinDistanceExpected.contains(regionsWithinDistance.get(i)));
+            assertFalse(regionsOutsideDistance.contains(regionsWithinDistance.get(i)));
+         }
+      }
+
+      Assert.assertTrue(false);
+   }
+
+   private static double findFurthestPointFromOrigin(ConvexPolygon2D polygon)
+   {
+      Point2D origin = new Point2D();
+      double distance = 0.0;
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         distance = Math.max(distance, polygon.getVertex(i).distance(origin));
+      }
+
+      return distance;
+   }
 }

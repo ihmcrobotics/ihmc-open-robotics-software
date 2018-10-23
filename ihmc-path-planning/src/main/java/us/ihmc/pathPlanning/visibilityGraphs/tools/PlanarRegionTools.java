@@ -130,7 +130,7 @@ public class PlanarRegionTools
 
          double height = region.getPlaneZGivenXY(pointInWorld.getX(), pointInWorld.getY());
 
-         if(highestIntersection.getZ() < height)
+         if (highestIntersection.getZ() < height)
          {
             highestIntersection.setZ(height);
          }
@@ -417,7 +417,7 @@ public class PlanarRegionTools
     * shrunk by {@code Math.abs(epsilon)} if {@code epsilon < 0.0}, or against the {@code regionB}
     * enlarged by {@code epsilon} if {@code epsilon > 0.0}.
     * </p>
-    * 
+    *
     * @param regionA the query. Not modified.
     * @param regionB the reference. Not modified.
     * @param epsilon the tolerance to use during the test.
@@ -449,7 +449,7 @@ public class PlanarRegionTools
    /**
     * From the local coordinates of the {@code regionB}, this method computes and return the minimum
     * z-coordinate among the vertices of {@code regionA}'s concave hull.
-    * 
+    *
     * @param regionA the query. Not modified.
     * @param regionB the reference. Not modified.
     * @return the height of the lowest vertex of {@code regionA} above {@code regionB}. The returned
@@ -506,6 +506,14 @@ public class PlanarRegionTools
       return planarRegions.stream().filter(region -> computePlanarRegionArea(region) >= minArea).collect(Collectors.toList());
    }
 
+   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCircle(Point3DReadOnly circleOrigin, double circleRadius, List<PlanarRegion> planarRegions)
+   {
+      if (!Double.isFinite(circleRadius) || circleRadius < 0.0)
+         return planarRegions;
+
+      return planarRegions.stream().filter(region -> isPlanarRegionIntersectingWithCircle(circleOrigin, circleRadius, region)).collect(Collectors.toList());
+   }
+
    public static List<PlanarRegion> filterPlanarRegionsWithBoundingCapsule(Point3DReadOnly capsuleStart, Point3DReadOnly capsuleEnd, double capsuleRadius,
                                                                            List<PlanarRegion> planarRegions)
    {
@@ -539,6 +547,15 @@ public class PlanarRegionTools
                    .anyMatch(vertex -> capsuleSegment.distance(vertex) <= capsuleRadius);
    }
 
+   public static boolean isPlanarRegionIntersectingWithCircle(Point3DReadOnly circleOrigin, double circleRadius, PlanarRegion query)
+   {
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      query.getTransformToWorld(transformToWorld);
+
+      return Arrays.stream(query.getConcaveHull()).map(vertex -> applyTransform(transformToWorld, vertex))
+                   .anyMatch(vertex -> circleOrigin.distance(vertex) <= circleRadius);
+   }
+
    private static Point3D applyTransform(RigidBodyTransform transform, Point2D point2D)
    {
       Point3D point3D = new Point3D(point2D);
@@ -570,7 +587,7 @@ public class PlanarRegionTools
    /**
     * Truncate the given planar region {@code planarRegionToTuncate} with the plane such that only
     * the part that is <b>above</b> the plane remains.
-    * 
+    *
     * @param pointOnPlane a point on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
     * @param planarRegionToTruncate the original planar region to be truncated. Not modified.
@@ -636,8 +653,8 @@ public class PlanarRegionTools
             {
                Vector3D edgeDirection = new Vector3D();
                edgeDirection.sub(vertex3D, previousVertex3D);
-               Point3D intersection = EuclidGeometryTools.intersectionBetweenLineSegment3DAndPlane3D(pointOnPlaneInRegionFrame, planeNormalInRegionFrame,
-                                                                                                     vertex3D, previousVertex3D);
+               Point3D intersection = EuclidGeometryTools
+                     .intersectionBetweenLineSegment3DAndPlane3D(pointOnPlaneInRegionFrame, planeNormalInRegionFrame, vertex3D, previousVertex3D);
 
                truncatedConcaveHullVertices.add(new Point2D(intersection));
             }
@@ -659,8 +676,8 @@ public class PlanarRegionTools
          return null; // The region is completely underneath
 
       List<ConvexPolygon2D> truncatedConvexPolygons = new ArrayList<>();
-      ConcaveHullDecomposition.recursiveApproximateDecomposition(new ArrayList<>(truncatedConcaveHullVertices), depthThresholdForConvexDecomposition,
-                                                                 truncatedConvexPolygons);
+      ConcaveHullDecomposition
+            .recursiveApproximateDecomposition(new ArrayList<>(truncatedConcaveHullVertices), depthThresholdForConvexDecomposition, truncatedConvexPolygons);
 
       Point2D[] concaveHullVertices = new Point2D[truncatedConcaveHullVertices.size()];
       truncatedConcaveHullVertices.toArray(concaveHullVertices);
