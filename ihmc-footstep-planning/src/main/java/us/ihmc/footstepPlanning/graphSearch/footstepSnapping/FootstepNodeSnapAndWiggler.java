@@ -15,6 +15,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -22,7 +23,6 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
    private final BipedalFootstepPlannerListener listener;
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
-   private final FootstepPlannerParameters parameters;
 
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private final PlanarRegion planarRegionToPack = new PlanarRegion();
@@ -31,8 +31,9 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParameters parameters,
                                      BipedalFootstepPlannerListener listener)
    {
+      super(parameters);
+
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
-      this.parameters = parameters;
       this.listener = listener;
    }
 
@@ -45,6 +46,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       }
 
       FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(footstepNode.getRobotSide()), footPolygon);
+      List<PlanarRegion> planarRegionsList = nearbyNavigablePlanarRegions.get(footstepNode.getPlanarRegionsHashCode());
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, planarRegionToPack);
 
       if (snapTransform == null)
@@ -78,7 +80,8 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(footholdPolygonInLocalFrame);
       footPolygonInWorld.applyTransform(snapAndWiggleTransform, false);
 
-      List<PlanarRegion> planarRegionsIntersectingSnappedAndWiggledPolygon = planarRegionsList.findPlanarRegionsIntersectingPolygon(footPolygonInWorld);
+      List<PlanarRegion> planarRegionsIntersectingSnappedAndWiggledPolygon = PlanarRegionTools
+            .findPlanarRegionsIntersectingPolygon(footPolygonInWorld, planarRegionsList);
 
       if (checkForTooMuchPenetrationAfterWiggle(footstepNode, planarRegionToPack, footPolygonInWorld,
                                                 planarRegionsIntersectingSnappedAndWiggledPolygon))

@@ -1,9 +1,15 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
+import us.ihmc.robotics.geometry.PlanarRegion;
+
+import java.util.List;
 
 public interface FootstepPlannerParameters
 {
@@ -392,5 +398,19 @@ public interface FootstepPlannerParameters
    default FootstepPlannerCostParameters getCostParameters()
    {
       return new DefaultFootstepPlannerCostParameters();
+   }
+
+   default NavigableRegionFilter getNavigableRegionFilter()
+   {
+      return new NavigableRegionFilter()
+      {
+         private Vector3D vertical = new Vector3D(0.0, 0.0, 1.0);
+
+         @Override
+         public boolean isPlanarRegionNavigable(PlanarRegion query, List<PlanarRegion> allOtherRegions)
+         {
+            return query.getNormal().angle(vertical) < getMinimumSurfaceInclineRadians();
+         }
+      };
    }
 }

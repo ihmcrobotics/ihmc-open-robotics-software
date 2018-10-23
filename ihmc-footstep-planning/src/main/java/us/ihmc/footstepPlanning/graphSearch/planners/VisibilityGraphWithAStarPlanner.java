@@ -102,7 +102,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
       heuristics = new BodyPathHeuristics(parameters.getCostParameters().getVisGraphWithAStarHeuristicsWeight(), parameters, bodyPathPlanner);
 
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
       FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);

@@ -368,7 +368,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
                                                     SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion,
                                                     YoVariableRegistry registry)
    {
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
       FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
