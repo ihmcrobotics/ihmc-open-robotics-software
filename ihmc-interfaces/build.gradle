@@ -1,23 +1,24 @@
 buildscript {
    repositories {
+      maven { url "https://plugins.gradle.org/m2/" }
       mavenCentral()
       maven { url "http://dl.bintray.com/ihmcrobotics/maven-release" }
       maven { url "http://dl.bintray.com/ihmcrobotics/maven-vendor" }
-      maven { url "https://plugins.gradle.org/m2/" }
       mavenLocal()
       jcenter()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.15.1"
-      classpath "us.ihmc:ihmc-ci-plugin:0.18.0"
       classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.10.0"
-//      classpath "us.ihmc:ihmc-pub-sub-generator:0.8.3"
-      classpath "com.bmuschko:gradle-docker-plugin:3.2.5"
+      classpath "com.bmuschko:gradle-docker-plugin:4.0.1"
    }
 }
 
-apply plugin: "us.ihmc.ihmc-build"
-apply plugin: "us.ihmc.ihmc-ci-plugin"
+plugins {
+   id("us.ihmc.ihmc-build") version "0.15.1"
+   id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
+   id("us.ihmc.log-tools") version "0.2.2"
+}
+
 apply plugin: "com.bmuschko.docker-remote-api"
 
 ihmc {
@@ -80,7 +81,6 @@ task generateMessages {
       {
          throw new org.gradle.api.GradleException("Could not find ros2-common-interfaces in configurations.compile!")
       }
-
 
       generator.addPackageRootToIDLGenerator(file("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces").toPath());
       generator.addPackageRootToIDLGenerator(file("build/tmp/generateMessages/ros2-common-interfaces/common_interfaces").toPath());
