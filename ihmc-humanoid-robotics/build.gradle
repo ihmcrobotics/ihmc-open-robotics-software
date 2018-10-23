@@ -1,15 +1,8 @@
-buildscript {
-   repositories {
-      maven { url "https://plugins.gradle.org/m2/" }
-      mavenLocal()
-   }
-   dependencies {
-      classpath "us.ihmc:ihmc-build:0.15.1"
-      classpath "us.ihmc:ihmc-ci-plugin:0.18.0"
-   }
+plugins {
+   id("us.ihmc.ihmc-build") version "0.15.1"
+   id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
+   id("us.ihmc.log-tools") version "0.2.2"
 }
-apply plugin: "us.ihmc.ihmc-build"
-apply plugin: "us.ihmc.ihmc-ci-plugin"
 
 ihmc {
    loadProductProperties("../product.properties")
