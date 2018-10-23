@@ -14,6 +14,15 @@
         <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
             <tabs>
 
+                <Tab text="Status">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
+                        <children>
+                            <fx:include fx:id="statusTab" source="StatusTab.fxml"/>
+                        </children>
+                    </content>
+                </Tab>
+
                 <Tab text="Start/Goal">
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
@@ -28,6 +37,15 @@
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
                         <children>
                             <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml"/>
+                        </children>
+                    </content>
+                </Tab>
+
+                <Tab text="Body Collisions">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
+                        <children>
+                            <fx:include fx:id="bodyCollisionCheckingUI" source="BodyCollisionCheckingUI.fxml"/>
                         </children>
                     </content>
                 </Tab>
