@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -36,7 +37,7 @@ public class PlanarRegionsListPolygonSnapper
    public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2DBasics polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo, PlanarRegion regionToPack)
    {
       double allowableExtraZ = 0.003; // For close ones. When close, take one that is flatter...
-      List<PlanarRegion> intersectingRegions = planarRegionsListToSnapTo.findPlanarRegionsIntersectingPolygon(polygonToSnap);
+      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(polygonToSnap, planarRegionsListToSnapTo);
 
       if ((intersectingRegions == null) || (intersectingRegions.isEmpty()))
       {
