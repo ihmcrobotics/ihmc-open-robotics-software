@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.Box3D;
@@ -7,9 +8,11 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.geometry.polytope.ConvexPolytope;
@@ -20,6 +23,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class BodyCollisionNodeChecker extends FootstepNodeChecker
@@ -32,13 +36,15 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
 
    private final GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
 
-   private final RecyclingArrayList<ConvexPolytope> planarRegionPolytopes = new RecyclingArrayList<>(ConvexPolytope.class);
+   private final HashMap<PlanarRegion, ConvexPolytope> planarRegionPolytopes = new HashMap<>();
 
    private final FootstepPlannerParameters parameters;
+   private final FootstepNodeSnapper snapper;
 
-   public BodyCollisionNodeChecker(FootstepPlannerParameters parameters)
+   public BodyCollisionNodeChecker(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper)
    {
       this.parameters = parameters;
+      this.snapper = snapper;
 
       bodyCollisionBox = new Box3D();
       bodyCollisionBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
@@ -60,7 +66,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
 
       for (PlanarRegion planarRegion : planarRegions.getPlanarRegionsAsList())
       {
-         ConvexPolytope planarRegionPolytope = planarRegionPolytopes.add();
+         ConvexPolytope planarRegionPolytope = new ConvexPolytope();
          List<? extends Point2DReadOnly> pointsInPlanarRegion = planarRegion.getConvexHull().getVertexBufferView();
          planarRegion.getTransformToWorld(tempTransform);
          for (Point2DReadOnly point : pointsInPlanarRegion)
@@ -70,6 +76,8 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
             tempPoint.applyTransform(tempTransform);
             planarRegionPolytope.addVertex(tempPoint.getX(), tempPoint.getY(), tempPoint.getZ());
          }
+
+         planarRegionPolytopes.put(planarRegion, planarRegionPolytope);
       }
    }
 
@@ -95,8 +103,17 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
          bodyCollisionPolytope.addVertex(tempPoint.getX(), tempPoint.getY(), tempPoint.getZ());
       }
 
-      for (ConvexPolytope planarRegionPolytope : planarRegionPolytopes)
+      double roundedX = FootstepNode.round(tempPoint.getX());
+      double roundedY = FootstepNode.round(tempPoint.getY());
+      List<PlanarRegion> planarRegionList = snapper.checkAndAddNearbyRegions(roundedX, roundedY);
+
+      for (PlanarRegion planarRegion : planarRegionList)
       {
+         RigidBodyTransform transform = new RigidBodyTransform();
+         planarRegion.getTransformToWorld(transform);
+         Point2D localPoint = new Point2D(tempPoint);
+         localPoint.applyInverseTransform(transform, false);
+         ConvexPolytope planarRegionPolytope = planarRegionPolytopes.get(planarRegion);
          if (collisionDetector.arePolytopesColliding(bodyCollisionPolytope, planarRegionPolytope, pointToThrowAway1, pointToThrowAway2))
             return false;
       }

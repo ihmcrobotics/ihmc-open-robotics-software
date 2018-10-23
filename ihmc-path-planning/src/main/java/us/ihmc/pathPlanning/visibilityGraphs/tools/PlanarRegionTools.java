@@ -643,15 +643,16 @@ public class PlanarRegionTools
       return minDistance;
    }
 
-   public static boolean isPlanarRegionIntersectingWithCircle(Point2DReadOnly circleOrigin, double circleRadius, PlanarRegion query)
+   public static boolean isPlanarRegionIntersectingWithCircle(Point2DReadOnly circleOriginInWorld, double circleRadius, PlanarRegion query)
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       query.getTransformToWorld(transformToWorld);
 
-      Point2D originInLocal = new Point2D(circleOrigin);
+      Point2D originInLocal = new Point2D(circleOriginInWorld);
       originInLocal.applyInverseTransform(transformToWorld, false);
 
-      return query.getConvexPolygons().stream().anyMatch(polygon -> polygon.signedDistance(originInLocal) <= circleRadius);
+      return query.getConvexHull().signedDistance(originInLocal) <= circleRadius;
+//      return query.getConvexPolygons().stream().anyMatch(polygon -> polygon.signedDistance(originInLocal) <= circleRadius);
    }
 
    private static Point3D applyTransform(RigidBodyTransform transform, Point2D point2D)
