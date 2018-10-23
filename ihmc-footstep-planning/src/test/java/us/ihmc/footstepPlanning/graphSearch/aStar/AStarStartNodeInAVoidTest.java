@@ -40,7 +40,7 @@ public class AStarStartNodeInAVoidTest
       DefaultFootstepPlanningParameters parameters = new DefaultFootstepPlanningParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
-      planner = AStarFootstepPlanner.createRoughTerrainPlanner(parameters, null, footPolygons, expansion, registry);
+      planner = AStarFootstepPlanner.createPlanner(parameters, null, footPolygons, expansion, registry);
    }
 
    @After

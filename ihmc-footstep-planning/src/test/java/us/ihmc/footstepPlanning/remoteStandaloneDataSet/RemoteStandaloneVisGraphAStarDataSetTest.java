@@ -51,7 +51,7 @@ public class RemoteStandaloneVisGraphAStarDataSetTest extends RemoteStandalonePl
       String prefix = "unitTestDataSets/test/";
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205120_BodyPathPlannerEnvironment");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214730_CinderBlockField");
       test.tearDown();
 
    }

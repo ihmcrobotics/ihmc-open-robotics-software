@@ -34,7 +34,7 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 2.5)
-   @Test(timeout = 100000)
+   @Test(timeout = 1000000)
    public void testDownCorridor()
    {
       setCheckForBodyBoxCollision(true);
@@ -93,7 +93,7 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(getPlannerParameters());
       planner = AStarFootstepPlanner
-            .createRoughTerrainPlanner(getPlannerParameters(), visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
+            .createPlanner(getPlannerParameters(), visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
    }
 
    @Override

@@ -49,11 +49,6 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
-      {
-          current_alignment += controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getMaxCdrSerializedSize(current_alignment);
-
 
       return current_alignment - initial_alignment;
    }
@@ -78,13 +73,6 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       {
           current_alignment += controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.getCdrSerializedSize(data.getObstacleClusters().get(i0), current_alignment);}
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getAllClusters().size(); ++i0)
-      {
-          current_alignment += controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.getCdrSerializedSize(data.getAllClusters().get(i0), current_alignment);}
-
-      current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getCdrSerializedSize(data.getTransformToWorld(), current_alignment);
-
 
       return current_alignment - initial_alignment;
    }
@@ -98,11 +86,6 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       cdr.write_type_e(data.getObstacleClusters());else
           throw new RuntimeException("obstacle_clusters field exceeds the maximum length");
 
-      if(data.getAllClusters().size() <= 100)
-      cdr.write_type_e(data.getAllClusters());else
-          throw new RuntimeException("all_clusters field exceeds the maximum length");
-
-      geometry_msgs.msg.dds.TransformPubSubType.write(data.getTransformToWorld(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.NavigableRegionMessage data, us.ihmc.idl.CDR cdr)
@@ -111,8 +94,6 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.read(data.getHomeRegionCluster(), cdr);	
       controller_msgs.msg.dds.VisibilityMapMessagePubSubType.read(data.getVisibilityMapInWorld(), cdr);	
       cdr.read_type_e(data.getObstacleClusters());	
-      cdr.read_type_e(data.getAllClusters());	
-      geometry_msgs.msg.dds.TransformPubSubType.read(data.getTransformToWorld(), cdr);	
 
    }
 
@@ -126,9 +107,6 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ser.write_type_a("visibility_map_in_world", new controller_msgs.msg.dds.VisibilityMapMessagePubSubType(), data.getVisibilityMapInWorld());
 
       ser.write_type_e("obstacle_clusters", data.getObstacleClusters());
-      ser.write_type_e("all_clusters", data.getAllClusters());
-      ser.write_type_a("transform_to_world", new geometry_msgs.msg.dds.TransformPubSubType(), data.getTransformToWorld());
-
    }
 
    @Override
@@ -141,9 +119,6 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ser.read_type_a("visibility_map_in_world", new controller_msgs.msg.dds.VisibilityMapMessagePubSubType(), data.getVisibilityMapInWorld());
 
       ser.read_type_e("obstacle_clusters", data.getObstacleClusters());
-      ser.read_type_e("all_clusters", data.getAllClusters());
-      ser.read_type_a("transform_to_world", new geometry_msgs.msg.dds.TransformPubSubType(), data.getTransformToWorld());
-
    }
 
    public static void staticCopy(controller_msgs.msg.dds.NavigableRegionMessage src, controller_msgs.msg.dds.NavigableRegionMessage dest)

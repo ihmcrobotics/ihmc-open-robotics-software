@@ -7,11 +7,10 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionBaseOfCliffAvoider;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
@@ -19,7 +18,6 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 

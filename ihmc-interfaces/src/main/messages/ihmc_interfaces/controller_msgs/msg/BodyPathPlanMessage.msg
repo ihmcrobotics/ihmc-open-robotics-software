@@ -12,7 +12,7 @@ byte FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED = 5
 
 int32 NO_PLAN_ID = -1
 
-byte path_planning_result 255
+byte footstep_planning_result 255
 int32 plan_id -1
 
 PlanarRegionsListMessage planar_regions_list

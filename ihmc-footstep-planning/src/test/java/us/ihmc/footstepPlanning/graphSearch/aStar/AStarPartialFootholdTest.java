@@ -44,7 +44,7 @@ public class AStarPartialFootholdTest
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
-      planner = AStarFootstepPlanner.createRoughTerrainPlanner(parameters, null, footPolygons, expansion, registry);
+      planner = AStarFootstepPlanner.createPlanner(parameters, null, footPolygons, expansion, registry);
       planner.setTimeout(5.0);
    }
 

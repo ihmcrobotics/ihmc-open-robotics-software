@@ -8,19 +8,16 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class SimpleNodeChecker implements FootstepNodeChecker
+public class SimpleNodeChecker extends FootstepNodeChecker
 {
-   private PlanarRegionsList planarRegions;
-
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previosNode)
    {
-      /** In case of flat ground walking */
-      if (planarRegions == null)
+      if(!hasPlanarRegions())
          return true;
 
       Point2D nodePosition = new Point2D(node.getX(), node.getY());
-      List<PlanarRegion> intersection = planarRegions.findPlanarRegionsContainingPointByProjectionOntoXYPlane(nodePosition);
+      List<PlanarRegion> intersection = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(nodePosition);
       if (intersection == null)
          return false;
 
@@ -28,14 +25,7 @@ public class SimpleNodeChecker implements FootstepNodeChecker
    }
 
    @Override
-   public void setPlanarRegions(PlanarRegionsList planarRegions)
-   {
-      this.planarRegions = planarRegions;
-   }
-
-   @Override
    public void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform)
    {
    }
-
 }

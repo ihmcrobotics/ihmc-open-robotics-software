@@ -43,9 +43,6 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
       module = new FootstepPathCalculatorModule(messager);
       module.start();
 
-      uiReceivedPlan = new AtomicReference<>(false);
-      uiReceivedResult = new AtomicReference<>(false);
-
       messager.registerTopicListener(FootstepPlanTopic, request -> receivedPlan());
       messager.registerTopicListener(PlanningResultTopic, request -> receivedResult());
 
@@ -165,6 +162,7 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
       uiReceivedResult.set(false);
       uiReceivedPlan.set(false);
       plannerReceivedPlan.set(false);
+      plannerReceivedResult.set(false);
 
       errorMessage += assertPlansAreValid(datasetName, expectedResult, actualResult, expectedPlan, actualPlan, dataset.getGoal());
 

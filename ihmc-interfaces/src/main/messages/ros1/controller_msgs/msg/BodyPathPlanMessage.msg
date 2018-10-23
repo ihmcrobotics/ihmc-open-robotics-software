@@ -16,7 +16,7 @@ int32 NO_PLAN_ID=-1
 uint32 sequence_id
 
 # Field default value 255
-int8 path_planning_result
+int8 footstep_planning_result
 
 # Field default value -1
 int32 plan_id
