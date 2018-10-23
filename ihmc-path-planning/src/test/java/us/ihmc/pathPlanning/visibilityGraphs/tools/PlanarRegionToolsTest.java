@@ -1,8 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertNull;
 import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDouble;
 
 import java.util.ArrayList;
@@ -20,6 +19,8 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
@@ -29,11 +30,13 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTest;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class PlanarRegionToolsTest
@@ -291,7 +294,7 @@ public class PlanarRegionToolsTest
             allRegions.add(planarRegion);
          }
 
-         List<PlanarRegion> regionsWithinDistance = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(randomOrigin, maxRegionDistance, allRegions);
+         List<PlanarRegion> regionsWithinDistance = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(new Point2D(randomOrigin), maxRegionDistance, allRegions);
 
          assertEquals(regionsWithinDistanceExpected.size(), regionsWithinDistance.size());
          for (int i = 0; i < regionsWithinDistance.size(); i++)
@@ -300,6 +303,88 @@ public class PlanarRegionToolsTest
             assertFalse(regionsOutsideDistance.contains(regionsWithinDistance.get(i)));
          }
       }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testTrivialCase() throws Exception
+   {
+      // polygons forming a "|"-shaped region.
+      List<ConvexPolygon2D> region1ConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D polygon1 = new ConvexPolygon2D();
+      polygon1.addVertex(5.0, 1.0);
+      polygon1.addVertex(5.0, -1.0);
+      polygon1.addVertex(-5.0, -1.0);
+      polygon1.addVertex(-5.0, 1.0);
+
+      region1ConvexPolygons.add(polygon1);
+      for (ConvexPolygon2D convexPolygon : region1ConvexPolygons)
+         convexPolygon.update();
+
+
+      // polygons forming a "--"-shaped region.
+      List<ConvexPolygon2D> region2ConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D polygon2 = new ConvexPolygon2D();
+      polygon2.addVertex(1.0, 5.0);
+      polygon2.addVertex(1.0, -5.0);
+      polygon2.addVertex(-1.0, -5.0);
+      polygon2.addVertex(-1.0, 5.0);
+
+      region2ConvexPolygons.add(polygon2);
+      for (ConvexPolygon2D convexPolygon : region2ConvexPolygons)
+         convexPolygon.update();
+
+      RigidBodyTransform region1Transform = new RigidBodyTransform();
+      RigidBodyTransform region2Transform = new RigidBodyTransform();
+
+      region2Transform.setTranslation(0.0, 0.0, 1.0);
+
+      PlanarRegion planarRegion1 = new PlanarRegion(region1Transform, region1ConvexPolygons);
+      PlanarRegion planarRegion2 = new PlanarRegion(region2Transform, region2ConvexPolygons);
+      List<PlanarRegion> planarRegions = new ArrayList<>();
+      planarRegions.add(planarRegion1);
+      planarRegions.add(planarRegion2);
+
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegions);
+
+      List<PlanarRegion> result;
+
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(0.2, 0.2);
+      convexPolygon.addVertex(0.2, -0.2);
+      convexPolygon.addVertex(-0.2, -0.2);
+      convexPolygon.addVertex(-0.2, 0.2);
+      convexPolygon.update();
+
+      // Do a bunch of trivial queries with findPlanarRegionsIntersectingPolygon(ConvexPolygon2d convexPolygon)
+      result = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(convexPolygon, planarRegionsList);
+      assertEquals(2, result.size());
+      result = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(translateConvexPolygon(2.0, 0.0, convexPolygon), planarRegionsList);
+      assertEquals(1, result.size());
+      assertTrue(result.get(0).epsilonEquals(planarRegion1, 1.0e-10));
+      result = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(translateConvexPolygon(-2.0, 0.0, convexPolygon), planarRegionsList);
+      assertEquals(1, result.size());
+      assertTrue(result.get(0).epsilonEquals(planarRegion1, 1.0e-10));
+      result = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(translateConvexPolygon(0.0, 2.0, convexPolygon), planarRegionsList);
+      assertEquals(1, result.size());
+      assertTrue(result.get(0).epsilonEquals(planarRegion2, 1.0e-10));
+      result = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(translateConvexPolygon(0.0, -2.0, convexPolygon), planarRegionsList);
+      assertEquals(1, result.size());
+      assertTrue(result.get(0).epsilonEquals(planarRegion2, 1.0e-10));
+      result = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(translateConvexPolygon(2.0, 2.0, convexPolygon), planarRegionsList);
+      assertNull(result);
+      result = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(translateConvexPolygon(2.0, -2.0, convexPolygon), planarRegionsList);
+      assertNull(result);
+      result = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(translateConvexPolygon(-2.0, -2.0, convexPolygon), planarRegionsList);
+      assertNull(result);
+      result = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(translateConvexPolygon(-2.0, 2.0, convexPolygon), planarRegionsList);
+      assertNull(result);
+   }
+
+   static ConvexPolygon2DBasics translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2DReadOnly convexPolygon)
+   {
+      Vector2D translation = new Vector2D(xTranslation, yTranslation);
+      return convexPolygon.translateCopy(translation);
    }
 
    @Test(timeout = 30000)
