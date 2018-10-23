@@ -71,8 +71,8 @@ public class RemotePlannerMessageConverter
 
       resultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResultTopic);
       footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanTopic);
-      plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
-      sequenceIdReference = messager.createInput(FootstepPlannerMessagerAPI.SequenceIdTopic);
+      plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, 0);
+      sequenceIdReference = messager.createInput(FootstepPlannerMessagerAPI.SequenceIdTopic, 0);
       acceptNewPlanarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, true);
 
       registerPubSubs(ros2Node);

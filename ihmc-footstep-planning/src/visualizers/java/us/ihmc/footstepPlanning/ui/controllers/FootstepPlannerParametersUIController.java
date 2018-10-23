@@ -123,7 +123,7 @@ public class FootstepPlannerParametersUIController
       double min = 0.0;
       double max = 100.0;
       double amountToStepBy = 5;
-      return new DoubleSpinnerValueFactory(min, max, 0.0, amountToStepBy);
+      return new DoubleSpinnerValueFactory(min, max, 15.0, amountToStepBy);
    }
 
    private SpinnerValueFactory.DoubleSpinnerValueFactory createHorizonValueFactory()
