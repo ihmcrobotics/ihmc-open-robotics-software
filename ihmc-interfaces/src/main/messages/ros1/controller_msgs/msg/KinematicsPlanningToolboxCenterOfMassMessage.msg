@@ -1,6 +1,7 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+# This is the list of desired times for each key frames.
 float64[] way_point_times
 
 # Specifies the desired center of mass position.
@@ -11,10 +12,9 @@ geometry_msgs/Point[] desired_way_point_positions_in_world
 # should be controlled.
 # The selection frame coming along with the given selection matrix is used to determine to what
 # reference frame the selected axes are referring to. For instance, if only the hand height in
-# world should be controlled on the linear z component of the selection matrix should be
+# world should be controlled only the linear z component of the selection matrix should be
 # selected and the reference frame should world frame. When no reference frame is provided with
-# the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed frame
-# if not defined otherwise.
+# the selection matrix, it will be used as it is in the center of mass frame which is aligned with the world axes.
 controller_msgs/SelectionMatrix3DMessage selection_matrix
 
 # Specifies the priority of controller the position along each axis independently.

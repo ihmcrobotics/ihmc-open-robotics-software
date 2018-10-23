@@ -9,6 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlanningToolboxOutputStatus> implements Settable<KinematicsPlanningToolboxOutputStatus>, EpsilonComparable<KinematicsPlanningToolboxOutputStatus>
 {
    /**
+            * This message is part of the IHMC whole-body inverse kinematics module.
             * This output status will be converted into the WholeBodyTrajectoryMessage.
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -22,6 +23,11 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
             * List of configurations for each key frames.
             */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>  robot_configurations_;
+   /**
+            * Solution quality.
+            * The total summation of the all solution quality for each key frames.
+            */
+   public double solution_quality_ = -1.0;
 
    public KinematicsPlanningToolboxOutputStatus()
    {
@@ -43,9 +49,12 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
 
       key_frame_times_.set(other.key_frame_times_);
       robot_configurations_.set(other.robot_configurations_);
+      solution_quality_ = other.solution_quality_;
+
    }
 
    /**
+            * This message is part of the IHMC whole-body inverse kinematics module.
             * This output status will be converted into the WholeBodyTrajectoryMessage.
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -54,6 +63,7 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
       sequence_id_ = sequence_id;
    }
    /**
+            * This message is part of the IHMC whole-body inverse kinematics module.
             * This output status will be converted into the WholeBodyTrajectoryMessage.
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -79,6 +89,23 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>  getRobotConfigurations()
    {
       return robot_configurations_;
+   }
+
+   /**
+            * Solution quality.
+            * The total summation of the all solution quality for each key frames.
+            */
+   public void setSolutionQuality(double solution_quality)
+   {
+      solution_quality_ = solution_quality;
+   }
+   /**
+            * Solution quality.
+            * The total summation of the all solution quality for each key frames.
+            */
+   public double getSolutionQuality()
+   {
+      return solution_quality_;
    }
 
 
@@ -110,6 +137,8 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
          {  if (!this.robot_configurations_.get(i).epsilonEquals(other.robot_configurations_.get(i), epsilon)) return false; }
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_, other.solution_quality_, epsilon)) return false;
+
 
       return true;
    }
@@ -127,6 +156,8 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
 
       if (!this.key_frame_times_.equals(otherMyClass.key_frame_times_)) return false;
       if (!this.robot_configurations_.equals(otherMyClass.robot_configurations_)) return false;
+      if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
+
 
       return true;
    }
@@ -142,7 +173,9 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
       builder.append("key_frame_times=");
       builder.append(this.key_frame_times_);      builder.append(", ");
       builder.append("robot_configurations=");
-      builder.append(this.robot_configurations_);
+      builder.append(this.robot_configurations_);      builder.append(", ");
+      builder.append("solution_quality=");
+      builder.append(this.solution_quality_);
       builder.append("}");
       return builder.toString();
    }

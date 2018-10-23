@@ -47,6 +47,8 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -72,6 +74,9 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
       {
           current_alignment += controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.getCdrSerializedSize(data.getRobotConfigurations().get(i0), current_alignment);}
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -88,6 +93,8 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
       cdr.write_type_e(data.getRobotConfigurations());else
           throw new RuntimeException("robot_configurations field exceeds the maximum length");
 
+      cdr.write_type_6(data.getSolutionQuality());
+
    }
 
    public static void read(controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
@@ -96,6 +103,8 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
       	
       cdr.read_type_e(data.getKeyFrameTimes());	
       cdr.read_type_e(data.getRobotConfigurations());	
+      data.setSolutionQuality(cdr.read_type_6());
+      	
 
    }
 
@@ -105,6 +114,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_e("key_frame_times", data.getKeyFrameTimes());
       ser.write_type_e("robot_configurations", data.getRobotConfigurations());
+      ser.write_type_6("solution_quality", data.getSolutionQuality());
    }
 
    @Override
@@ -113,6 +123,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_e("key_frame_times", data.getKeyFrameTimes());
       ser.read_type_e("robot_configurations", data.getRobotConfigurations());
+      data.setSolutionQuality(ser.read_type_6("solution_quality"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus src, controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus dest)
