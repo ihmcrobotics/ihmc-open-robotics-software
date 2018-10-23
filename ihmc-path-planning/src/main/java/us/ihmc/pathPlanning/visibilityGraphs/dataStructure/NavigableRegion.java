@@ -20,7 +20,8 @@ public class NavigableRegion implements VisibilityMapHolder
    private Cluster homeRegionCluster = null;
    private List<Cluster> obstacleClusters = new ArrayList<>();
    private List<Cluster> allClusters = new ArrayList<>();
-   private final VisibilityMap visibilityMapInLocal = new VisibilityMap();
+   private VisibilityMap visibilityMapInLocal = null;
+   private VisibilityMap visibilityMapInWorld = null;
 
    public NavigableRegion(PlanarRegion homeRegion)
    {
@@ -47,11 +48,14 @@ public class NavigableRegion implements VisibilityMapHolder
 
    public void setVisibilityMapInLocal(VisibilityMap visibilityMap)
    {
-      visibilityMapInLocal.copy(visibilityMap);
+      visibilityMapInLocal = visibilityMap;
    }
 
    public void setVisibilityMapInWorld(VisibilityMap visibilityMap)
    {
+      if (visibilityMapInLocal == null)
+         visibilityMapInLocal = new VisibilityMap();
+
       visibilityMapInLocal.copy(visibilityMap);
       transformFromWorldToLocal(visibilityMapInLocal);
       visibilityMapInLocal.computeVertices();
@@ -107,10 +111,13 @@ public class NavigableRegion implements VisibilityMapHolder
    @Override
    public VisibilityMap getVisibilityMapInWorld()
    {
-      VisibilityMap visibilityMapInWorld = new VisibilityMap();
-      visibilityMapInWorld.copy(visibilityMapInLocal);
-      transformFromLocalToWorld(visibilityMapInWorld);
-      visibilityMapInWorld.computeVertices();
+      if (visibilityMapInWorld == null)
+      {
+         visibilityMapInWorld = new VisibilityMap();
+         visibilityMapInWorld.copy(visibilityMapInLocal);
+         transformFromLocalToWorld(visibilityMapInWorld);
+         visibilityMapInWorld.computeVertices();
+      }
 
       return visibilityMapInWorld;
    }
