@@ -99,9 +99,9 @@ public class PlanarRegionTools
     * <p>
     * Will return null if the is no planar region above or below the point.
     */
-   public static Point3D projectPointToPlanesVertically(Point3DReadOnly point, PlanarRegionsList regions)
+   public static Point3DReadOnly projectPointToPlanesVertically(Point3DReadOnly pointInWorld, PlanarRegionsList regions)
    {
-      return projectPointToPlanesVertically(point, regions.getPlanarRegionsAsList());
+      return projectPointToPlanesVertically(pointInWorld, regions.getPlanarRegionsAsList());
    }
 
    /**
@@ -111,24 +111,24 @@ public class PlanarRegionTools
     * <p>
     * Will return null if the is no planar region above or below the point.
     */
-   public static Point3D projectPointToPlanesVertically(Point3DReadOnly point, List<PlanarRegion> regions)
+   public static Point3DReadOnly projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<PlanarRegion> regions)
    {
       Point3D highestIntersection = null;
 
       for (PlanarRegion region : regions)
       {
-         if (!region.isPointInside(point, 0.0))
+         if (!region.isPointInWorld2DInside(pointInWorld))
          {
             continue;
          }
 
          if (highestIntersection == null)
          {
-            highestIntersection = new Point3D(point);
+            highestIntersection = new Point3D(pointInWorld);
             highestIntersection.setZ(Double.NEGATIVE_INFINITY);
          }
 
-         double height = region.getPlaneZGivenXY(point.getX(), point.getY());
+         double height = region.getPlaneZGivenXY(pointInWorld.getX(), pointInWorld.getY());
 
          if(highestIntersection.getZ() < height)
          {
