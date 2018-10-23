@@ -26,9 +26,6 @@ public abstract class MessagerPlannerDataSetTest extends FootstepPlannerDataSetT
    {
       super.setup();
 
-      uiReceivedPlan = new AtomicReference<>(false);
-      uiReceivedResult = new AtomicReference<>(false);
-
       messager.registerTopicListener(FootstepPlanTopic, request -> uiReceivedPlan.set(true));
       messager.registerTopicListener(PlanningResultTopic, request -> uiReceivedResult.set(true));
 

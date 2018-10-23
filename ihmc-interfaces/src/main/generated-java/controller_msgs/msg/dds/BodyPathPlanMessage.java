@@ -22,7 +22,7 @@ public class BodyPathPlanMessage extends Packet<BodyPathPlanMessage> implements 
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-   public byte path_planning_result_ = (byte) 255;
+   public byte footstep_planning_result_ = (byte) 255;
    public int plan_id_ = -1;
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  body_path_;
@@ -48,7 +48,7 @@ public class BodyPathPlanMessage extends Packet<BodyPathPlanMessage> implements 
    {
       sequence_id_ = other.sequence_id_;
 
-      path_planning_result_ = other.path_planning_result_;
+      footstep_planning_result_ = other.footstep_planning_result_;
 
       plan_id_ = other.plan_id_;
 
@@ -73,13 +73,13 @@ public class BodyPathPlanMessage extends Packet<BodyPathPlanMessage> implements 
       return sequence_id_;
    }
 
-   public void setPathPlanningResult(byte path_planning_result)
+   public void setFootstepPlanningResult(byte footstep_planning_result)
    {
-      path_planning_result_ = path_planning_result;
+      footstep_planning_result_ = footstep_planning_result;
    }
-   public byte getPathPlanningResult()
+   public byte getFootstepPlanningResult()
    {
-      return path_planning_result_;
+      return footstep_planning_result_;
    }
 
    public void setPlanId(int plan_id)
@@ -135,7 +135,7 @@ public class BodyPathPlanMessage extends Packet<BodyPathPlanMessage> implements 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.path_planning_result_, other.path_planning_result_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_planning_result_, other.footstep_planning_result_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.plan_id_, other.plan_id_, epsilon)) return false;
 
@@ -164,7 +164,7 @@ public class BodyPathPlanMessage extends Packet<BodyPathPlanMessage> implements 
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.path_planning_result_ != otherMyClass.path_planning_result_) return false;
+      if(this.footstep_planning_result_ != otherMyClass.footstep_planning_result_) return false;
 
       if(this.plan_id_ != otherMyClass.plan_id_) return false;
 
@@ -184,8 +184,8 @@ public class BodyPathPlanMessage extends Packet<BodyPathPlanMessage> implements 
       builder.append("BodyPathPlanMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("path_planning_result=");
-      builder.append(this.path_planning_result_);      builder.append(", ");
+      builder.append("footstep_planning_result=");
+      builder.append(this.footstep_planning_result_);      builder.append(", ");
       builder.append("plan_id=");
       builder.append(this.plan_id_);      builder.append(", ");
       builder.append("planar_regions_list=");

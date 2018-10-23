@@ -2,13 +2,28 @@
 #define __controller_msgs__msg__VisibilityClusterMessage__idl__
 
 #include "geometry_msgs/msg/./Point_.idl"
-#include "geometry_msgs/msg/./Transform_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
 module controller_msgs
 {
   module msg
   {
     module dds
     {
+      const octet EXTRUSION_INSIDE =
+      0;
+
+      const octet EXTRUSION_OUTSIDE =
+      1;
+
+      const octet TYPE_LINE =
+      0;
+
+      const octet TYPE_MULTI_LINE =
+      1;
+
+      const octet TYPE_POLYGON =
+      2;
+
 
       /**
        * This message is part of the IHMC footstep planning module.
@@ -16,7 +31,11 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::VisibilityClusterMessage_")
       struct VisibilityClusterMessage
       {
-        geometry_msgs::msg::dds::Transform transform_to_world;
+        @defaultValue(value=255)
+        octet extrusion_side;
+        @defaultValue(value=255)
+        octet type;
+        geometry_msgs::msg::dds::Pose pose_in_world;
         sequence<geometry_msgs::msg::dds::Point> raw_points_in_local;
         sequence<geometry_msgs::msg::dds::Point> navigable_extrusions_in_local;
         sequence<geometry_msgs::msg::dds::Point> non_navigable_extrusions_in_local;

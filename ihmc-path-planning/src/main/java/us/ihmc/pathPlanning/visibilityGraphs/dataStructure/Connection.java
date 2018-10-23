@@ -39,6 +39,11 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
       this.target = new ConnectionPoint3D(target, targetRegionId);
    }
 
+   public Connection getCopy()
+   {
+      return new Connection(this);
+   }
+
    public ConnectionPoint3D getSourcePoint()
    {
       return source;

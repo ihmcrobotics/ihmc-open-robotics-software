@@ -5,11 +5,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.*;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -28,8 +31,16 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme EditMode = apiFactory.createCategoryTheme("EditMode");
    private static final CategoryTheme FootstepPlan = apiFactory.createCategoryTheme("FootstepPlan");
    private static final CategoryTheme BodyPath = apiFactory.createCategoryTheme("BodyPath");
+   private static final CategoryTheme VisibilityGraphs = apiFactory.createCategoryTheme("VisibilityGraphs");
    private static final CategoryTheme NodeChecking = apiFactory.createCategoryTheme("NodeChecking");
    private static final CategoryTheme UnitTest = apiFactory.createCategoryTheme("UnitTest");
+   private static final CategoryTheme Cluster = apiFactory.createCategoryTheme("Cluster");
+   private static final CategoryTheme Map = apiFactory.createCategoryTheme("Map");
+   private static final CategoryTheme InterRegion = apiFactory.createCategoryTheme("InterRegion");
+   private static final CategoryTheme Statistics = apiFactory.createCategoryTheme("Statistics");
+   private static final CategoryTheme Raw = apiFactory.createCategoryTheme("Raw");
+   private static final CategoryTheme Navigable = apiFactory.createCategoryTheme("Navigable");
+   private static final CategoryTheme NonNavigable = apiFactory.createCategoryTheme("NonNavigable");
 
    private static final CategoryTheme Parameters = apiFactory.createCategoryTheme("Parameters");
 
@@ -47,6 +58,7 @@ public class FootstepPlannerMessagerAPI
    private static final TypedTopicTheme<Integer> SequenceId = apiFactory.createTypedTopicTheme("SequenceId");
    private static final TypedTopicTheme<FootstepPlannerType> FootstepPlannerType = apiFactory.createTypedTopicTheme("FootstepPlannerType");
    private static final TypedTopicTheme<FootstepPlanningResult> FootstepPlannerResult = apiFactory.createTypedTopicTheme("FootstepPlannerResult");
+   private static final TypedTopicTheme<FootstepPlannerStatus> FootstepPlannerStatus = apiFactory.createTypedTopicTheme("FootstepPlannerStatus");
    private static final TypedTopicTheme<FootstepPlannerParameters> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
    private static final TypedTopicTheme<Boolean> Export = apiFactory.createTypedTopicTheme("Export");
    private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
@@ -56,6 +68,8 @@ public class FootstepPlannerMessagerAPI
 
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("FootstepPlanning"));
 
+   public static final Topic<Boolean> GlobalReset = Root.topic(Reset);
+
    public static final Topic<PlanarRegionsList> PlanarRegionDataTopic = Root.child(PlanarRegion).topic(Data);
    public static final Topic<Boolean> ShowPlanarRegionsTopic = Root.child(PlanarRegion).topic(Show);
    public static final Topic<Boolean> AcceptNewPlanarRegions = Root.child(PlanarRegion).topic(Enable);
@@ -63,12 +77,14 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepPlan> FootstepPlanTopic = Root.child(FootstepPlan).topic(Data);
 
    public static final Topic<Boolean> ComputePathTopic = Root.child(FootstepPlan).topic(ComputePath);
+   public static final Topic<Boolean> RequestPlannerStatistics = Root.child(Statistics).topic(Show);
    public static final Topic<FootstepPlannerParameters> PlannerParametersTopic = Root.child(Parameters).topic(FootstepPlannerParameters);
    public static final Topic<Double> PlannerTimeoutTopic = Root.child(FootstepPlan).topic(PlannerTimeout);
    public static final Topic<Double> PlannerTimeTakenTopic = Root.child(FootstepPlan).topic(PlannerTimeTaken);
    public static final Topic<Double> PlannerHorizonLengthTopic = Root.child(FootstepPlan).topic(PlannerHorizonLength);
    public static final Topic<FootstepPlannerType> PlannerTypeTopic = Root.child(FootstepPlan).topic(FootstepPlannerType);
    public static final Topic<FootstepPlanningResult> PlanningResultTopic = Root.child(FootstepPlan).topic(FootstepPlannerResult);
+   public static final Topic<FootstepPlannerStatus> PlannerStatusTopic = Root.child(FootstepPlan).topic(FootstepPlannerStatus);
    public static final Topic<Integer> PlannerRequestIdTopic = Root.child(FootstepPlan).topic(PlannerRequestId);
    public static final Topic<Integer> SequenceIdTopic = Root.child(FootstepPlan).topic(SequenceId);
 
@@ -99,6 +115,25 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<List<? extends Point3DReadOnly>> BodyPathDataTopic = Root.child(BodyPath).topic(Data);
 
    public static final Topic<Boolean> ShowBodyPath = Root.child(BodyPath).topic(Show);
+
+   public static final Topic<List<NavigableRegion>> NavigableRegionData = Root.child(VisibilityGraphs).topic(Data);
+
+   public static final Topic<VisibilityMapHolder> StartVisibilityMap = Root.child(VisibilityGraphs).child(Start).child(Map).topic(Data);
+   public static final Topic<VisibilityMapHolder> GoalVisibilityMap = Root.child(VisibilityGraphs).child(Goal).child(Map).topic(Data);
+   public static final Topic<VisibilityMapHolder> InterRegionVisibilityMap = Root.child(VisibilityGraphs).child(InterRegion).child(Map).topic(Data);
+
+
+   public static final Topic<Boolean> ShowClusterRawPoints = Root.child(VisibilityGraphs).child(Cluster).child(Raw).topic(Show);
+   public static final Topic<Boolean> ShowClusterNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(Navigable).topic(Show);
+   public static final Topic<Boolean> ShowClusterNonNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(NonNavigable).topic(Show);
+
+   public static final Topic<Boolean> ShowStartVisibilityMap = Root.child(VisibilityGraphs).child(Start).child(Map).topic(Show);
+   public static final Topic<Boolean> ShowGoalVisibilityMap = Root.child(VisibilityGraphs).child(Goal).child(Map).topic(Show);
+
+   public static final Topic<Boolean> ShowInterRegionVisibilityMap = Root.child(VisibilityGraphs).child(InterRegion).child(Map).topic(Show);
+
+   public static final Topic<Boolean> ShowNavigableRegionVisibilityMaps = Root.child(VisibilityGraphs).child(Map).topic(Show);
+
 
 
    private static final TypedTopicTheme<Boolean> ValidNode = apiFactory.createTypedTopicTheme("ValidNode");

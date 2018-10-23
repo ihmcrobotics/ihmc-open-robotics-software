@@ -11,14 +11,21 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> implements Settable<VisibilityClusterMessage>, EpsilonComparable<VisibilityClusterMessage>
 {
-   public us.ihmc.euclid.transform.QuaternionBasedTransform transform_to_world_;
+   public static final byte EXTRUSION_INSIDE = (byte) 0;
+   public static final byte EXTRUSION_OUTSIDE = (byte) 1;
+   public static final byte TYPE_LINE = (byte) 0;
+   public static final byte TYPE_MULTI_LINE = (byte) 1;
+   public static final byte TYPE_POLYGON = (byte) 2;
+   public byte extrusion_side_ = (byte) 255;
+   public byte type_ = (byte) 255;
+   public us.ihmc.euclid.geometry.Pose3D pose_in_world_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  raw_points_in_local_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  navigable_extrusions_in_local_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  non_navigable_extrusions_in_local_;
 
    public VisibilityClusterMessage()
    {
-      transform_to_world_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
+      pose_in_world_ = new us.ihmc.euclid.geometry.Pose3D();
       raw_points_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
       navigable_extrusions_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
       non_navigable_extrusions_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
@@ -33,16 +40,38 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
 
    public void set(VisibilityClusterMessage other)
    {
-      geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
+      extrusion_side_ = other.extrusion_side_;
+
+      type_ = other.type_;
+
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_in_world_, pose_in_world_);
       raw_points_in_local_.set(other.raw_points_in_local_);
       navigable_extrusions_in_local_.set(other.navigable_extrusions_in_local_);
       non_navigable_extrusions_in_local_.set(other.non_navigable_extrusions_in_local_);
    }
 
-
-   public us.ihmc.euclid.transform.QuaternionBasedTransform getTransformToWorld()
+   public void setExtrusionSide(byte extrusion_side)
    {
-      return transform_to_world_;
+      extrusion_side_ = extrusion_side;
+   }
+   public byte getExtrusionSide()
+   {
+      return extrusion_side_;
+   }
+
+   public void setType(byte type)
+   {
+      type_ = type;
+   }
+   public byte getType()
+   {
+      return type_;
+   }
+
+
+   public us.ihmc.euclid.geometry.Pose3D getPoseInWorld()
+   {
+      return pose_in_world_;
    }
 
 
@@ -81,7 +110,11 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.extrusion_side_, other.extrusion_side_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.type_, other.type_, epsilon)) return false;
+
+      if (!this.pose_in_world_.epsilonEquals(other.pose_in_world_, epsilon)) return false;
       if (this.raw_points_in_local_.size() != other.raw_points_in_local_.size()) { return false; }
       else
       {
@@ -116,7 +149,11 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
 
       VisibilityClusterMessage otherMyClass = (VisibilityClusterMessage) other;
 
-      if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
+      if(this.extrusion_side_ != otherMyClass.extrusion_side_) return false;
+
+      if(this.type_ != otherMyClass.type_) return false;
+
+      if (!this.pose_in_world_.equals(otherMyClass.pose_in_world_)) return false;
       if (!this.raw_points_in_local_.equals(otherMyClass.raw_points_in_local_)) return false;
       if (!this.navigable_extrusions_in_local_.equals(otherMyClass.navigable_extrusions_in_local_)) return false;
       if (!this.non_navigable_extrusions_in_local_.equals(otherMyClass.non_navigable_extrusions_in_local_)) return false;
@@ -130,8 +167,12 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
       StringBuilder builder = new StringBuilder();
 
       builder.append("VisibilityClusterMessage {");
-      builder.append("transform_to_world=");
-      builder.append(this.transform_to_world_);      builder.append(", ");
+      builder.append("extrusion_side=");
+      builder.append(this.extrusion_side_);      builder.append(", ");
+      builder.append("type=");
+      builder.append(this.type_);      builder.append(", ");
+      builder.append("pose_in_world=");
+      builder.append(this.pose_in_world_);      builder.append(", ");
       builder.append("raw_points_in_local=");
       builder.append(this.raw_points_in_local_);      builder.append(", ");
       builder.append("navigable_extrusions_in_local=");

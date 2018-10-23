@@ -71,7 +71,7 @@ public class FootstepPlannerStatusMessagePubSubType implements us.ihmc.pubsub.To
    {
       cdr.write_type_4(data.getSequenceId());
 
-      cdr.write_type_9(data.getPlanningStatus());
+      cdr.write_type_9(data.getFootstepPlannerStatus());
 
    }
 
@@ -79,7 +79,7 @@ public class FootstepPlannerStatusMessagePubSubType implements us.ihmc.pubsub.To
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      data.setPlanningStatus(cdr.read_type_9());
+      data.setFootstepPlannerStatus(cdr.read_type_9());
       	
 
    }
@@ -88,14 +88,14 @@ public class FootstepPlannerStatusMessagePubSubType implements us.ihmc.pubsub.To
    public final void serialize(controller_msgs.msg.dds.FootstepPlannerStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_9("planning_status", data.getPlanningStatus());
+      ser.write_type_9("footstep_planner_status", data.getFootstepPlannerStatus());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepPlannerStatusMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      data.setPlanningStatus(ser.read_type_9("planning_status"));
+      data.setFootstepPlannerStatus(ser.read_type_9("footstep_planner_status"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerStatusMessage src, controller_msgs.msg.dds.FootstepPlannerStatusMessage dest)

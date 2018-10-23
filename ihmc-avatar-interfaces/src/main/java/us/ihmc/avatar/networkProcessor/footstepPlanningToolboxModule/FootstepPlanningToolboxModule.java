@@ -51,6 +51,8 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
                                            s -> footstepPlanningToolboxController.processRequest(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlannerParametersPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> footstepPlanningToolboxController.processPlannerParameters(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanningStatisticsRequestMessage.class, getSubscriberTopicNameGenerator(),
+                                           s -> footstepPlanningToolboxController.processPlanningStatisticsRequest());
       textToSpeechPublisher = ROS2Tools.createPublisher(realtimeRos2Node, TextToSpeechPacket.class, ROS2Tools::generateDefaultTopicName);
    }
 
@@ -74,6 +76,7 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
       status.add(FootstepPlanningToolboxOutputStatus.class);
       status.add(FootstepPlannerStatusMessage.class);
       status.add(BodyPathPlanMessage.class);
+      status.add(BodyPathPlanStatisticsMessage.class);
       return status;
    }
 

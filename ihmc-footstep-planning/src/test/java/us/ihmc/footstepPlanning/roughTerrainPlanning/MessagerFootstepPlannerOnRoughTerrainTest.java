@@ -148,7 +148,7 @@ public abstract class MessagerFootstepPlannerOnRoughTerrainTest
       double timeout = 5.0;
       double totalTimeTaken = 0.0;
       long sleepDuration = 10;
-      while (!receivedPlan.get() && !receivedResult.get())
+      while (!receivedPlan.get() || !receivedResult.get() || footstepPlanReference.get() == null)
       {
          if (totalTimeTaken > timeout + 5.0)
             throw new RuntimeException("Waited too long for a result.");

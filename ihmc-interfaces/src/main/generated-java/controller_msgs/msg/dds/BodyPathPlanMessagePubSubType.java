@@ -96,7 +96,7 @@ public class BodyPathPlanMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       cdr.write_type_4(data.getSequenceId());
 
-      cdr.write_type_9(data.getPathPlanningResult());
+      cdr.write_type_9(data.getFootstepPlanningResult());
 
       cdr.write_type_2(data.getPlanId());
 
@@ -113,7 +113,7 @@ public class BodyPathPlanMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      data.setPathPlanningResult(cdr.read_type_9());
+      data.setFootstepPlanningResult(cdr.read_type_9());
       	
       data.setPlanId(cdr.read_type_2());
       	
@@ -128,7 +128,7 @@ public class BodyPathPlanMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    public final void serialize(controller_msgs.msg.dds.BodyPathPlanMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_9("path_planning_result", data.getPathPlanningResult());
+      ser.write_type_9("footstep_planning_result", data.getFootstepPlanningResult());
       ser.write_type_2("plan_id", data.getPlanId());
       ser.write_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
 
@@ -143,7 +143,7 @@ public class BodyPathPlanMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.BodyPathPlanMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      data.setPathPlanningResult(ser.read_type_9("path_planning_result"));
+      data.setFootstepPlanningResult(ser.read_type_9("footstep_planning_result"));
       data.setPlanId(ser.read_type_2("plan_id"));
       ser.read_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
 

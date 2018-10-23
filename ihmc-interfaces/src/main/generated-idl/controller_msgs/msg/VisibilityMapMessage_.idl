@@ -18,15 +18,17 @@ module controller_msgs
         /**
          * unique id of the map
          */
-        unsigned long map_id;
+        long map_id;
         /**
          * start point for the connection
          */
         sequence<geometry_msgs::msg::dds::Point> source_points;
+        sequence<long> source_region_ids;
         /**
          * target point for the connection
          */
         sequence<geometry_msgs::msg::dds::Point> target_points;
+        sequence<long> target_region_ids;
       };
     };
   };

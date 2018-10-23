@@ -17,6 +17,12 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minSurfaceIncline;
    private double maxStepWidth;
 
+   private boolean checkForBodyBoxCollisions;
+   private double bodyBoxWidth;
+   private double bodyBoxHeight;
+   private double bodyBoxDepth;
+   private double bodyBoxCenterHeight;
+
    private final SettableFootstepPlannerCostParameters costParameters;
 
    public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlanningParameters)
@@ -32,6 +38,12 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.maxStepWidth = footstepPlanningParameters.getMaximumStepWidth();
       this.minFootholdPercent = footstepPlanningParameters.getMinimumFootholdPercent();
       this.minSurfaceIncline = footstepPlanningParameters.getMinimumSurfaceInclineRadians();
+
+      this.checkForBodyBoxCollisions = footstepPlanningParameters.checkForBodyBoxCollisions();
+      this.bodyBoxHeight = footstepPlanningParameters.getBodyBoxHeight();
+      this.bodyBoxWidth = footstepPlanningParameters.getBodyBoxWidth();
+      this.bodyBoxDepth = footstepPlanningParameters.getBodyBoxDepth();
+      this.bodyBoxCenterHeight = footstepPlanningParameters.getBodyBoxCenterHeight();
 
       this.costParameters = new SettableFootstepPlannerCostParameters(footstepPlanningParameters.getCostParameters());
    }
@@ -161,6 +173,31 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       costParameters.setBodyPathBasedHeuristicsWeight(heuristicsWeight);
    }
 
+   public void setCheckForBodyBoxCollisions(boolean checkForBodyBoxCollisions)
+   {
+      this.checkForBodyBoxCollisions = checkForBodyBoxCollisions;
+   }
+
+   public void setBodyBoxWidth(double bodyBoxWidth)
+   {
+      this.bodyBoxWidth = bodyBoxWidth;
+   }
+
+   public void setBodyBoxHeight(double bodyBoxHeight)
+   {
+      this.bodyBoxHeight = bodyBoxHeight;
+   }
+
+   public void setBodyBoxDepth(double bodyBoxDepth)
+   {
+      this.bodyBoxDepth = bodyBoxDepth;
+   }
+
+   public void setBodyBoxCenterHeight(double bodyBoxCenterHeight)
+   {
+      this.bodyBoxCenterHeight = bodyBoxCenterHeight;
+   }
+
    @Override
    public double getIdealFootstepWidth()
    {
@@ -225,6 +262,36 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getMinimumSurfaceInclineRadians()
    {
       return minSurfaceIncline;
+   }
+
+   @Override
+   public boolean checkForBodyBoxCollisions()
+   {
+      return checkForBodyBoxCollisions;
+   }
+
+   @Override
+   public double getBodyBoxHeight()
+   {
+      return bodyBoxHeight;
+   }
+
+   @Override
+   public double getBodyBoxWidth()
+   {
+      return bodyBoxWidth;
+   }
+
+   @Override
+   public double getBodyBoxDepth()
+   {
+      return bodyBoxDepth;
+   }
+
+   @Override
+   public double getBodyBoxCenterHeight()
+   {
+      return bodyBoxCenterHeight;
    }
 
    public boolean useQuadraticDistanceCost()

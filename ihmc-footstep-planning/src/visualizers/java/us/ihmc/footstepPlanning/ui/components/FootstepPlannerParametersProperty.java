@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.ui.components;
 import javafx.beans.property.Property;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
-import us.ihmc.javaFXToolkit.messager.TopicListener;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -36,6 +35,12 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField visGraphWithAStarHeuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getVisGraphWithAStarHeuristicsWeight, (p, v) -> p.setVisGraphWithAStarHeuristicsWeight(v));
    private DoubleField depthFirstHeuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getDepthFirstHeuristicsWeight, (p, v) -> p.setDepthFirstHeuristicsWeight(v));
    private DoubleField bodyPathBasedHeuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getBodyPathBasedHeuristicsWeight, (p, v) -> p.setBodyPathBasedHeuristicsWeight(v));
+
+   private BooleanField checkForBodyBoxCollision = new BooleanField(SettableFootstepPlannerParameters::checkForBodyBoxCollisions, (p, v) -> p.setCheckForBodyBoxCollisions(v));
+   private DoubleField bodyBoxWidth = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxWidth, (p, v) -> p.setBodyBoxWidth(v));
+   private DoubleField bodyBoxDepth = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxDepth, (p, v) -> p.setBodyBoxDepth(v));
+   private DoubleField bodyBoxHeight = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxHeight, (p, v) -> p.setBodyBoxHeight(v));
+   private DoubleField bodyBoxCenterHeight = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxCenterHeight, (p, v) -> p.setBodyBoxCenterHeight(v));
 
    public FootstepPlannerParametersProperty(Object bean, String name)
    {
@@ -101,6 +106,31 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    public void bidirectionalBindMaxStepWidth(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, maxStepWidth);
+   }
+
+   public void bidirectionalBindCheckBodyBoxCollisions(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, checkForBodyBoxCollision);
+   }
+
+   public void bidirectionalBindBodyBoxWidth(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, bodyBoxWidth);
+   }
+
+   public void bidirectionalBindBodyBoxDepth(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, bodyBoxDepth);
+   }
+
+   public void bidirectionalBindBodyBoxHeight(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, bodyBoxHeight);
+   }
+
+   public void bidirectionalBindBodyBoxCenterHeight(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, bodyBoxCenterHeight);
    }
 
    public void bidirectionalBindYawWeight(Property<? extends Number> property)

@@ -15,7 +15,7 @@
 <?import javafx.scene.control.TextField?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
             xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="us.ihmc.footstepPlanning.ui.components.StartGoalTabController">
+            fx:controller="us.ihmc.footstepPlanning.ui.controllers.StartGoalTabController">
     <children>
         <GridPane hgap="5.0" layoutX="25.0" layoutY="27.0">
             <columnConstraints>
@@ -40,20 +40,12 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
             </rowConstraints>
             <children>
-                <Button mnemonicParsing="false" onAction="#computePath" text="Compute path" GridPane.columnSpan="2" GridPane.columnIndex="1"/>
-                <ComboBox fx:id="plannerTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnSpan="2" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                <TextField fx:id="requestID" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                <TextField fx:id="sequenceID" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                <TextField fx:id="timeTaken" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
 
                 <ToggleButton fx:id="startPositionToggleButton" mnemonicParsing="false" text="Place Start" GridPane.columnIndex="4"/>
                 <ToggleButton fx:id="startRotationToggleButton" mnemonicParsing="false" text="Rotate Start" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
                 <ToggleButton fx:id="goalPositionToggleButton" mnemonicParsing="false" text="Place Goal" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
                 <ToggleButton fx:id="goalRotationToggleButton" mnemonicParsing="false" text="Rotate Goal" GridPane.columnIndex="4" GridPane.rowIndex="4"/>
 
-                <Label text="Request ID" GridPane.halignment="LEFT" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-                <Label text="Sequence ID" GridPane.halignment="LEFT" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
-                <Label text="Time Taken" GridPane.halignment="LEFT" GridPane.columnIndex="2" GridPane.rowIndex="4"/>
 
                 <Label text="yaw" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
                 <Label text="yaw" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="4"/>

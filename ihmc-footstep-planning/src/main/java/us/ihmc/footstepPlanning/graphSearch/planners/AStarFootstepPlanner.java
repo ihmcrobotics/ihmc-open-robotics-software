@@ -364,26 +364,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
          throw new RuntimeException("Planner does not support goals other then " + supportedGoalType);
    }
 
-   public static AStarFootstepPlanner createFlatGroundPlanner(FootstepPlannerParameters parameters, GraphVisualization viz,
-                                                              SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion,
-                                                              YoVariableRegistry registry)
-   {
-      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
-
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getAStarHeuristicsWeight(), parameters);
-      FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(parameters);
-
-      AlwaysValidNodeChecker alwaysValidNodeChecker = new AlwaysValidNodeChecker();
-      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(parameters);
-
-      FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(alwaysValidNodeChecker, bodyCollisionNodeChecker));
-
-      return new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz, registry);
-   }
-
-   public static AStarFootstepPlanner createRoughTerrainPlanner(FootstepPlannerParameters parameters, GraphVisualization viz,
-                                                                SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion,
-                                                                YoVariableRegistry registry)
+   public static AStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, GraphVisualization viz,
+                                                    SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion,
+                                                    YoVariableRegistry registry)
    {
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);

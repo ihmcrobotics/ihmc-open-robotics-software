@@ -90,7 +90,7 @@ public class VisibilityGraphsFactory
 
       for (Cluster cluster : navigableRegion.getAllClusters())
       {
-         PointCloudTools.doBrakeDownOn2DPoints(cluster.getNavigableExtrusionsInLocal2D(), clusterResolution);
+         PointCloudTools.doBrakeDownOn2DPoints(cluster.getNavigableExtrusionsInLocal(), clusterResolution);
       }
 
       Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(navigableRegion.getAllClusters(), navigableRegion);
