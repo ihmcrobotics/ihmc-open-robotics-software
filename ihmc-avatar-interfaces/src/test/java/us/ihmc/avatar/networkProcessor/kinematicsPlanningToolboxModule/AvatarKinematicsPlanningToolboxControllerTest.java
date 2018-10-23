@@ -1,0 +1,282 @@
+package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
+
+import static org.junit.Assert.assertTrue;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
+import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
+import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.avatar.MultiRobotTestInterface;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
+
+public abstract class AvatarKinematicsPlanningToolboxControllerTest implements MultiRobotTestInterface
+{
+   private static final boolean VERBOSE = false;
+
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+   private static final boolean visualize = simulationTestingParameters.getCreateGUI();
+   static
+   {
+      simulationTestingParameters.setDataBufferSize(1 << 16);
+   }
+
+   private CommandInputManager commandInputManager;
+   private YoVariableRegistry mainRegistry;
+   private YoGraphicsListRegistry yoGraphicsListRegistry;
+   private KinematicsPlanningToolboxController toolboxController;
+
+   private YoBoolean initializationSucceeded;
+   private YoInteger numberOfIterations;
+
+   private SimulationConstructionSet scs;
+   private BlockingSimulationRunner blockingSimulationRunner;
+
+   private HumanoidFloatingRootJointRobot robot;
+   private HumanoidFloatingRootJointRobot ghost;
+   private RobotController toolboxUpdater;
+
+   /**
+    * Returns a separate instance of the robot model that will be modified in this test to create a
+    * ghost robot.
+    */
+   public abstract DRCRobotModel getGhostRobotModel();
+
+   @Before
+   public void setup()
+   {
+      mainRegistry = new YoVariableRegistry("main");
+      initializationSucceeded = new YoBoolean("initializationSucceeded", mainRegistry);
+      numberOfIterations = new YoInteger("numberOfIterations", mainRegistry);
+      yoGraphicsListRegistry = new YoGraphicsListRegistry();
+
+      DRCRobotModel robotModel = getRobotModel();
+
+      FullHumanoidRobotModel desiredFullRobotModel = robotModel.createFullRobotModel();
+      commandInputManager = new CommandInputManager(KinematicsPlanningToolboxModule.supportedCommands());
+      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
+
+      StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
+
+      toolboxController = new KinematicsPlanningToolboxController(robotModel, desiredFullRobotModel, commandInputManager, statusOutputManager, mainRegistry);
+
+      robot = robotModel.createHumanoidFloatingRootJointRobot(false);
+      toolboxUpdater = createToolboxUpdater();
+      robot.setController(toolboxUpdater);
+      robot.setDynamic(false);
+      robot.setGravity(0);
+
+      DRCRobotModel ghostRobotModel = getGhostRobotModel();
+      RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
+      robotDescription.setName("Ghost");
+      KinematicsToolboxControllerTest.recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
+      ghost = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
+      ghost.setDynamic(false);
+      ghost.setGravity(0);
+      hideGhost();
+
+      if (visualize)
+      {
+         scs = new SimulationConstructionSet(new Robot[] {robot, ghost}, simulationTestingParameters);
+         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
+         scs.setCameraFix(0.0, 0.0, 1.0);
+         scs.setCameraPosition(8.0, 0.0, 3.0);
+         scs.startOnAThread();
+         blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
+      }
+   }
+
+   private void hideGhost()
+   {
+      ghost.setPositionInWorld(new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY));
+   }
+
+   private void snapGhostToFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
+   {
+      new JointAnglesWriter(ghost, fullHumanoidRobotModel).updateRobotConfigurationBasedOnFullRobotModel();
+   }
+
+   @After
+   public void tearDown()
+   {
+      if (simulationTestingParameters.getKeepSCSUp())
+         ThreadTools.sleepForever();
+
+      if (mainRegistry != null)
+      {
+         mainRegistry.closeAndDispose();
+         mainRegistry = null;
+      }
+
+      initializationSucceeded = null;
+
+      yoGraphicsListRegistry = null;
+
+      commandInputManager = null;
+
+      toolboxController = null;
+
+      robot = null;
+      toolboxUpdater = null;
+      blockingSimulationRunner = null;
+
+      if (scs != null)
+      {
+         scs.closeAndDispose();
+         scs = null;
+      }
+
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 30000)
+   public void testMessages() throws Exception
+   {
+      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
+      snapGhostToFullRobotModel(initialFullRobotModel);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      RigidBody endEffector = initialFullRobotModel.getHand(robotSide);
+      TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
+      List<Pose3DReadOnly> keyFramePoses = new ArrayList<Pose3DReadOnly>();
+      List<Point3DReadOnly> desiredCOMPoints = new ArrayList<Point3DReadOnly>();
+
+      KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = MessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector, keyFrameTimes,
+                                                                                                                                  keyFramePoses);
+      KinematicsPlanningToolboxCenterOfMassMessage comMessage = MessageTools.createKinematicsPlanningToolboxCenterOfMassMessage(keyFrameTimes,
+                                                                                                                                desiredCOMPoints);
+
+      commandInputManager.submitMessage(endEffectorMessage);
+      commandInputManager.submitMessage(comMessage);
+
+      int numberOfIterations = 250;
+
+      runKinematicsPlanningToolboxController(numberOfIterations);
+
+      assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
+      assertTrue("Poor solution quality: " + toolboxController.getSolution().getSolutionQuality(),
+                 toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
+   }
+
+   private void runKinematicsPlanningToolboxController(int numberOfIterations) throws SimulationExceededMaximumTimeException
+   {
+      initializationSucceeded.set(false);
+      this.numberOfIterations.set(0);
+
+      if (visualize)
+      {
+         blockingSimulationRunner.simulateNTicksAndBlockAndCatchExceptions(numberOfIterations);
+      }
+      else
+      {
+         for (int i = 0; i < numberOfIterations; i++)
+            toolboxUpdater.doControl();
+      }
+
+   }
+
+   private FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration()
+   {
+      DRCRobotModel robotModel = getRobotModel();
+      FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel();
+      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
+      robotModel.getDefaultRobotInitialSetup(0.0, 0.0).initializeRobot(robot, robotModel.getJointMap());
+      DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(robot, null, 0);
+      drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null, null, null);
+      drcPerfectSensorReaderFactory.getSensorReader().read();
+      return initialFullRobotModel;
+   }
+
+   private RobotController createToolboxUpdater()
+   {
+      return new RobotController()
+      {
+         private final JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(robot, toolboxController.getDesiredFullRobotModel());
+
+         @Override
+         public void doControl()
+         {
+            if (!initializationSucceeded.getBooleanValue())
+               initializationSucceeded.set(toolboxController.initialize());
+
+            if (initializationSucceeded.getBooleanValue())
+            {
+               try
+               {
+                  toolboxController.updateInternal();
+               }
+               catch (Exception e)
+               {
+                  e.printStackTrace();
+               }
+               jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
+               numberOfIterations.increment();
+            }
+         }
+
+         @Override
+         public void initialize()
+         {
+         }
+
+         @Override
+         public YoVariableRegistry getYoVariableRegistry()
+         {
+            return mainRegistry;
+         }
+
+         @Override
+         public String getName()
+         {
+            return mainRegistry.getName();
+         }
+
+         @Override
+         public String getDescription()
+         {
+            return null;
+         }
+      };
+   }
+}
