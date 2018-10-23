@@ -35,8 +35,9 @@ public class MessagerVisGraphAStarDataSetTest extends MessagerPlannerDataSetTest
    {
       MessagerVisGraphAStarDataSetTest test = new MessagerVisGraphAStarDataSetTest();
       String prefix = "unitTestDataSets/test/";
+      VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171216_111326_CrossoverPlatforms");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214730_CinderBlockField");
       test.tearDown();
 
    }
