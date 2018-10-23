@@ -82,7 +82,7 @@ public class FootstepPathCalculatorModule
       goalOrientationReference = messager.createInput(GoalOrientationTopic, new Quaternion());
       parameters = messager.createInput(PlannerParametersTopic, new DefaultFootstepPlanningParameters());
       footstepPlannerTypeReference = messager.createInput(PlannerTypeTopic, FootstepPlannerType.A_STAR);
-      plannerTimeoutReference = messager.createInput(PlannerTimeoutTopic, 5.0);
+      plannerTimeoutReference = messager.createInput(PlannerTimeoutTopic);
       plannerHorizonLengthReference = messager.createInput(PlannerHorizonLengthTopic, 1.0);
 
       messager.registerTopicListener(ComputePathTopic, request -> computePathOnThread());
