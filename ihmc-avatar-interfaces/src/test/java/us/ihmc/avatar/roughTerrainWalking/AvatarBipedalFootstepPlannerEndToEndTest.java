@@ -29,6 +29,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -124,6 +125,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       toolboxModule = new FootstepPlanningToolboxModule(getRobotModel(), null, true, PubSubImplementation.INTRAPROCESS);
       footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class,
                                                                    FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
+
       toolboxStatePublisher = ROS2Tools
             .createPublisher(ros2Node, ToolboxStateMessage.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
 
@@ -266,6 +268,10 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       try
       {
          runEndToEndTest(plannerType, planarRegionsList, goalPose);
+         if (simulationTestingParameters.getKeepSCSUp())
+         {
+            ThreadTools.sleepForever();
+         }
       }
       catch (Exception e)
       {
