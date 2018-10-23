@@ -277,7 +277,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double ki = runningOnRealRobot ? 0.0 : 0.0;
       double maxIntegralError = 0.0;
       double maxAccel = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 2000.0 : Double.POSITIVE_INFINITY;
 
       armGains.setKp(kp);
       armGains.setZeta(zeta);
@@ -314,8 +314,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
-      double kpXY = runningOnRealRobot ? 90.0 : 100.0; // Was 100.0 before tuneup of sep 2018
-      double kpZ = runningOnRealRobot ? 80.0 : 100.0; // Was 80.0 before tuneup of sep 2018
+      double kpXY = runningOnRealRobot ? 100.0 : 100.0; // Was 100.0 before tuneup of sep 2018
+      double kpZ = runningOnRealRobot ? 90.0 : 100.0; // Was 80.0 before tuneup of sep 2018
       double zetaXY = runningOnRealRobot ? 0.8 : 0.8; // Was 0.9 before tuneup of sep 2018
       double zetaZ = runningOnRealRobot ? 0.8 : 0.8;
       double maxAccel = runningOnRealRobot ? 18.0 : 18.0; // Was 18.0 before tuneup of sep 2018
@@ -351,8 +351,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
-      double kpXY = runningOnRealRobot ? 80.0 : 100.0; // Was 80.0 before tuneup of sep 2018
-      double kpZ = runningOnRealRobot ? 60.0 : 100.0; // Was 60.0 before tuneup of sep 2018
+      double kpXY = runningOnRealRobot ? 100.0 : 100.0; // Was 80.0 before tuneup of sep 2018
+      double kpZ = runningOnRealRobot ? 80.0 : 100.0; // Was 60.0 before tuneup of sep 2018
       double zetaXY = runningOnRealRobot ? 0.8 : 0.8; // Was 0.8 before tuneup of sep 2018
       double zetaZ = runningOnRealRobot ? 0.8 : 0.8; // Was 0.8 before tuneup of sep 2018
       double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
