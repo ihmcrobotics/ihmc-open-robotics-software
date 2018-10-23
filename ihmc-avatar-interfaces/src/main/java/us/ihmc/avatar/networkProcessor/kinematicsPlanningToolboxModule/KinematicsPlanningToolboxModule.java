@@ -16,20 +16,23 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 public class KinematicsPlanningToolboxModule extends ToolboxModule
 {
    private final KinematicsPlanningToolboxController kinematicsPlanningToolboxController;
 
-   public KinematicsPlanningToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider,
-                                          boolean startYoVariableServer)
-         throws IOException
+   public KinematicsPlanningToolboxModule(DRCRobotModel drcRobotModel, boolean startYoVariableServer) throws IOException
    {
-      super(drcRobotModel.getSimpleRobotName(), fullRobotModelToLog, modelProvider, startYoVariableServer);
-      kinematicsPlanningToolboxController = new KinematicsPlanningToolboxController(drcRobotModel, fullRobotModel, commandInputManager, statusOutputManager,
+      this(drcRobotModel, startYoVariableServer, PubSubImplementation.FAST_RTPS);
+   }
+
+   public KinematicsPlanningToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation) throws IOException
+   {
+      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
+            DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+      kinematicsPlanningToolboxController = new KinematicsPlanningToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager,
                                                                                     registry);
       commandInputManager.registerConversionHelper(new KinematicsPlanningToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
