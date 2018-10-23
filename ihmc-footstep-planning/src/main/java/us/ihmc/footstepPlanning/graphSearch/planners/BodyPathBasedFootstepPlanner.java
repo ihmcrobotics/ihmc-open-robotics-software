@@ -77,6 +77,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
+      costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(false);
       costBuilder.setIncludePitchAndRollCost(false);
 
