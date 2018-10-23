@@ -23,7 +23,6 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
    private final BipedalFootstepPlannerListener listener;
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
-   private final FootstepPlannerParameters parameters;
 
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private final PlanarRegion planarRegionToPack = new PlanarRegion();
@@ -32,8 +31,9 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParameters parameters,
                                      BipedalFootstepPlannerListener listener)
    {
+      super(parameters);
+
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
-      this.parameters = parameters;
       this.listener = listener;
    }
 
@@ -46,6 +46,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       }
 
       FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(footstepNode.getRobotSide()), footPolygon);
+      List<PlanarRegion> planarRegionsList = nearbyNavigablePlanarRegions.get(footstepNode.getPlanarRegionsHashCode());
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, planarRegionToPack);
 
       if (snapTransform == null)
