@@ -36,6 +36,11 @@ public class PlanarRegionsListPolygonSnapper
     */
    public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2DBasics polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo, PlanarRegion regionToPack)
    {
+      return snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsListToSnapTo.getPlanarRegionsAsList(), regionToPack);
+   }
+
+   public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2DBasics polygonToSnap, List<PlanarRegion> planarRegionsListToSnapTo, PlanarRegion regionToPack)
+   {
       double allowableExtraZ = 0.003; // For close ones. When close, take one that is flatter...
       List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(polygonToSnap, planarRegionsListToSnapTo);
 
