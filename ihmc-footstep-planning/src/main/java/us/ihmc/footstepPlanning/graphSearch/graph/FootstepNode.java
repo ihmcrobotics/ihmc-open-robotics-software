@@ -12,18 +12,18 @@ public class FootstepNode
    public static final double gridSizeXY = 0.05;
    public static final double gridSizeYaw = Math.PI / 18.0;
 
+   public static final double PRECISION     = 1.0e-4;
+   public static final double INV_PRECISION = 1.0e+4;
+
    private final int xIndex;
    private final int yIndex;
    private final int yawIndex;
    private final RobotSide robotSide;
 
-   private double height = Double.NaN;
-   private double pitch = Double.NaN;
-   private double roll = Double.NaN;
-
    private Point2D midFootPoint;
 
    private final int hashCode;
+   private final int planarRegionsHashCode;
 
    public FootstepNode(double x, double y)
    {
@@ -38,6 +38,7 @@ public class FootstepNode
       this.robotSide = robotSide;
 
       hashCode = computeHashCode(this);
+      planarRegionsHashCode = computePlanarRegionsHashCode(this);
    }
 
    public double getX()
@@ -54,37 +55,6 @@ public class FootstepNode
    {
       return gridSizeYaw * yawIndex;
    }
-
-   public boolean hasZ()
-   {
-      return !Double.isNaN(height);
-   }
-
-   public boolean hasPitch()
-   {
-      return !Double.isNaN(pitch);
-   }
-
-   public boolean hasRoll()
-   {
-      return !Double.isNaN(roll);
-   }
-
-   public double getZ()
-   {
-      return height;
-   }
-
-   public double getPitch()
-   {
-      return pitch;
-   }
-
-   public double getRoll()
-   {
-      return roll;
-   }
-
 
    public RobotSide getRobotSide()
    {
@@ -127,6 +97,11 @@ public class FootstepNode
       return hashCode;
    }
 
+   public int getPlanarRegionsHashCode()
+   {
+      return planarRegionsHashCode;
+   }
+
    private static int computeHashCode(FootstepNode node)
    {
       final int prime = 31;
@@ -136,6 +111,30 @@ public class FootstepNode
       result = prime * result + node.yIndex;
       result = prime * result + node.yawIndex;
       return result;
+   }
+
+   public double getRoundedX()
+   {
+      return round(getX());
+   }
+
+   public double getRoundedY()
+   {
+      return round(getY());
+   }
+
+   private static int computePlanarRegionsHashCode(FootstepNode node)
+   {
+      final long prime = 31L;
+      long bits = 1L;
+      bits = prime * bits + Double.doubleToLongBits(node.getRoundedX());
+      bits = prime * bits + Double.doubleToLongBits(node.getRoundedY());
+      return (int) (bits ^ bits >> 32);
+   }
+
+   static double round(double value)
+   {
+      return Math.round(value * INV_PRECISION) * PRECISION;
    }
 
    @Override

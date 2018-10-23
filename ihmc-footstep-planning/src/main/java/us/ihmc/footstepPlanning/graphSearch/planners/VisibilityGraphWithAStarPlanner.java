@@ -109,6 +109,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
+      costBuilder.setSnapper(snapper);
       costBuilder.setIncludePitchAndRollCost(false);
       costBuilder.setIncludeHeightCost(false);
 

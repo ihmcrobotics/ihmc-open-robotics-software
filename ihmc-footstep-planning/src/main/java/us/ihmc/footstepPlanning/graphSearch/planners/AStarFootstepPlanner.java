@@ -381,6 +381,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
+      costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(true);
       costBuilder.setIncludeHeightCost(true);
       costBuilder.setIncludePitchAndRollCost(true);
