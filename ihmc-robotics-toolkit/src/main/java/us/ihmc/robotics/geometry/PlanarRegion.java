@@ -506,6 +506,23 @@ public class PlanarRegion
          return isPointInside(localPoint.getX(), localPoint.getY());
    }
 
+
+   /**
+    * Checks to see if a given point is on the plane or above it by the specified distance.
+    *
+    * @param point3dInWorld the point to check
+    * @return True if the point is on the plane or no more than distanceFromPlane above it.
+    */
+   public boolean isPointInWorld2DInside(Point3DReadOnly point3dInWorld)
+   {
+      Point3D localPoint = new Point3D();
+      fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
+
+      boolean isInsideXY = isPointInside(localPoint.getX(), localPoint.getY());
+
+      return isInsideXY;
+   }
+
    /**
     * Checks to see if a given point is on the plane or above it by the specified distance.
     *

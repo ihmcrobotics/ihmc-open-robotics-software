@@ -13,6 +13,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -20,6 +21,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -27,7 +29,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class PlanarRegionToolsTest
 {
@@ -124,4 +128,94 @@ public class PlanarRegionToolsTest
 
       assertFalse(PlanarRegionTools.isPointInsidePolygon(polygon, pointToCheck));
    }
+
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testProjectPointToPlanesVertically()
+   {
+
+      Random random = new Random(1738L);
+
+      // first test stacked regions
+      List<PlanarRegion> listOfPlanarRegions = new ArrayList<>();
+      int numberOfRegions = 5;
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
+      for (int i = 0; i < 10; i++)
+         polygon.addVertex(EuclidCoreRandomTools.nextPoint2D(random, 10));
+      polygon.update();
+      List<ConvexPolygon2D> polygons = new ArrayList<>();
+      polygons.add(polygon);
+      for (int i = 0; i < numberOfRegions; i++)
+      {
+         PlanarRegion planarRegion = new PlanarRegion();
+         RigidBodyTransform transform = new RigidBodyTransform();
+         transform.setTranslation(polygon.getCentroid().getX(), polygon.getCentroid().getY(), i * 0.10);
+         planarRegion.set(transform, polygons);
+         listOfPlanarRegions.add(planarRegion);
+      }
+
+
+      // test with point at centroid
+      Point3DReadOnly pointToProject = new Point3D(polygon.getCentroid());
+
+      Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(pointToProject, listOfPlanarRegions);
+      Point3D expectedPoint = new Point3D(pointToProject);
+      expectedPoint.setZ(0.1 * (numberOfRegions - 1));
+
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedPoint, projectedPoint, 1e-6);
+
+      // test with point outside bounds
+      pointToProject = new Point3D(15.0, 15.0, 100.0);
+
+      projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(pointToProject, listOfPlanarRegions);
+      assertEquals(null, projectedPoint);
+
+
+      // test two slightly overlapping regions
+      ConvexPolygon2D polygonA = new ConvexPolygon2D();
+      polygonA.addVertex(0.5, 0.5);
+      polygonA.addVertex(0.5, -0.5);
+      polygonA.addVertex(-0.5, 0.5);
+      polygonA.addVertex(-0.5, -0.5);
+      polygonA.update();
+      ConvexPolygon2D polygonB = new ConvexPolygon2D();
+      polygonB.addVertex(0.5, 0.5);
+      polygonB.addVertex(0.5, -0.5);
+      polygonB.addVertex(-0.5, 0.5);
+      polygonB.addVertex(-0.5, -0.5);
+      polygonB.update();
+      polygons.clear();
+      polygons.add(polygonA);
+      polygons.add(polygonB);
+      RigidBodyTransform transformA = new RigidBodyTransform();
+      RigidBodyTransform transformB = new RigidBodyTransform();
+      transformA.setTranslation(new Vector3D(0.4, 0.0, 0.0));
+      transformB.setTranslation(new Vector3D(-0.4, 0.0, 0.1));
+
+      PlanarRegion regionA = new PlanarRegion(transformA, polygonA);
+      PlanarRegion regionB = new PlanarRegion(transformB, polygonB);
+      listOfPlanarRegions.clear();
+      listOfPlanarRegions.add(regionA);
+      listOfPlanarRegions.add(regionB);
+
+      // middle
+      pointToProject = new Point3D();
+      projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(pointToProject, listOfPlanarRegions);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(0.0, 0.0, 0.1), projectedPoint, 1e-6);
+
+      // overlapping edge
+      pointToProject = new Point3D(0.1, 0.0, 0.0);
+      projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(pointToProject, listOfPlanarRegions);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(0.1, 0.0, 0.1), projectedPoint, 1e-6);
+
+      // past edge
+      pointToProject = new Point3D(0.2, 0.0, 0.0);
+      projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(pointToProject, listOfPlanarRegions);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(0.2, 0.0, 0.0), projectedPoint, 1e-6);
+
+      pointToProject = new Point3D(-0.2, 0.0, 0.0);
+      projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(pointToProject, listOfPlanarRegions);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-0.2, 0.0, 0.1), projectedPoint, 1e-6);
+   }
+
 }
