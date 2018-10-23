@@ -152,29 +152,6 @@ public class PlanarRegionsListTest
       convexPolygon.addVertex(-0.2, 0.2);
       convexPolygon.update();
 
-      // Do a bunch of trivial queries with findPlanarRegionsIntersectingPolygon(ConvexPolygon2d convexPolygon)
-      result = planarRegionsList.findPlanarRegionsIntersectingPolygon(convexPolygon);
-      assertEquals(2, result.size());
-      result = planarRegionsList.findPlanarRegionsIntersectingPolygon(PlanarRegionTest.translateConvexPolygon(2.0, 0.0, convexPolygon));
-      assertEquals(1, result.size());
-      assertTrue(result.get(0).epsilonEquals(planarRegion1, 1.0e-10));
-      result = planarRegionsList.findPlanarRegionsIntersectingPolygon(PlanarRegionTest.translateConvexPolygon(-2.0, 0.0, convexPolygon));
-      assertEquals(1, result.size());
-      assertTrue(result.get(0).epsilonEquals(planarRegion1, 1.0e-10));
-      result = planarRegionsList.findPlanarRegionsIntersectingPolygon(PlanarRegionTest.translateConvexPolygon(0.0, 2.0, convexPolygon));
-      assertEquals(1, result.size());
-      assertTrue(result.get(0).epsilonEquals(planarRegion2, 1.0e-10));
-      result = planarRegionsList.findPlanarRegionsIntersectingPolygon(PlanarRegionTest.translateConvexPolygon(0.0, -2.0, convexPolygon));
-      assertEquals(1, result.size());
-      assertTrue(result.get(0).epsilonEquals(planarRegion2, 1.0e-10));
-      result = planarRegionsList.findPlanarRegionsIntersectingPolygon(PlanarRegionTest.translateConvexPolygon(2.0, 2.0, convexPolygon));
-      assertNull(result);
-      result = planarRegionsList.findPlanarRegionsIntersectingPolygon(PlanarRegionTest.translateConvexPolygon(2.0, -2.0, convexPolygon));
-      assertNull(result);
-      result = planarRegionsList.findPlanarRegionsIntersectingPolygon(PlanarRegionTest.translateConvexPolygon(-2.0, -2.0, convexPolygon));
-      assertNull(result);
-      result = planarRegionsList.findPlanarRegionsIntersectingPolygon(PlanarRegionTest.translateConvexPolygon(-2.0, 2.0, convexPolygon));
-      assertNull(result);
    }
 
    public static void main(String[] args)

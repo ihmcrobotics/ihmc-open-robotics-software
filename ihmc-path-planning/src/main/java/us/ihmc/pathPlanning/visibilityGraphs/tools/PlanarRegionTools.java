@@ -12,6 +12,7 @@ import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -411,6 +412,50 @@ public class PlanarRegionTools
    }
 
    /**
+    * Find all the planar regions that intersect with the given convex polygon. The algorithm is
+    * equivalent to projecting all the regions onto the XY-plane and then finding the regions
+    * intersecting with the given convex polygon.
+    *
+    * @param convexPolygon the query.
+    * @return the list of planar regions intersecting with the given polygon. Returns null when no
+    *         region intersects.
+    */
+   public static List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2DReadOnly convexPolygon, PlanarRegionsList regions)
+   {
+      return findPlanarRegionsIntersectingPolygon(convexPolygon, regions.getPlanarRegionsAsList());
+   }
+
+   /**
+    * Find all the planar regions that intersect with the given convex polygon. The algorithm is
+    * equivalent to projecting all the regions onto the XY-plane and then finding the regions
+    * intersecting with the given convex polygon.
+    *
+    * @param convexPolygon the query.
+    * @return the list of planar regions intersecting with the given polygon. Returns null when no
+    *         region intersects.
+    */
+   public static List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2DReadOnly convexPolygon, List<PlanarRegion> regions)
+   {
+      List<PlanarRegion> containers = null;
+
+      for (int i = 0; i < regions.size(); i++)
+      {
+         PlanarRegion candidateRegion = regions.get(i);
+         if (candidateRegion.isVertical())
+            continue;
+
+         if (candidateRegion.isPolygonIntersecting(convexPolygon))
+         {
+            if (containers == null)
+               containers = new ArrayList<>();
+            containers.add(candidateRegion);
+         }
+      }
+
+      return containers;
+   }
+
+   /**
     * Check if the projection of at least one vertex of {@code regionA} is inside {@code regionB}.
     * <p>
     * The sign of {@code epsilon} is equivalent to performing the test against {@code regionB}
@@ -506,7 +551,7 @@ public class PlanarRegionTools
       return planarRegions.stream().filter(region -> computePlanarRegionArea(region) >= minArea).collect(Collectors.toList());
    }
 
-   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCircle(Point3DReadOnly circleOrigin, double circleRadius, List<PlanarRegion> planarRegions)
+   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCircle(Point2DReadOnly circleOrigin, double circleRadius, List<PlanarRegion> planarRegions)
    {
       if (!Double.isFinite(circleRadius) || circleRadius < 0.0)
          return planarRegions;
@@ -547,13 +592,13 @@ public class PlanarRegionTools
                    .anyMatch(vertex -> capsuleSegment.distance(vertex) <= capsuleRadius);
    }
 
-   public static boolean isPlanarRegionIntersectingWithCircle(Point3DReadOnly circleOrigin, double circleRadius, PlanarRegion query)
+   public static boolean isPlanarRegionIntersectingWithCircle(Point2DReadOnly circleOrigin, double circleRadius, PlanarRegion query)
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       query.getTransformToWorld(transformToWorld);
 
       return Arrays.stream(query.getConcaveHull()).map(vertex -> applyTransform(transformToWorld, vertex))
-                   .anyMatch(vertex -> circleOrigin.distance(vertex) <= circleRadius);
+                   .anyMatch(vertex -> circleOrigin.distanceXY(vertex) <= circleRadius);
    }
 
    private static Point3D applyTransform(RigidBodyTransform transform, Point2D point2D)
