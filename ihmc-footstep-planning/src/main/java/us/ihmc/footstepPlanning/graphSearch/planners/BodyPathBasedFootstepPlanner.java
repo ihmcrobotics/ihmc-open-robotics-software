@@ -70,13 +70,14 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
       bodyPath = new WaypointDefinedBodyPathPlanner();
 
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       CostToGoHeuristics heuristics = new BodyPathHeuristics(parameters.getCostParameters().getBodyPathBasedHeuristicsWeight(), parameters, bodyPath);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
+      costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(false);
       costBuilder.setIncludePitchAndRollCost(false);
 

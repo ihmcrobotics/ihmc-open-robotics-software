@@ -48,35 +48,6 @@ public class PlanarRegionsList
       regions.clear();
    }
 
-   /**
-    * Find all the planar regions that intersect with the given convex polygon. The algorithm is
-    * equivalent to projecting all the regions onto the XY-plane and then finding the regions
-    * intersecting with the given convex polygon.
-    * 
-    * @param convexPolygon the query.
-    * @return the list of planar regions intersecting with the given polygon. Returns null when no
-    *         region intersects.
-    */
-   public List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2DReadOnly convexPolygon)
-   {
-      List<PlanarRegion> containers = null;
-
-      for (int i = 0; i < regions.size(); i++)
-      {
-         PlanarRegion candidateRegion = regions.get(i);
-         if (candidateRegion.isVertical())
-            continue;
-
-         if (candidateRegion.isPolygonIntersecting(convexPolygon))
-         {
-            if (containers == null)
-               containers = new ArrayList<>();
-            containers.add(candidateRegion);
-         }
-      }
-
-      return containers;
-   }
 
    /**
     * Find all the planar regions that intersect with the given 2d line segment. The algorithm is

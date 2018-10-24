@@ -102,13 +102,14 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
       heuristics = new BodyPathHeuristics(parameters.getCostParameters().getVisGraphWithAStarHeuristicsWeight(), parameters, bodyPathPlanner);
 
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
       FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
+      costBuilder.setSnapper(snapper);
       costBuilder.setIncludePitchAndRollCost(false);
       costBuilder.setIncludeHeightCost(false);
 
@@ -211,8 +212,8 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       }
       else
       {
-         Point3D startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
-         Point3D goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
+         Point3DReadOnly startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
+         Point3DReadOnly goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
          navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
          if(startPos == null)
@@ -355,7 +356,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
          bodyPathPlanner.getPointAlongPath(percent, tempPose);
          Point3D position = new Point3D();
          position.set(tempPose.getPosition());
-         Point3D projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(position, planarRegionsList);
+         Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(position, planarRegionsList);
          if (projectedPoint != null)
          {
             bodyPathPoints.get(i).set(projectedPoint);

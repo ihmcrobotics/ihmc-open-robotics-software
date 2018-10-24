@@ -1,7 +1,5 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.signedDistanceFromPoint3DToPlane3D;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +10,8 @@ import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -28,6 +28,9 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
+
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D;
 
 public class PlanarRegionTools
 {
@@ -99,9 +102,9 @@ public class PlanarRegionTools
     * <p>
     * Will return null if the is no planar region above or below the point.
     */
-   public static Point3D projectPointToPlanesVertically(Point3DReadOnly point, PlanarRegionsList regions)
+   public static Point3DReadOnly projectPointToPlanesVertically(Point3DReadOnly pointInWorld, PlanarRegionsList regions)
    {
-      return projectPointToPlanesVertically(point, regions.getPlanarRegionsAsList());
+      return projectPointToPlanesVertically(pointInWorld, regions.getPlanarRegionsAsList());
    }
 
    /**
@@ -111,30 +114,33 @@ public class PlanarRegionTools
     * <p>
     * Will return null if the is no planar region above or below the point.
     */
-   public static Point3D projectPointToPlanesVertically(Point3DReadOnly point, List<PlanarRegion> regions)
+   public static Point3DReadOnly projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<PlanarRegion> regions)
    {
       Point3D highestIntersection = null;
 
       for (PlanarRegion region : regions)
       {
-         if (!region.isPointInside(point, 0.0))
+         if (!region.isPointInWorld2DInside(pointInWorld))
          {
             continue;
          }
 
          if (highestIntersection == null)
          {
-            highestIntersection = new Point3D(point);
+            highestIntersection = new Point3D(pointInWorld);
             highestIntersection.setZ(Double.NEGATIVE_INFINITY);
          }
 
-         double height = region.getPlaneZGivenXY(point.getX(), point.getY());
+         double height = region.getPlaneZGivenXY(pointInWorld.getX(), pointInWorld.getY());
 
-         if(highestIntersection.getZ() < height)
+         if (highestIntersection.getZ() < height)
          {
             highestIntersection.setZ(height);
          }
       }
+
+      if (highestIntersection != null && Double.isInfinite(highestIntersection.getZ()))
+         return null;
 
       return highestIntersection;
    }
@@ -411,13 +417,57 @@ public class PlanarRegionTools
    }
 
    /**
+    * Find all the planar regions that intersect with the given convex polygon. The algorithm is
+    * equivalent to projecting all the regions onto the XY-plane and then finding the regions
+    * intersecting with the given convex polygon.
+    *
+    * @param convexPolygon the query.
+    * @return the list of planar regions intersecting with the given polygon. Returns null when no
+    *         region intersects.
+    */
+   public static List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2DReadOnly convexPolygon, PlanarRegionsList regions)
+   {
+      return findPlanarRegionsIntersectingPolygon(convexPolygon, regions.getPlanarRegionsAsList());
+   }
+
+   /**
+    * Find all the planar regions that intersect with the given convex polygon. The algorithm is
+    * equivalent to projecting all the regions onto the XY-plane and then finding the regions
+    * intersecting with the given convex polygon.
+    *
+    * @param convexPolygon the query.
+    * @return the list of planar regions intersecting with the given polygon. Returns null when no
+    *         region intersects.
+    */
+   public static List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2DReadOnly convexPolygon, List<PlanarRegion> regions)
+   {
+      List<PlanarRegion> containers = null;
+
+      for (int i = 0; i < regions.size(); i++)
+      {
+         PlanarRegion candidateRegion = regions.get(i);
+         if (candidateRegion.isVertical())
+            continue;
+
+         if (candidateRegion.isPolygonIntersecting(convexPolygon))
+         {
+            if (containers == null)
+               containers = new ArrayList<>();
+            containers.add(candidateRegion);
+         }
+      }
+
+      return containers;
+   }
+
+   /**
     * Check if the projection of at least one vertex of {@code regionA} is inside {@code regionB}.
     * <p>
     * The sign of {@code epsilon} is equivalent to performing the test against {@code regionB}
     * shrunk by {@code Math.abs(epsilon)} if {@code epsilon < 0.0}, or against the {@code regionB}
     * enlarged by {@code epsilon} if {@code epsilon > 0.0}.
     * </p>
-    * 
+    *
     * @param regionA the query. Not modified.
     * @param regionB the reference. Not modified.
     * @param epsilon the tolerance to use during the test.
@@ -449,7 +499,7 @@ public class PlanarRegionTools
    /**
     * From the local coordinates of the {@code regionB}, this method computes and return the minimum
     * z-coordinate among the vertices of {@code regionA}'s concave hull.
-    * 
+    *
     * @param regionA the query. Not modified.
     * @param regionB the reference. Not modified.
     * @return the height of the lowest vertex of {@code regionA} above {@code regionB}. The returned
@@ -506,6 +556,14 @@ public class PlanarRegionTools
       return planarRegions.stream().filter(region -> computePlanarRegionArea(region) >= minArea).collect(Collectors.toList());
    }
 
+   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCircle(Point2DReadOnly circleOrigin, double circleRadius, List<PlanarRegion> planarRegions)
+   {
+      if (!Double.isFinite(circleRadius) || circleRadius < 0.0)
+         return planarRegions;
+
+      return planarRegions.stream().filter(region -> isPlanarRegionIntersectingWithCircle(circleOrigin, circleRadius, region)).collect(Collectors.toList());
+   }
+
    public static List<PlanarRegion> filterPlanarRegionsWithBoundingCapsule(Point3DReadOnly capsuleStart, Point3DReadOnly capsuleEnd, double capsuleRadius,
                                                                            List<PlanarRegion> planarRegions)
    {
@@ -537,6 +595,67 @@ public class PlanarRegionTools
 
       return Arrays.stream(query.getConcaveHull()).map(vertex -> applyTransform(transformToWorld, vertex))
                    .anyMatch(vertex -> capsuleSegment.distance(vertex) <= capsuleRadius);
+
+
+//      return query.getConvexPolygons().stream().anyMatch(polygon -> signedDistanceFromLineSegment2DToConvexPolygon2D(capsuleSegment.getFirstEndpoint(),
+//                                                                                                              capsuleSegment.getSecondEndpoint(),
+//                                                                                                              polygon.getVertexBufferView(),
+//                                                                                                              polygon.getNumberOfVertices(),
+//                                                                                                              polygon.isClockwiseOrdered()) <= capsuleRadius);
+   }
+
+   private static double signedDistanceFromLineSegment2DToConvexPolygon2D(Point3DReadOnly startPoint, Point3DReadOnly endPoint,
+                                                                          List<? extends Point2DReadOnly> convexPolygon2D, int numberOfVertices,
+                                                                          boolean clockwiseOrdered)
+   {
+      if (numberOfVertices < 0 || numberOfVertices > convexPolygon2D.size())
+         throw new IllegalArgumentException("Illegal numberOfVertices: " + numberOfVertices + ", expected a value in ] 0, " + convexPolygon2D.size() + "].");
+
+      List<Point3D> convexPolygon3D = new ArrayList<>();
+      convexPolygon2D.forEach(vertex -> convexPolygon3D.add(new Point3D(vertex)));
+      Point2DReadOnly startPoint2D = new Point2D(startPoint);
+      Point2DReadOnly endPoint2D = new Point2D(endPoint);
+
+      if (numberOfVertices == 0)
+         return Double.NaN;
+
+      if (numberOfVertices == 1)
+         return distanceFromPoint2DToLineSegment2D(convexPolygon2D.get(0), startPoint2D, endPoint2D);
+
+      if (numberOfVertices == 2)
+         return distanceBetweenTwoLineSegment3Ds(startPoint, endPoint, convexPolygon3D.get(0), convexPolygon3D.get(1));
+
+      boolean isQueryOutsidePolygon = false;
+      double minDistance = Double.POSITIVE_INFINITY;
+
+      for (int index = 0; index < numberOfVertices; index++)
+      {
+         Point3DReadOnly edgeStart = convexPolygon3D.get(index);
+         Point2DReadOnly edgeStart2D = convexPolygon2D.get(index);
+         Point3DReadOnly edgeEnd = convexPolygon3D.get(EuclidGeometryPolygonTools.next(index, numberOfVertices));
+         Point2DReadOnly edgeEnd2D = convexPolygon2D.get(EuclidGeometryPolygonTools.next(index, numberOfVertices));
+
+         isQueryOutsidePolygon |=
+               isPoint2DOnSideOfLine2D(startPoint2D, edgeStart2D, edgeEnd2D, clockwiseOrdered) && isPoint2DOnSideOfLine2D(endPoint2D, edgeStart2D, edgeEnd2D,
+                                                                                                                          clockwiseOrdered);
+         minDistance = Math.min(minDistance, distanceBetweenTwoLineSegment3Ds(startPoint, endPoint, edgeStart, edgeEnd));
+      }
+
+      if (!isQueryOutsidePolygon)
+         minDistance = -minDistance;
+      return minDistance;
+   }
+
+   public static boolean isPlanarRegionIntersectingWithCircle(Point2DReadOnly circleOriginInWorld, double circleRadius, PlanarRegion query)
+   {
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      query.getTransformToWorld(transformToWorld);
+
+      Point2D originInLocal = new Point2D(circleOriginInWorld);
+      originInLocal.applyInverseTransform(transformToWorld, false);
+
+      return query.getConvexHull().signedDistance(originInLocal) <= circleRadius;
+//      return query.getConvexPolygons().stream().anyMatch(polygon -> polygon.signedDistance(originInLocal) <= circleRadius);
    }
 
    private static Point3D applyTransform(RigidBodyTransform transform, Point2D point2D)
@@ -570,7 +689,7 @@ public class PlanarRegionTools
    /**
     * Truncate the given planar region {@code planarRegionToTuncate} with the plane such that only
     * the part that is <b>above</b> the plane remains.
-    * 
+    *
     * @param pointOnPlane a point on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
     * @param planarRegionToTruncate the original planar region to be truncated. Not modified.
@@ -636,8 +755,8 @@ public class PlanarRegionTools
             {
                Vector3D edgeDirection = new Vector3D();
                edgeDirection.sub(vertex3D, previousVertex3D);
-               Point3D intersection = EuclidGeometryTools.intersectionBetweenLineSegment3DAndPlane3D(pointOnPlaneInRegionFrame, planeNormalInRegionFrame,
-                                                                                                     vertex3D, previousVertex3D);
+               Point3D intersection = EuclidGeometryTools
+                     .intersectionBetweenLineSegment3DAndPlane3D(pointOnPlaneInRegionFrame, planeNormalInRegionFrame, vertex3D, previousVertex3D);
 
                truncatedConcaveHullVertices.add(new Point2D(intersection));
             }
@@ -659,8 +778,8 @@ public class PlanarRegionTools
          return null; // The region is completely underneath
 
       List<ConvexPolygon2D> truncatedConvexPolygons = new ArrayList<>();
-      ConcaveHullDecomposition.recursiveApproximateDecomposition(new ArrayList<>(truncatedConcaveHullVertices), depthThresholdForConvexDecomposition,
-                                                                 truncatedConvexPolygons);
+      ConcaveHullDecomposition
+            .recursiveApproximateDecomposition(new ArrayList<>(truncatedConcaveHullVertices), depthThresholdForConvexDecomposition, truncatedConvexPolygons);
 
       Point2D[] concaveHullVertices = new Point2D[truncatedConcaveHullVertices.size()];
       truncatedConcaveHullVertices.toArray(concaveHullVertices);
