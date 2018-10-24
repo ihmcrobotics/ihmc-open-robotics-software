@@ -30,6 +30,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -75,6 +76,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    private FootstepPlanningToolboxModule toolboxModule;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
+   private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
 
    private RealtimeRos2Node ros2Node;
 
@@ -117,7 +119,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       flatGround = generator.getPlanarRegionsList();
 
       networkModuleParameters = new DRCNetworkModuleParameters();
-      networkModuleParameters.enableFootstepPlanningToolbox(false);
+      networkModuleParameters.enableFootstepPlanningToolbox(true);
       networkModuleParameters.enableLocalControllerCommunicator(true);
       networkModuleParameters.enableNetworkProcessor(true);
 
@@ -125,6 +127,8 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       toolboxModule = new FootstepPlanningToolboxModule(getRobotModel(), null, true, PubSubImplementation.INTRAPROCESS);
       footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class,
                                                                    FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
+      footstepPlannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerParametersPacket.class,
+                                                                     FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
 
       toolboxStatePublisher = ROS2Tools
             .createPublisher(ros2Node, ToolboxStateMessage.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
@@ -260,6 +264,14 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       CollisionCheckerScript collisionChecker = getCollisionChecker(500);
       drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
       drcSimulationTestHelper.getSimulationConstructionSet().addScript(collisionChecker);
+
+      FootstepPlannerParameters parameters = getRobotModel().getFootstepPlannerParameters();
+      FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
+      RemoteUIMessageConverter.copyFootstepPlannerParametersToPacket(parametersPacket, parameters);
+      parametersPacket.setCheckForBodyBoxCollisions(true);
+      parametersPacket.setReturnBestEffortPlan(false);
+      footstepPlannerParametersPublisher.publish(parametersPacket);
+
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, bollardPlanarRegions, goalPose);
    }
 
