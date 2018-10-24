@@ -110,8 +110,8 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       tempPoint.changeFrame(worldFrame);
       double roundedX = FootstepNode.round(tempPoint.getX());
       double roundedY = FootstepNode.round(tempPoint.getY());
-//      List<PlanarRegion> planarRegionList = snapper.getOrCreateBodyCollisionRegions(roundedX, roundedY, tempPoint.getZ());
-      List<PlanarRegion> planarRegionList = snapper.getOrCreateNearbyRegions(roundedX, roundedY);
+      List<PlanarRegion> planarRegionList = snapper.getOrCreateBodyCollisionRegions(roundedX, roundedY, tempPoint.getZ());
+//      List<PlanarRegion> planarRegionList = snapper.getOrCreateNearbyRegions(roundedX, roundedY);
 
       if (planarRegionList.size() == 0)
          return true;
