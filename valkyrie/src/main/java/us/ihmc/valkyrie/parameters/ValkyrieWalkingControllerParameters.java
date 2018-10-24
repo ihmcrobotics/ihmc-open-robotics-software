@@ -277,7 +277,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double ki = runningOnRealRobot ? 0.0 : 0.0;
       double maxIntegralError = 0.0;
       double maxAccel = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 2000.0 : Double.POSITIVE_INFINITY;
 
       armGains.setKp(kp);
       armGains.setZeta(zeta);
@@ -314,10 +314,10 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
-      double kpXY = runningOnRealRobot ? 120.0 : 100.0; // Was 100.0 before tuneup of sep 2018
-      double kpZ = runningOnRealRobot ? 120.0 : 100.0; // Was 80.0 before tuneup of sep 2018
-      double zetaXY = runningOnRealRobot ? 1.0 : 0.8; // Was 0.9 before tuneup of sep 2018
-      double zetaZ = runningOnRealRobot ? 1.0 : 0.8;
+      double kpXY = runningOnRealRobot ? 100.0 : 100.0; // Was 100.0 before tuneup of sep 2018
+      double kpZ = runningOnRealRobot ? 90.0 : 100.0; // Was 80.0 before tuneup of sep 2018
+      double zetaXY = runningOnRealRobot ? 0.8 : 0.8; // Was 0.9 before tuneup of sep 2018
+      double zetaZ = runningOnRealRobot ? 0.8 : 0.8;
       double maxAccel = runningOnRealRobot ? 100.0 : 18.0; // Was 18.0 before tuneup of sep 2018
       double maxJerk = runningOnRealRobot ? 1500.0 : 270.0; // Was 270.0 before tuneup of sep 2018
 
@@ -351,10 +351,10 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
-      double kpXY = runningOnRealRobot ? 100.0 : 100.0; // Was 80.0 before tuneup of sep 2018
-      double kpZ = runningOnRealRobot ? 100.0 : 100.0; // Was 60.0 before tuneup of sep 2018
-      double zetaXY = runningOnRealRobot ? 1.0 : 0.8; // Was 0.8 before tuneup of sep 2018
-      double zetaZ = runningOnRealRobot ? 1.0 : 0.8; // Was 0.8 before tuneup of sep 2018
+      double kpXY = runningOnRealRobot ? 80.0 : 100.0; // Was 80.0 before tuneup of sep 2018
+      double kpZ = runningOnRealRobot ? 80.0 : 100.0; // Was 60.0 before tuneup of sep 2018
+      double zetaXY = runningOnRealRobot ? 0.8 : 0.8; // Was 0.8 before tuneup of sep 2018
+      double zetaZ = runningOnRealRobot ? 0.8 : 0.8; // Was 0.8 before tuneup of sep 2018
       double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 360.0 : 270.0;
 
@@ -472,20 +472,20 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
-      double kpX = 120.0; // Was 150.0 before tuneup of sep 2018
-      double kpY = 120.0; // Was 100.0 before tuneup of sep 2018
+      double kpX = 100.0; // Was 150.0 before tuneup of sep 2018
+      double kpY = 100.0; // Was 100.0 before tuneup of sep 2018
       double kpZ = runningOnRealRobot ? 250.0 : 200.0;  // Was 200.0 before tuneup of sep 2018
       // zeta was [0.8, 0.5, 0.8] before tuneup of sep 2018
-      double zetaXY = runningOnRealRobot ? 0.8 : 0.7;
-      double zetaZ = runningOnRealRobot ? 1.0 : 0.7;
-      double kpXYOrientation = runningOnRealRobot ? 300.0 : 300.0;
+      double zetaXY = runningOnRealRobot ? 0.7 : 0.7;
+      double zetaZ = runningOnRealRobot ? 0.8 : 0.7;
+      double kpXYOrientation = runningOnRealRobot ? 200.0 : 300.0;
       double kpZOrientation = runningOnRealRobot ? 150.0 : 200.0; // 160
       double zetaOrientationXY = runningOnRealRobot ? 0.8 : 0.7; // Was 0.7 before tuneup of sep 2018
       double zetaOrientationZ = runningOnRealRobot ? 0.8 : 0.7; // Was 0.5 before tuneup of sep 2018
       double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxLinearJerk = runningOnRealRobot ? 250.0 : Double.POSITIVE_INFINITY;
-      double maxAngularAcceleration = runningOnRealRobot ? 200.0 : Double.POSITIVE_INFINITY;
-      double maxAngularJerk = runningOnRealRobot ? 3000.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
       DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpX, kpY, kpZ);
