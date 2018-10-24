@@ -307,7 +307,7 @@ public class PlanarRegionToolsTest
 
    @Test(timeout = 30000)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   public void testFilterPlanarRegionsWithBoundingCirclePintWithinBigRegion()
+   public void testFilterPlanarRegionsWithBoundingCirclePointWithinBigRegion()
    {
       ConvexPolygon2D polygon2D = new ConvexPolygon2D();
       polygon2D.addVertex(10.0, 10.0);
@@ -511,8 +511,38 @@ public class PlanarRegionToolsTest
             assertFalse(regionsOutsideDistance.contains(regionsWithinDistance.get(i)));
          }
       }
+   }
 
-      Assert.assertTrue(false);
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testFilterPlanarRegionsWithBoundingCapsulePointWithinBigRegion()
+   {
+      ConvexPolygon2D polygon2D = new ConvexPolygon2D();
+      polygon2D.addVertex(10.0, 10.0);
+      polygon2D.addVertex(10.0, -10.0);
+      polygon2D.addVertex(-10.0, -10.0);
+      polygon2D.addVertex(-10.0, 10.0);
+      polygon2D.update();
+      List<ConvexPolygon2D> polygons = new ArrayList<>();
+      polygons.add(polygon2D);
+
+      Point2D[] concaveHull = polygon2D.getPolygonVerticesView().toArray(new Point2D[0]);
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      PlanarRegion planarRegion = new PlanarRegion(transform, concaveHull, polygons);
+      List<PlanarRegion> planarRegionList = new ArrayList<>();
+      planarRegionList.add(planarRegion);
+
+
+      // at middle of planar region
+      List<PlanarRegion> regionsWithinDistance = PlanarRegionTools.filterPlanarRegionsWithBoundingCapsule(new Point3D(0.1, 0.0, 0.0), new Point3D(-0.1, 0.0, 0.0), 1.0, planarRegionList);
+
+      assertTrue(regionsWithinDistance.contains(planarRegion));
+
+      // outside the planar region, but still within the distance
+      regionsWithinDistance = PlanarRegionTools.filterPlanarRegionsWithBoundingCapsule(new Point3D(10.5, 0.1, 0.0), new Point3D(10.5, -0.1, 0.0), 1.0, planarRegionList);
+
+      assertTrue(regionsWithinDistance.contains(planarRegion));
    }
 
    private static double findFurthestPointFromOrigin(ConvexPolygon2D polygon)
