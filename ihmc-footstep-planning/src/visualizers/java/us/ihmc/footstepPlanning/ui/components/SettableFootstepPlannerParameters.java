@@ -21,7 +21,9 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double bodyBoxWidth;
    private double bodyBoxHeight;
    private double bodyBoxDepth;
-   private double bodyBoxCenterHeight;
+   private double bodyBoxBaseX;
+   private double bodyBoxBaseY;
+   private double bodyBoxBaseZ;
 
    private final SettableFootstepPlannerCostParameters costParameters;
 
@@ -50,7 +52,9 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.bodyBoxHeight = footstepPlannerParameters.getBodyBoxHeight();
       this.bodyBoxWidth = footstepPlannerParameters.getBodyBoxWidth();
       this.bodyBoxDepth = footstepPlannerParameters.getBodyBoxDepth();
-      this.bodyBoxCenterHeight = footstepPlannerParameters.getBodyBoxCenterHeight();
+      this.bodyBoxBaseX = footstepPlannerParameters.getBodyBoxBaseX();
+      this.bodyBoxBaseY = footstepPlannerParameters.getBodyBoxBaseY();
+      this.bodyBoxBaseZ = footstepPlannerParameters.getBodyBoxBaseZ();
 
       this.costParameters.set(footstepPlannerParameters.getCostParameters());
    }
@@ -200,9 +204,19 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.bodyBoxDepth = bodyBoxDepth;
    }
 
-   public void setBodyBoxCenterHeight(double bodyBoxCenterHeight)
+   public void setBodyBoxBaseX(double bodyBoxBaseX)
    {
-      this.bodyBoxCenterHeight = bodyBoxCenterHeight;
+      this.bodyBoxBaseX = bodyBoxBaseX;
+   }
+
+   public void setBodyBoxBaseY(double bodyBoxBaseY)
+   {
+      this.bodyBoxBaseY = bodyBoxBaseY;
+   }
+
+   public void setBodyBoxBaseZ(double bodyBoxBaseZ)
+   {
+      this.bodyBoxBaseZ = bodyBoxBaseZ;
    }
 
    @Override
@@ -296,9 +310,21 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    }
 
    @Override
-   public double getBodyBoxCenterHeight()
+   public double getBodyBoxBaseX()
    {
-      return bodyBoxCenterHeight;
+      return bodyBoxBaseX;
+   }
+
+   @Override
+   public double getBodyBoxBaseY()
+   {
+      return bodyBoxBaseY;
+   }
+
+   @Override
+   public double getBodyBoxBaseZ()
+   {
+      return bodyBoxBaseZ;
    }
 
    public boolean useQuadraticDistanceCost()

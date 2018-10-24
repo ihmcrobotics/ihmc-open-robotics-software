@@ -805,12 +805,36 @@ public class RemoteFootstepPlannerUIMessagingTest
             return bodyBoxWidth;
          }
 
-         private final double bodyBoxCenterHeight = RandomNumbers.nextDouble(random, 0.1, 0.5);
+         private final double bodyBoxBaseX = RandomNumbers.nextDouble(random, 0.1, 0.5);
 
          @Override
-         public double getBodyBoxCenterHeight()
+         public double getBodyBoxBaseX()
          {
-            return bodyBoxCenterHeight;
+            return bodyBoxBaseX;
+         }
+
+         private final double bodyBoxBaseY = RandomNumbers.nextDouble(random, 0.1, 0.5);
+
+         @Override
+         public double getBodyBoxBaseY()
+         {
+            return bodyBoxBaseY;
+         }
+
+         private final double bodyBoxBaseZ = RandomNumbers.nextDouble(random, 0.1, 0.5);
+
+         @Override
+         public double getBodyBoxBaseZ()
+         {
+            return bodyBoxBaseZ;
+         }
+
+         private final boolean checkForBodyCollisions = random.nextBoolean();
+
+         @Override
+         public boolean checkForBodyBoxCollisions()
+         {
+            return checkForBodyCollisions;
          }
 
          private final double minXClearance = RandomNumbers.nextDouble(random, 0.01, 1.0);
@@ -1062,7 +1086,9 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Body box heigth isn't equal.", parameters.getBodyBoxHeight(), packet.getBodyBoxHeight(), epsilon);
       assertEquals("Body box depth isn't equal.", parameters.getBodyBoxDepth(), packet.getBodyBoxDepth(), epsilon);
       assertEquals("Body box width isn't equal.", parameters.getBodyBoxWidth(), packet.getBodyBoxWidth(), epsilon);
-      assertEquals("Body box center height isn't equal.", parameters.getBodyBoxCenterHeight(), packet.getBodyBoxCenterHeight(), epsilon);
+      assertEquals("Body box base X isn't equal.", parameters.getBodyBoxBaseX(), packet.getBodyBoxBaseX(), epsilon);
+      assertEquals("Body box base Y isn't equal.", parameters.getBodyBoxBaseY(), packet.getBodyBoxBaseY(), epsilon);
+      assertEquals("Body box base Z isn't equal.", parameters.getBodyBoxBaseZ(), packet.getBodyBoxBaseZ(), epsilon);
       assertEquals("Min X clearance from stance isn't equal.", parameters.getMinXClearanceFromStance(), packet.getMinXClearanceFromStance(), epsilon);
       assertEquals("Min Y clearance from stance isn't equal.", parameters.getMinYClearanceFromStance(), packet.getMinYClearanceFromStance(), epsilon);
 

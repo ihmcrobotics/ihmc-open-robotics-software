@@ -309,7 +309,9 @@ public class RemoteUIMessageConverter
       packet.setBodyBoxHeight(parameters.getBodyBoxHeight());
       packet.setBodyBoxDepth(parameters.getBodyBoxDepth());
       packet.setBodyBoxWidth(parameters.getBodyBoxWidth());
-      packet.setBodyBoxCenterHeight(parameters.getBodyBoxCenterHeight());
+      packet.setBodyBoxBaseX(parameters.getBodyBoxBaseX());
+      packet.setBodyBoxBaseY(parameters.getBodyBoxBaseY());
+      packet.setBodyBoxBaseZ(parameters.getBodyBoxBaseZ());
       packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
 

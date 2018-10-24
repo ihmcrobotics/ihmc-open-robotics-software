@@ -1,7 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -42,6 +40,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
 
    private final FootstepPlannerParameters parameters;
    private final FootstepNodeSnapper snapper;
+   private final Vector3D bodyBoxDimensions = new Vector3D();
 
    private BipedalFootstepPlannerListener listener;
 
@@ -54,7 +53,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       bodyCollisionBox = new Box3D();
       bodyCollisionBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
 
-      bodyCollisionFrame.updateTranslation(new Vector3D(0.0, 0.0, parameters.getBodyBoxCenterHeight()));
+      bodyCollisionFrame.updateTranslation(new Vector3D(parameters.getBodyBoxBaseX(), parameters.getBodyBoxBaseY(), parameters.getBodyBoxBaseZ() + 0.5 * parameters.getBodyBoxHeight()));
    }
 
    public void addPlannerListener(BipedalFootstepPlannerListener listener)
@@ -115,6 +114,9 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       if (planarRegionList.size() == 0)
          return true;
 
+      bodyCollisionBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
+      bodyBoxDimensions.set(parameters.getBodyBoxBaseX(), parameters.getBodyBoxBaseY(), parameters.getBodyBoxBaseZ() + 0.5 * parameters.getBodyBoxHeight());
+      bodyCollisionFrame.updateTranslation(bodyBoxDimensions);
       bodyCollisionPolytope.getVertices().clear();
       for (Point3D vertex : bodyCollisionBox.getVertices())
       {

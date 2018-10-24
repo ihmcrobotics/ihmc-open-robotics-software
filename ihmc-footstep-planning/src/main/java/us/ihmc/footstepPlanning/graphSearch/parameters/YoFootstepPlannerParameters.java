@@ -37,7 +37,9 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoDouble bodyBoxHeight = new YoDouble("bodyBoxHeight", registry);
    private final YoDouble bodyBoxWidth = new YoDouble("bodyBoxWidth", registry);
    private final YoDouble bodyBoxDepth = new YoDouble("bodyBoxDepth", registry);
-   private final YoDouble bodyBoxCenterHeight = new YoDouble("bodyBoxCenterHeight", registry);
+   private final YoDouble bodyBoxBaseX = new YoDouble("bodyBoxBaseX", registry);
+   private final YoDouble bodyBoxBaseY = new YoDouble("bodyBoxBaseY", registry);
+   private final YoDouble bodyBoxBaseZ = new YoDouble("bodyBoxBaseZ", registry);
    private final YoBoolean returnBestEffortPlan = new YoBoolean("returnBestEffortPlan", registry);
    private final YoInteger minimumStepForBestEffortPlan = new YoInteger("minimumStepForBestEffortPlan", registry);
    private final YoDouble minXClearanceFromStance = new YoDouble("minXClearanceFromStance", registry);
@@ -81,7 +83,9 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       bodyBoxDepth.set(defaults.getBodyBoxDepth());
       bodyBoxHeight.set(defaults.getBodyBoxHeight());
       bodyBoxWidth.set(defaults.getBodyBoxWidth());
-      bodyBoxCenterHeight.set(defaults.getBodyBoxCenterHeight());
+      bodyBoxBaseX.set(defaults.getBodyBoxBaseX());
+      bodyBoxBaseY.set(defaults.getBodyBoxBaseY());
+      bodyBoxBaseZ.set(defaults.getBodyBoxBaseZ());
       returnBestEffortPlan.set(defaults.getReturnBestEffortPlan());
       minimumStepForBestEffortPlan.set(defaults.getMinimumStepsForBestEffortPlan());
       minXClearanceFromStance.set(defaults.getMinXClearanceFromStance());
@@ -247,9 +251,21 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    }
 
    @Override
-   public double getBodyBoxCenterHeight()
+   public double getBodyBoxBaseX()
    {
-      return bodyBoxCenterHeight.getDoubleValue();
+      return bodyBoxBaseX.getDoubleValue();
+   }
+
+   @Override
+   public double getBodyBoxBaseY()
+   {
+      return bodyBoxBaseY.getDoubleValue();
+   }
+
+   @Override
+   public double getBodyBoxBaseZ()
+   {
+      return bodyBoxBaseZ.getDoubleValue();
    }
 
    @Override
@@ -336,8 +352,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
          setBodyBoxDepth(parametersPacket.getBodyBoxDepth());
       if (parametersPacket.getBodyBoxWidth() != -1.0)
          setBodyBoxWidth(parametersPacket.getBodyBoxWidth());
-      if (parametersPacket.getBodyBoxCenterHeight() != -1.0)
-         setBodyBoxCenterHeight(parametersPacket.getBodyBoxCenterHeight());
+      if (parametersPacket.getBodyBoxBaseX() != -1.0)
+         setBodyBoxBaseX(parametersPacket.getBodyBoxBaseX());
+      if (parametersPacket.getBodyBoxBaseY() != -1.0)
+         setBodyBoxBaseY(parametersPacket.getBodyBoxBaseY());
+      if (parametersPacket.getBodyBoxBaseZ() != -1.0)
+         setBodyBoxBaseZ(parametersPacket.getBodyBoxBaseZ());
       if (parametersPacket.getMinXClearanceFromStance() != -1.0)
          setMinXClearanceFromStance(parametersPacket.getMinXClearanceFromStance());
       if (parametersPacket.getMinYClearanceFromStance() != -1.0)
@@ -486,9 +506,19 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       this.bodyBoxWidth.set(bodyBoxWidth);
    }
 
-   public void setBodyBoxCenterHeight(double bodyBoxCenterHeight)
+   public void setBodyBoxBaseX(double bodyBoxBaseZ)
    {
-      this.bodyBoxCenterHeight.set(bodyBoxCenterHeight);
+      this.bodyBoxBaseX.set(bodyBoxBaseZ);
+   }
+
+   public void setBodyBoxBaseY(double bodyBoxBaseZ)
+   {
+      this.bodyBoxBaseY.set(bodyBoxBaseZ);
+   }
+
+   public void setBodyBoxBaseZ(double bodyBoxBaseZ)
+   {
+      this.bodyBoxBaseZ.set(bodyBoxBaseZ);
    }
 
    public void setMinXClearanceFromStance(double minXClearanceFromStance)
