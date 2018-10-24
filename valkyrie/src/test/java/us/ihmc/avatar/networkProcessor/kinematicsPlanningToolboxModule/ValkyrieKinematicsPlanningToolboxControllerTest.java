@@ -36,4 +36,11 @@ public class ValkyrieKinematicsPlanningToolboxControllerTest extends AvatarKinem
    {
       super.testMessages();
    }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 30000)
+   public void testRaiseUpHand() throws Exception
+   {
+      super.testRaiseUpHand();
+   }
 }

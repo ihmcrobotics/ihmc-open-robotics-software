@@ -16,13 +16,15 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -32,6 +34,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
@@ -39,6 +42,7 @@ import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Robot;
@@ -185,12 +189,65 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       List<Pose3DReadOnly> keyFramePoses = new ArrayList<Pose3DReadOnly>();
       List<Point3DReadOnly> desiredCOMPoints = new ArrayList<Point3DReadOnly>();
 
-      PrintTools.info("" + endEffector);
-      KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = MessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector, keyFrameTimes,
+      KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector, keyFrameTimes,
                                                                                                                                   keyFramePoses);
-      KinematicsPlanningToolboxCenterOfMassMessage comMessage = MessageTools.createKinematicsPlanningToolboxCenterOfMassMessage(keyFrameTimes,
+      KinematicsPlanningToolboxCenterOfMassMessage comMessage = HumanoidMessageTools.createKinematicsPlanningToolboxCenterOfMassMessage(keyFrameTimes,
                                                                                                                                 desiredCOMPoints);
 
+      commandInputManager.submitMessage(endEffectorMessage);
+      commandInputManager.submitMessage(comMessage);
+
+      int numberOfIterations = 250;
+
+      runKinematicsPlanningToolboxController(numberOfIterations);
+
+      assertTrue("Poor solution quality: " + toolboxController.getSolution().getSolutionQuality(),
+                 toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 30000)
+   public void testRaiseUpHand() throws Exception
+   {
+      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
+      snapGhostToFullRobotModel(initialFullRobotModel);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      RigidBody endEffector = initialFullRobotModel.getHand(robotSide);
+      double trajectoryTime = 5.0;
+      int numberOfKeyFrames = 10;
+      FramePose3D initialPose = new FramePose3D(endEffector.getBodyFixedFrame());
+      FramePose3D desiredPose = new FramePose3D(endEffector.getBodyFixedFrame(), new Point3D(0.1, 0.1, 0.6), new AxisAngle(0.0, 1.0, 0.0, -0.5 * Math.PI));
+      initialPose.changeFrame(worldFrame);
+      desiredPose.changeFrame(worldFrame);
+
+      TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
+      List<Pose3DReadOnly> keyFramePoses = new ArrayList<Pose3DReadOnly>();
+      List<Point3DReadOnly> desiredCOMPoints = new ArrayList<Point3DReadOnly>();
+
+      for (int i = 0; i < numberOfKeyFrames; i++)
+      {
+         double alpha = i / (double) (numberOfKeyFrames - 1);
+         keyFrameTimes.add(alpha * trajectoryTime);
+         Pose3D pose = new Pose3D(initialPose);
+         pose.interpolate(desiredPose, alpha);
+         keyFramePoses.add(pose);
+         desiredCOMPoints.add(new Point3D());
+      }
+
+      KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector, keyFrameTimes,
+                                                                                                                                  keyFramePoses);
+      KinematicsPlanningToolboxCenterOfMassMessage comMessage = HumanoidMessageTools.createKinematicsPlanningToolboxCenterOfMassMessage(keyFrameTimes,
+                                                                                                                                desiredCOMPoints);
+
+      endEffectorMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+      endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+      
+      SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
+      selectionMatrix.selectZAxis(false);
+      comMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
+      comMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(1.0));
+      
       commandInputManager.submitMessage(endEffectorMessage);
       commandInputManager.submitMessage(comMessage);
 
