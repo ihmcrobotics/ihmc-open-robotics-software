@@ -94,7 +94,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    public static final int CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS = 6;
    public static final double CINDER_BLOCK_HEIGHT_VARIATION = 0.0;
    public static final double CINDER_BLOCK_FIELD_PLATFORM_LENGTH = 0.6;
-   protected static final double BOLLARD_DISTANCE = 0.65;
+   protected static final double BOLLARD_DISTANCE = 0.85;
 
    public static final double STEPPING_STONE_PATH_RADIUS = 3.5;
 

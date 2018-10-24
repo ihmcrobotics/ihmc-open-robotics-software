@@ -26,6 +26,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE})
 public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPlannerEndToEndTest
 {
+   private static final boolean showCollisionGraphics = true;
    private DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 
    @Override
@@ -91,7 +92,9 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
       public ValkyrieLegCollisionDetectorScript(int simTicksPerCollisionCheck)
       {
          super(simTicksPerCollisionCheck);
-         setupGraphics();
+
+         if(showCollisionGraphics)
+            setupGraphics();
       }
 
       @Override
