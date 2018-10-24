@@ -13,7 +13,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
@@ -137,5 +139,49 @@ public class KinematicsPlanningToolboxRigidBodyCommand implements Command<Kinema
       return endEffector != null && waypoints.size() > 0 && waypoints.size() == waypointTimes.size()
             && waypointTimes.size() == allowablePositionDisplacement.size() && allowablePositionDisplacement.size() == allowableOrientationDisplacement.size();
    }
+   
+   public RigidBody getEndEffector()
+   {
+      return endEffector;
+   }
 
+   public int getNumberOfWayPoints()
+   {
+      return waypoints.size();
+   }
+   
+   public double getWayPointTime(int i)
+   {
+      return waypointTimes.get(i);
+   }
+   
+   public Pose3D getWayPoint(int i)
+   {
+      return waypoints.get(i);
+   }
+   
+   public SelectionMatrix6D getSelectionMatrix()
+   {
+      return selectionMatrix;
+   }
+   
+   public WeightMatrix6D getWeightMatrix()
+   {
+      return weightMatrix;
+   }
+
+   public FramePose3D getControlFramePose()
+   {
+      return controlFramePose;
+   }
+   
+   public double getAllowablePositionDisplacement(int i)
+   {
+      return allowablePositionDisplacement.get(i);
+   }
+   
+   public double getAllowableOrientationDisplacement(int i)
+   {
+      return allowableOrientationDisplacement.get(i);
+   }
 }

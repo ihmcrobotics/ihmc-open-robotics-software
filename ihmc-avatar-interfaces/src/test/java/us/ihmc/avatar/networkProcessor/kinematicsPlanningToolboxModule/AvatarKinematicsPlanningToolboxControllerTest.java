@@ -16,10 +16,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -30,9 +27,15 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotDescription.JointDescription;
+import us.ihmc.robotics.robotDescription.LinkDescription;
+import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -94,9 +97,9 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       FullHumanoidRobotModel desiredFullRobotModel = robotModel.createFullRobotModel();
       commandInputManager = new CommandInputManager(KinematicsPlanningToolboxModule.supportedCommands());
-      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
+      commandInputManager.registerConversionHelper(new KinematicsPlanningToolboxCommandConverter(desiredFullRobotModel));
 
-      StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
+      StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsPlanningToolboxModule.supportedStatus());
 
       toolboxController = new KinematicsPlanningToolboxController(robotModel, desiredFullRobotModel, commandInputManager, statusOutputManager, mainRegistry);
 
@@ -109,7 +112,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
       RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
       robotDescription.setName("Ghost");
-      KinematicsToolboxControllerTest.recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
+      recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
       ghost = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -182,6 +185,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       List<Pose3DReadOnly> keyFramePoses = new ArrayList<Pose3DReadOnly>();
       List<Point3DReadOnly> desiredCOMPoints = new ArrayList<Point3DReadOnly>();
 
+      PrintTools.info("" + endEffector);
       KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = MessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector, keyFrameTimes,
                                                                                                                                   keyFramePoses);
       KinematicsPlanningToolboxCenterOfMassMessage comMessage = MessageTools.createKinematicsPlanningToolboxCenterOfMassMessage(keyFrameTimes,
@@ -194,7 +198,6 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       runKinematicsPlanningToolboxController(numberOfIterations);
 
-      assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
       assertTrue("Poor solution quality: " + toolboxController.getSolution().getSolutionQuality(),
                  toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
    }
@@ -226,6 +229,41 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null, null, null);
       drcPerfectSensorReaderFactory.getSensorReader().read();
       return initialFullRobotModel;
+   }
+
+   public static void recursivelyModifyGraphics(JointDescription joint, AppearanceDefinition ghostApperance)
+   {
+      if (joint == null)
+         return;
+      LinkDescription link = joint.getLink();
+      if (link == null)
+         return;
+      LinkGraphicsDescription linkGraphics = link.getLinkGraphics();
+
+      if (linkGraphics != null)
+      {
+         ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructions = linkGraphics.getGraphics3DInstructions();
+
+         if (graphics3dInstructions == null)
+            return;
+
+         for (Graphics3DPrimitiveInstruction primitive : graphics3dInstructions)
+         {
+            if (primitive instanceof Graphics3DInstruction)
+            {
+               Graphics3DInstruction modelInstruction = (Graphics3DInstruction) primitive;
+               modelInstruction.setAppearance(ghostApperance);
+            }
+         }
+      }
+
+      if (joint.getChildrenJoints() == null)
+         return;
+
+      for (JointDescription child : joint.getChildrenJoints())
+      {
+         recursivelyModifyGraphics(child, ghostApperance);
+      }
    }
 
    private RobotController createToolboxUpdater()
