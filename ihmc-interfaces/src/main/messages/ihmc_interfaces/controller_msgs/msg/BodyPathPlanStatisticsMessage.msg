@@ -7,7 +7,7 @@ int32 NO_PLAN_ID = -1
 
 int32 plan_id -1
 
-NavigableRegionMessage[] navigable_regions
+NavigableRegionMessage[<=25] navigable_regions
 
 VisibilityMapMessage inter_regions_map
 VisibilityMapMessage start_visibility_map

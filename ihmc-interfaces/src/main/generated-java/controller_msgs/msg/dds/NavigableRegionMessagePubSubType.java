@@ -46,7 +46,7 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += controller_msgs.msg.dds.VisibilityMapMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 25; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -82,7 +82,7 @@ public class NavigableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       controller_msgs.msg.dds.PlanarRegionMessagePubSubType.write(data.getHomeRegion(), cdr);
       controller_msgs.msg.dds.VisibilityClusterMessagePubSubType.write(data.getHomeRegionCluster(), cdr);
       controller_msgs.msg.dds.VisibilityMapMessagePubSubType.write(data.getVisibilityMapInWorld(), cdr);
-      if(data.getObstacleClusters().size() <= 100)
+      if(data.getObstacleClusters().size() <= 25)
       cdr.write_type_e(data.getObstacleClusters());else
           throw new RuntimeException("obstacle_clusters field exceeds the maximum length");
 

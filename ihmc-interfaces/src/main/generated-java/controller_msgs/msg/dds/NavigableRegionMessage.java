@@ -21,7 +21,7 @@ public class NavigableRegionMessage extends Packet<NavigableRegionMessage> imple
       home_region_ = new controller_msgs.msg.dds.PlanarRegionMessage();
       home_region_cluster_ = new controller_msgs.msg.dds.VisibilityClusterMessage();
       visibility_map_in_world_ = new controller_msgs.msg.dds.VisibilityMapMessage();
-      obstacle_clusters_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage> (100, new controller_msgs.msg.dds.VisibilityClusterMessagePubSubType());
+      obstacle_clusters_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterMessage> (25, new controller_msgs.msg.dds.VisibilityClusterMessagePubSubType());
 
    }
 
