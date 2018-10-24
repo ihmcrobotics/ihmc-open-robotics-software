@@ -13,7 +13,7 @@ public class FootstepNode
    public static final double gridSizeXY = 0.05;
    public static final double gridSizeYaw = Math.PI / 18.0;
 
-   public static final double PRECISION     = 0.1;
+   public static final double PRECISION     = 0.05;
    public static final double INV_PRECISION = 1.0 / PRECISION;
 
    private final int xIndex;
@@ -127,11 +127,6 @@ public class FootstepNode
    private static int computePlanarRegionsHashCode(FootstepNode node)
    {
       return computePlanarRegionsHashCode(node.getRoundedX(), node.getRoundedY());
-   }
-
-   public static int computePlanarRegionsHashCode(Point2DReadOnly point)
-   {
-      return computePlanarRegionsHashCode(point.getX(), point.getY());
    }
 
    public static int computePlanarRegionsHashCode(double x, double y)
