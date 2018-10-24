@@ -49,11 +49,12 @@ public class PlanarRegionBipedalPlannerToolboxTest extends FootstepPlannerToolbo
    public static void main(String[] args) throws Exception
    {
       PlanarRegionBipedalPlannerToolboxTest test = new PlanarRegionBipedalPlannerToolboxTest();
-      String prefix = "unitTestData/testable/";
+      String prefix = "unitTestDataSets/test/";
+      VISUALIZE = true;
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       test.setup();
       //      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214730_CinderBlockField");
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171026_131304_PlanarRegion_Ramp_2Story_UnitTest");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171115_171243_SimplePlaneAndWall");
       PrintTools.info("Test passed.");
       test.tearDown();
    }
