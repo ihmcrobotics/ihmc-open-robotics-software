@@ -1,5 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
+import java.awt.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +30,7 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
+import us.ihmc.tools.ArrayTools;
 
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D;
@@ -564,18 +567,20 @@ public class PlanarRegionTools
       return planarRegions.stream().filter(region -> isPlanarRegionIntersectingWithCircle(circleOrigin, circleRadius, region)).collect(Collectors.toList());
    }
 
-   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCapsule(Point3DReadOnly capsuleStart, Point3DReadOnly capsuleEnd, double capsuleRadius,
-                                                                           List<PlanarRegion> planarRegions)
+   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCapsule(Point3DReadOnly capsuleStartInWorld, Point3DReadOnly capsuleEndInWorld,
+                                                                           double capsuleRadius, List<PlanarRegion> planarRegions)
    {
-      return filterPlanarRegionsWithBoundingCapsule(new LineSegment3D(capsuleStart, capsuleEnd), capsuleRadius, planarRegions);
+      return filterPlanarRegionsWithBoundingCapsule(new LineSegment3D(capsuleStartInWorld, capsuleEndInWorld), capsuleRadius, planarRegions);
    }
 
-   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCapsule(LineSegment3D capsuleSegment, double capsuleRadius, List<PlanarRegion> planarRegions)
+   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCapsule(LineSegment3D capsuleSegmentInWorld, double capsuleRadius,
+                                                                           List<PlanarRegion> planarRegions)
    {
       if (!Double.isFinite(capsuleRadius) || capsuleRadius < 0.0)
          return planarRegions;
 
-      return planarRegions.stream().filter(region -> isPlanarRegionIntersectingWithCapsule(capsuleSegment, capsuleRadius, region)).collect(Collectors.toList());
+      return planarRegions.stream().filter(region -> isPlanarRegionIntersectingWithCapsule(capsuleSegmentInWorld, capsuleRadius, region))
+                          .collect(Collectors.toList());
    }
 
    public static double computePlanarRegionArea(PlanarRegion planarRegion)
@@ -588,62 +593,87 @@ public class PlanarRegionTools
       return area;
    }
 
-   public static boolean isPlanarRegionIntersectingWithCapsule(LineSegment3D capsuleSegment, double capsuleRadius, PlanarRegion query)
+   public static boolean isPlanarRegionIntersectingWithCapsule(LineSegment3D capsuleSegmentInWorld, double capsuleRadius, PlanarRegion query)
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       query.getTransformToWorld(transformToWorld);
 
-      return Arrays.stream(query.getConcaveHull()).map(vertex -> applyTransform(transformToWorld, vertex))
-                   .anyMatch(vertex -> capsuleSegment.distance(vertex) <= capsuleRadius);
+      Point3D firstEndPointInLocal = new Point3D(capsuleSegmentInWorld.getFirstEndpoint());
+      Point3D secondEndPointInLocal = new Point3D(capsuleSegmentInWorld.getSecondEndpoint());
+      firstEndPointInLocal.applyInverseTransform(transformToWorld);
+      secondEndPointInLocal.applyInverseTransform(transformToWorld);
 
-
-//      return query.getConvexPolygons().stream().anyMatch(polygon -> signedDistanceFromLineSegment2DToConvexPolygon2D(capsuleSegment.getFirstEndpoint(),
-//                                                                                                              capsuleSegment.getSecondEndpoint(),
-//                                                                                                              polygon.getVertexBufferView(),
-//                                                                                                              polygon.getNumberOfVertices(),
-//                                                                                                              polygon.isClockwiseOrdered()) <= capsuleRadius);
-   }
-
-   private static double signedDistanceFromLineSegment2DToConvexPolygon2D(Point3DReadOnly startPoint, Point3DReadOnly endPoint,
-                                                                          List<? extends Point2DReadOnly> convexPolygon2D, int numberOfVertices,
-                                                                          boolean clockwiseOrdered)
-   {
-      if (numberOfVertices < 0 || numberOfVertices > convexPolygon2D.size())
-         throw new IllegalArgumentException("Illegal numberOfVertices: " + numberOfVertices + ", expected a value in ] 0, " + convexPolygon2D.size() + "].");
+      Point2D[] concaveHull = query.getConcaveHull();
 
       List<Point3D> convexPolygon3D = new ArrayList<>();
-      convexPolygon2D.forEach(vertex -> convexPolygon3D.add(new Point3D(vertex)));
-      Point2DReadOnly startPoint2D = new Point2D(startPoint);
-      Point2DReadOnly endPoint2D = new Point2D(endPoint);
+      for (int i = 0; i < concaveHull.length; i++)
+         convexPolygon3D.add(new Point3D(concaveHull[i]));
+
+      double minDistanceToEdge = getDistanceFromLineSegment3DToConvexPolygon(firstEndPointInLocal, secondEndPointInLocal, convexPolygon3D);
+
+      return minDistanceToEdge <= capsuleRadius;
+   }
+
+
+   public static double getDistanceFromLineSegment3DToConvexPolygon(Point3DReadOnly firstEndPointInLocal, Point3DReadOnly secondEndPointInLocal,
+                                                                    List<Point3D> convexPolygon3D)
+   {
+      int numberOfVertices = convexPolygon3D.size();
+      double minDistanceToEdge = Double.POSITIVE_INFINITY;
 
       if (numberOfVertices == 0)
-         return Double.NaN;
+         minDistanceToEdge = Double.NaN;
 
-      if (numberOfVertices == 1)
-         return distanceFromPoint2DToLineSegment2D(convexPolygon2D.get(0), startPoint2D, endPoint2D);
+      else if (numberOfVertices == 1)
+         minDistanceToEdge = distanceFromPoint3DToLineSegment3D(convexPolygon3D.get(0), firstEndPointInLocal, secondEndPointInLocal);
 
-      if (numberOfVertices == 2)
-         return distanceBetweenTwoLineSegment3Ds(startPoint, endPoint, convexPolygon3D.get(0), convexPolygon3D.get(1));
-
-      boolean isQueryOutsidePolygon = false;
-      double minDistance = Double.POSITIVE_INFINITY;
-
-      for (int index = 0; index < numberOfVertices; index++)
+      else if (numberOfVertices == 2)
+         minDistanceToEdge = distanceBetweenTwoLineSegment3Ds(firstEndPointInLocal, secondEndPointInLocal, convexPolygon3D.get(0), convexPolygon3D.get(1));
+      else
       {
-         Point3DReadOnly edgeStart = convexPolygon3D.get(index);
-         Point2DReadOnly edgeStart2D = convexPolygon2D.get(index);
-         Point3DReadOnly edgeEnd = convexPolygon3D.get(EuclidGeometryPolygonTools.next(index, numberOfVertices));
-         Point2DReadOnly edgeEnd2D = convexPolygon2D.get(EuclidGeometryPolygonTools.next(index, numberOfVertices));
+         boolean isQueryStartOutsidePolygon = false;
+         boolean isQueryEndOutsidePolygon = false;
 
-         isQueryOutsidePolygon |=
-               isPoint2DOnSideOfLine2D(startPoint2D, edgeStart2D, edgeEnd2D, clockwiseOrdered) && isPoint2DOnSideOfLine2D(endPoint2D, edgeStart2D, edgeEnd2D,
-                                                                                                                          clockwiseOrdered);
-         minDistance = Math.min(minDistance, distanceBetweenTwoLineSegment3Ds(startPoint, endPoint, edgeStart, edgeEnd));
+         for (int index = 0; index < numberOfVertices; index++)
+         {
+            Point3DReadOnly edgeStart = convexPolygon3D.get(index);
+            Point3DReadOnly edgeEnd = convexPolygon3D.get(EuclidGeometryPolygonTools.next(index, numberOfVertices));
+            Point2DReadOnly edgeStart2D = new Point2D(edgeStart);
+            Point2DReadOnly edgeEnd2D = new Point2D(edgeEnd);
+
+            minDistanceToEdge = Math.min(minDistanceToEdge, distanceBetweenTwoLineSegment3Ds(firstEndPointInLocal, secondEndPointInLocal, edgeStart, edgeEnd));
+
+            isQueryStartOutsidePolygon |= isPoint2DOnSideOfLine2D(firstEndPointInLocal.getX(), firstEndPointInLocal.getY(), edgeStart2D, edgeEnd2D, true);
+            isQueryEndOutsidePolygon |= isPoint2DOnSideOfLine2D(secondEndPointInLocal.getX(), secondEndPointInLocal.getY(), edgeStart2D, edgeEnd2D, true);
+         }
+
+         boolean pointsAllAbove = firstEndPointInLocal.getZ() > 0 && secondEndPointInLocal.getZ() > 0;
+         boolean pointsAllBelow = firstEndPointInLocal.getZ() < 0 && secondEndPointInLocal.getZ() < 0;
+
+         if (!isQueryStartOutsidePolygon && !isQueryEndOutsidePolygon)
+         { // points are within the edges, so the shortest distance is to the plane surface
+            minDistanceToEdge = Math.min(Math.abs(firstEndPointInLocal.getZ()), Math.abs(secondEndPointInLocal.getZ()));
+         }
+         else if (!pointsAllAbove || !pointsAllBelow)
+         { // points are on opposite sides of the plane
+            Point3DReadOnly intersectionWithPlane = EuclidGeometryTools
+                  .intersectionBetweenLineSegment3DAndPlane3D(convexPolygon3D.get(0), new Vector3D(0.0, 0.0, 1.0), firstEndPointInLocal, secondEndPointInLocal);
+
+            // checking convex hull here - might be better to check all polygons to avoid false positive
+            if (intersectionWithPlane != null)
+            {
+               List<Point2DReadOnly> polygonIn2D = new ArrayList<>();
+               Point2DReadOnly intersectionIn2D = new Point2D(intersectionWithPlane);
+               convexPolygon3D.forEach(vertex -> polygonIn2D.add(new Point2D(vertex)));
+               if (isPointInsidePolygon(polygonIn2D, intersectionIn2D))
+               {
+                  minDistanceToEdge = -minDistanceToEdge;
+               }
+            }
+         }
       }
 
-      if (!isQueryOutsidePolygon)
-         minDistance = -minDistance;
-      return minDistance;
+      return minDistanceToEdge;
    }
 
    public static boolean isPlanarRegionIntersectingWithCircle(Point2DReadOnly circleOriginInWorld, double circleRadius, PlanarRegion query)
@@ -655,7 +685,6 @@ public class PlanarRegionTools
       originInLocal.applyInverseTransform(transformToWorld, false);
 
       return query.getConvexHull().signedDistance(originInLocal) <= circleRadius;
-//      return query.getConvexPolygons().stream().anyMatch(polygon -> polygon.signedDistance(originInLocal) <= circleRadius);
    }
 
    private static Point3D applyTransform(RigidBodyTransform transform, Point2D point2D)
