@@ -19,6 +19,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.TwoBollardEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class PlannerTestEnvironments
    public static final String spiralStaircase = "spiralStaircase";
    public static final String hole = "hole";
    public static final String corridor = "corridor";
+   public static final String bollards = "bollards";
 
    public static final PlannerTestData staircaseData = new StaircaseTestData();
    public static final PlannerTestData wallData = new WallTestData();
@@ -63,6 +65,7 @@ public class PlannerTestEnvironments
    public static final PlannerTestData spiralStaircaseData = new SpiralStaircaseTestData();
    public static final PlannerTestData holeData = new HoleTestData();
    public static final PlannerTestData corridorData = new CorridorTestData();
+   public static final PlannerTestData bollardData = new BollardsTestData();
 
 
    public static PlannerTestData getTestData(String test)
@@ -101,6 +104,8 @@ public class PlannerTestEnvironments
          return spiralStaircaseData;
       case corridor:
          return corridorData;
+      case bollards:
+         return bollardData;
       default:
          return holeData;
       }
@@ -770,6 +775,30 @@ public class PlannerTestEnvironments
 
          FramePose3D goalPose = new FramePose3D(worldFrame);
          goalPose.setPosition(corridorStartDistance + corridorLength + 1.0, 0.0, 0.0);
+
+         setStartPose(initialStanceFootPose);
+         setGoalPose(goalPose);
+         setPlanarRegions(regions);
+         setStartSide(initialStanceSide);
+      }
+   }
+
+   private static class BollardsTestData extends PlannerTestData
+   {
+      public BollardsTestData()
+      {
+         super(bollards);
+
+         double bollardSeparation = 0.85;
+         PlanarRegionsList regions = new TwoBollardEnvironment(bollardSeparation).getPlanarRegionsList();
+
+         FramePose3D initialStanceFootPose = new FramePose3D(worldFrame);
+         RobotSide initialStanceSide = RobotSide.LEFT;
+         initialStanceFootPose.setY(initialStanceSide.negateIfRightSide(0.15));
+         initialStanceFootPose.setX(-1.5);
+
+         FramePose3D goalPose = new FramePose3D(worldFrame);
+         goalPose.setPosition(1.5, 0.0, 0.0);
 
          setStartPose(initialStanceFootPose);
          setGoalPose(goalPose);

@@ -42,6 +42,18 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    }
 
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 2.5)
+   @Test(timeout = 1000000)
+   public void testBetweenTwoBollards()
+   {
+      setCheckForBodyBoxCollision(true);
+      setBodyBoxDepth(0.45);
+      setBodyBoxWidth(0.9);
+      setBodyBoxOffsetX(0.1);
+      super.testBetweenTwoBollards();
+   }
+
+   @Override
    @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 51000)
