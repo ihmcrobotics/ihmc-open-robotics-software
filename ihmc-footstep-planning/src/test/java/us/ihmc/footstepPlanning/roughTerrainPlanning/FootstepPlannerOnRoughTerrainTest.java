@@ -45,6 +45,9 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
    protected JavaFXMessager messager;
 
    private boolean checkForBodyBoxCollision = false;
+   private double bodyBoxDepth = 0.3;
+   private double bodyBoxWidth = 0.7;
+   private double bodyBoxOffsetX = 0.0;
 
    @Before
    public void setup()
@@ -109,6 +112,21 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       this.checkForBodyBoxCollision = checkForBodyBoxCollision;
    }
 
+   public void setBodyBoxDepth(double bodyBoxDepth)
+   {
+      this.bodyBoxDepth = bodyBoxDepth;
+   }
+
+   public void setBodyBoxWidth(double bodyBoxWidth)
+   {
+      this.bodyBoxWidth = bodyBoxWidth;
+   }
+
+   public void setBodyBoxOffsetX(double bodyBoxOffsetX)
+   {
+      this.bodyBoxOffsetX = bodyBoxOffsetX;
+   }
+
    protected AtomicReference<FootstepPlannerParameters> parametersReference;
 
    protected abstract void setupInternal();
@@ -136,6 +154,11 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
    public void testDownCorridor()
    {
       runTestAndAssert(getTestData(corridor));
+   }
+
+   public void testBetweenTwoBollards()
+   {
+      runTestAndAssert(getTestData(bollards));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.6)
@@ -246,6 +269,24 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       return new DefaultFootstepPlanningParameters()
 
       {
+         @Override
+         public double getBodyBoxBaseX()
+         {
+            return bodyBoxOffsetX;
+         }
+
+         @Override
+         public double getBodyBoxDepth()
+         {
+            return bodyBoxDepth;
+         }
+
+         @Override
+         public double getBodyBoxWidth()
+         {
+            return bodyBoxWidth;
+         }
+
          @Override
          public boolean checkForBodyBoxCollisions()
          {
