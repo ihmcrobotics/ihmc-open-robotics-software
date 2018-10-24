@@ -26,9 +26,9 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
    public VisibilityClusterMessage()
    {
       pose_in_world_ = new us.ihmc.euclid.geometry.Pose3D();
-      raw_points_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
-      navigable_extrusions_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
-      non_navigable_extrusions_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
+      raw_points_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (25, new geometry_msgs.msg.dds.PointPubSubType());
+      navigable_extrusions_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (25, new geometry_msgs.msg.dds.PointPubSubType());
+      non_navigable_extrusions_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (25, new geometry_msgs.msg.dds.PointPubSubType());
 
    }
 

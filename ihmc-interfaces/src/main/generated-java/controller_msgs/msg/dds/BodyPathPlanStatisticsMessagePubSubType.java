@@ -44,7 +44,7 @@ public class BodyPathPlanStatisticsMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 25; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.NavigableRegionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += controller_msgs.msg.dds.VisibilityMapMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -93,7 +93,7 @@ public class BodyPathPlanStatisticsMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_2(data.getPlanId());
 
-      if(data.getNavigableRegions().size() <= 100)
+      if(data.getNavigableRegions().size() <= 25)
       cdr.write_type_e(data.getNavigableRegions());else
           throw new RuntimeException("navigable_regions field exceeds the maximum length");
 

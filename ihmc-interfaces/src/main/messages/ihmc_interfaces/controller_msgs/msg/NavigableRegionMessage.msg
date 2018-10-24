@@ -4,4 +4,4 @@ PlanarRegionMessage home_region
 
 VisibilityClusterMessage home_region_cluster
 VisibilityMapMessage visibility_map_in_world
-VisibilityClusterMessage[] obstacle_clusters
+VisibilityClusterMessage[<=25] obstacle_clusters

@@ -46,13 +46,13 @@ public class VisibilityClusterMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 25; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 25; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 25; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -102,15 +102,15 @@ public class VisibilityClusterMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_9(data.getType());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPoseInWorld(), cdr);
-      if(data.getRawPointsInLocal().size() <= 100)
+      if(data.getRawPointsInLocal().size() <= 25)
       cdr.write_type_e(data.getRawPointsInLocal());else
           throw new RuntimeException("raw_points_in_local field exceeds the maximum length");
 
-      if(data.getNavigableExtrusionsInLocal().size() <= 100)
+      if(data.getNavigableExtrusionsInLocal().size() <= 25)
       cdr.write_type_e(data.getNavigableExtrusionsInLocal());else
           throw new RuntimeException("navigable_extrusions_in_local field exceeds the maximum length");
 
-      if(data.getNonNavigableExtrusionsInLocal().size() <= 100)
+      if(data.getNonNavigableExtrusionsInLocal().size() <= 25)
       cdr.write_type_e(data.getNonNavigableExtrusionsInLocal());else
           throw new RuntimeException("non_navigable_extrusions_in_local field exceeds the maximum length");
 

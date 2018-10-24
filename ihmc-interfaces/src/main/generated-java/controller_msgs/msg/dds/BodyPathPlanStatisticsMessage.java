@@ -24,7 +24,7 @@ public class BodyPathPlanStatisticsMessage extends Packet<BodyPathPlanStatistics
 
    public BodyPathPlanStatisticsMessage()
    {
-      navigable_regions_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.NavigableRegionMessage> (100, new controller_msgs.msg.dds.NavigableRegionMessagePubSubType());
+      navigable_regions_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.NavigableRegionMessage> (25, new controller_msgs.msg.dds.NavigableRegionMessagePubSubType());
       inter_regions_map_ = new controller_msgs.msg.dds.VisibilityMapMessage();
       start_visibility_map_ = new controller_msgs.msg.dds.VisibilityMapMessage();
       goal_visibility_map_ = new controller_msgs.msg.dds.VisibilityMapMessage();
