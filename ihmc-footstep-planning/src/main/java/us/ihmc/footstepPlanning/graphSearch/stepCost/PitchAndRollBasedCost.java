@@ -23,6 +23,10 @@ public class PitchAndRollBasedCost implements FootstepCost
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
       FootstepNodeSnapData nodeData = snapper.getSnapData(endNode);
+
+      if (nodeData == null)
+         return 0.0;
+
       double[] yawPitchRoll = new double[3];
       RigidBodyTransform nodeTransform = new RigidBodyTransform();
       FootstepNodeTools.getSnappedNodeTransform(endNode, nodeData.getSnapTransform(), nodeTransform);

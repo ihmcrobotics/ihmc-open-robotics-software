@@ -25,7 +25,10 @@ public class LinearHeightCost implements FootstepCost
       RigidBodyTransform endNodeTransform = new RigidBodyTransform();
 
       FootstepNodeSnapData endNodeData = snapper.getSnapData(endNode);
-      FootstepNodeSnapData startNodeData = snapper.getSnapData(endNode);
+      FootstepNodeSnapData startNodeData = snapper.getSnapData(startNode);
+
+      if (startNodeData == null || endNodeData == null)
+         return 0.0;
 
       FootstepNodeTools.getSnappedNodeTransform(startNode, startNodeData.getSnapTransform(), startNodeTransform);
       FootstepNodeTools.getSnappedNodeTransform(endNode, endNodeData.getSnapTransform(), endNodeTransform);
