@@ -18,13 +18,13 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
 {
-   private static final double proximityForPlanarRegions = 1.25;
+   private static final double proximityForPlanarRegionsNearby = 2.0;
 
    private final HashMap<FootstepNode, FootstepNodeSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
-   protected final TIntObjectMap<List<PlanarRegion>> nearbyPlanarRegions = new TIntObjectHashMap<>();
-   protected final TIntObjectMap<List<PlanarRegion>> bodyCollisionPlanarRegions = new TIntObjectHashMap<>();
-   protected final TIntObjectMap<List<PlanarRegion>> nearbyNavigablePlanarRegions = new TIntObjectHashMap<>();
+   private final TIntObjectMap<List<PlanarRegion>> nearbyPlanarRegions = new TIntObjectHashMap<>();
+   private final TIntObjectMap<List<PlanarRegion>> bodyCollisionPlanarRegions = new TIntObjectHashMap<>();
+   private final TIntObjectMap<List<PlanarRegion>> nearbyNavigablePlanarRegions = new TIntObjectHashMap<>();
 
    protected final FootstepPlannerParameters parameters;
 
@@ -45,11 +45,6 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       snapDataHolder.clear();
    }
 
-   public TIntObjectMap<List<PlanarRegion>> getNearbyPlanarRegions()
-   {
-      return nearbyPlanarRegions;
-   }
-
    public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode)
    {
       if (snapDataHolder.containsKey(footstepNode))
@@ -62,9 +57,6 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       }
       else
       {
-
-         getOrCreateNearbyRegions(footstepNode.getRoundedX(), footstepNode.getRoundedY());
-
          FootstepNodeSnapData snapData = snapInternal(footstepNode);
          addSnapData(footstepNode, snapData);
          return snapData;
@@ -79,17 +71,30 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
 
       Point2DReadOnly centerPoint = new Point2D(roundedX, roundedY);
       List<PlanarRegion> nearbyRegions = PlanarRegionTools
-            .filterPlanarRegionsWithBoundingCircle(centerPoint, proximityForPlanarRegions, planarRegionsList.getPlanarRegionsAsList());
+            .filterPlanarRegionsWithBoundingCircle(centerPoint, proximityForPlanarRegionsNearby, planarRegionsList.getPlanarRegionsAsList());
       nearbyPlanarRegions.put(hashCode, nearbyRegions);
 
-      if (parameters != null)
-      {
-         List<PlanarRegion> navigableRegions = nearbyRegions.stream().filter(
-               region -> parameters.getNavigableRegionFilter().isPlanarRegionNavigable(region, nearbyRegions)).collect(Collectors.toList());
-         nearbyNavigablePlanarRegions.put(hashCode, navigableRegions);
-      }
-
       return nearbyRegions;
+   }
+
+   public List<PlanarRegion> getOrCreateSteppableRegions(double roundedX, double roundedY)
+   {
+      int hashcode = FootstepNode.computePlanarRegionsHashCode(roundedX, roundedY);
+
+      if (nearbyNavigablePlanarRegions.containsKey(hashcode))
+         return nearbyNavigablePlanarRegions.get(hashcode);
+
+      List<PlanarRegion> nearbyRegions = getOrCreateNearbyRegions(roundedX, roundedY);
+
+      if (parameters == null)
+         return nearbyRegions;
+
+      List<PlanarRegion> navigableRegions = nearbyRegions.stream()
+                                                         .filter(region -> parameters.getNavigableRegionFilter().isPlanarRegionNavigable(region, nearbyRegions))
+                                                         .collect(Collectors.toList());
+      nearbyNavigablePlanarRegions.put(hashcode, navigableRegions);
+
+      return navigableRegions;
    }
 
    public List<PlanarRegion> getOrCreateBodyCollisionRegions(double unroundedX, double unroundedY, double groundHeight)
@@ -103,9 +108,21 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
 
       List<PlanarRegion> nearbyRegions = getOrCreateNearbyRegions(roundedX, roundedY);
 
+      Point2DReadOnly centerPoint = new Point2D(roundedX, roundedY);
+
+      double maxDistanceForCollision = 1.25 * Math
+            .sqrt(parameters.getBodyBoxDepth() * parameters.getBodyBoxDepth() + parameters.getBodyBoxWidth() * parameters.getBodyBoxWidth());
+
+      List<PlanarRegion> bodyProximityRegions;
+      if (maxDistanceForCollision < proximityForPlanarRegionsNearby)
+         bodyProximityRegions = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(centerPoint, maxDistanceForCollision, nearbyRegions);
+      else
+         bodyProximityRegions = nearbyRegions;
+
       double minHeight = parameters.getBodyBoxCenterHeight() - 0.5 * parameters.getBodyBoxCenterHeight();
-      List<PlanarRegion> bodyCollisionRegions = nearbyRegions.stream().filter(region -> region.getBoundingBox3dInWorld().getMinZ() - groundHeight >= minHeight)
-                                                             .collect(Collectors.toList());
+      List<PlanarRegion> bodyCollisionRegions = bodyProximityRegions.stream()
+                                                                    .filter(region -> region.getBoundingBox3dInWorld().getMinZ() - groundHeight >= minHeight)
+                                                                    .collect(Collectors.toList());
 
       bodyCollisionPlanarRegions.put(FootstepNode.computePlanarRegionsHashCode(roundedX, roundedY), bodyCollisionRegions);
 
