@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -50,6 +51,13 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
       return kinematicsPlanningToolboxController;
    }
 
+   public static List<Class<? extends Settable<?>>> supportedStatus()
+   {
+      List<Class<? extends Settable<?>>> status = new ArrayList<>();
+      status.add(KinematicsPlanningToolboxOutputStatus.class);
+      return status;
+   }
+   
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
