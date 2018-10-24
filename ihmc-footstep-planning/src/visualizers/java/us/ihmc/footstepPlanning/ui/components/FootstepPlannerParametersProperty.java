@@ -41,7 +41,9 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField bodyBoxWidth = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxWidth, (p, v) -> p.setBodyBoxWidth(v));
    private DoubleField bodyBoxDepth = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxDepth, (p, v) -> p.setBodyBoxDepth(v));
    private DoubleField bodyBoxHeight = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxHeight, (p, v) -> p.setBodyBoxHeight(v));
-   private DoubleField bodyBoxCenterHeight = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxCenterHeight, (p, v) -> p.setBodyBoxCenterHeight(v));
+   private DoubleField bodyBoxBaseX = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxBaseX, (p, v) -> p.setBodyBoxBaseZ(v));
+   private DoubleField bodyBoxBaseY = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxBaseY, (p, v) -> p.setBodyBoxBaseZ(v));
+   private DoubleField bodyBoxBaseZ = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxBaseZ, (p, v) -> p.setBodyBoxBaseZ(v));
 
    public FootstepPlannerParametersProperty(Object bean, String name)
    {
@@ -139,9 +141,19 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, bodyBoxHeight);
    }
 
-   public void bidirectionalBindBodyBoxCenterHeight(Property<? extends Number> property)
+   public void bidirectionalBindBodyBoxBaseX(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, bodyBoxCenterHeight);
+      bindFieldBidirectionalToNumberProperty(property, bodyBoxBaseX);
+   }
+
+   public void bidirectionalBindBodyBoxBaseY(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, bodyBoxBaseY);
+   }
+
+   public void bidirectionalBindBodyBoxBaseZ(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, bodyBoxBaseZ);
    }
 
    public void bidirectionalBindYawWeight(Property<? extends Number> property)

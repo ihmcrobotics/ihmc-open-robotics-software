@@ -28,8 +28,11 @@ public class BodyCollisionCheckingUIController
    private Slider bodyHeight;
 
    @FXML
-   private Slider bodyCenterHeight;
-
+   private Slider bodyBoxBaseX;
+   @FXML
+   private Slider bodyBoxBaseY;
+   @FXML
+   private Slider bodyBoxBaseZ;
 
 
    public void attachMessager(JavaFXMessager messager)
@@ -45,7 +48,9 @@ public class BodyCollisionCheckingUIController
       parametersProperty.bidirectionalBindBodyBoxDepth(bodyDepth.valueProperty());
       parametersProperty.bidirectionalBindBodyBoxHeight(bodyHeight.valueProperty());
       parametersProperty.bidirectionalBindBodyBoxWidth(bodyWidth.valueProperty());
-      parametersProperty.bidirectionalBindBodyBoxCenterHeight(bodyCenterHeight.valueProperty());
+      parametersProperty.bidirectionalBindBodyBoxBaseX(bodyBoxBaseX.valueProperty());
+      parametersProperty.bidirectionalBindBodyBoxBaseY(bodyBoxBaseY.valueProperty());
+      parametersProperty.bidirectionalBindBodyBoxBaseZ(bodyBoxBaseZ.valueProperty());
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
 

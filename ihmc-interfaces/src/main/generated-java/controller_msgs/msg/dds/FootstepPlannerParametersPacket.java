@@ -230,9 +230,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    /**
             * Some node checkers will check if a bounding box that describes the body of the robot will move
             * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
-            * collisions, this defines the height of the center of the box.
+            * collisions, this defines the x-offset of a bounding box relative to the average frame between sequential footsteps.
             */
-   public double body_box_center_height_ = -1.0;
+   public double body_box_base_x_ = -1.0;
+   /**
+            * Some node checkers will check if a bounding box that describes the body of the robot will move
+            * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+            * collisions, this defines the y-offset of a bounding box relative to the average frame between sequential footsteps.
+            */
+   public double body_box_base_y_ = -1.0;
+   /**
+            * Some node checkers will check if a bounding box that describes the body of the robot will move
+            * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+            * collisions, this defines the z-offset of a bounding box relative to the average frame between sequential footsteps.
+            */
+   public double body_box_base_z_ = -1.0;
    /**
             * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
             * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
@@ -321,7 +333,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       body_box_width_ = other.body_box_width_;
 
-      body_box_center_height_ = other.body_box_center_height_;
+      body_box_base_x_ = other.body_box_base_x_;
+
+      body_box_base_y_ = other.body_box_base_y_;
+
+      body_box_base_z_ = other.body_box_base_z_;
 
       min_x_clearance_from_stance_ = other.min_x_clearance_from_stance_;
 
@@ -968,20 +984,58 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    /**
             * Some node checkers will check if a bounding box that describes the body of the robot will move
             * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
-            * collisions, this defines the height of the center of the box.
+            * collisions, this defines the x-offset of a bounding box relative to the average frame between sequential footsteps.
             */
-   public void setBodyBoxCenterHeight(double body_box_center_height)
+   public void setBodyBoxBaseX(double body_box_base_x)
    {
-      body_box_center_height_ = body_box_center_height;
+      body_box_base_x_ = body_box_base_x;
    }
    /**
             * Some node checkers will check if a bounding box that describes the body of the robot will move
             * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
-            * collisions, this defines the height of the center of the box.
+            * collisions, this defines the x-offset of a bounding box relative to the average frame between sequential footsteps.
             */
-   public double getBodyBoxCenterHeight()
+   public double getBodyBoxBaseX()
    {
-      return body_box_center_height_;
+      return body_box_base_x_;
+   }
+
+   /**
+            * Some node checkers will check if a bounding box that describes the body of the robot will move
+            * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+            * collisions, this defines the y-offset of a bounding box relative to the average frame between sequential footsteps.
+            */
+   public void setBodyBoxBaseY(double body_box_base_y)
+   {
+      body_box_base_y_ = body_box_base_y;
+   }
+   /**
+            * Some node checkers will check if a bounding box that describes the body of the robot will move
+            * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+            * collisions, this defines the y-offset of a bounding box relative to the average frame between sequential footsteps.
+            */
+   public double getBodyBoxBaseY()
+   {
+      return body_box_base_y_;
+   }
+
+   /**
+            * Some node checkers will check if a bounding box that describes the body of the robot will move
+            * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+            * collisions, this defines the z-offset of a bounding box relative to the average frame between sequential footsteps.
+            */
+   public void setBodyBoxBaseZ(double body_box_base_z)
+   {
+      body_box_base_z_ = body_box_base_z;
+   }
+   /**
+            * Some node checkers will check if a bounding box that describes the body of the robot will move
+            * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+            * collisions, this defines the z-offset of a bounding box relative to the average frame between sequential footsteps.
+            */
+   public double getBodyBoxBaseZ()
+   {
+      return body_box_base_z_;
    }
 
    /**
@@ -1107,7 +1161,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_width_, other.body_box_width_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_center_height_, other.body_box_center_height_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_base_x_, other.body_box_base_x_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_base_y_, other.body_box_base_y_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_base_z_, other.body_box_base_z_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_x_clearance_from_stance_, other.min_x_clearance_from_stance_, epsilon)) return false;
 
@@ -1185,7 +1243,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.body_box_width_ != otherMyClass.body_box_width_) return false;
 
-      if(this.body_box_center_height_ != otherMyClass.body_box_center_height_) return false;
+      if(this.body_box_base_x_ != otherMyClass.body_box_base_x_) return false;
+
+      if(this.body_box_base_y_ != otherMyClass.body_box_base_y_) return false;
+
+      if(this.body_box_base_z_ != otherMyClass.body_box_base_z_) return false;
 
       if(this.min_x_clearance_from_stance_ != otherMyClass.min_x_clearance_from_stance_) return false;
 
@@ -1260,8 +1322,12 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.body_box_depth_);      builder.append(", ");
       builder.append("body_box_width=");
       builder.append(this.body_box_width_);      builder.append(", ");
-      builder.append("body_box_center_height=");
-      builder.append(this.body_box_center_height_);      builder.append(", ");
+      builder.append("body_box_base_x=");
+      builder.append(this.body_box_base_x_);      builder.append(", ");
+      builder.append("body_box_base_y=");
+      builder.append(this.body_box_base_y_);      builder.append(", ");
+      builder.append("body_box_base_z=");
+      builder.append(this.body_box_base_z_);      builder.append(", ");
       builder.append("min_x_clearance_from_stance=");
       builder.append(this.min_x_clearance_from_stance_);      builder.append(", ");
       builder.append("min_y_clearance_from_stance=");

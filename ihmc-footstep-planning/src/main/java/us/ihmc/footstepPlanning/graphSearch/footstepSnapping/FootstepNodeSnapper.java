@@ -126,8 +126,8 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       else
          bodyProximityRegions = nearbyRegions;
 
-      double minHeight = parameters.getBodyBoxCenterHeight() - 0.5 * parameters.getBodyBoxCenterHeight();
-      double maxHeight = parameters.getBodyBoxCenterHeight() + 0.5 * parameters.getBodyBoxCenterHeight();
+      double minHeight = parameters.getBodyBoxBaseZ();
+      double maxHeight = parameters.getBodyBoxBaseZ() + parameters.getBodyBoxHeight();
 
       List<PlanarRegion> bodyCollisionRegions = bodyProximityRegions.stream().filter(
             region -> parameters.getBodyCollisionRegionFilter().isPlanarRegionCollidable(region, groundHeight, minHeight, maxHeight))

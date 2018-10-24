@@ -210,9 +210,21 @@ float64 body_box_width
 
 # Some node checkers will check if a bounding box that describes the body of the robot will move
 # through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
-# collisions, this defines the height of the center of the box.
+# collisions, this defines the x-offset of a bounding box relative to the average frame between sequential footsteps.
 # Field default value -1.0
-float64 body_box_center_height
+float64 body_box_base_x
+
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the y-offset of a bounding box relative to the average frame between sequential footsteps.
+# Field default value -1.0
+float64 body_box_base_y
+
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the z-offset of a bounding box relative to the average frame between sequential footsteps.
+# Field default value -1.0
+float64 body_box_base_z
 
 # Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
 # Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
