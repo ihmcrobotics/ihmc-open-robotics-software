@@ -107,11 +107,17 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
    private boolean updateToolboxConfiguration()
    {
+      // TODO : check number of key frames between each rigidbody commands.
       PrintTools.info(""+rigidBodyCommands.size());
       for(int i=0;i<rigidBodyCommands.size();i++)
       {
          PrintTools.info(""+rigidBodyCommands.get(i).getEndEffector());
-         PrintTools.info(""+rigidBodyCommands.get(i).getNumberOfWayPoints());
+         int numberOfWayPoints = rigidBodyCommands.get(i).getNumberOfWayPoints();
+         for(int j=0;j<numberOfWayPoints;j++)
+         {
+            PrintTools.info(""+rigidBodyCommands.get(i).getWayPointTime(j));
+            PrintTools.info(""+rigidBodyCommands.get(i).getWayPoint(j));
+         }
       }
       
       if(centerOfMassCommand.get() != null)
