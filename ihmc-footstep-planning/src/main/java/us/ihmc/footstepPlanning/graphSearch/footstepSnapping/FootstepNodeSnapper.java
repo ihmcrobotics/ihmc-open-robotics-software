@@ -6,9 +6,11 @@ import java.util.stream.Collectors;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -21,6 +23,7 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
    private final HashMap<FootstepNode, FootstepNodeSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
    protected final TIntObjectMap<List<PlanarRegion>> nearbyPlanarRegions = new TIntObjectHashMap<>();
+   protected final TIntObjectMap<List<PlanarRegion>> bodyCollisionPlanarRegions = new TIntObjectHashMap<>();
    protected final TIntObjectMap<List<PlanarRegion>> nearbyNavigablePlanarRegions = new TIntObjectHashMap<>();
 
    protected final FootstepPlannerParameters parameters;
@@ -34,7 +37,6 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
    {
       this.parameters = parameters;
    }
-
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
@@ -60,7 +62,8 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       }
       else
       {
-         checkAndAddNearbyRegions(footstepNode.getRoundedX(), footstepNode.getRoundedY());
+
+         getOrCreateNearbyRegions(footstepNode.getRoundedX(), footstepNode.getRoundedY());
 
          FootstepNodeSnapData snapData = snapInternal(footstepNode);
          addSnapData(footstepNode, snapData);
@@ -68,26 +71,45 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       }
    }
 
-   public List<PlanarRegion> checkAndAddNearbyRegions(double x, double y)
+   public List<PlanarRegion> getOrCreateNearbyRegions(double roundedX, double roundedY)
    {
-      int hashcode = FootstepNode.computePlanarRegionsHashCode(x, y);
-      if (nearbyPlanarRegions.containsKey(hashcode))
-         return nearbyPlanarRegions.get(hashcode);
+      int hashCode = FootstepNode.computePlanarRegionsHashCode(roundedX, roundedY);
+      if (nearbyPlanarRegions.containsKey(hashCode))
+         return nearbyPlanarRegions.get(hashCode);
 
-
-      Point2DReadOnly roundedPoint = new Point2D(x, y);
+      Point2DReadOnly centerPoint = new Point2D(roundedX, roundedY);
       List<PlanarRegion> nearbyRegions = PlanarRegionTools
-            .filterPlanarRegionsWithBoundingCircle(roundedPoint, proximityForPlanarRegions, planarRegionsList.getPlanarRegionsAsList());
-      nearbyPlanarRegions.put(hashcode, nearbyRegions);
+            .filterPlanarRegionsWithBoundingCircle(centerPoint, proximityForPlanarRegions, planarRegionsList.getPlanarRegionsAsList());
+      nearbyPlanarRegions.put(hashCode, nearbyRegions);
 
       if (parameters != null)
       {
          List<PlanarRegion> navigableRegions = nearbyRegions.stream().filter(
                region -> parameters.getNavigableRegionFilter().isPlanarRegionNavigable(region, nearbyRegions)).collect(Collectors.toList());
-         nearbyNavigablePlanarRegions.put(FootstepNode.computePlanarRegionsHashCode(roundedPoint), navigableRegions);
+         nearbyNavigablePlanarRegions.put(hashCode, navigableRegions);
       }
 
       return nearbyRegions;
+   }
+
+   public List<PlanarRegion> getOrCreateBodyCollisionRegions(double unroundedX, double unroundedY, double groundHeight)
+   {
+      double roundedX = FootstepNode.round(unroundedX);
+      double roundedY = FootstepNode.round(unroundedY);
+      int hashcode = FootstepNode.computePlanarRegionsHashCode(roundedX, roundedY);
+
+      if (bodyCollisionPlanarRegions.containsKey(hashcode))
+         return bodyCollisionPlanarRegions.get(hashcode);
+
+      List<PlanarRegion> nearbyRegions = getOrCreateNearbyRegions(roundedX, roundedY);
+
+      double minHeight = parameters.getBodyBoxCenterHeight() - 0.5 * parameters.getBodyBoxCenterHeight();
+      List<PlanarRegion> bodyCollisionRegions = nearbyRegions.stream().filter(region -> region.getBoundingBox3dInWorld().getMinZ() - groundHeight >= minHeight)
+                                                             .collect(Collectors.toList());
+
+      bodyCollisionPlanarRegions.put(FootstepNode.computePlanarRegionsHashCode(roundedX, roundedY), bodyCollisionRegions);
+
+      return bodyCollisionRegions;
    }
 
    /**
