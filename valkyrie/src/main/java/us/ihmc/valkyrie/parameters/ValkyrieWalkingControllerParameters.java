@@ -745,7 +745,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean useOptimizationBasedICPController()
    {
-      return true;
+      return false;
    }
    
    /** {@inheritDoc} */
