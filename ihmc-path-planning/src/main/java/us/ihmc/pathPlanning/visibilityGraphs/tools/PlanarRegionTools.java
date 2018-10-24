@@ -121,12 +121,14 @@ public class PlanarRegionTools
    {
       Point3D highestIntersection = null;
 
+      Line3D verticalLine = new Line3D();
+      verticalLine.set(pointInWorld, new Vector3D(0.0, 0.0, 1.0));
+
       for (PlanarRegion region : regions)
       {
-         if (!region.isPointInWorld2DInside(pointInWorld))
-         {
+         Point3D intersection = PlanarRegionTools.intersectRegionWithLine(region, verticalLine);
+         if (intersection == null)
             continue;
-         }
 
          if (highestIntersection == null)
          {
@@ -134,7 +136,7 @@ public class PlanarRegionTools
             highestIntersection.setZ(Double.NEGATIVE_INFINITY);
          }
 
-         double height = region.getPlaneZGivenXY(pointInWorld.getX(), pointInWorld.getY());
+         double height = intersection.getZ();
 
          if (highestIntersection.getZ() < height)
          {
@@ -152,30 +154,31 @@ public class PlanarRegionTools
     * Will return the intersection point between a line and a single planar region. If the line does
     * not intersect the region this method will return null.
     */
-   public static Point3D intersectRegionWithLine(PlanarRegion region, Line3D projectionLine)
+   public static Point3D intersectRegionWithLine(PlanarRegion region, Line3D projectionLineInWorld)
    {
       RigidBodyTransform regionToWorld = new RigidBodyTransform();
       region.getTransformToWorld(regionToWorld);
 
-      Vector3D planeNormal = new Vector3D(0.0, 0.0, 1.0);
-      planeNormal.applyTransform(regionToWorld);
+      Vector3D planeNormalInWorld = new Vector3D(0.0, 0.0, 1.0);
+      planeNormalInWorld.applyTransform(regionToWorld);
 
-      Point3D pointOnPlane = new Point3D();
-      pointOnPlane.set(region.getConvexPolygon(0).getVertex(0));
-      pointOnPlane.applyTransform(regionToWorld);
+      Point3D pointOnPlaneInWorld = new Point3D();
+      pointOnPlaneInWorld.set(region.getConvexPolygon(0).getVertex(0));
+      pointOnPlaneInWorld.applyTransform(regionToWorld);
 
-      Point3DReadOnly pointOnLine = projectionLine.getPoint();
-      Vector3DReadOnly directionOfLine = projectionLine.getDirection();
-      Point3D intersectionWithPlane = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, pointOnLine, directionOfLine);
-      if (intersectionWithPlane == null)
+      Point3DReadOnly pointOnLineInWorld = projectionLineInWorld.getPoint();
+      Vector3DReadOnly directionOfLineInWorld = projectionLineInWorld.getDirection();
+
+      Point3D intersectionWithPlaneInWorld = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlaneInWorld, planeNormalInWorld, pointOnLineInWorld, directionOfLineInWorld);
+      if (intersectionWithPlaneInWorld == null)
       {
          return null;
       }
 
       // checking convex hull here - might be better to check all polygons to avoid false positive
-      if (isPointInWorldInsidePlanarRegion(region, intersectionWithPlane))
+      if (isPointInWorldInsidePlanarRegion(region, intersectionWithPlaneInWorld))
       {
-         return intersectionWithPlane;
+         return intersectionWithPlaneInWorld;
       }
 
       return null;
@@ -294,7 +297,7 @@ public class PlanarRegionTools
 
    public static boolean isPointInWorldInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInWorldToCheck)
    {
-      return isPointInLocalInsidePlanarRegion(planarRegion, pointInWorldToCheck, 0.0);
+      return isPointInWorldInsidePlanarRegion(planarRegion, pointInWorldToCheck, 0.0);
    }
 
    public static boolean isPointInWorldInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInWorldToCheck, double epsilon)
