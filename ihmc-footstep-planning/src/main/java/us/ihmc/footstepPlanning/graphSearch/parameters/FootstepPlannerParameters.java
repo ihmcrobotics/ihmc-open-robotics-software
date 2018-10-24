@@ -19,7 +19,7 @@ public interface FootstepPlannerParameters
     */
    default boolean checkForBodyBoxCollisions()
    {
-      return false;
+      return true;
    }
 
    /**
@@ -409,7 +409,8 @@ public interface FootstepPlannerParameters
          @Override
          public boolean isPlanarRegionNavigable(PlanarRegion query, List<PlanarRegion> allOtherRegions)
          {
-            return query.getNormal().angle(vertical) < getMinimumSurfaceInclineRadians();
+            double angle = query.getNormal().angle(vertical);
+            return getMinimumSurfaceInclineRadians() + 1e-5 > angle ;
          }
       };
    }
