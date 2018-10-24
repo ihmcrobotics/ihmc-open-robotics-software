@@ -6,11 +6,11 @@ import java.util.stream.Collectors;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.footstepPlanning.filters.BodyCollisionRegionFilter;
+import us.ihmc.footstepPlanning.filters.SteppableRegionFilter;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -21,7 +21,7 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
    private static final double proximityForPlanarRegionsNearby = 2.0;
 
    private final HashMap<FootstepNode, FootstepNodeSnapData> snapDataHolder = new HashMap<>();
-   protected PlanarRegionsList planarRegionsList;
+   private PlanarRegionsList planarRegionsList;
    private final TIntObjectMap<List<PlanarRegion>> nearbyPlanarRegions = new TIntObjectHashMap<>();
    private final TIntObjectMap<List<PlanarRegion>> bodyCollisionPlanarRegions = new TIntObjectHashMap<>();
    private final TIntObjectMap<List<PlanarRegion>> nearbyNavigablePlanarRegions = new TIntObjectHashMap<>();
@@ -43,6 +43,12 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       this.planarRegionsList = planarRegionsList;
       nearbyPlanarRegions.clear();
       snapDataHolder.clear();
+      bodyCollisionPlanarRegions.clear();
+   }
+
+   public boolean hasPlanarRegions()
+   {
+      return planarRegionsList != null && !planarRegionsList.isEmpty();
    }
 
    public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode)
@@ -89,8 +95,7 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       if (parameters == null)
          return nearbyRegions;
 
-      List<PlanarRegion> navigableRegions = nearbyRegions.stream()
-                                                         .filter(region -> parameters.getNavigableRegionFilter().isPlanarRegionNavigable(region, nearbyRegions))
+      List<PlanarRegion> navigableRegions = nearbyRegions.stream().filter(region -> parameters.getSteppableRegionFilter().isPlanarRegionSteppable(region))
                                                          .collect(Collectors.toList());
       nearbyNavigablePlanarRegions.put(hashcode, navigableRegions);
 
@@ -120,8 +125,10 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
          bodyProximityRegions = nearbyRegions;
 
       double minHeight = parameters.getBodyBoxCenterHeight() - 0.5 * parameters.getBodyBoxCenterHeight();
-      List<PlanarRegion> bodyCollisionRegions = bodyProximityRegions.stream()
-                                                                    .filter(region -> region.getBoundingBox3dInWorld().getMinZ() - groundHeight >= minHeight)
+      double maxHeight = parameters.getBodyBoxCenterHeight() + 0.5 * parameters.getBodyBoxCenterHeight();
+
+      List<PlanarRegion> bodyCollisionRegions = bodyProximityRegions.stream().filter(
+            region -> parameters.getBodyCollisionRegionFilter().isPlanarRegionCollidable(region, groundHeight, minHeight, maxHeight))
                                                                     .collect(Collectors.toList());
 
       bodyCollisionPlanarRegions.put(FootstepNode.computePlanarRegionsHashCode(roundedX, roundedY), bodyCollisionRegions);

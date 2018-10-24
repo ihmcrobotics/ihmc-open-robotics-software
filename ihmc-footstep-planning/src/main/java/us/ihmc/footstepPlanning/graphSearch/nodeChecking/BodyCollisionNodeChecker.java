@@ -107,8 +107,6 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       if (!findMidStanceFrame(node, previousNode))
          return false;
 
-
-
       tempPoint.setToZero(midStanceFrame);
       tempPoint.changeFrame(worldFrame);
       double roundedX = FootstepNode.round(tempPoint.getX());
@@ -147,7 +145,6 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
 
    private final TIntObjectMap<FramePoint3D> midpointMap = new TIntObjectHashMap<>();
 
-   private final FramePoint3D midPoint = new FramePoint3D();
    private final FramePose3D midPose = new FramePose3D();
 
    private FramePoint3D getMidPoint(FootstepNode node, FootstepNode previousNode)
@@ -165,6 +162,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       tempPoint.set(previousNode.getRoundedX(), previousNode.getRoundedY(), 0.0);
       Point3DReadOnly previousProjectedPoint = PlanarRegionTools.projectPointToPlanesVertically(tempPoint, nodePlanes);
 
+      FramePoint3D midPoint = new FramePoint3D();
       midPoint.interpolate(projectedPoint, previousProjectedPoint, 0.5);
       midpointMap.put(hashcode, midPoint);
 

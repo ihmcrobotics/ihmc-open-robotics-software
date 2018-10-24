@@ -1,15 +1,13 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.filters.BodyCollisionRegionFilter;
+import us.ihmc.footstepPlanning.filters.SteppableRegionFilter;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
 import us.ihmc.robotics.geometry.PlanarRegion;
-
-import java.util.List;
 
 public interface FootstepPlannerParameters
 {
@@ -400,17 +398,36 @@ public interface FootstepPlannerParameters
       return new DefaultFootstepPlannerCostParameters();
    }
 
-   default NavigableRegionFilter getNavigableRegionFilter()
+   default SteppableRegionFilter getSteppableRegionFilter()
    {
-      return new NavigableRegionFilter()
+      return new SteppableRegionFilter()
       {
          private Vector3D vertical = new Vector3D(0.0, 0.0, 1.0);
 
          @Override
-         public boolean isPlanarRegionNavigable(PlanarRegion query, List<PlanarRegion> allOtherRegions)
+         public boolean isPlanarRegionSteppable(PlanarRegion query)
          {
             double angle = query.getNormal().angle(vertical);
-            return getMinimumSurfaceInclineRadians() + 1e-5 > angle ;
+
+            if (angle > getMinimumSurfaceInclineRadians() + 1e-5)
+               return false;
+
+            return true;
+         }
+      };
+   }
+
+   default BodyCollisionRegionFilter getBodyCollisionRegionFilter()
+   {
+      return new BodyCollisionRegionFilter()
+      {
+         @Override
+         public boolean isPlanarRegionCollidable(PlanarRegion query, double groundHeight, double minHeight, double maxHeight)
+         {
+            if (query.getBoundingBox3dInWorld().getMaxZ() < minHeight + groundHeight)
+               return false;
+
+            return maxHeight + groundHeight > query.getBoundingBox3dInWorld().getMinZ();
          }
       };
    }

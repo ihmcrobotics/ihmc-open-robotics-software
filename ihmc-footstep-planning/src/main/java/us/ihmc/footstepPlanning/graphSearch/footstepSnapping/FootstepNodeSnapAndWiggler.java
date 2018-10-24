@@ -40,7 +40,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    @Override
    public FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
    {
-      if(planarRegionsList == null || planarRegionsList.isEmpty())
+      if(!hasPlanarRegions())
       {
          return FootstepNodeSnapData.identityData();
       }
