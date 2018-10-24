@@ -139,6 +139,9 @@ public class PlanarRegionTools
          }
       }
 
+      if (highestIntersection != null && Double.isInfinite(highestIntersection.getZ()))
+         return null;
+
       return highestIntersection;
    }
 
