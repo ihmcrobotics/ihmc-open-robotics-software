@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.ui;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -263,7 +264,12 @@ public class RemoteUIMessageConverter
 
    private void requestNewPlan()
    {
-      submitFootstepPlannerParametersPacket();
+      FootstepPlannerParametersPacket packet = new FootstepPlannerParametersPacket();
+      FootstepPlannerParameters parameters = plannerParametersReference.get();
+
+      copyFootstepPlannerParametersToPacket(packet, parameters);
+      plannerParametersPublisher.publish(packet);
+
       submitFootstepPlanningRequestPacket();
    }
 
@@ -272,11 +278,8 @@ public class RemoteUIMessageConverter
       plannerStatisticsRequestPublisher.publish(new PlanningStatisticsRequestMessage());
    }
 
-   private void submitFootstepPlannerParametersPacket()
+   public static void copyFootstepPlannerParametersToPacket(FootstepPlannerParametersPacket packet, FootstepPlannerParameters parameters)
    {
-      FootstepPlannerParametersPacket packet = new FootstepPlannerParametersPacket();
-      FootstepPlannerParameters parameters = plannerParametersReference.get();
-
       if (parameters == null)
       {
          return;
@@ -333,8 +336,6 @@ public class RemoteUIMessageConverter
       packet.getCostParameters().setForwardWeight(costParameters.getForwardWeight());
       packet.getCostParameters().setLateralWeight(costParameters.getLateralWeight());
       packet.getCostParameters().setCostPerStep(costParameters.getCostPerStep());
-
-      plannerParametersPublisher.publish(packet);
    }
 
    private void submitFootstepPlanningRequestPacket()
