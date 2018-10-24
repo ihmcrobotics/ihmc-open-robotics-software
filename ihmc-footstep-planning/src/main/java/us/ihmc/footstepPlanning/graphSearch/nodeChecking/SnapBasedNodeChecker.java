@@ -47,6 +47,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       snapper.setPlanarRegions(planarRegions);
    }
 
+   // TODO make this faster
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
@@ -103,7 +104,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          return false;
       }
 
-      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegionsList, parameters.getBodyGroundClearance()))
+      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition, snapper.getOrCreateNearbyRegions(node.getRoundedX(), node.getRoundedY()), parameters.getBodyGroundClearance()))
       {
          if (DEBUG)
          {
@@ -120,11 +121,11 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
     * This is meant to test if there is a wall that the body of the robot would run into when shifting
     * from one step to the next. It is not meant to eliminate swing overs.
     */
-   private static boolean isObstacleBetweenNodes(Point3D nodePosition, Point3D previousNodePosition, PlanarRegionsList planarRegions, double groundClearance)
+   private static boolean isObstacleBetweenNodes(Point3D nodePosition, Point3D previousNodePosition, List<PlanarRegion> planarRegions, double groundClearance)
    {
       PlanarRegion bodyPath = createBodyRegionFromNodes(nodePosition, previousNodePosition, groundClearance, 2.0);
 
-      for (PlanarRegion region : planarRegions.getPlanarRegionsAsList())
+      for (PlanarRegion region : planarRegions)
       {
          List<LineSegment3D> intersections = region.intersect(bodyPath);
          if (!intersections.isEmpty())
