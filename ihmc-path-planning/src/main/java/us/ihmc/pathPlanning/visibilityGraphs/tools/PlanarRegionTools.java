@@ -14,6 +14,7 @@ import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -21,7 +22,9 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
@@ -159,26 +162,25 @@ public class PlanarRegionTools
       RigidBodyTransform regionToWorld = new RigidBodyTransform();
       region.getTransformToWorld(regionToWorld);
 
-      Vector3D planeNormalInWorld = new Vector3D(0.0, 0.0, 1.0);
-      planeNormalInWorld.applyTransform(regionToWorld);
+      Vector3DReadOnly planeNormal = new Vector3D(0.0, 0.0, 1.0);
+      Point3DReadOnly pointOnPlane = new Point3D(region.getConvexPolygon(0).getVertex(0));
 
-      Point3D pointOnPlaneInWorld = new Point3D();
-      pointOnPlaneInWorld.set(region.getConvexPolygon(0).getVertex(0));
-      pointOnPlaneInWorld.applyTransform(regionToWorld);
+      Point3DBasics pointOnLineInLocal = new Point3D(projectionLineInWorld.getPoint());
+      Vector3DBasics directionOfLineInLocal = new Vector3D(projectionLineInWorld.getDirection());
 
-      Point3DReadOnly pointOnLineInWorld = projectionLineInWorld.getPoint();
-      Vector3DReadOnly directionOfLineInWorld = projectionLineInWorld.getDirection();
+      pointOnLineInLocal.applyInverseTransform(regionToWorld);
+      directionOfLineInLocal.applyInverseTransform(regionToWorld);
 
-      Point3D intersectionWithPlaneInWorld = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlaneInWorld, planeNormalInWorld, pointOnLineInWorld, directionOfLineInWorld);
-      if (intersectionWithPlaneInWorld == null)
+      Point3D intersectionWithPlaneInLocal = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, pointOnLineInLocal, directionOfLineInLocal);
+      if (intersectionWithPlaneInLocal == null)
       {
          return null;
       }
 
-      // checking convex hull here - might be better to check all polygons to avoid false positive
-      if (isPointInWorldInsidePlanarRegion(region, intersectionWithPlaneInWorld))
+      if (region.isPointInside(intersectionWithPlaneInLocal.getX(), intersectionWithPlaneInLocal.getY()))
       {
-         return intersectionWithPlaneInWorld;
+         intersectionWithPlaneInLocal.applyTransform(regionToWorld);
+         return intersectionWithPlaneInLocal;
       }
 
       return null;
@@ -304,8 +306,8 @@ public class PlanarRegionTools
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       planarRegion.getTransformToWorld(transformToWorld);
-      Point3D pointInLocalToCheck = new Point3D();
-      transformToWorld.inverseTransform(pointInWorldToCheck, pointInLocalToCheck);
+      Point2D pointInLocalToCheck = new Point2D(pointInWorldToCheck);
+      pointInLocalToCheck.applyInverseTransform(transformToWorld, false);
       return isPointInLocalInsidePlanarRegion(planarRegion, pointInLocalToCheck, epsilon);
    }
 
@@ -328,6 +330,9 @@ public class PlanarRegionTools
    {
       ConvexPolygon2D convexHull = planarRegion.getConvexHull();
       BoundingBox2D boundingBox = convexHull.getBoundingBox();
+
+      if (planarRegion.getConcaveHullSize() < convexHull.getNumberOfVertices())
+         throw new IllegalArgumentException("The concave hull of this polygon is not valid.");
 
       if (!boundingBox.isInsideEpsilon(pointInLocalToCheck, epsilon))
          return false;
@@ -389,7 +394,7 @@ public class PlanarRegionTools
          Point2DReadOnly edgeStart = polygon.get(i);
          Point2DReadOnly edgeEnd = ListWrappingIndexTools.getNext(i, polygon);
 
-         currentIntersection = VisibilityGraphsGeometryTools.intersectionBetweenRay2DAndLineSegment2D(rayOrigin, rayDirection, edgeStart, edgeEnd);
+         currentIntersection = EuclidGeometryTools.intersectionBetweenRay2DAndLineSegment2D(rayOrigin, rayDirection, edgeStart, edgeEnd);
 
          if (currentIntersection != null)
          { // There is an intersection
