@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.parameters;
 
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -9,17 +10,17 @@ import java.util.EnumMap;
 /** {@inheritDoc} */
 public class ValkyrieCapturePointPlannerParameters extends ContinuousCMPICPPlannerParameters
 {
-   private final boolean runningOnRealRobot;
    private final boolean useTwoCMPsPerSupport;
 
    private final CoPPointName exitCoPName = CoPPointName.EXIT_COP;
+   private final RobotTarget target;
 
    private EnumMap<CoPPointName, Vector2D> copOffsets;
    private EnumMap<CoPPointName, Vector2D> copForwardOffsetBounds;
 
-   public ValkyrieCapturePointPlannerParameters(boolean runningOnRealRobot)
+   public ValkyrieCapturePointPlannerParameters(RobotTarget target)
    {
-      this.runningOnRealRobot = runningOnRealRobot;
+      this.target = target;
       useTwoCMPsPerSupport = true;
    }
 
@@ -49,7 +50,7 @@ public class ValkyrieCapturePointPlannerParameters extends ContinuousCMPICPPlann
          return copOffsets;
 
       Vector2D entryOffset, exitOffset;
-      if (runningOnRealRobot)
+      if (target == RobotTarget.REAL_ROBOT)
          entryOffset = new Vector2D(0.01, 0.01);
       else
          entryOffset = new Vector2D(0.0, 0.006);
