@@ -15,24 +15,18 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
-import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotDescription.JointDescription;
-import us.ihmc.robotics.robotDescription.LinkDescription;
-import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -40,7 +34,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 public class KinematicsPlanningToolboxController extends ToolboxController
 {
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
-
    private final AtomicReference<CapturabilityBasedStatus> latestCapturabilityBasedStatusReference = new AtomicReference<>(null);
 
    private final FullHumanoidRobotModel desiredFullRobotModel;
@@ -63,7 +56,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    private final TDoubleArrayList keyFrameTimes;
 
    public KinematicsPlanningToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel, CommandInputManager commandInputManager,
-                                              StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
+                                              StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                              YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
 
@@ -86,6 +80,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       keyFrameTimes = new TDoubleArrayList();
 
       isDone = new YoBoolean("isDone", parentRegistry);
+
    }
 
    @Override
@@ -119,7 +114,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       if (!updateToolboxConfiguration())
          return false;
 
-      PrintTools.info("Initializing is done");
+      System.out.println("Initializing is done");
       return true;
    }
 
@@ -206,8 +201,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       if (configurationCommand.get() != null)
       {
-         
-         //ikConfigurationMessage.set(configurationCommand.get());
+
       }
       else
       {
@@ -252,41 +246,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    public FullHumanoidRobotModel getDesiredFullRobotModel()
    {
       return desiredFullRobotModel;
-   }
-
-   public static void recursivelyModifyGraphics(JointDescription joint, AppearanceDefinition ghostApperance)
-   {
-      if (joint == null)
-         return;
-      LinkDescription link = joint.getLink();
-      if (link == null)
-         return;
-      LinkGraphicsDescription linkGraphics = link.getLinkGraphics();
-
-      if (linkGraphics != null)
-      {
-         ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructions = linkGraphics.getGraphics3DInstructions();
-
-         if (graphics3dInstructions == null)
-            return;
-
-         for (Graphics3DPrimitiveInstruction primitive : graphics3dInstructions)
-         {
-            if (primitive instanceof Graphics3DInstruction)
-            {
-               Graphics3DInstruction modelInstruction = (Graphics3DInstruction) primitive;
-               modelInstruction.setAppearance(ghostApperance);
-            }
-         }
-      }
-
-      if (joint.getChildrenJoints() == null)
-         return;
-
-      for (JointDescription child : joint.getChildrenJoints())
-      {
-         recursivelyModifyGraphics(child, ghostApperance);
-      }
    }
 
    // TODO : check this method and variable.

@@ -33,7 +33,7 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
             DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
-      kinematicsPlanningToolboxController = new KinematicsPlanningToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager,
+      kinematicsPlanningToolboxController = new KinematicsPlanningToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager, yoGraphicsListRegistry, 
                                                                                     registry);
       commandInputManager.registerConversionHelper(new KinematicsPlanningToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();

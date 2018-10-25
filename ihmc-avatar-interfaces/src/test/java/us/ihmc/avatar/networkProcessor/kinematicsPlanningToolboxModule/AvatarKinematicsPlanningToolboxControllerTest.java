@@ -20,6 +20,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.AvatarHumanoidKinematicsToolboxControllerTest;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -115,7 +116,8 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsPlanningToolboxModule.supportedStatus());
 
-      toolboxController = new KinematicsPlanningToolboxController(robotModel, desiredFullRobotModel, commandInputManager, statusOutputManager, mainRegistry);
+      toolboxController = new KinematicsPlanningToolboxController(robotModel, desiredFullRobotModel, commandInputManager, statusOutputManager,
+                                                                  yoGraphicsListRegistry, mainRegistry);
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       toolboxUpdater = createToolboxUpdater();
@@ -126,7 +128,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
       RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
       robotDescription.setName("Ghost");
-      recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
+      KinematicsToolboxControllerTest.recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
       ghost = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -199,10 +201,11 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       List<Pose3DReadOnly> keyFramePoses = new ArrayList<Pose3DReadOnly>();
       List<Point3DReadOnly> desiredCOMPoints = new ArrayList<Point3DReadOnly>();
 
-      KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector, keyFrameTimes,
-                                                                                                                                  keyFramePoses);
+      KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
+                                                                                                                                          keyFrameTimes,
+                                                                                                                                          keyFramePoses);
       KinematicsPlanningToolboxCenterOfMassMessage comMessage = HumanoidMessageTools.createKinematicsPlanningToolboxCenterOfMassMessage(keyFrameTimes,
-                                                                                                                                desiredCOMPoints);
+                                                                                                                                        desiredCOMPoints);
 
       commandInputManager.submitMessage(endEffectorMessage);
       commandInputManager.submitMessage(comMessage);
@@ -245,26 +248,27 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
          desiredCOMPoints.add(new Point3D());
       }
 
-      KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector, keyFrameTimes,
-                                                                                                                                  keyFramePoses);
+      KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
+                                                                                                                                          keyFrameTimes,
+                                                                                                                                          keyFramePoses);
       KinematicsPlanningToolboxCenterOfMassMessage comMessage = HumanoidMessageTools.createKinematicsPlanningToolboxCenterOfMassMessage(keyFrameTimes,
-                                                                                                                                desiredCOMPoints);
+                                                                                                                                        desiredCOMPoints);
 
       endEffectorMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
       endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
-      
+
       SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
       selectionMatrix.selectZAxis(false);
       comMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
       comMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(1.0));
-      
+
       commandInputManager.submitMessage(endEffectorMessage);
       commandInputManager.submitMessage(comMessage);
 
       RobotConfigurationData robotConfigurationData = AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
       toolboxController.updateCapturabilityBasedStatus(AvatarHumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
-      
+
       int numberOfIterations = 250;
 
       runKinematicsPlanningToolboxController(numberOfIterations);
@@ -287,7 +291,6 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
          for (int i = 0; i < numberOfIterations; i++)
             toolboxUpdater.doControl();
       }
-
    }
 
    private FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration()
@@ -300,41 +303,6 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null, null, null);
       drcPerfectSensorReaderFactory.getSensorReader().read();
       return initialFullRobotModel;
-   }
-
-   public static void recursivelyModifyGraphics(JointDescription joint, AppearanceDefinition ghostApperance)
-   {
-      if (joint == null)
-         return;
-      LinkDescription link = joint.getLink();
-      if (link == null)
-         return;
-      LinkGraphicsDescription linkGraphics = link.getLinkGraphics();
-
-      if (linkGraphics != null)
-      {
-         ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructions = linkGraphics.getGraphics3DInstructions();
-
-         if (graphics3dInstructions == null)
-            return;
-
-         for (Graphics3DPrimitiveInstruction primitive : graphics3dInstructions)
-         {
-            if (primitive instanceof Graphics3DInstruction)
-            {
-               Graphics3DInstruction modelInstruction = (Graphics3DInstruction) primitive;
-               modelInstruction.setAppearance(ghostApperance);
-            }
-         }
-      }
-
-      if (joint.getChildrenJoints() == null)
-         return;
-
-      for (JointDescription child : joint.getChildrenJoints())
-      {
-         recursivelyModifyGraphics(child, ghostApperance);
-      }
    }
 
    private RobotController createToolboxUpdater()
