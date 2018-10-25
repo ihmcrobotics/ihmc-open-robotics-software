@@ -136,7 +136,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    }
 
    @Override
-   protected void updateInternal()
+   public void updateInternal()
    {
       toolboxTime.add(dt);
       if (toolboxTime.getDoubleValue() > 20.0)
@@ -189,7 +189,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    }
 
    @Override
-   protected boolean initialize()
+   public boolean initialize()
    {
       isDone.set(false);
       requestedPlanarRegions.set(false);
@@ -272,7 +272,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    }
 
    @Override
-   protected boolean isDone()
+   public boolean isDone()
    {
       return isDone.getBooleanValue();
    }
