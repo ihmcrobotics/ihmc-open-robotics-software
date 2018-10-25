@@ -580,6 +580,15 @@ public class RemoteFootstepPlannerUIMessagingTest
    {
       FootstepPlannerParameters parameters = new FootstepPlannerParameters()
       {
+
+         private final boolean checkForBodyBoxCollisions = RandomNumbers.nextBoolean(random, 0.5);
+
+         @Override
+         public boolean checkForBodyBoxCollisions()
+         {
+            return checkForBodyBoxCollisions;
+         }
+
          private final double idealWidth = RandomNumbers.nextDouble(random, 0.01, 1.0);
 
          @Override
