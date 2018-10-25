@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -34,8 +35,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 {
    private static final boolean DEBUG_VELOCITY_WITH_FD = false;
 
-   private final boolean runningOnRealRobot;
-
+   private final RobotTarget target;
    private final double estimatorDT;
 
    private final double kinematicsPelvisPositionFilterFreqInHertz;
@@ -73,17 +73,18 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
     * consistent, for instance joint velocity should be in phase with joint
     * position.
     */
-   public ValkyrieStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT, ValkyrieSensorInformation sensorInformation,
+   public ValkyrieStateEstimatorParameters(RobotTarget target, double estimatorDT, ValkyrieSensorInformation sensorInformation,
                                            ValkyrieJointMap jointMap)
    {
-      this.runningOnRealRobot = runningOnRealRobot;
-
+      this.target = target;
       this.estimatorDT = estimatorDT;
 
       this.sensorInformation = sensorInformation;
       this.jointMap = jointMap;
       this.footForceSensorNames = sensorInformation.getFeetForceSensorNames();
       this.wristForceSensorNames = sensorInformation.getWristForceSensorNames();
+
+      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       // Filtering done onboard at 20Hz
       // We might want to try to set them at around 30Hz to see if that gets rid of the shakies in single support when walking.
@@ -224,7 +225,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public boolean isRunningOnRealRobot()
    {
-      return runningOnRealRobot;
+      return target == RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -342,7 +343,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public boolean useIMUsForSpineJointVelocityEstimation()
    {
-      return runningOnRealRobot;
+      return target == RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -389,7 +390,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public boolean requestFootForceSensorCalibrationAtStart()
    {
-      return runningOnRealRobot;
+      return target == RobotTarget.REAL_ROBOT;
    }
 
    @Override

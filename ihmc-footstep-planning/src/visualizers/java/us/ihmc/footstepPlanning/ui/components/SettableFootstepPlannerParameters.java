@@ -25,27 +25,34 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    private final SettableFootstepPlannerCostParameters costParameters;
 
-   public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlanningParameters)
+   public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
-      this.idealFootstepWidth = footstepPlanningParameters.getIdealFootstepWidth();
-      this.idealFootstepLength = footstepPlanningParameters.getIdealFootstepLength();
-      this.maxStepReach = footstepPlanningParameters.getMaximumStepReach();
-      this.maxStepYaw = footstepPlanningParameters.getMaximumStepYaw();
-      this.minStepWidth = footstepPlanningParameters.getMinimumStepWidth();
-      this.minStepLength = footstepPlanningParameters.getMinimumStepLength();
-      this.minStepYaw = footstepPlanningParameters.getMinimumStepYaw();
-      this.maxStepZ = footstepPlanningParameters.getMaximumStepZ();
-      this.maxStepWidth = footstepPlanningParameters.getMaximumStepWidth();
-      this.minFootholdPercent = footstepPlanningParameters.getMinimumFootholdPercent();
-      this.minSurfaceIncline = footstepPlanningParameters.getMinimumSurfaceInclineRadians();
+      this.costParameters = new SettableFootstepPlannerCostParameters(footstepPlannerParameters.getCostParameters());
 
-      this.checkForBodyBoxCollisions = footstepPlanningParameters.checkForBodyBoxCollisions();
-      this.bodyBoxHeight = footstepPlanningParameters.getBodyBoxHeight();
-      this.bodyBoxWidth = footstepPlanningParameters.getBodyBoxWidth();
-      this.bodyBoxDepth = footstepPlanningParameters.getBodyBoxDepth();
-      this.bodyBoxCenterHeight = footstepPlanningParameters.getBodyBoxCenterHeight();
+      set(footstepPlannerParameters);
+   }
 
-      this.costParameters = new SettableFootstepPlannerCostParameters(footstepPlanningParameters.getCostParameters());
+   public void set(FootstepPlannerParameters footstepPlannerParameters)
+   {
+      this.idealFootstepWidth = footstepPlannerParameters.getIdealFootstepWidth();
+      this.idealFootstepLength = footstepPlannerParameters.getIdealFootstepLength();
+      this.maxStepReach = footstepPlannerParameters.getMaximumStepReach();
+      this.maxStepYaw = footstepPlannerParameters.getMaximumStepYaw();
+      this.minStepWidth = footstepPlannerParameters.getMinimumStepWidth();
+      this.minStepLength = footstepPlannerParameters.getMinimumStepLength();
+      this.minStepYaw = footstepPlannerParameters.getMinimumStepYaw();
+      this.maxStepZ = footstepPlannerParameters.getMaximumStepZ();
+      this.maxStepWidth = footstepPlannerParameters.getMaximumStepWidth();
+      this.minFootholdPercent = footstepPlannerParameters.getMinimumFootholdPercent();
+      this.minSurfaceIncline = footstepPlannerParameters.getMinimumSurfaceInclineRadians();
+
+      this.checkForBodyBoxCollisions = footstepPlannerParameters.checkForBodyBoxCollisions();
+      this.bodyBoxHeight = footstepPlannerParameters.getBodyBoxHeight();
+      this.bodyBoxWidth = footstepPlannerParameters.getBodyBoxWidth();
+      this.bodyBoxDepth = footstepPlannerParameters.getBodyBoxDepth();
+      this.bodyBoxCenterHeight = footstepPlannerParameters.getBodyBoxCenterHeight();
+
+      this.costParameters.set(footstepPlannerParameters.getCostParameters());
    }
 
    public void setIdealFootstepWidth(double idealFootstepLength)

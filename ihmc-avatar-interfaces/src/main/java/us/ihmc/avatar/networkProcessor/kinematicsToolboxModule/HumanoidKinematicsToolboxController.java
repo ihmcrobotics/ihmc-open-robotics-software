@@ -167,7 +167,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    }
 
    @Override
-   protected boolean initialize()
+   public boolean initialize()
    {
       if (!super.initialize())
          return false;
@@ -197,7 +197,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    }
 
    @Override
-   protected void updateInternal()
+   public void updateInternal()
    {
       if (commandInputManager.isNewCommandAvailable(HumanoidKinematicsToolboxConfigurationCommand.class))
       {

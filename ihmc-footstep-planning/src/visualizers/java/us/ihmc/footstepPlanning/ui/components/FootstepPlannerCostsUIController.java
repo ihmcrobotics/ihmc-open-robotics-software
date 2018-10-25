@@ -53,6 +53,11 @@ public class FootstepPlannerCostsUIController
       this.messager = messager;
    }
 
+   public void setPlannerParameters(FootstepPlannerParameters parameters)
+   {
+      property.setPlannerParameters(parameters);
+   }
+
    public void setupControls()
    {
       costPerStep.setValueFactory(createLowWeightValueFactory());

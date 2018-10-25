@@ -79,7 +79,7 @@ public abstract class ToolboxController
     * 
     * @param statusMessage the message to publish.
     */
-   protected <S extends Settable<S>> void reportMessage(S statusMessage)
+   public <S extends Settable<S>> void reportMessage(S statusMessage)
    {
       statusOutputManager.reportStatusMessage(statusMessage);
    }
@@ -90,7 +90,7 @@ public abstract class ToolboxController
     * 
     * @return {@code true} if the initialization succeeded, {@code false} otherwise.
     */
-   abstract protected boolean initialize();
+   abstract public boolean initialize();
 
    /**
     * Internal update method that should perform the computation for this toolbox controller. It is
@@ -98,7 +98,7 @@ public abstract class ToolboxController
     * 
     * @throws Exception
     */
-   abstract protected void updateInternal() throws Exception;
+   abstract public void updateInternal() throws Exception;
 
-   abstract protected boolean isDone();
+   abstract public boolean isDone();
 }

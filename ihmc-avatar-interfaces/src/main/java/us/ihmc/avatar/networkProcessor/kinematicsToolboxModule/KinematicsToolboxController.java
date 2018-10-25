@@ -367,7 +367,7 @@ public class KinematicsToolboxController extends ToolboxController
     *         will fail and prevent the user from using this toolbox.
     */
    @Override
-   protected boolean initialize()
+   public boolean initialize()
    {
       userFeedbackCommands.clear();
 
@@ -394,7 +394,7 @@ public class KinematicsToolboxController extends ToolboxController
     * </p>
     */
    @Override
-   protected void updateInternal()
+   public void updateInternal()
    {
       // Updating the reference frames and twist calculator.
       updateTools();
@@ -600,7 +600,7 @@ public class KinematicsToolboxController extends ToolboxController
    }
 
    @Override
-   protected boolean isDone()
+   public boolean isDone()
    {
       // This toolbox should run until if falls asleep.
       return false;

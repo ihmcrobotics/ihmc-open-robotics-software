@@ -199,7 +199,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    }
 
    @Override
-   protected void updateInternal() throws InterruptedException, ExecutionException
+   public void updateInternal() throws InterruptedException, ExecutionException
    {
       currentNumberOfIterations.increment();
 
@@ -608,7 +608,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    }
 
    @Override
-   protected boolean initialize()
+   public boolean initialize()
    {
       isDone.set(false);
 
@@ -799,7 +799,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    }
 
    @Override
-   protected boolean isDone()
+   public boolean isDone()
    {
       return isDone.getBooleanValue();
    }
