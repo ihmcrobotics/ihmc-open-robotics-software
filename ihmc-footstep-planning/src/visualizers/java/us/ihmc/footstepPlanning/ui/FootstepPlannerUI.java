@@ -7,6 +7,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.footstepPlanning.ui.components.*;
 import us.ihmc.footstepPlanning.ui.controllers.*;
@@ -63,13 +65,18 @@ public class FootstepPlannerUI
    @FXML
    private VisualizationController visibilityGraphsUIController;
 
-   public FootstepPlannerUI(Stage primaryStage) throws Exception
+   public FootstepPlannerUI(Stage primaryStage, FootstepPlannerParameters plannerParameters) throws Exception
    {
-      this(primaryStage, new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API));
+      this(primaryStage, new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API), plannerParameters);
       messager.startMessager();
    }
 
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
+   {
+      this(primaryStage, messager, new DefaultFootstepPlanningParameters());
+   }
+
+   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters) throws Exception
    {
       this.primaryStage = primaryStage;
       this.messager = messager;
@@ -79,6 +86,9 @@ public class FootstepPlannerUI
       loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
 
       mainPane = loader.load();
+
+      footstepPlannerCostsUIController.setPlannerParameters(plannerParameters);
+      footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
 
       footstepPlannerMenuUIController.attachMessager(messager);
       statusTabController.attachMessager(messager);
@@ -174,5 +184,10 @@ public class FootstepPlannerUI
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
    {
       return new FootstepPlannerUI(primaryStage, messager);
+   }
+
+   public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters) throws Exception
+   {
+      return new FootstepPlannerUI(primaryStage, messager, plannerParameters);
    }
 }
