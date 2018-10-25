@@ -104,14 +104,13 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       }
 
       if (!findMidStanceFrame(node, previousNode))
-         return false;
+         return true;
 
       tempPoint.setToZero(midStanceFrame);
       tempPoint.changeFrame(worldFrame);
       double roundedX = FootstepNode.round(tempPoint.getX());
       double roundedY = FootstepNode.round(tempPoint.getY());
       List<PlanarRegion> planarRegionList = snapper.getOrCreateBodyCollisionRegions(roundedX, roundedY, tempPoint.getZ());
-//      List<PlanarRegion> planarRegionList = snapper.getOrCreateNearbyRegions(roundedX, roundedY);
 
       if (planarRegionList.size() == 0)
          return true;
@@ -164,7 +163,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
 
    private Point3D getMidPoint(FootstepNode node, FootstepNode previousNode)
    {
-      List<PlanarRegion> nodePlanes = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(node.getX(), node.getY());
+      List<PlanarRegion> nodePlanes = snapper.getOrCreateSteppableRegions(node.getRoundedX(), node.getRoundedY());
       if (nodePlanes.isEmpty())
          return null;
 
@@ -174,11 +173,16 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       if (projectedPoint == null)
          return null;
 
-      List<PlanarRegion> previousNodePlanes = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(previousNode.getX(), previousNode.getY());
+      List<PlanarRegion> previousNodePlanes = snapper.getOrCreateSteppableRegions(previousNode.getRoundedX(), previousNode.getRoundedY());
+      if (previousNodePlanes.isEmpty())
+         return null;
 
       tempPoint.set(previousNode.getRoundedX(), previousNode.getRoundedY(), 0.0);
+
       Point3DReadOnly previousProjectedPoint = PlanarRegionTools.projectPointToPlanesVertically(tempPoint, previousNodePlanes);
 
+      if (previousProjectedPoint == null)
+         return null;
 
       Point3D midPoint = new Point3D();
       midPoint.interpolate(projectedPoint, previousProjectedPoint, 0.5);
