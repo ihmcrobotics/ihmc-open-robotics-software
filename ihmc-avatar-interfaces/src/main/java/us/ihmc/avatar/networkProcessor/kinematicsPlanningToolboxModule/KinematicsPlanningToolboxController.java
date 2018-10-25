@@ -84,7 +84,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    }
 
    @Override
-   protected boolean initialize()
+   public boolean initialize()
    {
       isDone.set(false);
 
@@ -119,13 +119,13 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    }
 
    @Override
-   protected void updateInternal() throws Exception
+   public void updateInternal() throws Exception
    {
 
    }
 
    @Override
-   protected boolean isDone()
+   public boolean isDone()
    {
       return isDone.getBooleanValue();
    }

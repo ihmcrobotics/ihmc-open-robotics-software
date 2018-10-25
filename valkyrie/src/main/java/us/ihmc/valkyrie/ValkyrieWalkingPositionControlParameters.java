@@ -3,6 +3,7 @@ package us.ihmc.valkyrie;
 import java.util.HashMap;
 import java.util.Map;
 
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.PositionControlParameters;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -15,11 +16,15 @@ public class ValkyrieWalkingPositionControlParameters implements PositionControl
 {
    private final Map<String, Double> positionGains = new HashMap<>();
    private final Map<String, Double> derivativeGains = new HashMap<>();
+   private final RobotTarget robotTarget;
    private final ValkyrieJointMap jointMap;
 
-   public ValkyrieWalkingPositionControlParameters(boolean runningOnRealRobot, ValkyrieJointMap jointMap)
+   public ValkyrieWalkingPositionControlParameters(RobotTarget robotTarget, ValkyrieJointMap jointMap)
    {
+      this.robotTarget = robotTarget;
       this.jointMap = jointMap;
+
+      boolean runningOnRealRobot = robotTarget == RobotTarget.REAL_ROBOT;
 
       if (runningOnRealRobot)
       {

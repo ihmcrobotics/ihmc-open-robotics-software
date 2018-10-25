@@ -145,7 +145,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       jointMap = new ValkyrieJointMap();
       contactPointParameters = new ValkyrieContactPointParameters(jointMap, simulationContactPoints);
       sensorInformation = new ValkyrieSensorInformation(target);
-      highLevelControllerParameters = new ValkyrieHighLevelControllerParameters(target == RobotTarget.REAL_ROBOT, jointMap);
+      highLevelControllerParameters = new ValkyrieHighLevelControllerParameters(target, jointMap);
       calibrationParameters = new ValkyrieCalibrationParameters(jointMap);
       InputStream sdf = null;
 
@@ -201,11 +201,10 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
          }
       }
 
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
       planarRegionFootstepPlanningParameters = new ValkyriePlanarRegionFootstepPlannerParameters();
-      capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(runningOnRealRobot);
+      capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(target);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, target);
-      stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
+      stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(target, getEstimatorDT(), sensorInformation, jointMap);
       collisionMeshDefinitionDataHolder = new ValkyrieCollisionMeshDefinitionDataHolder(jointMap);
 
       this.useShapeCollision = useShapeCollision;
