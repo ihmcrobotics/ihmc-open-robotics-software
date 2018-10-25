@@ -528,6 +528,11 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       RobotConfigurationDataFactory.packJointState(robotConfigurationData, Arrays.stream(joints).collect(Collectors.toList()));
       robotConfigurationData.getRootTranslation().set(fullRobotModel.getRootJoint().getTranslationForReading());
       robotConfigurationData.getRootOrientation().set(fullRobotModel.getRootJoint().getRotationForReading());
+      
+      for(int i=0;i<joints.length;i++)
+      {
+         PrintTools.info(""+joints[i] +" "+joints[i].getQ()+" "+joints[i].getqDesired());
+      }
       return robotConfigurationData;
    }
 

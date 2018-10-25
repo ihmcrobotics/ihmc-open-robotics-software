@@ -19,6 +19,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -31,6 +32,8 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -121,10 +124,10 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          configurationCommand.set(command);
       }
 
-      if (!updateToolboxConfiguration())
+      if (!updateInitialRobotConfigurationToIKController())
          return false;
 
-      if (!updateInitialRobotConfigurationToIKController())
+      if (!updateToolboxConfiguration())
          return false;
 
       ikController.updateFootSupportState(true, true);
@@ -136,56 +139,11 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       return true;
    }
 
-   boolean isSolving = false;
-
-   @Override
-   public void updateInternal() throws Exception
-   {
-      if (!isSolving)
-      {
-         submitKeyFrameMessages(0);
-         isSolving = true;
-      }
-      ikController.updateInternal();
-
-      System.out.println("" + ikController.getSolution().getSolutionQuality());
-   }
-
-   @Override
-   public boolean isDone()
-   {
-      return isDone.getBooleanValue();
-   }
-
-   private boolean submitKeyFrameMessages(int indexOfKeyFrame)
-   {
-      for (int i = 0; i < ikRigidBodies.size(); i++)
-      {
-         List<KinematicsToolboxRigidBodyMessage> rigidBodyMessages = ikRigidBodyMessageMap.get(ikRigidBodies.get(i));
-         ikCommandInputManager.submitMessage(rigidBodyMessages.get(indexOfKeyFrame));
-      }
-      ikCommandInputManager.submitMessage(ikCenterOfMassMessages.get(indexOfKeyFrame));
-      ikCommandInputManager.submitMessage(ikConfigurationMessage.get());
-
-      return true;
-   }
-
-   private boolean updateInitialRobotConfigurationToIKController()
-   {
-      RobotConfigurationData currentRobotConfiguration = latestRobotConfigurationDataReference.getAndSet(null);
-      if (currentRobotConfiguration == null)
-         return false;
-
-      ikController.updateRobotConfigurationData(currentRobotConfiguration);
-      return true;
-   }
-
    private boolean updateToolboxConfiguration()
    {
       if (rigidBodyCommands.size() == 0)
          new Exception(this.getClass().getSimpleName() + " needs at least one KinematicsPlanningToolboxRigidBodyMessage.");
 
-      // clear
       ikRigidBodies.clear();
       ikRigidBodyMessageMap.clear();
       ikCenterOfMassMessages.clear();
@@ -255,18 +213,103 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       }
       else
       {
-         ikConfigurationMessage.set(KinematicsToolboxMessageFactory.privilegedConfigurationFromFullRobotModel(getDesiredFullRobotModel(), false));
+         // TODO : implement please.
+         //ikConfigurationMessage.set(KinematicsToolboxMessageFactory.privilegedConfigurationFromFullRobotModel(getDesiredFullRobotModel(), false));
       }
 
       return true;
    }
 
+   int tempTerminalIteration = 30;
+   int tempCurrentIteration = 30;
+   int tempCurrentIndexOfKeyFrame = -1;
+
+   @Override
+   public void updateInternal() throws Exception
+   {
+      if (ikSolved())
+      {
+         updateRobotConfigurationFromIKController();
+
+         tempCurrentIndexOfKeyFrame++;
+         submitKeyFrameMessages(tempCurrentIndexOfKeyFrame);
+      }
+      else
+      {
+         ikController.updateInternal();
+      }
+         
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      return isDone.getBooleanValue();
+   }
+
+   // TODO : analyze solution quality curve.
+   private boolean ikSolved()
+   {
+      if (tempCurrentIteration == tempTerminalIteration)
+      {
+         tempCurrentIteration = 0;
+         return true;
+      }
+      else
+      {
+         tempCurrentIteration++;
+         return false;
+      }
+   }
+
+   private boolean submitKeyFrameMessages(int indexOfKeyFrame)
+   {
+      for (int i = 0; i < ikRigidBodies.size(); i++)
+      {
+         List<KinematicsToolboxRigidBodyMessage> rigidBodyMessages = ikRigidBodyMessageMap.get(ikRigidBodies.get(i));
+         ikCommandInputManager.submitMessage(rigidBodyMessages.get(indexOfKeyFrame));
+      }
+      ikCommandInputManager.submitMessage(ikCenterOfMassMessages.get(indexOfKeyFrame));
+      ikCommandInputManager.submitMessage(ikConfigurationMessage.get());
+
+      return true;
+   }
+
+   private void updateRobotConfigurationFromIKController()
+   {
+      ikController.getSolution();
+
+      // TODO
+      // bring robot configuration from ikcontroller.
+      //      RobotConfigurationData keyFrameRobotConfiguration = new RobotConfigurationData();
+      //      latestRobotConfigurationDataReference.set(keyFrameRobotConfiguration);
+   }
+
+   // TODO 
+   private void addRobotConfigurationOnSolution()
+   {
+      // add on output status.
+   }
+
+   private boolean updateInitialRobotConfigurationToIKController()
+   {
+      RobotConfigurationData currentRobotConfiguration = latestRobotConfigurationDataReference.getAndSet(null);
+      if (currentRobotConfiguration == null)
+      {
+         System.out.println("latestRobotConfigurationDataReference should be set up.");
+         return false;
+      }
+
+      ikController.updateRobotConfigurationData(currentRobotConfiguration);
+      return true;
+   }
+
    private boolean checkKeyFrameTimes(KinematicsPlanningToolboxRigidBodyCommand command)
    {
-      if (command.getNumberOfWayPoints() != keyFrameTimes.size())
+      if (command.getNumberOfWayPoints() != getNumberOfKeyFrames())
          return false;
-      for (int i = 0; i < keyFrameTimes.size(); i++)
-         if (!EuclidCoreTools.epsilonEquals(command.getWayPointTime(i), keyFrameTimes.size(), keyFrameTimeEpsilon))
+      for (int i = 0; i < getNumberOfKeyFrames(); i++)
+         if (!EuclidCoreTools.epsilonEquals(command.getWayPointTime(i), keyFrameTimes.get(i), keyFrameTimeEpsilon))
             return false;
 
       return true;
@@ -274,10 +317,10 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
    private boolean checkKeyFrameTimes(KinematicsPlanningToolboxCenterOfMassCommand command)
    {
-      if (command.getNumberOfWayPoints() != keyFrameTimes.size())
+      if (command.getNumberOfWayPoints() != getNumberOfKeyFrames())
          return false;
-      for (int i = 0; i < keyFrameTimes.size(); i++)
-         if (!EuclidCoreTools.epsilonEquals(command.getWayPointTime(i), keyFrameTimes.size(), keyFrameTimeEpsilon))
+      for (int i = 0; i < getNumberOfKeyFrames(); i++)
+         if (!EuclidCoreTools.epsilonEquals(command.getWayPointTime(i), keyFrameTimes.get(i), keyFrameTimeEpsilon))
             return false;
 
       return true;

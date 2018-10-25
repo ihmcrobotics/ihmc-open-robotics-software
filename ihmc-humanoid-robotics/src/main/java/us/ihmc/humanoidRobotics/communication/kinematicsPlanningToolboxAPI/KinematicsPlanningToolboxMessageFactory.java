@@ -29,10 +29,9 @@ public class KinematicsPlanningToolboxMessageFactory
    {
       List<Pose3DReadOnly> currentPoses = new ArrayList<Pose3DReadOnly>();
       for (int i = 0; i < keyFrameTimes.size(); i++)
-         currentPoses.add(new Pose3D());
-      KinematicsPlanningToolboxRigidBodyMessage message = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(rigidBody,
-                                                                                                                               rigidBody.getBodyFixedFrame(),
-                                                                                                                               keyFrameTimes, currentPoses);
+         currentPoses.add(new Pose3D(rigidBody.getBodyFixedFrame().getTransformToWorldFrame()));
+      KinematicsPlanningToolboxRigidBodyMessage message = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(rigidBody, keyFrameTimes,
+                                                                                                                               currentPoses);
 
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
