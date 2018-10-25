@@ -64,12 +64,11 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       this.jointMap = jointMap;
       this.target = target;
 
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-      legConfigurationParameters = new ValkyrieLegConfigurationParameters(runningOnRealRobot);
-      toeOffParameters = new ValkyrieToeOffParameters(runningOnRealRobot);
+      legConfigurationParameters = new ValkyrieLegConfigurationParameters(target);
+      toeOffParameters = new ValkyrieToeOffParameters(target);
       swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
       steppingParameters = new ValkyrieSteppingParameters(target);
-      icpOptimizationParameters = new ValkyrieICPOptimizationParameters(runningOnRealRobot);
+      icpOptimizationParameters = new ValkyrieICPOptimizationParameters(target);
 
       // Generated using ValkyrieFullRobotModelVisualizer
       RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
