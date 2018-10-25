@@ -17,7 +17,7 @@ public interface FootstepPlannerParameters
     */
    default boolean checkForBodyBoxCollisions()
    {
-      return true;
+      return false;
    }
 
    /**
