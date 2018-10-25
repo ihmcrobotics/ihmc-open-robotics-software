@@ -14,6 +14,10 @@ import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -55,6 +59,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    private final static double keyFrameTimeEpsilon = 0.01;
    private final TDoubleArrayList keyFrameTimes;
 
+   private final HumanoidKinematicsToolboxController ikController;
+   private final CommandInputManager ikCommandInputManager = new CommandInputManager(getClass().getSimpleName(), KinematicsToolboxModule.supportedCommands());
+
    public KinematicsPlanningToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel, CommandInputManager commandInputManager,
                                               StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoVariableRegistry parentRegistry)
@@ -81,6 +88,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       isDone = new YoBoolean("isDone", parentRegistry);
 
+      ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
+      ikController = new HumanoidKinematicsToolboxController(ikCommandInputManager, statusOutputManager, fullRobotModel, yoGraphicsListRegistry,
+                                                             parentRegistry);
    }
 
    @Override
@@ -114,20 +124,60 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       if (!updateToolboxConfiguration())
          return false;
 
+      if (!updateInitialRobotConfigurationToIKController())
+         return false;
+
+      ikController.updateFootSupportState(true, true);
+      boolean initialized = ikController.initialize();
+      if (!initialized)
+         throw new RuntimeException("Could not initialize the " + KinematicsToolboxController.class.getSimpleName());
+
       System.out.println("Initializing is done");
       return true;
    }
 
+   boolean isSolving = false;
+
    @Override
    public void updateInternal() throws Exception
    {
+      if (!isSolving)
+      {
+         submitKeyFrameMessages(0);
+         isSolving = true;
+      }
+      ikController.updateInternal();
 
+      System.out.println("" + ikController.getSolution().getSolutionQuality());
    }
 
    @Override
    public boolean isDone()
    {
       return isDone.getBooleanValue();
+   }
+
+   private boolean submitKeyFrameMessages(int indexOfKeyFrame)
+   {
+      for (int i = 0; i < ikRigidBodies.size(); i++)
+      {
+         List<KinematicsToolboxRigidBodyMessage> rigidBodyMessages = ikRigidBodyMessageMap.get(ikRigidBodies.get(i));
+         ikCommandInputManager.submitMessage(rigidBodyMessages.get(indexOfKeyFrame));
+      }
+      ikCommandInputManager.submitMessage(ikCenterOfMassMessages.get(indexOfKeyFrame));
+      ikCommandInputManager.submitMessage(ikConfigurationMessage.get());
+
+      return true;
+   }
+
+   private boolean updateInitialRobotConfigurationToIKController()
+   {
+      RobotConfigurationData currentRobotConfiguration = latestRobotConfigurationDataReference.getAndSet(null);
+      if (currentRobotConfiguration == null)
+         return false;
+
+      ikController.updateRobotConfigurationData(currentRobotConfiguration);
+      return true;
    }
 
    private boolean updateToolboxConfiguration()
@@ -248,7 +298,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       return desiredFullRobotModel;
    }
 
-   // TODO : check this method and variable.
    public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
       latestRobotConfigurationDataReference.set(newConfigurationData);
