@@ -84,7 +84,7 @@ public interface FootstepPlanner
 
    double getPlanningDuration();
 
-   default PlannerStatistics getPlannerStatistics()
+   default PlannerStatistics<?> getPlannerStatistics()
    {
       return null;
    }
