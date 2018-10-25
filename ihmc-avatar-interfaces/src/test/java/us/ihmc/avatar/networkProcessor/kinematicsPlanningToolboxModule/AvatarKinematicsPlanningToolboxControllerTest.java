@@ -39,6 +39,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -230,7 +231,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       double trajectoryTime = 5.0;
       int numberOfKeyFrames = 10;
       FramePose3D initialPose = new FramePose3D(endEffector.getBodyFixedFrame());
-      FramePose3D desiredPose = new FramePose3D(endEffector.getBodyFixedFrame(), new Point3D(0.1, 0.1, 0.6), new AxisAngle(0.0, 1.0, 0.0, -0.5 * Math.PI));
+      FramePose3D desiredPose = new FramePose3D(endEffector.getBodyFixedFrame(), new Point3D(0.1, 0.1, 0.6), new AxisAngle(1.0, 0.0, 0.0, 0.5 * Math.PI));
       initialPose.changeFrame(worldFrame);
       desiredPose.changeFrame(worldFrame);
 
@@ -240,12 +241,13 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       for (int i = 0; i < numberOfKeyFrames; i++)
       {
-         double alpha = i / (double) (numberOfKeyFrames - 1);
+         double alpha = (i + 1) / (double) (numberOfKeyFrames);
          keyFrameTimes.add(alpha * trajectoryTime);
          Pose3D pose = new Pose3D(initialPose);
          pose.interpolate(desiredPose, alpha);
          keyFramePoses.add(pose);
          desiredCOMPoints.add(new Point3D());
+         System.out.println(pose);
       }
 
       KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
@@ -265,11 +267,15 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       commandInputManager.submitMessage(endEffectorMessage);
       commandInputManager.submitMessage(comMessage);
 
+      KinematicsPlanningToolboxRigidBodyMessage holdAnotherHandMessage = KinematicsPlanningToolboxMessageFactory.holdRigidBodyCurrentPose(initialFullRobotModel.getHand(robotSide.getOppositeSide()),
+                                                                                                                                          keyFrameTimes);
+      commandInputManager.submitMessage(holdAnotherHandMessage);
+
       RobotConfigurationData robotConfigurationData = AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
       toolboxController.updateCapturabilityBasedStatus(AvatarHumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
 
-      int numberOfIterations = 250;
+      int numberOfIterations = 350;
 
       runKinematicsPlanningToolboxController(numberOfIterations);
 
