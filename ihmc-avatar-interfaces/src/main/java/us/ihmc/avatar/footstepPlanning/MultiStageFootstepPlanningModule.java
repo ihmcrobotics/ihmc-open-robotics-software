@@ -3,7 +3,6 @@ package us.ihmc.avatar.footstepPlanning;
 import com.google.common.base.CaseFormat;
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxController;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
@@ -13,9 +12,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -29,14 +26,10 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MultiStageFootstepPlanningToolboxModule
+public class MultiStageFootstepPlanningModule
 {
    private static final boolean DEBUG = false;
    private static final double YO_VARIABLE_SERVER_DT = 0.01;
@@ -61,10 +54,10 @@ public class MultiStageFootstepPlanningToolboxModule
    private final boolean startYoVariableServer;
    private final YoVariableServer yoVariableServer;
 
-   private final MutiStageFootstepPlanningController footstepPlanningController;
+   private final MultiStageFootstepPlanningController footstepPlanningController;
 
-   public MultiStageFootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer,
-                                                  DomainFactory.PubSubImplementation pubSubImplementation)
+   public MultiStageFootstepPlanningModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer,
+                                           DomainFactory.PubSubImplementation pubSubImplementation)
    {
       this.robotName = drcRobotModel.getSimpleRobotName();
 
@@ -85,11 +78,14 @@ public class MultiStageFootstepPlanningToolboxModule
 
       timeWithoutInputsBeforeGoingToSleep.set(Double.POSITIVE_INFINITY);
 
-      footstepPlanningController = new MutiStageFootstepPlanningController(drcRobotModel.getContactPointParameters(),
-                                                                           drcRobotModel.getFootstepPlannerParameters(), statusOutputManager, executorService,
-                                                                           registry, yoGraphicsListRegistry,
-                                                                           Conversions.millisecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
+      footstepPlanningController = new MultiStageFootstepPlanningController(drcRobotModel.getContactPointParameters(),
+                                                                            drcRobotModel.getFootstepPlannerParameters(), statusOutputManager, executorService,
+                                                                            registry, yoGraphicsListRegistry,
+                                                                            Conversions.millisecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
 
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class,
+                                           FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
+                                           s -> receivedPacket(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningRequestPacket.class,
                                            FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
                                            s -> footstepPlanningController.processRequest(s.takeNextData()));
@@ -183,10 +179,4 @@ public class MultiStageFootstepPlanningToolboxModule
       if (DEBUG)
          PrintTools.debug(this, "Destroyed");
    }
-
-   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
-   {
-      return FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName);
-   }
-
 }

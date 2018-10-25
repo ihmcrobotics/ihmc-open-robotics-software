@@ -1,7 +1,6 @@
 package us.ihmc.avatar.footstepPlanning;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -9,29 +8,14 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
-import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
-import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
@@ -41,7 +25,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -50,16 +33,14 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class MutiStageFootstepPlanningController
+public class MultiStageFootstepPlanningController
 {
    private static final boolean debug = false;
 
@@ -80,9 +61,20 @@ public class MutiStageFootstepPlanningController
 
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
-   private final List<FootstepPlanningStage> planningStages = new ArrayList<>();
-   private final List<ScheduledFuture<?>> toolboxTasksScheduled = new ArrayList<>();
+   private final List<FootstepPlanningStage> allPlanningStages = new ArrayList<>();
+   private final List<FootstepPlanningStage> availablePlanningStages = new ArrayList<>();
+   private final List<FootstepPlanningStage> planningStagesInProgress = new ArrayList<>();
 
+   private final List<ScheduledFuture<?>> scheduledStages = new ArrayList<>();
+
+   private final List<FootstepPlanningResult> completedPathResults = new ArrayList<>();
+   private final List<FootstepPlanningResult> completedStepResults = new ArrayList<>();
+
+   private final List<BodyPathPlan> completedPathPlans = new ArrayList<>();
+   private final List<FootstepPlan> completedFootstepPlans = new ArrayList<>();
+
+   private Runnable thisRunnable = null;
+   private ScheduledFuture<?> thisScheduledTask = null;
 
    private double dt;
 
@@ -95,9 +87,10 @@ public class MutiStageFootstepPlanningController
    private final ScheduledExecutorService executorService;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
-   public MutiStageFootstepPlanningController(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
-                                              StatusMessageOutputManager statusOutputManager, ScheduledExecutorService executorService, YoVariableRegistry parentRegistry,
-                                              YoGraphicsListRegistry graphicsListRegistry, double dt)
+   public MultiStageFootstepPlanningController(RobotContactPointParameters<RobotSide> contactPointParameters,
+                                               FootstepPlannerParameters footstepPlannerParameters, StatusMessageOutputManager statusOutputManager,
+                                               ScheduledExecutorService executorService, YoVariableRegistry parentRegistry,
+                                               YoGraphicsListRegistry graphicsListRegistry, double dt)
    {
       this.contactPointParameters = contactPointParameters;
       this.statusOutputManager = statusOutputManager;
@@ -105,7 +98,6 @@ public class MutiStageFootstepPlanningController
       this.executorService = executorService;
       this.graphicsListRegistry = graphicsListRegistry;
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerToolboxPlanarRegions", 200, 30, registry);
-
 
       footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
 
@@ -123,7 +115,6 @@ public class MutiStageFootstepPlanningController
    {
       return new FootstepPlanningStage(contactPointParameters, footstepPlanningParameters, activePlanner, registry, graphicsListRegistry, dt);
    }
-
 
    private FootstepPlannerStatusMessage packStatus(FootstepPlannerStatus status)
    {
@@ -158,6 +149,35 @@ public class MutiStageFootstepPlanningController
       initialize.set(true);
    }
 
+   private void createPlanningStage()
+   {
+      if (!planningStagesInProgress.isEmpty())
+      {
+         if (debug)
+            PrintTools.error(this, "toolboxRunnable is not null.");
+         return;
+      }
+
+      FootstepPlanningStage stage = createFootstepPlanningStage();
+      planningStagesInProgress.add(stage);
+      allPlanningStages.add(stage);
+   }
+
+   private void updateStageStatus()
+   {
+      for (FootstepPlanningStage stage : planningStagesInProgress)
+      {
+         if (stage.donePlanningSteps())
+         {
+            completedPathPlans.add(stage.getPathPlan());
+            completedFootstepPlans.add(stage.getPlan());
+
+            availablePlanningStages.add(stage);
+            planningStagesInProgress.remove(stage);
+         }
+      }
+   }
+
    /**
     * Initializes once and run the {@link #updateInternal()} of this toolbox controller only if the
     * initialization succeeded.
@@ -166,72 +186,14 @@ public class MutiStageFootstepPlanningController
     */
    public void update()
    {
-      if (initialize.getBooleanValue())
+      if (!hasBeenInitialized())
       {
          if (!initialize()) // Return until the initialization succeeds
             return;
          initialize.set(false);
       }
 
-         updateInternal();
-   }
-
-   /**
-    * Internal update method that should perform the computation for this toolbox controller. It is
-    * called only if {@link #initialize()} has succeeded.
-    *
-    * @throws Exception
-    */
-   protected void updateInternal()
-   {
-      toolboxTime.add(dt);
-      if (toolboxTime.getDoubleValue() > 20.0)
-      {
-         if (debug)
-            PrintTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
-         reportMessage(packStepResult(null, null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION, -1.0));
-         isDone.set(true);
-         return;
-      }
-
-      FootstepPlanner planner = planningStages.get(0);
-
-      if (planarRegionsList.isPresent())
-      {
-         planner.setPlanarRegions(planarRegionsList.get());
-         yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegionsList.get());
-         yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
-      }
-      else
-      {
-         planner.setPlanarRegions(null);
-         yoGraphicPlanarRegionsList.clear();
-      }
-
-      sendMessageToUI("Starting To Plan: " + planId.getIntegerValue() + ", " + activePlanner.getEnumValue().toString());
-
-      reportMessage(packStatus(FootstepPlannerStatus.PLANNING_PATH));
-
-      FootstepPlanningResult status = planner.planPath();
-
-      BodyPathPlan bodyPathPlan = null;
-      if (status.validForExecution())
-      {
-         bodyPathPlan = planner.getPathPlan();
-         reportMessage(packStatus(FootstepPlannerStatus.PLANNING_STEPS));
-         reportMessage(packPathResult(bodyPathPlan, status));
-
-         status = planner.plan();
-      }
-
-      FootstepPlan footstepPlan = planner.getPlan();
-
-      sendMessageToUI("Result: " + planId.getIntegerValue() + ", " + status.toString());
-
-      reportMessage(packStepResult(footstepPlan, bodyPathPlan, status, planner.getPlanningDuration()));
-      reportMessage(packStatus(FootstepPlannerStatus.IDLE));
-
-      isDone.set(true);
+      updateInternal();
    }
 
    /**
@@ -240,7 +202,7 @@ public class MutiStageFootstepPlanningController
     *
     * @return {@code true} if the initialization succeeded, {@code false} otherwise.
     */
-   protected boolean initialize()
+   private boolean initialize()
    {
       isDone.set(false);
       requestedPlanarRegions.set(false);
@@ -286,7 +248,7 @@ public class MutiStageFootstepPlanningController
       goalPose.setPosition(new Point3D(request.getGoalPositionInWorld()));
       goalPose.setOrientation(new Quaternion(request.getGoalOrientationInWorld()));
 
-      FootstepPlanner planner = planningStages.get(0);
+      FootstepPlanner planner = planningStagesInProgress.get(0);
       planner.setInitialStanceFoot(initialStancePose, RobotSide.fromByte(request.getInitialStanceRobotSide()));
 
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
@@ -315,6 +277,62 @@ public class MutiStageFootstepPlanningController
       }
 
       return true;
+   }
+
+   /**
+    * Internal update method that should perform the computation for this toolbox controller. It is
+    * called only if {@link #initialize()} has succeeded.
+    */
+   private void updateInternal()
+   {
+      toolboxTime.add(dt);
+      if (toolboxTime.getDoubleValue() > 20.0)
+      {
+         if (debug)
+            PrintTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
+         statusOutputManager.reportStatusMessage(packStepResult(null, null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION, -1.0));
+         isDone.set(true);
+         return;
+      }
+
+      FootstepPlanner planner = planningStagesInProgress.get(0);
+
+      if (planarRegionsList.isPresent())
+      {
+         planner.setPlanarRegions(planarRegionsList.get());
+         yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegionsList.get());
+         yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
+      }
+      else
+      {
+         planner.setPlanarRegions(null);
+         yoGraphicPlanarRegionsList.clear();
+      }
+
+      sendMessageToUI("Starting To Plan: " + planId.getIntegerValue() + ", " + activePlanner.getEnumValue().toString());
+
+      statusOutputManager.reportStatusMessage(packStatus(FootstepPlannerStatus.PLANNING_PATH));
+
+      FootstepPlanningResult status = planner.planPath();
+
+      BodyPathPlan bodyPathPlan = null;
+      if (status.validForExecution())
+      {
+         bodyPathPlan = planner.getPathPlan();
+         statusOutputManager.reportStatusMessage(packStatus(FootstepPlannerStatus.PLANNING_STEPS));
+         statusOutputManager.reportStatusMessage(packPathResult(bodyPathPlan, status));
+
+         status = planner.plan();
+      }
+
+      FootstepPlan footstepPlan = planner.getPlan();
+
+      sendMessageToUI("Result: " + planId.getIntegerValue() + ", " + status.toString());
+
+      statusOutputManager.reportStatusMessage(packStepResult(footstepPlan, bodyPathPlan, status, planner.getPlanningDuration()));
+      statusOutputManager.reportStatusMessage(packStatus(FootstepPlannerStatus.IDLE));
+
+      isDone.set(true);
    }
 
    private void sendMessageToUI(String message)
@@ -350,7 +368,8 @@ public class MutiStageFootstepPlanningController
       return result;
    }
 
-   private FootstepPlanningToolboxOutputStatus packStepResult(FootstepPlan footstepPlan, BodyPathPlan bodyPathPlan, FootstepPlanningResult status, double timeTaken)
+   private FootstepPlanningToolboxOutputStatus packStepResult(FootstepPlan footstepPlan, BodyPathPlan bodyPathPlan, FootstepPlanningResult status,
+                                                              double timeTaken)
    {
       if (debug)
       {
@@ -385,7 +404,6 @@ public class MutiStageFootstepPlanningController
       return result;
    }
 
-
    public void processRequest(FootstepPlanningRequestPacket request)
    {
       latestRequestReference.set(request);
@@ -398,7 +416,7 @@ public class MutiStageFootstepPlanningController
 
    public void processPlanningStatisticsRequest()
    {
-      FootstepPlanner planner = planningStages.get(0);
+      FootstepPlanner planner = planningStagesInProgress.get(0);
       sendPlannerStatistics(planner.getPlannerStatistics());
    }
 
@@ -410,7 +428,8 @@ public class MutiStageFootstepPlanningController
          sendListOfStatistics((ListOfStatistics) plannerStatistics);
          break;
       case VISIBILITY_GRAPH:
-         reportMessage(VisibilityGraphMessagesConverter.convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(), (VisibilityGraphStatistics) plannerStatistics));
+         reportMessage(VisibilityGraphMessagesConverter
+                             .convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(), (VisibilityGraphStatistics) plannerStatistics));
          break;
       }
    }
@@ -420,7 +439,6 @@ public class MutiStageFootstepPlanningController
       while (listOfStatistics.getNumberOfStatistics() > 0)
          sendPlannerStatistics(listOfStatistics.pollStatistics());
    }
-
 
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> publisher)
    {
@@ -445,18 +463,22 @@ public class MutiStageFootstepPlanningController
 
    public void wakeUp()
    {
-      if (!toolboxTasksScheduled.isEmpty())
+      if (thisScheduledTask != null && !scheduledStages.isEmpty())
       {
          if (debug)
-            PrintTools.error(this, "This toolbox is already running.");
+            PrintTools.error(this, "This planner is already running.");
          return;
       }
 
       if (debug)
          PrintTools.debug(this, "Waking up");
 
-      createToolboxRunnable();
-      toolboxTasksScheduled.add(executorService.scheduleAtFixedRate(planningStages.get(0), 0, (long) Conversions.secondsToMilliseconds(dt), TimeUnit.MILLISECONDS));
+      createPlannerRunnable();
+      thisScheduledTask = executorService.scheduleAtFixedRate(thisRunnable, 0, (long) Conversions.secondsToMilliseconds(dt), TimeUnit.MILLISECONDS);
+
+      createPlanningStage();
+      //      scheduledStages
+      //            .add(executorService.scheduleAtFixedRate(planningStagesInProgress.get(0), 0, (long) dt, TimeUnit.SECONDS));
       reinitialize();
    }
 
@@ -465,17 +487,33 @@ public class MutiStageFootstepPlanningController
       if (debug)
          PrintTools.debug(this, "Going to sleep");
 
-      planningStages.clear();
+      thisRunnable = null;
 
-      if (toolboxTasksScheduled.isEmpty())
+      planningStagesInProgress.clear();
+
+      if (scheduledStages.isEmpty())
+      {
+         if (debug)
+            PrintTools.error(this, "There are no stages running.");
+      }
+      else
+      {
+         while (!scheduledStages.isEmpty())
+            scheduledStages.remove(0).cancel(true);
+      }
+
+      if (thisScheduledTask == null)
       {
          if (debug)
             PrintTools.error(this, "There is no task running.");
          return;
       }
+      else
+      {
+         thisScheduledTask.cancel(true);
+         thisScheduledTask = null;
+      }
 
-      while (!toolboxTasksScheduled.isEmpty())
-         toolboxTasksScheduled.remove(0).cancel(true);
    }
 
    public void destroy()
@@ -486,15 +524,44 @@ public class MutiStageFootstepPlanningController
          PrintTools.debug(this, "Destroyed");
    }
 
-   private void createToolboxRunnable()
+   private void createPlannerRunnable()
    {
-      if (!planningStages.isEmpty())
+      if (thisRunnable != null)
       {
          if (debug)
-            PrintTools.error(this, "toolboxRunnable is not null.");
+            PrintTools.error(this, "This planning runnable is not null.");
          return;
       }
 
-      planningStages.add(createFootstepPlanningStage());
+      thisRunnable = new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            if (Thread.interrupted())
+               return;
+
+            try
+            {
+               //               updateStageStatus();
+               update();
+               //               yoTime.add(Conversions.millisecondsToSeconds(updatePeriodMilliseconds));
+
+               //               if (receivedInput.getAndSet(false))
+               //                  timeOfLastInput.set(yoTime.getDoubleValue());
+               //               if (yoTime.getDoubleValue() - timeOfLastInput.getDoubleValue() >= timeWithoutInputsBeforeGoingToSleep.getDoubleValue())
+               //                  sleep();
+               if (isDone())
+                  sleep();
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+               sleep();
+               throw e;
+            }
+         }
+      };
    }
+
 }
