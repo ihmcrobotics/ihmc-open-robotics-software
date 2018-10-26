@@ -197,6 +197,8 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       for (int i = 0; i < allFeet.size(); i++)
          areFeetTrusted.get(allFeet.get(i)).setWindowSize(windowSize);
 
+      boolean isStanding = robotMotionStatusFromController.getCurrentRobotMotionStatus() == RobotMotionStatus.STANDING;
+
       for (int i = 0; i < numberOfFeet; i++)
       {
          RigidBody foot = allFeet.get(i);
@@ -205,9 +207,9 @@ public class IMUYawDriftEstimator implements YawDriftProvider
          boolean hasFootHitGround;
 
          if (estimateWhenControllerIsStanding.getValue())
-            hasFootHitGround = robotMotionStatusFromController.getCurrentRobotMotionStatus() == RobotMotionStatus.STANDING;
+            hasFootHitGround = isStanding;
          else
-            hasFootHitGround = footSwitches.get(foot).hasFootHitGround();
+            hasFootHitGround = isStanding && footSwitches.get(foot).hasFootHitGround();
 
          boolean isFootStatic = currentFootLinearVelocities.get(foot).getDoubleValue() < footLinearVelocityThreshold.getValue();
 
