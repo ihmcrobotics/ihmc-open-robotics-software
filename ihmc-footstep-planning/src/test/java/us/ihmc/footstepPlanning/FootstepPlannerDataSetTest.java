@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.commons.Conversions;
@@ -26,7 +27,7 @@ import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -169,71 +170,43 @@ public abstract class FootstepPlannerDataSetTest
    protected void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner, List<FootstepPlannerUnitTestDataset> allDatasets)
    {
       if (VERBOSE || DEBUG)
-      {
          PrintTools.info("Unit test files found: " + allDatasets.size());
-      }
 
-      int numberOfFailingDatasets = 0;
-      int numberOfTotalDatasets = 0;
-      String errorMessages = "";
-
-      int currentDatasetIndex = 0;
       if (allDatasets.isEmpty())
          Assert.fail("Did not find any datasets to test.");
 
-      // Randomizing the regionIds so the viz is better
-      Random random = new Random(324);
-      allDatasets.stream().map(FootstepPlannerUnitTestDataset::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
-                 .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
-
-      FootstepPlannerUnitTestDataset dataset = allDatasets.get(currentDatasetIndex);
-
-      ThreadTools.sleep(200);
-
-      List<String> dataSetNames = new ArrayList<>();
-      while (dataset != null)
+      List<Pair<String, String>> failingTestNameAndErrorList = new ArrayList<>();
+      for (int i = 0; i < allDatasets.size(); i++)
       {
+         FootstepPlannerUnitTestDataset dataset = allDatasets.get(i);
          if (DEBUG || VERBOSE)
-         {
-            PrintTools.info("Processing file: " + dataset.getDatasetName());
-         }
+            PrintTools.info("Testing file: " + dataset.getDatasetName());
 
-         boolean hasType = false;
-         for (FootstepPlannerType type : dataset.getTypes())
+         if(!dataset.getTypes().contains(getPlannerType()))
          {
-            if (getPlannerType() == type)
-               hasType = true;
+            if(DEBUG || VERBOSE)
+               PrintTools.info(dataset.getDatasetName() + " does not contain planner type " + getPlannerType() + ", skipping");
+            continue;
          }
 
          resetAllAtomics();
-
-         ThreadTools.sleep(500);
-
-         if (hasType)
+         String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
+         if (!errorMessagesForCurrentFile.isEmpty())
          {
-            dataSetNames.add(dataset.getDatasetName());
-            String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
-            if (!errorMessagesForCurrentFile.isEmpty())
-               numberOfFailingDatasets++;
-            errorMessages += errorMessagesForCurrentFile;
-            numberOfTotalDatasets++;
+            failingTestNameAndErrorList.add(Pair.of(dataset.getDatasetName(), errorMessagesForCurrentFile));
          }
 
-         currentDatasetIndex++;
-         if (currentDatasetIndex < allDatasets.size())
-            dataset = allDatasets.get(currentDatasetIndex);
-         else
-            dataset = null;
+         if (DEBUG || VERBOSE)
+         {
+            String result = errorMessagesForCurrentFile.isEmpty() ? "passed" : "failed";
+            PrintTools.info(dataset.getDatasetName() + " " + result);
+         }
 
          ThreadTools.sleep(500); // Apparently need to give some time for the prints to appear in the right order.
       }
 
-      Assert.assertTrue("Number of failing datasets: " + numberOfFailingDatasets + " out of " + numberOfTotalDatasets + ". Errors:" + errorMessages,
-                        errorMessages.isEmpty());
-
-      PrintTools.info("Tests ran: ");
-      for (String name : dataSetNames)
-         PrintTools.info(name);
+      Assert.assertTrue("Number of failing datasets: " + failingTestNameAndErrorList.size() + " out of " + allDatasets.size(),
+                        failingTestNameAndErrorList.isEmpty());
    }
 
    public String runAssertions(FootstepPlannerUnitTestDataset dataset)
