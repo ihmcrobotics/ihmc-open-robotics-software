@@ -10,8 +10,6 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
 
@@ -48,9 +46,6 @@ public abstract class MessagerPlannerDataSetTest extends FootstepPlannerDataSetT
       if (ui != null)
          ui.stop();
       ui = null;
-
-      uiReceivedPlan = null;
-      uiReceivedResult = null;
 
       uiFootstepPlanReference = null;
       uiPlanningResultReference = null;
