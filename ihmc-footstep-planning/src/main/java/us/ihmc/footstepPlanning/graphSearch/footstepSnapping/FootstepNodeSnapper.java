@@ -21,7 +21,7 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
    private static final double proximityForPlanarRegionsNearby = 2.0;
 
    private final HashMap<FootstepNode, FootstepNodeSnapData> snapDataHolder = new HashMap<>();
-   private PlanarRegionsList planarRegionsList;
+   protected PlanarRegionsList planarRegionsList;
    private final TIntObjectMap<List<PlanarRegion>> nearbyPlanarRegions = new TIntObjectHashMap<>();
    private final TIntObjectMap<List<PlanarRegion>> bodyCollisionPlanarRegions = new TIntObjectHashMap<>();
    private final TIntObjectMap<List<PlanarRegion>> nearbyNavigablePlanarRegions = new TIntObjectHashMap<>();
@@ -41,9 +41,11 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
-      nearbyPlanarRegions.clear();
+
       snapDataHolder.clear();
+      nearbyPlanarRegions.clear();
       bodyCollisionPlanarRegions.clear();
+      nearbyNavigablePlanarRegions.clear();
    }
 
    public boolean hasPlanarRegions()
