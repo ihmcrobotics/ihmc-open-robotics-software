@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
-import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -10,16 +10,22 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.geometry.polytope.ConvexPolytope;
 import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class BodyCollisionNodeChecker extends FootstepNodeChecker
@@ -32,19 +38,30 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
 
    private final GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
 
-   private final RecyclingArrayList<ConvexPolytope> planarRegionPolytopes = new RecyclingArrayList<>(ConvexPolytope.class);
+   private final HashMap<PlanarRegion, ConvexPolytope> planarRegionPolytopes = new HashMap<>();
 
    private final FootstepPlannerParameters parameters;
+   private final FootstepNodeSnapper snapper;
 
-   public BodyCollisionNodeChecker(FootstepPlannerParameters parameters)
+   private BipedalFootstepPlannerListener listener;
+
+
+   public BodyCollisionNodeChecker(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper)
    {
       this.parameters = parameters;
+      this.snapper = snapper;
 
       bodyCollisionBox = new Box3D();
       bodyCollisionBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
 
       bodyCollisionFrame.updateTranslation(new Vector3D(0.0, 0.0, parameters.getBodyBoxCenterHeight()));
    }
+
+   public void addPlannerListener(BipedalFootstepPlannerListener listener)
+   {
+      this.listener = listener;
+   }
+
 
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final RigidBodyTransform tempTransform= new RigidBodyTransform();
@@ -60,7 +77,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
 
       for (PlanarRegion planarRegion : planarRegions.getPlanarRegionsAsList())
       {
-         ConvexPolytope planarRegionPolytope = planarRegionPolytopes.add();
+         ConvexPolytope planarRegionPolytope = new ConvexPolytope();
          List<? extends Point2DReadOnly> pointsInPlanarRegion = planarRegion.getConvexHull().getVertexBufferView();
          planarRegion.getTransformToWorld(tempTransform);
          for (Point2DReadOnly point : pointsInPlanarRegion)
@@ -70,6 +87,8 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
             tempPoint.applyTransform(tempTransform);
             planarRegionPolytope.addVertex(tempPoint.getX(), tempPoint.getY(), tempPoint.getZ());
          }
+
+         planarRegionPolytopes.put(planarRegion, planarRegionPolytope);
       }
    }
 
@@ -85,7 +104,16 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       }
 
       if (!findMidStanceFrame(node, previousNode))
-         return false;
+         return true;
+
+      tempPoint.setToZero(midStanceFrame);
+      tempPoint.changeFrame(worldFrame);
+      double roundedX = FootstepNode.round(tempPoint.getX());
+      double roundedY = FootstepNode.round(tempPoint.getY());
+      List<PlanarRegion> planarRegionList = snapper.getOrCreateBodyCollisionRegions(roundedX, roundedY, tempPoint.getZ());
+
+      if (planarRegionList.size() == 0)
+         return true;
 
       bodyCollisionPolytope.getVertices().clear();
       for (Point3D vertex : bodyCollisionBox.getVertices())
@@ -95,10 +123,14 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
          bodyCollisionPolytope.addVertex(tempPoint.getX(), tempPoint.getY(), tempPoint.getZ());
       }
 
-      for (ConvexPolytope planarRegionPolytope : planarRegionPolytopes)
+      for (PlanarRegion planarRegion : planarRegionList)
       {
+         ConvexPolytope planarRegionPolytope = planarRegionPolytopes.get(planarRegion);
          if (collisionDetector.arePolytopesColliding(bodyCollisionPolytope, planarRegionPolytope, pointToThrowAway1, pointToThrowAway2))
+         {
+            notifyPlannerListenerThatNodeIsRejected(node, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
             return false;
+         }
       }
 
       return true;
@@ -110,37 +142,13 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
 
    }
 
-   private final FramePoint3D point = new FramePoint3D();
-   private final FramePoint3D previousPoint = new FramePoint3D();
-   private final FramePoint3D midPoint = new FramePoint3D();
    private final FramePose3D midPose = new FramePose3D();
 
    private boolean findMidStanceFrame(FootstepNode node, FootstepNode previousNode)
    {
-      List<PlanarRegion> nodePlanes = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(node.getX(), node.getY());
-      if (nodePlanes.isEmpty())
-      {
+      Point3D midPoint = getMidPoint(node, previousNode);
+      if (midPoint == null)
          return false;
-      }
-
-      List<PlanarRegion> previousNodePlanes = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(previousNode.getX(), previousNode.getY());
-
-      double nodeZ = -Double.MAX_VALUE;
-      double previousNodeZ = -Double.MAX_VALUE;
-      for (PlanarRegion nodePlane : nodePlanes)
-      {
-         double height = nodePlane.getPlaneZGivenXY(node.getX(), node.getY());
-         nodeZ = Math.max(nodeZ, height);
-      }
-      for (PlanarRegion previousNodePlane : previousNodePlanes)
-      {
-         double height = previousNodePlane.getPlaneZGivenXY(previousNode.getX(), previousNode.getY());
-         previousNodeZ = Math.max(height, previousNodeZ);
-      }
-
-      point.set(node.getX(), node.getY(), nodeZ);
-      previousPoint.set(previousNode.getX(), previousNode.getY(), previousNodeZ);
-      midPoint.interpolate(point, previousPoint, 0.5);
 
       double angleAverage = AngleTools.computeAngleAverage(node.getYaw(), previousNode.getYaw());
 
@@ -151,5 +159,40 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       bodyCollisionFrame.update();
 
       return true;
+   }
+
+   private Point3D getMidPoint(FootstepNode node, FootstepNode previousNode)
+   {
+      List<PlanarRegion> nodePlanes = snapper.getOrCreateSteppableRegions(node.getRoundedX(), node.getRoundedY());
+      if (nodePlanes.isEmpty())
+         return null;
+
+      tempPoint.set(node.getRoundedX(), node.getRoundedY(), 0.0);
+      Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(tempPoint, nodePlanes);
+
+      if (projectedPoint == null)
+         return null;
+
+      List<PlanarRegion> previousNodePlanes = snapper.getOrCreateSteppableRegions(previousNode.getRoundedX(), previousNode.getRoundedY());
+      if (previousNodePlanes.isEmpty())
+         return null;
+
+      tempPoint.set(previousNode.getRoundedX(), previousNode.getRoundedY(), 0.0);
+
+      Point3DReadOnly previousProjectedPoint = PlanarRegionTools.projectPointToPlanesVertically(tempPoint, previousNodePlanes);
+
+      if (previousProjectedPoint == null)
+         return null;
+
+      Point3D midPoint = new Point3D();
+      midPoint.interpolate(projectedPoint, previousProjectedPoint, 0.5);
+
+      return midPoint;
+   }
+
+   private void notifyPlannerListenerThatNodeIsRejected(FootstepNode node, BipedalFootstepPlannerNodeRejectionReason rejectionReason)
+   {
+      if(listener != null)
+         listener.nodeUnderConsiderationWasRejected(node, rejectionReason);
    }
 }

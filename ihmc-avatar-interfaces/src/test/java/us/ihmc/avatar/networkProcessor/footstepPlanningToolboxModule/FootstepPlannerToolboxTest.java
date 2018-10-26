@@ -61,7 +61,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
@@ -86,9 +85,6 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
       messageConverter = RemoteUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
 
       tryToStartModule(() -> setupFootstepPlanningToolboxModule());
-
-      uiReceivedPlan = new AtomicReference<>(false);
-      uiReceivedResult = new AtomicReference<>(false);
 
       messager.registerTopicListener(FootstepPlanTopic, request -> uiReceivedPlan.set(true));
       messager.registerTopicListener(PlanningResultTopic, request -> uiReceivedResult.set(true));
@@ -151,9 +147,6 @@ public abstract class FootstepPlannerToolboxTest extends FootstepPlannerDataSetT
       if (ui != null)
          ui.stop();
       ui = null;
-
-      uiReceivedPlan = null;
-      uiReceivedResult = null;
 
       pubSubImplementation = null;
 

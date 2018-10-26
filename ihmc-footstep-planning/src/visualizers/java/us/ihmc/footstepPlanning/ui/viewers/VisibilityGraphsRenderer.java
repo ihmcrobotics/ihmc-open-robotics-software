@@ -41,7 +41,7 @@ public class VisibilityGraphsRenderer
       goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic);
 
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
-      clusterMeshViewer.setTopics(GlobalReset, ShowClusterRawPoints, ShowClusterNavigableExtrusions, ShowClusterNonNavigableExtrusions, NavigableRegionData);
+      clusterMeshViewer.setTopics(GlobalResetTopic, ShowClusterRawPoints, ShowClusterNavigableExtrusions, ShowClusterNonNavigableExtrusions, NavigableRegionData);
 
       startMapViewer = new VisibilityMapHolderViewer(messager, executorService);
       startMapViewer.setCustomColor(Color.YELLOW);
@@ -52,7 +52,7 @@ public class VisibilityGraphsRenderer
       goalMapViewer.setTopics(ShowGoalVisibilityMap, GoalVisibilityMap);
 
       navigableRegionViewer = new NavigableRegionViewer(messager, executorService);
-      navigableRegionViewer.setTopics(GlobalReset, ShowNavigableRegionVisibilityMaps, NavigableRegionData);
+      navigableRegionViewer.setTopics(GlobalResetTopic, ShowNavigableRegionVisibilityMaps, NavigableRegionData);
 
       interRegionConnectionsViewer = new VisibilityMapHolderViewer(messager, executorService);
       interRegionConnectionsViewer.setCustomColor(Color.CRIMSON);
