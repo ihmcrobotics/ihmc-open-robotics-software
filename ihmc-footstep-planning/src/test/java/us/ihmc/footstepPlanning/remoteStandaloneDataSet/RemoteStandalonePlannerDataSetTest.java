@@ -88,9 +88,6 @@ public abstract class RemoteStandalonePlannerDataSetTest extends FootstepPlanner
          ui.stop();
       ui = null;
 
-      uiReceivedPlan = null;
-      uiReceivedResult = null;
-
       pubSubImplementation = null;
 
       uiFootstepPlanReference = null;

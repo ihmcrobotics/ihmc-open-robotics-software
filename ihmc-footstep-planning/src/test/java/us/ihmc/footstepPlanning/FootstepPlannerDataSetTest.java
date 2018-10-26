@@ -56,8 +56,8 @@ public abstract class FootstepPlannerDataSetTest
 
    protected AtomicReference<FootstepPlan> uiFootstepPlanReference;
    protected AtomicReference<FootstepPlanningResult> uiPlanningResultReference;
-   protected AtomicReference<Boolean> uiReceivedPlan = new AtomicReference<>(false);
-   protected AtomicReference<Boolean> uiReceivedResult = new AtomicReference<>(false);
+   protected final AtomicReference<Boolean> uiReceivedPlan = new AtomicReference<>(false);
+   protected final AtomicReference<Boolean> uiReceivedResult = new AtomicReference<>(false);
 
    protected final AtomicReference<FootstepPlan> expectedPlan = new AtomicReference<>(null);
    protected final AtomicReference<FootstepPlan> actualPlan = new AtomicReference<>(null);
