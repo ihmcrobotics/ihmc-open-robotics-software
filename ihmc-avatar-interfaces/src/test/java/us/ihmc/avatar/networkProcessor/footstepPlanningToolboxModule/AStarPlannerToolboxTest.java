@@ -17,7 +17,7 @@ public class AStarPlannerToolboxTest extends FootstepPlannerToolboxTest
    }
 
    @Override
-   @Test(timeout = 500000)
+   @Test(timeout = 1000000)
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 142)
    public void testDatasetsWithoutOcclusion()
    {

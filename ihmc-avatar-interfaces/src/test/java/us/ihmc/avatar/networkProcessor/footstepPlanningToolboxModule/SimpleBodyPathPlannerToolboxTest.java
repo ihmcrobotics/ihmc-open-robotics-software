@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
 import org.junit.Test;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
@@ -40,5 +41,18 @@ public class SimpleBodyPathPlannerToolboxTest extends FootstepPlannerToolboxTest
       pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
       setup();
       runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
+   }
+
+   public static void main(String[] args) throws Exception
+   {
+      SimpleBodyPathPlannerToolboxTest test = new SimpleBodyPathPlannerToolboxTest();
+      String prefix = "unitTestDataSets/test/";
+      VISUALIZE = true;
+      test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
+      test.setup();
+      //      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214730_CinderBlockField");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214801_StairsUpDown");
+      PrintTools.info("Test passed.");
+      test.tearDown();
    }
 }
