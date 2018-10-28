@@ -441,7 +441,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          if (footstepPlan.hasLowLevelPlanGoal())
             totalFootstepPlan.setLowLevelPlanGoal(footstepPlan.getLowLevelPlanGoal());
 
-         for (int i = 0; i < totalFootstepPlan.getNumberOfSteps(); i++)
+         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
             totalFootstepPlan.addFootstep(footstepPlan.getFootstep(i));
       }
 
