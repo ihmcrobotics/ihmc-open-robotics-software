@@ -1,44 +1,25 @@
 package us.ihmc.avatar.footstepPlanning;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
-import us.ihmc.pathPlanning.statistics.ListOfStatistics;
-import us.ihmc.pathPlanning.statistics.PlannerStatistics;
-import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MultiStageFootstepPlanningController
 {
@@ -48,41 +29,41 @@ public class MultiStageFootstepPlanningController
 
    private final MultiStageFootstepPlanningManager stageManager;
 
-   private final YoBoolean isDone = new YoBoolean("isDone", registry);
-   private final YoBoolean requestedPlanarRegions = new YoBoolean("RequestedPlanarRegions", registry);
+   private final YoDouble timeWithoutInputsBeforeGoingToSleep = new YoDouble("timeWithoutInputsBeforeGoingToSleep", registry);
+
    private final YoDouble toolboxTime = new YoDouble("ToolboxTime", registry);
-   private final YoDouble timeout = new YoDouble("ToolboxTimeout", registry);
-   private final YoInteger planId = new YoInteger("planId", registry);
+   protected final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
 
    private Runnable managerRunnable = null;
    private ScheduledFuture<?> managerTask = null;
+
+   protected final AtomicBoolean receivedInput = new AtomicBoolean();
 
    private double dt;
    private final ScheduledExecutorService executorService;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
    public MultiStageFootstepPlanningController(RobotContactPointParameters<RobotSide> contactPointParameters,
-                                               FootstepPlannerParameters footstepPlannerParameters, StatusMessageOutputManager statusOutputManager,
-                                               ScheduledExecutorService executorService, YoVariableRegistry parentRegistry,
-                                               YoGraphicsListRegistry graphicsListRegistry, double dt)
+                                               FootstepPlannerParameters footstepPlannerParameters, CommandInputManager commandInputManager,
+                                               StatusMessageOutputManager statusOutputManager, ScheduledExecutorService executorService,
+                                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, double dt)
    {
       this.dt = dt;
       this.executorService = executorService;
-      stageManager = new MultiStageFootstepPlanningManager(contactPointParameters, footstepPlannerParameters, statusOutputManager, executorService, parentRegistry, graphicsListRegistry, dt);
+      stageManager = new MultiStageFootstepPlanningManager(contactPointParameters, footstepPlannerParameters, statusOutputManager, executorService,
+                                                           parentRegistry, graphicsListRegistry, dt);
 
-      isDone.set(true);
-      planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
+      commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
+
+      timeWithoutInputsBeforeGoingToSleep.set(Double.POSITIVE_INFINITY);
 
       parentRegistry.addChild(registry);
    }
-
 
    public void requestInitialize()
    {
       initialize.set(true);
    }
-
-
 
    public void processRequest(FootstepPlanningRequestPacket request)
    {
@@ -99,12 +80,10 @@ public class MultiStageFootstepPlanningController
       stageManager.processPlanningStatisticsRequest();
    }
 
-
-   public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> publisher)
+   public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher)
    {
-      stageManager.setTextToSpeechPublisher(publisher);
+      stageManager.setTextToSpeechPublisher(textToSpeechPublisher);
    }
-
 
    public void reinitialize()
    {
@@ -127,6 +106,7 @@ public class MultiStageFootstepPlanningController
       managerTask = executorService.scheduleAtFixedRate(managerRunnable, 0, (long) Conversions.secondsToMilliseconds(dt), TimeUnit.MILLISECONDS);
 
       stageManager.wakeUp();
+      receivedInput.set(true);
    }
 
    public void sleep()
@@ -180,10 +160,10 @@ public class MultiStageFootstepPlanningController
                stageManager.update();
                toolboxTime.add(dt);
 
-               //               if (receivedInput.getAndSet(false))
-               //                  timeOfLastInput.set(yoTime.getDoubleValue());
-               //               if (yoTime.getDoubleValue() - timeOfLastInput.getDoubleValue() >= timeWithoutInputsBeforeGoingToSleep.getDoubleValue())
-               //                  sleep();
+               if (receivedInput.getAndSet(false))
+                  timeOfLastInput.set(toolboxTime.getDoubleValue());
+               if (toolboxTime.getDoubleValue() - timeOfLastInput.getDoubleValue() >= timeWithoutInputsBeforeGoingToSleep.getDoubleValue())
+                  sleep();
                if (stageManager.isDone())
                   sleep();
             }

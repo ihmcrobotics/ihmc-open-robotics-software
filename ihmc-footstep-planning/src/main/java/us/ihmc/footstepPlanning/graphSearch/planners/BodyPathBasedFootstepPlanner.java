@@ -41,6 +41,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
    private static final boolean debug = false;
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
@@ -59,9 +61,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
    private final YoDouble planningHorizonLength;
 
-   private static final double weight = 1.0;
-
-   public BodyPathBasedFootstepPlanner(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry registry)
+   public BodyPathBasedFootstepPlanner(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry parentRegistry)
    {
       this.parameters = parameters;
       xPoly = new YoPolynomial("xPoly", 4, registry);
@@ -89,6 +89,8 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
       planningHorizonLength = new YoDouble("planningHorizonLength", registry);
       planningHorizonLength.set(1.0);
+
+      parentRegistry.addChild(registry);
    }
 
    @Override

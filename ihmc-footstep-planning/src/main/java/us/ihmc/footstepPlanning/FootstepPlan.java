@@ -68,6 +68,7 @@ public class FootstepPlan
    {
       return lowLevelPlanGoal != null;
    }
+
    public FramePose3DReadOnly getLowLevelPlanGoal()
    {
       if (hasLowLevelPlanGoal())

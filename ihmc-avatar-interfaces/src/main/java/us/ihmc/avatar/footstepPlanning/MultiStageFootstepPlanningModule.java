@@ -48,7 +48,6 @@ public class MultiStageFootstepPlanningModule
    private ScheduledFuture<?> yoVariableServerScheduled = null;
    private final int updatePeriodMilliseconds = 1;
 
-   private final YoDouble timeWithoutInputsBeforeGoingToSleep = new YoDouble("timeWithoutInputsBeforeGoingToSleep", registry);
    private final AtomicBoolean receivedInput = new AtomicBoolean();
    private final LogModelProvider modelProvider;
    private final boolean startYoVariableServer;
@@ -76,11 +75,9 @@ public class MultiStageFootstepPlanningModule
 
       commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
 
-      timeWithoutInputsBeforeGoingToSleep.set(Double.POSITIVE_INFINITY);
-
       footstepPlanningController = new MultiStageFootstepPlanningController(drcRobotModel.getContactPointParameters(),
-                                                                            drcRobotModel.getFootstepPlannerParameters(), statusOutputManager, executorService,
-                                                                            registry, yoGraphicsListRegistry,
+                                                                            drcRobotModel.getFootstepPlannerParameters(), commandInputManager,
+                                                                            statusOutputManager, executorService, registry, yoGraphicsListRegistry,
                                                                             Conversions.millisecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
 
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class,
@@ -98,9 +95,9 @@ public class MultiStageFootstepPlanningModule
       IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher = ROS2Tools
             .createPublisher(realtimeRos2Node, TextToSpeechPacket.class, ROS2Tools::generateDefaultTopicName);
 
-      realtimeRos2Node.spin();
-
       footstepPlanningController.setTextToSpeechPublisher(textToSpeechPublisher);
+
+      realtimeRos2Node.spin();
 
       yoVariableServer = startYoVariableServer();
    }

@@ -1,18 +1,13 @@
 package us.ihmc.avatar.footstepPlanning;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
@@ -34,6 +29,9 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.EnumProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -42,36 +40,55 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.Optional;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlanningStage implements FootstepPlanner, Runnable
 {
    private static final boolean debug = false;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoVariableRegistry registry;
+
+   private final AtomicReference<FootstepPlanningResult> pathPlanResult = new AtomicReference<>();
+   private final AtomicReference<FootstepPlanningResult> stepPlanResult = new AtomicReference<>();
+
+   private final AtomicReference<BodyPathPlan> pathPlan = new AtomicReference<>();
+   private final AtomicReference<FootstepPlan> stepPlan = new AtomicReference<>();
 
    private final EnumMap<FootstepPlannerType, FootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
-   private final YoEnum<FootstepPlannerType> activePlannerEnum;
+   private final EnumProvider<FootstepPlannerType> activePlannerEnum;
+   private final IntegerProvider planId;
 
-   private final YoBoolean donePlanningPath = new YoBoolean("donePlanningPath", registry);
-   private final YoBoolean donePlanningSteps = new YoBoolean("donePlanningSteps", registry);
+   private final YoBoolean donePlanningPath;
+   private final YoBoolean donePlanningSteps;
 
-   private final YoDouble toolboxTime = new YoDouble("ToolboxTime", registry);
-   private final YoInteger planId = new YoInteger("planId", registry);
-   private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
+   private final YoDouble stageTime;
+   private final YoBoolean initialize;
 
-   private double dt;
+   private final int stageId;
+   private final double dt;
+
+   private final List<PlannerCompletionCallback> completionCallbackList = new ArrayList<>();
 
    private final FootstepPlannerParameters footstepPlanningParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
-   public FootstepPlanningStage(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
-                                YoEnum<FootstepPlannerType> activePlanner, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
-                                double dt)
+   public FootstepPlanningStage(int stageId, RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
+                                EnumProvider<FootstepPlannerType> activePlanner, IntegerProvider planId, YoGraphicsListRegistry graphicsListRegistry, double dt)
    {
-      this.dt = dt;
+      this.stageId = stageId;
       this.footstepPlanningParameters = footstepPlannerParameters;
+      this.planId = planId;
+      this.dt = dt;
       this.activePlannerEnum = activePlanner;
+
+      registry = new YoVariableRegistry(stageId + getClass().getSimpleName());
+
+      donePlanningPath = new YoBoolean(stageId + "_DonePlanningPath", registry);
+      donePlanningSteps = new YoBoolean(stageId + "_DonePlanningSteps", registry);
+
+      stageTime = new YoDouble(stageId + "_StageTime", registry);
+      initialize = new YoBoolean(stageId + "_Initialize" + registry.getName(), registry);
 
       SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame;
       if (contactPointParameters == null)
@@ -82,13 +99,17 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
       plannerMap.put(FootstepPlannerType.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame));
-      plannerMap
-            .put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedFootstepPlanner(footstepPlanningParameters, contactPointsInSoleFrame, parentRegistry));
+      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedFootstepPlanner(footstepPlanningParameters, contactPointsInSoleFrame, registry));
+      // FIXME this should use a real graphics list registry
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
-                     new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, graphicsListRegistry, parentRegistry));
+                     new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, null, registry));
 
       donePlanningSteps.set(true);
-      planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
+   }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
    }
 
    private AStarFootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons)
@@ -124,7 +145,7 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
 
    private FootstepPlanner getPlanner()
    {
-      return plannerMap.get(activePlannerEnum.getEnumValue());
+      return plannerMap.get(activePlannerEnum.getValue());
    }
 
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
@@ -162,14 +183,24 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
       return getPlanner().getPlannerStatistics();
    }
 
+   public FootstepPlanningResult getPathPlanResult()
+   {
+      return pathPlanResult.getAndSet(null);
+   }
+
    public BodyPathPlan getPathPlan()
    {
-      return getPlanner().getPathPlan();
+      return pathPlan.getAndSet(null);
+   }
+
+   public FootstepPlanningResult getStepPlanResult()
+   {
+      return stepPlanResult.getAndSet(null);
    }
 
    public FootstepPlan getPlan()
    {
-      return getPlanner().getPlan();
+      return stepPlan.getAndSet(null);
    }
 
    @Override
@@ -178,6 +209,7 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
       donePlanningPath.set(false);
 
       FootstepPlanningResult result = getPlanner().planPath();
+      pathPlanResult.set(result);
 
       donePlanningPath.set(true);
 
@@ -190,6 +222,7 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
       donePlanningSteps.set(false);
 
       FootstepPlanningResult result = getPlanner().plan();
+      stepPlanResult.set(result);
 
       donePlanningPath.set(true);
 
@@ -203,29 +236,14 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
          return;
 
       update();
-      toolboxTime.add(dt);
+      stageTime.add(dt);
    }
 
-   /**
-    * Get the initialization state of this toolbox controller:
-    * <ul>
-    * <li>{@code true}: this toolbox controller has been initialized properly and is ready for doing
-    * some computation!
-    * <li>{@code false}: this toolbox controller has either not been initialized yet or the
-    * initialization process failed.
-    * </ul>
-    *
-    * @return the initialization state of this toolbox controller.
-    */
-   public boolean hasBeenInitialized()
+   public void addCompletionCallback(PlannerCompletionCallback completionCallback)
    {
-      return !initialize.getValue();
+      completionCallbackList.add(completionCallback);
    }
 
-   /**
-    * Request this toolbox controller to run {@link #initialize} on the next call of
-    * {@link #update()}.
-    */
    public void requestInitialize()
    {
       initialize.set(true);
@@ -233,7 +251,7 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
 
    public void update()
    {
-      if (!hasBeenInitialized())
+      if (initialize.getBooleanValue())
       {
          if (!initialize()) // Return until the initialization succeeds
             return;
@@ -245,42 +263,54 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
 
    private void updateInternal()
    {
-      toolboxTime.add(dt);
-      if (toolboxTime.getDoubleValue() > 20.0)
+      stageTime.add(dt);
+      if (stageTime.getDoubleValue() > 20.0)
       {
          if (debug)
-            PrintTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
+            PrintTools.info("Hard timeout at " + stageTime.getDoubleValue());
          donePlanningSteps.set(true);
          donePlanningPath.set(true);
          return;
       }
 
-      sendMessageToUI("Starting To Plan: " + planId.getIntegerValue() + ", " + activePlannerEnum.getEnumValue().toString());
+      sendMessageToUI("Starting To Plan: " + planId.getValue() + ", using type " + activePlannerEnum.getValue().toString() + " on stage " + stageId);
 
-      FootstepPlanningResult status = planPath();
+      FootstepPlanningResult status = getPlanner().planPath();
+      pathPlanResult.set(status);
+
+      for (PlannerCompletionCallback completionCallback : completionCallbackList)
+         completionCallback.pathPlanningIsComplete(status, this);
 
       if (status.validForExecution())
       {
-         getPathPlan();
+         pathPlan.set(getPlanner().getPathPlan());
 
-         status = plan();
+         status = getPlanner().plan();
       }
 
-      getPlan();
+      stepPlanResult.set(status);
+      if (status.validForExecution())
+         stepPlan.set(getPlanner().getPlan());
 
-      sendMessageToUI("Result: " + planId.getIntegerValue() + ", " + status.toString());
+      for (PlannerCompletionCallback completionCallback : completionCallbackList)
+         completionCallback.stepPlanningIsComplete(status, this);
 
-
+      sendMessageToUI("Result: " + planId.getValue() + ", " + status.toString() + " on stage " + stageId);
    }
 
-   protected boolean initialize()
+   public boolean initialize()
    {
       donePlanningSteps.set(false);
       donePlanningPath.set(false);
 
-      toolboxTime.set(0.0);
+      stageTime.set(0.0);
 
       return true;
+   }
+
+   public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher)
+   {
+      this.textToSpeechPublisher = textToSpeechPublisher;
    }
 
    private void sendMessageToUI(String message)

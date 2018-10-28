@@ -35,6 +35,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
@@ -64,7 +65,6 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    private static final boolean DEBUG = false;
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
-   private static final double defaultHeuristicWeight = 15.0;
    private static final double defaultTimeout = 5.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -131,14 +131,18 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
    private void setupVisualization(YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
+      YoGraphicsList yoGraphicsList = new YoGraphicsList("VisGraph");
+
       for (int i = 0; i < bodyPathPointsForVisualization; i++)
       {
          YoFramePoint3D point = new YoFramePoint3D("BodyPathPoint" + i, ReferenceFrame.getWorldFrame(), registry);
          point.setToNaN();
          bodyPathPoints.add(point);
          YoGraphicPosition pointVisualization = new YoGraphicPosition("BodyPathPoint" + i, point, 0.02, YoAppearance.Yellow());
-         graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), pointVisualization);
+         yoGraphicsList.add(pointVisualization);
       }
+
+      graphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
    }
 
    @Override

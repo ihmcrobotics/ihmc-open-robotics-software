@@ -5,10 +5,8 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -17,7 +15,6 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
@@ -26,13 +23,12 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
@@ -40,17 +36,21 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class MultiStageFootstepPlanningManager
+public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
    private static final boolean debug = false;
+   private static final int stagesToCreate = 4;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoGraphicsListRegistry graphicsListRegistry;
 
    private final YoEnum<FootstepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry, FootstepPlannerType.class);
 
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlannerParametersPacket> latestParametersReference = new AtomicReference<>(null);
+
+   private final AtomicReference<BodyPathPlan> bodyPathPlan = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlan> footstepPlan = new AtomicReference<>(null);
+
    private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
@@ -63,7 +63,12 @@ public class MultiStageFootstepPlanningManager
 
    private final List<FootstepPlanningStage> allPlanningStages = new ArrayList<>();
    private final List<FootstepPlanningStage> availablePlanningStages = new ArrayList<>();
-   private final List<FootstepPlanningStage> planningStagesInProgress = new ArrayList<>();
+   private final List<FootstepPlanningStage> pathPlanningStagesInProgress = new ArrayList<>();
+   private final List<FootstepPlanningStage> stepPlanningStagesInProgress = new ArrayList<>();
+   private final HashMap<FootstepPlanningStage, ScheduledFuture<?>> planningTasks = new HashMap<>();
+
+   private final YoBoolean isDonePlanningPath = new YoBoolean("isDonePlanningPath", registry);
+   private final YoBoolean isDonePlanningSteps = new YoBoolean("isDonePlanningSteps", registry);
 
    private final List<ScheduledFuture<?>> scheduledStages = new ArrayList<>();
 
@@ -71,7 +76,7 @@ public class MultiStageFootstepPlanningManager
    private final List<FootstepPlanningResult> completedStepResults = new ArrayList<>();
 
    private final List<BodyPathPlan> completedPathPlans = new ArrayList<>();
-   private final List<FootstepPlan> completedFootstepPlans = new ArrayList<>();
+   private final List<FootstepPlan> completedStepPlans = new ArrayList<>();
 
    private double dt;
 
@@ -84,16 +89,14 @@ public class MultiStageFootstepPlanningManager
    private final ScheduledExecutorService executorService;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
-   public MultiStageFootstepPlanningManager(RobotContactPointParameters<RobotSide> contactPointParameters,
-                                            FootstepPlannerParameters footstepPlannerParameters, StatusMessageOutputManager statusOutputManager,
-                                            ScheduledExecutorService executorService, YoVariableRegistry parentRegistry,
-                                            YoGraphicsListRegistry graphicsListRegistry, double dt)
+   public MultiStageFootstepPlanningManager(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
+                                            StatusMessageOutputManager statusOutputManager, ScheduledExecutorService executorService,
+                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, double dt)
    {
       this.contactPointParameters = contactPointParameters;
       this.statusOutputManager = statusOutputManager;
       this.dt = dt;
       this.executorService = executorService;
-      this.graphicsListRegistry = graphicsListRegistry;
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerToolboxPlanarRegions", 200, 30, registry);
 
       footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
@@ -104,86 +107,119 @@ public class MultiStageFootstepPlanningManager
       isDone.set(true);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
 
+      for (int i = 0; i < stagesToCreate; i++)
+      {
+         FootstepPlanningStage planningStage = new FootstepPlanningStage(i, contactPointParameters, footstepPlannerParameters, activePlanner, planId,
+                                                                         graphicsListRegistry, dt);
+         planningStage.addCompletionCallback(this);
+         registry.addChild(planningStage.getYoVariableRegistry());
+         allPlanningStages.add(planningStage);
+         availablePlanningStages.add(planningStage);
+      }
+
+      isDonePlanningPath.set(false);
+      isDonePlanningSteps.set(false);
+
+      isDonePlanningPath.addVariableChangedListener(v -> {
+         if (!isDonePlanningPath.getBooleanValue())
+            statusOutputManager.reportStatusMessage(FootstepPlanningMessageReporter.packStatus(FootstepPlannerStatus.PLANNING_PATH));
+         else
+            statusOutputManager.reportStatusMessage(FootstepPlanningMessageReporter.packStatus(FootstepPlannerStatus.PLANNING_STEPS));
+      });
+      isDonePlanningSteps.addVariableChangedListener(v -> {
+         if (isDonePlanningSteps.getBooleanValue())
+            statusOutputManager.reportStatusMessage(FootstepPlanningMessageReporter.packStatus(FootstepPlannerStatus.IDLE));
+      });
+
       parentRegistry.addChild(registry);
-      requestInitialize();
-   }
-
-   private FootstepPlanningStage createFootstepPlanningStage()
-   {
-      return new FootstepPlanningStage(contactPointParameters, footstepPlanningParameters, activePlanner, registry, graphicsListRegistry, dt);
-   }
-
-   private FootstepPlannerStatusMessage packStatus(FootstepPlannerStatus status)
-   {
-      FootstepPlannerStatusMessage message = new FootstepPlannerStatusMessage();
-      message.setFootstepPlannerStatus(status.toByte());
-
-      return message;
-   }
-
-   /**
-    * Get the initialization state of this toolbox controller:
-    * <ul>
-    * <li>{@code true}: this toolbox controller has been initialized properly and is ready for doing
-    * some computation!
-    * <li>{@code false}: this toolbox controller has either not been initialized yet or the
-    * initialization process failed.
-    * </ul>
-    *
-    * @return the initialization state of this toolbox controller.
-    */
-   public boolean hasBeenInitialized()
-   {
-      return !initialize.getValue();
-   }
-
-   /**
-    * Request this toolbox controller to run {@link #initialize} on the next call of
-    * {@link #update()}.
-    */
-   public void requestInitialize()
-   {
       initialize.set(true);
+   }
+
+   private FootstepPlanningStage createNewFootstepPlanningStage()
+   {
+      FootstepPlanningStage stage = new FootstepPlanningStage(allPlanningStages.size(), contactPointParameters, footstepPlanningParameters, activePlanner,
+                                                              planId, null, dt);
+      stage.addCompletionCallback(this);
+      return stage;
+   }
+
+   private FootstepPlanningStage spawnNextAvailablePlanner()
+   {
+      if (availablePlanningStages.isEmpty())
+      {
+         FootstepPlanningStage planningStage = createNewFootstepPlanningStage();
+         allPlanningStages.add(planningStage);
+         availablePlanningStages.add(planningStage);
+      }
+
+      return availablePlanningStages.remove(0);
+   }
+
+   private FootstepPlanningStage cleanupPlanningStage(int stageIndex)
+   {
+      FootstepPlanningStage planningStage = stepPlanningStagesInProgress.remove(stageIndex);
+      planningStage.requestInitialize();
+      planningTasks.remove(planningStage).cancel(true);
+
+      return planningStage;
    }
 
    private void createPlanningStage()
    {
-      if (!planningStagesInProgress.isEmpty())
+      if (!pathPlanningStagesInProgress.isEmpty())
       {
          if (debug)
             PrintTools.error(this, "toolboxRunnable is not null.");
          return;
       }
 
-      FootstepPlanningStage stage = createFootstepPlanningStage();
-      planningStagesInProgress.add(stage);
+      FootstepPlanningStage stage = createNewFootstepPlanningStage();
+      pathPlanningStagesInProgress.add(stage);
       allPlanningStages.add(stage);
    }
 
-   private void updateStageStatus()
+   private void cleanupAllPlanningStages()
    {
-      for (FootstepPlanningStage stage : planningStagesInProgress)
-      {
-         if (stage.donePlanningSteps())
-         {
-            completedPathPlans.add(stage.getPathPlan());
-            completedFootstepPlans.add(stage.getPlan());
+      pathPlanningStagesInProgress.clear();
 
-            availablePlanningStages.add(stage);
-            planningStagesInProgress.remove(stage);
-         }
+      while (!stepPlanningStagesInProgress.isEmpty())
+      {
+         availablePlanningStages.add(cleanupPlanningStage(0));
       }
+
+      completedPathPlans.clear();
+      completedStepPlans.clear();
+
+      completedPathResults.clear();
+      completedStepResults.clear();
    }
 
-   /**
-    * Initializes once and run the {@link #updateInternal()} of this toolbox controller only if the
-    * initialization succeeded.
-    *
-    * @see #hasBeenInitialized() The initialization state of this toolbox controller.
-    */
+   @Override
+   public void pathPlanningIsComplete(FootstepPlanningResult pathPlanningResult, FootstepPlanningStage stageFinished)
+   {
+      completedPathResults.add(pathPlanningResult);
+      pathPlanningStagesInProgress.remove(stageFinished);
+
+      if (pathPlanningResult.validForExecution())
+         completedPathPlans.add(stageFinished.getPathPlan());
+   }
+
+   @Override
+   public void stepPlanningIsComplete(FootstepPlanningResult stepPlanningResult, FootstepPlanningStage stageFinished)
+   {
+      completedStepResults.add(stepPlanningResult);
+      stepPlanningStagesInProgress.remove(stageFinished);
+      availablePlanningStages.add(stageFinished);
+
+      planningTasks.remove(stageFinished).cancel(true);
+
+      if (stepPlanningResult.validForExecution())
+         completedStepPlans.add(stageFinished.getPlan());
+   }
+
    public void update()
    {
-      if (!hasBeenInitialized())
+      if (initialize.getBooleanValue())
       {
          if (!initialize()) // Return until the initialization succeeds
             return;
@@ -193,17 +229,14 @@ public class MultiStageFootstepPlanningManager
       updateInternal();
    }
 
-   /**
-    * Internal initialization method for preparing this toolbox controller before running
-    * {@link #updateInternal()}.
-    *
-    * @return {@code true} if the initialization succeeded, {@code false} otherwise.
-    */
    private boolean initialize()
    {
       isDone.set(false);
       requestedPlanarRegions.set(false);
       toolboxTime.set(0.0);
+
+      for (FootstepPlanningStage stage : allPlanningStages)
+         stage.setTextToSpeechPublisher(textToSpeechPublisher);
 
       FootstepPlanningRequestPacket request = latestRequestReference.getAndSet(null);
       if (request == null)
@@ -245,7 +278,7 @@ public class MultiStageFootstepPlanningManager
       goalPose.setPosition(new Point3D(request.getGoalPositionInWorld()));
       goalPose.setOrientation(new Quaternion(request.getGoalOrientationInWorld()));
 
-      FootstepPlanner planner = planningStagesInProgress.get(0);
+      FootstepPlanningStage planner = spawnNextAvailablePlanner();
       planner.setInitialStanceFoot(initialStancePose, RobotSide.fromByte(request.getInitialStanceRobotSide()));
 
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
@@ -273,13 +306,15 @@ public class MultiStageFootstepPlanningManager
          planner.setTimeout(Double.POSITIVE_INFINITY);
       }
 
+      ScheduledFuture<?> plannerTask = executorService.scheduleAtFixedRate(planner, 0, (long) Conversions.secondsToMilliseconds(dt), TimeUnit.MILLISECONDS);
+      planningTasks.put(planner, plannerTask);
+
+      pathPlanningStagesInProgress.add(planner);
+      stepPlanningStagesInProgress.add(planner);
+
       return true;
    }
 
-   /**
-    * Internal update method that should perform the computation for this toolbox controller. It is
-    * called only if {@link #initialize()} has succeeded.
-    */
    private void updateInternal()
    {
       toolboxTime.add(dt);
@@ -287,49 +322,132 @@ public class MultiStageFootstepPlanningManager
       {
          if (debug)
             PrintTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
-         statusOutputManager.reportStatusMessage(packStepResult(null, null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION, -1.0));
-         isDone.set(true);
+         reportPlannerFailed(FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION);
          return;
       }
 
-      FootstepPlanner planner = planningStagesInProgress.get(0);
-
-      if (planarRegionsList.isPresent())
+      PlanarRegionsList planarRegionsList;
+      if (this.planarRegionsList.isPresent())
       {
-         planner.setPlanarRegions(planarRegionsList.get());
-         yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegionsList.get());
+         planarRegionsList = this.planarRegionsList.get();
+         yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegionsList);
          yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
       }
       else
       {
-         planner.setPlanarRegions(null);
+         planarRegionsList = null;
          yoGraphicPlanarRegionsList.clear();
       }
 
+      for (FootstepPlanner footstepPlanner : stepPlanningStagesInProgress)
+         footstepPlanner.setPlanarRegions(planarRegionsList);
+
       sendMessageToUI("Starting To Plan: " + planId.getIntegerValue() + ", " + activePlanner.getEnumValue().toString());
 
-      statusOutputManager.reportStatusMessage(packStatus(FootstepPlannerStatus.PLANNING_PATH));
+      statusOutputManager.reportStatusMessage(FootstepPlanningMessageReporter.packStatus(FootstepPlannerStatus.PLANNING_PATH));
 
-      FootstepPlanningResult status = planner.planPath();
-
-      BodyPathPlan bodyPathPlan = null;
-      if (status.validForExecution())
+      // check the status of the path planners
+      FootstepPlanningResult pathStatus = getWorstResult(completedPathResults);
+      if (!pathStatus.validForExecution())
       {
-         bodyPathPlan = planner.getPathPlan();
-         statusOutputManager.reportStatusMessage(packStatus(FootstepPlannerStatus.PLANNING_STEPS));
-         statusOutputManager.reportStatusMessage(packPathResult(bodyPathPlan, status));
-
-         status = planner.plan();
+         reportPlannerFailed(pathStatus);
+         return;
       }
 
-      FootstepPlan footstepPlan = planner.getPlan();
+      // path planner hasn't failed, so update the path planner status and send out new plan if finished
+      boolean pathPlanningStatusChanged = isDonePlanningPath.getBooleanValue() != pathPlanningStagesInProgress.isEmpty();
+      if (pathPlanningStagesInProgress.isEmpty() && pathPlanningStatusChanged)
+      {
+         concatenateBodyPathPlans();
+         statusOutputManager.reportStatusMessage(packPathResult(bodyPathPlan.get(), pathStatus));
+      }
+      if (pathPlanningStatusChanged)
+         isDonePlanningPath.set(pathPlanningStagesInProgress.isEmpty());
 
-      sendMessageToUI("Result: " + planId.getIntegerValue() + ", " + status.toString());
+      // check the status of the step planners
+      FootstepPlanningResult stepStatus = getWorstResult(completedStepResults);
+      if (!stepStatus.validForExecution())
+      {
+         reportPlannerFailed(stepStatus);
+         return;
+      }
 
-      statusOutputManager.reportStatusMessage(packStepResult(footstepPlan, bodyPathPlan, status, planner.getPlanningDuration()));
-      statusOutputManager.reportStatusMessage(packStatus(FootstepPlannerStatus.IDLE));
+      // step planner hasn't failed, so update the step planner stauts and send out the new plan if finished
+      boolean stepPlanningStatusChanged = isDonePlanningSteps.getBooleanValue() != stepPlanningStagesInProgress.isEmpty();
+      if (stepPlanningStagesInProgress.isEmpty() && stepPlanningStatusChanged)
+      {
+         sendMessageToUI("Result: " + planId.getIntegerValue() + ", " + stepStatus.toString());
+         concatenateFootstepPlans();
+         statusOutputManager
+               .reportStatusMessage(packStepResult(footstepPlan.getAndSet(null), bodyPathPlan.getAndSet(null), stepStatus, toolboxTime.getDoubleValue()));
+      }
+      if (stepPlanningStatusChanged)
+         isDonePlanningSteps.set(stepPlanningStagesInProgress.isEmpty());
 
+      isDone.set(isDonePlanningPath.getBooleanValue() && isDonePlanningSteps.getBooleanValue());
+   }
+
+   private static FootstepPlanningResult getWorstResult(List<FootstepPlanningResult> results)
+   {
+      FootstepPlanningResult worstResult = FootstepPlanningResult.OPTIMAL_SOLUTION;
+      for (FootstepPlanningResult result : results)
+         worstResult = FootstepPlanningResult.getWorstResult(worstResult, result);
+
+      return worstResult;
+   }
+
+   private void reportPlannerFailed(FootstepPlanningResult result)
+   {
+      statusOutputManager.reportStatusMessage(packStepResult(null, null, result, toolboxTime.getDoubleValue()));
+      statusOutputManager.reportStatusMessage(FootstepPlanningMessageReporter.packStatus(FootstepPlannerStatus.IDLE));
+      isDonePlanningSteps.set(true);
+      isDonePlanningPath.set(true);
       isDone.set(true);
+   }
+
+   private void concatenateBodyPathPlans()
+   {
+      if (completedPathPlans.isEmpty())
+      {
+         bodyPathPlan.set(null);
+         return;
+      }
+
+      BodyPathPlan totalBodyPathPlan = new BodyPathPlan();
+      totalBodyPathPlan.setStartPose(completedPathPlans.get(0).getStartPose());
+      totalBodyPathPlan.setGoalPose(completedPathPlans.get(completedPathPlans.size() - 1).getStartPose());
+      for (BodyPathPlan bodyPathPlan : completedPathPlans)
+      {
+         for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
+            totalBodyPathPlan.addWaypoint(bodyPathPlan.getWaypoint(i));
+      }
+
+      completedPathPlans.clear();
+
+      bodyPathPlan.set(totalBodyPathPlan);
+   }
+
+   private void concatenateFootstepPlans()
+   {
+      if (completedStepPlans.isEmpty())
+      {
+         footstepPlan.set(null);
+         return;
+      }
+
+      FootstepPlan totalFootstepPlan = new FootstepPlan();
+      for (FootstepPlan footstepPlan : completedStepPlans)
+      {
+         if (footstepPlan.hasLowLevelPlanGoal())
+            totalFootstepPlan.setLowLevelPlanGoal(footstepPlan.getLowLevelPlanGoal());
+
+         for (int i = 0; i < totalFootstepPlan.getNumberOfSteps(); i++)
+            totalFootstepPlan.addFootstep(footstepPlan.getFootstep(i));
+      }
+
+      completedPathPlans.clear();
+
+      footstepPlan.set(totalFootstepPlan);
    }
 
    private void sendMessageToUI(String message)
@@ -344,61 +462,13 @@ public class MultiStageFootstepPlanningManager
 
    private BodyPathPlanMessage packPathResult(BodyPathPlan bodyPathPlan, FootstepPlanningResult status)
    {
-      if (debug)
-      {
-         PrintTools.info("Finished planning path. Result: " + status);
-      }
-
-      BodyPathPlanMessage result = new BodyPathPlanMessage();
-      if (bodyPathPlan != null)
-      {
-         for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
-            result.getBodyPath().add().set(bodyPathPlan.getWaypoint(i));
-
-         result.getPathPlannerStartPose().set(bodyPathPlan.getStartPose());
-         result.getPathPlannerGoalPose().set(bodyPathPlan.getGoalPose());
-      }
-
-      planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
-      result.setPlanId(planId.getIntegerValue());
-      result.setFootstepPlanningResult(status.toByte());
-      return result;
+      return FootstepPlanningMessageReporter.packPathResult(bodyPathPlan, status, planarRegionsList, planId.getIntegerValue());
    }
 
    private FootstepPlanningToolboxOutputStatus packStepResult(FootstepPlan footstepPlan, BodyPathPlan bodyPathPlan, FootstepPlanningResult status,
                                                               double timeTaken)
    {
-      if (debug)
-      {
-         PrintTools.info("Finished planning. Result: " + status);
-      }
-
-      FootstepPlanningToolboxOutputStatus result = new FootstepPlanningToolboxOutputStatus();
-      if (footstepPlan == null)
-      {
-         result.getFootstepDataList().set(new FootstepDataListMessage());
-      }
-      else
-      {
-         result.getFootstepDataList().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE));
-
-         if (footstepPlan.hasLowLevelPlanGoal())
-         {
-            result.getLowLevelPlannerGoal().set(footstepPlan.getLowLevelPlanGoal());
-         }
-      }
-
-      if (bodyPathPlan != null)
-      {
-         for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
-            result.getBodyPath().add().set(bodyPathPlan.getWaypoint(i));
-      }
-
-      planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
-      result.setPlanId(planId.getIntegerValue());
-      result.setFootstepPlanningResult(status.toByte());
-      result.setTimeTaken(timeTaken);
-      return result;
+      return FootstepPlanningMessageReporter.packStepResult(footstepPlan, bodyPathPlan, status, timeTaken, planarRegionsList, planId.getIntegerValue());
    }
 
    public void processRequest(FootstepPlanningRequestPacket request)
@@ -413,8 +483,13 @@ public class MultiStageFootstepPlanningManager
 
    public void processPlanningStatisticsRequest()
    {
-      FootstepPlanner planner = planningStagesInProgress.get(0);
+      FootstepPlanner planner = pathPlanningStagesInProgress.get(0);
       sendPlannerStatistics(planner.getPlannerStatistics());
+   }
+
+   public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher)
+   {
+      this.textToSpeechPublisher = textToSpeechPublisher;
    }
 
    private void sendPlannerStatistics(PlannerStatistics plannerStatistics)
@@ -425,8 +500,8 @@ public class MultiStageFootstepPlanningManager
          sendListOfStatistics((ListOfStatistics) plannerStatistics);
          break;
       case VISIBILITY_GRAPH:
-         reportMessage(VisibilityGraphMessagesConverter
-                             .convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(), (VisibilityGraphStatistics) plannerStatistics));
+         statusOutputManager.reportStatusMessage(VisibilityGraphMessagesConverter.convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(),
+                                                                                                                         (VisibilityGraphStatistics) plannerStatistics));
          break;
       }
    }
@@ -437,43 +512,15 @@ public class MultiStageFootstepPlanningManager
          sendPlannerStatistics(listOfStatistics.pollStatistics());
    }
 
-   public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> publisher)
-   {
-      textToSpeechPublisher = publisher;
-   }
-
-   /**
-    * Publishes the given status message. It used for sending the result computed by this toolbox
-    * controller.
-    *
-    * @param statusMessage the message to publish.
-    */
-   private <S extends Settable<S>> void reportMessage(S statusMessage)
-   {
-      statusOutputManager.reportStatusMessage(statusMessage);
-   }
-
-   public void reinitialize()
-   {
-      requestInitialize();
-   }
-
    public void wakeUp()
    {
-      if (!scheduledStages.isEmpty())
-      {
-         if (debug)
-            PrintTools.error(this, "This planner is already running.");
-         return;
-      }
-
       if (debug)
          PrintTools.debug(this, "Waking up");
 
       createPlanningStage();
       //      scheduledStages
-      //            .add(executorService.scheduleAtFixedRate(planningStagesInProgress.get(0), 0, (long) dt, TimeUnit.SECONDS));
-      reinitialize();
+      //            .add(executorService.scheduleAtFixedRate(pathPlanningStagesInProgress.get(0), 0, (long) dt, TimeUnit.SECONDS));
+      initialize.set(true);
    }
 
    public void sleep()
@@ -481,18 +528,10 @@ public class MultiStageFootstepPlanningManager
       if (debug)
          PrintTools.debug(this, "Going to sleep");
 
-      planningStagesInProgress.clear();
+      cleanupAllPlanningStages();
 
-      if (scheduledStages.isEmpty())
-      {
-         if (debug)
-            PrintTools.error(this, "There are no stages running.");
-      }
-      else
-      {
-         while (!scheduledStages.isEmpty())
-            scheduledStages.remove(0).cancel(true);
-      }
+      while (!scheduledStages.isEmpty())
+         scheduledStages.remove(0).cancel(true);
    }
 
    public void destroy()
