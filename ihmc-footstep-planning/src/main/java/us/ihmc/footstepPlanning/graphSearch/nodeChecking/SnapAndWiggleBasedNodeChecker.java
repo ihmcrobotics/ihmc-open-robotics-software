@@ -44,6 +44,13 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
    }
 
    @Override
+   public void addPlannerListener(BipedalFootstepPlannerListener listener)
+   {
+      snapAndWiggler.addPlannerListener(listener);
+      listeners.add(listener);
+   }
+
+   @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       super.setPlanarRegions(planarRegionsList);
@@ -53,7 +60,7 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode nodeToExpand, FootstepNode previousNode)
    {
-      if(!hasPlanarRegions())
+      if (!hasPlanarRegions())
          return true;
 
       FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(nodeToExpand);
@@ -78,7 +85,7 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
       if (!isEnoughArea)
          return false;
 
-      if(previousNode == null)
+      if (previousNode == null)
          return true;
 
       FootstepNodeSnapData previousNodeSnapData = snapAndWiggler.snapFootstepNode(previousNode);
@@ -146,8 +153,8 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
          return false;
       }
 
-      if ((solePositionInParentZUpFrame.getX() > parameters.getMaximumStepXWhenForwardAndDown())
-            && (solePositionInParentZUpFrame.getZ() < -Math.abs(parameters.getMaximumStepZWhenForwardAndDown())))
+      if ((solePositionInParentZUpFrame.getX() > parameters.getMaximumStepXWhenForwardAndDown()) && (solePositionInParentZUpFrame.getZ() < -Math
+            .abs(parameters.getMaximumStepZWhenForwardAndDown())))
       {
          rejectNode(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN);
          return false;

@@ -21,6 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
+   private final List<BipedalFootstepPlannerListener> listeners = new ArrayList<>();
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
 
    private final WiggleParameters wiggleParameters = new WiggleParameters();
@@ -33,10 +34,15 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
    }
 
+   public void addPlannerListener(BipedalFootstepPlannerListener listener)
+   {
+      listeners.add(listener);
+   }
+
    @Override
    public FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
    {
-      if(!hasPlanarRegions())
+      if (!hasPlanarRegions())
       {
          return FootstepNodeSnapData.identityData();
       }
@@ -48,7 +54,8 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       if (snapTransform == null)
          return FootstepNodeSnapData.emptyData();
 
-      ConvexPolygon2D footholdPolygonInLocalFrame = FootstepNodeSnappingTools.getConvexHullOfPolygonIntersections(planarRegionToPack, footPolygon, snapTransform);
+      ConvexPolygon2D footholdPolygonInLocalFrame = FootstepNodeSnappingTools
+            .getConvexHullOfPolygonIntersections(planarRegionToPack, footPolygon, snapTransform);
       if (footholdPolygonInLocalFrame.isEmpty())
          return FootstepNodeSnapData.emptyData();
 
@@ -58,6 +65,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       {
          if (parameters.getRejectIfCannotFullyWiggleInside())
          {
+            notifyListerNodeWAsRejected(footstepNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
             return FootstepNodeSnapData.emptyData();
          }
          else
@@ -78,11 +86,11 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       List<PlanarRegion> planarRegionsIntersectingSnappedAndWiggledPolygon = PlanarRegionTools
             .findPlanarRegionsIntersectingPolygon(footPolygonInWorld, planarRegionsList);
 
-      if (checkForTooMuchPenetrationAfterWiggle(footstepNode, planarRegionToPack, footPolygonInWorld,
-                                                planarRegionsIntersectingSnappedAndWiggledPolygon))
+      if (checkForTooMuchPenetrationAfterWiggle(footstepNode, planarRegionToPack, footPolygonInWorld, planarRegionsIntersectingSnappedAndWiggledPolygon))
          return FootstepNodeSnapData.emptyData();
 
-      ConvexPolygon2D wiggledFootholdPolygonInLocalFrame = FootstepNodeSnappingTools.getConvexHullOfPolygonIntersections(planarRegionToPack, footPolygon, snapAndWiggleTransform);
+      ConvexPolygon2D wiggledFootholdPolygonInLocalFrame = FootstepNodeSnappingTools
+            .getConvexHullOfPolygonIntersections(planarRegionToPack, footPolygon, snapAndWiggleTransform);
       FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(planarRegionToPack, footstepNode, snapAndWiggleTransform, wiggledFootholdPolygonInLocalFrame);
 
       return new FootstepNodeSnapData(snapAndWiggleTransform, wiggledFootholdPolygonInLocalFrame);
@@ -120,8 +128,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       return wiggleTransformWorldToWorld;
    }
 
-   private boolean checkForTooMuchPenetrationAfterWiggle(FootstepNode node, PlanarRegion highestElevationPlanarRegion,
-                                                         ConvexPolygon2D footPolygonInWorld,
+   private boolean checkForTooMuchPenetrationAfterWiggle(FootstepNode node, PlanarRegion highestElevationPlanarRegion, ConvexPolygon2D footPolygonInWorld,
                                                          List<PlanarRegion> planarRegionsIntersectingSnappedAndWiggledPolygon)
    {
       ArrayList<ConvexPolygon2D> intersectionsInPlaneFrameToPack = new ArrayList<>();
@@ -133,8 +140,8 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
          {
             planarRegionIntersectingSnappedAndWiggledPolygon.getTransformToWorld(transformToWorldFromIntersectingPlanarRegion);
             intersectionsInPlaneFrameToPack.clear();
-            planarRegionIntersectingSnappedAndWiggledPolygon.getPolygonIntersectionsWhenProjectedVertically(footPolygonInWorld,
-                                                                                                            intersectionsInPlaneFrameToPack);
+            planarRegionIntersectingSnappedAndWiggledPolygon
+                  .getPolygonIntersectionsWhenProjectedVertically(footPolygonInWorld, intersectionsInPlaneFrameToPack);
 
             // If any points are above the plane of the planarRegionToPack, then this is stepping into a v type problem.
             for (ConvexPolygon2D intersectionPolygon : intersectionsInPlaneFrameToPack)
@@ -152,6 +159,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
                   if (zPenetration > parameters.getMaximumZPenetrationOnValleyRegions())
                   {
+                     notifyListerNodeWAsRejected(node, BipedalFootstepPlannerNodeRejectionReason.TOO_MUCH_PENETRATION_AFTER_WIGGLE);
                      return true;
                   }
                }
@@ -160,5 +168,11 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       }
 
       return false;
+   }
+
+   private void notifyListerNodeWAsRejected(FootstepNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
+   {
+      for (BipedalFootstepPlannerListener listener : listeners)
+         listener.rejectNode(nodeToExpand, reason);
    }
 }
