@@ -103,9 +103,8 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedFootstepPlanner(footstepPlanningParameters, contactPointsInSoleFrame, registry));
-      // FIXME this should use a real graphics list registry
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
-                     new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, null, registry));
+                     new VisibilityGraphWithAStarPlanner(stageId + "", footstepPlanningParameters, contactPointsInSoleFrame, graphicsListRegistry, registry));
 
       donePlanningSteps.set(true);
    }
