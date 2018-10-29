@@ -112,7 +112,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
 
       toolboxController = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, desiredFullRobotModel, yoGraphicsListRegistry,
-                                                          mainRegistry);
+                                                                  mainRegistry);
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       toolboxUpdater = createToolboxUpdater();
@@ -338,11 +338,8 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
 
       int numberOfTests = 30;
 
-      RigidBody[] bodiesToControl = {
-            randomizedFullRobotModel.getChest(),
-            randomizedFullRobotModel.getHand(RobotSide.LEFT),
-            randomizedFullRobotModel.getHand(RobotSide.RIGHT),
-            randomizedFullRobotModel.getFoot(supportFootSide.getOppositeSide())};
+      RigidBody[] bodiesToControl = {randomizedFullRobotModel.getChest(), randomizedFullRobotModel.getHand(RobotSide.LEFT),
+            randomizedFullRobotModel.getHand(RobotSide.RIGHT), randomizedFullRobotModel.getFoot(supportFootSide.getOppositeSide())};
 
       for (int i = 0; i < numberOfTests; i++)
       {
@@ -353,7 +350,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          RigidBodyTransform transformFromRootJointToWorldFrame = rootJointFrame.getTransformToDesiredFrame(supportFootFrame);
          RigidBodyTransform initialSupportFootTransform = initialFullRobotModel.getFoot(supportFootSide).getBodyFixedFrame().getTransformToWorldFrame();
          transformFromRootJointToWorldFrame.preMultiply(initialSupportFootTransform);
-         
+
          randomizedFullRobotModel.getRootJoint().setPositionAndRotation(transformFromRootJointToWorldFrame);
          randomizedFullRobotModel.updateFrames();
 
@@ -528,11 +525,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       RobotConfigurationDataFactory.packJointState(robotConfigurationData, Arrays.stream(joints).collect(Collectors.toList()));
       robotConfigurationData.getRootTranslation().set(fullRobotModel.getRootJoint().getTranslationForReading());
       robotConfigurationData.getRootOrientation().set(fullRobotModel.getRootJoint().getRotationForReading());
-      
-      for(int i=0;i<joints.length;i++)
-      {
-         PrintTools.info(""+joints[i] +" "+joints[i].getQ()+" "+joints[i].getqDesired());
-      }
+
       return robotConfigurationData;
    }
 

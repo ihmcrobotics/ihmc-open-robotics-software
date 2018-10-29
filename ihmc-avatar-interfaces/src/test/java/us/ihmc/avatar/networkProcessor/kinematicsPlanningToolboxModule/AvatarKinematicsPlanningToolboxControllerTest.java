@@ -21,6 +21,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.AvatarHumanoidKinematicsToolboxControllerTest;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -247,7 +248,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
          pose.interpolate(desiredPose, alpha);
          keyFramePoses.add(pose);
          desiredCOMPoints.add(new Point3D());
-         System.out.println(pose);
+         //System.out.println(pose);
       }
 
       KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
@@ -295,7 +296,13 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       else
       {
          for (int i = 0; i < numberOfIterations; i++)
-            toolboxUpdater.doControl();
+         {
+            if(!toolboxController.isDone())
+               toolboxUpdater.doControl();
+            else
+               PrintTools.info(""+i);
+         }
+            
       }
    }
 
