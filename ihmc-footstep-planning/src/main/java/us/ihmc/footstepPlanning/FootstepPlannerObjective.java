@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class FootstepPlannerInfo
+public class FootstepPlannerObjective
 {
    private double horizonLength = Double.NaN;
    private double timeout = Double.NaN;
@@ -12,19 +12,19 @@ public class FootstepPlannerInfo
    private RobotSide initialStanceFootSide = null;
    private FootstepPlannerGoal goal = null;
 
-   public FootstepPlannerInfo()
+   public FootstepPlannerObjective()
    {
       initialStanceFootPose.setToNaN();
    }
 
    public boolean hasHorizonLength()
    {
-      return Double.isNaN(horizonLength);
+      return !Double.isNaN(horizonLength);
    }
 
    public boolean hasTimeout()
    {
-      return Double.isNaN(timeout);
+      return !Double.isNaN(timeout);
    }
 
    public boolean hasGoal()

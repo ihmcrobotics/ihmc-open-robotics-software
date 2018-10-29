@@ -277,16 +277,14 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
 
       FootstepPlanningResult status = getPlanner().planPath();
       pathPlanResult.set(status);
+      if (status.validForExecution())
+         pathPlan.set(getPlanner().getPathPlan());
 
       for (PlannerCompletionCallback completionCallback : completionCallbackList)
          completionCallback.pathPlanningIsComplete(status, this);
 
       if (status.validForExecution())
-      {
-         pathPlan.set(getPlanner().getPathPlan());
-
          status = getPlanner().plan();
-      }
 
       stepPlanResult.set(status);
       if (status.validForExecution())

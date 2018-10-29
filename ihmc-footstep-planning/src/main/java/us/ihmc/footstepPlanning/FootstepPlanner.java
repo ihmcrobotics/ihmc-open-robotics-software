@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -10,9 +9,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface FootstepPlanner
 {
-   default void setFootstepPlannerInfo(FootstepPlannerInfo info)
+   default void setFootstepPlannerObjective(FootstepPlannerObjective info)
    {
-      if (info.hasInitialStanceFootPose() && info.hasInitialStanceFootSide())
+      if (info.hasInitialStanceFootPose())
          setInitialStanceFoot(info.getInitialStanceFootPose(), info.getInitialStanceFootSide());
       if (info.hasHorizonLength())
          setPlanningHorizonLength(info.getHorizonLength());
