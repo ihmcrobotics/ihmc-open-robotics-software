@@ -8,17 +8,16 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.GraphVisualization;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.NodeComparator;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -52,7 +51,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    private final FootstepGraph graph;
    private final FootstepNodeChecker nodeChecker;
-   private final GraphVisualization visualization;
+   private final BipedalFootstepPlannerListener listener;
    private final CostToGoHeuristics heuristics;
    private final FootstepNodeExpansion nodeExpansion;
    private final FootstepCost stepCostCalculator;
@@ -74,14 +73,14 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    public AStarFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics,
                                FootstepNodeExpansion nodeExpansion, FootstepCost stepCostCalculator, FootstepNodeSnapper snapper,
-                               GraphVisualization visualization, YoVariableRegistry parentRegistry)
+                               BipedalFootstepPlannerListener listener, YoVariableRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.nodeChecker = nodeChecker;
       this.heuristics = heuristics;
       this.nodeExpansion = nodeExpansion;
       this.stepCostCalculator = stepCostCalculator;
-      this.visualization = visualization;
+      this.listener = listener;
       this.snapper = snapper;
       this.graph = new FootstepGraph();
 
@@ -239,12 +238,12 @@ public class AStarFootstepPlanner implements FootstepPlanner
       expandedNodes = new HashSet<>();
       endNode = null;
 
-      if (visualization != null)
+      if (listener != null)
       {
-         visualization.addNode(startNode);
+         listener.addNode(startNode);
          for (RobotSide side : RobotSide.values)
-            visualization.addNode(goalNodes.get(side));
-         visualization.tickAndUpdate();
+            listener.addNode(goalNodes.get(side));
+         listener.tickAndUpdate();
       }
    }
 
@@ -265,10 +264,10 @@ public class AStarFootstepPlanner implements FootstepPlanner
             continue;
          expandedNodes.add(nodeToExpand);
 
-         if (visualization != null)
+         if (listener != null)
          {
-            visualization.addNode(nodeToExpand);
-            visualization.tickAndUpdate();
+            listener.addNode(nodeToExpand);
+            listener.tickAndUpdate();
          }
 
          if (checkAndHandleNodeAtGoal(nodeToExpand))
@@ -356,7 +355,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          throw new RuntimeException("Planner does not support goals other then " + supportedGoalType);
    }
 
-   public static AStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, GraphVisualization viz,
+   public static AStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, BipedalFootstepPlannerListener listener,
                                                     SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion,
                                                     YoVariableRegistry registry)
    {
@@ -380,7 +379,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, viz,
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, listener,
                                                               registry);
       return planner;
    }

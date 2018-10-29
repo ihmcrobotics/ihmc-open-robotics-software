@@ -171,7 +171,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    {
       if (listener != null)
       {
-         listener.nodeUnderConsiderationWasRejected(nodeToExpand, reason);
+         listener.rejectNode(nodeToExpand, reason);
       }
    }
 }

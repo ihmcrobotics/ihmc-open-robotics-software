@@ -6,8 +6,8 @@ import java.util.Queue;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.GraphVisualization;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -23,7 +23,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.commons.thread.ThreadTools;
 
-public class FootstepNodeVisualization implements GraphVisualization
+public class FootstepNodeVisualization implements BipedalFootstepPlannerListener
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 

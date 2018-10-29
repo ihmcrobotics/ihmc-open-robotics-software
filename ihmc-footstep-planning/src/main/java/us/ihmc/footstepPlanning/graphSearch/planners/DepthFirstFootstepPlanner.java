@@ -190,8 +190,6 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    {
       checker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
-      if (listener != null)
-         listener.planarRegionsListSet(planarRegionsList);
    }
 
    @Override
@@ -228,7 +226,6 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
       stack.clear();
       stack.add(startNode);
       footstepGraph.initialize(startNode);
-      notifiyListenersStartNodeWasAdded(startNode);
 
       numberOfNodesExpanded.set(0);
       planningStartTime.set(System.nanoTime());
@@ -250,8 +247,6 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
             nodeToExpand = stack.pollFirst();
          else
             nodeToExpand = stack.pollLast();
-
-         notifyListenerNodeIsBeingExpanded(nodeToExpand);
 
          if (goalNodes.get(nodeToExpand.getRobotSide()).equals(nodeToExpand))
          {
@@ -294,7 +289,6 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
 
       if (bestGoalNode == null)
       {
-         notifyListenerSolutionWasNotFound();
          planningDuration.set(-1.0);
          return FootstepPlanningResult.NO_PATH_EXISTS;
       }
@@ -347,32 +341,6 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
 
             plan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
          }
-
-         listener.solutionWasFound(plan);
-      }
-   }
-
-   private void notifyListenerSolutionWasNotFound()
-   {
-      if (listener != null)
-      {
-         listener.solutionWasNotFound();
-      }
-   }
-
-   private void notifyListenerNodeIsBeingExpanded(FootstepNode nodeToExpand)
-   {
-      if (listener != null)
-      {
-         listener.nodeIsBeingExpanded(nodeToExpand);
-      }
-   }
-
-   private void notifiyListenersStartNodeWasAdded(FootstepNode startNode)
-   {
-      if (listener != null)
-      {
-         listener.startNodeWasAdded(startNode);
       }
    }
 }
