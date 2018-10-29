@@ -65,6 +65,8 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
    private final YoDouble stageTime;
    private final YoBoolean initialize;
 
+   private final YoInteger sequenceId;
+
    private final int stageId;
    private final double dt;
 
@@ -89,6 +91,7 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
 
       stageTime = new YoDouble(stageId + "_StageTime", registry);
       initialize = new YoBoolean(stageId + "_Initialize" + registry.getName(), registry);
+      sequenceId = new YoInteger(stageId + "_PlanningSequenceId", registry);
 
       SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame;
       if (contactPointParameters == null)
@@ -133,16 +136,6 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
       return footstepPlanner;
    }
 
-   protected boolean donePlanningSteps()
-   {
-      return donePlanningSteps.getBooleanValue();
-   }
-
-   protected boolean donePlanningPath()
-   {
-      return donePlanningPath.getBooleanValue();
-   }
-
    private FootstepPlanner getPlanner()
    {
       return plannerMap.get(activePlannerEnum.getValue());
@@ -173,6 +166,11 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
       getPlanner().setPlanningHorizonLength(planningHorizonLength);
    }
 
+   public void setPlanSequenceId(int sequenceId)
+   {
+      this.sequenceId.set(sequenceId);
+   }
+
    public double getPlanningDuration()
    {
       return getPlanner().getPlanningDuration();
@@ -183,24 +181,19 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
       return getPlanner().getPlannerStatistics();
    }
 
-   public FootstepPlanningResult getPathPlanResult()
-   {
-      return pathPlanResult.getAndSet(null);
-   }
-
    public BodyPathPlan getPathPlan()
    {
       return pathPlan.getAndSet(null);
    }
 
-   public FootstepPlanningResult getStepPlanResult()
-   {
-      return stepPlanResult.getAndSet(null);
-   }
-
    public FootstepPlan getPlan()
    {
       return stepPlan.getAndSet(null);
+   }
+
+   public int getPlanSequenceId()
+   {
+      return sequenceId.getIntegerValue();
    }
 
    @Override
