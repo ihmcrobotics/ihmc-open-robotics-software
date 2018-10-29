@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.geometry.polytope.ConvexPolytope;
@@ -23,7 +23,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -94,6 +93,23 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
          return true;
       }
 
+      if (!isNodeValidInternal(node, previousNode))
+      {
+         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
+         return false;
+      }
+
+      return true;
+   }
+
+   @Override
+   public void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform)
+   {
+
+   }
+
+   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
+   {
       if (!findMidStanceFrame(node, previousNode))
          return true;
 
@@ -122,18 +138,11 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
          ConvexPolytope planarRegionPolytope = planarRegionPolytopes.get(planarRegion);
          if (collisionDetector.arePolytopesColliding(bodyCollisionPolytope, planarRegionPolytope, pointToThrowAway1, pointToThrowAway2))
          {
-            rejectNode(node, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
             return false;
          }
       }
 
       return true;
-   }
-
-   @Override
-   public void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform)
-   {
-
    }
 
    private final FramePose3D midPose = new FramePose3D();
@@ -182,11 +191,5 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       midPoint.interpolate(projectedPoint, previousProjectedPoint, 0.5);
 
       return midPoint;
-   }
-
-   private void notifyPlannerListenerThatNodeIsRejected(FootstepNode node, BipedalFootstepPlannerNodeRejectionReason rejectionReason)
-   {
-      for (BipedalFootstepPlannerListener listener : listeners)
-         listener.rejectNode(node, rejectionReason);
    }
 }

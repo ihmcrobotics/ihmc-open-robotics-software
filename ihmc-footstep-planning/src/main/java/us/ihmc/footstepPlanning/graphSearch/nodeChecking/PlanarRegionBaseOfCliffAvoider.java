@@ -1,9 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -13,15 +9,17 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
 {
@@ -44,7 +42,7 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
       this.startNode = startNode;
    }
 
-   public boolean isNodeValid(FootstepNode node, FootstepNode previosNode)
+   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
       if(startNode != null && startNode.equals(node))
          return true;
@@ -84,7 +82,7 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
 
       boolean tooCloseToCliff = maximumCliffZInSoleFrame < cliffHeightToAvoid;
       if(tooCloseToCliff)
-         rejectNode(node, BipedalFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
+         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
       return tooCloseToCliff;
    }
    
