@@ -39,11 +39,11 @@ import org.yaml.snakeyaml.Yaml;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -234,7 +234,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
       }
       else
       {
-         PrintTools.info(this, "Did not find: \"" + fingerTransmissionFile + "\", setting coeffs to default.");
+         LogTools.info("Did not find: \"" + fingerTransmissionFile + "\", setting coeffs to default.");
       }
       return areCoeffsLoaded;
    }
@@ -439,7 +439,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
       });
    }
    
-   public double getMotorBasedFingerJointPosition(RobotSide robotSide, ValkyrieFingerMotorName motorName)
+   public double getFingerMotorPosition(RobotSide robotSide, ValkyrieFingerMotorName motorName)
    {
       return sideDependentFingerMotorHandles.get(robotSide).get(motorName).getQ();
    }
