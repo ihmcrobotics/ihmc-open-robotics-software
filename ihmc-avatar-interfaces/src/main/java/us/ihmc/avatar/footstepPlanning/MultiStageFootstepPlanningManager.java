@@ -23,7 +23,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
@@ -61,10 +60,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
+   private final List<FootstepPlannerInfo> poolOfPlanningGoals = new ArrayList<>();
+
    private final List<FootstepPlanningStage> allPlanningStages = new ArrayList<>();
    private final List<FootstepPlanningStage> availablePlanningStages = new ArrayList<>();
    private final List<FootstepPlanningStage> pathPlanningStagesInProgress = new ArrayList<>();
    private final List<FootstepPlanningStage> stepPlanningStagesInProgress = new ArrayList<>();
+
    private final HashMap<FootstepPlanningStage, ScheduledFuture<?>> planningTasks = new HashMap<>();
 
    private final YoBoolean isDonePlanningPath = new YoBoolean("isDonePlanningPath", registry);
@@ -192,6 +194,30 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       completedPathResults.clear();
       completedStepResults.clear();
+
+      poolOfPlanningGoals.clear();
+   }
+
+   private void assignGoalsToAvailablePlanners()
+   {
+      if (poolOfPlanningGoals.isEmpty())
+         return;
+
+      if (availablePlanningStages.isEmpty())
+         return;
+
+      while (!poolOfPlanningGoals.isEmpty() && !availablePlanningStages.isEmpty())
+      {
+         FootstepPlanningStage planner = spawnNextAvailablePlanner();
+         FootstepPlannerInfo plannerGoal = poolOfPlanningGoals.remove(0);
+
+         ScheduledFuture<?> plannerTask = executorService.scheduleAtFixedRate(planner, 0, (long) Conversions.secondsToMilliseconds(dt), TimeUnit.MILLISECONDS);
+         planningTasks.put(planner, plannerTask);
+
+         poolOfPlanningGoals.add(plannerGoal);
+         pathPlanningStagesInProgress.add(planner);
+         stepPlanningStagesInProgress.add(planner);
+      }
    }
 
    @Override
@@ -270,30 +296,32 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          this.planarRegionsList = Optional.of(planarRegionsList);
       }
 
+      FootstepPlannerInfo plannerGoal = new FootstepPlannerInfo();
+
       FramePose3D initialStancePose = new FramePose3D(ReferenceFrame.getWorldFrame());
       initialStancePose.setPosition(new Point3D(request.getStanceFootPositionInWorld()));
       initialStancePose.setOrientation(new Quaternion(request.getStanceFootOrientationInWorld()));
+      plannerGoal.setInitialStanceFootPose(initialStancePose);
 
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame());
       goalPose.setPosition(new Point3D(request.getGoalPositionInWorld()));
       goalPose.setOrientation(new Quaternion(request.getGoalOrientationInWorld()));
 
-      FootstepPlanningStage planner = spawnNextAvailablePlanner();
-      planner.setInitialStanceFoot(initialStancePose, RobotSide.fromByte(request.getInitialStanceRobotSide()));
+      plannerGoal.setInitialStanceFootSide(RobotSide.fromByte(request.getInitialStanceRobotSide()));
 
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       goal.setGoalPoseBetweenFeet(goalPose);
-      planner.setGoal(goal);
+      plannerGoal.setGoal(goal);
 
       double horizonLength = request.getHorizonLength();
       if (horizonLength > 0 && Double.isFinite(horizonLength))
-         planner.setPlanningHorizonLength(horizonLength);
+         plannerGoal.setHorizonLength(horizonLength);
 
       double timeout = request.getTimeout();
       if (timeout > 0.0 && Double.isFinite(timeout))
       {
-         planner.setTimeout(timeout);
+         plannerGoal.setTimeout(timeout);
          this.timeout.set(timeout);
 
          if (debug)
@@ -303,14 +331,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       }
       else
       {
-         planner.setTimeout(Double.POSITIVE_INFINITY);
+         plannerGoal.setTimeout(Double.POSITIVE_INFINITY);
       }
-
-      ScheduledFuture<?> plannerTask = executorService.scheduleAtFixedRate(planner, 0, (long) Conversions.secondsToMilliseconds(dt), TimeUnit.MILLISECONDS);
-      planningTasks.put(planner, plannerTask);
-
-      pathPlanningStagesInProgress.add(planner);
-      stepPlanningStagesInProgress.add(planner);
 
       return true;
    }
@@ -342,9 +364,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       for (FootstepPlanner footstepPlanner : stepPlanningStagesInProgress)
          footstepPlanner.setPlanarRegions(planarRegionsList);
 
-      sendMessageToUI("Starting To Plan: " + planId.getIntegerValue() + ", " + activePlanner.getEnumValue().toString());
-
-      statusOutputManager.reportStatusMessage(FootstepPlanningMessageReporter.packStatus(FootstepPlannerStatus.PLANNING_PATH));
+      // check if there are any more goals, and assign them to the available planners
+      assignGoalsToAvailablePlanners();
 
       // check the status of the path planners
       FootstepPlanningResult pathStatus = getWorstResult(completedPathResults);
@@ -386,6 +407,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       isDone.set(isDonePlanningPath.getBooleanValue() && isDonePlanningSteps.getBooleanValue());
    }
+
+
 
    private static FootstepPlanningResult getWorstResult(List<FootstepPlanningResult> results)
    {
