@@ -202,8 +202,16 @@ public abstract class FootstepPlannerDataSetTest
          ThreadTools.sleep(500); // Apparently need to give some time for the prints to appear in the right order.
       }
 
-      Assert.assertTrue("Number of failing datasets: " + failingTestNameAndErrorList.size() + " out of " + allDatasets.size(),
-                        failingTestNameAndErrorList.isEmpty());
+      String message = "Number of failing datasets: " + failingTestNameAndErrorList.size() + " out of " + allDatasets.size();
+      if (VISUALIZE)
+      {
+         PrintTools.info(message);
+         ThreadTools.sleepForever();
+      }
+      else
+      {
+         Assert.assertTrue(message, failingTestNameAndErrorList.isEmpty());
+      }
    }
 
    public String runAssertions(FootstepPlannerUnitTestDataset dataset)
