@@ -241,9 +241,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       if (visualization != null)
       {
-         visualization.addNode(startNode, true);
+         visualization.addNode(startNode);
          for (RobotSide side : RobotSide.values)
-            visualization.addNode(goalNodes.get(side), true);
+            visualization.addNode(goalNodes.get(side));
          visualization.tickAndUpdate();
       }
    }
@@ -267,7 +267,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
          if (visualization != null)
          {
-            visualization.addNode(nodeToExpand, false);
+            visualization.addNode(nodeToExpand);
             visualization.tickAndUpdate();
          }
 
@@ -342,14 +342,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
          return FootstepPlanningResult.NO_PATH_EXISTS;
       if (!graph.doesNodeExist(endNode))
          return FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
-
-      if (visualization != null)
-      {
-         List<FootstepNode> path = graph.getPathFromStart(endNode);
-         for (FootstepNode node : path)
-            visualization.setNodeActive(node);
-         visualization.tickAndUpdate();
-      }
 
       if (heuristics.getWeight() <= 1.0)
          return FootstepPlanningResult.OPTIMAL_SOLUTION;
