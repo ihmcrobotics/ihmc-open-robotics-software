@@ -1,6 +1,7 @@
 package us.ihmc.avatar.footstepPlanning;
 
 import controller_msgs.msg.dds.*;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -22,14 +23,12 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.lists.PairList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -57,6 +56,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final YoDouble toolboxTime = new YoDouble("ToolboxTime", registry);
    private final YoDouble timeout = new YoDouble("ToolboxTimeout", registry);
    private final YoInteger planId = new YoInteger("planId", registry);
+   private final YoInteger globalSequenceIndex = new YoInteger("globalSequenceIndex", registry);
 
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
@@ -77,8 +77,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final List<FootstepPlanningResult> completedPathResults = new ArrayList<>();
    private final List<FootstepPlanningResult> completedStepResults = new ArrayList<>();
 
-   private final List<BodyPathPlan> completedPathPlans = new ArrayList<>();
-   private final List<FootstepPlan> completedStepPlans = new ArrayList<>();
+   private final PairList<Integer, BodyPathPlan> completedPathPlans = new PairList<>();
+   private final PairList<Integer, FootstepPlan> completedStepPlans = new PairList<>();
 
    private double dt;
 
@@ -198,7 +198,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          FootstepPlanningStage planner = spawnNextAvailablePlanner();
          FootstepPlannerObjective plannerGoal = poolOfPlanningObjectives.remove(0);
 
+         globalSequenceIndex.increment();
          planner.setFootstepPlannerObjective(plannerGoal);
+         planner.setPlanSequenceId(globalSequenceIndex.getIntegerValue());
 
          ScheduledFuture<?> plannerTask = executorService.scheduleAtFixedRate(planner, 0, (long) Conversions.secondsToMilliseconds(dt), TimeUnit.MILLISECONDS);
          planningTasks.put(planner, plannerTask);
@@ -218,7 +220,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       if (pathPlanningResult.validForExecution() && bodyPathPlan != null)
       {
-         completedPathPlans.add(bodyPathPlan);
+         completedPathPlans.add(new ImmutablePair<>(stageFinished.getPlanSequenceId(), bodyPathPlan));
       }
    }
 
@@ -232,7 +234,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       planningTasks.remove(stageFinished).cancel(true);
 
       if (stepPlanningResult.validForExecution())
-         completedStepPlans.add(stageFinished.getPlan());
+         completedStepPlans.add(new ImmutablePair<>(stageFinished.getPlanSequenceId(), stageFinished.getPlan()));
    }
 
    public void update()
@@ -432,13 +434,15 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          return;
       }
 
+      completedPathPlans.sort(Comparator.comparingInt(ImmutablePair<Integer, BodyPathPlan>::getLeft));
+
       BodyPathPlan totalBodyPathPlan = new BodyPathPlan();
-      totalBodyPathPlan.setStartPose(completedPathPlans.get(0).getStartPose());
-      totalBodyPathPlan.setGoalPose(completedPathPlans.get(completedPathPlans.size() - 1).getStartPose());
-      for (BodyPathPlan bodyPathPlan : completedPathPlans)
+      totalBodyPathPlan.setStartPose(completedPathPlans.get(0).getRight().getStartPose());
+      totalBodyPathPlan.setGoalPose(completedPathPlans.get(completedPathPlans.size() - 1).getRight().getStartPose());
+      for (ImmutablePair<Integer, BodyPathPlan> bodyPathPlan : completedPathPlans)
       {
-         for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
-            totalBodyPathPlan.addWaypoint(bodyPathPlan.getWaypoint(i));
+         for (int i = 0; i < bodyPathPlan.getRight().getNumberOfWaypoints(); i++)
+            totalBodyPathPlan.addWaypoint(bodyPathPlan.getRight().getWaypoint(i));
       }
 
       completedPathPlans.clear();
@@ -454,9 +458,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          return;
       }
 
+      completedStepPlans.sort(Comparator.comparingInt(ImmutablePair<Integer, FootstepPlan>::getLeft));
+
       FootstepPlan totalFootstepPlan = new FootstepPlan();
-      for (FootstepPlan footstepPlan : completedStepPlans)
+      for (ImmutablePair<Integer, FootstepPlan> footstepPlanPairs : completedStepPlans)
       {
+         FootstepPlan footstepPlan = footstepPlanPairs.getRight();
+
          if (footstepPlan.hasLowLevelPlanGoal())
             totalFootstepPlan.setLowLevelPlanGoal(footstepPlan.getLowLevelPlanGoal());
 
