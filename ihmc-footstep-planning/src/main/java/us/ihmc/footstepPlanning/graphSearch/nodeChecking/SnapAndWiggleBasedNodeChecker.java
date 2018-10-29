@@ -52,11 +52,6 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
    {
       super.setPlanarRegions(planarRegionsList);
       this.snapAndWiggler.setPlanarRegions(planarRegionsList);
-
-      if (listener != null)
-      {
-         listener.planarRegionsListSet(planarRegionsList);
-      }
    }
 
    @Override
@@ -100,8 +95,6 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
       boolean goodFootstep = checkIfGoodFootstep(nodeToExpand, snappedSoleTransform, previousSnappedSoleTransform);
       if (!goodFootstep)
          return false;
-
-      notifyListenerNodeUnderConsiderationWasSuccessful(nodeToExpand);
 
       return true;
    }
@@ -181,27 +174,11 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
       return Math.sqrt(point.getX() * point.getX() + point.getY() * point.getY());
    }
 
-   private void notifyListenerNodeUnderConsiderationWasSuccessful(FootstepNode node)
-   {
-      if (listener != null)
-      {
-         listener.nodeUnderConsiderationWasSuccessful(node);
-      }
-   }
-
-   private void notifyListenerNodeUnderConsideration(FootstepNode nodeToExpand)
-   {
-      if (listener != null)
-      {
-         listener.nodeUnderConsideration(nodeToExpand);
-      }
-   }
-
    private void notifyListenerNodeUnderConsiderationWasRejected(FootstepNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       if (listener != null)
       {
-         listener.nodeUnderConsiderationWasRejected(nodeToExpand, reason);
+         listener.rejectNode(nodeToExpand, reason);
       }
    }
 
