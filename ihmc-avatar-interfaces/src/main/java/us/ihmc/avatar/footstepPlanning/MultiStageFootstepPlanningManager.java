@@ -60,7 +60,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
-   private final List<FootstepPlannerInfo> poolOfPlanningGoals = new ArrayList<>();
+   private final List<FootstepPlannerObjective> poolOfPlanningObjectives = new ArrayList<>();
 
    private final List<FootstepPlanningStage> allPlanningStages = new ArrayList<>();
    private final List<FootstepPlanningStage> availablePlanningStages = new ArrayList<>();
@@ -166,19 +166,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       return planningStage;
    }
 
-   private void createPlanningStage()
-   {
-      if (!pathPlanningStagesInProgress.isEmpty())
-      {
-         if (debug)
-            PrintTools.error(this, "toolboxRunnable is not null.");
-         return;
-      }
-
-      FootstepPlanningStage stage = createNewFootstepPlanningStage();
-      pathPlanningStagesInProgress.add(stage);
-      allPlanningStages.add(stage);
-   }
 
    private void cleanupAllPlanningStages()
    {
@@ -195,26 +182,27 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       completedPathResults.clear();
       completedStepResults.clear();
 
-      poolOfPlanningGoals.clear();
+      poolOfPlanningObjectives.clear();
    }
 
    private void assignGoalsToAvailablePlanners()
    {
-      if (poolOfPlanningGoals.isEmpty())
+      if (poolOfPlanningObjectives.isEmpty())
          return;
 
       if (availablePlanningStages.isEmpty())
          return;
 
-      while (!poolOfPlanningGoals.isEmpty() && !availablePlanningStages.isEmpty())
+      while (!poolOfPlanningObjectives.isEmpty() && !availablePlanningStages.isEmpty())
       {
          FootstepPlanningStage planner = spawnNextAvailablePlanner();
-         FootstepPlannerInfo plannerGoal = poolOfPlanningGoals.remove(0);
+         FootstepPlannerObjective plannerGoal = poolOfPlanningObjectives.remove(0);
+
+         planner.setFootstepPlannerObjective(plannerGoal);
 
          ScheduledFuture<?> plannerTask = executorService.scheduleAtFixedRate(planner, 0, (long) Conversions.secondsToMilliseconds(dt), TimeUnit.MILLISECONDS);
          planningTasks.put(planner, plannerTask);
 
-         poolOfPlanningGoals.add(plannerGoal);
          pathPlanningStagesInProgress.add(planner);
          stepPlanningStagesInProgress.add(planner);
       }
@@ -226,8 +214,12 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       completedPathResults.add(pathPlanningResult);
       pathPlanningStagesInProgress.remove(stageFinished);
 
-      if (pathPlanningResult.validForExecution())
-         completedPathPlans.add(stageFinished.getPathPlan());
+      BodyPathPlan bodyPathPlan = stageFinished.getPathPlan();
+
+      if (pathPlanningResult.validForExecution() && bodyPathPlan != null)
+      {
+         completedPathPlans.add(bodyPathPlan);
+      }
    }
 
    @Override
@@ -296,7 +288,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          this.planarRegionsList = Optional.of(planarRegionsList);
       }
 
-      FootstepPlannerInfo plannerGoal = new FootstepPlannerInfo();
+      FootstepPlannerObjective plannerGoal = new FootstepPlannerObjective();
 
       FramePose3D initialStancePose = new FramePose3D(ReferenceFrame.getWorldFrame());
       initialStancePose.setPosition(new Point3D(request.getStanceFootPositionInWorld()));
@@ -333,6 +325,10 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       {
          plannerGoal.setTimeout(Double.POSITIVE_INFINITY);
       }
+
+      poolOfPlanningObjectives.add(plannerGoal);
+
+      assignGoalsToAvailablePlanners();
 
       return true;
    }
@@ -540,9 +536,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       if (debug)
          PrintTools.debug(this, "Waking up");
 
-      createPlanningStage();
-      //      scheduledStages
-      //            .add(executorService.scheduleAtFixedRate(pathPlanningStagesInProgress.get(0), 0, (long) dt, TimeUnit.SECONDS));
       initialize.set(true);
    }
 
