@@ -6,30 +6,32 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.ArrayList;
+
 public abstract class FootstepNodeChecker
 {
    protected PlanarRegionsList planarRegionsList;
-   protected BipedalFootstepPlannerListener listener;
+   protected final ArrayList<BipedalFootstepPlannerListener> listeners = new ArrayList<>();
 
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
       this.planarRegionsList = planarRegions;
    }
 
-   public void addPlannerListener(BipedalFootstepPlannerListener listener)
-   {
-      this.listener = listener;
-   }
-
    protected void rejectNode(FootstepNode node, BipedalFootstepPlannerNodeRejectionReason rejectionReason)
    {
-      if(listener != null)
+      for (BipedalFootstepPlannerListener listener : listeners)
          listener.rejectNode(node, rejectionReason);
    }
 
    protected boolean hasPlanarRegions()
    {
       return planarRegionsList != null && !planarRegionsList.isEmpty();
+   }
+
+   public void addPlannerListener(BipedalFootstepPlannerListener listener)
+   {
+      listeners.add(listener);
    }
 
    public abstract boolean isNodeValid(FootstepNode node, FootstepNode previousNode);

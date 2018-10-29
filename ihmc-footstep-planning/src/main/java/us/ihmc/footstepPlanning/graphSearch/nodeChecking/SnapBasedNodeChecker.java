@@ -1,22 +1,22 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
-import java.util.List;
-
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.List;
 
 public class SnapBasedNodeChecker extends FootstepNodeChecker
 {
@@ -31,11 +31,6 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       this.parameters = parameters;
       this.footPolygons = footPolygons;
       this.snapper = snapper;
-   }
-
-   public void addPlannerListener(BipedalFootstepPlannerListener listener)
-   {
-      this.listener = listener;
    }
 
    @Override
@@ -102,7 +97,9 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          return false;
       }
 
-      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition, snapper.getOrCreateNearbyRegions(node.getRoundedX(), node.getRoundedY()), parameters.getBodyGroundClearance()))
+      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition,
+                                                       snapper.getOrCreateNearbyRegions(node.getRoundedX(), node.getRoundedY()),
+                                                       parameters.getBodyGroundClearance()))
       {
          if (DEBUG)
          {
