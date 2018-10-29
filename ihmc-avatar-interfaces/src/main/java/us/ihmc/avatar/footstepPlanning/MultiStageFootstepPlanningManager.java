@@ -60,10 +60,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
-   private final List<FootstepPlannerObjective> poolOfPlanningObjectives = new ArrayList<>();
+   private FootstepPlannerObjective overallPlanningObjective = null;
+   private final List<FootstepPlannerObjective> planningObjectivePool = new ArrayList<>();
 
    private final List<FootstepPlanningStage> allPlanningStages = new ArrayList<>();
-   private final List<FootstepPlanningStage> availablePlanningStages = new ArrayList<>();
+   private final List<FootstepPlanningStage> planningStagePool = new ArrayList<>();
    private final List<FootstepPlanningStage> pathPlanningStagesInProgress = new ArrayList<>();
    private final List<FootstepPlanningStage> stepPlanningStagesInProgress = new ArrayList<>();
 
@@ -116,7 +117,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          planningStage.addCompletionCallback(this);
          registry.addChild(planningStage.getYoVariableRegistry());
          allPlanningStages.add(planningStage);
-         availablePlanningStages.add(planningStage);
+         planningStagePool.add(planningStage);
       }
 
       isDonePlanningPath.set(false);
@@ -147,14 +148,14 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private FootstepPlanningStage spawnNextAvailablePlanner()
    {
-      if (availablePlanningStages.isEmpty())
+      if (planningStagePool.isEmpty())
       {
          FootstepPlanningStage planningStage = createNewFootstepPlanningStage();
          allPlanningStages.add(planningStage);
-         availablePlanningStages.add(planningStage);
+         planningStagePool.add(planningStage);
       }
 
-      return availablePlanningStages.remove(0);
+      return planningStagePool.remove(0);
    }
 
    private FootstepPlanningStage cleanupPlanningStage(int stageIndex)
@@ -169,11 +170,12 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private void cleanupAllPlanningStages()
    {
+      globalSequenceIndex.set(0);
       pathPlanningStagesInProgress.clear();
 
       while (!stepPlanningStagesInProgress.isEmpty())
       {
-         availablePlanningStages.add(cleanupPlanningStage(0));
+         planningStagePool.add(cleanupPlanningStage(0));
       }
 
       completedPathPlans.clear();
@@ -182,21 +184,21 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       completedPathResults.clear();
       completedStepResults.clear();
 
-      poolOfPlanningObjectives.clear();
+      planningObjectivePool.clear();
    }
 
    private void assignGoalsToAvailablePlanners()
    {
-      if (poolOfPlanningObjectives.isEmpty())
+      if (planningObjectivePool.isEmpty())
          return;
 
-      if (availablePlanningStages.isEmpty())
+      if (planningStagePool.isEmpty())
          return;
 
-      while (!poolOfPlanningObjectives.isEmpty() && !availablePlanningStages.isEmpty())
+      while (!planningObjectivePool.isEmpty() && !planningStagePool.isEmpty())
       {
          FootstepPlanningStage planner = spawnNextAvailablePlanner();
-         FootstepPlannerObjective plannerGoal = poolOfPlanningObjectives.remove(0);
+         FootstepPlannerObjective plannerGoal = planningObjectivePool.remove(0);
 
          globalSequenceIndex.increment();
          planner.setFootstepPlannerObjective(plannerGoal);
@@ -229,7 +231,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    {
       completedStepResults.add(stepPlanningResult);
       stepPlanningStagesInProgress.remove(stageFinished);
-      availablePlanningStages.add(stageFinished);
+      planningStagePool.add(stageFinished);
 
       planningTasks.remove(stageFinished).cancel(true);
 
@@ -328,7 +330,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          plannerGoal.setTimeout(Double.POSITIVE_INFINITY);
       }
 
-      poolOfPlanningObjectives.add(plannerGoal);
+      overallPlanningObjective = plannerGoal;
+      planningObjectivePool.add(plannerGoal);
 
       assignGoalsToAvailablePlanners();
 
@@ -374,14 +377,17 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       }
 
       // path planner hasn't failed, so update the path planner status and send out new plan if finished
-      boolean pathPlanningStatusChanged = isDonePlanningPath.getBooleanValue() != pathPlanningStagesInProgress.isEmpty();
-      if (pathPlanningStagesInProgress.isEmpty() && pathPlanningStatusChanged)
+      boolean noMorePathsToPlan = pathPlanningStagesInProgress.isEmpty() && planningObjectivePool.isEmpty();
+      boolean pathPlanningStatusChanged = isDonePlanningPath.getBooleanValue() != noMorePathsToPlan;
+      if (noMorePathsToPlan && pathPlanningStatusChanged) // path planning just finished
       {
+         sendMessageToUI("Result of path planning: " + planId.getIntegerValue() + ", " + pathStatus.toString());
+
          concatenateBodyPathPlans();
          statusOutputManager.reportStatusMessage(packPathResult(bodyPathPlan.get(), pathStatus));
       }
-      if (pathPlanningStatusChanged)
-         isDonePlanningPath.set(pathPlanningStagesInProgress.isEmpty());
+      if (pathPlanningStatusChanged) // path planning either just started or just finished, so this flag needs updating
+         isDonePlanningPath.set(noMorePathsToPlan);
 
       // check the status of the step planners
       FootstepPlanningResult stepStatus = getWorstResult(completedStepResults);
@@ -391,17 +397,18 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          return;
       }
 
-      // step planner hasn't failed, so update the step planner stauts and send out the new plan if finished
-      boolean stepPlanningStatusChanged = isDonePlanningSteps.getBooleanValue() != stepPlanningStagesInProgress.isEmpty();
-      if (stepPlanningStagesInProgress.isEmpty() && stepPlanningStatusChanged)
+      // step planner hasn't failed, so update the step planner status and send out the new plan if finished
+      boolean noMoreStepsToPlan = stepPlanningStagesInProgress.isEmpty() && planningObjectivePool.isEmpty();
+      boolean stepPlanningStatusChanged = isDonePlanningSteps.getBooleanValue() != noMoreStepsToPlan;
+      if (noMorePathsToPlan && stepPlanningStatusChanged) // step planning just finished.
       {
-         sendMessageToUI("Result: " + planId.getIntegerValue() + ", " + stepStatus.toString());
+         sendMessageToUI("Result of step planning: " + planId.getIntegerValue() + ", " + stepStatus.toString());
          concatenateFootstepPlans();
          statusOutputManager
                .reportStatusMessage(packStepResult(footstepPlan.getAndSet(null), bodyPathPlan.getAndSet(null), stepStatus, toolboxTime.getDoubleValue()));
       }
-      if (stepPlanningStatusChanged)
-         isDonePlanningSteps.set(stepPlanningStagesInProgress.isEmpty());
+      if (stepPlanningStatusChanged) // step planning just started or just finished, so this flag needs updating.
+         isDonePlanningSteps.set(noMoreStepsToPlan);
 
       isDone.set(isDonePlanningPath.getBooleanValue() && isDonePlanningSteps.getBooleanValue());
    }

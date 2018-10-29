@@ -266,7 +266,9 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
          return;
       }
 
-      sendMessageToUI("Starting To Plan: " + planId.getValue() + ", using type " + activePlannerEnum.getValue().toString() + " on stage " + stageId);
+      sendMessageToUI(
+            "Starting To Plan: " + planId.getValue() + " sequence: " + sequenceId.getValue() + ", using type " + activePlannerEnum.getValue().toString()
+                  + " on stage " + stageId);
 
       FootstepPlanningResult status = getPlanner().planPath();
       pathPlanResult.set(status);
@@ -285,8 +287,6 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
 
       for (PlannerCompletionCallback completionCallback : completionCallbackList)
          completionCallback.stepPlanningIsComplete(status, this);
-
-      sendMessageToUI("Result: " + planId.getValue() + ", " + status.toString() + " on stage " + stageId);
    }
 
    public boolean initialize()
@@ -321,5 +321,4 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
 
       return footPolygons;
    }
-
 }
