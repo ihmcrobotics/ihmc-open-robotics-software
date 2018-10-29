@@ -1,22 +1,16 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
@@ -30,16 +24,11 @@ import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTypeTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public abstract class FootstepPlannerDataSetTest
 {
@@ -174,7 +163,7 @@ public abstract class FootstepPlannerDataSetTest
    protected void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner, List<FootstepPlannerUnitTestDataset> allDatasets)
    {
       if (VERBOSE || DEBUG)
-         PrintTools.info("Unit test files found: " + allDatasets.size());
+         LogTools.info("Unit test files found: " + allDatasets.size());
 
       if (allDatasets.isEmpty())
          Assert.fail("Did not find any datasets to test.");
@@ -184,12 +173,12 @@ public abstract class FootstepPlannerDataSetTest
       {
          FootstepPlannerUnitTestDataset dataset = allDatasets.get(i);
          if (DEBUG || VERBOSE)
-            PrintTools.info("Testing file: " + dataset.getDatasetName());
+            LogTools.info("Testing file: " + dataset.getDatasetName());
 
          if(!dataset.getTypes().contains(getPlannerType()))
          {
             if(DEBUG || VERBOSE)
-               PrintTools.info(dataset.getDatasetName() + " does not contain planner type " + getPlannerType() + ", skipping");
+               LogTools.info(dataset.getDatasetName() + " does not contain planner type " + getPlannerType() + ", skipping");
             continue;
          }
 
@@ -201,7 +190,7 @@ public abstract class FootstepPlannerDataSetTest
          if (DEBUG || VERBOSE)
          {
             String result = errorMessagesForCurrentFile.isEmpty() ? "passed" : "failed";
-            PrintTools.info(dataset.getDatasetName() + " " + result);
+            LogTools.info(dataset.getDatasetName() + " " + result);
          }
 
          ThreadTools.sleep(500); // Apparently need to give some time for the prints to appear in the right order.
@@ -210,7 +199,7 @@ public abstract class FootstepPlannerDataSetTest
       String message = "Number of failing datasets: " + numberOfFailingTests + " out of " + allDatasets.size();
       if (VISUALIZE)
       {
-         PrintTools.info(message);
+         LogTools.info(message);
          ThreadTools.sleepForever();
       }
       else
@@ -246,7 +235,7 @@ public abstract class FootstepPlannerDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
 
       if (DEBUG)
-         PrintTools.info("Sending out planning request packet.");
+         LogTools.info("Sending out planning request packet.");
    }
 
    protected String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plan, Point3D goal)
@@ -270,7 +259,7 @@ public abstract class FootstepPlannerDataSetTest
       if (VISUALIZE || DEBUG)
       {
          if (!condition)
-            PrintTools.error(datasetName + ": " + message);
+            LogTools.error(datasetName + ": " + message);
       }
       return !condition ? "\n" + message : "";
    }
@@ -370,7 +359,7 @@ public abstract class FootstepPlannerDataSetTest
       if (uiReceivedPlan.get() && uiFootstepPlanReference.get() != null && actualPlan.get() == null)
       {
          if (DEBUG)
-            PrintTools.info("Received a plan from the UI.");
+            LogTools.info("Received a plan from the UI.");
          actualPlan.set(uiFootstepPlanReference.getAndSet(null));
          uiReceivedPlan.set(false);
       }
@@ -378,7 +367,7 @@ public abstract class FootstepPlannerDataSetTest
       if (uiReceivedResult.get() && uiPlanningResultReference.get() != null)
       {
          if (DEBUG)
-            PrintTools.info("Received a result " + uiPlanningResultReference.get() + " from the UI.");
+            LogTools.info("Received a result " + uiPlanningResultReference.get() + " from the UI.");
          actualResult.set(uiPlanningResultReference.getAndSet(null));
          uiReceivedResult.set(false);
       }
@@ -389,7 +378,7 @@ public abstract class FootstepPlannerDataSetTest
       if (plannerReceivedPlan.get() && plannerPlanReference.get() != null && expectedPlan.get() == null)
       {
          if (DEBUG)
-            PrintTools.info("Received a plan from the planner.");
+            LogTools.info("Received a plan from the planner.");
          expectedPlan.set(plannerPlanReference.getAndSet(null));
          plannerReceivedPlan.set(false);
       }
@@ -397,7 +386,7 @@ public abstract class FootstepPlannerDataSetTest
       if (plannerReceivedResult.get() && plannerResultReference.get() != null)
       {
          if (DEBUG)
-            PrintTools.info("Received a result " + plannerResultReference.get() + " from the planner.");
+            LogTools.info("Received a result " + plannerResultReference.get() + " from the planner.");
          expectedResult.set(plannerResultReference.getAndSet(null));
          plannerReceivedResult.set(false);
       }

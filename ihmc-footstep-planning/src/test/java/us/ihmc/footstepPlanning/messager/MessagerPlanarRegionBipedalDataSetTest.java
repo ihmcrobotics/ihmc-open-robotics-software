@@ -1,12 +1,12 @@
 package us.ihmc.footstepPlanning.messager;
 
 import org.junit.Test;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.log.LogTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.SLOW)
 public class MessagerPlanarRegionBipedalDataSetTest extends FootstepPlannerDataSetTest
@@ -39,9 +39,9 @@ public class MessagerPlanarRegionBipedalDataSetTest extends FootstepPlannerDataS
       MessagerPlanarRegionBipedalDataSetTest test = new MessagerPlanarRegionBipedalDataSetTest();
       String prefix = "unitTestDataSets/test/";
       test.setup();
-      PrintTools.info("Running test.");
+      LogTools.info("Running test.");
       test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214801_StairsUpDown");
-      PrintTools.info("Test finished.");
+      LogTools.info("Test finished.");
       test.tearDown();
 
    }
