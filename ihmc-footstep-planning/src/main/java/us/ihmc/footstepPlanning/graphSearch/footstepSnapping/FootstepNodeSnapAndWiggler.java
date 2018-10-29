@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
@@ -65,7 +65,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       {
          if (parameters.getRejectIfCannotFullyWiggleInside())
          {
-            notifyListerNodeWAsRejected(footstepNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
+            rejectNode(footstepNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
             return FootstepNodeSnapData.emptyData();
          }
          else
@@ -159,7 +159,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
                   if (zPenetration > parameters.getMaximumZPenetrationOnValleyRegions())
                   {
-                     notifyListerNodeWAsRejected(node, BipedalFootstepPlannerNodeRejectionReason.TOO_MUCH_PENETRATION_AFTER_WIGGLE);
+                     rejectNode(node, BipedalFootstepPlannerNodeRejectionReason.TOO_MUCH_PENETRATION_AFTER_WIGGLE);
                      return true;
                   }
                }
@@ -170,9 +170,9 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       return false;
    }
 
-   private void notifyListerNodeWAsRejected(FootstepNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
+   private void rejectNode(FootstepNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       for (BipedalFootstepPlannerListener listener : listeners)
-         listener.rejectNode(nodeToExpand, reason);
+         listener.rejectNode(nodeToExpand, null, reason);
    }
 }

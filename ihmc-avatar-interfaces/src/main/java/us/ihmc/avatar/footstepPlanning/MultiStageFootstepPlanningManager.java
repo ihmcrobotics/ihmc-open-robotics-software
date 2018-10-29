@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.listeners.PlannerGoalRecommendationListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -62,11 +63,12 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private FootstepPlannerObjective overallPlanningObjective = null;
    private final List<FootstepPlannerObjective> planningObjectivePool = new ArrayList<>();
+   private final PlannerGoalRecommendationHandler goalRecommendationHandler;
 
    private final List<FootstepPlanningStage> allPlanningStages = new ArrayList<>();
    private final List<FootstepPlanningStage> planningStagePool = new ArrayList<>();
-   private final List<FootstepPlanningStage> pathPlanningStagesInProgress = new ArrayList<>();
-   private final List<FootstepPlanningStage> stepPlanningStagesInProgress = new ArrayList<>();
+   private final HashMap<FootstepPlanningStage, FootstepPlannerObjective> pathPlanningStagesInProgress = new HashMap<>();
+   private final HashMap<FootstepPlanningStage, FootstepPlannerObjective> stepPlanningStagesInProgress = new HashMap<>();
 
    private final HashMap<FootstepPlanningStage, ScheduledFuture<?>> planningTasks = new HashMap<>();
 
@@ -101,6 +103,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       this.dt = dt;
       this.executorService = executorService;
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerPlanarRegions", 200, 30, registry);
+      goalRecommendationHandler = new PlannerGoalRecommendationHandler(allPlanningStages, stepPlanningStagesInProgress, footstepPlannerParameters);
 
       footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
 
@@ -115,6 +118,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          FootstepPlanningStage planningStage = new FootstepPlanningStage(i, contactPointParameters, footstepPlannerParameters, activePlanner, planId,
                                                                          graphicsListRegistry, dt);
          planningStage.addCompletionCallback(this);
+         planningStage.setPlannerGoalRecommendationHandler(goalRecommendationHandler);
          registry.addChild(planningStage.getYoVariableRegistry());
          allPlanningStages.add(planningStage);
          planningStagePool.add(planningStage);
@@ -143,6 +147,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       FootstepPlanningStage stage = new FootstepPlanningStage(allPlanningStages.size(), contactPointParameters, footstepPlanningParameters, activePlanner,
                                                               planId, null, dt);
       stage.addCompletionCallback(this);
+      stage.setPlannerGoalRecommendationHandler(goalRecommendationHandler);
       return stage;
    }
 
@@ -158,9 +163,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       return planningStagePool.remove(0);
    }
 
-   private FootstepPlanningStage cleanupPlanningStage(int stageIndex)
+   private FootstepPlanningStage cleanupPlanningStage(FootstepPlanningStage planningStage)
    {
-      FootstepPlanningStage planningStage = stepPlanningStagesInProgress.remove(stageIndex);
+      stepPlanningStagesInProgress.remove(planningStage);
       planningStage.requestInitialize();
       planningTasks.remove(planningStage).cancel(true);
 
@@ -173,9 +178,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       globalSequenceIndex.set(0);
       pathPlanningStagesInProgress.clear();
 
-      while (!stepPlanningStagesInProgress.isEmpty())
+      for (FootstepPlanningStage stepPlanningStageInProgress : stepPlanningStagesInProgress.keySet())
       {
-         planningStagePool.add(cleanupPlanningStage(0));
+         planningStagePool.add(cleanupPlanningStage(stepPlanningStageInProgress));
       }
 
       completedPathPlans.clear();
@@ -207,9 +212,15 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          ScheduledFuture<?> plannerTask = executorService.scheduleAtFixedRate(planner, 0, (long) Conversions.secondsToMilliseconds(dt), TimeUnit.MILLISECONDS);
          planningTasks.put(planner, plannerTask);
 
-         pathPlanningStagesInProgress.add(planner);
-         stepPlanningStagesInProgress.add(planner);
+         pathPlanningStagesInProgress.put(planner, plannerGoal);
+         stepPlanningStagesInProgress.put(planner, plannerGoal);
       }
+   }
+
+   private void updatePlanningObjectives()
+   {
+      while (goalRecommendationHandler.hasNewFootstepPlannerObjectives())
+         planningObjectivePool.add(goalRecommendationHandler.pollNextFootstepPlannerObjective());
    }
 
    @Override
@@ -362,8 +373,10 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          yoGraphicPlanarRegionsList.clear();
       }
 
-      for (FootstepPlanner footstepPlanner : stepPlanningStagesInProgress)
+      for (FootstepPlanner footstepPlanner : stepPlanningStagesInProgress.keySet())
          footstepPlanner.setPlanarRegions(planarRegionsList);
+
+      updatePlanningObjectives();
 
       // check if there are any more goals, and assign them to the available planners
       assignGoalsToAvailablePlanners();
@@ -517,8 +530,10 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void processPlanningStatisticsRequest()
    {
+      /*
       FootstepPlanner planner = pathPlanningStagesInProgress.get(0);
       sendPlannerStatistics(planner.getPlannerStatistics());
+      */
    }
 
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher)

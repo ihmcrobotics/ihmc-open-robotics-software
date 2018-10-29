@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -57,7 +57,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          {
             PrintTools.debug("Was not able to snap node:\n" + node);
          }
-         rejectNode(node, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
+         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
          return false;
       }
 
@@ -70,7 +70,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          {
             PrintTools.debug("Node does not have enough foothold area. It only has " + Math.floor(100.0 * area / footArea) + "% foothold:\n" + node);
          }
-         rejectNode(node, BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
+         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
          return false;
       }
 
@@ -93,7 +93,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          {
             PrintTools.debug("Too much height difference (" + Math.round(100.0 * heightChange) + "cm) to previous node:\n" + node);
          }
-         rejectNode(node, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
+         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
          return false;
       }
 
@@ -105,7 +105,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          {
             PrintTools.debug("Found a obstacle between the nodes " + node + " and " + previousNode);
          }
-         rejectNode(node, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
+         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
          return false;
       }
 

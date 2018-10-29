@@ -29,13 +29,11 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.EnumProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
@@ -75,6 +73,8 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
    private final FootstepPlannerParameters footstepPlanningParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
+   private final PlannerGoalRecommendationHolder plannerGoalRecommendationHolder;
+
    public FootstepPlanningStage(int stageId, RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
                                 EnumProvider<FootstepPlannerType> activePlanner, IntegerProvider planId, YoGraphicsListRegistry graphicsListRegistry, double dt)
    {
@@ -83,6 +83,8 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
       this.planId = planId;
       this.dt = dt;
       this.activePlannerEnum = activePlanner;
+
+      plannerGoalRecommendationHolder = new PlannerGoalRecommendationHolder(stageId);
 
       registry = new YoVariableRegistry(stageId + getClass().getSimpleName());
 
@@ -114,10 +116,12 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
       return registry;
    }
 
+
+
    private AStarFootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons)
    {
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlanningParameters);
-      AStarFootstepPlanner planner = AStarFootstepPlanner.createPlanner(footstepPlanningParameters, null, footPolygons, expansion, registry);
+      AStarFootstepPlanner planner = AStarFootstepPlanner.createPlanner(footstepPlanningParameters, null, footPolygons, expansion, plannerGoalRecommendationHolder, registry);
       return planner;
    }
 
@@ -234,6 +238,11 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
    public void addCompletionCallback(PlannerCompletionCallback completionCallback)
    {
       completionCallbackList.add(completionCallback);
+   }
+
+   public void setPlannerGoalRecommendationHandler(PlannerGoalRecommendationHandler plannerGoalRecommendationHandler)
+   {
+      this.plannerGoalRecommendationHolder.setPlannerGoalRecommendationHandler(plannerGoalRecommendationHandler);
    }
 
    public void requestInitialize()

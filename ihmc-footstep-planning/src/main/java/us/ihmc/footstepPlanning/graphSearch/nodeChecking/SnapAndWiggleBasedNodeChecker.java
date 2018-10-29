@@ -9,7 +9,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAnd
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
@@ -68,20 +68,20 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
 
       if (snapTransform.containsNaN())
       {
-         rejectNode(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
+         rejectNode(nodeToExpand, previousNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
          return false;
       }
 
       if (Math.abs(snapTransform.getM22()) < parameters.getMinimumSurfaceInclineRadians())
       {
-         rejectNode(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
+         rejectNode(nodeToExpand, previousNode, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
          return false;
       }
 
       RigidBodyTransform snappedSoleTransform = new RigidBodyTransform();
       FootstepNodeTools.getSnappedNodeTransform(nodeToExpand, snapTransform, snappedSoleTransform);
 
-      boolean isEnoughArea = checkIfEnoughArea(nodeToExpand, footholdIntersection);
+      boolean isEnoughArea = checkIfEnoughArea(nodeToExpand, previousNode, footholdIntersection);
       if (!isEnoughArea)
          return false;
 
@@ -93,27 +93,27 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
       RigidBodyTransform previousSnappedSoleTransform = new RigidBodyTransform();
       FootstepNodeTools.getSnappedNodeTransform(previousNode, previousSnapTransform, previousSnappedSoleTransform);
 
-      boolean goodFootstep = checkIfGoodFootstep(nodeToExpand, snappedSoleTransform, previousSnappedSoleTransform);
+      boolean goodFootstep = checkIfGoodFootstep(nodeToExpand, previousNode, snappedSoleTransform, previousSnappedSoleTransform);
       if (!goodFootstep)
          return false;
 
       return true;
    }
 
-   private boolean checkIfEnoughArea(FootstepNode nodeToExpand, ConvexPolygon2D footholdIntersection)
+   private boolean checkIfEnoughArea(FootstepNode nodeToExpand, FootstepNode previousNode, ConvexPolygon2D footholdIntersection)
    {
       totalArea.set(footholdIntersection.getArea());
 
       if (totalArea.getDoubleValue() < parameters.getMinimumFootholdPercent() * footArea.getDoubleValue())
       {
-         rejectNode(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
+         rejectNode(nodeToExpand, previousNode, BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
          return false;
       }
 
       return true;
    }
 
-   private boolean checkIfGoodFootstep(FootstepNode nodeToExpand, RigidBodyTransform soleTransform, RigidBodyTransform previousSoleTransform)
+   private boolean checkIfGoodFootstep(FootstepNode nodeToExpand, FootstepNode previousNode, RigidBodyTransform soleTransform, RigidBodyTransform previousSoleTransform)
    {
       parentSoleFrame.setTransformAndUpdate(previousSoleTransform);
       parentSoleZupFrame.update();
@@ -128,7 +128,7 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
       RobotSide robotSide = nodeToExpand.getRobotSide();
       if (robotSide.negateIfRightSide(solePositionInParentZUpFrame.getY()) < minimumStepWidth)
       {
-         rejectNode(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH);
+         rejectNode(nodeToExpand, previousNode, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH);
          return false;
       }
 
@@ -136,34 +136,34 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
 
       if (robotSide.negateIfRightSide(solePositionInParentZUpFrame.getY()) > maximumStepWidth)
       {
-         rejectNode(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE);
+         rejectNode(nodeToExpand, previousNode, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE);
          return false;
       }
 
       double minimumStepLength = parameters.getMinimumStepLength();
       if (solePositionInParentZUpFrame.getX() < minimumStepLength)
       {
-         rejectNode(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH);
+         rejectNode(nodeToExpand, previousNode, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH);
          return false;
       }
 
       if (Math.abs(solePositionInParentZUpFrame.getZ()) > parameters.getMaximumStepZ())
       {
-         rejectNode(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
+         rejectNode(nodeToExpand, previousNode, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
          return false;
       }
 
       if ((solePositionInParentZUpFrame.getX() > parameters.getMaximumStepXWhenForwardAndDown()) && (solePositionInParentZUpFrame.getZ() < -Math
             .abs(parameters.getMaximumStepZWhenForwardAndDown())))
       {
-         rejectNode(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN);
+         rejectNode(nodeToExpand, previousNode, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN);
          return false;
       }
 
       stepReach.set(getXYLength(solePositionInParentZUpFrame));
       if (stepReach.getDoubleValue() > parameters.getMaximumStepReach())
       {
-         rejectNode(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR);
+         rejectNode(nodeToExpand, previousNode, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR);
          return false;
       }
 

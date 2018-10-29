@@ -7,8 +7,8 @@ import java.util.Queue;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -142,7 +142,7 @@ public class FootstepNodeVisualization implements BipedalFootstepPlannerListener
    }
 
    @Override
-   public void rejectNode(FootstepNode node, BipedalFootstepPlannerNodeRejectionReason reason)
+   public void rejectNode(FootstepNode node, FootstepNode previousNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       FootstepNode localNode = creat2dNode(node);
 
@@ -250,14 +250,14 @@ public class FootstepNodeVisualization implements BipedalFootstepPlannerListener
       for (int i = 0; i < 10; i++)
       {
          FootstepNode node = new FootstepNode(0.05 * i, 0.0);
-         viz.rejectNode(node, null);
+         viz.rejectNode(node, null, null);
          viz.tickAndUpdate();
       }
 
       for (int i = 0; i < 10; i++)
       {
          FootstepNode node = new FootstepNode(0.05 * i, 0.1);
-         viz.rejectNode(node, null);
+         viz.rejectNode(node, null, null);
          viz.tickAndUpdate();
       }
 
