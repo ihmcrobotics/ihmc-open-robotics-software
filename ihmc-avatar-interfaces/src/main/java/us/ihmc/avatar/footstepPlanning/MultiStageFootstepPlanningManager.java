@@ -110,7 +110,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
 
       graphicsListRegistry.registerYoGraphic("footstepPlanning", yoGraphicPlanarRegionsList);
-      isDone.set(true);
+      isDone.set(false);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
 
       for (int i = 0; i < stagesToCreate; i++)
@@ -215,6 +215,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          pathPlanningStagesInProgress.put(planner, plannerGoal);
          stepPlanningStagesInProgress.put(planner, plannerGoal);
       }
+
+      return;
    }
 
    private void updatePlanningObjectives()
@@ -423,7 +425,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       if (stepPlanningStatusChanged) // step planning just started or just finished, so this flag needs updating.
          isDonePlanningSteps.set(noMoreStepsToPlan);
 
-      isDone.set(isDonePlanningPath.getBooleanValue() && isDonePlanningSteps.getBooleanValue());
+      boolean isDone = stepPlanningStagesInProgress.isEmpty();
+      isDone &= pathPlanningStagesInProgress.isEmpty();
+      isDone &= planningObjectivePool.isEmpty();
+      isDone &= !goalRecommendationHandler.hasNewFootstepPlannerObjectives();
+      this.isDone.set(isDone);
    }
 
 
