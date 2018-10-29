@@ -9,7 +9,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ToolboxState;
@@ -24,7 +23,6 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -44,7 +42,7 @@ public class MultiStageFootstepPlanningModule
    private final RealtimeRos2Node realtimeRos2Node;
 
    private final ScheduledExecutorService executorService;
-   private ScheduledFuture<?> toolboxTaskScheduled = null;
+   private ScheduledFuture<?> taskScheduled = null;
    private ScheduledFuture<?> yoVariableServerScheduled = null;
    private final int updatePeriodMilliseconds = 1;
 
@@ -138,7 +136,7 @@ public class MultiStageFootstepPlanningModule
 
    public void receivedPacket(ToolboxStateMessage message)
    {
-      if (toolboxTaskScheduled != null)
+      if (taskScheduled != null)
       {
          return;
       }
