@@ -35,8 +35,8 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
             DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
-      kinematicsPlanningToolboxController = new KinematicsPlanningToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager, yoGraphicsListRegistry, 
-                                                                                    registry);
+      kinematicsPlanningToolboxController = new KinematicsPlanningToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager,
+                                                                                    yoGraphicsListRegistry, registry);
       commandInputManager.registerConversionHelper(new KinematicsPlanningToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
    }
@@ -62,9 +62,10 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    {
       List<Class<? extends Settable<?>>> status = new ArrayList<>();
       status.add(KinematicsPlanningToolboxOutputStatus.class);
+      status.add(KinematicsToolboxOutputStatus.class);
       return status;
    }
-   
+
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
@@ -85,6 +86,7 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    {
       List<Class<? extends Settable<?>>> status = new ArrayList<>();
       status.add(KinematicsPlanningToolboxOutputStatus.class);
+      status.add(KinematicsToolboxOutputStatus.class);
       return status;
    }
 

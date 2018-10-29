@@ -1,0 +1,6 @@
+package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
+
+public class KinematicsPlanningToolboxOptimizationSettings implements SolutionQualityConvergenceSettings
+{
+
+}

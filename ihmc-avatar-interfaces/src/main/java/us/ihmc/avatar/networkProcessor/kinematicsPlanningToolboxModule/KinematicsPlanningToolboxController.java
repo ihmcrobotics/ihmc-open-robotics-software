@@ -31,12 +31,12 @@ import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.Kinem
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class KinematicsPlanningToolboxController extends ToolboxController
 {
@@ -64,6 +64,10 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
    private final HumanoidKinematicsToolboxController ikController;
    private final CommandInputManager ikCommandInputManager = new CommandInputManager(getClass().getSimpleName(), KinematicsToolboxModule.supportedCommands());
+
+   private final YoInteger indexOfCurrentKeyFrame;
+
+   private final SolutionQualityConvergenceDetector solutionQualityConvergenceDetector;
 
    public KinematicsPlanningToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel, CommandInputManager commandInputManager,
                                               StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -94,12 +98,19 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
       ikController = new HumanoidKinematicsToolboxController(ikCommandInputManager, statusOutputManager, fullRobotModel, yoGraphicsListRegistry,
                                                              parentRegistry);
+
+      indexOfCurrentKeyFrame = new YoInteger("indexOfCurrentKeyFrame", parentRegistry);
+
+      SolutionQualityConvergenceSettings optimizationSettings = new KinematicsPlanningToolboxOptimizationSettings();
+      solutionQualityConvergenceDetector = new SolutionQualityConvergenceDetector(optimizationSettings, parentRegistry);
    }
 
    @Override
    public boolean initialize()
    {
       isDone.set(false);
+      indexOfCurrentKeyFrame.set(0);
+      solutionQualityConvergenceDetector.initialize();
 
       rigidBodyCommands.clear();
       centerOfMassCommand.set(null);
@@ -220,46 +231,36 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       return true;
    }
 
-   int tempTerminalIteration = 30;
-   int tempCurrentIteration = 30;
-   int tempCurrentIndexOfKeyFrame = -1;
-
    @Override
    public void updateInternal() throws Exception
    {
-      if (ikSolved())
+      if (indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
       {
-         updateRobotConfigurationFromIKController();
-
-         tempCurrentIndexOfKeyFrame++;
-         submitKeyFrameMessages(tempCurrentIndexOfKeyFrame);
+         isDone.set(true);
       }
       else
       {
-         ikController.updateInternal();
+         if (solutionQualityConvergenceDetector.isConverged())
+         {
+            updateRobotConfigurationFromIKController();
+
+            solutionQualityConvergenceDetector.initialize();
+            submitKeyFrameMessages(indexOfCurrentKeyFrame.getIntegerValue());
+            indexOfCurrentKeyFrame.increment();
+         }
+         else
+         {
+            ikController.updateInternal();
+            solutionQualityConvergenceDetector.submitSolutionQuality(ikController.getSolution().getSolutionQuality());
+         }
+         solutionQualityConvergenceDetector.update();
       }
-         
    }
 
    @Override
    public boolean isDone()
    {
       return isDone.getBooleanValue();
-   }
-
-   // TODO : analyze solution quality curve.
-   private boolean ikSolved()
-   {
-      if (tempCurrentIteration == tempTerminalIteration)
-      {
-         tempCurrentIteration = 0;
-         return true;
-      }
-      else
-      {
-         tempCurrentIteration++;
-         return false;
-      }
    }
 
    private boolean submitKeyFrameMessages(int indexOfKeyFrame)
@@ -269,8 +270,10 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          List<KinematicsToolboxRigidBodyMessage> rigidBodyMessages = ikRigidBodyMessageMap.get(ikRigidBodies.get(i));
          ikCommandInputManager.submitMessage(rigidBodyMessages.get(indexOfKeyFrame));
       }
-      ikCommandInputManager.submitMessage(ikCenterOfMassMessages.get(indexOfKeyFrame));
-      ikCommandInputManager.submitMessage(ikConfigurationMessage.get());
+      if (ikCenterOfMassMessages.get(indexOfKeyFrame) != null)
+         ikCommandInputManager.submitMessage(ikCenterOfMassMessages.get(indexOfKeyFrame));
+      if (ikConfigurationMessage.get() != null)
+         ikCommandInputManager.submitMessage(ikConfigurationMessage.get());
 
       return true;
    }
@@ -280,7 +283,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       ikController.getSolution();
 
       // TODO
-      // bring robot configuration from ikcontroller.
+      //      bring robot configuration from ikcontroller.
       //      RobotConfigurationData keyFrameRobotConfiguration = new RobotConfigurationData();
       //      latestRobotConfigurationDataReference.set(keyFrameRobotConfiguration);
    }
@@ -296,7 +299,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       RobotConfigurationData currentRobotConfiguration = latestRobotConfigurationDataReference.getAndSet(null);
       if (currentRobotConfiguration == null)
       {
-         System.out.println("latestRobotConfigurationDataReference should be set up.");
+         LogTools.warn("latestRobotConfigurationDataReference should be set up.");
          return false;
       }
 
@@ -346,7 +349,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       latestRobotConfigurationDataReference.set(newConfigurationData);
    }
 
-   // TODO : check this method and variable.
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
       latestCapturabilityBasedStatusReference.set(newStatus);
