@@ -31,7 +31,7 @@ public class MultiStageFootstepPlanningController
 
    private final YoDouble timeWithoutInputsBeforeGoingToSleep = new YoDouble("timeWithoutInputsBeforeGoingToSleep", registry);
 
-   private final YoDouble toolboxTime = new YoDouble("ToolboxTime", registry);
+   private final YoDouble controllerTime = new YoDouble("PlanningControllerTime", registry);
    protected final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
 
    private Runnable managerRunnable = null;
@@ -158,11 +158,11 @@ public class MultiStageFootstepPlanningController
             try
             {
                stageManager.update();
-               toolboxTime.add(dt);
+               controllerTime.add(dt);
 
                if (receivedInput.getAndSet(false))
-                  timeOfLastInput.set(toolboxTime.getDoubleValue());
-               if (toolboxTime.getDoubleValue() - timeOfLastInput.getDoubleValue() >= timeWithoutInputsBeforeGoingToSleep.getDoubleValue())
+                  timeOfLastInput.set(controllerTime.getDoubleValue());
+               if (controllerTime.getDoubleValue() - timeOfLastInput.getDoubleValue() >= timeWithoutInputsBeforeGoingToSleep.getDoubleValue())
                   sleep();
                if (stageManager.isDone())
                   sleep();

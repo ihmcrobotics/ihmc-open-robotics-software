@@ -53,8 +53,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
    private final YoBoolean requestedPlanarRegions = new YoBoolean("RequestedPlanarRegions", registry);
-   private final YoDouble toolboxTime = new YoDouble("ToolboxTime", registry);
-   private final YoDouble timeout = new YoDouble("ToolboxTimeout", registry);
+   private final YoDouble plannerTime = new YoDouble("PlannerTime", registry);
+   private final YoDouble timeout = new YoDouble("PlannerTimeout", registry);
    private final YoInteger planId = new YoInteger("planId", registry);
    private final YoInteger globalSequenceIndex = new YoInteger("globalSequenceIndex", registry);
 
@@ -100,13 +100,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       this.statusOutputManager = statusOutputManager;
       this.dt = dt;
       this.executorService = executorService;
-      this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerToolboxPlanarRegions", 200, 30, registry);
+      this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerPlanarRegions", 200, 30, registry);
 
       footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
 
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
 
-      graphicsListRegistry.registerYoGraphic("footstepPlanningToolbox", yoGraphicPlanarRegionsList);
+      graphicsListRegistry.registerYoGraphic("footstepPlanning", yoGraphicPlanarRegionsList);
       isDone.set(true);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
 
@@ -255,7 +255,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    {
       isDone.set(false);
       requestedPlanarRegions.set(false);
-      toolboxTime.set(0.0);
+      plannerTime.set(0.0);
 
       for (FootstepPlanningStage stage : allPlanningStages)
          stage.setTextToSpeechPublisher(textToSpeechPublisher);
@@ -340,11 +340,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private void updateInternal()
    {
-      toolboxTime.add(dt);
-      if (toolboxTime.getDoubleValue() > 20.0)
+      plannerTime.add(dt);
+      if (plannerTime.getDoubleValue() > 20.0)
       {
          if (debug)
-            PrintTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
+            PrintTools.info("Hard timeout at " + plannerTime.getDoubleValue());
          reportPlannerFailed(FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION);
          return;
       }
@@ -405,7 +405,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          sendMessageToUI("Result of step planning: " + planId.getIntegerValue() + ", " + stepStatus.toString());
          concatenateFootstepPlans();
          statusOutputManager
-               .reportStatusMessage(packStepResult(footstepPlan.getAndSet(null), bodyPathPlan.getAndSet(null), stepStatus, toolboxTime.getDoubleValue()));
+               .reportStatusMessage(packStepResult(footstepPlan.getAndSet(null), bodyPathPlan.getAndSet(null), stepStatus, plannerTime.getDoubleValue()));
       }
       if (stepPlanningStatusChanged) // step planning just started or just finished, so this flag needs updating.
          isDonePlanningSteps.set(noMoreStepsToPlan);
@@ -426,7 +426,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private void reportPlannerFailed(FootstepPlanningResult result)
    {
-      statusOutputManager.reportStatusMessage(packStepResult(null, null, result, toolboxTime.getDoubleValue()));
+      statusOutputManager.reportStatusMessage(packStepResult(null, null, result, plannerTime.getDoubleValue()));
       statusOutputManager.reportStatusMessage(FootstepPlanningMessageReporter.packStatus(FootstepPlannerStatus.IDLE));
       isDonePlanningSteps.set(true);
       isDonePlanningPath.set(true);
