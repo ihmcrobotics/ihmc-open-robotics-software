@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -35,7 +36,7 @@ public abstract class FootstepPlannerDataSetTest
    private static final double bambooTimeScaling = 4.0;
 
    // Whether to start the UI or not.
-   protected static boolean VISUALIZE = false;
+   protected static boolean VISUALIZE = true;
    // For enabling helpful prints.
    private static boolean DEBUG = false;
    private static boolean VERBOSE = false;
@@ -62,6 +63,7 @@ public abstract class FootstepPlannerDataSetTest
 
    protected abstract FootstepPlannerType getPlannerType();
 
+   @Before
    public void setup()
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -160,7 +162,7 @@ public abstract class FootstepPlannerDataSetTest
       Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
    }
 
-   protected void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner, List<FootstepPlannerUnitTestDataset> allDatasets)
+   private void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner, List<FootstepPlannerUnitTestDataset> allDatasets)
    {
       if (VERBOSE || DEBUG)
          LogTools.info("Unit test files found: " + allDatasets.size());
@@ -208,14 +210,14 @@ public abstract class FootstepPlannerDataSetTest
       }
    }
 
-   public String runAssertions(FootstepPlannerUnitTestDataset dataset)
+   protected String runAssertions(FootstepPlannerUnitTestDataset dataset)
    {
       ThreadTools.sleep(1000);
       packPlanningRequest(dataset, messager);
       return findPlanAndAssertGoodResult(dataset);
    }
 
-   protected void packPlanningRequest(FootstepPlannerUnitTestDataset dataset, Messager messager)
+   private void packPlanningRequest(FootstepPlannerUnitTestDataset dataset, Messager messager)
    {
       messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, dataset.getStart());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, dataset.getGoal());
@@ -238,33 +240,26 @@ public abstract class FootstepPlannerDataSetTest
          LogTools.info("Sending out planning request packet.");
    }
 
-   protected String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plan, Point3D goal)
+   private String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plan, Point3D goal)
    {
       String errorMessage = "";
 
-      errorMessage += assertTrue(datasetName, "Planning result for " + datasetName + " is invalid, result was " + result, result.validForExecution());
-
-      if (result.validForExecution())
+      if(!result.validForExecution())
       {
-         errorMessage += assertTrue(datasetName,
-                                    datasetName + " did not reach goal. Made it to " + PlannerTools.getEndPosition(plan) + ", trying to get to " + goal,
-                                    PlannerTools.isGoalNextToLastStep(goal, plan));
+         errorMessage = "Planning result for " + datasetName + " is invalid, result was " + result;
       }
+      else if(!PlannerTools.isGoalNextToLastStep(goal, plan))
+      {
+         errorMessage = datasetName + " did not reach goal. Made it to " + PlannerTools.getEndPosition(plan) + ", trying to get to " + goal;
+      }
+
+      if((VISUALIZE || DEBUG) && !errorMessage.isEmpty())
+         LogTools.error(errorMessage);
 
       return errorMessage;
    }
 
-   private String assertTrue(String datasetName, String message, boolean condition)
-   {
-      if (VISUALIZE || DEBUG)
-      {
-         if (!condition)
-            LogTools.error(datasetName + ": " + message);
-      }
-      return !condition ? "\n" + message : "";
-   }
-
-   protected void createUI(Messager messager)
+   private void createUI(Messager messager)
    {
       ApplicationRunner.runApplication(new Application()
       {
@@ -296,65 +291,62 @@ public abstract class FootstepPlannerDataSetTest
       }
    }
 
-   protected double totalTimeTaken;
+   private double totalTimeTaken;
 
-   protected String waitForResult(ConditionChecker conditionChecker, double maxTimeToWait, String prefix)
+   private String waitForResult(double maxTimeToWait, String prefix)
    {
-      String errorMessage = "";
       long waitTime = 10;
-      while (conditionChecker.checkCondition())
+
+      while (actualResult.get() == null)
       {
+         queryUIResults();
+         queryPlannerResults();
+
          if (totalTimeTaken > maxTimeToWait)
          {
-            errorMessage += prefix + " timed out waiting for a result.\n";
-            return errorMessage;
+            return prefix + " timed out waiting for a result.\n";
          }
 
          ThreadTools.sleep(waitTime);
          totalTimeTaken += Conversions.millisecondsToSeconds(waitTime);
+      }
+
+      return "";
+   }
+
+   private String validateResult(String prefix)
+   {
+      if (!actualResult.get().validForExecution())
+      {
+         return prefix + " failed to find a valid result. Result : " + actualResult.get() + "\n";
+      }
+      else
+      {
+         return "";
+      }
+   }
+
+   private String waitForPlan(double maxTimeToWait, String prefix)
+   {
+      while (actualPlan.get() == null)
+      {
          queryUIResults();
          queryPlannerResults();
-      }
-
-      return errorMessage;
-   }
-
-   protected String validateResult(ConditionChecker conditionChecker, FootstepPlanningResult result, String prefix)
-   {
-      String errorMessage = "";
-
-      if (!conditionChecker.checkCondition())
-      {
-         errorMessage += prefix + " failed to find a valid result. Result : " + result + "\n";
-      }
-
-      return errorMessage;
-   }
-
-   protected String waitForPlan(ConditionChecker conditionChecker, double maxTimeToWait, String prefix)
-   {
-      String errorMessage = "";
-
-      while (conditionChecker.checkCondition())
-      {
          long waitTime = 10;
 
          if (totalTimeTaken > maxTimeToWait)
          {
-            errorMessage += prefix + " timed out waiting on plan.\n";
-            return errorMessage;
+            return prefix + " timed out waiting on plan.\n";
          }
 
          ThreadTools.sleep(waitTime);
          totalTimeTaken += Conversions.millisecondsToSeconds(waitTime);
-         queryUIResults();
-         queryPlannerResults();
       }
 
-      return errorMessage;
+      return "";
    }
 
-   protected void queryUIResults()
+   private void queryUIResults()
    {
       if (uiReceivedPlan.get() && uiFootstepPlanReference.get() != null && actualPlan.get() == null)
       {
@@ -373,7 +365,7 @@ public abstract class FootstepPlannerDataSetTest
       }
    }
 
-   protected void queryPlannerResults()
+   private void queryPlannerResults()
    {
       if (plannerReceivedPlan.get() && plannerPlanReference.get() != null && expectedPlan.get() == null)
       {
@@ -392,48 +384,35 @@ public abstract class FootstepPlannerDataSetTest
       }
    }
 
-   public String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset)
+   private String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset)
    {
       totalTimeTaken = 0.0;
       double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
       double maxTimeToWait = 2.0 * timeoutMultiplier * dataset.getTimeout(getPlannerType());
       String datasetName = dataset.getDatasetName();
 
-      queryUIResults();
-
-      String errorMessage = "";
-
-      errorMessage += waitForResult(() -> actualResult.get() == null, maxTimeToWait, datasetName);
+      String errorMessage = waitForResult(maxTimeToWait, datasetName);
       if (!errorMessage.isEmpty())
          return errorMessage;
 
-      errorMessage += validateResult(() -> actualResult.get().validForExecution(), actualResult.get(), datasetName);
+      errorMessage = validateResult(datasetName);
       if (!errorMessage.isEmpty())
          return errorMessage;
 
-      errorMessage += waitForPlan(() -> actualPlan.get() == null, maxTimeToWait, datasetName);
+      errorMessage = waitForPlan(maxTimeToWait, datasetName);
       if (!errorMessage.isEmpty())
          return errorMessage;
 
       FootstepPlanningResult result = actualResult.getAndSet(null);
       FootstepPlan plan = actualPlan.getAndSet(null);
-
-      uiReceivedPlan.getAndSet(false);
-      uiReceivedResult.getAndSet(false);
-
-      errorMessage += assertPlanIsValid(datasetName, result, plan, dataset.getGoal());
+      errorMessage = assertPlanIsValid(datasetName, result, plan, dataset.getGoal());
 
       ThreadTools.sleep(1000);
       return errorMessage;
    }
 
-   protected static interface DatasetTestRunner
+   protected interface DatasetTestRunner
    {
       String testDataset(FootstepPlannerUnitTestDataset dataset);
-   }
-
-   protected static interface ConditionChecker
-   {
-      boolean checkCondition();
    }
 }
