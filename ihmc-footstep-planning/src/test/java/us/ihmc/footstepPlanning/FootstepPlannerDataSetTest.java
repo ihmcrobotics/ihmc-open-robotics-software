@@ -159,9 +159,6 @@ public abstract class FootstepPlannerDataSetTest
    {
       FootstepPlannerUnitTestDataset dataset = FootstepPlannerIOTools.loadDataset(FootstepPlannerDataExporter.class, datasetName);
 
-      Random random = new Random(324);
-      dataset.getPlanarRegionsList().getPlanarRegionsAsList().forEach(region -> region.setRegionId(random.nextInt()));
-
       resetAllAtomics();
       String errorMessages = datasetTestRunner.testDataset(dataset);
       Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
