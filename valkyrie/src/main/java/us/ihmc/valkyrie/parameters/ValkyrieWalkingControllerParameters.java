@@ -745,7 +745,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean useOptimizationBasedICPController()
    {
-      return true;
+   // TODO Need to be re-enabled once tuned on unit A which appears to be more sensitive.
+      return false;
    }
    
    /** {@inheritDoc} */
