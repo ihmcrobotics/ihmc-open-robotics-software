@@ -232,6 +232,8 @@ public class StepGeneratorJavaFXController
          try
          {
             snapAndWiggleSingleStep.snapAndWiggle(wiggledPose, footPolygonToWiggle, forwardVelocityProperty.get() > 0.0);
+            if (wiggledPose.containsNaN())
+               return adjustedBasedOnStanceFoot;
          }
          catch(SnappingFailedException e)
          {
@@ -245,7 +247,7 @@ public class StepGeneratorJavaFXController
       }
       else
       {
-         return null;
+         return adjustedBasedOnStanceFoot;
       }
    }
 
