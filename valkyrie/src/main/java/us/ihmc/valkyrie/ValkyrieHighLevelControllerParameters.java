@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.regexp.RE;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -75,15 +74,27 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    {
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
 
-      // Can go up to kp = 30.0, kd = 3.0
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 15.0, 1.5);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.5);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.5);
-      // Can go up to kp = 30.0, kd = 4.0
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 15.0, 2.0);
-      // Can go up to kp = 60.0, kd = 6.0
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 0.0, 3.0);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 0.0, 3.0);
+      if (target == RobotTarget.REAL_ROBOT)
+      {
+         // Can go up to kp = 30.0, kd = 3.0
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+         // Can go up to kp = 30.0, kd = 4.0
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 15.0, 2.0);
+         // Can go up to kp = 60.0, kd = 6.0
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 0.0, 3.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 0.0, 3.0);
+      }
+      else
+      {
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 0.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 0.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 0.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 0.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 0.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 0.0, 0.0);
+      }
 
       return behaviors;
    }
