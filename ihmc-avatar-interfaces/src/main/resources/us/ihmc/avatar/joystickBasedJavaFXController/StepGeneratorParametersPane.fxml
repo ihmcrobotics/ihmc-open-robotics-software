@@ -3,16 +3,33 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="170.0" prefWidth="817.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorParametersPaneController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="106.0" prefWidth="817.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorParametersPaneController">
    <children>
-      <Slider fx:id="swingHeightSlider" layoutX="113.0" layoutY="28.0" majorTickUnit="0.05" max="0.35" min="0.025" minorTickCount="4" showTickLabels="true" showTickMarks="true" value="0.125" />
-      <Label layoutX="28.0" layoutY="27.0" text="Swing height" />
-      <Label layoutX="303.0" layoutY="27.0" text="Swing time" />
-      <Slider fx:id="swingDurationSlider" blockIncrement="0.2" layoutX="397.0" layoutY="17.0" majorTickUnit="0.2" max="2.0" min="0.6" prefHeight="38.0" prefWidth="342.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" />
-      <Label layoutX="303.0" layoutY="77.0" text="Transfer time" />
-      <Slider fx:id="transferDurationSlider" blockIncrement="0.2" layoutX="397.0" layoutY="75.0" majorTickUnit="0.2" max="2.0" min="0.1" prefHeight="38.0" prefWidth="342.0" showTickLabels="true" showTickMarks="true" />
-      <Slider fx:id="trajectoryDurationSlider" blockIncrement="0.5" layoutX="113.0" layoutY="79.0" majorTickUnit="1.0" max="10.0" min="1.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="5.0" />
-      <Label layoutX="28.0" layoutY="77.0" text="Trajectory time" />
+      <GridPane hgap="10.0" layoutX="27.9619140625" layoutY="16.0">
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <Slider fx:id="swingHeightSlider" majorTickUnit="0.05" max="0.35" min="0.025" minorTickCount="4" showTickLabels="true" showTickMarks="true" value="0.125" GridPane.columnIndex="1" />
+            <Label text="Swing height" />
+            <Label text="Swing time" GridPane.columnIndex="2" />
+            <Slider fx:id="swingDurationSlider" blockIncrement="0.2" majorTickUnit="0.2" max="2.0" min="0.6" prefHeight="38.0" prefWidth="342.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" GridPane.columnIndex="3" />
+            <Label text="Transfer time" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Slider fx:id="transferDurationSlider" blockIncrement="0.2" majorTickUnit="0.2" max="2.0" min="0.1" prefHeight="38.0" prefWidth="342.0" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            <Slider fx:id="trajectoryDurationSlider" blockIncrement="0.5" majorTickUnit="1.0" max="10.0" min="1.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label text="Trajectory time" GridPane.rowIndex="1" />
+         </children>
+      </GridPane>
    </children>
 </AnchorPane>

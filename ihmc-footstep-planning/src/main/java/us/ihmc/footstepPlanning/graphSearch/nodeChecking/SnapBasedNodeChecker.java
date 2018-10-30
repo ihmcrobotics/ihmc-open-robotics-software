@@ -8,7 +8,7 @@ import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -18,7 +18,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class SnapBasedNodeChecker implements FootstepNodeChecker
+public class SnapBasedNodeChecker extends FootstepNodeChecker
 {
    private static final boolean DEBUG = false;
 
@@ -26,7 +26,6 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepNodeSnapper snapper;
 
-   private PlanarRegionsList planarRegions;
    private BipedalFootstepPlannerListener listener;
 
    public SnapBasedNodeChecker(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper)
@@ -44,16 +43,17 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
+      super.setPlanarRegions(planarRegions);
       snapper.setPlanarRegions(planarRegions);
-      this.planarRegions = planarRegions;
    }
 
+   // TODO make this faster
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
       if (previousNode != null && node.equals(previousNode))
       {
-         throw new RuntimeException("Checking node assuming it is follwoing itself.");
+         throw new RuntimeException("Checking node assuming it is following itself.");
       }
 
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
@@ -104,7 +104,7 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
          return false;
       }
 
-      if (planarRegions != null && isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegions, parameters.getBodyGroundClearance()))
+      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition, snapper.getOrCreateNearbyRegions(node.getRoundedX(), node.getRoundedY()), parameters.getBodyGroundClearance()))
       {
          if (DEBUG)
          {
@@ -121,11 +121,11 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
     * This is meant to test if there is a wall that the body of the robot would run into when shifting
     * from one step to the next. It is not meant to eliminate swing overs.
     */
-   private static boolean isObstacleBetweenNodes(Point3D nodePosition, Point3D previousNodePosition, PlanarRegionsList planarRegions, double groundClearance)
+   private static boolean isObstacleBetweenNodes(Point3D nodePosition, Point3D previousNodePosition, List<PlanarRegion> planarRegions, double groundClearance)
    {
       PlanarRegion bodyPath = createBodyRegionFromNodes(nodePosition, previousNodePosition, groundClearance, 2.0);
 
-      for (PlanarRegion region : planarRegions.getPlanarRegionsAsList())
+      for (PlanarRegion region : planarRegions)
       {
          List<LineSegment3D> intersections = region.intersect(bodyPath);
          if (!intersections.isEmpty())

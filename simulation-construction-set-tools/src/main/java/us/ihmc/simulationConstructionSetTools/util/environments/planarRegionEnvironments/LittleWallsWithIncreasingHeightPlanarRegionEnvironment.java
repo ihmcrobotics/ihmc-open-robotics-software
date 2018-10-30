@@ -1,5 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments;
 
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+
 public class LittleWallsWithIncreasingHeightPlanarRegionEnvironment extends PlanarRegionEnvironmentInterface
 {
    public LittleWallsWithIncreasingHeightPlanarRegionEnvironment()
@@ -15,5 +17,6 @@ public class LittleWallsWithIncreasingHeightPlanarRegionEnvironment extends Plan
       generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.15);
       generator.translate(0.4, 0.1, 0.0);
       generator.addCubeReferencedAtBottomMiddle(0.1, 1.0, 0.11);
+      addPlanarRegionsToTerrain(YoAppearance.Grey());
    }
 }

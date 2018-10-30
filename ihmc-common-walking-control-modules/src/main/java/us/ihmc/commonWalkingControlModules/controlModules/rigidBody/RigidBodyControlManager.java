@@ -8,11 +8,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -22,6 +20,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingC
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -51,9 +50,7 @@ public class RigidBodyControlManager
    private final RigidBodyUserControlState userControlState;
    private final RigidBodyLoadBearingControlState loadBearingControlState;
 
-   private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
    private final double[] initialJointPositions;
-   private final FramePose3D initialPose = new FramePose3D();
    private final FramePose3D homePose;
 
    private final OneDoFJoint[] jointsToControl;
@@ -65,9 +62,9 @@ public class RigidBodyControlManager
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
                                   Pose3D homePose, Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
-                                  boolean enablePositionTracking, boolean enableOrientationTracking, ContactablePlaneBody contactableBody,
-                                  RigidBodyControlMode defaultControlMode, YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry,
-                                  YoVariableRegistry parentRegistry)
+                                  Vector3DReadOnly taskspaceAngularWeight, Vector3DReadOnly taskspaceLinearWeight, PID3DGainsReadOnly taskspaceOrientationGains,
+                                  PID3DGainsReadOnly taskspacePositionGains, ContactablePlaneBody contactableBody, RigidBodyControlMode defaultControlMode,
+                                  YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
@@ -83,16 +80,48 @@ public class RigidBodyControlManager
       RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, parentRegistry);
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
-      taskspaceControlState = new RigidBodyTaskspaceControlState("", bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame,
-                                                                 enablePositionTracking, enableOrientationTracking, yoTime, jointControlHelper,
-                                                                 graphicsListRegistry, registry);
+
+      if (taskspaceAngularWeight != null && taskspaceLinearWeight == null)
+      {
+         RigidBodyOrientationController taskspaceControlState = new RigidBodyOrientationController(bodyToControl, baseBody, elevator, trajectoryFrames,
+                                                                                                   baseFrame, yoTime, jointControlHelper, parentRegistry);
+         taskspaceControlState.setGains(taskspaceOrientationGains);
+         taskspaceControlState.setWeights(taskspaceAngularWeight);
+         this.taskspaceControlState = taskspaceControlState;
+         LogTools.info("Creating manager for " + bodyName + " with orientation controller.");
+      }
+      else if (taskspaceAngularWeight == null && taskspaceLinearWeight != null)
+      {
+         RigidBodyPositionController taskspaceControlState = new RigidBodyPositionController(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame,
+                                                                                             baseFrame, yoTime, parentRegistry, graphicsListRegistry);
+         taskspaceControlState.setGains(taskspacePositionGains);
+         taskspaceControlState.setWeights(taskspaceLinearWeight);
+         this.taskspaceControlState = taskspaceControlState;
+         LogTools.info("Creating manager for " + bodyName + " with position controller.");
+      }
+      else
+      {
+         RigidBodyPoseController taskspaceControlState = new RigidBodyPoseController(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame,
+                                                                                     baseFrame, yoTime, jointControlHelper, graphicsListRegistry, registry);
+         taskspaceControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
+         taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
+         this.taskspaceControlState = taskspaceControlState;
+         LogTools.info("Creating manager for " + bodyName + " with pose controller.");
+      }
+
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
 
       if (contactableBody != null)
+      {
          loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, contactableBody, elevator, yoTime, jointControlHelper,
                                                                         graphicsListRegistry, registry);
+         loadBearingControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
+         loadBearingControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
+      }
       else
+      {
          loadBearingControlState = null;
+      }
 
       if (homePose != null)
          this.homePose = new FramePose3D(baseFrame, homePose);
@@ -103,7 +132,7 @@ public class RigidBodyControlManager
       checkDefaultControlMode(defaultControlMode, this.homePose, bodyName);
       String description = "WARNING: only " + RigidBodyControlMode.JOINTSPACE + " or " + RigidBodyControlMode.TASKSPACE + " possible!";
       this.defaultControlMode = new EnumParameter<>(namePrefix + "DefaultControlMode", description, registry, RigidBodyControlMode.class, false,
-            defaultControlMode);
+                                                    defaultControlMode);
       this.defaultControlMode.addParameterChangedListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
 
       allJointsEnabled = new YoBoolean(namePrefix + "AllJointsEnabled", registry);
@@ -135,23 +164,15 @@ public class RigidBodyControlManager
       return factory.build(RigidBodyControlMode.JOINTSPACE);
    }
 
-   public void setWeights(Map<String, DoubleProvider> jointspaceWeights, Vector3DReadOnly taskspaceAngularWeight, Vector3DReadOnly taskspaceLinearWeight,
-                          Map<String, DoubleProvider> userModeWeights)
+   public void setWeights(Map<String, DoubleProvider> jointspaceWeights, Map<String, DoubleProvider> userModeWeights)
    {
       jointspaceControlState.setDefaultWeights(jointspaceWeights);
-      taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
       userControlState.setWeights(userModeWeights);
-      if (loadBearingControlState != null)
-         loadBearingControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
    }
 
-   public void setGains(Map<String, PIDGainsReadOnly> jointspaceGains, PID3DGainsReadOnly taskspaceOrientationGains,
-                        PID3DGainsReadOnly taskspacePositionGains)
+   public void setGains(Map<String, PIDGainsReadOnly> jointspaceGains)
    {
       jointspaceControlState.setGains(jointspaceGains);
-      taskspaceControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
-      if (loadBearingControlState != null)
-         loadBearingControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
    }
 
    private static void checkDefaultControlMode(RigidBodyControlMode defaultControlMode, FramePose3D homePose, String bodyName)
@@ -199,52 +220,26 @@ public class RigidBodyControlManager
 
    public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand command)
    {
-      if (command.useCustomControlFrame())
-      {
-         command.getControlFramePose(controlFrameTransform);
-         taskspaceControlState.setControlFramePose(controlFrameTransform);
-      }
-      else
-      {
-         taskspaceControlState.setDefaultControlFrame();
-      }
-
-      computeDesiredPose(initialPose);
-
-      if (taskspaceControlState.handleOrientationTrajectoryCommand(command, initialPose))
+      if (taskspaceControlState.handleTrajectoryCommand(command))
       {
          requestState(taskspaceControlState.getControlMode());
       }
       else
       {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid orientation trajectory command.");
-         taskspaceControlState.clear();
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid orientation trajectory command.");
          hold();
       }
    }
 
    public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand command)
    {
-      if (command.useCustomControlFrame())
-      {
-         command.getControlFramePose(controlFrameTransform);
-         taskspaceControlState.setControlFramePose(controlFrameTransform);
-      }
-      else
-      {
-         taskspaceControlState.setDefaultControlFrame();
-      }
-
-      computeDesiredPose(initialPose);
-
-      if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
+      if (taskspaceControlState.handleTrajectoryCommand(command))
       {
          requestState(taskspaceControlState.getControlMode());
       }
       else
       {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
-         taskspaceControlState.clear();
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
          hold();
       }
    }
@@ -259,33 +254,37 @@ public class RigidBodyControlManager
       }
       else
       {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
          hold();
       }
    }
 
    public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand)
    {
-      if (taskspaceCommand.useCustomControlFrame())
-      {
-         taskspaceCommand.getControlFramePose(controlFrameTransform);
-         taskspaceControlState.setControlFramePose(controlFrameTransform);
-      }
-      else
-      {
-         taskspaceControlState.setDefaultControlFrame();
-      }
-
       computeDesiredJointPositions(initialJointPositions);
-      computeDesiredPose(initialPose);
 
-      if (taskspaceControlState.handleHybridPoseTrajectoryCommand(taskspaceCommand, initialPose, jointSpaceCommand, initialJointPositions))
+      if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions))
       {
          requestState(taskspaceControlState.getControlMode());
       }
       else
       {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SE3 trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SE3 trajectory command.");
+         hold();
+      }
+   }
+
+   public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand)
+   {
+      computeDesiredJointPositions(initialJointPositions);
+
+      if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions))
+      {
+         requestState(taskspaceControlState.getControlMode());
+      }
+      else
+      {
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SO3 trajectory command.");
          hold();
       }
    }
@@ -298,7 +297,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid desired accelerations command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid desired accelerations command.");
          hold();
       }
    }
@@ -402,9 +401,7 @@ public class RigidBodyControlManager
          requestState(jointspaceControlState.getControlMode());
          break;
       case TASKSPACE:
-         taskspaceControlState.setDefaultControlFrame();
-         computeDesiredPose(initialPose);
-         taskspaceControlState.goToPose(homePose, initialPose, trajectoryTime);
+         taskspaceControlState.goToPose(homePose, trajectoryTime);
          requestState(taskspaceControlState.getControlMode());
          break;
       default:
@@ -416,7 +413,7 @@ public class RigidBodyControlManager
    {
       if (loadBearingControlState == null)
       {
-         PrintTools.info(getClass().getSimpleName() + " for " + bodyName + " can not go to load bearing.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " can not go to load bearing.");
          return;
       }
 
@@ -464,18 +461,6 @@ public class RigidBodyControlManager
       {
          for (int i = 0; i < jointsToControl.length; i++)
             desiredJointPositionsToPack[i] = jointsToControl[i].getQ();
-      }
-   }
-
-   private void computeDesiredPose(FramePose3D poseToPack)
-   {
-      if (stateMachine.getCurrentStateKey() == taskspaceControlState.getControlMode())
-      {
-         taskspaceControlState.getDesiredPose(poseToPack);
-      }
-      else
-      {
-         poseToPack.setToZero(taskspaceControlState.getControlFrame());
       }
    }
 

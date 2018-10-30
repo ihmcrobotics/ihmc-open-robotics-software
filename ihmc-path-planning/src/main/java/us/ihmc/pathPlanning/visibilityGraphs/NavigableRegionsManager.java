@@ -173,7 +173,7 @@ public class NavigableRegionsManager
          NavigableRegion regionContainingPoint = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, navigableRegions);
          List<Cluster> intersectingClusters = OcclusionTools.getListOfIntersectingObstacles(regionContainingPoint.getObstacleClusters(), start, goal);
          Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
-         Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0, start, goal, closestCluster.getNavigableExtrusionsInWorld3D(),
+         Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0, start, goal, closestCluster.getNavigableExtrusionsInWorld(),
                                                                                     regionContainingPoint.getHomeRegion());
 
          path = calculateBodyPath(start, closestExtrusion);
@@ -187,20 +187,20 @@ public class NavigableRegionsManager
       }
    }
 
-   public Point3D[][] getNavigableExtrusions()
+   public Point3DReadOnly[][] getNavigableExtrusions()
    {
-      Point3D[][] allNavigableExtrusions = new Point3D[navigableRegions.size()][];
+      Point3DReadOnly[][] allNavigableExtrusions = new Point3D[navigableRegions.size()][];
 
       for (int i = 0; i < navigableRegions.size(); i++)
       {
          NavigableRegion localPlanner = navigableRegions.get(i);
-         Point3D[] navigableExtrusions = new Point3D[localPlanner.getAllClusters().size()];
+         Point3DReadOnly[] navigableExtrusions = new Point3D[localPlanner.getAllClusters().size()];
 
          for (Cluster cluster : localPlanner.getAllClusters())
          {
             for (int j = 0; j < cluster.getNumberOfNavigableExtrusions(); j++)
             {
-               navigableExtrusions[j] = cluster.getNavigableExtrusionInWorld3D(j);
+               navigableExtrusions[j] = cluster.getNavigableExtrusionInWorld(j);
             }
          }
 

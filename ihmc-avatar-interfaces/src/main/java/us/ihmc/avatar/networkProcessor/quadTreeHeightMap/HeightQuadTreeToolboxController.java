@@ -92,7 +92,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
    }
 
    @Override
-   protected boolean initialize()
+   public boolean initialize()
    {
       return true;
    }
@@ -101,7 +101,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
    private final MutableBoolean quadTreeUpdateRequested = new MutableBoolean(false);
 
    @Override
-   protected void updateInternal()
+   public void updateInternal()
    {
       updateRobotContactPoints();
 
@@ -262,7 +262,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
    }
 
    @Override
-   protected boolean isDone()
+   public boolean isDone()
    {
       return false;
    }

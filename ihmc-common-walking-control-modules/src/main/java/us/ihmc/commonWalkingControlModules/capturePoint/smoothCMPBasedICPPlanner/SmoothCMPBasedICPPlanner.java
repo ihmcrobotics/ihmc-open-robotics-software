@@ -603,7 +603,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       timer.stopMeasurement();
    }
 
-   private void updateListeners()
+   public void updateListeners()
    {
       referenceCoPGenerator.updateListeners();
    }
@@ -717,6 +717,22 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.setDefaultPhaseTimes(defaultSwingTime, defaultTransferTime);
    }
 
+   public void getDesiredCenterOfMassVelocity(YoFrameVector3D desiredCenterOfMassVelocityToPack)
+   {
+      desiredCenterOfMassVelocityToPack.set(desiredCoMVelocity);
+   }
+
+   public void getDesiredCenterOfMassAcceleration(YoFrameVector3D desiredCenterOfMassAccelerationToPack)
+   {
+      desiredCenterOfMassAccelerationToPack.set(desiredCoMVelocity);
+   }
+
+   public void getDesiredCenterOfPressurePosition(YoFramePoint3D desiredCenterOfPressurePositionToPack)
+   {
+      desiredCenterOfPressurePositionToPack.setMatchingFrame(desiredCoPPosition);
+   }
+
+
    /** {@inheritDoc} */
    @Override
    public void getDesiredCenterOfPressurePosition(FramePoint3D desiredCenterOfPressurePositionToPack)
@@ -750,9 +766,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       this.adjustPlanForDSContinuity.set(ensureContinuity);
    }
 
-   // package-private getters for tests
+   // getters for tests and visualizers
 
-   ReferenceCoPTrajectoryGenerator getReferenceCoPGenerator()
+   public ReferenceCoPTrajectoryGenerator getReferenceCoPGenerator()
    {
       return referenceCoPGenerator;
    }
@@ -762,12 +778,12 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       return referenceCMPGenerator;
    }
 
-   ReferenceICPTrajectoryGenerator getReferenceICPGenerator()
+   public ReferenceICPTrajectoryGenerator getReferenceICPGenerator()
    {
       return referenceICPGenerator;
    }
 
-   ReferenceCoMTrajectoryGenerator getReferenceCoMGenerator()
+   public ReferenceCoMTrajectoryGenerator getReferenceCoMGenerator()
    {
       return referenceCoMGenerator;
    }

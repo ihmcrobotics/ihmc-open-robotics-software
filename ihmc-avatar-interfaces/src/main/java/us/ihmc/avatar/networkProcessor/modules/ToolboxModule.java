@@ -88,6 +88,13 @@ public abstract class ToolboxModule
    }
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
+                        PubSubImplementation pubSubImplementation)
+         throws IOException
+   {
+      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+   }
+
+   public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
                         int updatePeriodMilliseconds, PubSubImplementation pubSubImplementation)
          throws IOException
    {
@@ -300,7 +307,7 @@ public abstract class ToolboxModule
          yoVariableServer.close();
          yoVariableServer = null;
       }
-      realtimeRos2Node.stopSpinning();
+      realtimeRos2Node.destroy();
 
       if (DEBUG)
          PrintTools.debug(this, "Destroyed");

@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.parameters;
 
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
@@ -7,48 +8,48 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 /** {@inheritDoc} */
 public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
 {
-   private final boolean runningOnRealRobot;
    private final boolean useAngularMomentum = false;
    private final boolean useStepAdjustment = false;
+   private final RobotTarget target;
 
-   public ValkyrieICPOptimizationParameters(boolean runningOnRealRobot)
+   public ValkyrieICPOptimizationParameters(RobotTarget target)
    {
-      this.runningOnRealRobot = runningOnRealRobot;
+      this.target = target;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getForwardFootstepWeight()
    {
-      return runningOnRealRobot ? 7.5 : 20.0;
+      return (target == RobotTarget.REAL_ROBOT) ? 7.5 : 20.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getLateralFootstepWeight()
    {
-      return runningOnRealRobot ? 7.5 : 20.0;
+      return (target == RobotTarget.REAL_ROBOT) ? 7.5 : 20.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFootstepRateWeight()
    {
-      return runningOnRealRobot ? 4e-7 : 4e-7;
+      return (target == RobotTarget.REAL_ROBOT) ? 4e-7 : 4e-7;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackLateralWeight()
    {
-      return runningOnRealRobot ? 0.5 : 0.5;
+      return (target == RobotTarget.REAL_ROBOT) ? 0.5 : 0.5;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackForwardWeight()
    {
-      return runningOnRealRobot ? 0.5 : 0.5;
+      return (target == RobotTarget.REAL_ROBOT) ? 0.5 : 0.5;
    }
    
    /**
