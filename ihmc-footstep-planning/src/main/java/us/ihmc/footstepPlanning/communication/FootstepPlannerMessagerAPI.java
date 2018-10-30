@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.communication;
 
+import controller_msgs.msg.dds.FootstepNodeDataListMessage;
+import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -41,6 +43,7 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme Raw = apiFactory.createCategoryTheme("Raw");
    private static final CategoryTheme Navigable = apiFactory.createCategoryTheme("Navigable");
    private static final CategoryTheme NonNavigable = apiFactory.createCategoryTheme("NonNavigable");
+   private static final CategoryTheme Status = apiFactory.createCategoryTheme("Status");
 
    private static final CategoryTheme Parameters = apiFactory.createCategoryTheme("Parameters");
 
@@ -62,6 +65,8 @@ public class FootstepPlannerMessagerAPI
    private static final TypedTopicTheme<FootstepPlannerParameters> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
    private static final TypedTopicTheme<Boolean> Export = apiFactory.createTypedTopicTheme("Export");
    private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
+   private static final TypedTopicTheme<FootstepNodeDataListMessage> NodeData = apiFactory.createTypedTopicTheme("NodeData");
+   private static final TypedTopicTheme<FootstepPlannerOccupancyMapMessage> OccupancyMap = apiFactory.createTypedTopicTheme("OccupancyMap");
 
 
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
@@ -131,14 +136,11 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowInterRegionVisibilityMap = Root.child(VisibilityGraphs).child(InterRegion).child(Map).topic(Show);
 
    public static final Topic<Boolean> ShowNavigableRegionVisibilityMaps = Root.child(VisibilityGraphs).child(Map).topic(Show);
-
-
+   public static final Topic<FootstepNodeDataListMessage> NodeDataTopic = Root.child(Status).topic(NodeData);
+   public static final Topic<FootstepPlannerOccupancyMapMessage> OccupancyMapTopic = Root.child(Status).topic(OccupancyMap);
 
    private static final TypedTopicTheme<Boolean> ValidNode = apiFactory.createTypedTopicTheme("ValidNode");
    private static final TypedTopicTheme<Pose3D> FootstepPose = apiFactory.createTypedTopicTheme("FootstepPose");
-
-   public static final Topic<Boolean> ValidNodeTopic = Root.child(NodeChecking).topic(ValidNode);
-   public static final Topic<Pose3D> FootstepPoseTopic = Root.child(NodeChecking).topic(FootstepPose);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }

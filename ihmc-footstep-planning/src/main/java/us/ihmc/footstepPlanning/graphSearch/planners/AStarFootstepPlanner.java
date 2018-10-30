@@ -230,19 +230,13 @@ public class AStarFootstepPlanner implements FootstepPlanner
          this.validGoalNode.set(validGoalNode && this.validGoalNode.getBooleanValue());
       }
 
-//      RigidBodyTransform snapTransform = snapper.snapFootstepNode(startNode).getSnapTransform();
-//      FootstepNodeSnappingTools.constructGroundPlaneAroundFeet(planarRegionsList, startNode, snapTransform, parameters.getIdealFootstepWidth(), 0.5, 0.2,  0.5);
-
-
       stack.add(startNode);
       expandedNodes = new HashSet<>();
       endNode = null;
 
       if (listener != null)
       {
-         listener.addNode(startNode);
-         for (RobotSide side : RobotSide.values)
-            listener.addNode(goalNodes.get(side));
+         listener.addNode(startNode, null);
          listener.tickAndUpdate();
       }
    }
@@ -264,12 +258,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
             continue;
          expandedNodes.add(nodeToExpand);
 
-         if (listener != null)
-         {
-            listener.addNode(nodeToExpand);
-            listener.tickAndUpdate();
-         }
-
          if (checkAndHandleNodeAtGoal(nodeToExpand))
             break;
 
@@ -279,7 +267,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
          expandedNodesCount += neighbors.size();
          for (FootstepNode neighbor : neighbors)
          {
-            /** Checks if the footstep (center of the foot) is on a planar region*/
+            if (listener != null)
+               listener.addNode(neighbor, nodeToExpand);
+
             if (!nodeChecker.isNodeValid(neighbor, nodeToExpand))
             {
                rejectedNodesCount++;
@@ -292,6 +282,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
             if(endNode == null || stack.comparator().compare(neighbor, endNode) < 0)
                stack.add(neighbor);
          }
+
+         if(listener != null)
+            listener.tickAndUpdate();
 
          long timeInNano = System.nanoTime();
          if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime) > timeout.getDoubleValue())
