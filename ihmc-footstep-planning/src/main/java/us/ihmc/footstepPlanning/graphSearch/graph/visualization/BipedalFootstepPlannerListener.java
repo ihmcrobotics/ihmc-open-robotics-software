@@ -4,7 +4,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 
 public interface BipedalFootstepPlannerListener
 {
-   void addNode(FootstepNode node);
+   void addNode(FootstepNode node, FootstepNode previousNode);
 
    void rejectNode(FootstepNode rejectedNode, BipedalFootstepPlannerNodeRejectionReason reason);
 

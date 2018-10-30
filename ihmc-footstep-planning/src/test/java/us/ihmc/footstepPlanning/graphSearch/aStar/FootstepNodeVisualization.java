@@ -87,7 +87,7 @@ public class FootstepNodeVisualization implements BipedalFootstepPlannerListener
    }
 
    @Override
-   public void addNode(FootstepNode node)
+   public void addNode(FootstepNode node, FootstepNode previousNode)
    {
       FootstepNode localNode = creat2dNode(node);
 
@@ -226,13 +226,13 @@ public class FootstepNodeVisualization implements BipedalFootstepPlannerListener
 
       for (int i = 0; i < 10; i++)
       {
-         viz.addNode(new FootstepNode(0.05 * i, 0.0));
+         viz.addNode(new FootstepNode(0.05 * i, 0.0), null);
          viz.tickAndUpdate();
       }
 
       for (int i = 0; i < 10; i++)
       {
-         viz.addNode(new FootstepNode(0.05 * i, 0.1));
+         viz.addNode(new FootstepNode(0.05 * i, 0.1), null);
          viz.tickAndUpdate();
       }
 
@@ -252,13 +252,13 @@ public class FootstepNodeVisualization implements BipedalFootstepPlannerListener
 
       for (int i = 0; i < 10; i++)
       {
-         viz.addNode(new FootstepNode(0.05 * i, 0.0));
+         viz.addNode(new FootstepNode(0.05 * i, 0.0), null);
          viz.tickAndUpdate();
       }
 
       for (int i = 0; i < 10; i++)
       {
-         viz.addNode(new FootstepNode(0.05 * i, 0.1));
+         viz.addNode(new FootstepNode(0.05 * i, 0.1), null);
          viz.tickAndUpdate();
       }
 
