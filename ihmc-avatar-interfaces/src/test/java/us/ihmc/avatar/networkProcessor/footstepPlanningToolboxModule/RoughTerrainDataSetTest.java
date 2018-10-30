@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
@@ -137,6 +138,7 @@ public abstract class RoughTerrainDataSetTest
 
    public abstract FootstepPlannerType getPlannerType();
 
+   @Before
    public void setup()
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -146,33 +148,6 @@ public abstract class RoughTerrainDataSetTest
       else
          messager = new SharedMemoryMessager(FootstepPlannerMessagerAPI.API);
 
-      setupInternal();
-
-      try
-      {
-         messager.startMessager();
-      }
-      catch (Exception e)
-      {
-         throw new RuntimeException("Failed to start messager.");
-      }
-
-      if (VISUALIZE)
-      {
-         createUI(messager);
-      }
-
-      for (int i = 0; i < 100; i++)
-         ThreadTools.sleep(10);
-   }
-
-   public void setCheckForBodyBoxCollision(boolean checkForBodyBoxCollision)
-   {
-      this.checkForBodyBoxCollision = checkForBodyBoxCollision;
-   }
-
-   public void setupInternal()
-   {
       messageConverter = RemoteUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
 
       tryToStartModule(() -> setupFootstepPlanningToolboxModule());
@@ -197,7 +172,30 @@ public abstract class RoughTerrainDataSetTest
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
 
       ros2Node.spin();
+
+      try
+      {
+         messager.startMessager();
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException("Failed to start messager.");
+      }
+
+      if (VISUALIZE)
+      {
+         createUI(messager);
+      }
+
+      for (int i = 0; i < 100; i++)
+         ThreadTools.sleep(10);
    }
+
+   public void setCheckForBodyBoxCollision(boolean checkForBodyBoxCollision)
+   {
+      this.checkForBodyBoxCollision = checkForBodyBoxCollision;
+   }
+
 
    @After
    public void tearDown() throws Exception

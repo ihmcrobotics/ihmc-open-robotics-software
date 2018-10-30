@@ -8,12 +8,12 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.listeners.PlannerGoalRecommendationListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -30,15 +30,12 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
 import java.util.*;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
    private static final boolean debug = false;
-   private static final int stagesToCreate = 4;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -75,15 +72,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final YoBoolean isDonePlanningPath = new YoBoolean("isDonePlanningPath", registry);
    private final YoBoolean isDonePlanningSteps = new YoBoolean("isDonePlanningSteps", registry);
 
-   private final List<ScheduledFuture<?>> scheduledStages = new ArrayList<>();
+   private final ConcurrentCopier<List<FootstepPlanningResult>> completedPathResults = new ConcurrentCopier<>(ArrayList::new);
+   private final ConcurrentCopier<List<FootstepPlanningResult>> completedStepResults = new ConcurrentCopier<>(ArrayList::new);
 
-   private final List<FootstepPlanningResult> completedPathResults = new ArrayList<>();
-   private final List<FootstepPlanningResult> completedStepResults = new ArrayList<>();
+   private final ConcurrentCopier<PairList<Integer, BodyPathPlan>> completedPathPlans = new ConcurrentCopier<>(PairList::new);
+   private final ConcurrentCopier<PairList<Integer, FootstepPlan>> completedStepPlans = new ConcurrentCopier<>(PairList::new);
 
-   private final PairList<Integer, BodyPathPlan> completedPathPlans = new PairList<>();
-   private final PairList<Integer, FootstepPlan> completedStepPlans = new PairList<>();
-
-   private double dt;
+   private long tickDurationMs;
 
    private final YoFootstepPlannerParameters footstepPlanningParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
@@ -96,11 +91,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public MultiStageFootstepPlanningManager(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
                                             StatusMessageOutputManager statusOutputManager, ScheduledExecutorService executorService,
-                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, double dt)
+                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickDurationMs)
    {
       this.contactPointParameters = contactPointParameters;
       this.statusOutputManager = statusOutputManager;
-      this.dt = dt;
+      this.tickDurationMs = tickDurationMs;
       this.executorService = executorService;
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerPlanarRegions", 200, 30, registry);
       goalRecommendationHandler = new PlannerGoalRecommendationHandler(allPlanningStages, stepPlanningStagesInProgress, footstepPlannerParameters);
@@ -113,10 +108,10 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone.set(false);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
 
-      for (int i = 0; i < stagesToCreate; i++)
+      for (int i = 0; i < 5; i++)
       {
          FootstepPlanningStage planningStage = new FootstepPlanningStage(i, contactPointParameters, footstepPlannerParameters, activePlanner, planId,
-                                                                         graphicsListRegistry, dt);
+                                                                         graphicsListRegistry, tickDurationMs);
          planningStage.addCompletionCallback(this);
          planningStage.setPlannerGoalRecommendationHandler(goalRecommendationHandler);
          registry.addChild(planningStage.getYoVariableRegistry());
@@ -145,7 +140,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private FootstepPlanningStage createNewFootstepPlanningStage()
    {
       FootstepPlanningStage stage = new FootstepPlanningStage(allPlanningStages.size(), contactPointParameters, footstepPlanningParameters, activePlanner,
-                                                              planId, null, dt);
+                                                              planId, null, tickDurationMs);
       stage.addCompletionCallback(this);
       stage.setPlannerGoalRecommendationHandler(goalRecommendationHandler);
       return stage;
@@ -172,7 +167,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       return planningStage;
    }
 
-
    private void cleanupAllPlanningStages()
    {
       globalSequenceIndex.set(0);
@@ -183,11 +177,15 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          planningStagePool.add(cleanupPlanningStage(stepPlanningStageInProgress));
       }
 
-      completedPathPlans.clear();
-      completedStepPlans.clear();
+      completedPathPlans.getCopyForWriting();
+      completedPathPlans.commit();
+      completedStepPlans.getCopyForWriting();
+      completedStepPlans.commit();
 
-      completedPathResults.clear();
-      completedStepResults.clear();
+      completedPathResults.getCopyForWriting();
+      completedPathResults.commit();
+      completedStepResults.getCopyForWriting();
+      completedStepResults.commit();
 
       planningObjectivePool.clear();
    }
@@ -209,7 +207,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          planner.setFootstepPlannerObjective(plannerGoal);
          planner.setPlanSequenceId(globalSequenceIndex.getIntegerValue());
 
-         ScheduledFuture<?> plannerTask = executorService.scheduleAtFixedRate(planner, 0, (long) Conversions.secondsToMilliseconds(dt), TimeUnit.MILLISECONDS);
+         Runnable runnable = planner.createStageRunnable();
+         ScheduledFuture<?> plannerTask = executorService.scheduleAtFixedRate(runnable, 0, tickDurationMs, TimeUnit.MILLISECONDS);
          planningTasks.put(planner, plannerTask);
 
          pathPlanningStagesInProgress.put(planner, plannerGoal);
@@ -228,28 +227,55 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    @Override
    public void pathPlanningIsComplete(FootstepPlanningResult pathPlanningResult, FootstepPlanningStage stageFinished)
    {
-      completedPathResults.add(pathPlanningResult);
-      pathPlanningStagesInProgress.remove(stageFinished);
+      List<FootstepPlanningResult> currentPathPlanResults = completedPathResults.getCopyForReading();
+      List<FootstepPlanningResult> allPathPlanResults = completedPathResults.getCopyForWriting();
+      if (currentPathPlanResults != null)
+         allPathPlanResults.addAll(currentPathPlanResults);
+      allPathPlanResults.add(pathPlanningResult);
+      completedPathResults.commit();
+
+      PairList<Integer, BodyPathPlan> currentPathPlans = completedPathPlans.getCopyForReading();
+      PairList<Integer, BodyPathPlan> allCompletedPathPlans = completedPathPlans.getCopyForWriting();
 
       BodyPathPlan bodyPathPlan = stageFinished.getPathPlan();
 
+      if (currentPathPlans != null)
+         allCompletedPathPlans.addAll(currentPathPlans);
       if (pathPlanningResult.validForExecution() && bodyPathPlan != null)
       {
-         completedPathPlans.add(new ImmutablePair<>(stageFinished.getPlanSequenceId(), bodyPathPlan));
+         allCompletedPathPlans.add(new ImmutablePair<>(stageFinished.getPlanSequenceId(), bodyPathPlan));
       }
+      completedPathPlans.commit();
+
+      pathPlanningStagesInProgress.remove(stageFinished);
    }
 
    @Override
    public void stepPlanningIsComplete(FootstepPlanningResult stepPlanningResult, FootstepPlanningStage stageFinished)
    {
-      completedStepResults.add(stepPlanningResult);
+      List<FootstepPlanningResult> currentStepPlanResults = completedStepResults.getCopyForReading();
+      List<FootstepPlanningResult> allStepPlanResults = completedStepResults.getCopyForWriting();
+      if (currentStepPlanResults != null)
+         allStepPlanResults.addAll(currentStepPlanResults);
+      allStepPlanResults.add(stepPlanningResult);
+      completedStepResults.commit();
+
+      PairList<Integer, FootstepPlan> currentStepPlans = completedStepPlans.getCopyForReading();
+      PairList<Integer, FootstepPlan> allCompletedStepPlans = completedStepPlans.getCopyForWriting();
+
+      if (currentStepPlans != null)
+         allCompletedStepPlans.addAll(currentStepPlans);
+      if (stepPlanningResult.validForExecution())
+      {
+         allCompletedStepPlans.add(new ImmutablePair<>(stageFinished.getPlanSequenceId(), stageFinished.getPlan()));
+      }
+      completedStepPlans.commit();
+
       stepPlanningStagesInProgress.remove(stageFinished);
       planningStagePool.add(stageFinished);
 
+      stageFinished.destroyStageRunnable();
       planningTasks.remove(stageFinished).cancel(true);
-
-      if (stepPlanningResult.validForExecution())
-         completedStepPlans.add(new ImmutablePair<>(stageFinished.getPlanSequenceId(), stageFinished.getPlan()));
    }
 
    public void update()
@@ -353,7 +379,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private void updateInternal()
    {
-      plannerTime.add(dt);
+      plannerTime.add(Conversions.millisecondsToSeconds(tickDurationMs));
       if (plannerTime.getDoubleValue() > 20.0)
       {
          if (debug)
@@ -384,7 +410,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       assignGoalsToAvailablePlanners();
 
       // check the status of the path planners
-      FootstepPlanningResult pathStatus = getWorstResult(completedPathResults);
+      FootstepPlanningResult pathStatus = getWorstResult(completedPathResults.getCopyForReading());
       if (!pathStatus.validForExecution())
       {
          reportPlannerFailed(pathStatus);
@@ -405,7 +431,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          isDonePlanningPath.set(noMorePathsToPlan);
 
       // check the status of the step planners
-      FootstepPlanningResult stepStatus = getWorstResult(completedStepResults);
+      FootstepPlanningResult stepStatus = getWorstResult(completedStepResults.getCopyForReading());
       if (!stepStatus.validForExecution())
       {
          reportPlannerFailed(stepStatus);
@@ -432,11 +458,12 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       this.isDone.set(isDone);
    }
 
-
-
    private static FootstepPlanningResult getWorstResult(List<FootstepPlanningResult> results)
    {
       FootstepPlanningResult worstResult = FootstepPlanningResult.OPTIMAL_SOLUTION;
+      if (results == null) // hasn't been assigned yet.
+         return worstResult;
+
       for (FootstepPlanningResult result : results)
          worstResult = FootstepPlanningResult.getWorstResult(worstResult, result);
 
@@ -454,6 +481,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private void concatenateBodyPathPlans()
    {
+      PairList<Integer, BodyPathPlan> completedPathPlans = this.completedPathPlans.getCopyForReading();
+
       if (completedPathPlans.isEmpty())
       {
          bodyPathPlan.set(null);
@@ -471,13 +500,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
             totalBodyPathPlan.addWaypoint(bodyPathPlan.getRight().getWaypoint(i));
       }
 
-      completedPathPlans.clear();
-
       bodyPathPlan.set(totalBodyPathPlan);
    }
 
    private void concatenateFootstepPlans()
    {
+      PairList<Integer, FootstepPlan> completedStepPlans = this.completedStepPlans.getCopyForReading();
+
       if (completedStepPlans.isEmpty())
       {
          footstepPlan.set(null);
@@ -497,8 +526,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
             totalFootstepPlan.addFootstep(footstepPlan.getFootstep(i));
       }
-
-      completedPathPlans.clear();
 
       footstepPlan.set(totalFootstepPlan);
    }
@@ -582,8 +609,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       cleanupAllPlanningStages();
 
-      while (!scheduledStages.isEmpty())
-         scheduledStages.remove(0).cancel(true);
+      for (FootstepPlanningStage planningTask : planningTasks.keySet())
+         planningTasks.remove(planningTask).cancel(true);
    }
 
    public void destroy()

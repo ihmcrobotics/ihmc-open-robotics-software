@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -16,10 +17,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MultiStageFootstepPlanningController
 {
@@ -39,19 +39,19 @@ public class MultiStageFootstepPlanningController
 
    protected final AtomicBoolean receivedInput = new AtomicBoolean();
 
-   private double dt;
+   private final long tickTimeMs;
    private final ScheduledExecutorService executorService;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
    public MultiStageFootstepPlanningController(RobotContactPointParameters<RobotSide> contactPointParameters,
                                                FootstepPlannerParameters footstepPlannerParameters, CommandInputManager commandInputManager,
                                                StatusMessageOutputManager statusOutputManager, ScheduledExecutorService executorService,
-                                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, double dt)
+                                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {
-      this.dt = dt;
+      this.tickTimeMs = tickTimeMs;
       this.executorService = executorService;
       stageManager = new MultiStageFootstepPlanningManager(contactPointParameters, footstepPlannerParameters, statusOutputManager, executorService,
-                                                           parentRegistry, graphicsListRegistry, dt);
+                                                           parentRegistry, graphicsListRegistry, tickTimeMs);
 
       commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
 
@@ -103,7 +103,7 @@ public class MultiStageFootstepPlanningController
          PrintTools.debug(this, "Waking up");
 
       createPlannerRunnable();
-      managerTask = executorService.scheduleAtFixedRate(managerRunnable, 0, (long) Conversions.secondsToMilliseconds(dt), TimeUnit.MILLISECONDS);
+      managerTask = executorService.scheduleAtFixedRate(managerRunnable, 0, tickTimeMs, TimeUnit.MILLISECONDS);
 
       stageManager.wakeUp();
       receivedInput.set(true);
@@ -158,7 +158,7 @@ public class MultiStageFootstepPlanningController
             try
             {
                stageManager.update();
-               controllerTime.add(dt);
+               controllerTime.add(Conversions.millisecondsToSeconds(tickTimeMs));
 
                if (receivedInput.getAndSet(false))
                   timeOfLastInput.set(controllerTime.getDoubleValue());

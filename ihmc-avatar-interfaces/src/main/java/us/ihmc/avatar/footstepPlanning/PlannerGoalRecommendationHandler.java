@@ -1,5 +1,6 @@
 package us.ihmc.avatar.footstepPlanning;
 
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -18,7 +19,7 @@ public class PlannerGoalRecommendationHandler
    private final List<FootstepPlanningStage> allPlanningStages;
    private final HashMap<FootstepPlanningStage, FootstepPlannerObjective> stepPlanningStagesInProgress;
 
-   private final List<FootstepPlannerObjective> footstepPlannerObjectives = new ArrayList<>();
+   private final ConcurrentCopier<List<FootstepPlannerObjective>> footstepPlannerObjectives = new ConcurrentCopier<>(ArrayList::new);
 
    public PlannerGoalRecommendationHandler(List<FootstepPlanningStage> allPlanningStages,
                                            HashMap<FootstepPlanningStage, FootstepPlannerObjective> stepPlanningStagesInProgress,
@@ -37,7 +38,6 @@ public class PlannerGoalRecommendationHandler
 
       FootstepPlannerGoal newFinalPlanningGoal = new FootstepPlannerGoal();
       newFinalPlanningGoal.set(currentPlanningObjective.getGoal());
-
 
       FramePose3D newLeftFootPoseGoal = new FramePose3D();
       FramePose3D newRightFootPoseGoal = new FramePose3D();
@@ -58,7 +58,12 @@ public class PlannerGoalRecommendationHandler
       newFinalPlanningObjective.setInitialStanceFootPose(newLeftFootPoseGoal);
       newFinalPlanningObjective.setInitialStanceFootSide(newInitialSide);
 
-      footstepPlannerObjectives.add(newFinalPlanningObjective);
+      List<FootstepPlannerObjective> currentObjectives = footstepPlannerObjectives.getCopyForReading();
+      List<FootstepPlannerObjective> newSetOfObjectives = footstepPlannerObjectives.getCopyForWriting();
+      if (currentObjectives != null)
+         newSetOfObjectives.addAll(currentObjectives);
+      newSetOfObjectives.add(newFinalPlanningObjective);
+      footstepPlannerObjectives.commit();
 
       currentPlanningObjective.setGoal(newIntermediateGoal);
       currentPlanningStage.setGoal(newIntermediateGoal);
@@ -66,11 +71,22 @@ public class PlannerGoalRecommendationHandler
 
    public boolean hasNewFootstepPlannerObjectives()
    {
-      return !footstepPlannerObjectives.isEmpty();
+      List<FootstepPlannerObjective> objectives = footstepPlannerObjectives.getCopyForReading();
+      if (objectives != null)
+         return !objectives.isEmpty();
+      else
+         return false;
    }
 
    public FootstepPlannerObjective pollNextFootstepPlannerObjective()
    {
-      return footstepPlannerObjectives.remove(0);
+      List<FootstepPlannerObjective> currentObjectives = footstepPlannerObjectives.getCopyForReading();
+      List<FootstepPlannerObjective> shortenedObjectives = footstepPlannerObjectives.getCopyForWriting();
+      FootstepPlannerObjective objective = currentObjectives.remove(0);
+      shortenedObjectives.addAll(currentObjectives);
+      footstepPlannerObjectives.commit();
+
+      return objective;
    }
+
 }

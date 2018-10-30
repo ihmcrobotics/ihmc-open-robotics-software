@@ -1,6 +1,7 @@
 package us.ihmc.avatar.footstepPlanning;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
@@ -41,7 +42,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class FootstepPlanningStage implements FootstepPlanner, Runnable
+public class FootstepPlanningStage implements FootstepPlanner
 {
    private static final boolean debug = false;
 
@@ -57,6 +58,8 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
    private final EnumProvider<FootstepPlannerType> activePlannerEnum;
    private final IntegerProvider planId;
 
+   private Runnable stageRunnable;
+
    private final YoBoolean donePlanningPath;
    private final YoBoolean donePlanningSteps;
 
@@ -66,7 +69,7 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
    private final YoInteger sequenceId;
 
    private final int stageId;
-   private final double dt;
+   private final long tickDurationMs;
 
    private final List<PlannerCompletionCallback> completionCallbackList = new ArrayList<>();
 
@@ -76,12 +79,12 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
    private final PlannerGoalRecommendationHolder plannerGoalRecommendationHolder;
 
    public FootstepPlanningStage(int stageId, RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
-                                EnumProvider<FootstepPlannerType> activePlanner, IntegerProvider planId, YoGraphicsListRegistry graphicsListRegistry, double dt)
+                                EnumProvider<FootstepPlannerType> activePlanner, IntegerProvider planId, YoGraphicsListRegistry graphicsListRegistry, long tickDurationMs)
    {
       this.stageId = stageId;
       this.footstepPlanningParameters = footstepPlannerParameters;
       this.planId = planId;
-      this.dt = dt;
+      this.tickDurationMs = tickDurationMs;
       this.activePlannerEnum = activePlanner;
 
       plannerGoalRecommendationHolder = new PlannerGoalRecommendationHolder(stageId);
@@ -225,14 +228,42 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
       return result;
    }
 
-   @Override
-   public void run()
+   public Runnable createStageRunnable()
    {
-      if (Thread.interrupted())
-         return;
+      if (stageRunnable != null)
+      {
+         if (debug)
+            PrintTools.error(this, "stageRunnable is not null.");
+         return null;
+      }
 
-      update();
-      stageTime.add(dt);
+      stageRunnable = new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            if (Thread.interrupted())
+               return;
+
+            try
+            {
+               update();
+
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+               throw e;
+            }
+         }
+      };
+
+      return stageRunnable;
+   }
+
+   public void destroyStageRunnable()
+   {
+      stageRunnable = null;
    }
 
    public void addCompletionCallback(PlannerCompletionCallback completionCallback)
@@ -259,12 +290,22 @@ public class FootstepPlanningStage implements FootstepPlanner, Runnable
          initialize.set(false);
       }
 
-      updateInternal();
+      try
+      {
+         updateInternal();
+      }
+      catch (Exception e)
+      {
+         if (debug)
+         {
+            e.printStackTrace();
+         }
+      }
    }
 
    private void updateInternal()
    {
-      stageTime.add(dt);
+      stageTime.add(Conversions.millisecondsToSeconds(tickDurationMs));
       if (stageTime.getDoubleValue() > 20.0)
       {
          if (debug)

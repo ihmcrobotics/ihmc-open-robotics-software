@@ -26,6 +26,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MultiStageFootstepPlanningModule
 {
@@ -68,7 +69,23 @@ public class MultiStageFootstepPlanningModule
             FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName), commandInputManager,
             FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName), statusOutputManager, realtimeRos2Node);
 
-      ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(name);
+      ThreadFactory threadFactory = new ThreadFactory()
+      {
+         private final AtomicInteger threadNumber = new AtomicInteger(1);
+
+         @Override
+         public Thread newThread(Runnable r)
+         {
+            Thread t = new Thread(r, name + "-thread-" + threadNumber.getAndIncrement());
+
+            if (t.isDaemon())
+               t.setDaemon(false);
+            if (t.getPriority() != Thread.MAX_PRIORITY)
+               t.setPriority(Thread.MAX_PRIORITY);
+
+            return t;
+         }
+      };
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
       commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
@@ -76,7 +93,7 @@ public class MultiStageFootstepPlanningModule
       footstepPlanningController = new MultiStageFootstepPlanningController(drcRobotModel.getContactPointParameters(),
                                                                             drcRobotModel.getFootstepPlannerParameters(), commandInputManager,
                                                                             statusOutputManager, executorService, registry, yoGraphicsListRegistry,
-                                                                            Conversions.millisecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
+                                                                            DEFAULT_UPDATE_PERIOD_MILLISECONDS);
 
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class,
                                            FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
