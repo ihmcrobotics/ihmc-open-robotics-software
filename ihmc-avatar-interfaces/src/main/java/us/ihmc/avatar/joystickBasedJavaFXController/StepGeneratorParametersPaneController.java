@@ -33,8 +33,8 @@ public class StepGeneratorParametersPaneController
    public void initialize(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters)
    {
       swingHeightSlider.setValue(0.025);
-      swingDurationSlider.setValue(0.7);
-      transferDurationSlider.setValue(0.3);
+      swingDurationSlider.setValue(walkingControllerParameters.getDefaultSwingTime());
+      transferDurationSlider.setValue(walkingControllerParameters.getDefaultTransferTime());
       trajectoryDurationSlider.setValue(1.0);
       swingHeightSlider.setLabelFormatter(StringConverterTools.metersToRoundedCentimeters());
       messager.bindBidirectional(WalkingSwingHeight, swingHeightSlider.valueProperty(), createConverter(), true);
