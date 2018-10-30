@@ -172,7 +172,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          }
       }
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 + trajectoryTime);
       assertTrue(success);
 
       for (RobotSide robotSide : RobotSide.values)
