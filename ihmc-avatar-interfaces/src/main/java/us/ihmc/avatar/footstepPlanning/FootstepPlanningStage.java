@@ -1,10 +1,12 @@
 package us.ihmc.avatar.footstepPlanning;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -57,6 +59,13 @@ public class FootstepPlanningStage implements FootstepPlanner
    private final EnumMap<FootstepPlannerType, FootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
    private final EnumProvider<FootstepPlannerType> activePlannerEnum;
    private final IntegerProvider planId;
+
+   private final ConcurrentCopier<AtomicDouble> timeout = new ConcurrentCopier<>(AtomicDouble::new);
+   private final ConcurrentCopier<AtomicDouble> horizonLength = new ConcurrentCopier<>(AtomicDouble::new);
+   private final ConcurrentCopier<PlanarRegionsList> planarRegionsList = new ConcurrentCopier<>(PlanarRegionsList::new);
+   private final ConcurrentCopier<FootstepPlannerGoal> goal = new ConcurrentCopier<>(FootstepPlannerGoal::new);
+   private final ConcurrentCopier<FramePose3D> stanceFootPose = new ConcurrentCopier<>(FramePose3D::new);
+   private final ConcurrentCopier<AtomicReference<RobotSide>> stanceFootSide = new ConcurrentCopier<>(AtomicReference::new);
 
    private Runnable stageRunnable;
 
@@ -149,27 +158,36 @@ public class FootstepPlanningStage implements FootstepPlanner
 
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
    {
-      getPlanner().setInitialStanceFoot(stanceFootPose, side);
+      this.stanceFootPose.getCopyForWriting().setIncludingFrame(stanceFootPose);
+      this.stanceFootPose.commit();
+      this.stanceFootSide.getCopyForWriting().set(side);
+      this.stanceFootSide.commit();
    }
 
    public void setGoal(FootstepPlannerGoal goal)
    {
-      getPlanner().setGoal(goal);
+      this.goal.getCopyForWriting().set(goal);
+      this.goal.commit();
    }
 
    public void setTimeout(double timeout)
    {
-      getPlanner().setTimeout(timeout);
+      this.timeout.getCopyForWriting().set(timeout);
+      this.timeout.commit();
    }
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      getPlanner().setPlanarRegions(planarRegionsList);
+      PlanarRegionsList newPlanarRegionsList = this.planarRegionsList.getCopyForWriting();
+      newPlanarRegionsList.clear();
+      newPlanarRegionsList.getPlanarRegionsAsList().addAll(planarRegionsList.getPlanarRegionsAsList());
+      this.planarRegionsList.commit();
    }
 
    public void setPlanningHorizonLength(double planningHorizonLength)
    {
-      getPlanner().setPlanningHorizonLength(planningHorizonLength);
+      this.horizonLength.getCopyForWriting().set(planningHorizonLength);
+      this.horizonLength.commit();
    }
 
    public void setPlanSequenceId(int sequenceId)
@@ -318,6 +336,12 @@ public class FootstepPlanningStage implements FootstepPlanner
       sendMessageToUI(
             "Starting To Plan: " + planId.getValue() + " sequence: " + sequenceId.getValue() + ", using type " + activePlannerEnum.getValue().toString()
                   + " on stage " + stageId);
+
+      getPlanner().setInitialStanceFoot(stanceFootPose.getCopyForReading(), stanceFootSide.getCopyForReading().get());
+      getPlanner().setGoal(goal.getCopyForReading());
+      getPlanner().setTimeout(timeout.getCopyForReading().get());
+      getPlanner().setPlanarRegions(planarRegionsList.getCopyForReading());
+      getPlanner().setPlanningHorizonLength(horizonLength.getCopyForReading().get());
 
       FootstepPlanningResult status = getPlanner().planPath();
       pathPlanResult.set(status);

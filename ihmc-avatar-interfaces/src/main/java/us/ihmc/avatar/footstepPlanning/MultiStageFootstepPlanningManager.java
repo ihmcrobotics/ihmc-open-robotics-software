@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -90,15 +91,18 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
    public MultiStageFootstepPlanningManager(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
-                                            StatusMessageOutputManager statusOutputManager, ScheduledExecutorService executorService,
-                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickDurationMs)
+                                            StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry,
+                                            YoGraphicsListRegistry graphicsListRegistry, long tickDurationMs)
    {
       this.contactPointParameters = contactPointParameters;
       this.statusOutputManager = statusOutputManager;
       this.tickDurationMs = tickDurationMs;
-      this.executorService = executorService;
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerPlanarRegions", 200, 30, registry);
       goalRecommendationHandler = new PlannerGoalRecommendationHandler(allPlanningStages, stepPlanningStagesInProgress, footstepPlannerParameters);
+
+      ThreadFactory threadFactory = new MyThreadFactory(new MyExceptionHandler());
+//            ThreadTools.getNamedThreadFactory(getClass().getSimpleName());
+      executorService = Executors.newScheduledThreadPool(5, threadFactory);
 
       footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
 
@@ -135,6 +139,35 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       parentRegistry.addChild(registry);
       initialize.set(true);
+   }
+   private class MyThreadFactory implements ThreadFactory
+   {
+      private final ThreadFactory defaultFactory = Executors.defaultThreadFactory();
+      private final Thread.UncaughtExceptionHandler handler;
+
+      public MyThreadFactory(Thread.UncaughtExceptionHandler handler)
+      {
+         this.handler = handler;
+      }
+
+      @Override
+      public Thread newThread(Runnable runnable)
+      {
+         Thread thread = defaultFactory.newThread(runnable);
+         thread.setUncaughtExceptionHandler(handler);
+         return thread;
+      }
+   }
+
+   private class MyExceptionHandler implements Thread.UncaughtExceptionHandler
+   {
+      @Override
+      public void uncaughtException(Thread thread, Throwable t)
+      {
+         if (t instanceof NullPointerException)
+            PrintTools.info("real bad");
+         PrintTools.info("Yo");
+      }
    }
 
    private FootstepPlanningStage createNewFootstepPlanningStage()
@@ -207,8 +240,23 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          planner.setFootstepPlannerObjective(plannerGoal);
          planner.setPlanSequenceId(globalSequenceIndex.getIntegerValue());
 
+         PlanarRegionsList planarRegionsList;
+         if (this.planarRegionsList.isPresent())
+         {
+            planarRegionsList = this.planarRegionsList.get();
+            yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegionsList);
+            yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
+         }
+         else
+         {
+            planarRegionsList = null;
+            yoGraphicPlanarRegionsList.clear();
+         }
+
+         planner.setPlanarRegions(planarRegionsList);
+
          Runnable runnable = planner.createStageRunnable();
-         ScheduledFuture<?> plannerTask = executorService.scheduleAtFixedRate(runnable, 0, tickDurationMs, TimeUnit.MILLISECONDS);
+         ScheduledFuture<?> plannerTask = executorService.schedule(runnable, 0, TimeUnit.MILLISECONDS);
          planningTasks.put(planner, plannerTask);
 
          pathPlanningStagesInProgress.put(planner, plannerGoal);
@@ -380,7 +428,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private void updateInternal()
    {
       plannerTime.add(Conversions.millisecondsToSeconds(tickDurationMs));
-      if (plannerTime.getDoubleValue() > 20.0)
+      if (plannerTime.getDoubleValue() > 1000.0)
       {
          if (debug)
             PrintTools.info("Hard timeout at " + plannerTime.getDoubleValue());
@@ -388,21 +436,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          return;
       }
 
-      PlanarRegionsList planarRegionsList;
-      if (this.planarRegionsList.isPresent())
-      {
-         planarRegionsList = this.planarRegionsList.get();
-         yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegionsList);
-         yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
-      }
-      else
-      {
-         planarRegionsList = null;
-         yoGraphicPlanarRegionsList.clear();
-      }
 
-      for (FootstepPlanner footstepPlanner : stepPlanningStagesInProgress.keySet())
-         footstepPlanner.setPlanarRegions(planarRegionsList);
 
       updatePlanningObjectives();
 
@@ -455,7 +489,10 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone &= pathPlanningStagesInProgress.isEmpty();
       isDone &= planningObjectivePool.isEmpty();
       isDone &= !goalRecommendationHandler.hasNewFootstepPlannerObjectives();
-      this.isDone.set(isDone);
+      if (isDone)
+         this.isDone.set(true);
+      else
+         this.isDone.set(false);
    }
 
    private static FootstepPlanningResult getWorstResult(List<FootstepPlanningResult> results)

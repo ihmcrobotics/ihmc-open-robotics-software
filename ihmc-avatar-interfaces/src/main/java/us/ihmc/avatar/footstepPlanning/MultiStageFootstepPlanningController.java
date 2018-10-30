@@ -50,8 +50,8 @@ public class MultiStageFootstepPlanningController
    {
       this.tickTimeMs = tickTimeMs;
       this.executorService = executorService;
-      stageManager = new MultiStageFootstepPlanningManager(contactPointParameters, footstepPlannerParameters, statusOutputManager, executorService,
-                                                           parentRegistry, graphicsListRegistry, tickTimeMs);
+      stageManager = new MultiStageFootstepPlanningManager(contactPointParameters, footstepPlannerParameters, statusOutputManager, parentRegistry,
+                                                           graphicsListRegistry, tickTimeMs);
 
       commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
 
@@ -127,7 +127,6 @@ public class MultiStageFootstepPlanningController
          managerTask.cancel(true);
          managerTask = null;
       }
-
    }
 
    public void destroy()
@@ -176,5 +175,4 @@ public class MultiStageFootstepPlanningController
          }
       };
    }
-
 }
