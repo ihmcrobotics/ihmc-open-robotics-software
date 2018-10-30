@@ -4,9 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.Before;
@@ -21,7 +19,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.AvatarHumanoidKinematicsToolboxControllerTest;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -33,32 +30,24 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
-import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
-import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.robotDescription.JointDescription;
-import us.ihmc.robotics.robotDescription.LinkDescription;
-import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -192,7 +181,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 30000)
-   public void testMessages() throws Exception
+   public void testMessages() throws Exception, UnreasonableAccelerationException
    {
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       snapGhostToFullRobotModel(initialFullRobotModel);
@@ -222,7 +211,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 30000)
-   public void testRaiseUpHand() throws Exception
+   public void testRaiseUpHand() throws Exception, UnreasonableAccelerationException
    {
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       snapGhostToFullRobotModel(initialFullRobotModel);
@@ -248,7 +237,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
          pose.interpolate(desiredPose, alpha);
          keyFramePoses.add(pose);
          desiredCOMPoints.add(new Point3D());
-         //System.out.println(pose);
+         scs.addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(pose));
       }
 
       KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
@@ -284,25 +273,31 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
                  toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
    }
 
-   private void runKinematicsPlanningToolboxController(int numberOfIterations) throws SimulationExceededMaximumTimeException
+   private static Graphics3DObject createEndEffectorKeyFrameVisualization(Pose3D pose)
+   {
+      Graphics3DObject object = new Graphics3DObject();
+      object.transform(new RigidBodyTransform(pose.getOrientation(), pose.getPosition()));
+      object.addSphere(0.01);
+
+      return object;
+   }
+
+   private void runKinematicsPlanningToolboxController(int numberOfIterations) throws SimulationExceededMaximumTimeException, UnreasonableAccelerationException
    {
       initializationSucceeded.set(false);
       this.numberOfIterations.set(0);
 
       if (visualize)
       {
-         blockingSimulationRunner.simulateNTicksAndBlockAndCatchExceptions(numberOfIterations);
+         for (int i = 0; !toolboxController.isDone() && i < numberOfIterations; i++)
+            scs.simulateOneTimeStep();
       }
       else
       {
-         for (int i = 0; i < numberOfIterations; i++)
+         for (int i = 0; !toolboxController.isDone() && i < numberOfIterations; i++)
          {
-            if(!toolboxController.isDone())
-               toolboxUpdater.doControl();
-            else
-               PrintTools.info(""+i);
+            toolboxUpdater.doControl();
          }
-            
       }
    }
 

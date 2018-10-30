@@ -5,6 +5,7 @@ import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieKinematicsPlanningToolboxControllerTest extends AvatarKinematicsPlanningToolboxControllerTest
@@ -32,14 +33,14 @@ public class ValkyrieKinematicsPlanningToolboxControllerTest extends AvatarKinem
    
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 30000)
-   public void testMessages() throws Exception
+   public void testMessages() throws Exception, UnreasonableAccelerationException
    {
       super.testMessages();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 30000)
-   public void testRaiseUpHand() throws Exception
+   public void testRaiseUpHand() throws Exception, UnreasonableAccelerationException
    {
       super.testRaiseUpHand();
    }
