@@ -1,0 +1,105 @@
+#ifndef __controller_msgs__msg__FootstepNodeDataMessage__idl__
+#define __controller_msgs__msg__FootstepNodeDataMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+      /**
+       * Node rejection reasons. See BipedalFootstepPlannerNodeRejectionReason
+       */
+      const octet STEP_TOO_HIGH_OR_LOW =
+      0;
+
+      const octet STEP_TOO_FORWARD_AND_DOWN =
+      1;
+
+      const octet STEP_TOO_FAR =
+      2;
+
+      const octet STEP_NOT_WIDE_ENOUGH =
+      3;
+
+      const octet STEP_IN_PLACE =
+      4;
+
+      const octet NOT_ENOUGH_AREA =
+      5;
+
+      const octet COULD_NOT_SNAP =
+      6;
+
+      const octet COULD_NOT_WIGGLE_INSIDE =
+      7;
+
+      const octet SURFACE_NORMAL_TOO_STEEP_TO_SNAP =
+      8;
+
+      const octet TOO_MUCH_PENETRATION_AFTER_WIGGLE =
+      9;
+
+      const octet STEP_NOT_LONG_ENOUGH =
+      10;
+
+      const octet STEP_TOO_WIDE =
+      11;
+
+      const octet OBSTACLE_BLOCKING_BODY =
+      12;
+
+      const octet OBSTACLE_HITTING_BODY =
+      13;
+
+      const octet AT_CLIFF_BOTTOM =
+      14;
+
+
+      /**
+       * This message is part of the IHMC footstep planning module.
+       * This message is sent from the planner in order to visualize and debug planner progress
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::FootstepNodeDataMessage_")
+      struct FootstepNodeDataMessage
+      {
+        /**
+         * Footstep node side
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        long x_index;
+        long y_index;
+        long yaw_index;
+        /**
+         * Specifies snap transform translation. NaN if snap was unsuccessful
+         */
+        geometry_msgs::msg::dds::Point snap_translation;
+        /**
+         * Specifies the snap rotation. NaN if snap unsuccessful.
+         */
+        geometry_msgs::msg::dds::Quaternion snap_rotation;
+        /**
+         * ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
+         */
+        @defaultValue(value=-1)
+        long parent_node_id;
+        /**
+         * Node rejection reason. 255 if node was accepted
+         */
+        @defaultValue(value=255)
+        octet bipedal_footstep_planner_node_rejection_reason;
+      };
+    };
+  };
+};
+
+#endif
