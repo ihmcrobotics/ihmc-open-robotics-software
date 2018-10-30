@@ -19,7 +19,6 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -36,6 +35,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class KinematicsPlanningToolboxController extends ToolboxController
@@ -66,6 +66,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    private final CommandInputManager ikCommandInputManager = new CommandInputManager(getClass().getSimpleName(), KinematicsToolboxModule.supportedCommands());
 
    private final YoInteger indexOfCurrentKeyFrame;
+   private final YoDouble totalComputationTime;
 
    private final SolutionQualityConvergenceDetector solutionQualityConvergenceDetector;
 
@@ -100,6 +101,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
                                                              parentRegistry);
 
       indexOfCurrentKeyFrame = new YoInteger("indexOfCurrentKeyFrame", parentRegistry);
+      totalComputationTime = new YoDouble("totalComputationTime", parentRegistry);
 
       SolutionQualityConvergenceSettings optimizationSettings = new KinematicsPlanningToolboxOptimizationSettings();
       solutionQualityConvergenceDetector = new SolutionQualityConvergenceDetector(optimizationSettings, parentRegistry);
@@ -110,7 +112,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    {
       isDone.set(false);
       indexOfCurrentKeyFrame.set(0);
-      solutionQualityConvergenceDetector.initialize();
+      totalComputationTime.set(0);
 
       rigidBodyCommands.clear();
       centerOfMassCommand.set(null);
@@ -145,6 +147,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       boolean initialized = ikController.initialize();
       if (!initialized)
          throw new RuntimeException("Could not initialize the " + KinematicsToolboxController.class.getSimpleName());
+
+      solutionQualityConvergenceDetector.initialize();
+      submitKeyFrameMessages();
 
       System.out.println("Initializing is done");
       return true;
@@ -234,25 +239,24 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    @Override
    public void updateInternal() throws Exception
    {
-      if (indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
+      if (solutionQualityConvergenceDetector.isSolved())
       {
-         isDone.set(true);
-      }
-      else
-      {
-         if (solutionQualityConvergenceDetector.isConverged())
+         if (indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
          {
-            updateRobotConfigurationFromIKController();
-
-            solutionQualityConvergenceDetector.initialize();
-            submitKeyFrameMessages(indexOfCurrentKeyFrame.getIntegerValue());
-            indexOfCurrentKeyFrame.increment();
+            isDone.set(true);
          }
          else
          {
-            ikController.updateInternal();
-            solutionQualityConvergenceDetector.submitSolutionQuality(ikController.getSolution().getSolutionQuality());
+            totalComputationTime.add(solutionQualityConvergenceDetector.getComputationTime());
+
+            solutionQualityConvergenceDetector.initialize();
+            submitKeyFrameMessages();
          }
+      }
+      else
+      {
+         ikController.updateInternal();
+         solutionQualityConvergenceDetector.submitSolutionQuality(ikController.getSolution().getSolutionQuality());
          solutionQualityConvergenceDetector.update();
       }
    }
@@ -263,35 +267,21 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       return isDone.getBooleanValue();
    }
 
-   private boolean submitKeyFrameMessages(int indexOfKeyFrame)
+   private boolean submitKeyFrameMessages()
    {
       for (int i = 0; i < ikRigidBodies.size(); i++)
       {
          List<KinematicsToolboxRigidBodyMessage> rigidBodyMessages = ikRigidBodyMessageMap.get(ikRigidBodies.get(i));
-         ikCommandInputManager.submitMessage(rigidBodyMessages.get(indexOfKeyFrame));
+         ikCommandInputManager.submitMessage(rigidBodyMessages.get(indexOfCurrentKeyFrame.getIntegerValue()));
       }
-      if (ikCenterOfMassMessages.get(indexOfKeyFrame) != null)
-         ikCommandInputManager.submitMessage(ikCenterOfMassMessages.get(indexOfKeyFrame));
+      if (ikCenterOfMassMessages.get(indexOfCurrentKeyFrame.getIntegerValue()) != null)
+         ikCommandInputManager.submitMessage(ikCenterOfMassMessages.get(indexOfCurrentKeyFrame.getIntegerValue()));
       if (ikConfigurationMessage.get() != null)
          ikCommandInputManager.submitMessage(ikConfigurationMessage.get());
 
+      indexOfCurrentKeyFrame.increment();
+
       return true;
-   }
-
-   private void updateRobotConfigurationFromIKController()
-   {
-      ikController.getSolution();
-
-      // TODO
-      //      bring robot configuration from ikcontroller.
-      //      RobotConfigurationData keyFrameRobotConfiguration = new RobotConfigurationData();
-      //      latestRobotConfigurationDataReference.set(keyFrameRobotConfiguration);
-   }
-
-   // TODO 
-   private void addRobotConfigurationOnSolution()
-   {
-      // add on output status.
    }
 
    private boolean updateInitialRobotConfigurationToIKController()

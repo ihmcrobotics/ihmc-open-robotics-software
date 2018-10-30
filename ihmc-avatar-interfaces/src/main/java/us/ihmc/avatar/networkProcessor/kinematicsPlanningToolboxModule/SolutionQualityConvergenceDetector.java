@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -7,7 +8,14 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SolutionQualityConvergenceDetector
 {
+   private final String name;
+
+   private final YoBoolean useConvergenceDetecting;
+
    private final YoDouble solutionQuality;
+   private final YoDouble solutionQualityLast;
+   private final YoDouble solutionQualityBeforeLast;
+
    private final YoDouble solutionQualityThreshold;
    private final YoDouble solutionStabilityThreshold;
    private final YoDouble solutionMinimumProgression;
@@ -16,20 +24,35 @@ public class SolutionQualityConvergenceDetector
    private final YoInteger maximumNumberOfIterations;
 
    private final YoDouble computationTime;
-   private final YoBoolean isConverged;
+
+   private final YoBoolean isSolved;
+   private final YoBoolean isGoodSolution;
+   private final YoBoolean isStucked;
 
    public SolutionQualityConvergenceDetector(SolutionQualityConvergenceSettings settings, YoVariableRegistry parentRegistry)
    {
-      solutionQuality = new YoDouble("solutionQuality", parentRegistry);
+      name = this.getClass().getSimpleName();
+
+      useConvergenceDetecting = new YoBoolean("useConvergenceDetecting", parentRegistry);
+
+      solutionQuality = new YoDouble(name + "solutionQuality", parentRegistry);
+      solutionQualityLast = new YoDouble(name + "solutionQualityLast", parentRegistry);
+      solutionQualityBeforeLast = new YoDouble(name + "solutionQualityBeforeLast", parentRegistry);
+
       solutionQualityThreshold = new YoDouble("solutionQualityThreshold", parentRegistry);
       solutionStabilityThreshold = new YoDouble("solutionStabilityThreshold", parentRegistry);
       solutionMinimumProgression = new YoDouble("solutionProgressionThreshold", parentRegistry);
 
-      numberOfIterations = new YoInteger("convergenceDetectorIterations", parentRegistry);
+      numberOfIterations = new YoInteger(name + "numberOfIterations", parentRegistry);
       maximumNumberOfIterations = new YoInteger("maximumNumberOfIterations", parentRegistry);
 
       computationTime = new YoDouble("computationTime", parentRegistry);
-      isConverged = new YoBoolean("isConverged", parentRegistry);
+
+      isSolved = new YoBoolean("isSolved", parentRegistry);
+      isGoodSolution = new YoBoolean("isGoodSolution", parentRegistry);
+      isStucked = new YoBoolean("isStucked", parentRegistry);
+
+      useConvergenceDetecting.set(settings.useConvergenceDetecting());
 
       maximumNumberOfIterations.set(settings.getDefaultTerminalIteration());
       solutionQualityThreshold.set(settings.getSolutionQualityThreshold());
@@ -39,25 +62,60 @@ public class SolutionQualityConvergenceDetector
       initialize();
    }
 
+   private long startTime;
+
    public void initialize()
    {
+      startTime = System.nanoTime();
+
       numberOfIterations.set(0);
       solutionQuality.set(Double.MAX_VALUE);
-      isConverged.set(true);
+      solutionQualityLast.setToNaN();
+      solutionQualityBeforeLast.setToNaN();
+      isSolved.set(false);
    }
 
    public void update()
    {
       numberOfIterations.increment();
 
-      // detecting rules.
-      if (numberOfIterations.getIntegerValue() == maximumNumberOfIterations.getIntegerValue())
-         isConverged.set(true);
-      else
-         isConverged.set(false);
+      double deltaSolutionQualityLast = Math.abs(solutionQuality.getDoubleValue() - solutionQualityLast.getDoubleValue());
+      double deltaSolutionQualityBeforeLast = Math.abs(solutionQuality.getDoubleValue() - solutionQualityBeforeLast.getDoubleValue());
 
-      if (isConverged())
-         initialize();
+      boolean isSolutionStable = deltaSolutionQualityLast < solutionStabilityThreshold.getDoubleValue();
+      boolean isSolutionQualityHigh = solutionQuality.getDoubleValue() < solutionQualityThreshold.getDoubleValue();
+
+      isGoodSolution.set(isSolutionStable && isSolutionQualityHigh);
+
+      if (useConvergenceDetecting.getBooleanValue())
+      {
+         boolean isSolverStuck = false;
+
+         if (!isSolutionQualityHigh)
+         {
+            boolean stuckLast = (deltaSolutionQualityLast / solutionQuality.getDoubleValue()) < solutionMinimumProgression.getDoubleValue();
+            boolean stuckBeforeLast = (deltaSolutionQualityBeforeLast / solutionQuality.getDoubleValue()) < solutionMinimumProgression.getDoubleValue();
+
+            isSolverStuck = stuckLast || stuckBeforeLast;
+         }
+         else
+            isSolverStuck = false;
+
+         isStucked.set(isSolverStuck);
+         solutionQualityBeforeLast.set(solutionQualityLast.getDoubleValue());
+         solutionQualityLast.set(solutionQuality.getDoubleValue());
+
+         if (isStucked.getBooleanValue())
+            isSolved.set(true);
+      }
+
+      if (numberOfIterations.getIntegerValue() == maximumNumberOfIterations.getIntegerValue() || isGoodSolution.getBooleanValue())
+         isSolved.set(true);
+      else
+         isSolved.set(false);
+
+      computationTime.set(Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
+
    }
 
    public void submitSolutionQuality(double solutionQuality)
@@ -70,8 +128,13 @@ public class SolutionQualityConvergenceDetector
       return computationTime.getDoubleValue();
    }
 
-   public boolean isConverged()
+   public boolean isValid()
    {
-      return isConverged.getBooleanValue();
+      return isGoodSolution.getBooleanValue();
+   }
+
+   public boolean isSolved()
+   {
+      return isSolved.getBooleanValue();
    }
 }
