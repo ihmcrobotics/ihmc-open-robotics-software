@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixDimensionException;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
@@ -23,7 +24,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
  * assuming the destination frame is the same as the weight frame.
  * </p>
  */
-public class WeightMatrix3D
+public class WeightMatrix3D implements Tuple3DReadOnly
 {
    private static final double EPSILON = 1.0e-7;
    /**
@@ -471,5 +472,30 @@ public class WeightMatrix3D
       }
 
       return true;
+   }
+
+   @Override
+   public double getX()
+   {
+      return xWeight;
+   }
+
+   @Override
+   public double getY()
+   {
+      return yWeight;
+   }
+
+   @Override
+   public double getZ()
+   {
+      return zWeight;
+   }
+
+   public void set(Tuple3DReadOnly weightVector)
+   {
+      setXAxisWeight(weightVector.getX());
+      setYAxisWeight(weightVector.getY());
+      setZAxisWeight(weightVector.getZ());
    }
 }

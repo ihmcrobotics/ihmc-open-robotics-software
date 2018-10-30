@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import java.util.Map;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commons.PrintTools;
@@ -127,18 +126,6 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return jointspaceAccelerationCommand;
-   }
-
-   @Override
-   public FeedbackControlCommand<?> getFeedbackControlCommand()
-   {
-      return null;
-   }
-
-   @Override
-   public FeedbackControlCommand<?> createFeedbackControlTemplate()
-   {
-      return getFeedbackControlCommand();
    }
 
    @Override

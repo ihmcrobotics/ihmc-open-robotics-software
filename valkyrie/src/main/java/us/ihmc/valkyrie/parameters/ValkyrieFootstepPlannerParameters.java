@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 
 public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParameters
 {
@@ -58,7 +58,25 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    {
       return true;
    }
-   
+
+   @Override
+   public double getBodyBoxBaseX()
+   {
+      return 0.1;
+   }
+
+   @Override
+   public double getBodyBoxWidth()
+   {
+      return 0.9;
+   }
+
+   @Override
+   public double getBodyBoxDepth()
+   {
+      return 0.45;
+   }
+
    @Override
    public int getMinimumStepsForBestEffortPlan()
    {

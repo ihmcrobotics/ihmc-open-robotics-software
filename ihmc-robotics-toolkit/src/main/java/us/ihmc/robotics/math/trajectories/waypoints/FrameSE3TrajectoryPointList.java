@@ -26,6 +26,13 @@ public class FrameSE3TrajectoryPointList extends FrameTrajectoryPointList<FrameS
          addOrientationTrajectoryPoint(trajectoryPointList.getTrajectoryPoint(i));
    }
 
+   public void setToPositionTrajectoryIncludingFrame(FrameEuclideanTrajectoryPointList trajectoryPointList)
+   {
+      clear(trajectoryPointList.getReferenceFrame());
+      for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
+         addPositionTrajectoryPoint(trajectoryPointList.getTrajectoryPoint(i));
+   }
+
    public void addTrajectoryPoint(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       FrameSE3TrajectoryPoint newTrajectoryPoint = addAndInitializeTrajectoryPoint();
@@ -50,7 +57,13 @@ public class FrameSE3TrajectoryPointList extends FrameTrajectoryPointList<FrameS
       FrameSE3TrajectoryPoint newTrajectoryPoint = addAndInitializeTrajectoryPoint();
       newTrajectoryPoint.setToRotation(trajectoryPoint);
    }
-   
+
+   public void addPositionTrajectoryPoint(FrameEuclideanTrajectoryPoint trajectoryPoint)
+   {
+      FrameSE3TrajectoryPoint newTrajectoryPoint = addAndInitializeTrajectoryPoint();
+      newTrajectoryPoint.setToPosition(trajectoryPoint);
+   }
+
    public void addTrajectoryPoint(SimpleSE3TrajectoryPoint trajectoryPoint)
    {
       FrameSE3TrajectoryPoint newTrajectoryPoint = addAndInitializeTrajectoryPoint();

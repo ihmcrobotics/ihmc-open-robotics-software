@@ -78,8 +78,7 @@ public class DRCNetworkProcessor
       if (!params.isFootstepPlanningToolboxEnabled())
          return;
 
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      new FootstepPlanningToolboxModule(robotModel, fullRobotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled());
+      new FootstepPlanningToolboxModule(robotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled());
    }
 
    private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException

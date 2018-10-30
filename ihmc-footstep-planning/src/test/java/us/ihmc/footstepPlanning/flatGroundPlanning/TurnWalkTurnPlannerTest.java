@@ -9,6 +9,7 @@ import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 public class TurnWalkTurnPlannerTest extends FootstepPlannerOnFlatGroundTest
 {
    private static final boolean visualize = false;
+   private static final boolean keepUp = false;
    private final TurnWalkTurnPlanner planner = new TurnWalkTurnPlanner();
 
    @Override
@@ -27,5 +28,11 @@ public class TurnWalkTurnPlannerTest extends FootstepPlannerOnFlatGroundTest
    public boolean visualize()
    {
       return visualize;
+   }
+
+   @Override
+   public boolean keepUp()
+   {
+      return keepUp;
    }
 }

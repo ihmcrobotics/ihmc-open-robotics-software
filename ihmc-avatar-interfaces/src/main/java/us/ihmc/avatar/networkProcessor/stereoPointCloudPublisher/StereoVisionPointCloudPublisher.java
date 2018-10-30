@@ -2,14 +2,20 @@ package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
 import java.awt.Color;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import sensor_msgs.PointCloud2;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -27,7 +33,7 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 
 public class StereoVisionPointCloudPublisher
 {
-   private static final int MAX_NUMBER_OF_LISTENERS = 10;
+   private static final int MAX_NUMBER_OF_POINTS = 200000;
 
    private final String name = getClass().getSimpleName();
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
@@ -107,8 +113,6 @@ public class StereoVisionPointCloudPublisher
             if (pointCloudData == null)
                return;
 
-            int count = 0;
-
             long robotTimestamp;
 
             if (ppsTimestampOffsetProvider == null)
@@ -126,6 +130,9 @@ public class StereoVisionPointCloudPublisher
                   return;
             }
 
+            if (pointCloudData.numberOfPoints > MAX_NUMBER_OF_POINTS)
+               pointCloudData = pointCloudData.trim(MAX_NUMBER_OF_POINTS);
+
             float[] scanPointBuffer = pointCloudData.getPointCloudBuffer();
 
             int[] colors = pointCloudData.getColors();
@@ -141,6 +148,15 @@ public class StereoVisionPointCloudPublisher
       private final Point3D[] pointCloud;
       private final int numberOfPoints;
       private final int[] colors;
+
+      public ColorPointCloudData(long timestamp, Point3D[] pointCloud, int[] colors)
+      {
+         this.timestamp = timestamp;
+         this.pointCloud = pointCloud;
+         this.colors = new int[colors.length];
+         System.arraycopy(colors, 0, this.colors, 0, colors.length);
+         numberOfPoints = pointCloud.length;
+      }
 
       public ColorPointCloudData(long timestamp, Point3D[] pointCloud, Color[] colors)
       {
@@ -188,5 +204,22 @@ public class StereoVisionPointCloudPublisher
          return colors;
       }
 
+      public ColorPointCloudData trim(int size)
+      {
+         Random random = new Random();
+         List<Point3D> trimmedPoints = Arrays.stream(pointCloud).collect(Collectors.toList());
+         TIntArrayList trimmedColors = new TIntArrayList(colors);
+
+         while (trimmedColors.size() > size)
+         {
+            int indexToRemove = random.nextInt(trimmedColors.size());
+            int lastIndex = trimmedPoints.size() - 1;
+            Collections.swap(trimmedPoints, indexToRemove, lastIndex);
+            trimmedPoints.remove(lastIndex);
+            trimmedColors.removeAt(indexToRemove);
+         }
+
+         return new ColorPointCloudData(size, trimmedPoints.toArray(new Point3D[size]), trimmedColors.toArray());
+      }
    }
 }

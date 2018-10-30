@@ -4,7 +4,6 @@ import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
@@ -165,20 +164,8 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    }
 
    @Override
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
-   {
-      return null;
-   }
-
-   @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return jointControlHelper.getJointspaceCommand();
-   }
-
-   @Override
-   public FeedbackControlCommand<?> createFeedbackControlTemplate()
-   {
-      return getFeedbackControlCommand();
    }
 }

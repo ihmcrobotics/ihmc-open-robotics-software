@@ -57,7 +57,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class KinematicsToolboxControllerTest
 {
-   private static final boolean VERBOSE = true;
+   private static final boolean VERBOSE = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
@@ -338,7 +338,8 @@ public class KinematicsToolboxControllerTest
             if (initializationSucceeded.getBooleanValue())
             {
                toolboxController.updateInternal();
-               PrintTools.info("Solution quality: " + toolboxController.getSolution().getSolutionQuality());
+               if (VERBOSE)
+                  PrintTools.info("Solution quality: " + toolboxController.getSolution().getSolutionQuality());
                jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
                numberOfIterations.increment();
             }
