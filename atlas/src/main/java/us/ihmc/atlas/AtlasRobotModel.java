@@ -360,7 +360,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public double getSimulateDT()
    {
-      return 0.0001;
+      return 0.0005;
    }
 
    @Override
