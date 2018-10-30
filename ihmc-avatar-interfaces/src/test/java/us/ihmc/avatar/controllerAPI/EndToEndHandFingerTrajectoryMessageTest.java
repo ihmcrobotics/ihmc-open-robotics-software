@@ -64,7 +64,7 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
       for (RobotSide robotSide : RobotSide.values)
          drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
 
       for (RobotSide robotSide : RobotSide.values)
          drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.STOP));
@@ -74,7 +74,7 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
       for (RobotSide robotSide : RobotSide.values)
          drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.OPEN));
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
 
       for (RobotSide robotSide : RobotSide.values)
          assertDesiredFingerJoint(robotSide, HandConfiguration.OPEN, epsilon);
@@ -95,7 +95,7 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
       for (RobotSide robotSide : RobotSide.values)
          drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
 
       for (RobotSide robotSide : RobotSide.values)
          assertDesiredFingerJoint(robotSide, HandConfiguration.CLOSE, epsilon);
@@ -103,7 +103,7 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
       for (RobotSide robotSide : RobotSide.values)
          drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.OPEN_FINGERS));
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
 
       for (RobotSide robotSide : RobotSide.values)
          assertDesiredFingerJoint(robotSide, HandConfiguration.OPEN_FINGERS, epsilon);
