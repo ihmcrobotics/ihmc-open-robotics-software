@@ -32,7 +32,7 @@ public class MultiStageFootstepPlanningModule
 {
    private static final boolean DEBUG = false;
    private static final double YO_VARIABLE_SERVER_DT = 0.01;
-   private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 1;
+   private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 2;
 
    private final String name = getClass().getSimpleName();
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -69,23 +69,7 @@ public class MultiStageFootstepPlanningModule
             FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName), commandInputManager,
             FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName), statusOutputManager, realtimeRos2Node);
 
-      ThreadFactory threadFactory = new ThreadFactory()
-      {
-         private final AtomicInteger threadNumber = new AtomicInteger(1);
-
-         @Override
-         public Thread newThread(Runnable r)
-         {
-            Thread t = new Thread(r, name + "-thread-" + threadNumber.getAndIncrement());
-
-            if (t.isDaemon())
-               t.setDaemon(false);
-            if (t.getPriority() != Thread.MAX_PRIORITY)
-               t.setPriority(Thread.MAX_PRIORITY);
-
-            return t;
-         }
-      };
+      ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(name);
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
       commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
