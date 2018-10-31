@@ -34,16 +34,16 @@ public class PlannerGoalAdditionActionPolicy implements PlannerHeuristicNodeActi
    }
 
    @Override
-   public void performActionForNewValidNode(FootstepNode newValidNode, FootstepNode parentNode)
+   public void performActionForNewValidNode(FootstepNode newValidNode, FootstepNode newValidParentNode)
    {
       FootstepNodeSnapData newNodeSnapData = snapper.snapFootstepNode(newValidNode);
-      FootstepNodeSnapData previousSnapData = snapper.snapFootstepNode(parentNode);
+      FootstepNodeSnapData previousSnapData = snapper.snapFootstepNode(newValidParentNode);
 
       RigidBodyTransform newNodeTransform = new RigidBodyTransform();
       RigidBodyTransform previousNodeTransform = new RigidBodyTransform();
 
       FootstepNodeTools.getSnappedNodeTransform(newValidNode, newNodeSnapData.getSnapTransform(), newNodeTransform);
-      FootstepNodeTools.getSnappedNodeTransform(parentNode, previousSnapData.getSnapTransform(), previousNodeTransform);
+      FootstepNodeTools.getSnappedNodeTransform(newValidParentNode, previousSnapData.getSnapTransform(), previousNodeTransform);
 
       SideDependentList<SimpleFootstep> doubleFootstepGoal = new SideDependentList<>();
 

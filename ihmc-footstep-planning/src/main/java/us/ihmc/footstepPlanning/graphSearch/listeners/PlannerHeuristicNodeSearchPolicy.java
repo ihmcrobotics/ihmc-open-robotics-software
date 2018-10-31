@@ -26,6 +26,8 @@ public interface PlannerHeuristicNodeSearchPolicy
     */
    FootstepNode pollNewValidNode();
 
+   FootstepNode pollNewValidParentNode();
+
    /**
     * Using the new valid node, executes all the action policies defined by {@link PlannerHeuristicNodeActionPolicy}.
     */

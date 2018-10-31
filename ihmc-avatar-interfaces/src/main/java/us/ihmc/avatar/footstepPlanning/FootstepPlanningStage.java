@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlanningStage implements FootstepPlanner
 {
-   private static final boolean debug = false;
+   private static final boolean debug = true;
 
    private final YoVariableRegistry registry;
 
@@ -129,6 +129,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       HeuristicSearchAndActionPolicyDefinitions heuristicPolicies = new HeuristicSearchAndActionPolicyDefinitions();
       heuristicPolicies.setGoalRecommendationListener(plannerGoalRecommendationHolder);
       heuristicPolicies.setAutomaticallyRotate(true);
+      heuristicPolicies.setParameters(footstepPlanningParameters);
 
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlanningParameters);
       AStarFootstepPlanner planner = AStarFootstepPlanner
