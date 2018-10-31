@@ -9,17 +9,17 @@ buildscript {
    }
    dependencies {
       classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.10.0"
-      classpath "com.bmuschko:gradle-docker-plugin:4.0.1"
+//      classpath "com.bmuschko:gradle-docker-plugin:4.0.1"
    }
 }
 
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.1"
+   id("us.ihmc.ihmc-build") version "0.15.3"
    id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
    id("us.ihmc.log-tools") version "0.2.2"
 }
 
-apply plugin: "com.bmuschko.docker-remote-api"
+//apply plugin: "com.bmuschko.docker-remote-api"
 
 ihmc {
    loadProductProperties("../product.properties")
@@ -55,10 +55,10 @@ generatorDependencies {
    compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.10.0"
 }
 
-task buildImage(type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
-   inputDir = file("src/generator/docker")
-   tag = "ihmc/ros1-bridge-build"
-}
+//task buildImage(type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
+//   inputDir = file("src/generator/docker")
+//   tag = "ihmc/ros1-bridge-build"
+//}
 
 def generator = new us.ihmc.ros2.rosidl.RosInterfaceGenerator();
 
