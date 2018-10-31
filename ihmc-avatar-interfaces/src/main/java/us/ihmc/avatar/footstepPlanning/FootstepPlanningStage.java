@@ -1,7 +1,7 @@
 package us.ihmc.avatar.footstepPlanning;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -69,9 +69,6 @@ public class FootstepPlanningStage implements FootstepPlanner
 
    private Runnable stageRunnable;
 
-   private final YoBoolean donePlanningPath;
-   private final YoBoolean donePlanningSteps;
-
    private final YoDouble stageTime;
    private final YoBoolean initialize;
 
@@ -88,7 +85,8 @@ public class FootstepPlanningStage implements FootstepPlanner
    private final PlannerGoalRecommendationHolder plannerGoalRecommendationHolder;
 
    public FootstepPlanningStage(int stageId, RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
-                                EnumProvider<FootstepPlannerType> activePlanner, IntegerProvider planId, YoGraphicsListRegistry graphicsListRegistry, long tickDurationMs)
+                                EnumProvider<FootstepPlannerType> activePlanner, IntegerProvider planId, YoGraphicsListRegistry graphicsListRegistry,
+                                long tickDurationMs)
    {
       this.stageId = stageId;
       this.footstepPlanningParameters = footstepPlannerParameters;
@@ -99,9 +97,6 @@ public class FootstepPlanningStage implements FootstepPlanner
       plannerGoalRecommendationHolder = new PlannerGoalRecommendationHolder(stageId);
 
       registry = new YoVariableRegistry(stageId + getClass().getSimpleName());
-
-      donePlanningPath = new YoBoolean(stageId + "_DonePlanningPath", registry);
-      donePlanningSteps = new YoBoolean(stageId + "_DonePlanningSteps", registry);
 
       stageTime = new YoDouble(stageId + "_StageTime", registry);
       initialize = new YoBoolean(stageId + "_Initialize" + registry.getName(), registry);
@@ -120,7 +115,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
                      new VisibilityGraphWithAStarPlanner(stageId + "", footstepPlanningParameters, contactPointsInSoleFrame, graphicsListRegistry, registry));
 
-      donePlanningSteps.set(true);
+      initialize.set(true);
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -128,12 +123,11 @@ public class FootstepPlanningStage implements FootstepPlanner
       return registry;
    }
 
-
-
    private AStarFootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons)
    {
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlanningParameters);
-      AStarFootstepPlanner planner = AStarFootstepPlanner.createPlanner(footstepPlanningParameters, null, footPolygons, expansion, plannerGoalRecommendationHolder, registry);
+      AStarFootstepPlanner planner = AStarFootstepPlanner
+            .createPlanner(footstepPlanningParameters, null, footPolygons, expansion, plannerGoalRecommendationHolder, registry);
       return planner;
    }
 
@@ -229,12 +223,8 @@ public class FootstepPlanningStage implements FootstepPlanner
    @Override
    public FootstepPlanningResult planPath()
    {
-      donePlanningPath.set(false);
-
       FootstepPlanningResult result = getPlanner().planPath();
       pathPlanResult.set(result);
-
-      donePlanningPath.set(true);
 
       return result;
    }
@@ -242,14 +232,16 @@ public class FootstepPlanningStage implements FootstepPlanner
    @Override
    public FootstepPlanningResult plan()
    {
-      donePlanningSteps.set(false);
-
       FootstepPlanningResult result = getPlanner().plan();
       stepPlanResult.set(result);
 
-      donePlanningPath.set(true);
-
       return result;
+   }
+
+
+   public int getStageId()
+   {
+      return stageId;
    }
 
    public Runnable createStageRunnable()
@@ -269,16 +261,7 @@ public class FootstepPlanningStage implements FootstepPlanner
             if (Thread.interrupted())
                return;
 
-            try
-            {
-               update();
-
-            }
-            catch (Exception e)
-            {
-               e.printStackTrace();
-               throw e;
-            }
+            update();
          }
       };
 
@@ -314,17 +297,7 @@ public class FootstepPlanningStage implements FootstepPlanner
          initialize.set(false);
       }
 
-      try
-      {
-         updateInternal();
-      }
-      catch (Exception e)
-      {
-         if (debug)
-         {
-            e.printStackTrace();
-         }
-      }
+      updateInternal();
    }
 
    private void updateInternal()
@@ -334,8 +307,6 @@ public class FootstepPlanningStage implements FootstepPlanner
       {
          if (debug)
             PrintTools.info("Hard timeout at " + stageTime.getDoubleValue());
-         donePlanningSteps.set(true);
-         donePlanningPath.set(true);
          return;
       }
 
@@ -343,11 +314,8 @@ public class FootstepPlanningStage implements FootstepPlanner
             "Starting To Plan: " + planId.getValue() + " sequence: " + sequenceId.getValue() + ", using type " + activePlannerEnum.getValue().toString()
                   + " on stage " + stageId);
 
-      getPlanner().setInitialStanceFoot(stanceFootPose.getCopyForReading(), stanceFootSide.getCopyForReading().get());
-      getPlanner().setGoal(goal.getCopyForReading());
-      getPlanner().setTimeout(timeout.getCopyForReading().get());
-      getPlanner().setPlanarRegions(planarRegionsList.getCopyForReading());
-      getPlanner().setPlanningHorizonLength(horizonLength.getCopyForReading().get());
+      if (debug)
+         PrintTools.info("Stage " + stageId + " planning path.");
 
       FootstepPlanningResult status = getPlanner().planPath();
       pathPlanResult.set(status);
@@ -356,6 +324,9 @@ public class FootstepPlanningStage implements FootstepPlanner
 
       for (PlannerCompletionCallback completionCallback : completionCallbackList)
          completionCallback.pathPlanningIsComplete(status, this);
+
+      if (debug)
+         PrintTools.info("Stage " + stageId + " planning steps.");
 
       if (status.validForExecution())
          status = getPlanner().plan();
@@ -370,10 +341,13 @@ public class FootstepPlanningStage implements FootstepPlanner
 
    public boolean initialize()
    {
-      donePlanningSteps.set(false);
-      donePlanningPath.set(false);
-
       stageTime.set(0.0);
+
+      getPlanner().setInitialStanceFoot(stanceFootPose.getCopyForReading(), stanceFootSide.getCopyForReading().get());
+      getPlanner().setGoal(goal.getCopyForReading());
+      getPlanner().setTimeout(timeout.getCopyForReading().get());
+      getPlanner().setPlanarRegions(planarRegionsList.getCopyForReading().copy());
+      getPlanner().setPlanningHorizonLength(horizonLength.getCopyForReading().get());
 
       return true;
    }
