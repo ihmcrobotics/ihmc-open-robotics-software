@@ -5,12 +5,11 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 
 import java.util.List;
 
-public class BodyCollisionListener implements BipedalFootstepPlannerListener
+public class BodyCollisionListener implements NodeFailureEventListener
 {
-   public FootstepPlannerHeuristicSearchPolicy heuristicSearchPolicy = null;
+   public PlannerHeuristicNodeSearchPolicy heuristicSearchPolicy = null;
 
-
-   public void setHeuristicSearchPolicy(FootstepPlannerHeuristicSearchPolicy heuristicSearchPolicy)
+   public void setHeuristicSearchPolicy(PlannerHeuristicNodeSearchPolicy heuristicSearchPolicy)
    {
       this.heuristicSearchPolicy = heuristicSearchPolicy;
    }
@@ -26,11 +25,9 @@ public class BodyCollisionListener implements BipedalFootstepPlannerListener
    {
       if (reason.equals(BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY) && heuristicSearchPolicy != null)
       {
-         boolean foundNewNode = heuristicSearchPolicy.performSearchForNewNode(rejectedNode, parentNode);
+         boolean foundNewNode = heuristicSearchPolicy.performSearchForValidNode(rejectedNode, parentNode);
          if (foundNewNode)
-         {
-            heuristicSearchPolicy.performActionPoliciesForNewNode();
-         }
+            heuristicSearchPolicy.executeActionPoliciesForNewValidNode();
       }
 
    }

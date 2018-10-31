@@ -10,40 +10,40 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NewPlannerGoalActionPolicy implements FootstepPlannerHeuristicActionPolicy
+public class PlannerGoalAdditionActionPolicy implements PlannerHeuristicNodeActionPolicy
 {
    private final List<PlannerGoalRecommendationListener> plannerGoalRecommendationListener = new ArrayList<>();
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
 
-   public NewPlannerGoalActionPolicy(SimplePlanarRegionFootstepNodeSnapper snapper)
+   public PlannerGoalAdditionActionPolicy(SimplePlanarRegionFootstepNodeSnapper snapper)
    {
       this.snapper = snapper;
    }
 
-   public void addPlannerGoalRecommendationListener(PlannerGoalRecommendationListener plannerGoalRecommendationListener)
+   @Override
+   public void addActionListener(PlannerHeuristicActionListener listener)
    {
-      if (plannerGoalRecommendationListener != null)
-         this.plannerGoalRecommendationListener.add(plannerGoalRecommendationListener);
+      if (listener instanceof PlannerGoalRecommendationListener)
+         this.plannerGoalRecommendationListener.add((PlannerGoalRecommendationListener) listener);
    }
 
    @Override
-   public void performActionFromNewNode(FootstepNode newNode, FootstepNode previousNode)
+   public void performActionForNewValidNode(FootstepNode newValidNode, FootstepNode parentNode)
    {
-      FootstepNodeSnapData newNodeSnapData = snapper.snapFootstepNode(newNode);
-      FootstepNodeSnapData previousSnapData = snapper.snapFootstepNode(previousNode);
+      FootstepNodeSnapData newNodeSnapData = snapper.snapFootstepNode(newValidNode);
+      FootstepNodeSnapData previousSnapData = snapper.snapFootstepNode(parentNode);
 
       RigidBodyTransform newNodeTransform = new RigidBodyTransform();
       RigidBodyTransform previousNodeTransform = new RigidBodyTransform();
 
-      FootstepNodeTools.getSnappedNodeTransform(newNode, newNodeSnapData.getSnapTransform(), newNodeTransform);
-      FootstepNodeTools.getSnappedNodeTransform(previousNode, previousSnapData.getSnapTransform(), previousNodeTransform);
+      FootstepNodeTools.getSnappedNodeTransform(newValidNode, newNodeSnapData.getSnapTransform(), newNodeTransform);
+      FootstepNodeTools.getSnappedNodeTransform(parentNode, previousSnapData.getSnapTransform(), previousNodeTransform);
 
       SideDependentList<SimpleFootstep> doubleFootstepGoal = new SideDependentList<>();
 
@@ -52,7 +52,7 @@ public class NewPlannerGoalActionPolicy implements FootstepPlannerHeuristicActio
       FramePose3D newLeftPose = new FramePose3D();
       FramePose3D newRightPose = new FramePose3D();
 
-      if (newNode.getRobotSide().equals(RobotSide.LEFT))
+      if (newValidNode.getRobotSide().equals(RobotSide.LEFT))
       {
          newLeftPose.appendTransform(newNodeTransform);
          newRightPose.appendTransform(previousNodeTransform);
@@ -83,7 +83,6 @@ public class NewPlannerGoalActionPolicy implements FootstepPlannerHeuristicActio
       newPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.DOUBLE_FOOTSTEP);
       newPlannerGoal.setDoubleFootstepGoal(doubleFootstepGoal);
 
-      for (PlannerGoalRecommendationListener goalRecommendationListener : plannerGoalRecommendationListener)
-         goalRecommendationListener.notifyWithPlannerGoalRecommendation(newPlannerGoal);
+      plannerGoalRecommendationListener.parallelStream().forEach(plannerListener -> plannerListener.notifyWithPlannerGoalRecommendation(newPlannerGoal));
    }
 }

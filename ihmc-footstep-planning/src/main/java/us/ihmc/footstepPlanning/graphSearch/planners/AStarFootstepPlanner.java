@@ -119,7 +119,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransform));
       nodeChecker.addStartNode(startNode, startNodeSnapTransform);
 
-      startAndGoalListeners.forEach(listener -> listener.setStartPose(stanceFootPose));
+      startAndGoalListeners.parallelStream().forEach(listener -> listener.setInitialPose(stanceFootPose));
    }
 
    @Override
@@ -163,7 +163,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       }
 
       goalPoseInWorld.interpolate(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT), 0.5);
-      startAndGoalListeners.forEach(listener -> listener.setGoalPose(goalPoseInWorld));
+      startAndGoalListeners.parallelStream().forEach(listener -> listener.setGoalPose(goalPoseInWorld));
    }
 
    @Override
@@ -404,11 +404,11 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getAStarHeuristicsWeight(), parameters);
 
-      NewPlannerGoalActionPolicy newPlannerGoalActionPolicy = new NewPlannerGoalActionPolicy(snapper);
+      PlannerGoalAdditionActionPolicy newPlannerGoalActionPolicy = new PlannerGoalAdditionActionPolicy(snapper);
       BodyCollisionFreeSearchPolicy bodyCollisionFreeSearchPolicy = new BodyCollisionFreeSearchPolicy(bodyCollisionNodeChecker);
       BodyCollisionListener bodyCollisionListener = new BodyCollisionListener();
 
-      newPlannerGoalActionPolicy.addPlannerGoalRecommendationListener(plannerGoalRecommendationListener);
+      newPlannerGoalActionPolicy.addActionListener(plannerGoalRecommendationListener);
       bodyCollisionFreeSearchPolicy.attachActionPolicy(newPlannerGoalActionPolicy);
       bodyCollisionListener.setHeuristicSearchPolicy(bodyCollisionFreeSearchPolicy);
 
