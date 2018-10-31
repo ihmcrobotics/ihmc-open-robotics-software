@@ -471,8 +471,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
-      double kpX = 100.0; // Was 150.0 before tuneup of sep 2018
-      double kpY = 100.0; // Was 100.0 before tuneup of sep 2018
+      double kpX = runningOnRealRobot? 100.0 : 150.0; // Was 150.0 before tuneup of sep 2018
+      double kpY = runningOnRealRobot? 100.0 : 150.0; // Was 100.0 before tuneup of sep 2018
       double kpZ = runningOnRealRobot ? 250.0 : 200.0;  // Was 200.0 before tuneup of sep 2018
       // zeta was [0.8, 0.5, 0.8] before tuneup of sep 2018
       double zetaXY = runningOnRealRobot ? 0.7 : 0.7;
