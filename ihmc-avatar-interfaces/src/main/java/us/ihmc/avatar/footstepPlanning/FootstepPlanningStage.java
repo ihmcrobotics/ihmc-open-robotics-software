@@ -170,6 +170,12 @@ public class FootstepPlanningStage implements FootstepPlanner
       this.goal.commit();
    }
 
+   public void setGoalUnsafe(FootstepPlannerGoal goal)
+   {
+      setGoal(goal);
+      getPlanner().setGoal(goal);
+   }
+
    public void setTimeout(double timeout)
    {
       this.timeout.getCopyForWriting().set(timeout);
