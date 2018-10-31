@@ -30,6 +30,8 @@ public class VisualizationController
    @FXML
    private ToggleButton showClusterNonNavigableExtrusionsToggleButton;
    @FXML
+   private ToggleButton showOccupancyMap;
+   @FXML
    public void requestStatistics()
    {
       if (verbose)
@@ -58,5 +60,6 @@ public class VisualizationController
       messager.bindBidirectional(ShowInterRegionVisibilityMap, showInterRegionMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowStartVisibilityMap, showStartMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowGoalVisibilityMap, showGoalMapToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(ShowOccupancyMap, showOccupancyMap.selectedProperty(), true);
    }
 }

@@ -41,6 +41,7 @@ public class OccupancyMapRenderer extends AnimationTimer
    private final Group root = new Group();
    private final AtomicReference<Pair<Mesh, Material>> footstepGraphToRender = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>(null);
+   private final AtomicReference<Boolean> show;
 
    private final MeshView footstepGraphMeshView = new MeshView();
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
@@ -50,6 +51,7 @@ public class OccupancyMapRenderer extends AnimationTimer
    {
       messager.registerTopicListener(FootstepPlannerMessagerAPI.OccupancyMapTopic, message -> executorService.execute(() -> processOccupancyMapMessage(message)));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList::set);
+      this.show = messager.createInput(FootstepPlannerMessagerAPI.ShowOccupancyMap, true);
 
       cellPolygon.addVertex(cellWidth, 0.0);
       cellPolygon.addVertex(0.5 * cellWidth, 0.5 * Math.sqrt(3.0) * cellWidth);
@@ -95,6 +97,11 @@ public class OccupancyMapRenderer extends AnimationTimer
    @Override
    public void handle(long now)
    {
+      if (show.get() && root.getChildren().isEmpty())
+         root.getChildren().add(footstepGraphMeshView);
+      else if (!show.get() && !root.getChildren().isEmpty())
+         root.getChildren().clear();
+
       Pair<Mesh, Material> newMesh = footstepGraphToRender.get();
       if(newMesh != null)
       {

@@ -40,7 +40,8 @@
                 <ToggleButton fx:id="showInnerRegionMapsToggleButton" mnemonicParsing="false" text="Show inner-region maps" GridPane.columnIndex="3"
                               GridPane.rowIndex="4"/>
 
-
+                <ToggleButton fx:id="showOccupancyMap" mnemonicParsing="false" selected="true" text="Show occupancy map" GridPane.columnIndex="4"
+                              GridPane.rowIndex="1"/>
             </children>
         </GridPane>
     </children>
