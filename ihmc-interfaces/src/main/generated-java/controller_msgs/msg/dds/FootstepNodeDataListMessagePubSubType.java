@@ -45,6 +45,8 @@ public class FootstepNodeDataListMessagePubSubType implements us.ihmc.pubsub.Top
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.FootstepNodeDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -66,6 +68,9 @@ public class FootstepNodeDataListMessagePubSubType implements us.ihmc.pubsub.Top
       {
           current_alignment += controller_msgs.msg.dds.FootstepNodeDataMessagePubSubType.getCdrSerializedSize(data.getNodeData().get(i0), current_alignment);}
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -78,6 +83,8 @@ public class FootstepNodeDataListMessagePubSubType implements us.ihmc.pubsub.Top
       cdr.write_type_e(data.getNodeData());else
           throw new RuntimeException("node_data field exceeds the maximum length");
 
+      cdr.write_type_7(data.getIsFootstepGraph());
+
    }
 
    public static void read(controller_msgs.msg.dds.FootstepNodeDataListMessage data, us.ihmc.idl.CDR cdr)
@@ -85,6 +92,8 @@ public class FootstepNodeDataListMessagePubSubType implements us.ihmc.pubsub.Top
       data.setSequenceId(cdr.read_type_4());
       	
       cdr.read_type_e(data.getNodeData());	
+      data.setIsFootstepGraph(cdr.read_type_7());
+      	
 
    }
 
@@ -93,6 +102,7 @@ public class FootstepNodeDataListMessagePubSubType implements us.ihmc.pubsub.Top
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_e("node_data", data.getNodeData());
+      ser.write_type_7("is_footstep_graph", data.getIsFootstepGraph());
    }
 
    @Override
@@ -100,6 +110,7 @@ public class FootstepNodeDataListMessagePubSubType implements us.ihmc.pubsub.Top
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_e("node_data", data.getNodeData());
+      data.setIsFootstepGraph(ser.read_type_7("is_footstep_graph"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepNodeDataListMessage src, controller_msgs.msg.dds.FootstepNodeDataListMessage dest)
