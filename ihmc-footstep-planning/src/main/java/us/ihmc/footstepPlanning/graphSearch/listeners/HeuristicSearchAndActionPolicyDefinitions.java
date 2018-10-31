@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.listeners;
 import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.BodyCollisionNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -16,6 +17,7 @@ public class HeuristicSearchAndActionPolicyDefinitions
    private final AtomicBoolean automaticallyRotate = new AtomicBoolean(false);
 
    private final RequiredFactoryField<FootstepNodeSnapper> snapper = new RequiredFactoryField<>("snapper");
+   private final RequiredFactoryField<FootstepPlannerParameters> parameters= new RequiredFactoryField<>("parameters");
    private final OptionalFactoryField<BodyCollisionNodeChecker> collisionNodeChecker = new OptionalFactoryField<>("collisionNodeChecker");
    private final OptionalFactoryField<PlannerGoalRecommendationListener> goalRecommendationListener = new OptionalFactoryField<>("goalRecommendationListener");
 
@@ -40,6 +42,11 @@ public class HeuristicSearchAndActionPolicyDefinitions
    public void setNodeSnapper(FootstepNodeSnapper snapper)
    {
       this.snapper.set(snapper);
+   }
+
+   public void setParameters(FootstepPlannerParameters parameters)
+   {
+      this.parameters.set(parameters);
    }
 
    public void build()

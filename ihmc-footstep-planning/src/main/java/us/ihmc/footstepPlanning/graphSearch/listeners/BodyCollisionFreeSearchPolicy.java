@@ -7,6 +7,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.BodyCollisionNodeChecke
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class BodyCollisionFreeSearchPolicy implements PlannerHeuristicNodeSearchPolicy, StartAndGoalListener
 {
@@ -14,15 +15,17 @@ public class BodyCollisionFreeSearchPolicy implements PlannerHeuristicNodeSearch
    private final static double distanceFromGoalToConsiderSearching = 1.0;
 
    private final static double rotationIncrement = Math.toRadians(10.0);
+   private final static double minimumRotation = Math.toRadians(30.0);
+
+   private final static double maxRotation = Math.PI / 2.0;
 
    private final List<PlannerHeuristicNodeActionPolicy> actionPolicies = new ArrayList<>();
 
    private final FramePose3D initialPose = new FramePose3D();
    private final FramePose3D finalPose = new FramePose3D();
 
-   private FootstepNode validNode = null;
-   private FootstepNode parentOfValidNode = null;
-   private boolean hasNewValidNode = false;
+   private final AtomicReference<FootstepNode> validNode = new AtomicReference<>();
+   private final AtomicReference<FootstepNode> parentOfValidNode = new AtomicReference<>();
 
    private final BodyCollisionNodeChecker collisionNodeChecker;
    private double currentRotation = 0.0;
@@ -74,38 +77,35 @@ public class BodyCollisionFreeSearchPolicy implements PlannerHeuristicNodeSearch
 
       currentRotation = 0.0;
       boolean newNodeIsValid = false;
-      hasNewValidNode = false;
-      validNode = null;
-      parentOfValidNode = null;
+      validNode.set(null);
+      parentOfValidNode.set(null);
       FootstepNode newNode = null;
-      while ((Math.PI / 2 > currentRotation) && !newNodeIsValid)
+      while ((maxRotation > currentRotation) && !newNodeIsValid)
       {
          currentRotation += rotationIncrement;
          newNode = new FootstepNode(rejectedNode.getX(), rejectedNode.getY(), rejectedNode.getYaw() + currentRotation, rejectedNode.getRobotSide());
          newNodeIsValid = collisionNodeChecker.isNodeValidInternal(newNode, parentNode);
       }
 
-      if (newNodeIsValid && Math.abs(currentRotation) > Math.toRadians(30))
+      if (newNodeIsValid && Math.abs(currentRotation) > minimumRotation)
       {
-         hasNewValidNode = true;
-         validNode = newNode;
-         parentOfValidNode = parentNode;
+         validNode.set(newNode);
+         parentOfValidNode.set(parentNode);
          return true;
       }
 
       currentRotation = 0.0;
-      while ((currentRotation > -Math.PI / 2) && !newNodeIsValid)
+      while ((currentRotation > -maxRotation) && !newNodeIsValid)
       {
          currentRotation -= rotationIncrement;
          newNode = new FootstepNode(rejectedNode.getX(), rejectedNode.getY(), rejectedNode.getYaw() + currentRotation, rejectedNode.getRobotSide());
          newNodeIsValid = collisionNodeChecker.isNodeValidInternal(newNode, parentNode);
       }
 
-      if (newNodeIsValid && Math.abs(currentRotation) > Math.toRadians(30))
+      if (newNodeIsValid && Math.abs(currentRotation) > minimumRotation)
       {
-         hasNewValidNode = true;
-         validNode = newNode;
-         parentOfValidNode = parentNode;
+         validNode.set(newNode);
+         parentOfValidNode.set(parentNode);
          return true;
       }
 
@@ -115,23 +115,18 @@ public class BodyCollisionFreeSearchPolicy implements PlannerHeuristicNodeSearch
    @Override
    public FootstepNode pollNewValidNode()
    {
-      FootstepNode nodeToReturn;
-      if (hasNewValidNode)
-      {
-         hasNewValidNode = false;
-         nodeToReturn = validNode;
-      }
-      else
-      {
-         nodeToReturn = null;
-      }
+      return validNode.getAndSet(null);
+   }
 
-      return nodeToReturn;
+   @Override
+   public FootstepNode pollNewValidParentNode()
+   {
+      return parentOfValidNode.getAndSet(null);
    }
 
    @Override
    public void executeActionPoliciesForNewValidNode()
    {
-      actionPolicies.parallelStream().forEach(actionPolicy -> actionPolicy.performActionForNewValidNode(pollNewValidNode(), parentOfValidNode));
+      actionPolicies.parallelStream().forEach(actionPolicy -> actionPolicy.performActionForNewValidNode(pollNewValidNode(), pollNewValidParentNode()));
    }
 }
