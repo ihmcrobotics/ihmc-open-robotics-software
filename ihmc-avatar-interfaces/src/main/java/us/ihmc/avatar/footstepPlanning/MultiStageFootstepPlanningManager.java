@@ -169,7 +169,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    {
       stepPlanningStagesInProgress.remove(planningStage);
       planningStage.requestInitialize();
+      planningStage.destroyStageRunnable();
       planningTasks.remove(planningStage).cancel(true);
+      planningStagePool.add(planningStage);
 
       return planningStage;
    }
@@ -288,11 +290,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       }
       completedStepPlans.commit();
 
-      stepPlanningStagesInProgress.remove(stageFinished);
-      planningStagePool.add(stageFinished);
-
-      stageFinished.destroyStageRunnable();
-      planningTasks.remove(stageFinished).cancel(true);
+      planningStagePool.add(cleanupPlanningStage(stageFinished));
 
       if (debug)
          PrintTools.info("Stage " + stageFinished.getStageId() + " just finished planning its steps.");
@@ -481,10 +479,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone &= pathPlanningStagesInProgress.isEmpty();
       isDone &= planningObjectivePool.isEmpty();
       isDone &= !goalRecommendationHandler.hasNewFootstepPlannerObjectives();
-      if (isDone)
-         this.isDone.set(true);
-      else
-         this.isDone.set(false);
+      this.isDone.set(isDone);
    }
 
    private static FootstepPlanningResult getWorstResult(List<FootstepPlanningResult> results)
