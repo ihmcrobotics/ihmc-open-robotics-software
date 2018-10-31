@@ -20,6 +20,16 @@ public class FootstepNodeDataListMessage extends Packet<FootstepNodeDataListMess
             * List of all footstep node data. Index 0 should hold the start node
             */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepNodeDataMessage>  node_data_;
+   /**
+            * This message has two modes:
+            * Mode 1: The planner will periodically emit a list of nodes representing the current lowest cost path while planning.
+            * The interpretation of lower cost path depends on the planner, but usually means the sequence of nodes with the lowest ((cost from start) + heuristic) value.
+            * In this case, each of the node_data elements will not have the rejection reason or parent id fields populated
+            * Mode 2: The planner can emit the entire footstep graph, with rejection reasons and parents indices populated.
+            * This is emitted once after planning has completed.
+            * If this value is true, this packet is in mode 2
+            */
+   public boolean is_footstep_graph_;
 
    public FootstepNodeDataListMessage()
    {
@@ -38,6 +48,8 @@ public class FootstepNodeDataListMessage extends Packet<FootstepNodeDataListMess
       sequence_id_ = other.sequence_id_;
 
       node_data_.set(other.node_data_);
+      is_footstep_graph_ = other.is_footstep_graph_;
+
    }
 
    /**
@@ -62,6 +74,33 @@ public class FootstepNodeDataListMessage extends Packet<FootstepNodeDataListMess
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepNodeDataMessage>  getNodeData()
    {
       return node_data_;
+   }
+
+   /**
+            * This message has two modes:
+            * Mode 1: The planner will periodically emit a list of nodes representing the current lowest cost path while planning.
+            * The interpretation of lower cost path depends on the planner, but usually means the sequence of nodes with the lowest ((cost from start) + heuristic) value.
+            * In this case, each of the node_data elements will not have the rejection reason or parent id fields populated
+            * Mode 2: The planner can emit the entire footstep graph, with rejection reasons and parents indices populated.
+            * This is emitted once after planning has completed.
+            * If this value is true, this packet is in mode 2
+            */
+   public void setIsFootstepGraph(boolean is_footstep_graph)
+   {
+      is_footstep_graph_ = is_footstep_graph;
+   }
+   /**
+            * This message has two modes:
+            * Mode 1: The planner will periodically emit a list of nodes representing the current lowest cost path while planning.
+            * The interpretation of lower cost path depends on the planner, but usually means the sequence of nodes with the lowest ((cost from start) + heuristic) value.
+            * In this case, each of the node_data elements will not have the rejection reason or parent id fields populated
+            * Mode 2: The planner can emit the entire footstep graph, with rejection reasons and parents indices populated.
+            * This is emitted once after planning has completed.
+            * If this value is true, this packet is in mode 2
+            */
+   public boolean getIsFootstepGraph()
+   {
+      return is_footstep_graph_;
    }
 
 
@@ -91,6 +130,8 @@ public class FootstepNodeDataListMessage extends Packet<FootstepNodeDataListMess
          {  if (!this.node_data_.get(i).epsilonEquals(other.node_data_.get(i), epsilon)) return false; }
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_footstep_graph_, other.is_footstep_graph_, epsilon)) return false;
+
 
       return true;
    }
@@ -107,6 +148,8 @@ public class FootstepNodeDataListMessage extends Packet<FootstepNodeDataListMess
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if (!this.node_data_.equals(otherMyClass.node_data_)) return false;
+      if(this.is_footstep_graph_ != otherMyClass.is_footstep_graph_) return false;
+
 
       return true;
    }
@@ -120,7 +163,9 @@ public class FootstepNodeDataListMessage extends Packet<FootstepNodeDataListMess
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("node_data=");
-      builder.append(this.node_data_);
+      builder.append(this.node_data_);      builder.append(", ");
+      builder.append("is_footstep_graph=");
+      builder.append(this.is_footstep_graph_);
       builder.append("}");
       return builder.toString();
    }
