@@ -119,7 +119,7 @@ public class PlanarRegionViewer
          }
 
          MeshView regionMeshView = new MeshView(meshBuilder.generateMesh());
-         regionMeshView.setMaterial(new PhongMaterial(getRegionColor(regionId, opacity.get())));
+         regionMeshView.setMaterial(new PhongMaterial(getRegionColor(regionId)));
          regionMeshViews.add(regionMeshView);
       }
 
@@ -161,7 +161,7 @@ public class PlanarRegionViewer
 
       java.awt.Color getColor(int regionId)
       {
-         return colors.get(regionId % colors.size());
+         return colors.get(Math.abs(regionId % colors.size()));
       }
    }
 }
