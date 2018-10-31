@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.aStar;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Queue;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -161,6 +162,11 @@ public class FootstepNodeVisualization implements BipedalFootstepPlannerListener
       }
       else
          addNodeUnsafe(localNode, false);
+   }
+
+   @Override
+   public void planWasFound(List<FootstepNode> plan)
+   {
    }
 
    private boolean nodeExists(FootstepNode node)
