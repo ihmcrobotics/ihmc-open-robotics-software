@@ -163,7 +163,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
       int numberOfSteps = footsteps.getFootstepDataList().size();
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(numberOfSteps * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(numberOfSteps * stepTime + 2.0 * initialFinalTransfer + 3.0);
 
       assertReachedGoal(footsteps);
       assertTrue(success);
