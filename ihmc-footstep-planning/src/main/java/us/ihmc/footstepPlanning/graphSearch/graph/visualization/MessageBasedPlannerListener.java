@@ -49,7 +49,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       }
       else
       {
-         childMap.getOrDefault(previousNode, new ArrayList<>()).add(node);
+         childMap.computeIfAbsent(previousNode, n -> new ArrayList<>()).add(node);
          exploredCells.add(new PlannerCell(node.getXIndex(), node.getYIndex()));
       }
    }
@@ -72,7 +72,18 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       {
          packOccupancyMapMessage();
          broadcastOccupancyMap(occupancyMapMessage);
+         lastBroadcastTime = currentTime;
       }
+   }
+
+   @Override
+   public void planWasFound(List<FootstepNode> plan)
+   {
+      packOccupancyMapMessage();
+      broadcastOccupancyMap(occupancyMapMessage);
+
+//      packNodeDataListMessage();
+//      broadcastNodeDataList(nodeDataListMessage);
    }
 
    abstract void broadcastOccupancyMap(FootstepPlannerOccupancyMapMessage occupancyMapMessage);
@@ -119,7 +130,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    {
       nodeDataMessage.setParentNodeId(parentNodeIndex);
 
-      byte rejectionReason = rejectionReasons.containsKey(node) ? (byte) 255 : rejectionReasons.get(node).toByte();
+      byte rejectionReason = rejectionReasons.containsKey(node) ? rejectionReasons.get(node).toByte() : (byte) 255;
       nodeDataMessage.setBipedalFootstepPlannerNodeRejectionReason(rejectionReason);
 
       nodeDataMessage.setRobotSide(node.getRobotSide().toByte());

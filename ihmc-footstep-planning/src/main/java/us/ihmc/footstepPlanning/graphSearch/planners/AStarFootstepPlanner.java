@@ -155,6 +155,10 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       planInternal();
       FootstepPlanningResult result = checkResult();
+
+      if(result.validForExecution() && listener != null)
+         listener.planWasFound(null);
+
       if (debug)
       {
          PrintTools.info("A* Footstep planning statistics for " + result);

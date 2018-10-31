@@ -44,6 +44,7 @@ public class FootstepPlannerUI
    private final FootstepPlannerDataExporter dataExporter;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
+   private final OccupancyMapRenderer graphRenderer;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -128,6 +129,7 @@ public class FootstepPlannerUI
       this.dataExporter = new FootstepPlannerDataExporter(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
+      this.graphRenderer = new OccupancyMapRenderer(messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
@@ -136,6 +138,7 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(nodeCheckerRenderer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
+      view3dFactory.addNodeToView(graphRenderer.getRoot());
 
       planarRegionViewer.start();
       startGoalPositionViewer.start();
@@ -147,6 +150,7 @@ public class FootstepPlannerUI
       footPositionEditor.start();
       bodyPathMeshViewer.start();
       visibilityGraphsRenderer.start();
+      graphRenderer.start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -179,6 +183,7 @@ public class FootstepPlannerUI
       dataExporter.stop();
       bodyPathMeshViewer.stop();
       visibilityGraphsRenderer.stop();
+      graphRenderer.stop();
    }
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
