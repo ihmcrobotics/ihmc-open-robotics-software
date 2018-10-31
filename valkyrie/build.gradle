@@ -167,7 +167,6 @@ if (ihmc.isBuildRoot())
             session(remotes.valkyrieRealtimeComputer) {
                execute("rm -rf " + directory + "/lib")
                execute("mkdir -p " + directory + "/lib")
-               execute("mkdir -p " + directory + "/Configurations")
 
                configurations.runtime.each {
                   put from: it, into: directory + "/lib"
@@ -187,14 +186,15 @@ if (ihmc.isBuildRoot())
             session(remotes.valkyrieNonRealtimeComputer) {
                execute("rm -rf " + directory + "/lib")
                execute("mkdir -p " + directory + "/lib")
-               execute("mkdir -p " + directory + "/Configurations")
 
                configurations.runtime.each {
                   put from: it, into: directory + "/lib"
                }
 
                put from: jar.archivePath, into: directory + "/ValkyrieController.jar"
-               
+
+               execute("rm -rf .ihmc/Configurations")
+               execute("mkdir -p .ihmc/Configurations")
                put from: file("saved-configurations/defaultREAModuleConfiguration.txt"), into: ".ihmc/Configurations"
 
                def scriptDir = new File(projectDir, "launchScripts/")
