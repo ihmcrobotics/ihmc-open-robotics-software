@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.listeners.HeuristicSearchAndActionPolicyDefinitions;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
@@ -125,9 +126,13 @@ public class FootstepPlanningStage implements FootstepPlanner
 
    private AStarFootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons)
    {
+      HeuristicSearchAndActionPolicyDefinitions heuristicPolicies = new HeuristicSearchAndActionPolicyDefinitions();
+      heuristicPolicies.setGoalRecommendationListener(plannerGoalRecommendationHolder);
+      heuristicPolicies.setAutomaticallyRotate(true);
+
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlanningParameters);
       AStarFootstepPlanner planner = AStarFootstepPlanner
-            .createPlanner(footstepPlanningParameters, null, footPolygons, expansion, plannerGoalRecommendationHolder, registry);
+            .createPlanner(footstepPlanningParameters, null, footPolygons, expansion, heuristicPolicies, registry);
       return planner;
    }
 

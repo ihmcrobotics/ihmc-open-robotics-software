@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class PlannerGoalRecommendationHandler
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
    private static final boolean reinitializeOnGoalChange = false;
 
    private final ConcurrentList<FootstepPlanningStage> allPlanningStages;
