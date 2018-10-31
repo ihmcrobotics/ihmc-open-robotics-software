@@ -1,25 +1,30 @@
 package us.ihmc.avatar.footstepPlanning;
 
+import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningManager.ConcurrentList;
+import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningManager.ConcurrentMap;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerObjective;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PlannerGoalRecommendationHandler
 {
-   private final ConcurrentCopier<List<FootstepPlanningStage>> allPlanningStages;
-   private final ConcurrentCopier<HashMap<FootstepPlanningStage, FootstepPlannerObjective>> stepPlanningStagesInProgress;
+   private static final boolean debug = true;
+   private static final boolean reinitializeOnGoalChange = false;
+
+   private final ConcurrentList<FootstepPlanningStage> allPlanningStages;
+   private final ConcurrentMap<FootstepPlanningStage, FootstepPlannerObjective> stepPlanningStagesInProgress;
 
    private final ConcurrentCopier<List<FootstepPlannerObjective>> footstepPlannerObjectives = new ConcurrentCopier<>(ArrayList::new);
 
-   public PlannerGoalRecommendationHandler(ConcurrentCopier<List<FootstepPlanningStage>> allPlanningStages,
-                                           ConcurrentCopier<HashMap<FootstepPlanningStage, FootstepPlannerObjective>> stepPlanningStagesInProgress)
+   public PlannerGoalRecommendationHandler(ConcurrentList<FootstepPlanningStage> allPlanningStages,
+                                           ConcurrentMap<FootstepPlanningStage, FootstepPlannerObjective> stepPlanningStagesInProgress)
    {
       this.allPlanningStages = allPlanningStages;
       this.stepPlanningStagesInProgress = stepPlanningStagesInProgress;
@@ -29,8 +34,8 @@ public class PlannerGoalRecommendationHandler
    {
       FootstepPlanningStage currentPlanningStage = allPlanningStages.getCopyForReading().get(stageId);
 
-      HashMap<FootstepPlanningStage, FootstepPlannerObjective> currentPlanningObjectives = stepPlanningStagesInProgress.getCopyForReading();
-      HashMap<FootstepPlanningStage, FootstepPlannerObjective> updatedPlanningObjectives = stepPlanningStagesInProgress.getCopyForWriting();
+      Map<FootstepPlanningStage, FootstepPlannerObjective> currentPlanningObjectives = stepPlanningStagesInProgress.getCopyForReading();
+      Map<FootstepPlanningStage, FootstepPlannerObjective> updatedPlanningObjectives = stepPlanningStagesInProgress.getCopyForWriting();
       updatedPlanningObjectives.putAll(currentPlanningObjectives);
 
       FootstepPlannerObjective currentPlanningObjective = updatedPlanningObjectives.get(currentPlanningStage);
@@ -60,13 +65,20 @@ public class PlannerGoalRecommendationHandler
 
       List<FootstepPlannerObjective> currentObjectives = footstepPlannerObjectives.getCopyForReading();
       List<FootstepPlannerObjective> newSetOfObjectives = footstepPlannerObjectives.getCopyForWriting();
+      newSetOfObjectives.clear();
       if (currentObjectives != null)
          newSetOfObjectives.addAll(currentObjectives);
       newSetOfObjectives.add(newFinalPlanningObjective);
       footstepPlannerObjectives.commit();
 
       currentPlanningObjective.setGoal(newIntermediateGoal);
+
+      if (reinitializeOnGoalChange)
+         currentPlanningStage.requestInitialize();
       currentPlanningStage.setGoalUnsafe(newIntermediateGoal);
+
+      if (debug)
+         PrintTools.info("Adding a new objective.");
 
       stepPlanningStagesInProgress.commit();
    }
@@ -84,11 +96,16 @@ public class PlannerGoalRecommendationHandler
    {
       List<FootstepPlannerObjective> currentObjectives = footstepPlannerObjectives.getCopyForReading();
       List<FootstepPlannerObjective> shortenedObjectives = footstepPlannerObjectives.getCopyForWriting();
+
+      if (currentObjectives == null)
+         return null;
+
       FootstepPlannerObjective objective = currentObjectives.remove(0);
+
+      shortenedObjectives.clear();
       shortenedObjectives.addAll(currentObjectives);
       footstepPlannerObjectives.commit();
 
       return objective;
    }
-
 }
