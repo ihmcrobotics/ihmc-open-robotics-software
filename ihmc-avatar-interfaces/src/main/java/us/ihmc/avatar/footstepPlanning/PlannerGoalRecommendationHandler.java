@@ -13,14 +13,13 @@ import java.util.List;
 
 public class PlannerGoalRecommendationHandler
 {
-   private final List<FootstepPlanningStage> allPlanningStages;
-   private final HashMap<FootstepPlanningStage, FootstepPlannerObjective> stepPlanningStagesInProgress;
+   private final ConcurrentCopier<List<FootstepPlanningStage>> allPlanningStages;
+   private final ConcurrentCopier<HashMap<FootstepPlanningStage, FootstepPlannerObjective>> stepPlanningStagesInProgress;
 
    private final ConcurrentCopier<List<FootstepPlannerObjective>> footstepPlannerObjectives = new ConcurrentCopier<>(ArrayList::new);
 
-   public PlannerGoalRecommendationHandler(List<FootstepPlanningStage> allPlanningStages,
-                                           HashMap<FootstepPlanningStage, FootstepPlannerObjective> stepPlanningStagesInProgress,
-                                           FootstepPlannerParameters parameters)
+   public PlannerGoalRecommendationHandler(ConcurrentCopier<List<FootstepPlanningStage>> allPlanningStages,
+                                           ConcurrentCopier<HashMap<FootstepPlanningStage, FootstepPlannerObjective>> stepPlanningStagesInProgress)
    {
       this.allPlanningStages = allPlanningStages;
       this.stepPlanningStagesInProgress = stepPlanningStagesInProgress;
@@ -28,9 +27,13 @@ public class PlannerGoalRecommendationHandler
 
    public void notifyWithPlannerGoalRecommendation(FootstepPlannerGoal newIntermediateGoal, int stageId)
    {
-      FootstepPlanningStage currentPlanningStage = allPlanningStages.get(stageId);
+      FootstepPlanningStage currentPlanningStage = allPlanningStages.getCopyForReading().get(stageId);
 
-      FootstepPlannerObjective currentPlanningObjective = stepPlanningStagesInProgress.get(currentPlanningStage);
+      HashMap<FootstepPlanningStage, FootstepPlannerObjective> currentPlanningObjectives = stepPlanningStagesInProgress.getCopyForReading();
+      HashMap<FootstepPlanningStage, FootstepPlannerObjective> updatedPlanningObjectives = stepPlanningStagesInProgress.getCopyForWriting();
+      updatedPlanningObjectives.putAll(currentPlanningObjectives);
+
+      FootstepPlannerObjective currentPlanningObjective = updatedPlanningObjectives.get(currentPlanningStage);
       FootstepPlannerObjective newFinalPlanningObjective = new FootstepPlannerObjective();
 
       FootstepPlannerGoal newFinalPlanningGoal = new FootstepPlannerGoal();
@@ -63,7 +66,9 @@ public class PlannerGoalRecommendationHandler
       footstepPlannerObjectives.commit();
 
       currentPlanningObjective.setGoal(newIntermediateGoal);
-      currentPlanningStage.setGoal(newIntermediateGoal);
+      currentPlanningStage.setGoalUnsafe(newIntermediateGoal);
+
+      stepPlanningStagesInProgress.commit();
    }
 
    public boolean hasNewFootstepPlannerObjectives()

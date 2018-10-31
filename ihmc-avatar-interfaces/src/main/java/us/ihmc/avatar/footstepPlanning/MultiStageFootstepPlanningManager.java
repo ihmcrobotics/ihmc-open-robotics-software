@@ -59,22 +59,21 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
-   private FootstepPlannerObjective overallPlanningObjective = null;
    private final List<FootstepPlannerObjective> planningObjectivePool = new ArrayList<>();
    private final PlannerGoalRecommendationHandler goalRecommendationHandler;
 
-   private final List<FootstepPlanningStage> allPlanningStages = new ArrayList<>();
-   private final List<FootstepPlanningStage> planningStagePool = new ArrayList<>();
-   private final HashMap<FootstepPlanningStage, FootstepPlannerObjective> pathPlanningStagesInProgress = new HashMap<>();
-   private final HashMap<FootstepPlanningStage, FootstepPlannerObjective> stepPlanningStagesInProgress = new HashMap<>();
+   private final ConcurrentCopier<List<FootstepPlanningStage>> planningStagePool = new ConcurrentCopier<>(ArrayList::new);
+   private final ConcurrentCopier<List<FootstepPlanningStage>> allPlanningStages = new ConcurrentCopier<>(ArrayList::new);
+   private final ConcurrentCopier<HashMap<FootstepPlanningStage, FootstepPlannerObjective>> pathPlanningStagesInProgress = new ConcurrentCopier<>(HashMap::new);
+   private final ConcurrentCopier<HashMap<FootstepPlanningStage, FootstepPlannerObjective>> stepPlanningStagesInProgress = new ConcurrentCopier<>(HashMap::new);
 
-   private final HashMap<FootstepPlanningStage, ScheduledFuture<?>> planningTasks = new HashMap<>();
+   private final ConcurrentCopier<HashMap<FootstepPlanningStage, ScheduledFuture<?>>> planningTasks = new ConcurrentCopier<>(HashMap::new);
 
    private final YoBoolean isDonePlanningPath = new YoBoolean("isDonePlanningPath", registry);
    private final YoBoolean isDonePlanningSteps = new YoBoolean("isDonePlanningSteps", registry);
 
-   private final ConcurrentCopier<List<FootstepPlanningResult>> completedPathResults = new ConcurrentCopier<>(ArrayList::new);
-   private final ConcurrentCopier<List<FootstepPlanningResult>> completedStepResults = new ConcurrentCopier<>(ArrayList::new);
+   private final ConcurrentList<FootstepPlanningResult> completedPathResults = new ConcurrentList<>();
+   private final ConcurrentList<FootstepPlanningResult> completedStepResults = new ConcurrentList<>();
 
    private final ConcurrentCopier<PairList<Integer, BodyPathPlan>> completedPathPlans = new ConcurrentCopier<>(PairList::new);
    private final ConcurrentCopier<PairList<Integer, FootstepPlan>> completedStepPlans = new ConcurrentCopier<>(PairList::new);
@@ -98,10 +97,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       this.statusOutputManager = statusOutputManager;
       this.tickDurationMs = tickDurationMs;
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerPlanarRegions", 200, 30, registry);
-      goalRecommendationHandler = new PlannerGoalRecommendationHandler(allPlanningStages, stepPlanningStagesInProgress, footstepPlannerParameters);
+      goalRecommendationHandler = new PlannerGoalRecommendationHandler(allPlanningStages, stepPlanningStagesInProgress);
 
-      ThreadFactory threadFactory = new MyThreadFactory(new MyExceptionHandler());
-//            ThreadTools.getNamedThreadFactory(getClass().getSimpleName());
+      ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(getClass().getSimpleName());
       executorService = Executors.newScheduledThreadPool(5, threadFactory);
 
       footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
@@ -112,6 +110,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone.set(false);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
 
+      List<FootstepPlanningStage> allPlanningStages = this.allPlanningStages.getCopyForWriting();
+      List<FootstepPlanningStage> planningStagePool = this.planningStagePool.getCopyForWriting();
       for (int i = 0; i < 5; i++)
       {
          FootstepPlanningStage planningStage = new FootstepPlanningStage(i, contactPointParameters, footstepPlannerParameters, activePlanner, planId,
@@ -122,6 +122,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          allPlanningStages.add(planningStage);
          planningStagePool.add(planningStage);
       }
+      this.allPlanningStages.commit();
+      this.planningStagePool.commit();
 
       isDonePlanningPath.set(false);
       isDonePlanningSteps.set(false);
@@ -140,39 +142,10 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       parentRegistry.addChild(registry);
       initialize.set(true);
    }
-   private class MyThreadFactory implements ThreadFactory
-   {
-      private final ThreadFactory defaultFactory = Executors.defaultThreadFactory();
-      private final Thread.UncaughtExceptionHandler handler;
-
-      public MyThreadFactory(Thread.UncaughtExceptionHandler handler)
-      {
-         this.handler = handler;
-      }
-
-      @Override
-      public Thread newThread(Runnable runnable)
-      {
-         Thread thread = defaultFactory.newThread(runnable);
-         thread.setUncaughtExceptionHandler(handler);
-         return thread;
-      }
-   }
-
-   private class MyExceptionHandler implements Thread.UncaughtExceptionHandler
-   {
-      @Override
-      public void uncaughtException(Thread thread, Throwable t)
-      {
-         if (t instanceof NullPointerException)
-            PrintTools.info("real bad");
-         PrintTools.info("Yo");
-      }
-   }
 
    private FootstepPlanningStage createNewFootstepPlanningStage()
    {
-      FootstepPlanningStage stage = new FootstepPlanningStage(allPlanningStages.size(), contactPointParameters, footstepPlanningParameters, activePlanner,
+      FootstepPlanningStage stage = new FootstepPlanningStage(allPlanningStages.getCopyForReading().size(), contactPointParameters, footstepPlanningParameters, activePlanner,
                                                               planId, null, tickDurationMs);
       stage.addCompletionCallback(this);
       stage.setPlannerGoalRecommendationHandler(goalRecommendationHandler);
@@ -181,14 +154,33 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private FootstepPlanningStage spawnNextAvailablePlanner()
    {
-      if (planningStagePool.isEmpty())
-      {
-         FootstepPlanningStage planningStage = createNewFootstepPlanningStage();
-         allPlanningStages.add(planningStage);
-         planningStagePool.add(planningStage);
+      List<FootstepPlanningStage> existingPlanningStagePool = planningStagePool.getCopyForReading();
+
+      FootstepPlanningStage stageToReturn;
+
+      if (existingPlanningStagePool.isEmpty())
+      { // create a new stage
+         stageToReturn = createNewFootstepPlanningStage();
+
+         List<FootstepPlanningStage> existingPlanningStages = allPlanningStages.getCopyForReading();
+         List<FootstepPlanningStage> updatedPlanningStages = allPlanningStages.getCopyForWriting();
+         updatedPlanningStages.addAll(existingPlanningStages);
+         updatedPlanningStages.add(stageToReturn);
+
+         allPlanningStages.commit();
+      }
+      else
+      { // get one fro the pool
+         List<FootstepPlanningStage> updatedPlanningStagePool = planningStagePool.getCopyForWriting();
+
+         updatedPlanningStagePool.addAll(existingPlanningStagePool);
+         stageToReturn = updatedPlanningStagePool.remove(0);
+
+         planningStagePool.commit();
       }
 
-      return planningStagePool.remove(0);
+
+      return stageToReturn;
    }
 
    private FootstepPlanningStage cleanupPlanningStage(FootstepPlanningStage planningStage)
@@ -295,7 +287,12 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       }
       completedPathPlans.commit();
 
-      pathPlanningStagesInProgress.remove(stageFinished);
+      HashMap<FootstepPlanningStage, FootstepPlannerObjective> currentPlanningStagesInProgress = pathPlanningStagesInProgress.getCopyForReading();
+      HashMap<FootstepPlanningStage, FootstepPlannerObjective> updatedPlanningStagesInProgress = pathPlanningStagesInProgress.getCopyForWriting();
+      updatedPlanningStagesInProgress.putAll(currentPlanningStagesInProgress);
+      updatedPlanningStagesInProgress.remove(stageFinished);
+
+      pathPlanningStagesInProgress.commit();
    }
 
    @Override
@@ -319,8 +316,17 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       }
       completedStepPlans.commit();
 
-      stepPlanningStagesInProgress.remove(stageFinished);
-      planningStagePool.add(stageFinished);
+      HashMap<FootstepPlanningStage, FootstepPlannerObjective> currentPlanningStagesInProgress = stepPlanningStagesInProgress.getCopyForReading();
+      HashMap<FootstepPlanningStage, FootstepPlannerObjective> updatedPlanningStagesInProgress = stepPlanningStagesInProgress.getCopyForWriting();
+      updatedPlanningStagesInProgress.putAll(currentPlanningStagesInProgress);
+      updatedPlanningStagesInProgress.remove(stageFinished);
+      stepPlanningStagesInProgress.commit();
+
+      List<FootstepPlanningStage> currentStagePool = planningStagePool.getCopyForReading();
+      List<FootstepPlanningStage> updatedStagePool = planningStagePool.getCopyForWriting();
+      updatedStagePool.addAll(currentStagePool);
+      updatedStagePool.add(stageFinished);
+      planningStagePool.commit();
 
       stageFinished.destroyStageRunnable();
       planningTasks.remove(stageFinished).cancel(true);
@@ -417,7 +423,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          plannerGoal.setTimeout(Double.POSITIVE_INFINITY);
       }
 
-      overallPlanningObjective = plannerGoal;
       planningObjectivePool.add(plannerGoal);
 
       assignGoalsToAvailablePlanners();
@@ -435,8 +440,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          reportPlannerFailed(FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION);
          return;
       }
-
-
 
       updatePlanningObjectives();
 
@@ -657,4 +660,73 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       if (debug)
          PrintTools.debug(this, "Destroyed");
    }
+
+   private class ConcurrentList<T> extends ConcurrentCopier<List<T>>
+   {
+      public ConcurrentList()
+      {
+         super(ArrayList<T>::new);
+      }
+
+      public boolean isEmpty()
+      {
+         this.getCopyForReading().isEmpty();
+      }
+
+      public void add(T objectToAdd)
+      {
+         List<T> existingList = this.getCopyForReading();
+         List<T> updatedList = this.getCopyForWriting();
+         updatedList.addAll(existingList);
+         updatedList.add(objectToAdd);
+
+         this.commit();
+      }
+
+      public T remove(int indexToRemove)
+      {
+         List<T> existingList = this.getCopyForReading();
+         List<T> updatedList = this.getCopyForWriting();
+         updatedList.addAll(existingList);
+         T objectToReturn = updatedList.remove(indexToRemove);
+
+         this.commit();
+
+         return objectToReturn;
+      }
+   }
+
+   private class ConcurrentMap<K, V> extends ConcurrentCopier<Map<K, V>>
+   {
+      public ConcurrentMap()
+      {
+         super(HashMap<K, V>::new);
+      }
+
+      public boolean isEmpty()
+      {
+         return this.getCopyForReading().isEmpty();
+      }
+
+      public void put(K key, V value)
+      {
+         Map<K, V> existingMap = this.getCopyForReading();
+         Map<K, V> updatedMap = this.getCopyForWriting();
+         updatedMap.putAll(existingMap);
+         updatedMap.put(key, value);
+
+         this.commit();
+      }
+
+      public V remove(K key)
+      {
+         Map<K, V> existingMap = this.getCopyForReading();
+         Map<K, V> updatedMap = this.getCopyForWriting();
+         updatedMap.putAll(existingMap);
+         updatedMap.remove(key, value);
+
+         this.commit();
+      }
+   }
+
 }
