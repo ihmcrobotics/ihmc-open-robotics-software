@@ -707,7 +707,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       }
    }
 
-   class ConcurrentMap<K, V> extends ConcurrentCopier<Map<K, V>>
+   class ConcurrentMap<K, V> extends ConcurrentCopier<HashMap<K, V>>
    {
       public ConcurrentMap()
       {

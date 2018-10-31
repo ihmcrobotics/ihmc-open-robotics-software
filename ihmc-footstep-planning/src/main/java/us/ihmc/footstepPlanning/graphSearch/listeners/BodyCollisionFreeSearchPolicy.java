@@ -8,14 +8,14 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.BodyCollisionNodeChecke
 import java.util.ArrayList;
 import java.util.List;
 
-public class BodyCollisionFreeSearchPolicy implements FootstepPlannerHeuristicSearchPolicy, StartAndGoalListener
+public class BodyCollisionFreeSearchPolicy implements PlannerHeuristicNodeSearchPolicy, StartAndGoalListener
 {
    private final static double distanceFromStartToConsiderSearching = 1.0;
    private final static double distanceFromGoalToConsiderSearching = 1.0;
 
    private final static double rotationIncrement = Math.toRadians(10.0);
 
-   private final List<FootstepPlannerHeuristicActionPolicy> actionPolicies = new ArrayList<>();
+   private final List<PlannerHeuristicNodeActionPolicy> actionPolicies = new ArrayList<>();
 
    private final FramePose3D initialPose = new FramePose3D();
    private final FramePose3D finalPose = new FramePose3D();
@@ -33,13 +33,13 @@ public class BodyCollisionFreeSearchPolicy implements FootstepPlannerHeuristicSe
    }
 
    @Override
-   public void attachActionPolicy(FootstepPlannerHeuristicActionPolicy actionPolicy)
+   public void attachActionPolicy(PlannerHeuristicNodeActionPolicy actionPolicy)
    {
       this.actionPolicies.add(actionPolicy);
    }
 
    @Override
-   public void setStartPose(FramePose3D initialPose)
+   public void setInitialPose(FramePose3D initialPose)
    {
       this.initialPose.set(initialPose);
    }
@@ -67,7 +67,7 @@ public class BodyCollisionFreeSearchPolicy implements FootstepPlannerHeuristicSe
    }
 
    @Override
-   public boolean performSearchForNewNode(FootstepNode rejectedNode, FootstepNode parentNode)
+   public boolean performSearchForValidNode(FootstepNode rejectedNode, FootstepNode parentNode)
    {
       if (!checkFarEnoughFromStart(rejectedNode) || !checkFarEnoughFromEnd(rejectedNode))
          return false;
@@ -130,9 +130,8 @@ public class BodyCollisionFreeSearchPolicy implements FootstepPlannerHeuristicSe
    }
 
    @Override
-   public void performActionPoliciesForNewNode()
+   public void executeActionPoliciesForNewValidNode()
    {
-      for (FootstepPlannerHeuristicActionPolicy actionPolicy : actionPolicies)
-         actionPolicy.performActionFromNewNode(pollNewValidNode(), parentOfValidNode);
+      actionPolicies.parallelStream().forEach(actionPolicy -> actionPolicy.performActionForNewValidNode(pollNewValidNode(), parentOfValidNode));
    }
 }
