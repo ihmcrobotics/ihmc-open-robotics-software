@@ -50,8 +50,8 @@ public class FootstepPlanningStage implements FootstepPlanner
 
    private final YoVariableRegistry registry;
 
-   private final AtomicReference<FootstepPlanningResult> pathPlanResult = new AtomicReference<>();
-   private final AtomicReference<FootstepPlanningResult> stepPlanResult = new AtomicReference<>();
+   private FootstepPlanningResult pathPlanResult = null;
+   private FootstepPlanningResult stepPlanResult = null;
 
    private final AtomicReference<BodyPathPlan> pathPlan = new AtomicReference<>();
    private final AtomicReference<FootstepPlan> stepPlan = new AtomicReference<>();
@@ -60,12 +60,12 @@ public class FootstepPlanningStage implements FootstepPlanner
    private final EnumProvider<FootstepPlannerType> activePlannerEnum;
    private final IntegerProvider planId;
 
-   private final ConcurrentCopier<AtomicDouble> timeout = new ConcurrentCopier<>(AtomicDouble::new);
-   private final ConcurrentCopier<AtomicDouble> horizonLength = new ConcurrentCopier<>(AtomicDouble::new);
-   private final ConcurrentCopier<PlanarRegionsList> planarRegionsList = new ConcurrentCopier<>(PlanarRegionsList::new);
-   private final ConcurrentCopier<FootstepPlannerGoal> goal = new ConcurrentCopier<>(FootstepPlannerGoal::new);
-   private final ConcurrentCopier<FramePose3D> stanceFootPose = new ConcurrentCopier<>(FramePose3D::new);
-   private final ConcurrentCopier<AtomicReference<RobotSide>> stanceFootSide = new ConcurrentCopier<>(AtomicReference::new);
+   private final AtomicDouble timeout = new AtomicDouble();
+   private final AtomicDouble horizonLength = new AtomicDouble();
+   private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>();
+   private final AtomicReference<FootstepPlannerGoal> goal = new AtomicReference<>();
+   private final AtomicReference<FramePose3D> stanceFootPose = new AtomicReference<>();
+   private final AtomicReference<RobotSide> stanceFootSide = new AtomicReference<>();
 
    private Runnable stageRunnable;
 
@@ -152,16 +152,13 @@ public class FootstepPlanningStage implements FootstepPlanner
 
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
    {
-      this.stanceFootPose.getCopyForWriting().setIncludingFrame(stanceFootPose);
-      this.stanceFootPose.commit();
-      this.stanceFootSide.getCopyForWriting().set(side);
-      this.stanceFootSide.commit();
+      this.stanceFootPose.set(stanceFootPose);
+      this.stanceFootSide.set(side);
    }
 
    public void setGoal(FootstepPlannerGoal goal)
    {
-      this.goal.getCopyForWriting().set(goal);
-      this.goal.commit();
+      this.goal.set(goal);
    }
 
    public void setGoalUnsafe(FootstepPlannerGoal goal)
@@ -172,22 +169,17 @@ public class FootstepPlanningStage implements FootstepPlanner
 
    public void setTimeout(double timeout)
    {
-      this.timeout.getCopyForWriting().set(timeout);
-      this.timeout.commit();
+      this.timeout.set(timeout);
    }
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      PlanarRegionsList newPlanarRegionsList = this.planarRegionsList.getCopyForWriting();
-      newPlanarRegionsList.clear();
-      newPlanarRegionsList.getPlanarRegionsAsList().addAll(planarRegionsList.getPlanarRegionsAsList());
-      this.planarRegionsList.commit();
+      this.planarRegionsList.set(planarRegionsList.copy());
    }
 
    public void setPlanningHorizonLength(double planningHorizonLength)
    {
-      this.horizonLength.getCopyForWriting().set(planningHorizonLength);
-      this.horizonLength.commit();
+      this.horizonLength.set(planningHorizonLength);
    }
 
    public void setPlanSequenceId(int sequenceId)
@@ -223,19 +215,13 @@ public class FootstepPlanningStage implements FootstepPlanner
    @Override
    public FootstepPlanningResult planPath()
    {
-      FootstepPlanningResult result = getPlanner().planPath();
-      pathPlanResult.set(result);
-
-      return result;
+      return getPlanner().planPath();
    }
 
    @Override
    public FootstepPlanningResult plan()
    {
-      FootstepPlanningResult result = getPlanner().plan();
-      stepPlanResult.set(result);
-
-      return result;
+      return getPlanner().plan();
    }
 
 
@@ -317,37 +303,39 @@ public class FootstepPlanningStage implements FootstepPlanner
       if (debug)
          PrintTools.info("Stage " + stageId + " planning path.");
 
-      FootstepPlanningResult status = getPlanner().planPath();
-      pathPlanResult.set(status);
-      if (status.validForExecution())
+      pathPlanResult = planPath();
+      if (pathPlanResult.validForExecution())
          pathPlan.set(getPlanner().getPathPlan());
 
       for (PlannerCompletionCallback completionCallback : completionCallbackList)
-         completionCallback.pathPlanningIsComplete(status, this);
+         completionCallback.pathPlanningIsComplete(pathPlanResult, this);
 
       if (debug)
          PrintTools.info("Stage " + stageId + " planning steps.");
 
-      if (status.validForExecution())
-         status = getPlanner().plan();
+      stepPlanResult = pathPlanResult;
+      if (pathPlanResult.validForExecution())
+         stepPlanResult = plan();
 
-      stepPlanResult.set(status);
-      if (status.validForExecution())
+      if (stepPlanResult.validForExecution())
          stepPlan.set(getPlanner().getPlan());
 
       for (PlannerCompletionCallback completionCallback : completionCallbackList)
-         completionCallback.stepPlanningIsComplete(status, this);
+         completionCallback.stepPlanningIsComplete(stepPlanResult, this);
    }
 
    public boolean initialize()
    {
       stageTime.set(0.0);
 
-      getPlanner().setInitialStanceFoot(stanceFootPose.getCopyForReading(), stanceFootSide.getCopyForReading().get());
-      getPlanner().setGoal(goal.getCopyForReading());
-      getPlanner().setTimeout(timeout.getCopyForReading().get());
-      getPlanner().setPlanarRegions(planarRegionsList.getCopyForReading().copy());
-      getPlanner().setPlanningHorizonLength(horizonLength.getCopyForReading().get());
+      pathPlanResult = null;
+      stepPlanResult = null;
+
+      getPlanner().setInitialStanceFoot(stanceFootPose.get(), stanceFootSide.get());
+      getPlanner().setGoal(goal.get());
+      getPlanner().setTimeout(timeout.get());
+      getPlanner().setPlanarRegions(planarRegionsList.get());
+      getPlanner().setPlanningHorizonLength(horizonLength.get());
 
       return true;
    }
