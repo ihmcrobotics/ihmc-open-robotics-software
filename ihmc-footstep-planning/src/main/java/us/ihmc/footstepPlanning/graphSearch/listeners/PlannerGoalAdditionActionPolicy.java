@@ -7,7 +7,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -19,9 +19,9 @@ import java.util.List;
 public class PlannerGoalAdditionActionPolicy implements PlannerHeuristicNodeActionPolicy
 {
    private final List<PlannerGoalRecommendationListener> plannerGoalRecommendationListener = new ArrayList<>();
-   private final SimplePlanarRegionFootstepNodeSnapper snapper;
+   private final FootstepNodeSnapper snapper;
 
-   public PlannerGoalAdditionActionPolicy(SimplePlanarRegionFootstepNodeSnapper snapper)
+   public PlannerGoalAdditionActionPolicy(FootstepNodeSnapper snapper)
    {
       this.snapper = snapper;
    }

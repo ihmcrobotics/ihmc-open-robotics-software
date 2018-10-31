@@ -393,7 +393,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    public static AStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, BipedalFootstepPlannerListener listener,
                                                     SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion,
-                                                    PlannerGoalRecommendationListener plannerGoalRecommendationListener, YoVariableRegistry registry)
+                                                    HeuristicSearchAndActionPolicyDefinitions policyDefinitions, YoVariableRegistry registry)
    {
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
       FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
@@ -404,17 +404,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getAStarHeuristicsWeight(), parameters);
 
-      PlannerGoalAdditionActionPolicy newPlannerGoalActionPolicy = new PlannerGoalAdditionActionPolicy(snapper);
-      BodyCollisionFreeSearchPolicy bodyCollisionFreeSearchPolicy = new BodyCollisionFreeSearchPolicy(bodyCollisionNodeChecker);
-      BodyCollisionListener bodyCollisionListener = new BodyCollisionListener();
-
-      newPlannerGoalActionPolicy.addActionListener(plannerGoalRecommendationListener);
-      bodyCollisionFreeSearchPolicy.attachActionPolicy(newPlannerGoalActionPolicy);
-      bodyCollisionListener.setHeuristicSearchPolicy(bodyCollisionFreeSearchPolicy);
-
       FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
       nodeChecker.addPlannerListener(listener);
-      nodeChecker.addPlannerListener(bodyCollisionListener);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
@@ -427,7 +418,16 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, listener,
                                                               registry);
-      planner.addStartAndGoalListener(bodyCollisionFreeSearchPolicy);
+
+      if (policyDefinitions != null)
+      {
+         policyDefinitions.setCollisionNodeChecker(bodyCollisionNodeChecker);
+         policyDefinitions.setNodeSnapper(snapper);
+         policyDefinitions.build();
+
+         policyDefinitions.getPlannerListeners().forEach(nodeChecker::addPlannerListener);
+         policyDefinitions.getStartAndGoalListeners().forEach(planner::addStartAndGoalListener);
+      }
 
       return planner;
    }
