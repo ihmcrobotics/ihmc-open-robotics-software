@@ -2,6 +2,7 @@ package us.ihmc.avatar.footstepPlanning;
 
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import us.ihmc.affinity.CPUTopology;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -28,7 +29,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -99,8 +103,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerPlanarRegions", 200, 30, registry);
       goalRecommendationHandler = new PlannerGoalRecommendationHandler(allPlanningStages, stepPlanningStagesInProgress);
 
-      ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(getClass().getSimpleName());
-      executorService = Executors.newScheduledThreadPool(5, threadFactory);
+      CPUTopology topology = new CPUTopology();
+      int numberOfCores = topology.getNumberOfCores();
+
+      ThreadFactory threadFactory =  ThreadTools.getNamedThreadFactory(getClass().getSimpleName());
+      executorService = Executors.newScheduledThreadPool(numberOfCores, threadFactory);
 
       footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
 
@@ -110,7 +117,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone.set(false);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
 
-      for (int i = 0; i < 3; i++)
+
+      for (int i = 0; i < numberOfCores; i++)
       {
          FootstepPlanningStage planningStage = new FootstepPlanningStage(i, contactPointParameters, footstepPlannerParameters, activePlanner, planId,
                                                                          graphicsListRegistry, tickDurationMs);
