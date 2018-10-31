@@ -29,6 +29,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
+import java.security.InvalidParameterException;
 import java.util.*;
 
 public class AStarFootstepPlanner implements FootstepPlanner
@@ -243,9 +244,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private void initialize()
    {
       if (startNode == null)
-         throw new RuntimeException("Need to set initial conditions before planning.");
+         throw new NullPointerException("Need to set initial conditions before planning.");
       if (goalNodes == null)
-         throw new RuntimeException("Need to set goal before planning.");
+         throw new NullPointerException("Need to set goal before planning.");
 
       graph.initialize(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
@@ -256,7 +257,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       {
          boolean validGoalNode = nodeChecker.isNodeValid(goalNodes.get(robotSide), null);
          if (!validGoalNode && !parameters.getReturnBestEffortPlan())
-            throw new RuntimeException("Goal node isn't valid. To plan without a valid goal node, best effort planning must be enabled");
+            throw new InvalidParameterException("Goal node isn't valid. To plan without a valid goal node, best effort planning must be enabled");
 
          this.validGoalNode.set(validGoalNode && this.validGoalNode.getBooleanValue());
       }
@@ -380,7 +381,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       FootstepPlannerGoalType supportedGoalType1 = FootstepPlannerGoalType.POSE_BETWEEN_FEET;
       FootstepPlannerGoalType supportedGoalType2 = FootstepPlannerGoalType.DOUBLE_FOOTSTEP;
       if (!goal.getFootstepPlannerGoalType().equals(supportedGoalType1) && !goal.getFootstepPlannerGoalType().equals(supportedGoalType2))
-         throw new RuntimeException("Planner does not support goals other than " + supportedGoalType1 + " and " + supportedGoalType2);
+         throw new IllegalArgumentException("Planner does not support goals other than " + supportedGoalType1 + " and " + supportedGoalType2);
    }
 
    public static AStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, BipedalFootstepPlannerListener listener,
