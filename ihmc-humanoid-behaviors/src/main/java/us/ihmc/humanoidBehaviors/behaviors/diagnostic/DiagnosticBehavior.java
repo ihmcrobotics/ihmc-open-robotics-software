@@ -444,6 +444,9 @@ public class DiagnosticBehavior extends AbstractBehavior
          RigidBody chest = fullRobotModel.getChest();
          RigidBody hand = fullRobotModel.getHand(robotSide);
 
+         if (hand == null)
+            continue;
+
          // The following one works for Valkyrie but doesn't work for Atlas
          //         RigidBody upperArmBody = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH).getPredecessor();
          // Pretty hackish but will work for now: Consider the elbow joint to be the fourth joint of the chain

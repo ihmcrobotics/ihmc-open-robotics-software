@@ -420,7 +420,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       assertTrue(success);
 
-      Vector3D plusMinusVector = new Vector3D(0.01, 0.01, 0.01);
+      Vector3D plusMinusVector = new Vector3D(0.02, 0.02, 0.01);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(rootPositionAtStart, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 

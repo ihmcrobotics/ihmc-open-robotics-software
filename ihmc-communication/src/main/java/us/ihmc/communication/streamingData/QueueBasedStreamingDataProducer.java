@@ -19,6 +19,7 @@ public class QueueBasedStreamingDataProducer<T extends Packet<?>> extends Packet
    public QueueBasedStreamingDataProducer(String name)
    {
       thread = new Thread(this, name);
+      thread.setDaemon(true);
    }
 
    public void notifyConsumers(T dataObject)

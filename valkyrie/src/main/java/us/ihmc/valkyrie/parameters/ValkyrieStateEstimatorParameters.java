@@ -91,14 +91,15 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       armJointPositionFilterFrequencyHz = Double.POSITIVE_INFINITY;
       jointOutputEncoderVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
       lowerBodyJointPositionFilterFrequencyHz = Double.POSITIVE_INFINITY;
-      lowerBodyJointVelocityFilterFrequencyHz = runningOnRealRobot ? 50.0 : Double.POSITIVE_INFINITY;
+      lowerBodyJointVelocityFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
       fingerPositionFilterFrequencyHz = runningOnRealRobot ? 2.5 : Double.POSITIVE_INFINITY;
 
       // Somehow it's less shaky when these are low especially when pitching the chest forward. I still don't quite get it. Sylvain
-      // Update (2018-09-12): Tried 50Hz for IMU filters, it looks like 25Hz reduces shakies in single support while using 50Hz for joint filters.
-      orientationFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
-      angularVelocityFilterFrequencyHz = runningOnRealRobot ? 40.0 : Double.POSITIVE_INFINITY;
-      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 40.0 : Double.POSITIVE_INFINITY;
+      // Update (2018-09-12 on Unit B): Tried 50Hz for IMU filters, it looks like 25Hz reduces shakies in single support while using 50Hz for joint filters.
+      // Unit A seems to be shakier in general, 25Hz works better.
+      orientationFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
+      angularVelocityFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
+      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
 
       lowerBodyJointVelocityBacklashSlopTime = 0.0;
       armJointVelocityBacklashSlopTime = 0.0;
