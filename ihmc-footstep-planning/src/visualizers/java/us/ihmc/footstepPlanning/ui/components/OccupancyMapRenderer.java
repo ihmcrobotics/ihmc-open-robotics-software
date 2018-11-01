@@ -27,6 +27,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class OccupancyMapRenderer extends AnimationTimer
@@ -42,6 +43,7 @@ public class OccupancyMapRenderer extends AnimationTimer
    private final AtomicReference<Pair<Mesh, Material>> footstepGraphToRender = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>(null);
    private final AtomicReference<Boolean> show;
+   private final AtomicBoolean reset = new AtomicBoolean(false);
 
    private final MeshView footstepGraphMeshView = new MeshView();
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
@@ -52,6 +54,8 @@ public class OccupancyMapRenderer extends AnimationTimer
       messager.registerTopicListener(FootstepPlannerMessagerAPI.OccupancyMapTopic, message -> executorService.execute(() -> processOccupancyMapMessage(message)));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList::set);
       this.show = messager.createInput(FootstepPlannerMessagerAPI.ShowOccupancyMap, true);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, data -> reset.set(true));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
 
       cellPolygon.addVertex(cellWidth, 0.0);
       cellPolygon.addVertex(0.5 * cellWidth, 0.5 * Math.sqrt(3.0) * cellWidth);
@@ -101,6 +105,14 @@ public class OccupancyMapRenderer extends AnimationTimer
          root.getChildren().add(footstepGraphMeshView);
       else if (!show.get() && !root.getChildren().isEmpty())
          root.getChildren().clear();
+
+      if(reset.getAndSet(false))
+      {
+         footstepGraphToRender.set(null);
+         footstepGraphMeshView.setMesh(null);
+         footstepGraphMeshView.setMaterial(null);
+         return;
+      }
 
       Pair<Mesh, Material> newMesh = footstepGraphToRender.get();
       if(newMesh != null)
