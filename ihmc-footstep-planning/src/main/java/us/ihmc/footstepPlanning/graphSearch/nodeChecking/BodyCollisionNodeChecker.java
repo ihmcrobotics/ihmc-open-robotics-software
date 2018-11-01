@@ -44,7 +44,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
    private final Vector3D bodyBoxDimensions = new Vector3D();
 
    private final FramePoint3D tempPoint = new FramePoint3D();
-   private final RigidBodyTransform tempTransform= new RigidBodyTransform();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public BodyCollisionNodeChecker(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper)
    {
@@ -54,14 +54,15 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       bodyCollisionBox = new Box3D();
       bodyCollisionBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
 
-      bodyCollisionFrame.updateTranslation(new Vector3D(parameters.getBodyBoxBaseX(), parameters.getBodyBoxBaseY(), parameters.getBodyBoxBaseZ() + 0.5 * parameters.getBodyBoxHeight()));
+      bodyCollisionFrame.updateTranslation(
+            new Vector3D(parameters.getBodyBoxBaseX(), parameters.getBodyBoxBaseY(), parameters.getBodyBoxBaseZ() + 0.5 * parameters.getBodyBoxHeight()));
    }
 
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
       super.setPlanarRegions(planarRegions);
-      if(!hasPlanarRegions())
+      if (!hasPlanarRegions())
          return;
 
       planarRegionPolytopes.clear();
