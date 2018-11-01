@@ -58,6 +58,7 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.*;
@@ -89,6 +90,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTypeTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
+import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.bollards;
 import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.corridor;
 import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.getTestData;
 
@@ -134,7 +136,7 @@ public abstract class RoughTerrainDataSetTest
 
    private RemoteUIMessageConverter messageConverter = null;
 
-   protected DomainFactory.PubSubImplementation pubSubImplementation;
+   protected DomainFactory.PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
 
    public abstract FootstepPlannerType getPlannerType();
 
@@ -194,6 +196,21 @@ public abstract class RoughTerrainDataSetTest
    public void setCheckForBodyBoxCollision(boolean checkForBodyBoxCollision)
    {
       this.checkForBodyBoxCollision = checkForBodyBoxCollision;
+   }
+
+   public void setBodyBoxDepth(double bodyBoxDepth)
+   {
+      this.bodyBoxDepth = bodyBoxDepth;
+   }
+
+   public void setBodyBoxWidth(double bodyBoxWidth)
+   {
+      this.bodyBoxWidth = bodyBoxWidth;
+   }
+
+   public void setBodyBoxOffsetX(double bodyBoxOffsetX)
+   {
+      this.bodyBoxOffsetX = bodyBoxOffsetX;
    }
 
 
@@ -271,11 +288,18 @@ public abstract class RoughTerrainDataSetTest
       return new TestRobotModel();
    }
 
-   @Test(timeout = 500000)
-   @ContinuousIntegrationTest(estimatedDuration = 13.0)
    public void testDownCorridor()
    {
       runAssertions(getTestData(corridor));
+   }
+
+   public void testBetweenTwoBollards()
+   {
+      setCheckForBodyBoxCollision(true);
+      setBodyBoxDepth(0.45);
+      setBodyBoxWidth(0.9);
+      setBodyBoxOffsetX(0.1);
+      runAssertions(getTestData(bollards));
    }
 
    public String runAssertions(PlannerTestData dataset)
