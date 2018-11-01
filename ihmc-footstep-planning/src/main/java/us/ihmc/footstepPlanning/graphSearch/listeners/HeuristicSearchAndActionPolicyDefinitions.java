@@ -1,10 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.listeners;
 
-import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.BodyCollisionNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 
@@ -55,7 +53,7 @@ public class HeuristicSearchAndActionPolicyDefinitions
 
       if (collisionNodeChecker.hasValue() && goalRecommendationListener.hasValue() && automaticallyRotate.get())
       {
-         BodyCollisionFreeSearchPolicy bodyCollisionFreeSearchPolicy = new BodyCollisionFreeSearchPolicy(collisionNodeChecker.get(), parameters.get());
+         CollisionEndStanceFreeSearchPolicy bodyCollisionFreeSearchPolicy = new CollisionEndStanceFreeSearchPolicy(collisionNodeChecker.get(), parameters.get());
          BodyCollisionListener bodyCollisionListener = new BodyCollisionListener();
 
          plannerGoalAdditionActionPolicy.addActionListener(goalRecommendationListener.get());
