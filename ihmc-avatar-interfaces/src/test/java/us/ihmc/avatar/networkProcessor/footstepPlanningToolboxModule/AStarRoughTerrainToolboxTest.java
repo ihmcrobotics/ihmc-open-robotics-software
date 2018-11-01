@@ -44,12 +44,22 @@ public class AStarRoughTerrainToolboxTest extends RoughTerrainDataSetTest
 
    public static void main(String[] args) throws Exception
    {
+      String testName = bollards;
       AStarRoughTerrainToolboxTest test = new AStarRoughTerrainToolboxTest();
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       VISUALIZE = true;
       test.setup();
       test.setCheckForBodyBoxCollision(true);
-      test.runAssertions(getTestData(corridor));
+
+      if (testName.equals(bollards))
+      {
+         test.setBodyBoxDepth(0.45);
+         test.setBodyBoxWidth(0.9);
+         test.setBodyBoxOffsetX(0.1);
+      }
+
+
+      test.runAssertions(getTestData(testName));
       PrintTools.info("Test passed.");
    }
 }
