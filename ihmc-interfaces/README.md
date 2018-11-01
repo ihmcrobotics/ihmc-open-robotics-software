@@ -101,8 +101,10 @@ Any python shebangs need to be of this form: `#!/usr/bin/env python3`. If you en
 
 2. Excluding some files from the tarball: There are many ways to do this, we're going to use an excludes file. `cd ..` to get out of the extracted ros1_bridge directory and make a file called `tar-excludes` with the following contents:
     
+    ```
     .egg-info
     SOURCES.txt
+    ```
     
 We'll pass this file in to the tar command and it will filter out the files we don't want.
 
