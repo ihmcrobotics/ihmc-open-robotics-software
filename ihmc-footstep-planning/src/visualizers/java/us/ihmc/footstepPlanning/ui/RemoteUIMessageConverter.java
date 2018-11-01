@@ -5,7 +5,9 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -65,6 +67,7 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Double> plannerHorizonLengthReference;
    private final AtomicReference<Boolean> acceptNewPlanarRegionsReference;
 
+   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
    private IHMCRealtimeROS2Publisher<PlanningStatisticsRequestMessage> plannerStatisticsRequestPublisher;
@@ -91,6 +94,7 @@ public class RemoteUIMessageConverter
       this.robotName = robotName;
       this.ros2Node = ros2Node;
 
+      PrintTools.info("Converter robot name " + robotName);
       plannerParametersReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerParametersTopic, null);
       plannerStartPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic);
       plannerStartOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion());
@@ -142,6 +146,8 @@ public class RemoteUIMessageConverter
       // publishers
       plannerParametersPublisher = ROS2Tools
             .createPublisher(ros2Node, FootstepPlannerParametersPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
+      toolboxStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, 
+                                                        FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
       footstepPlanningRequestPublisher = ROS2Tools
             .createPublisher(ros2Node, FootstepPlanningRequestPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
       plannerStatisticsRequestPublisher = ROS2Tools
@@ -264,11 +270,16 @@ public class RemoteUIMessageConverter
 
    private void requestNewPlan()
    {
+      toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
+      PrintTools.info("Told the toolbox to wake up.");;
+      
       FootstepPlannerParametersPacket packet = new FootstepPlannerParametersPacket();
       FootstepPlannerParameters parameters = plannerParametersReference.get();
 
       copyFootstepPlannerParametersToPacket(packet, parameters);
       plannerParametersPublisher.publish(packet);
+      
+      PrintTools.info("Sent out some parameters");;
 
       submitFootstepPlanningRequestPacket();
    }
@@ -361,6 +372,8 @@ public class RemoteUIMessageConverter
          packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get()));
 
       footstepPlanningRequestPublisher.publish(packet);
+      
+      PrintTools.info("Sent the new planning request.");
    }
 
    private static FootstepPlan convertToFootstepPlan(FootstepDataListMessage footstepDataListMessage)
