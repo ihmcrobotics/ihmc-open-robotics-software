@@ -8,6 +8,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pubsub.DomainFactory;
 
+import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.bollards;
 import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.corridor;
 import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.getTestData;
 
@@ -29,7 +30,17 @@ public class AStarRoughTerrainToolboxTest extends RoughTerrainDataSetTest
       super.testDownCorridor();
    }
 
-
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 2.5)
+   @Test(timeout = 1000000)
+   public void testBetweenTwoBollards()
+   {
+      setCheckForBodyBoxCollision(true);
+      setBodyBoxDepth(0.45);
+      setBodyBoxWidth(0.9);
+      setBodyBoxOffsetX(0.1);
+      super.testBetweenTwoBollards();
+   }
 
    public static void main(String[] args) throws Exception
    {
