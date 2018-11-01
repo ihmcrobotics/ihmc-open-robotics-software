@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<parameters>
+    <registry name="DRCControllerThread">
+        <registry name="DRCMomentumBasedController">
+            <registry name="HumanoidHighLevelControllerManager">
+                <registry name="HighLevelHumanoidControllerFactory">
+                    <registry name="HighLevelControlManagerFactory">
+                        <registry name="FeetManager">
+                            <registry name="leftFootControlModule">
+<parameter name="maxContactPointRate" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                            </registry>
+                            <registry name="rightFootControlModule">
+<parameter name="maxContactPointRate" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                            </registry>
+                        </registry>
+                    </registry>
+                    <registry name="RigidBodyGains">
+                        <parameter name="kpXYPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="kpZPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="90.0"/>
+                        <parameter name="kpXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="80.0"/>
+                        <parameter name="kpZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="80.0"/>
+                        <parameter name="zetaXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                        <parameter name="zetaZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                    </registry>
+                    <registry name="FootGains">
+                        <parameter name="kpXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="kpYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="kpZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="250.0"/>
+                        <parameter name="kpXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                        <parameter name="kpYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                        <parameter name="kpZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="150.0"/>
+                        <parameter name="zetaXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7"/>
+                        <parameter name="zetaYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7"/>
+                    </registry>
+                </registry>
+                <registry name="WalkingControllerState">
+                    <registry name="WalkingHighLevelHumanoidController">
+                        <registry name="ControllerCoreOptimizationSettings">
+                            <parameter name="RhoMin" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        </registry>
+                    </registry>
+                    <registry name="WalkingJointSettings">
+                        <parameter name="LoadedAnklePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0"/>
+                        <parameter name="LoadedAnkleRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0"/>
+                    </registry>
+                    <registry name="WholeBodyControllerCore">
+                        <registry name="WholeBodyFeedbackController">
+                            <registry name="FeedbackControllerToolbox">
+<parameter name="torsoErrorVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="16.0"/>
+                            </registry>
+                        </registry>
+                    </registry>
+                </registry>
+            </registry>
+        </registry>
+    </registry>
+</parameters>

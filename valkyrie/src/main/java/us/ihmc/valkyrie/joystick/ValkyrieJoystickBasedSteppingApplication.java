@@ -56,6 +56,7 @@ public class ValkyrieJoystickBasedSteppingApplication extends Application
    {
       super.stop();
       ui.stop();
+      ros2Node.destroy();
 
       Platform.exit();
    }

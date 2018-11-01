@@ -282,6 +282,9 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          swingDurationAlphas.get(i).setToNaN();
          transferDurationAlphas.get(i).setToNaN();
       }
+
+      finalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
+      finalTransferDurationAlpha.set(defaultTransferDurationAlpha.getDoubleValue());
    }
 
    /** {@inheritDoc} */

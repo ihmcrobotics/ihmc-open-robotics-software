@@ -28,9 +28,6 @@ public class ValkyrieFingerController implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final YoDouble time;
-   private final YoDouble trajectoryTime = new YoDouble("fingerTrajectoryTime", registry);
-   private final YoDouble thumbCloseDelay = new YoDouble("thumbCloseDelay", registry);
-   private final YoDouble fingerOpenDelay = new YoDouble("fingerOpenDelay", registry);
 
    private final SideDependentList<HandDesiredConfigurationMessageSubscriber> handDesiredConfigurationMessageSubscribers = new SideDependentList<>();
    private final SideDependentList<ValkyrieHandFingerTrajectoryMessageSubscriber> valkyrieHandFingerTrajectoryMessageSubscribers = new SideDependentList<>();
@@ -40,10 +37,6 @@ public class ValkyrieFingerController implements RobotController
                                    List<YoEffortJointHandleHolder> jointHandles, YoVariableRegistry parentRegistry)
    {
       time = yoTime;
-      trajectoryTime.set(5.0); // The fingers seem to be pretty slow, so kinda pointless reducing this one.
-      thumbCloseDelay.set(1.25); // Making sure the thumb does not crush the finger when closing.
-      fingerOpenDelay.set(0.25); // Assuming the thumb is over the fingers, probably better to start opening it first.
-
       YoPIDGains gains = new YoPIDGains("Hand", registry);
       gains.setKp(7.0);
       gains.setKi(3.0);
@@ -71,8 +64,8 @@ public class ValkyrieFingerController implements RobotController
 
          if (!jointHandleEnumMap.isEmpty())
          {
-            ValkyrieFingerSetController controller = new ValkyrieFingerSetController(robotSide, time, controlDT, fingerStateEstimator, gains, trajectoryTime,
-                                                                                     thumbCloseDelay, fingerOpenDelay, jointHandleEnumMap, registry);
+            ValkyrieFingerSetController controller = new ValkyrieFingerSetController(robotSide, time, controlDT, fingerStateEstimator, gains, jointHandleEnumMap,
+                                                                                     registry);
             fingerSetControllers.put(robotSide, controller);
          }
       }

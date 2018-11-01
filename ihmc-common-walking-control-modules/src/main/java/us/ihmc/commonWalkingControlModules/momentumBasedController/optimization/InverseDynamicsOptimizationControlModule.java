@@ -263,11 +263,13 @@ public class InverseDynamicsOptimizationControlModule
 
       DenseMatrix64F copRegularizationWeight = wrenchMatrixCalculator.getCoPRegularizationWeight();
       DenseMatrix64F copRegularizationJacobian = wrenchMatrixCalculator.getCoPRegularizationJacobian();
-      qpSolver.addRhoTask(copRegularizationJacobian, zeroObjective, copRegularizationWeight);
+      DenseMatrix64F coPRegularizationObjective = wrenchMatrixCalculator.getCoPRegularizationObjective();
+      qpSolver.addRhoTask(copRegularizationJacobian, coPRegularizationObjective, copRegularizationWeight);
 
       DenseMatrix64F copRateRegularizationWeight = wrenchMatrixCalculator.getCoPRateRegularizationWeight();
       DenseMatrix64F copRateRegularizationJacobian = wrenchMatrixCalculator.getCoPRateRegularizationJacobian();
-      qpSolver.addRhoTask(copRateRegularizationJacobian, zeroObjective, copRateRegularizationWeight);
+      DenseMatrix64F copRateRegularizationObjective = wrenchMatrixCalculator.getCoPRateRegularizationObjective();
+      qpSolver.addRhoTask(copRateRegularizationJacobian, copRateRegularizationObjective, copRateRegularizationWeight);
 
       // The wrench matrix calculator holds on to the command until all inverse dynamics commands are received since the
       // contact state may yet change and the rho Jacobians need to be computed for these inputs.
