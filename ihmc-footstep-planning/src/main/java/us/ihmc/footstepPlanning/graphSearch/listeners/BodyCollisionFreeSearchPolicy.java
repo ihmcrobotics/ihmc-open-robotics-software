@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.BodyCollisionNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,12 +28,14 @@ public class BodyCollisionFreeSearchPolicy implements PlannerHeuristicNodeSearch
    private final AtomicReference<FootstepNode> validNode = new AtomicReference<>();
    private final AtomicReference<FootstepNode> parentOfValidNode = new AtomicReference<>();
 
+   private final FootstepPlannerParameters parameters;
    private final BodyCollisionNodeChecker collisionNodeChecker;
    private double currentRotation = 0.0;
 
-   public BodyCollisionFreeSearchPolicy(BodyCollisionNodeChecker collisionNodeChecker)
+   public BodyCollisionFreeSearchPolicy(BodyCollisionNodeChecker collisionNodeChecker, FootstepPlannerParameters parameters)
    {
       this.collisionNodeChecker = collisionNodeChecker;
+      this.parameters = parameters;
    }
 
    @Override
@@ -84,7 +87,7 @@ public class BodyCollisionFreeSearchPolicy implements PlannerHeuristicNodeSearch
       {
          currentRotation += rotationIncrement;
          newNode = new FootstepNode(rejectedNode.getX(), rejectedNode.getY(), rejectedNode.getYaw() + currentRotation, rejectedNode.getRobotSide());
-         newNodeIsValid = collisionNodeChecker.isNodeValidInternal(newNode, parentNode);
+         newNodeIsValid = collisionNodeChecker.isNodeValidInternal(newNode, parentNode, 1.0);
       }
 
       if (newNodeIsValid && Math.abs(currentRotation) > minimumRotation)
@@ -99,7 +102,7 @@ public class BodyCollisionFreeSearchPolicy implements PlannerHeuristicNodeSearch
       {
          currentRotation -= rotationIncrement;
          newNode = new FootstepNode(rejectedNode.getX(), rejectedNode.getY(), rejectedNode.getYaw() + currentRotation, rejectedNode.getRobotSide());
-         newNodeIsValid = collisionNodeChecker.isNodeValidInternal(newNode, parentNode);
+         newNodeIsValid = collisionNodeChecker.isNodeValidInternal(newNode, parentNode, 1.0);
       }
 
       if (newNodeIsValid && Math.abs(currentRotation) > minimumRotation)

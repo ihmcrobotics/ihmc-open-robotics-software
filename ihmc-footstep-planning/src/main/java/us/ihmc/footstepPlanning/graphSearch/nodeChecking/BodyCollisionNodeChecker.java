@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -93,7 +94,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
          return true;
       }
 
-      if (!isNodeValidInternal(node, previousNode))
+      if (!isNodeValidInternal(node, previousNode, 1.0))
       {
          rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
          return false;
@@ -108,7 +109,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
 
    }
 
-   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
+   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode, double scaleFactor)
    {
       if (!findMidStanceFrame(node, previousNode))
          return true;
@@ -123,6 +124,8 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
          return true;
 
       bodyCollisionBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
+      if (!MathTools.epsilonEquals(1.0, scaleFactor, 1e-5))
+         bodyCollisionBox.scale(scaleFactor);
       bodyBoxDimensions.set(parameters.getBodyBoxBaseX(), parameters.getBodyBoxBaseY(), parameters.getBodyBoxBaseZ() + 0.5 * parameters.getBodyBoxHeight());
       bodyCollisionFrame.updateTranslation(bodyBoxDimensions);
       bodyCollisionPolytope.getVertices().clear();
