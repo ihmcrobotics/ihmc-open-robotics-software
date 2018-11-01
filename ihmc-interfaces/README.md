@@ -100,8 +100,10 @@ First let's `cd ihmc_ros1_bridge`.
 Any python shebangs need to be of this form: `#!/usr/bin/env python3`. If you encounter any Python shebangs that are NOT of that form, you need to modify those files in the `install` space.
 
 2. Excluding some files from the tarball: There are many ways to do this, we're going to use an excludes file. `cd ..` to get out of the extracted ros1_bridge directory and make a file called `tar-excludes` with the following contents:
+    
     .egg-info
     SOURCES.txt
+    
 We'll pass this file in to the tar command and it will filter out the files we don't want.
 
 #### 5. Making the tarball
