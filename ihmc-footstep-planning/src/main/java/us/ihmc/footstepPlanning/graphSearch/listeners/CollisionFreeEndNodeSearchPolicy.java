@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class BodyCollisionFreeSearchPolicy implements PlannerHeuristicNodeSearchPolicy, StartAndGoalListener
+public class CollisionFreeEndNodeSearchPolicy implements PlannerHeuristicNodeSearchPolicy, StartAndGoalListener
 {
    private final static double distanceFromStartToConsiderSearching = 1.0;
    private final static double distanceFromGoalToConsiderSearching = 1.0;
@@ -32,7 +32,7 @@ public class BodyCollisionFreeSearchPolicy implements PlannerHeuristicNodeSearch
    private final BodyCollisionNodeChecker collisionNodeChecker;
    private double currentRotation = 0.0;
 
-   public BodyCollisionFreeSearchPolicy(BodyCollisionNodeChecker collisionNodeChecker, FootstepPlannerParameters parameters)
+   public CollisionFreeEndNodeSearchPolicy(BodyCollisionNodeChecker collisionNodeChecker, FootstepPlannerParameters parameters)
    {
       this.collisionNodeChecker = collisionNodeChecker;
       this.parameters = parameters;
