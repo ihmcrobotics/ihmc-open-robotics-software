@@ -16,7 +16,7 @@ import java.util.Map;
 public class PlannerGoalRecommendationHandler
 {
    private static final boolean debug = false;
-   private static final boolean reinitializeOnGoalChange = false;
+   private static final boolean reinitializeOnGoalChange = true;
 
    private final ConcurrentList<FootstepPlanningStage> allPlanningStages;
    private final ConcurrentMap<FootstepPlanningStage, FootstepPlannerObjective> stepPlanningStagesInProgress;
@@ -30,7 +30,7 @@ public class PlannerGoalRecommendationHandler
       this.stepPlanningStagesInProgress = stepPlanningStagesInProgress;
    }
 
-   public void notifyWithPlannerGoalRecommendation(FootstepPlannerGoal newIntermediateGoal, int stageId)
+   public void notifyWithPlannerGoalRecommendation(FootstepPlannerGoal newIntermediateGoal, RobotSide lastStepSide, int stageId)
    {
       FootstepPlanningStage currentPlanningStage = allPlanningStages.getCopyForReading().get(stageId);
 
@@ -50,17 +50,19 @@ public class PlannerGoalRecommendationHandler
 
       newIntermediateGoal.getDoubleFootstepGoal().get(RobotSide.LEFT).getSoleFramePose(newLeftFootPoseGoal);
       newIntermediateGoal.getDoubleFootstepGoal().get(RobotSide.RIGHT).getSoleFramePose(newRightFootPoseGoal);
+
       newMidstancePoseGoal.interpolate(newLeftFootPoseGoal, newRightFootPoseGoal, 0.5);
 
       double currentPlanningDistance = currentPlanningObjective.getInitialStanceFootPose().getPositionDistance(newMidstancePoseGoal);
       double remainingHorizonLength = Math.max(0.0, currentPlanningObjective.getHorizonLength() - currentPlanningDistance);
 
-      RobotSide newInitialSide = RobotSide.LEFT;
+      RobotSide newInitialSide = lastStepSide.getOppositeSide();
+      FramePose3D newInitialPose = newInitialSide.equals(RobotSide.LEFT) ? newLeftFootPoseGoal : newRightFootPoseGoal;
 
       newFinalPlanningObjective.setTimeout(currentPlanningObjective.getTimeout());
       newFinalPlanningObjective.setHorizonLength(remainingHorizonLength);
       newFinalPlanningObjective.setGoal(newFinalPlanningGoal);
-      newFinalPlanningObjective.setInitialStanceFootPose(newLeftFootPoseGoal);
+      newFinalPlanningObjective.setInitialStanceFootPose(newInitialPose);
       newFinalPlanningObjective.setInitialStanceFootSide(newInitialSide);
 
       List<FootstepPlannerObjective> currentObjectives = footstepPlannerObjectives.getCopyForReading();
@@ -74,7 +76,9 @@ public class PlannerGoalRecommendationHandler
       currentPlanningObjective.setGoal(newIntermediateGoal);
 
       if (reinitializeOnGoalChange)
+      {
          currentPlanningStage.requestInitialize();
+      }
       currentPlanningStage.setGoalUnsafe(newIntermediateGoal);
 
       if (debug)
