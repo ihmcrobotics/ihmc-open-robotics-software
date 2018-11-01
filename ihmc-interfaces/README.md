@@ -96,7 +96,7 @@ The cleanup process is pretty straight forward; we need to rewrite some Python s
 
 First let's `cd ihmc_ros1_bridge`.
 
-1. Cleaning up shebangs: What we're doing here is looking for python 3 shebangs and tidying them up. One way to do this is to grep for all shebangs in the `install` space: `sudo grep -iR \#\! install/`.
+1. Cleaning up shebangs: What we're doing here is looking for python 3 shebangs and tidying them up. One way to do this is to grep for all shebangs in the `install` space: `grep -iR \#\! install/`.
 Any python shebangs need to be of this form: `#!/usr/bin/env python3`. If you encounter any Python shebangs that are NOT of that form, you need to modify those files in the `install` space.
 
 2. Excluding some files from the tarball: There are many ways to do this, we're going to use an excludes file. `cd ..` to get out of the extracted ros1_bridge directory and make a file called `tar-excludes` with the following contents:
