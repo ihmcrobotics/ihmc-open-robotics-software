@@ -531,16 +531,20 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       PairList<Integer, FootstepPlan> completedStepPlans = this.completedStepPlans.getCopyForReading();
       completedStepPlans.sort(Comparator.comparingInt(ImmutablePair<Integer, FootstepPlan>::getLeft));
 
+      int firstPlan = Integer.MAX_VALUE;
       FootstepPlan totalFootstepPlan = new FootstepPlan();
       for (ImmutablePair<Integer, FootstepPlan> footstepPlanPairs : completedStepPlans)
       {
          FootstepPlan footstepPlan = footstepPlanPairs.getRight();
+         int number = footstepPlanPairs.getLeft();
 
-         if (footstepPlan.hasLowLevelPlanGoal())
+         if (footstepPlan.hasLowLevelPlanGoal() && number < firstPlan)
+         {
             totalFootstepPlan.setLowLevelPlanGoal(footstepPlan.getLowLevelPlanGoal());
+            firstPlan = number;
+         }
 
-         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
-            totalFootstepPlan.addFootstep(footstepPlan.getFootstep(i));
+         totalFootstepPlan.addFootstepPlan(footstepPlan);
       }
 
       footstepPlan.set(totalFootstepPlan);

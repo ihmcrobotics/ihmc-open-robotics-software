@@ -41,6 +41,11 @@ public class FootstepPlan
       footsteps.add(footstep);
    }
 
+   public void addFootstepPlan(FootstepPlan other)
+   {
+      footsteps.addAll(other.footsteps);
+   }
+
    public SimpleFootstep addFootstep(RobotSide robotSide, FramePose3D soleFramePose)
    {
       SimpleFootstep simpleFootstep = new SimpleFootstep(robotSide, soleFramePose);
