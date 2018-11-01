@@ -38,7 +38,7 @@ public class FootstepPlannerUI
    private final FootPositionEditor footPositionEditor;
    private final StartGoalPositionViewer startGoalPositionViewer;
    private final StartGoalOrientationViewer startGoalOrientationViewer;
-   private final FootstepPathRenderer pathRenderer;
+   private final FootstepPathMeshViewer pathViewer;
    private final StartGoalOrientationEditor orientationEditor;
    private final NodeCheckerRenderer nodeCheckerRenderer;
    private final FootstepPlannerDataExporter dataExporter;
@@ -124,7 +124,7 @@ public class FootstepPlannerUI
                                                          StartPositionTopic, GoalPositionTopic);
       this.footPositionEditor = new FootPositionEditor(messager, subScene);
       this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
-      this.pathRenderer = new FootstepPathRenderer(messager);
+      this.pathViewer = new FootstepPathMeshViewer(messager);
       this.nodeCheckerRenderer = new NodeCheckerRenderer(messager);
       this.dataExporter = new FootstepPlannerDataExporter(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
@@ -134,7 +134,7 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
-      view3dFactory.addNodeToView(pathRenderer.getRoot());
+      view3dFactory.addNodeToView(pathViewer.getRoot());
       view3dFactory.addNodeToView(nodeCheckerRenderer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
@@ -145,7 +145,7 @@ public class FootstepPlannerUI
       startGoalOrientationViewer.start();
       startGoalEditor.start();
       orientationEditor.start();
-      pathRenderer.start();
+      pathViewer.start();
       nodeCheckerRenderer.start();
       footPositionEditor.start();
       bodyPathMeshViewer.start();
@@ -178,7 +178,7 @@ public class FootstepPlannerUI
       startGoalOrientationViewer.stop();
       startGoalEditor.stop();
       orientationEditor.stop();
-      pathRenderer.stop();
+      pathViewer.stop();
       nodeCheckerRenderer.stop();
       dataExporter.stop();
       bodyPathMeshViewer.stop();
