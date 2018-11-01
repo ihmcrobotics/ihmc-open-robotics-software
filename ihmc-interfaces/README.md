@@ -61,7 +61,7 @@ Building the ROS 1 Bridge starts with using the Linux Dockerfile, as building th
 A `docker build` will create an image that can be started which has a valid bridge inside of it; these instructions outline the procedures for extracting the installed software from a running container of the image and creating a portable ROS 2 package out of the install space.
 Because this is being done based on a Linux-based image we recommend doing the following on a Linux host as well; the instructions below will assume that and be using a lot of \*NIX command line tools to set up the deliverable package.
 
-Note that the Linux Dockerfile does not use the symlink install scheme from colcon; this is required for the built workspace to be portable.
+Note that the Linux Dockerfile does not use the symlink install scheme from ament; this is required for the built workspace to be portable.
 
 #### 1. Build the image
 
