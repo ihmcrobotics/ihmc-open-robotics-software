@@ -78,7 +78,7 @@ If you used the command above you should have a tagged image for the Ardent ROS 
 
     $ docker run --name ros1_bridge -it ihmc_ros1_bridge:ardent
     
-Because the image doesn't have a proper entrypoint for a long-running process, this will start a container with a shell attached to it; you'll need to leave this terminal alone while completing the process so the image stays running while you extract the software.
+Because the image doesn't have a proper entrypoint for a long-running process, this will start a container with a shell attached to it; you'll need to leave this terminal alone while completing the process so the image stays running while you extract the software. The rest of this process will be done from an additional terminal on the host system (not attached to the Docker container)
 
 #### 3. Extract the installed software from the running image
 
