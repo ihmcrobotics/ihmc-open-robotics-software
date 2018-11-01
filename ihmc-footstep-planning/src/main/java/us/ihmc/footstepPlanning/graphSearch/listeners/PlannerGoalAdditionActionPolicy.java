@@ -83,6 +83,7 @@ public class PlannerGoalAdditionActionPolicy implements PlannerHeuristicNodeActi
       newPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.DOUBLE_FOOTSTEP);
       newPlannerGoal.setDoubleFootstepGoal(doubleFootstepGoal);
 
-      plannerGoalRecommendationListener.parallelStream().forEach(plannerListener -> plannerListener.notifyWithPlannerGoalRecommendation(newPlannerGoal));
+      for (PlannerGoalRecommendationListener listener : plannerGoalRecommendationListener)
+         listener.notifyWithPlannerGoalRecommendation(newPlannerGoal, newValidNode.getRobotSide().getOppositeSide());
    }
 }

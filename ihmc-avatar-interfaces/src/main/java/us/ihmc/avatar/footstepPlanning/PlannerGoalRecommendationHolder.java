@@ -2,6 +2,7 @@ package us.ihmc.avatar.footstepPlanning;
 
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.graphSearch.listeners.PlannerGoalRecommendationListener;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class PlannerGoalRecommendationHolder implements PlannerGoalRecommendationListener
 {
@@ -19,8 +20,8 @@ public class PlannerGoalRecommendationHolder implements PlannerGoalRecommendatio
    }
 
    @Override
-   public void notifyWithPlannerGoalRecommendation(FootstepPlannerGoal footstepPlannerGoal)
+   public void notifyWithPlannerGoalRecommendation(FootstepPlannerGoal footstepPlannerGoal, RobotSide lastStepSide)
    {
-      goalHandler.notifyWithPlannerGoalRecommendation(footstepPlannerGoal, stageId);
+      goalHandler.notifyWithPlannerGoalRecommendation(footstepPlannerGoal, lastStepSide, stageId);
    }
 }
