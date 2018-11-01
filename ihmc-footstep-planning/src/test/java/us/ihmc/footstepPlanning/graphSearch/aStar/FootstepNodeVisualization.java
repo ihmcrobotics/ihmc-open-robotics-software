@@ -165,7 +165,12 @@ public class FootstepNodeVisualization implements BipedalFootstepPlannerListener
    }
 
    @Override
-   public void planWasFound(List<FootstepNode> plan)
+   public void plannerFinished(List<FootstepNode> plan)
+   {
+   }
+
+   @Override
+   public void reportLowestCostNodeList(List<FootstepNode> plan)
    {
    }
 

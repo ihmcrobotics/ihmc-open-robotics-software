@@ -20,7 +20,7 @@ public class RosBasedPlannerListener extends MessageBasedPlannerListener
    }
 
    @Override
-   void broadcastNodeDataList(FootstepNodeDataListMessage message)
+   void broadcastNodeData(FootstepNodeDataListMessage message)
    {
       nodeDataListPublisher.publish(message);
    }
