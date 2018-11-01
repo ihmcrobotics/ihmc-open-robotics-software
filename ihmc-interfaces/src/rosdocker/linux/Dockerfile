@@ -53,7 +53,7 @@ RUN /bin/bash -c "source /opt/ros/$ROS2_DISTRO/setup.bash \
                && source /root/ihmc_ros1_bridge/install/local_setup.bash \
                && source /opt/ros/kinetic/setup.bash \
                && source /root/ihmc_catkin_ws/install/setup.bash \
-               && ament build --only ros1_bridge --force-cmake-configure --cmake-args -DCMAKE_BUILD_TYPE=Debug"
+               && ament build --only ros1_bridge --force-cmake-configure"
 
 #COPY ./runtime_entrypoint.sh /
 
