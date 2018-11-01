@@ -55,7 +55,7 @@ public class HeuristicSearchAndActionPolicyDefinitions
 
       if (collisionNodeChecker.hasValue() && goalRecommendationListener.hasValue() && automaticallyRotate.get())
       {
-         BodyCollisionFreeSearchPolicy bodyCollisionFreeSearchPolicy = new BodyCollisionFreeSearchPolicy(collisionNodeChecker.get());
+         BodyCollisionFreeSearchPolicy bodyCollisionFreeSearchPolicy = new BodyCollisionFreeSearchPolicy(collisionNodeChecker.get(), parameters.get());
          BodyCollisionListener bodyCollisionListener = new BodyCollisionListener();
 
          plannerGoalAdditionActionPolicy.addActionListener(goalRecommendationListener.get());
