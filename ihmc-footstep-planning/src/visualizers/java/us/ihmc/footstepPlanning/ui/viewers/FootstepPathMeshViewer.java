@@ -17,6 +17,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.idl.IDLSequence;
@@ -43,6 +44,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private final AtomicReference<Boolean> showSolution;
    private final AtomicReference<Boolean> showIntermediatePlan;
    private final AtomicBoolean solutionWasReceived = new AtomicBoolean(false);
+   private final AtomicBoolean reset = new AtomicBoolean(false);
 
    private final MeshView footstepPathMeshView = new MeshView();
    private final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
@@ -65,6 +67,9 @@ public class FootstepPathMeshViewer extends AnimationTimer
                                                                                           solutionWasReceived.set(false);
                                                                                           processLowestCostNodeList(nodeData);
                                                                                        }));
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, data -> reset.set(true));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
 
       showSolution = messager.createInput(ShowFootstepPlanTopic, true);
       showIntermediatePlan = messager.createInput(ShowNodeDataTopic, true);
@@ -139,7 +144,6 @@ public class FootstepPathMeshViewer extends AnimationTimer
    @Override
    public void handle(long now)
    {
-      Pair<Mesh, Material> newMeshAndMaterial = meshReference.getAndSet(null);
       boolean addIntermediatePlan = showIntermediatePlan.get() && !solutionWasReceived.get() && root.getChildren().isEmpty();
       boolean addFinalPlan = showSolution.get() && solutionWasReceived.get() && root.getChildren().isEmpty();
       if(addIntermediatePlan || addFinalPlan)
@@ -150,6 +154,15 @@ public class FootstepPathMeshViewer extends AnimationTimer
       if(removeIntermediatePlan || removeFinalPlan)
          root.getChildren().clear();
 
+      if(reset.getAndSet(false))
+      {
+         footstepPathMeshView.setMesh(null);
+         footstepPathMeshView.setMaterial(null);
+         meshReference.set(null);
+         return;
+      }
+
+      Pair<Mesh, Material> newMeshAndMaterial = meshReference.getAndSet(null);
       if (newMeshAndMaterial != null)
       {
          footstepPathMeshView.setMesh(newMeshAndMaterial.getKey());
