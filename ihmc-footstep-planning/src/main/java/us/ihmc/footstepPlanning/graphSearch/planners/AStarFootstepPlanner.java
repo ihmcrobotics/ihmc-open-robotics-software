@@ -157,7 +157,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       FootstepPlanningResult result = checkResult();
 
       if(result.validForExecution() && listener != null)
-         listener.planWasFound(null);
+         listener.plannerFinished(null);
 
       if (debug)
       {
@@ -283,7 +283,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
             double cost = stepCostCalculator.compute(nodeToExpand, neighbor);
             graph.checkAndSetEdge(nodeToExpand, neighbor, cost);
 
-            if(endNode == null || stack.comparator().compare(neighbor, endNode) < 0)
+            if(!parameters.getReturnBestEffortPlan() || endNode == null || stack.comparator().compare(neighbor, endNode) < 0)
                stack.add(neighbor);
          }
 
@@ -320,7 +320,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    private void checkAndHandleBestEffortNode(FootstepNode nodeToExpand)
    {
-      if(!parameters.getReturnBestEffortPlan())
+      if(!parameters.getReturnBestEffortPlan() && listener == null)
          return;
 
       if(graph.getPathFromStart(nodeToExpand).size() - 1 < parameters.getMinimumStepsForBestEffortPlan())
@@ -328,6 +328,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       if(endNode == null || heuristics.compute(nodeToExpand, goalNodes.get(nodeToExpand.getRobotSide())) < heuristics.compute(endNode, goalNodes.get(endNode.getRobotSide())))
       {
+         if(listener != null)
+            listener.reportLowestCostNodeList(graph.getPathFromStart(nodeToExpand));
          endNode = nodeToExpand;
       }
   }

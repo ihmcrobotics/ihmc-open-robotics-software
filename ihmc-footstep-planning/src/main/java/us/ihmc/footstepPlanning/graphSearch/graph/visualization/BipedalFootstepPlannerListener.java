@@ -10,7 +10,9 @@ public interface BipedalFootstepPlannerListener
 
    void rejectNode(FootstepNode rejectedNode, BipedalFootstepPlannerNodeRejectionReason reason);
 
-   void planWasFound(List<FootstepNode> plan);
+   void plannerFinished(List<FootstepNode> plan);
+
+   void reportLowestCostNodeList(List<FootstepNode> plan);
 
    void tickAndUpdate();
 }

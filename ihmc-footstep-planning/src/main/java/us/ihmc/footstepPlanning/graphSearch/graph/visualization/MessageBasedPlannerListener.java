@@ -22,6 +22,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    private final HashMap<FootstepNode, BipedalFootstepPlannerNodeRejectionReason> rejectionReasons = new HashMap<>();
    private final HashMap<FootstepNode, List<FootstepNode>> childMap = new HashMap<>();
    private final HashSet<PlannerCell> exploredCells = new HashSet<>();
+   private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
 
    private final FootstepNodeDataListMessage nodeDataListMessage = new FootstepNodeDataListMessage();
    private final FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
@@ -46,12 +47,20 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
          rejectionReasons.clear();
          childMap.clear();
          exploredCells.clear();
+         lowestCostPlan.clear();
       }
       else
       {
          childMap.computeIfAbsent(previousNode, n -> new ArrayList<>()).add(node);
          exploredCells.add(new PlannerCell(node.getXIndex(), node.getYIndex()));
       }
+   }
+
+   @Override
+   public void reportLowestCostNodeList(List<FootstepNode> plan)
+   {
+      lowestCostPlan.clear();
+      lowestCostPlan.addAll(plan);
    }
 
    @Override
@@ -72,23 +81,27 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       {
          packOccupancyMapMessage();
          broadcastOccupancyMap(occupancyMapMessage);
+
+         if(packLowestCostPlanMessage())
+            broadcastNodeData(nodeDataListMessage);
+
          lastBroadcastTime = currentTime;
       }
    }
 
    @Override
-   public void planWasFound(List<FootstepNode> plan)
+   public void plannerFinished(List<FootstepNode> plan)
    {
       packOccupancyMapMessage();
       broadcastOccupancyMap(occupancyMapMessage);
 
-//      packNodeDataListMessage();
+//      packFullFootstepGraph();
 //      broadcastNodeDataList(nodeDataListMessage);
    }
 
    abstract void broadcastOccupancyMap(FootstepPlannerOccupancyMapMessage occupancyMapMessage);
 
-   abstract void broadcastNodeDataList(FootstepNodeDataListMessage nodeDataListMessage);
+   abstract void broadcastNodeData(FootstepNodeDataListMessage nodeDataListMessage);
 
    private void packOccupancyMapMessage()
    {
@@ -103,11 +116,31 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       }
    }
 
-   private void packNodeDataListMessage()
+   private boolean packLowestCostPlanMessage()
+   {
+      if(lowestCostPlan.isEmpty())
+         return false;
+
+      Object<FootstepNodeDataMessage> nodeDataList = nodeDataListMessage.getNodeData();
+      nodeDataList.clear();
+      for (int i = 0; i < lowestCostPlan.size(); i++)
+      {
+         FootstepNode node = lowestCostPlan.get(i);
+         FootstepNodeDataMessage nodeDataMessage = nodeDataList.add();
+         setNodeDataMessage(nodeDataMessage, node, -1);
+      }
+
+      nodeDataListMessage.setIsFootstepGraph(false);
+      lowestCostPlan.clear();
+      return true;
+   }
+
+   private void packFullFootstepGraph()
    {
       Object<FootstepNodeDataMessage> nodeDataList = nodeDataListMessage.getNodeData();
       nodeDataList.clear();
       packNodeDataRecursively(nodeDataList, startNode, -1);
+      nodeDataListMessage.setIsFootstepGraph(true);
    }
 
    private void packNodeDataRecursively(Object<FootstepNodeDataMessage> nodeDataList, FootstepNode nodeToAdd, int parentNodeIndex)

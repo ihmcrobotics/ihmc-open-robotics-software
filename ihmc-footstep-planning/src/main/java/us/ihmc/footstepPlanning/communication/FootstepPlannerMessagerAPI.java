@@ -137,7 +137,6 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<Boolean> ShowNavigableRegionVisibilityMaps = Root.child(VisibilityGraphs).child(Map).topic(Show);
    public static final Topic<FootstepNodeDataListMessage> NodeDataTopic = Root.child(PlannerData).topic(NodeData);
-   public static final Topic<Boolean> ShowNodeData = Root.child(PlannerData).topic(Show);
    public static final Topic<FootstepPlannerOccupancyMapMessage> OccupancyMapTopic = Root.child(OccupancyMap).topic(OccupancyMapData);
    public static final Topic<Boolean> ShowOccupancyMap = Root.child(OccupancyMap).topic(Show);
 
