@@ -21,6 +21,10 @@ public interface FootstepPlanner
          setGoal(info.getGoal());
    }
 
+   default void requestInitialize()
+   {
+   }
+
    /**
     * Set the initial stance side and the pose of the initial stance foot for planning.
     * @param stanceFootPose      Pose of the sole frame of the initial stance foot

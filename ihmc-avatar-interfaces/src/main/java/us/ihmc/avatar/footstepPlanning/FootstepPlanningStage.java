@@ -278,6 +278,7 @@ public class FootstepPlanningStage implements FootstepPlanner
    public void requestInitialize()
    {
       initialize.set(true);
+      getPlanner().requestInitialize();
    }
 
    public void update()
