@@ -318,7 +318,7 @@ public class FootstepPathCalculatorModule
       FootstepPlannerParameters parameters = this.parameters.get();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
-      FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
+      FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(parameters, snapper);
@@ -349,8 +349,8 @@ public class FootstepPathCalculatorModule
 
    private FootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, YoVariableRegistry registry)
    {
-      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, parameters.get(), null);
-      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, null, parameters.get());
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, parameters.get());
+      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, parameters.get());
       ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
 
       DepthFirstFootstepPlanner footstepPlanner = new DepthFirstFootstepPlanner(parameters.get(), snapper, nodeChecker, stepCostCalculator, registry);

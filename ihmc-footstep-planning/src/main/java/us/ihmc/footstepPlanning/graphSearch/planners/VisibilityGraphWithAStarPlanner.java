@@ -105,7 +105,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
-      FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
+      FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);

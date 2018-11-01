@@ -179,7 +179,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters());
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlannerTools.createDefaultFootPolygons();
 
-      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, parameters, null);
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, parameters);
       SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygonsInSoleFrame, snapper);
       ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
 

@@ -359,7 +359,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
                                                     YoVariableRegistry registry)
    {
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
-      FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
+      FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(parameters, snapper);
@@ -368,6 +368,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getAStarHeuristicsWeight(), parameters);
 
       FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
+      nodeChecker.addPlannerListener(listener);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
