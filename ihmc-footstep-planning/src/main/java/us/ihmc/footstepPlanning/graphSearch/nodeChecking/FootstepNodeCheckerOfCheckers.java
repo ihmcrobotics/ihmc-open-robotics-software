@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.List;
@@ -16,17 +17,23 @@ public class FootstepNodeCheckerOfCheckers extends FootstepNodeChecker
    }
 
    @Override
-   public void setPlanarRegions(PlanarRegionsList planarRegions)
+   public void addPlannerListener(BipedalFootstepPlannerListener listener)
    {
-      nodeCheckers.forEach((checker) -> checker.setPlanarRegions(planarRegions));
+      nodeCheckers.forEach(checker -> checker.addPlannerListener(listener));
    }
 
    @Override
-   public boolean isNodeValid(FootstepNode node, FootstepNode previosNode)
+   public void setPlanarRegions(PlanarRegionsList planarRegions)
+   {
+      nodeCheckers.forEach(checker -> checker.setPlanarRegions(planarRegions));
+   }
+
+   @Override
+   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
       for(FootstepNodeChecker checker : nodeCheckers)
       {
-         if(!checker.isNodeValid(node, previosNode))
+         if(!checker.isNodeValid(node, previousNode))
             return false;
       }
       return true;

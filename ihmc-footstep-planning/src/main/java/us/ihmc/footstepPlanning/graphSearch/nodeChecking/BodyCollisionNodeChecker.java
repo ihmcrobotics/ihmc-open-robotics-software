@@ -42,9 +42,6 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
    private final FootstepNodeSnapper snapper;
    private final Vector3D bodyBoxDimensions = new Vector3D();
 
-   private BipedalFootstepPlannerListener listener;
-
-
    public BodyCollisionNodeChecker(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper)
    {
       this.parameters = parameters;
@@ -55,12 +52,6 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
 
       bodyCollisionFrame.updateTranslation(new Vector3D(parameters.getBodyBoxBaseX(), parameters.getBodyBoxBaseY(), parameters.getBodyBoxBaseZ() + 0.5 * parameters.getBodyBoxHeight()));
    }
-
-   public void addPlannerListener(BipedalFootstepPlannerListener listener)
-   {
-      this.listener = listener;
-   }
-
 
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final RigidBodyTransform tempTransform= new RigidBodyTransform();
@@ -130,7 +121,7 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
          ConvexPolytope planarRegionPolytope = planarRegionPolytopes.get(planarRegion);
          if (collisionDetector.arePolytopesColliding(bodyCollisionPolytope, planarRegionPolytope, pointToThrowAway1, pointToThrowAway2))
          {
-            notifyPlannerListenerThatNodeIsRejected(node, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
+            rejectNode(node, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
             return false;
          }
       }
@@ -190,11 +181,5 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       midPoint.interpolate(projectedPoint, previousProjectedPoint, 0.5);
 
       return midPoint;
-   }
-
-   private void notifyPlannerListenerThatNodeIsRejected(FootstepNode node, BipedalFootstepPlannerNodeRejectionReason rejectionReason)
-   {
-      if(listener != null)
-         listener.rejectNode(node, rejectionReason);
    }
 }
