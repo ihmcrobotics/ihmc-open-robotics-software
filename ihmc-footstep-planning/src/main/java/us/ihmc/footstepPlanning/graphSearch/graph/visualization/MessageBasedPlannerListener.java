@@ -30,8 +30,6 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    private final long occupancyMapBroadcastDt;
    private long lastBroadcastTime = -1;
 
-   private FootstepNode startNode;
-
    public MessageBasedPlannerListener(FootstepNodeSnapperReadOnly snapper, long occupancyMapBroadcastDt)
    {
       this.snapper = snapper;
@@ -43,7 +41,6 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    {
       if(previousNode == null)
       {
-         startNode = node;
          rejectionReasons.clear();
          childMap.clear();
          exploredCells.clear();
@@ -94,9 +91,6 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    {
       packOccupancyMapMessage();
       broadcastOccupancyMap(occupancyMapMessage);
-
-//      packFullFootstepGraph();
-//      broadcastNodeDataList(nodeDataListMessage);
    }
 
    abstract void broadcastOccupancyMap(FootstepPlannerOccupancyMapMessage occupancyMapMessage);
@@ -133,30 +127,6 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       nodeDataListMessage.setIsFootstepGraph(false);
       lowestCostPlan.clear();
       return true;
-   }
-
-   private void packFullFootstepGraph()
-   {
-      Object<FootstepNodeDataMessage> nodeDataList = nodeDataListMessage.getNodeData();
-      nodeDataList.clear();
-      packNodeDataRecursively(nodeDataList, startNode, -1);
-      nodeDataListMessage.setIsFootstepGraph(true);
-   }
-
-   private void packNodeDataRecursively(Object<FootstepNodeDataMessage> nodeDataList, FootstepNode nodeToAdd, int parentNodeIndex)
-   {
-      FootstepNodeDataMessage nodeDataMessage = nodeDataList.add();
-      setNodeDataMessage(nodeDataMessage, nodeToAdd, parentNodeIndex);
-
-      if(childMap.containsKey(nodeToAdd))
-      {
-         List<FootstepNode> footstepNodes = childMap.get(nodeToAdd);
-         int index = nodeDataList.size() - 1;
-         for(FootstepNode childNode : footstepNodes)
-         {
-            packNodeDataRecursively(nodeDataList, childNode, index);
-         }
-      }
    }
 
    private void setNodeDataMessage(FootstepNodeDataMessage nodeDataMessage, FootstepNode node, int parentNodeIndex)
