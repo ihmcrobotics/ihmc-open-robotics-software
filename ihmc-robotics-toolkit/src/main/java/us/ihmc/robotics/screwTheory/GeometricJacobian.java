@@ -6,6 +6,9 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
 
 /**
  * This class provides a simple tool to compute the Jacobian matrix of a kinematic chain composed of
@@ -80,7 +83,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
       this.joints = new InverseDynamicsJoint[joints.length];
       System.arraycopy(joints, 0, this.joints, 0, joints.length);
       this.jacobianFrame = jacobianFrame;
-      this.jacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, ScrewTools.computeDegreesOfFreedom(joints));
+      this.jacobian = new DenseMatrix64F(SpatialVector.SIZE, ScrewTools.computeDegreesOfFreedom(joints));
       this.jointPathFromBaseToEndEffector = ScrewTools.createJointPath(getBase(), getEndEffector());
       this.allowChangeFrame = allowChangeFrame;
 

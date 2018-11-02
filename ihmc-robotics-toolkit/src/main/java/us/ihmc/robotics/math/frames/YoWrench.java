@@ -1,10 +1,10 @@
 package us.ihmc.robotics.math.frames;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.Wrench;
 
 public class YoWrench extends YoSpatialVector
 {

@@ -11,6 +11,8 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
+import us.ihmc.mecano.spatial.SpatialInertia;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 
 /**
  * {@code RigidBody} describes a link which used with {@code InverseDynamicsJoint}s describe a robot
@@ -38,7 +40,7 @@ import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 public class RigidBody implements NameBasedHashCodeHolder
 {
    /** This is where the physical properties of this rigid-body are stored. */
-   private final RigidBodyInertia inertia;
+   private final SpatialInertia inertia;
    /**
     * This is a reference rigidly attached this rigid-body. It's usually centered at the
     * rigid-body's center of mass.
@@ -146,7 +148,7 @@ public class RigidBody implements NameBasedHashCodeHolder
       nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(name, parentJoint);
       ReferenceFrame frameAfterJoint = parentJoint.getFrameAfterJoint();
       bodyFixedFrame = MovingReferenceFrame.constructFrameFixedInParent(bodyName + "CoM", frameAfterJoint, inertiaPose);
-      inertia = new RigidBodyInertia(bodyFixedFrame, momentOfInertia, mass);
+      inertia = new SpatialInertia(bodyFixedFrame, bodyFixedFrame, momentOfInertia, mass);
       inertia.getBodyFrame().checkReferenceFrameMatch(inertia.getReferenceFrame()); // inertia should be expressed in body frame, otherwise it will change
       parentJoint.setSuccessor(this);
    }
@@ -157,7 +159,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     *
     * @return the reference to this rigid-body's inertia.
     */
-   public RigidBodyInertia getInertia()
+   public SpatialInertiaBasics getInertia()
    {
       return inertia;
    }
@@ -286,7 +288,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     */
    public void getCoMOffset(FramePoint3D comOffsetToPack)
    {
-      inertia.getCenterOfMassOffset(comOffsetToPack);
+      comOffsetToPack.setIncludingFrame(inertia.getCenterOfMassOffset());
    }
 
    /**
@@ -305,7 +307,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     */
    public void setCoMOffset(FramePoint3D comOffset)
    {
-      inertia.setCenterOfMassOffset(comOffset);
+      inertia.getCenterOfMassOffset().set(comOffset);
    }
 
    /**

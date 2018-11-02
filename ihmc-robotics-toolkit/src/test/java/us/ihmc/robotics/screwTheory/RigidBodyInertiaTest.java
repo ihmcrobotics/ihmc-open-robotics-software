@@ -23,6 +23,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.SpatialInertia;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.testing.JUnitTools;
 
@@ -35,7 +37,7 @@ public class RigidBodyInertiaTest
    private ReferenceFrame frameC;
    private ReferenceFrame rotatedOnlyFrame;
 
-   private RigidBodyInertia inertia;
+   private SpatialInertia inertia;
 
 
    @Before
@@ -79,7 +81,7 @@ public class RigidBodyInertiaTest
       frameC.update();
       rotatedOnlyFrame.update();
 
-      inertia = new RigidBodyInertia(frameB, getRandomSymmetricPositiveDefiniteMatrix(), getRandomPositiveNumber());
+      inertia = new SpatialInertia(frameB, frameB, getRandomSymmetricPositiveDefiniteMatrix(), getRandomPositiveNumber());
    }
 
    @After
@@ -150,13 +152,13 @@ public class RigidBodyInertiaTest
 	@Test(timeout = 30000)
    public void testSantiyIfChangeFramePurelyRotational()
    {
-      inertia = new RigidBodyInertia(rotatedOnlyFrame, getRandomSymmetricPositiveDefiniteMatrix(), getRandomPositiveNumber());
-      Matrix3D massMomentOfInertiaBeforeChange = inertia.getMassMomentOfInertiaPartCopy();
+      inertia = new SpatialInertia(rotatedOnlyFrame, rotatedOnlyFrame, getRandomSymmetricPositiveDefiniteMatrix(), getRandomPositiveNumber());
+      Matrix3D massMomentOfInertiaBeforeChange = new Matrix3D(inertia.getMomentOfInertia());
 
       inertia.changeFrame(worldFrame);
-      Matrix3D massMomentOfInertiaAfterChange = inertia.getMassMomentOfInertiaPartCopy();
+      Matrix3D massMomentOfInertiaAfterChange = new Matrix3D(inertia.getMomentOfInertia());
 
-      if (!inertia.isCrossPartZero())
+      if (inertia.getCenterOfMassOffset().length() > 1.0e-8)
       {
          fail("Inertia should still be expressed in a frame that has the CoM as its origin; hence the cross part should be zero.");
       }
@@ -259,7 +261,7 @@ public class RigidBodyInertiaTest
 
    }
 
-   private static void assertKineticCoEnergyFrameIndependent(Twist twist, RigidBodyInertia inertia)
+   private static void assertKineticCoEnergyFrameIndependent(Twist twist, SpatialInertia inertia)
    {
       double kineticCoEnergyCheap = inertia.computeKineticCoEnergy(twist);
 

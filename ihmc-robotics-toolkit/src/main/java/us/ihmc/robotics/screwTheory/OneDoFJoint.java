@@ -2,9 +2,12 @@ package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
 
 public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 {

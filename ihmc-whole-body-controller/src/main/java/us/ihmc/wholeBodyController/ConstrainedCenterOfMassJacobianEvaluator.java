@@ -14,6 +14,8 @@ import com.google.common.primitives.Doubles;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.ColumnSpaceProjector;
@@ -22,10 +24,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ConstrainedCenterOfMassJacobianCalculator;
 import us.ihmc.robotics.screwTheory.ConstrainedCentroidalMomentumMatrixCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.Momentum;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -75,7 +75,7 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
    {
       constrainedCenterOfMassJacobianCalculator = new ConstrainedCenterOfMassJacobianCalculator(fullRobotModel.getRootJoint());
 
-      momentumSelectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE / 2, SpatialMotionVector.SIZE);
+      momentumSelectionMatrix = new DenseMatrix64F(SpatialVector.SIZE / 2, SpatialVector.SIZE);
       momentumSelectionMatrix.set(0, 3, 1.0);
       momentumSelectionMatrix.set(1, 4, 1.0);
       momentumSelectionMatrix.set(2, 5, 1.0);
@@ -90,7 +90,7 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
-         DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+         DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialVector.SIZE, SpatialVector.SIZE);
          CommonOps.setIdentity(selectionMatrix);
          constrainedCenterOfMassJacobianCalculator.addConstraint(foot, selectionMatrix);
          constrainedCentroidalMomentumMatrixCalculator.addConstraint(foot, selectionMatrix);
@@ -99,7 +99,7 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
       allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       v = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(allJoints), 1);
 
-      DenseMatrix64F orientationSelectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE / 2, SpatialMotionVector.SIZE);
+      DenseMatrix64F orientationSelectionMatrix = new DenseMatrix64F(SpatialVector.SIZE / 2, SpatialVector.SIZE);
       orientationSelectionMatrix.set(0, 0, 1.0);
       orientationSelectionMatrix.set(1, 1, 1.0);
       orientationSelectionMatrix.set(2, 2, 1.0);

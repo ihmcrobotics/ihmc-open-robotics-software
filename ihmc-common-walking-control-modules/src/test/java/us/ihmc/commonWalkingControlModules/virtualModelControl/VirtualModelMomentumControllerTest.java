@@ -1,18 +1,25 @@
 package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
+import static junit.framework.TestCase.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelMomentumController;
-import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.RobotLegs;
-import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.RobotArm;
-import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.PlanarRobotArm;
-import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.PlanarForkedRobotArm;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.ForkedRobotArm;
+import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.PlanarForkedRobotArm;
+import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.PlanarRobotArm;
+import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.RobotArm;
+import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.RobotLegs;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -22,20 +29,20 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static junit.framework.TestCase.assertTrue;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class VirtualModelMomentumControllerTest

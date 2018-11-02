@@ -2,11 +2,13 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.List;
 
-import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 
 public class InverseDynamicsMechanismExplorer
 {
@@ -96,7 +98,7 @@ public class InverseDynamicsMechanismExplorer
 
    private void printLinkInformation(RigidBody link, StringBuffer buffer)
    {
-      RigidBodyInertia inertia = link.getInertia();
+      SpatialInertiaBasics inertia = link.getInertia();
       InverseDynamicsJoint parentJoint = link.getParentJoint();
       if (inertia != null)
       {
@@ -106,7 +108,7 @@ public class InverseDynamicsMechanismExplorer
          RigidBodyTransform comOffsetTransform = link.getBodyFixedFrame().getTransformToDesiredFrame(parentJoint.getFrameAfterJoint());
          comOffsetTransform.getTranslation(comOffset);
 
-         Matrix3D momentOfInertia = inertia.getMassMomentOfInertiaPartCopy();
+         Matrix3DBasics momentOfInertia = inertia.getMomentOfInertia();
 
          buffer.append("Mass = " + mass + "\n");
          buffer.append("comOffset = " + comOffset + "\n");

@@ -16,6 +16,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.SpatialInertia;
+import us.ihmc.mecano.spatial.Twist;
 
 public abstract class MassMatrixCalculatorTest
 {
@@ -64,7 +66,7 @@ public abstract class MassMatrixCalculatorTest
          successorTwist.changeFrame(elevatorFrame);
          twistWithRespectToWorld.add(successorTwist);
 
-         RigidBodyInertia inertia = new RigidBodyInertia(joint.getSuccessor().getInertia());
+         SpatialInertia inertia = new SpatialInertia(joint.getSuccessor().getInertia());
          inertia.changeFrame(elevatorFrame);
 
          ret += inertia.computeKineticCoEnergy(twistWithRespectToWorld);

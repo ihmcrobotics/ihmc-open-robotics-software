@@ -14,6 +14,9 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.SpatialInertia;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.testing.JUnitTools;
 
@@ -38,7 +41,7 @@ public class MomentumTest
       ReferenceFrame frame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame", world, transformToParent);
       Matrix3D massMomentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
       double mass = random.nextDouble();
-      GeneralizedRigidBodyInertia inertia = new CompositeRigidBodyInertia(frame, massMomentOfInertia, mass);
+      SpatialInertia inertia = new SpatialInertia(frame, frame, massMomentOfInertia, mass);
       inertia.changeFrame(world);
 
       Vector3D linearVelocity = RandomGeometry.nextVector3D(random);

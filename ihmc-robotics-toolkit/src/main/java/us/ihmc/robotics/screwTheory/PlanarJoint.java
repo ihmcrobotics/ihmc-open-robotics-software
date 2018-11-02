@@ -18,6 +18,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
 
 public class PlanarJoint extends AbstractInverseDynamicsJoint implements FloatingInverseDynamicsJoint
 {
@@ -434,7 +438,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
             frame = afterJointFrame;
          }
 
-         DenseMatrix64F twistMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+         DenseMatrix64F twistMatrix = new DenseMatrix64F(SpatialVector.SIZE, 1);
          int startIndex = 0;
          twistMatrix.set(startIndex + i, 0, 1.0);
          Twist twist = new Twist(frame, previousFrame, frame, twistMatrix);

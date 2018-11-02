@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.robotics.screwTheory.SpatialAcceleration;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
 
 public interface SE3TrajectoryGenerator
 {

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.mecano.spatial.Wrench;
 
 public interface ForceSensorDataHolderReadOnly
 {

@@ -1,12 +1,13 @@
 package us.ihmc.robotics.screwTheory;
 
-import gnu.trove.list.array.TIntArrayList;
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import org.ejml.data.DenseMatrix64F;
+
+import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class CompositeRigidBodyMassMatrixHandler
 {

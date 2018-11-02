@@ -1,8 +1,8 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.Twist;
 
 public class CurrentLinearVelocityProvider implements VectorProvider
 {

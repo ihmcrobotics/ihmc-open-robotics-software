@@ -4,6 +4,9 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class CentroidalMomentumMatrix
@@ -63,7 +66,7 @@ public class CentroidalMomentumMatrix
                if (isAncestorMapping[i][j])
                {
                   RigidBody rowRigidBody = jointList[i].getSuccessor();
-                  RigidBodyInertia inertia = rowRigidBody.getInertia();
+                  SpatialInertiaBasics inertia = rowRigidBody.getInertia();
                   columnJoint.getUnitTwist(k, tempTwist);
                   tempTwist.changeFrame(inertia.getReferenceFrame());
                   tempMomentum.compute(inertia, tempTwist);

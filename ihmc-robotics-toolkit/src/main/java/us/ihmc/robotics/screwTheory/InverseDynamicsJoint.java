@@ -3,6 +3,9 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.simulationconstructionset.util.CommonJoint;
 
 /**

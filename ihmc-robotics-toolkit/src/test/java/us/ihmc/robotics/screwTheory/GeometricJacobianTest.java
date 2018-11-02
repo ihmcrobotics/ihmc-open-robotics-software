@@ -17,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
 public class GeometricJacobianTest

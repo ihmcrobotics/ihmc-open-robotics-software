@@ -6,8 +6,8 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.frames.YoWrench;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;

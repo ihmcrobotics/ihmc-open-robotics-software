@@ -19,7 +19,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
@@ -550,7 +551,7 @@ public class ScrewTools
       original.getCoMOffset(comOffset);
       comOffset.changeFrame(original.getParentJoint().getFrameAfterJoint());
       String nameOriginal = original.getName();
-      Matrix3D massMomentOfInertiaPartCopy = original.getInertia().getMassMomentOfInertiaPartCopy();
+      Matrix3D massMomentOfInertiaPartCopy = new Matrix3D(original.getInertia().getMomentOfInertia());
       double mass = original.getInertia().getMass();
       Vector3D comOffsetCopy = new Vector3D(comOffset);
       RigidBody clone = ScrewTools.addRigidBody(nameOriginal + cloneSuffix, parentJointOfClone, massMomentOfInertiaPartCopy, mass, comOffsetCopy);

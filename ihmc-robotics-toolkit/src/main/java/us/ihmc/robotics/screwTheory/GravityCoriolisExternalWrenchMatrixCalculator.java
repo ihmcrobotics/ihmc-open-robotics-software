@@ -8,6 +8,9 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
 
 public class GravityCoriolisExternalWrenchMatrixCalculator
 {
@@ -98,7 +101,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
          if (!doVelocityTerms)
             tempTwist.setToZero();
          spatialAccelerationCalculator.getAccelerationOfBody(body, tempAcceleration);
-         body.getInertia().computeDynamicWrenchInBodyCoordinates(tempAcceleration, tempTwist, netWrench);
+         body.getInertia().computeDynamicWrench(tempAcceleration, tempTwist, netWrench);
       }
    }
 

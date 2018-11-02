@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**

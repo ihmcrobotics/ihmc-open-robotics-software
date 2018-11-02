@@ -66,6 +66,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
@@ -83,7 +84,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.taskExecutor.NullTask;
 import us.ihmc.tools.taskExecutor.PipeLine;
@@ -434,7 +434,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       double minRandomSearchScalar = 0.01;
       double maxRandomSearchScalar = 0.8;
 
-      DenseMatrix64F angularSelectionMatrix = new DenseMatrix64F(3, SpatialMotionVector.SIZE);
+      DenseMatrix64F angularSelectionMatrix = new DenseMatrix64F(3, SpatialVector.SIZE);
       angularSelectionMatrix.set(0, 0, 1.0);
       angularSelectionMatrix.set(1, 1, 1.0);
       angularSelectionMatrix.set(2, 2, 1.0);

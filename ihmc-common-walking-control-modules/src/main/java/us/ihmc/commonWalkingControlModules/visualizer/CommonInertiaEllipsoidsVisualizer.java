@@ -17,16 +17,16 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
+import us.ihmc.robotics.robotDescription.InertiaTools;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
-import us.ihmc.robotics.robotDescription.InertiaTools;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.RigidBodyInertia;
-import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotController
 {
@@ -78,7 +78,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
    private void findMinimumAndMaximumMassOfRigidBodies(RigidBody body)
    {
-      RigidBodyInertia inertia = body.getInertia();
+      SpatialInertiaBasics inertia = body.getInertia();
       if (inertia != null)
       {
          double mass = body.getInertia().getMass();
@@ -126,11 +126,11 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
    private void addRigidBodyAndChilderenToVisualization(RigidBody currentRigidBody)
    {
 
-      RigidBodyInertia inertia = currentRigidBody.getInertia();
+      SpatialInertiaBasics inertia = currentRigidBody.getInertia();
 
       if (inertia != null)
       {
-         Matrix3D inertiaMatrix = inertia.getMassMomentOfInertiaPartCopy();
+         Matrix3D inertiaMatrix = new Matrix3D(inertia.getMomentOfInertia());
          double mass = inertia.getMass();
 
          //         Vector3d principalMomentsOfInertia = new Vector3d(inertiaMatrix.m00, inertiaMatrix.m11, inertiaMatrix.m22);

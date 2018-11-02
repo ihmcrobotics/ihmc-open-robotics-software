@@ -5,9 +5,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.Twist;
 
 /**
  * {@code MovingWalkingReferenceFrame} was originally implemented in

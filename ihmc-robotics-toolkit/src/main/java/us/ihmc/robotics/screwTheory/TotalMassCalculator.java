@@ -2,11 +2,13 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.List;
 
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
+
 public class TotalMassCalculator
 {
    public static double computeSubTreeMass(RigidBody rootBody)
    {
-      RigidBodyInertia inertia = rootBody.getInertia();
+      SpatialInertiaBasics inertia = rootBody.getInertia();
       double ret = inertia == null ? 0.0 : inertia.getMass();
 
       for (InverseDynamicsJoint childJoint : rootBody.getChildrenJoints())

@@ -13,6 +13,8 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SpecializedOps;
 
+import us.ihmc.mecano.spatial.Twist;
+
 /**
  *
  * See: L. Sentis. Synthesis and Control of Whole-Body Behaviors in Humanoid Systems (2007)

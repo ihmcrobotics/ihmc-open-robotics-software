@@ -5,10 +5,10 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialForce;
-import us.ihmc.robotics.screwTheory.Wrench;
 
 public class MomentumModuleSolution
 {

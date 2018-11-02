@@ -13,12 +13,12 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
 /**
  * @author twan
@@ -46,7 +46,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
    private final Vector3D axis = new Vector3D();
    private final Vector3D errorTranslationVector = new Vector3D();
 
-   private final DenseMatrix64F spatialError = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+   private final DenseMatrix64F spatialError = new DenseMatrix64F(SpatialVector.SIZE, 1);
    private final DenseMatrix64F jointAnglesCorrection;
    private final DenseMatrix64F jointAnglesMinimumError;
    
@@ -88,7 +88,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
          throw new RuntimeException("jacobian.getJacobianFrame() != jacobian.getEndEffectorFrame()");
       
       this.jacobian = jacobian;
-      numberOfConstraints = SpatialMotionVector.SIZE;
+      numberOfConstraints = SpatialVector.SIZE;
       numberOfDoF = jacobian.getNumberOfColumns();
       inverseJacobianCalculator = InverseJacobianSolver.createInverseJacobianSolver(numberOfConstraints, numberOfDoF, false);
 
@@ -120,7 +120,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
    
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
-      if (selectionMatrix.getNumCols() != SpatialMotionVector.SIZE)
+      if (selectionMatrix.getNumCols() != SpatialVector.SIZE)
          throw new RuntimeException("The selection matrix must have 6 columns, the argument has: " + selectionMatrix.getNumCols());
 
       inverseJacobianCalculator.setSelectionMatrix(selectionMatrix);

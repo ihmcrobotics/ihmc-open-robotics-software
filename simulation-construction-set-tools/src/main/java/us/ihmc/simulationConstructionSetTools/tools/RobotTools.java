@@ -10,6 +10,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.robotics.robotDescription.Plane;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -17,10 +19,8 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.PlanarJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
 import us.ihmc.simulationconstructionset.FloatingSCSJoint;
@@ -256,15 +256,15 @@ public class RobotTools
       }
 
       RigidBody idRigidBody = idJoint.getSuccessor();
-      RigidBodyInertia idInertia = idRigidBody.getInertia();
+      SpatialInertiaBasics idInertia = idRigidBody.getInertia();
 
       String bodyName = idRigidBody.getName();
       Vector3D comOffset = new Vector3D();
-      FramePoint3D centerOfMassOffset = idInertia.getCenterOfMassOffset();
+      FramePoint3D centerOfMassOffset = new FramePoint3D(idInertia.getCenterOfMassOffset());
       centerOfMassOffset.changeFrame(idJoint.getFrameAfterJoint());
       comOffset.set(centerOfMassOffset);
       double mass = idInertia.getMass();
-      Matrix3D momentOfInertia = idInertia.getMassMomentOfInertiaPartCopy();
+      Matrix3D momentOfInertia = new Matrix3D(idInertia.getMomentOfInertia());
 
       Link scsRigidBody = new Link(bodyName);
       scsRigidBody.setComOffset(comOffset);

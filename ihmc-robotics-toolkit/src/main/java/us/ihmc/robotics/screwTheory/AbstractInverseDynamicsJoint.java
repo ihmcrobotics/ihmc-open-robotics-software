@@ -5,6 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
 
 /**
  * Base implementation for any {@link InverseDynamicsJoint} that gathers all the basic setup for a

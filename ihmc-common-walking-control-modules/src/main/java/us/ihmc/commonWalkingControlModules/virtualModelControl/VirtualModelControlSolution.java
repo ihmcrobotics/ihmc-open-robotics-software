@@ -1,10 +1,13 @@
 package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.screwTheory.*;
-
 import java.util.List;
 import java.util.Map;
+
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class VirtualModelControlSolution
 {

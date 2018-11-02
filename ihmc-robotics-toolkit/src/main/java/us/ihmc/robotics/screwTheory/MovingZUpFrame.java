@@ -2,6 +2,7 @@ package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.geometry.RotationTools;
 
 public class MovingZUpFrame extends MovingReferenceFrame

@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.testing.JUnitTools;
@@ -89,7 +90,7 @@ public class MomentumCalculatorTest
       FrameVector3D angularMomentum = new FrameVector3D(momentum.getReferenceFrame(), new Vector3D(momentum.getAngularPart()));
 
       FrameVector3D linearMomentumCheck = new FrameVector3D(world);
-      Matrix3D inertia = body.getInertia().getMassMomentOfInertiaPartCopy();
+      Matrix3D inertia = new Matrix3D(body.getInertia().getMomentOfInertia());
       Vector3D angularMomentumCheckVector = new Vector3D(jointAxis);
       angularMomentumCheckVector.scale(joint.getQd());
       inertia.transform(angularMomentumCheckVector);

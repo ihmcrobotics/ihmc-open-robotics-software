@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator

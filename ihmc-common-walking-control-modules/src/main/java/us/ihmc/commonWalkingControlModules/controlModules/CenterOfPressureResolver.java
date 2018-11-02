@@ -4,7 +4,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.screwTheory.SpatialForce;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceBasics;
 
 /**
  * This class resolves where the Center of Pressure is for a given wrench and plane.
@@ -26,7 +27,7 @@ public class CenterOfPressureResolver
    private final Vector3D torqueAtZeroInPlaneFrame = new Vector3D();
    private final Vector3D forceInPlaneFrame = new Vector3D();
 
-   public double resolveCenterOfPressureAndNormalTorque(FramePoint2D centerOfPressureToPack, SpatialForce spatialForceVector,
+   public double resolveCenterOfPressureAndNormalTorque(FramePoint2D centerOfPressureToPack, SpatialForceBasics spatialForceVector,
          ReferenceFrame centerOfPressurePlaneFrame)
    {
       // First resolve the wrench at the plane origin:
@@ -59,7 +60,7 @@ public class CenterOfPressureResolver
       return normalTorqueAtCenterOfPressure;
    }
 
-   public double resolveCenterOfPressureAndNormalTorque(FramePoint3D centerOfPressureToPack, SpatialForce spatialForceVector,
+   public double resolveCenterOfPressureAndNormalTorque(FramePoint3D centerOfPressureToPack, SpatialForceBasics spatialForceVector,
          ReferenceFrame centerOfPressurePlaneFrame)
    {
       // First resolve the wrench at the plane origin:
