@@ -97,7 +97,7 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
       wrench.setIncludingFrame(jacobian.getJacobianFrame(), footWrench);
       
       footForce.setToZero(jacobian.getJacobianFrame());
-      wrench.getLinearPart(footForce);
+      footForce.set(wrench.getLinearPart());
       footForce.changeFrame(ReferenceFrame.getWorldFrame());
       
       measuredZForce.set(footForce.getZ() * -1.0);

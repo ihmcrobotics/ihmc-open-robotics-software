@@ -140,8 +140,8 @@ public class CenterOfPressureResolverTest
          PoseReferenceFrame centerOfPressurePlaneFrame = createPlaneFrame("groundPlaneFrame", copPoint3d, groundNormal);
          spatialForceVector.changeFrame(centerOfPressurePlaneFrame);
 
-         FrameVector3D forceResolvedInCenterOfPressureFrame = spatialForceVector.getLinearPartAsFrameVectorCopy();
-         FrameVector3D torqueResolvedInCenterOfPressureFrame = spatialForceVector.getAngularPartAsFrameVectorCopy();
+         FrameVector3D forceResolvedInCenterOfPressureFrame = new FrameVector3D(spatialForceVector.getLinearPart());
+         FrameVector3D torqueResolvedInCenterOfPressureFrame = new FrameVector3D(spatialForceVector.getAngularPart());
 
          forceResolvedInCenterOfPressureFrame.changeFrame(worldFrame);
 

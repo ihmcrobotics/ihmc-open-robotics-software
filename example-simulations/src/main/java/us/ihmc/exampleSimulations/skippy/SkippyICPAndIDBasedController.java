@@ -105,7 +105,7 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
       errorVector.changeFrame(endEffectorFrame);
 
       endEffectorWrench.setToZero(endEffectorBodyFrame, endEffectorFrame);
-      endEffectorWrench.setLinearPart(errorVector);
+      endEffectorWrench.getLinearPart().set(errorVector);
       endEffectorWrench.changeFrame(endEffectorBodyFrame);
 
       endEffectorWrench.scale(-kp.getDoubleValue());

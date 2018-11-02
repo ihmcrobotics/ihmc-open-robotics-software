@@ -132,8 +132,8 @@ public class CenterOfMassCalibrationTool implements Updatable
          ForceSensorDataReadOnly forceSensorData = ankleForceSensors.get(robotSide);
          ReferenceFrame measurementFrame = forceSensorData.getMeasurementFrame();
          forceSensorData.getWrench(footWrench);
-         FrameVector3D footForce = footWrench.getLinearPartAsFrameVectorCopy();
-         FrameVector3D footTorque = footWrench.getAngularPartAsFrameVectorCopy();
+         FrameVector3D footForce = new FrameVector3D(footWrench.getLinearPart());
+         FrameVector3D footTorque = new FrameVector3D(footWrench.getAngularPart());
          
          ReferenceFrame jointFrame = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getFrameAfterJoint();
          

@@ -41,7 +41,7 @@ public class ActuatorForceBasedTouchdownDetector implements TouchdownDetector
    public void update()
    {
       foreSensorData.getWrench(wrenchToPack);
-      wrenchToPack.getLinearPart(vectorToPack);
+      vectorToPack.set(wrenchToPack.getLinearPart());
 
       touchdownDetected.set(vectorToPack.length() > touchdownForceThreshold.getDoubleValue());
       touchdownDetectedFiltered.update();

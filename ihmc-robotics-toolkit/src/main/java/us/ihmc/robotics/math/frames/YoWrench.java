@@ -40,8 +40,8 @@ public class YoWrench extends YoSpatialVector
    protected void putYoValuesIntoWrench()
    {
       wrench.setToZero(bodyFrame, expressedInFrame);
-      wrench.setLinearPart(linearPart);
-      wrench.setAngularPart(angularPart);
+      wrench.getLinearPart().set(linearPart);
+      wrench.getAngularPart().set(angularPart);
    }
    
    protected void getYoValuesFromWrench()

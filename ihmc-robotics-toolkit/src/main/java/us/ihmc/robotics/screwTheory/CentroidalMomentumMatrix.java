@@ -46,8 +46,8 @@ public class CentroidalMomentumMatrix
    {
       for (Momentum momentum : unitMomenta)
       {
-         momentum.setAngularPart(zero);
-         momentum.setLinearPart(zero);
+         momentum.getAngularPart().set(zero);
+         momentum.getLinearPart().set(zero);
       }
       
       int column = 0;

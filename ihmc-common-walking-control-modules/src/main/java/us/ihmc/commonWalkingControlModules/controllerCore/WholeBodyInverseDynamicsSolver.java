@@ -221,8 +221,8 @@ public class WholeBodyInverseDynamicsSolver
       if (rootJoint != null)
       {
          rootJoint.getWrench(residualRootJointWrench);
-         residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
-         residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
+         residualRootJointTorque.setIncludingFrame(residualRootJointWrench.getAngularPart());
+         residualRootJointForce.setIncludingFrame(residualRootJointWrench.getLinearPart());
          yoResidualRootJointForce.setMatchingFrame(residualRootJointForce);
          yoResidualRootJointTorque.setMatchingFrame(residualRootJointTorque);
       }

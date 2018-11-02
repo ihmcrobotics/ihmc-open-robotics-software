@@ -278,8 +278,8 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       if (!isMomentumUpToDate)
       {
          CommonOps.mult(getCentroidalMomentumMatrix(), getJointVelocityMatrix(), momentumMatrix);
-         momentum.angularPart.set(0, momentumMatrix);
-         momentum.linearPart.set(3, momentumMatrix);
+         momentum.getAngularPart().set(0, momentumMatrix);
+         momentum.getLinearPart().set(3, momentumMatrix);
          isMomentumUpToDate = true;
       }
       return momentum;
@@ -290,8 +290,8 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       if (!isMomentumRateUpToDate)
       {
          CommonOps.mult(getCentroidalMomentumMatrix(), getJointAccelerationMatrix(), momentumMatrix);
-         momentumRate.angularPart.set(0, momentumMatrix);
-         momentumRate.linearPart.set(3, momentumMatrix);
+         momentumRate.getAngularPart().set(0, momentumMatrix);
+         momentumRate.getLinearPart().set(3, momentumMatrix);
          momentumRate.add(getBiasSpatialForce());
          isMomentumRateUpToDate = true;
       }
@@ -302,16 +302,16 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
    {
       CommonOps.mult(getCentroidalMomentumMatrix(), jointVelocityMatrix, momentumMatrix);
       momentumToPack.setToZero(matrixFrame);
-      momentumToPack.angularPart.set(0, momentumMatrix);
-      momentumToPack.linearPart.set(3, momentumMatrix);
+      momentumToPack.getAngularPart().set(0, momentumMatrix);
+      momentumToPack.getLinearPart().set(3, momentumMatrix);
    }
 
    public void getMomentumRate(DenseMatrix64F jointAccelerationMatrix, SpatialForceVector momentumRateToPack)
    {
       CommonOps.mult(getCentroidalMomentumMatrix(), jointAccelerationMatrix, momentumMatrix);
       momentumRateToPack.setToZero(matrixFrame);
-      momentumRateToPack.angularPart.set(0, momentumMatrix);
-      momentumRateToPack.linearPart.set(3, momentumMatrix);
+      momentumRateToPack.getAngularPart().set(0, momentumMatrix);
+      momentumRateToPack.getLinearPart().set(3, momentumMatrix);
       momentumRateToPack.add(getBiasSpatialForce());
    }
 
@@ -319,8 +319,8 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
    {
       CommonOps.mult(getCentroidalMomentumMatrix(joints), jointAccelerationMatrix, momentumMatrix);
       momentumRateToPack.setToZero(matrixFrame);
-      momentumRateToPack.angularPart.set(0, momentumMatrix);
-      momentumRateToPack.linearPart.set(3, momentumMatrix);
+      momentumRateToPack.getAngularPart().set(0, momentumMatrix);
+      momentumRateToPack.getLinearPart().set(3, momentumMatrix);
       momentumRateToPack.add(getBiasSpatialForce());
    }
 

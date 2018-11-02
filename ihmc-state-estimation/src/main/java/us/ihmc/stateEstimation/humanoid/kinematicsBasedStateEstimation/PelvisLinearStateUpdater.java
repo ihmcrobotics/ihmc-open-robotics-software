@@ -664,7 +664,7 @@ public class PelvisLinearStateUpdater
          RigidBody foot = feet.get(i);
          Wrench footWrench = footWrenches.get(foot);
          footSwitches.get(foot).computeAndPackFootWrench(footWrench);
-         footWrench.getLinearPartIncludingFrame(tempFootForce);
+         tempFootForce.setIncludingFrame(footWrench.getLinearPart());
          tempFootForce.changeFrame(worldFrame);
 
          totalGroundReactionForce.add(tempFootForce);

@@ -535,7 +535,7 @@ public class HighLevelHumanoidControllerToolbox
    {
       robotMomentum.setToZero(centerOfMassFrame);
       momentumCalculator.computeAndPack(robotMomentum);
-      robotMomentum.getAngularPartIncludingFrame(angularMomentum);
+      angularMomentum.setIncludingFrame(robotMomentum.getAngularPart());
       yoAngularMomentum.set(angularMomentum);
       filteredYoAngularMomentum.update();
    }
@@ -625,7 +625,7 @@ public class HighLevelHumanoidControllerToolbox
          yoCoPErrorMagnitude.get(robotSide).set(copError.length());
 
          footSwitch.computeAndPackFootWrench(footWrench);
-         footWrench.getLinearPartIncludingFrame(footForceVector);
+         footForceVector.setIncludingFrame(footWrench.getLinearPart());
          footForceVector.changeFrame(ReferenceFrame.getWorldFrame());
 
          if (footForceVector.getZ() > minZForceForCoPControlScaling
@@ -689,16 +689,16 @@ public class HighLevelHumanoidControllerToolbox
          ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
          wristForceSensor.getWrench(wristTempWrench);
 
-         wristTempWrench.getLinearPartIncludingFrame(tempWristForce);
-         wristTempWrench.getAngularPartIncludingFrame(tempWristTorque);
+         tempWristForce.setIncludingFrame(wristTempWrench.getLinearPart());
+         tempWristTorque.setIncludingFrame(wristTempWrench.getAngularPart());
 
          wristRawMeasuredForces.get(robotSide).setMatchingFrame(tempWristForce);
          wristRawMeasuredTorques.get(robotSide).setMatchingFrame(tempWristTorque);
 
          cancelHandWeight(robotSide, wristTempWrench, measurementFrame);
 
-         wristTempWrench.getLinearPartIncludingFrame(tempWristForce);
-         wristTempWrench.getAngularPartIncludingFrame(tempWristTorque);
+         tempWristForce.setIncludingFrame(wristTempWrench.getLinearPart());
+         tempWristTorque.setIncludingFrame(wristTempWrench.getAngularPart());
 
          wristForcesHandWeightCancelled.get(robotSide).setMatchingFrame(tempWristForce);
          wristTorquesHandWeightCancelled.get(robotSide).setMatchingFrame(tempWristTorque);
@@ -712,7 +712,7 @@ public class HighLevelHumanoidControllerToolbox
       tempWristForce.setIncludingFrame(worldFrame, 0.0, 0.0, -handsMass.get(robotSide).getDoubleValue() * gravity);
       tempWristForce.changeFrame(handCoMFrame);
       wristWrenchDueToGravity.setToZero(measurementFrame, handCoMFrame);
-      wristWrenchDueToGravity.setLinearPart(tempWristForce);
+      wristWrenchDueToGravity.getLinearPart().set(tempWristForce);
       wristWrenchDueToGravity.changeFrame(measurementFrame);
 
       wrenchToSubstractHandWeightTo.sub(wristWrenchDueToGravity);
@@ -997,8 +997,8 @@ public class HighLevelHumanoidControllerToolbox
       tempWristTorque.setIncludingFrame(wristRawMeasuredTorques.get(robotSide));
       ReferenceFrame measurementFrames = wristForceSensorMeasurementFrames.get(robotSide);
       wrenchToPack.setToZero(measurementFrames, measurementFrames);
-      wrenchToPack.setLinearPart(tempWristForce);
-      wrenchToPack.setAngularPart(tempWristTorque);
+      wrenchToPack.getLinearPart().set(tempWristForce);
+      wrenchToPack.getAngularPart().set(tempWristTorque);
    }
 
    public void getWristMeasuredWrenchHandWeightCancelled(Wrench wrenchToPack, RobotSide robotSide)
@@ -1010,8 +1010,8 @@ public class HighLevelHumanoidControllerToolbox
       tempWristTorque.setIncludingFrame(wristTorquesHandWeightCancelled.get(robotSide));
       ReferenceFrame measurementFrames = wristForceSensorMeasurementFrames.get(robotSide);
       wrenchToPack.setToZero(measurementFrames, measurementFrames);
-      wrenchToPack.setLinearPart(tempWristForce);
-      wrenchToPack.setAngularPart(tempWristTorque);
+      wrenchToPack.getLinearPart().set(tempWristForce);
+      wrenchToPack.getAngularPart().set(tempWristTorque);
    }
 
    public void getDefaultFootPolygon(RobotSide robotSide, FrameConvexPolygon2D polygonToPack)

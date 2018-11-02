@@ -187,8 +187,8 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
-      desiredWrench.getAngularPart(desiredAngularTorque);
-      desiredWrench.getLinearPart(desiredLinearForce);
+      desiredAngularTorque.set(desiredWrench.getAngularPart());
+      desiredLinearForce.set(desiredWrench.getLinearPart());
    }
 
    /**
@@ -399,8 +399,8 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
    {
       getControlFrame(controlFrameToPack);
       desiredWrenchToPack.setToZero(endEffector.getBodyFixedFrame(), controlFrameToPack);
-      desiredWrenchToPack.setLinearPart(desiredLinearForce);
-      desiredWrenchToPack.setAngularPart(desiredAngularTorque);
+      desiredWrenchToPack.getLinearPart().set(desiredLinearForce);
+      desiredWrenchToPack.getAngularPart().set(desiredAngularTorque);
    }
 
    /**

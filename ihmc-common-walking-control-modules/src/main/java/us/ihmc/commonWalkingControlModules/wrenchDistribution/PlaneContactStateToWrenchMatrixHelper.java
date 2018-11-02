@@ -363,7 +363,7 @@ public class PlaneContactStateToWrenchMatrixHelper
             return;
          }
 
-         wrenchFromRho.getLinearPartIncludingFrame(forceFromRho);
+         forceFromRho.setIncludingFrame(wrenchFromRho.getLinearPart());
          forceFromRho.changeFrame(planeFrame);
 
          if (forceFromRho.getZ() < 1.0e-1)

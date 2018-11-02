@@ -19,6 +19,7 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -927,7 +928,7 @@ public class ScrewToolsTest
       expectedWrench.setIncludingFrame(externalWrench2);
       expectedWrench.add(addedWrench2);
       
-      assertTrue(expectedWrench.getAngularPartAsFrameVectorCopy().epsilonEquals(external.get(rigidBody3).getAngularPartAsFrameVectorCopy(), epsilon));
-      assertTrue(expectedWrench.getLinearPartAsFrameVectorCopy().epsilonEquals(external.get(rigidBody3).getLinearPartAsFrameVectorCopy(), epsilon));
+      assertTrue(new FrameVector3D(expectedWrench.getAngularPart()).epsilonEquals(new FrameVector3D(external.get(rigidBody3).getAngularPart()), epsilon));
+      assertTrue(new FrameVector3D(expectedWrench.getLinearPart()).epsilonEquals(new FrameVector3D(external.get(rigidBody3).getLinearPart()), epsilon));
    }
 }

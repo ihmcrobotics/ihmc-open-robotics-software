@@ -152,8 +152,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
       Wrench rootJointWrench = new Wrench(bodyFixedFrame, bodyFixedFrame);
       rootJoint.getWrench(rootJointWrench);
 
-      FrameVector3D rootJointForce = rootJointWrench.getLinearPartAsFrameVectorCopy();
-      FrameVector3D rootJointTorque = rootJointWrench.getAngularPartAsFrameVectorCopy();
+      FrameVector3D rootJointForce = new FrameVector3D(rootJointWrench.getLinearPart());
+      FrameVector3D rootJointTorque = new FrameVector3D(rootJointWrench.getAngularPart());
 
       rootJointForce.changeFrame(ReferenceFrame.getWorldFrame());
       rootJointTorque.changeFrame(ReferenceFrame.getWorldFrame());
@@ -280,8 +280,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
       Wrench rootJointWrench = new Wrench(rootJoint.getFrameAfterJoint(), rootJoint.getFrameAfterJoint());
       rootJoint.getWrench(rootJointWrench);
 
-      FrameVector3D rootJointForce = rootJointWrench.getLinearPartAsFrameVectorCopy();
-      FrameVector3D rootJointTorque = rootJointWrench.getAngularPartAsFrameVectorCopy();
+      FrameVector3D rootJointForce = new FrameVector3D(rootJointWrench.getLinearPart());
+      FrameVector3D rootJointTorque = new FrameVector3D(rootJointWrench.getAngularPart());
 
       rootJointForce.changeFrame(ReferenceFrame.getWorldFrame());
       rootJointTorque.changeFrame(ReferenceFrame.getWorldFrame());
@@ -541,14 +541,14 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
          externalForcePointMoment.add(torqueFromLeverArm);
 
-         FrameVector3D totalTorqueOnFoot = wrench.getAngularPartAsFrameVectorCopy();
-         FrameVector3D totalForceOnFoot = wrench.getLinearPartAsFrameVectorCopy();
+         FrameVector3D totalTorqueOnFoot = new FrameVector3D(wrench.getAngularPart());
+         FrameVector3D totalForceOnFoot = new FrameVector3D(wrench.getLinearPart());
 
          totalTorqueOnFoot.add(externalForcePointMoment);
          totalForceOnFoot.add(externalForcePointForce);
 
-         wrench.setAngularPart(totalTorqueOnFoot);
-         wrench.setLinearPart(totalForceOnFoot);
+         wrench.getAngularPart().set(totalTorqueOnFoot);
+         wrench.getLinearPart().set(totalForceOnFoot);
 
          inverseDynamicsCalculator.setExternalWrench(foot, wrench);
       }
@@ -721,10 +721,10 @@ public class DRCInverseDynamicsCalculatorTestHelper
          ExternalForcePoint footExternalForcePoint = feetExternalForcePoints.get(robotSide);
          footExternalForcePoint.setOffsetWorld(pointOfWrenchApplication);
 
-         FrameVector3D wrenchForce = wrench.getLinearPartAsFrameVectorCopy();
+         FrameVector3D wrenchForce = new FrameVector3D(wrench.getLinearPart());
          wrenchForce.changeFrame(ReferenceFrame.getWorldFrame());
 
-         FrameVector3D wrenchTorque = wrench.getAngularPartAsFrameVectorCopy();
+         FrameVector3D wrenchTorque = new FrameVector3D(wrench.getAngularPart());
          wrenchTorque.changeFrame(ReferenceFrame.getWorldFrame());
 
          footExternalForcePoint.setForce(new Vector3D(wrenchForce));
