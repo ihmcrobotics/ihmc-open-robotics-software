@@ -761,8 +761,8 @@ public class SwingState extends AbstractFootControlState
       desiredAngularVelocity.changeFrame(desiredSoleFrame);
       desiredTwist.setIncludingFrame(desiredSoleFrame, worldFrame, desiredSoleFrame, desiredAngularVelocity, desiredLinearVelocity);
       desiredTwist.changeFrame(desiredControlFrame);
-      desiredTwist.getLinearPart(desiredLinearVelocity);
-      desiredTwist.getAngularPart(desiredAngularVelocity);
+      desiredLinearVelocity.setIncludingFrame(desiredTwist.getLinearPart());
+      desiredAngularVelocity.setIncludingFrame(desiredTwist.getAngularPart());
       desiredLinearVelocity.changeFrame(worldFrame);
       desiredAngularVelocity.changeFrame(worldFrame);
 
@@ -771,8 +771,8 @@ public class SwingState extends AbstractFootControlState
       desiredAngularAcceleration.changeFrame(desiredSoleFrame);
       desiredSpatialAcceleration.setIncludingFrame(desiredSoleFrame, worldFrame, desiredSoleFrame, desiredAngularAcceleration, desiredLinearAcceleration);
       desiredSpatialAcceleration.changeFrame(desiredControlFrame);
-      desiredSpatialAcceleration.getLinearPart(desiredLinearAcceleration);
-      desiredSpatialAcceleration.getAngularPart(desiredAngularAcceleration);
+      desiredLinearAcceleration.setIncludingFrame(desiredSpatialAcceleration.getLinearPart());
+      desiredAngularAcceleration.setIncludingFrame(desiredSpatialAcceleration.getAngularPart());
       desiredLinearAcceleration.changeFrame(worldFrame);
       desiredAngularAcceleration.changeFrame(worldFrame);
    }

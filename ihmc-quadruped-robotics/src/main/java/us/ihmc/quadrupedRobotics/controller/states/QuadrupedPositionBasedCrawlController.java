@@ -1129,7 +1129,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       filteredDesiredCoMRoll.update();
 
       bodyTwist.changeFrame(referenceFrames.getBodyFrame());
-      bodyTwist.getAngularPart(bodyOrienation);
+      bodyOrienation.set(bodyTwist.getAngularPart());
 
       if (useImuFeedback.getBooleanValue())
       {

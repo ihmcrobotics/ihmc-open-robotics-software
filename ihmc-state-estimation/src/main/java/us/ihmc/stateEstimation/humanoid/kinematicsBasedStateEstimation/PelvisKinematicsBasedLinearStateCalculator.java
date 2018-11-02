@@ -410,7 +410,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       tempFrameVector.setIncludingFrame(rootJointLinearVelocityNewTwist);
       tempFrameVector.changeFrame(tempRootBodyTwist.getReferenceFrame());
 
-      tempRootBodyTwist.setLinearPart(tempFrameVector);
+      tempRootBodyTwist.getLinearPart().set(tempFrameVector);
       rootJoint.setJointTwist(tempRootBodyTwist);
       rootJoint.updateFramesRecursively();
 

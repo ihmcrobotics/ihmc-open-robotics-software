@@ -156,14 +156,14 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       }
 
       // first step: add cross terms:
-      tempVector.cross(twistOfCurrentWithRespectToNew.linearPart, twistOfBodyWithRespectToBase.angularPart); // v_1 x omega_2
-      linearPart.add(tempVector);
+      tempVector.cross(twistOfCurrentWithRespectToNew.getLinearPart(), twistOfBodyWithRespectToBase.getAngularPart()); // v_1 x omega_2
+      getLinearPart().add(tempVector);
 
-      tempVector.cross(twistOfCurrentWithRespectToNew.angularPart, twistOfBodyWithRespectToBase.linearPart); // omega_1 x v_2
-      linearPart.add(tempVector);
+      tempVector.cross(twistOfCurrentWithRespectToNew.getAngularPart(), twistOfBodyWithRespectToBase.getLinearPart()); // omega_1 x v_2
+      getLinearPart().add(tempVector);
 
-      tempVector.cross(twistOfCurrentWithRespectToNew.angularPart, twistOfBodyWithRespectToBase.angularPart); // omega_1 x omega_2
-      angularPart.add(tempVector);
+      tempVector.cross(twistOfCurrentWithRespectToNew.getAngularPart(), twistOfBodyWithRespectToBase.getAngularPart()); // omega_1 x omega_2
+      getAngularPart().add(tempVector);
 
       /*
        * The relative motion being dealt with the acceleration can be now transformed as if there
@@ -191,13 +191,13 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       // transform the accelerations so that they are expressed in newReferenceFrame
       if (tempTransform.hasRotation())
       {
-         tempTransform.transform(angularPart); // only performs a rotation, since we're passing in a vector
-         tempTransform.transform(linearPart);
+         tempTransform.transform(getAngularPart()); // only performs a rotation, since we're passing in a vector
+         tempTransform.transform(getLinearPart());
       }
       if (tempTransform.hasTranslation())
       {
-         tempVector.cross(tempTransform.getTranslationVector(), angularPart);
-         linearPart.add(tempVector);
+         tempVector.cross(tempTransform.getTranslationVector(), getAngularPart());
+         getLinearPart().add(tempVector);
       }
 
       // change this spatial motion vector's expressedInFrame to newReferenceFrame
@@ -221,8 +221,8 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       bodyFrame.checkReferenceFrameMatch(other.baseFrame);
 
       // now it should be safe to add, and change the bodyFrame
-      angularPart.add(other.angularPart);
-      linearPart.add(other.linearPart);
+      getAngularPart().add(other.getAngularPart());
+      getLinearPart().add(other.getLinearPart());
       bodyFrame = other.bodyFrame;
    }
 
@@ -234,14 +234,14 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       // make sure that either the bodyFrames or baseFrames are the same
       if (baseFrame == other.baseFrame)
       {
-         angularPart.sub(other.angularPart);
-         linearPart.sub(other.linearPart);
+         getAngularPart().sub(other.getAngularPart());
+         getLinearPart().sub(other.getLinearPart());
          baseFrame = other.bodyFrame;
       }
       else if (bodyFrame == other.bodyFrame)
       {
-         angularPart.sub(other.angularPart);
-         linearPart.sub(other.linearPart);
+         getAngularPart().sub(other.getAngularPart());
+         getLinearPart().sub(other.getLinearPart());
          bodyFrame = other.baseFrame;
       }
       else
@@ -270,8 +270,8 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       linearAccelerationToPack.setToZero(expressedInFrame);
 
       tempVector.set(pointFixedInBodyFrame);
-      linearAccelerationToPack.cross(angularPart, tempVector);
-      linearAccelerationToPack.add(linearPart);
+      linearAccelerationToPack.cross(getAngularPart(), tempVector);
+      linearAccelerationToPack.add(getLinearPart());
 
       tempVector.set(pointFixedInBodyFrame);
       tempVector.cross(twist.getAngularPart(), tempVector);
@@ -297,12 +297,12 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       twistOfBodyWithRespectToBase.getBaseFrame().checkReferenceFrameMatch(baseFrame);
 
       angularAcceleration.changeFrame(bodyFrame);
-      angularPart.set(angularAcceleration);
+      getAngularPart().set(angularAcceleration);
 
       originAcceleration.changeFrame(bodyFrame);
       twistOfBodyWithRespectToBase.changeFrame(bodyFrame);
-      linearPart.cross(twistOfBodyWithRespectToBase.getAngularPart(), twistOfBodyWithRespectToBase.getLinearPart());
-      linearPart.sub(originAcceleration, linearPart);
+      getLinearPart().cross(twistOfBodyWithRespectToBase.getAngularPart(), twistOfBodyWithRespectToBase.getLinearPart());
+      getLinearPart().sub(originAcceleration, getLinearPart());
    }
 
    public void getLinearAccelerationFromOriginAcceleration(Twist twistOfBodyWithRespectToBase, FrameVector3D linearAccelerationToPack)
@@ -315,7 +315,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
 
       linearAccelerationToPack.setToZero(bodyFrame);
       linearAccelerationToPack.cross(twistOfBodyWithRespectToBase.getAngularPart(), twistOfBodyWithRespectToBase.getLinearPart());
-      linearAccelerationToPack.add(linearPart);
+      linearAccelerationToPack.add(getLinearPart());
    }
 
    public void setScrew(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double angularVelocityMagnitude,
@@ -333,28 +333,28 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
 
-      linearPart.cross(offsetDot, axisOfRotation);
+      getLinearPart().cross(offsetDot, axisOfRotation);
       tempVector.cross(offset, axisOfRotationDot);
-      linearPart.add(tempVector);
-      linearPart.scale(angularVelocityMagnitude);
+      getLinearPart().add(tempVector);
+      getLinearPart().scale(angularVelocityMagnitude);
 
       tempVector.set(axisOfRotation);
       tempVector.scale(linearAccelerationMagnitude);
-      linearPart.add(tempVector);
+      getLinearPart().add(tempVector);
 
       tempVector.set(axisOfRotationDot);
       tempVector.scale(linearVelocityMagnitude);
-      linearPart.add(tempVector);
+      getLinearPart().add(tempVector);
 
       tempVector.cross(offset, axisOfRotation);
       tempVector.scale(angularAccelerationMagnitude);
-      linearPart.add(tempVector);
+      getLinearPart().add(tempVector);
 
-      angularPart.set(axisOfRotation);
-      angularPart.scale(angularAccelerationMagnitude);
+      getAngularPart().set(axisOfRotation);
+      getAngularPart().scale(angularAccelerationMagnitude);
       tempVector.set(axisOfRotationDot);
       tempVector.scale(angularVelocityMagnitude);
-      angularPart.add(tempVector);
+      getAngularPart().add(tempVector);
    }
 
    ///CLOVER:OFF
@@ -362,7 +362,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
    public String toString()
    {
       String ret = new String("Spatial acceleration of " + bodyFrame + ", with respect to " + baseFrame + ", expressed in " + expressedInFrame + "\n"
-            + "Linear part: " + linearPart + "\n" + "Angular part: " + angularPart);
+            + "Linear part: " + getLinearPart() + "\n" + "Angular part: " + getAngularPart());
 
       return ret;
    }

@@ -135,8 +135,8 @@ public class RobotTools
          {
             ReferenceFrame rootBodyFrame = idFloatingJoint.getFrameAfterJoint();
             idFloatingJoint.getJointTwist(rootJointTwist);
-            rootJointTwist.getLinearPart(linearVelocity);
-            rootJointTwist.getAngularPart(angularVelocity);
+            linearVelocity.setIncludingFrame(rootJointTwist.getLinearPart());
+            angularVelocity.setIncludingFrame(rootJointTwist.getAngularPart());
             linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
             angularVelocity.changeFrame(rootBodyFrame);
             scsFloatingJoint.setVelocity(linearVelocity);

@@ -385,7 +385,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    {
       spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector, achievedSpatialAccelerationVector);
       achievedSpatialAccelerationVector.changeFrame(controlFrame);
-      achievedSpatialAccelerationVector.getLinearPart(achievedLinearAcceleration);
+      achievedLinearAcceleration.setIncludingFrame(achievedSpatialAccelerationVector.getLinearPart());
       subtractCoriolisAcceleration(achievedLinearAcceleration);
       yoAchievedLinearAcceleration.setMatchingFrame(achievedLinearAcceleration);
    }
@@ -443,7 +443,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private void computeDerivativeTerm(FrameVector3D feedbackTermToPack)
    {
       controlFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
-      currentTwist.getLinearPart(currentLinearVelocity);
+      currentLinearVelocity.setIncludingFrame(currentTwist.getLinearPart());
       currentLinearVelocity.changeFrame(worldFrame);
       yoCurrentLinearVelocity.set(currentLinearVelocity);
 
@@ -544,8 +544,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private void addCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
    {
       controlFrame.getTwistOfFrame(currentTwist);
-      currentTwist.getAngularPart(currentAngularVelocity);
-      currentTwist.getLinearPart(currentLinearVelocity);
+      currentAngularVelocity.setIncludingFrame(currentTwist.getAngularPart());
+      currentLinearVelocity.setIncludingFrame(currentTwist.getLinearPart());
 
       biasLinearAcceleration.setToZero(controlFrame);
       biasLinearAcceleration.cross(currentLinearVelocity, currentAngularVelocity);
@@ -571,8 +571,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private void subtractCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
    {
       controlFrame.getTwistOfFrame(currentTwist);
-      currentTwist.getAngularPart(currentAngularVelocity);
-      currentTwist.getLinearPart(currentLinearVelocity);
+      currentAngularVelocity.setIncludingFrame(currentTwist.getAngularPart());
+      currentLinearVelocity.setIncludingFrame(currentTwist.getLinearPart());
 
       biasLinearAcceleration.setToZero(controlFrame);
       biasLinearAcceleration.cross(currentLinearVelocity, currentAngularVelocity);

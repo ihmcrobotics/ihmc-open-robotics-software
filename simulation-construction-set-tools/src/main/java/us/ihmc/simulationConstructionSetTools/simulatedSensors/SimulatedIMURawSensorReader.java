@@ -201,7 +201,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    {
       twistInIMUFrame.setIncludingFrame(twist);
       twistInIMUFrame.changeFrame(imuFrame);
-      twistInIMUFrame.getAngularPart(angularVelocity);
+      angularVelocity.set(twistInIMUFrame.getAngularPart());
 
       perfGyroX.set(angularVelocity.getX());
       perfGyroY.set(angularVelocity.getY());

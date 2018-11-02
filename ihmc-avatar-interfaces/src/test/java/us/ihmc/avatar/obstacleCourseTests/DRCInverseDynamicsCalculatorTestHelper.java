@@ -575,10 +575,10 @@ public class DRCInverseDynamicsCalculatorTestHelper
       Twist rootJointTwist = new Twist();
       sixDoFJoint.getJointTwist(rootJointTwist);
 
-      floatingJoint.setAngularVelocityInBody(rootJointTwist.getAngularPartCopy());
+      floatingJoint.setAngularVelocityInBody(new Vector3D(rootJointTwist.getAngularPart()));
 
       FrameVector3D linearVelocityInWorld = new FrameVector3D();
-      rootJointTwist.getLinearPart(linearVelocityInWorld);
+      linearVelocityInWorld.setIncludingFrame(rootJointTwist.getLinearPart());
 
       linearVelocityInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       floatingJoint.setVelocity(new Vector3D(linearVelocityInWorld));
@@ -776,8 +776,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
       linearAccelerationInBody.changeFrame(bodyFrame);
 
       SpatialAccelerationVector jointAcceleration = new SpatialAccelerationVector(bodyFrame, elevatorFrame, bodyFrame);
-      jointAcceleration.setLinearPart(linearAccelerationInBody);
-      jointAcceleration.setAngularPart(angularAccelerationInBody);
+      jointAcceleration.getLinearPart().set(linearAccelerationInBody);
+      jointAcceleration.getAngularPart().set(angularAccelerationInBody);
 
       sixDoFJoint.setDesiredAcceleration(jointAcceleration);
    }

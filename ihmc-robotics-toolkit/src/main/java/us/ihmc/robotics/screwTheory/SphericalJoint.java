@@ -44,21 +44,21 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    public void getJointTwist(Twist twistToPack)
    {
       twistToPack.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
-      twistToPack.setAngularPart(jointAngularVelocity);
+      twistToPack.getAngularPart().set(jointAngularVelocity);
    }
 
    @Override
    public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
-      accelerationToPack.setAngularPart(jointAngularAcceleration);
+      accelerationToPack.getAngularPart().set(jointAngularAcceleration);
    }
 
    @Override
    public void getDesiredJointAcceleration(SpatialAccelerationVector jointAcceleration)
    {
       jointAcceleration.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
-      jointAcceleration.setAngularPart(jointAngularAccelerationDesired);
+      jointAcceleration.getAngularPart().set(jointAngularAccelerationDesired);
    }
 
    @Override

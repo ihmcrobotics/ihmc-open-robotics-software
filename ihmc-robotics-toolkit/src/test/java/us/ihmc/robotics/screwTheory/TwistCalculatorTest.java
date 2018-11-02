@@ -65,7 +65,7 @@ public class TwistCalculatorTest
             cumulatedLinearVelocity.changeFrame(jointAxis.getReferenceFrame());
             cumulatedLinearVelocity.scaleAdd(joint.getQd(), jointAxis, cumulatedLinearVelocity);
             cumulatedLinearVelocity.changeFrame(bodyFrame);
-            expectedTwist.setLinearPart(cumulatedLinearVelocity);
+            expectedTwist.getLinearPart().set(cumulatedLinearVelocity);
 
             assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
          }
@@ -102,11 +102,11 @@ public class TwistCalculatorTest
             cumulatedAngularVelocity.changeFrame(jointAxis.getReferenceFrame());
             cumulatedAngularVelocity.scaleAdd(joint.getQd(), jointAxis, cumulatedAngularVelocity);
             cumulatedAngularVelocity.changeFrame(bodyFrame);
-            expectedTwist.setAngularPart(cumulatedAngularVelocity);
+            expectedTwist.getAngularPart().set(cumulatedAngularVelocity);
 
             expectedTwist.checkReferenceFramesMatch(actualTwist);
 
-            assertTrue(expectedTwist.angularPart.epsilonEquals(actualTwist.angularPart, 1.0e-12));
+            assertTrue(expectedTwist.getAngularPart().epsilonEquals(actualTwist.getAngularPart(), 1.0e-12));
          }
       }
    }
@@ -148,7 +148,7 @@ public class TwistCalculatorTest
             }
 
             cumulatedLinearVelocity.changeFrame(bodyFrame);
-            expectedTwist.setLinearPart(cumulatedLinearVelocity);
+            expectedTwist.getLinearPart().set(cumulatedLinearVelocity);
 
             assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
          }
@@ -192,11 +192,11 @@ public class TwistCalculatorTest
             }
 
             cumulatedAngularVelocity.changeFrame(bodyFrame);
-            expectedTwist.setAngularPart(cumulatedAngularVelocity);
+            expectedTwist.getAngularPart().set(cumulatedAngularVelocity);
 
             expectedTwist.checkReferenceFramesMatch(actualTwist);
 
-            assertTrue(expectedTwist.angularPart.epsilonEquals(actualTwist.angularPart, 1.0e-12));
+            assertTrue(expectedTwist.getAngularPart().epsilonEquals(actualTwist.getAngularPart(), 1.0e-12));
          }
       }
    }
@@ -452,7 +452,7 @@ public class TwistCalculatorTest
                EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity, actualLinearVelocity, 2.0e-5);
 
                FrameVector3D expectedAngularVelocity = new FrameVector3D();
-               expectedRelativeTwist.getAngularPart(expectedAngularVelocity);
+               expectedAngularVelocity.setIncludingFrame(expectedRelativeTwist.getAngularPart());
                FrameVector3D actualAngularVelocity = new FrameVector3D();
                twistCalculator.getRelativeAngularVelocity(base, body, actualAngularVelocity);
 
@@ -512,10 +512,10 @@ public class TwistCalculatorTest
       Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
 
       FrameVector3D bodyLinearVelocity = computeLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
-      expectedTwist.setLinearPart(bodyLinearVelocity);
+      expectedTwist.getLinearPart().set(bodyLinearVelocity);
 
       FrameVector3D bodyAngularVelocity = computeAngularVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
-      expectedTwist.setAngularPart(bodyAngularVelocity);
+      expectedTwist.getAngularPart().set(bodyAngularVelocity);
       return expectedTwist;
    }
 

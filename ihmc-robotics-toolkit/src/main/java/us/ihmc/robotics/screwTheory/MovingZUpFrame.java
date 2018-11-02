@@ -75,6 +75,6 @@ public class MovingZUpFrame extends MovingReferenceFrame
       twistRelativeToParentToPack.changeFrame(this);
       twistRelativeToParentToPack.setBodyFrame(this);
       twistRelativeToParentToPack.setBaseFrame(rootFrame);
-      twistRelativeToParentToPack.setAngularPart(0.0, 0.0, yawDot);
+      twistRelativeToParentToPack.getAngularPart().set(0.0, 0.0, yawDot);
    }
 }

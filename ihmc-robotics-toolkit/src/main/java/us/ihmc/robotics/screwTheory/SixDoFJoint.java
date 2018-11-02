@@ -84,13 +84,13 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
-      jointTwist.getAngularPart(angularVelocityToPack);
+      angularVelocityToPack.set(jointTwist.getAngularPart());
    }
 
    @Override
    public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
-      jointTwist.getLinearPart(linearVelocityToPack);
+      linearVelocityToPack.set(jointTwist.getLinearPart());
    }
 
    @Override
@@ -363,9 +363,9 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    public void setLinearVelocityInWorld(Vector3D linearVelocityInWorld)
    {
       Twist newTwist = new Twist(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), ReferenceFrame.getWorldFrame());
-      newTwist.setLinearPart(linearVelocityInWorld);
+      newTwist.getLinearPart().set(linearVelocityInWorld);
       newTwist.changeFrame(jointTwist.getReferenceFrame());
-      newTwist.setAngularPart(jointTwist.getAngularPart());
+      newTwist.getAngularPart().set(jointTwist.getAngularPart());
 
       jointTwist.setIncludingFrame(newTwist);
    }
@@ -397,19 +397,19 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
       setPosition(sixDoFOriginalJoint.jointTranslation);
       setRotation(sixDoFOriginalJoint.jointRotation);
 
-      jointTwist.setAngularPart(sixDoFOriginalJoint.jointTwist.getAngularPart());
-      jointTwist.setLinearPart(sixDoFOriginalJoint.jointTwist.getLinearPart());
+      jointTwist.getAngularPart().set(sixDoFOriginalJoint.jointTwist.getAngularPart());
+      jointTwist.getLinearPart().set(sixDoFOriginalJoint.jointTwist.getLinearPart());
 
-      jointAcceleration.setAngularPart(sixDoFOriginalJoint.jointAcceleration.getAngularPart());
-      jointAcceleration.setLinearPart(sixDoFOriginalJoint.jointAcceleration.getLinearPart());
+      jointAcceleration.getAngularPart().set(sixDoFOriginalJoint.jointAcceleration.getAngularPart());
+      jointAcceleration.getLinearPart().set(sixDoFOriginalJoint.jointAcceleration.getLinearPart());
    }
 
    @Override
    public void setQddDesired(InverseDynamicsJoint originalJoint)
    {
       SixDoFJoint sixDoFOriginalJoint = checkAndGetAsSiXDoFJoint(originalJoint);
-      jointAccelerationDesired.setAngularPart(sixDoFOriginalJoint.jointAccelerationDesired.getAngularPart());
-      jointAccelerationDesired.setLinearPart(sixDoFOriginalJoint.jointAccelerationDesired.getLinearPart());
+      jointAccelerationDesired.getAngularPart().set(sixDoFOriginalJoint.jointAccelerationDesired.getAngularPart());
+      jointAccelerationDesired.getLinearPart().set(sixDoFOriginalJoint.jointAccelerationDesired.getLinearPart());
    }
 
    @Override

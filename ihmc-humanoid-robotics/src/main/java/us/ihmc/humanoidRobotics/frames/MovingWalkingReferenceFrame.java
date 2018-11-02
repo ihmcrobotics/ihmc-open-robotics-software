@@ -65,12 +65,12 @@ public class MovingWalkingReferenceFrame extends MovingReferenceFrame
       twistRelativeToParentToPack.setToZero(this, getParent(), this);
 
       Twist twistOfMidFootFrame = midFootZUpGroundFrame.getTwistOfFrame();
-      twistOfMidFootFrame.getAngularPart(angularVelocity);
-      twistOfMidFootFrame.getLinearPart(linearVelocity);
+      angularVelocity.setIncludingFrame(twistOfMidFootFrame.getAngularPart());
+      linearVelocity.setIncludingFrame(twistOfMidFootFrame.getLinearPart());
 
       pelvisFrame.getTwistRelativeToOther(midFootZUpGroundFrame, twistOfPelvisRelativeToMidFootFrame);
 
-      twistOfPelvisRelativeToMidFootFrame.getLinearPart(linearPelvisVelocity);
+      linearPelvisVelocity.setIncludingFrame(twistOfPelvisRelativeToMidFootFrame.getLinearPart());
       linearPelvisVelocity.changeFrame(this);
 
       angularVelocity.changeFrame(this);
@@ -82,7 +82,7 @@ public class MovingWalkingReferenceFrame extends MovingReferenceFrame
 
       linearVelocity.add(linearVelocityOffset);
 
-      twistRelativeToParentToPack.setAngularPart(angularVelocity);
-      twistRelativeToParentToPack.setLinearPart(linearVelocity);
+      twistRelativeToParentToPack.getAngularPart().set(angularVelocity);
+      twistRelativeToParentToPack.getLinearPart().set(linearVelocity);
    }
 }

@@ -75,8 +75,8 @@ public class MotionQPInputCalculatorTest
          centerOfMassFrame.update();
 
          SpatialAccelerationVector desiredSpatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, rootFrame, endEffectorFrame);
-         desiredSpatialAcceleration.setLinearPart(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
-         desiredSpatialAcceleration.setAngularPart(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         desiredSpatialAcceleration.getLinearPart().set(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         desiredSpatialAcceleration.getAngularPart().set(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
          spatialAccelerationCommand.setSpatialAcceleration(endEffectorFrame, desiredSpatialAcceleration);
 
          motionQPInputCalculator.initialize();
@@ -106,8 +106,8 @@ public class MotionQPInputCalculatorTest
          ReferenceFrame controlFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("controlFrame" + i, endEffectorFrame, controlFrameTransform);
 
          SpatialAccelerationVector desiredSpatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, rootFrame, controlFrame);
-         desiredSpatialAcceleration.setLinearPart(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
-         desiredSpatialAcceleration.setAngularPart(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         desiredSpatialAcceleration.getLinearPart().set(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         desiredSpatialAcceleration.getAngularPart().set(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
          spatialAccelerationCommand.setSpatialAcceleration(controlFrame, desiredSpatialAcceleration);
 
          motionQPInputCalculator.initialize();

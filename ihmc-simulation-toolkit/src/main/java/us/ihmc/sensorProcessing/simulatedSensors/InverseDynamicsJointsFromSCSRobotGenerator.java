@@ -315,10 +315,10 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
                   sixDoFJoint.getDesiredJointAcceleration(spatialAccelerationVector);
                else
                   sixDoFJoint.getJointAcceleration(spatialAccelerationVector);
-               spatialAccelerationVector.getLinearPart(originAcceleration);
+               originAcceleration.setIncludingFrame(spatialAccelerationVector.getLinearPart());
                originAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
                floatingJoint.setAcceleration(originAcceleration);
-               spatialAccelerationVector.getAngularPart(angularAcceleration);
+               angularAcceleration.setIncludingFrame(spatialAccelerationVector.getAngularPart());
                floatingJoint.setAngularAccelerationInBody(angularAcceleration);
             }
          }

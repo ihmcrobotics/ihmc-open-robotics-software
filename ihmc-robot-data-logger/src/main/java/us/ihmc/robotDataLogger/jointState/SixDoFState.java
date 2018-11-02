@@ -124,11 +124,11 @@ public class SixDoFState extends JointState
 
    public void getTwistAngularPart(Vector3D tempVector)
    {
-      twist.getAngularPart(tempVector);
+      tempVector.set(twist.getAngularPart());
    }
    
    public void getTwistLinearPart(Vector3D tempVector)
    {
-      twist.getLinearPart(tempVector);
+      tempVector.set(twist.getLinearPart());
    }
 }

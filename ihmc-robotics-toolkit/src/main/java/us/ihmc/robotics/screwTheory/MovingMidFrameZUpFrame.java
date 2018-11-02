@@ -66,15 +66,15 @@ public class MovingMidFrameZUpFrame extends MovingReferenceFrame
       Twist twistOfFrameOne = frameOne.getTwistOfFrame();
       Twist twistOfFrameTwo = frameTwo.getTwistOfFrame();
 
-      twistOfFrameOne.getLinearPart(linearVelocityOne);
-      twistOfFrameTwo.getLinearPart(linearVelocityTwo);
+      linearVelocityOne.setIncludingFrame(twistOfFrameOne.getLinearPart());
+      linearVelocityTwo.setIncludingFrame(twistOfFrameTwo.getLinearPart());
 
       linearVelocityOne.changeFrame(this);
       linearVelocityTwo.changeFrame(this);
       linearVelocity.setToZero(this);
       linearVelocity.interpolate(linearVelocityOne, linearVelocityTwo, 0.5);
       twistRelativeToParentToPack.setToZero(this, getParent(), this);
-      twistRelativeToParentToPack.setLinearPart(linearVelocity);
+      twistRelativeToParentToPack.getLinearPart().set(linearVelocity);
 
       linearVelocityOne.sub(linearVelocity);
       linearVelocityTwo.sub(linearVelocity);

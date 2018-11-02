@@ -116,8 +116,8 @@ public class CentroidalMomentumMatrixSCSTest
          sixDoFJoint.setRotation(rotation);
          Twist jointTwist = new Twist();
          sixDoFJoint.getJointTwist(jointTwist);
-         jointTwist.setAngularPart(angularVelocity);
-         jointTwist.setLinearPart(linearVelocityInBody);
+         jointTwist.getAngularPart().set(angularVelocity);
+         jointTwist.getLinearPart().set(linearVelocityInBody);
          sixDoFJoint.setJointTwist(jointTwist);
          elevator.updateFramesRecursively();
 

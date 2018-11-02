@@ -104,8 +104,8 @@ public class BlendedPoseTrajectoryGeneratorTest
          linearVelocity.changeFrame(expressedInFrame);
          angularVelocity.changeFrame(expressedInFrame);
          Twist twist = new Twist(bodyFrame, baseFrame, expressedInFrame);
-         twist.setLinearPart(linearVelocity);
-         twist.setAngularPart(angularVelocity);
+         twist.getLinearPart().set(linearVelocity);
+         twist.getAngularPart().set(angularVelocity);
          return twist;
       }
 

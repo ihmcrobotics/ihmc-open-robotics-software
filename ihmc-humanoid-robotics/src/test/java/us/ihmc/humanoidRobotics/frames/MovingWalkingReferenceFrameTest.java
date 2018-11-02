@@ -179,9 +179,9 @@ public class MovingWalkingReferenceFrameTest
          {
             twistRelativeToParentToPack.setToZero(this, parentFrame, this);
             linearVelocity.changeFrame(this);
-            twistRelativeToParentToPack.setLinearPart(linearVelocity);
+            twistRelativeToParentToPack.getLinearPart().set(linearVelocity);
             angularVelocity.changeFrame(this);
-            twistRelativeToParentToPack.setAngularPart(angularVelocity);
+            twistRelativeToParentToPack.getAngularPart().set(angularVelocity);
          }
       };
    }
