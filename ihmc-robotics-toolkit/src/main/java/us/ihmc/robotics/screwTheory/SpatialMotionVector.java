@@ -444,7 +444,7 @@ public abstract class SpatialMotionVector implements Clearable
       matrixToPack.set(rowStart + 5, columnIndex, linearPart.getZ());
    }
 
-   public void getArray(double[] array, int offset)
+   public void get(int offset, double[] array)
    {
       array[offset + 0] = angularPart.getX();
       array[offset + 1] = angularPart.getY();

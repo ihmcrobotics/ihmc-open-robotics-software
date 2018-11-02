@@ -36,7 +36,7 @@ public class SixDoFState extends JointState
       array[5] = translation.getY();
       array[6] = translation.getZ();
 
-      twist.getArray(array, 7);
+      twist.get(7, array);
    }
 
    public void update(DoubleBuffer buffer)
