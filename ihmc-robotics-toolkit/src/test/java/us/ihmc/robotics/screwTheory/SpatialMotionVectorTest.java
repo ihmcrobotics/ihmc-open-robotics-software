@@ -92,16 +92,16 @@ public class SpatialMotionVectorTest
       twist1.invert();
 
       double epsilon = 1e-10;
-      EuclidCoreTestTools.assertTuple3DEquals(angularPartInverse, twist1.getAngularPartCopy(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(linearPartInverse, twist1.getLinearPartCopy(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(angularPartInverse, new Vector3D(twist1.getAngularPart()), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(linearPartInverse, new Vector3D(twist1.getLinearPart()), epsilon);
       assertEquals(frameA, twist1.getReferenceFrame());
       assertEquals(frameB, twist1.getBaseFrame());
       assertEquals(frameA, twist1.getBodyFrame());
 
       SpatialMotionVector twist2 = createSpatialMotionVector(frameB, frameA, frameB, linearPart, angularPart);
       twist2.invert();
-      EuclidCoreTestTools.assertTuple3DEquals(angularPartInverse, twist2.getAngularPartCopy(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(linearPartInverse, twist2.getLinearPartCopy(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(angularPartInverse, new Vector3D(twist2.getAngularPart()), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(linearPartInverse, new Vector3D(twist2.getLinearPart()), epsilon);
       assertEquals(frameB, twist2.getReferenceFrame());
       assertEquals(frameB, twist2.getBaseFrame());
       assertEquals(frameA, twist2.getBodyFrame());
@@ -164,8 +164,8 @@ public class SpatialMotionVectorTest
       vector.limitLinearPartMagnitude(maximumLinearMagnitude);
       vector.limitAngularPartMagnitude(maximumAngularMagnitude);
             
-      assertEquals(linearLength, vector.getLinearPartCopy().length(), 1e-7);
-      assertEquals(angularLength, vector.getAngularPartCopy().length(), 1e-7);
+      assertEquals(linearLength, new Vector3D(vector.getLinearPart()).length(), 1e-7);
+      assertEquals(angularLength, new Vector3D(vector.getAngularPart()).length(), 1e-7);
       
       maximumLinearMagnitude = 1.9;
       maximumAngularMagnitude = 0.4;
@@ -173,8 +173,8 @@ public class SpatialMotionVectorTest
       vector.limitLinearPartMagnitude(maximumLinearMagnitude);
       vector.limitAngularPartMagnitude(maximumAngularMagnitude);
             
-      assertEquals(maximumLinearMagnitude, vector.getLinearPartCopy().length(), 1e-7);
-      assertEquals(maximumAngularMagnitude, vector.getAngularPartCopy().length(), 1e-7);
+      assertEquals(maximumLinearMagnitude, new Vector3D(vector.getLinearPart()).length(), 1e-7);
+      assertEquals(maximumAngularMagnitude, new Vector3D(vector.getAngularPart()).length(), 1e-7);
             
    }
 
@@ -237,8 +237,8 @@ public class SpatialMotionVectorTest
          assertEquals(vector1.getBaseFrame(), vector2.getBaseFrame());
          assertEquals(vector1.getReferenceFrame(), vector2.getReferenceFrame());
 
-         EuclidCoreTestTools.assertTuple3DEquals(vector1.getAngularPartCopy(), vector2.getAngularPartCopy(), epsilon);
-         EuclidCoreTestTools.assertTuple3DEquals(vector1.getLinearPartCopy(), vector2.getLinearPartCopy(), epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(vector1.getAngularPart()), new Vector3D(vector2.getAngularPart()), epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(vector1.getLinearPart()), new Vector3D(vector2.getLinearPart()), epsilon);
       }
    }
 }

@@ -120,8 +120,8 @@ public class CenterOfMassJacobianTest
       sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.nextRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
       sixDoFJoint.getJointTwist(sixDoFJointTwist);
-      sixDoFJointTwist.setLinearPart(RandomGeometry.nextVector3D(random));
-      sixDoFJointTwist.setAngularPart(RandomGeometry.nextVector3D(random));
+      sixDoFJointTwist.getLinearPart().set(RandomGeometry.nextVector3D(random));
+      sixDoFJointTwist.getAngularPart().set(RandomGeometry.nextVector3D(random));
       sixDoFJoint.setJointTwist(sixDoFJointTwist);
 
       ScrewTestTools.setRandomPositions(revoluteJoints, random);
@@ -184,7 +184,7 @@ public class CenterOfMassJacobianTest
       Twist rootJointTwist = new Twist();
       rootJoint.getJointTwist(rootJointTwist);
       FrameVector3D rootJointLinearVelocity = new FrameVector3D(rootJointFrame);
-      rootJointTwist.getLinearPart(rootJointLinearVelocity);
+      rootJointLinearVelocity.setIncludingFrame(rootJointTwist.getLinearPart());
       
       CenterOfMassJacobian jacobianBody = new CenterOfMassJacobian(ScrewTools.computeSupportAndSubtreeSuccessors(elevator), ScrewTools.computeSubtreeJoints(body0), elevator.getBodyFixedFrame());
       jacobianBody.compute();
@@ -199,7 +199,7 @@ public class CenterOfMassJacobianTest
       comVelocityWorld.changeFrame(rootJointFrame);
       
       FrameVector3D angularVelocityBody = new FrameVector3D(rootJointFrame);
-      rootJointTwist.getAngularPart(angularVelocityBody);
+      angularVelocityBody.setIncludingFrame(rootJointTwist.getAngularPart());
 
       CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(elevator, rootJointFrame);
       centerOfMassCalculator.compute();

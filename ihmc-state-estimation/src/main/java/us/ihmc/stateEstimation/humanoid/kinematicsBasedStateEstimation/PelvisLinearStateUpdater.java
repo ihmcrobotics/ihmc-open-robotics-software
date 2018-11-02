@@ -381,7 +381,7 @@ public class PelvisLinearStateUpdater
       tempVelocity.setIncludingFrame(rootJointVelocity);
       rootJoint.getJointTwist(rootJointTwist);
       tempVelocity.changeFrame(rootJointTwist.getReferenceFrame());
-      rootJointTwist.setLinearPart(tempVelocity);
+      rootJointTwist.getLinearPart().set(tempVelocity);
       rootJoint.setJointTwist(rootJointTwist);
       rootJoint.updateFramesRecursively();
    }

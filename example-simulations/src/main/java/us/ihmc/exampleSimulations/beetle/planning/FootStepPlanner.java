@@ -223,7 +223,7 @@ public class FootStepPlanner
    {
       pelvis.getBodyFixedFrame().getTwistOfFrame(twistToPack);
       twistToPack.changeFrame(ReferenceFrame.getWorldFrame());
-      twistToPack.getAngularPart(angularVelocity);
+      angularVelocity.setIncludingFrame(twistToPack.getAngularPart());
 
       centerOfMassJacobian.compute();
       centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);

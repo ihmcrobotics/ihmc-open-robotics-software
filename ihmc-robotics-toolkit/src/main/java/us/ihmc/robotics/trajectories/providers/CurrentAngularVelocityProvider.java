@@ -17,6 +17,6 @@ public class CurrentAngularVelocityProvider implements VectorProvider
    public void get(FrameVector3D frameVectorToPack)
    {
       referenceFrame.getTwistOfFrame(twist);
-      twist.getAngularPart(frameVectorToPack);
+      frameVectorToPack.setIncludingFrame(twist.getAngularPart());
    }
 }

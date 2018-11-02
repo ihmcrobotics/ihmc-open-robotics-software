@@ -254,7 +254,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       twistRootJointFrameRelativeToMeasurementLink.setBodyFrame(rootJointFrame);
 
       // omega_{rootJointFrame}^{rootJointFrame, measurementLink}
-      twistRootJointFrameRelativeToMeasurementLink.getAngularPart(angularVelocityRootJointFrameRelativeToMeasurementLink);
+      angularVelocityRootJointFrameRelativeToMeasurementLink.setIncludingFrame(twistRootJointFrameRelativeToMeasurementLink.getAngularPart());
 
       // omega_{measurementLink}^{measurementFrame, world}
       angularVelocityMeasurement.set(imuProcessedOutput.getAngularVelocityMeasurement());
@@ -272,7 +272,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       angularVelocityRootJointFrameRelativeToWorld.add(angularVelocityRootJointFrameRelativeToMeasurementLink, angularVelocityMeasurementLinkRelativeToWorld);
 
       rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
-      twistRootBodyRelativeToWorld.setAngularPart(angularVelocityRootJointFrameRelativeToWorld);
+      twistRootBodyRelativeToWorld.getAngularPart().set(angularVelocityRootJointFrameRelativeToWorld);
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
       rootJoint.updateFramesRecursively();
 

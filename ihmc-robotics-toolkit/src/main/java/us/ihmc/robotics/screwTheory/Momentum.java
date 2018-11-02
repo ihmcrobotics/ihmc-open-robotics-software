@@ -92,7 +92,7 @@ public class Momentum extends SpatialForceVector
    public double computeKineticCoEnergy(Twist twist)
    {
       getReferenceFrame().checkReferenceFrameMatch(twist.getReferenceFrame());
-      double ret = linearPart.dot(twist.linearPart) + angularPart.dot(twist.angularPart);
+      double ret = linearPart.dot(twist.getLinearPart()) + angularPart.dot(twist.getAngularPart());
 
       return ret;
    }

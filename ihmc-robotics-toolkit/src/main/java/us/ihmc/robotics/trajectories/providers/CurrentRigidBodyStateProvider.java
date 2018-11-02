@@ -24,7 +24,7 @@ public class CurrentRigidBodyStateProvider
    public void getLinearVelocity(FrameVector3D linearVelocityToPack)
    {
       frameOfInterest.getTwistOfFrame(twist);
-      twist.getLinearPart(linearVelocityToPack);
+      linearVelocityToPack.setIncludingFrame(twist.getLinearPart());
    }
    
    public void getOrientation(FrameQuaternion orientationToPack)
@@ -35,6 +35,6 @@ public class CurrentRigidBodyStateProvider
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       frameOfInterest.getTwistOfFrame(twist);
-      twist.getAngularPart(angularVelocityToPack);
+      angularVelocityToPack.setIncludingFrame(twist.getAngularPart());
    }
 }

@@ -199,7 +199,7 @@ public class TwistCalculator
    public void getAngularVelocityOfBody(RigidBody body, FrameVector3D angularVelocityToPack)
    {
       getTwistOfBody(body, twistForGetAngularVelocityOfBody);
-      twistForGetAngularVelocityOfBody.getAngularPart(angularVelocityToPack);
+      angularVelocityToPack.setIncludingFrame(twistForGetAngularVelocityOfBody.getAngularPart());
    }
 
    /**
@@ -218,7 +218,7 @@ public class TwistCalculator
    public void getRelativeAngularVelocity(RigidBody base, RigidBody body, FrameVector3D angularVelocityToPack)
    {
       getRelativeTwist(base, body, twistForGetAngularVelocityOfBody);
-      twistForGetAngularVelocityOfBody.getAngularPart(angularVelocityToPack);
+      angularVelocityToPack.setIncludingFrame(twistForGetAngularVelocityOfBody.getAngularPart());
    }
 
    /**

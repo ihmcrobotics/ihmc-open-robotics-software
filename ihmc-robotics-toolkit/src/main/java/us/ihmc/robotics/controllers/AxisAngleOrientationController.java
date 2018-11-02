@@ -131,10 +131,10 @@ public class AxisAngleOrientationController
       twistToPack.setToZero(bodyFrame, desiredTwist.getBaseFrame(), bodyFrame);
 
       desiredOrientation.setIncludingFrame(desiredPose.getOrientation());
-      desiredTwist.getAngularPart(desiredAngularVelocity);
-      desiredTwist.getAngularPart(feedForwardAngularAction);
+      desiredAngularVelocity.setIncludingFrame(desiredTwist.getAngularPart());
+      feedForwardAngularAction.setIncludingFrame(desiredTwist.getAngularPart());
       compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, null, feedForwardAngularAction);
-      twistToPack.setAngularPart(angularActionFromOrientationController);
+      twistToPack.getAngularPart().set(angularActionFromOrientationController);
    }
 
    private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)

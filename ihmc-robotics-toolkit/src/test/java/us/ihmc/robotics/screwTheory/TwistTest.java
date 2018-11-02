@@ -44,23 +44,23 @@ public class TwistTest extends SpatialMotionVectorTest
 
       // test getters
       double epsilon = 1e-14;
-      Vector3D angularVelocity2 = twist.getAngularPartCopy();
+      Vector3D angularVelocity2 = new Vector3D(twist.getAngularPart());
       EuclidCoreTestTools.assertTuple3DEquals(angularVelocity, angularVelocity2, epsilon);
 
-      Vector3D linearVelocity2 = twist.getLinearPartCopy();
+      Vector3D linearVelocity2 = new Vector3D(twist.getLinearPart());
       EuclidCoreTestTools.assertTuple3DEquals(linearVelocity, linearVelocity2, epsilon);
 
       EuclidCoreTestTools.assertTuple3DEquals(angularVelocity, angularVelocity2, epsilon);    // make sure the linear velocity setter didn't change the angular velocity
 
       // test setters
       Vector3D angularVelocity3 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      twist.setAngularPart(angularVelocity3);
+      twist.getAngularPart().set(angularVelocity3);
 
       Vector3D linearVelocity3 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      twist.setLinearPart(linearVelocity3);
+      twist.getLinearPart().set(linearVelocity3);
 
-      Vector3D angularVelocity4 = twist.getAngularPartCopy();
-      Vector3D linearVelocity4 = twist.getLinearPartCopy();
+      Vector3D angularVelocity4 = new Vector3D(twist.getAngularPart());
+      Vector3D linearVelocity4 = new Vector3D(twist.getLinearPart());
 
       EuclidCoreTestTools.assertTuple3DEquals(angularVelocity3, angularVelocity4, epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(linearVelocity3, linearVelocity4, epsilon);
@@ -241,10 +241,10 @@ public class TwistTest extends SpatialMotionVectorTest
       linearVelocity1.add(linearVelocity2);
 
       double epsilon = 1e-14;
-      Vector3D angularVelocity1Plus2 = twist1.getAngularPartCopy();
+      Vector3D angularVelocity1Plus2 = new Vector3D(twist1.getAngularPart());
       EuclidCoreTestTools.assertTuple3DEquals(angularVelocity1, angularVelocity1Plus2, epsilon);
 
-      Vector3D linearVelocity1Plus2 = twist1.getLinearPartCopy();
+      Vector3D linearVelocity1Plus2 = new Vector3D(twist1.getLinearPart());
       EuclidCoreTestTools.assertTuple3DEquals(linearVelocity1, linearVelocity1Plus2, epsilon);
 
       // Should throw exception if try it the other way:
@@ -352,8 +352,8 @@ public class TwistTest extends SpatialMotionVectorTest
          twist1.changeFrame(frameC);
          assertEquals(frameC, twist1.getReferenceFrame());
 
-         Vector3D omega1InC2 = twist1.getAngularPartCopy();
-         Vector3D v1InC2 = twist1.getLinearPartCopy();
+         Vector3D omega1InC2 = new Vector3D(twist1.getAngularPart());
+         Vector3D v1InC2 = new Vector3D(twist1.getLinearPart());
 
          double epsilon = 1e-8;
          EuclidCoreTestTools.assertTuple3DEquals(omega1InC, omega1InC2, epsilon);
@@ -544,8 +544,8 @@ public class TwistTest extends SpatialMotionVectorTest
     */
    private static DenseMatrix64F toTildeForm(Twist twist)
    {
-      Vector3D angularVelocity = twist.getAngularPartCopy();
-      Vector3D linearVelocity = twist.getLinearPartCopy();
+      Vector3D angularVelocity = new Vector3D(twist.getAngularPart());
+      Vector3D linearVelocity = new Vector3D(twist.getLinearPart());
 
       DenseMatrix64F ret = new DenseMatrix64F(4, 4);
       MatrixTools.vectorToSkewSymmetricMatrix(ret, angularVelocity);

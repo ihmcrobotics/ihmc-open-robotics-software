@@ -149,7 +149,7 @@ public class CentroidalMomentumRateADotVTerm
       {
          throw new RuntimeException("Your robot has zero mass");
       }
-      comTwist.setLinearPart(comVelocityVector); //Velocity of CoM w.r.t rootBody expressed in CoM frame. Angular part is zero.
+      comTwist.getLinearPart().set(comVelocityVector); //Velocity of CoM w.r.t rootBody expressed in CoM frame. Angular part is zero.
    }
 
    public DenseMatrix64F getMatrix()

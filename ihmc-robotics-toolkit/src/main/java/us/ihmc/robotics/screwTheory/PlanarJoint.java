@@ -80,8 +80,8 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    {
       PlanarJoint floatingJoint = checkAndGetAsPlanarJoint(originalJoint);
 
-      jointAccelerationDesired.setAngularPart(floatingJoint.jointAccelerationDesired.getAngularPart());
-      jointAccelerationDesired.setLinearPart(floatingJoint.jointAccelerationDesired.getLinearPart());
+      jointAccelerationDesired.getAngularPart().set(floatingJoint.jointAccelerationDesired.getAngularPart());
+      jointAccelerationDesired.getLinearPart().set(floatingJoint.jointAccelerationDesired.getLinearPart());
    }
 
    @Override
@@ -378,7 +378,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
       double zd = matrix.get(index++, 0);
       jointTwist.setToZero();
       jointTwist.setAngularPartY(qdRot);
-      jointTwist.setLinearPart(xd, 0.0, zd);
+      jointTwist.getLinearPart().set(xd, 0.0, zd);
    }
 
    @Override

@@ -370,7 +370,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       controlPosition.changeFrame(pelvis.getBodyFixedFrame());
       yoControlFrame.setOffsetToParentToTranslationOnly(controlPosition);
       yoControlFrame.getTwistRelativeToOther(baseFrame, twist);
-      twist.getLinearPart(currentLinearVelocity);
+      currentLinearVelocity.setIncludingFrame(twist.getLinearPart());
 
       currentLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       controlPosition.changeFrame(ReferenceFrame.getWorldFrame());

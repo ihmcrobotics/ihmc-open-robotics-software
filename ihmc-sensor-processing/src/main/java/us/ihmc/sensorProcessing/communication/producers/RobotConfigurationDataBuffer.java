@@ -197,8 +197,8 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       rootJoint.getJointTwist(rootJointTwist);
       Vector3D pelvisAngularVelocity = robotConfigurationData.getPelvisAngularVelocity();
       Vector3D pelvisLinearVelocity = robotConfigurationData.getPelvisLinearVelocity();
-      rootJointTwist.setAngularPart(pelvisAngularVelocity);
-      rootJointTwist.setLinearPart(pelvisLinearVelocity);
+      rootJointTwist.getAngularPart().set(pelvisAngularVelocity);
+      rootJointTwist.getLinearPart().set(pelvisLinearVelocity);
       rootJoint.setJointTwist(rootJointTwist);
 
       rootJoint.getPredecessor().updateFramesRecursively();

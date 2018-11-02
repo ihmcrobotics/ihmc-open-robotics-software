@@ -258,8 +258,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
-      desiredSpatialAcceleration.getAngularPart(desiredAngularAcceleration);
-      desiredSpatialAcceleration.getLinearPart(desiredLinearAcceleration);
+      desiredAngularAcceleration.set(desiredSpatialAcceleration.getAngularPart());
+      desiredLinearAcceleration.set(desiredSpatialAcceleration.getLinearPart());
    }
 
    /**

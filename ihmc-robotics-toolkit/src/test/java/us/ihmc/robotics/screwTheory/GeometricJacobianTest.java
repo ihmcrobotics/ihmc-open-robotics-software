@@ -176,8 +176,8 @@ public class GeometricJacobianTest
       CommonOps.mult(bodyManipulatorJacobian.getJacobianMatrix(), qd, twistMatrixFromBodyManipulatorJacobian);
       Twist twistFromBodyManipulatorJacobian = new Twist(bodyManipulatorJacobian.getEndEffectorFrame(), bodyManipulatorJacobian.getBaseFrame(),
                                                   bodyManipulatorJacobian.getJacobianFrame(), twistMatrixFromBodyManipulatorJacobian);
-      Vector3D omegaFromBodyManipulatorJacobian = twistFromBodyManipulatorJacobian.getAngularPartCopy();
-      Vector3D vFromBodyManipulatorJacobian = twistFromBodyManipulatorJacobian.getLinearPartCopy();
+      Vector3D omegaFromBodyManipulatorJacobian = new Vector3D(twistFromBodyManipulatorJacobian.getAngularPart());
+      Vector3D vFromBodyManipulatorJacobian = new Vector3D(twistFromBodyManipulatorJacobian.getLinearPart());
 
 
       DenseMatrix64F twistMatrixFromSpatialManipulatorJacobian = new DenseMatrix64F(Twist.SIZE, 1);
@@ -185,8 +185,8 @@ public class GeometricJacobianTest
 
       Twist twistFromSpatialManipulatorJacobian = new Twist(spatialManipulatorJacobian.getEndEffectorFrame(), spatialManipulatorJacobian.getBaseFrame(),
                                                      spatialManipulatorJacobian.getJacobianFrame(), twistMatrixFromSpatialManipulatorJacobian);
-      Vector3D omegaFromSpatialManipulatorJacobian = twistFromSpatialManipulatorJacobian.getAngularPartCopy();
-      Vector3D vFromSpatialManipulatorJacobian = twistFromSpatialManipulatorJacobian.getLinearPartCopy();
+      Vector3D omegaFromSpatialManipulatorJacobian = new Vector3D(twistFromSpatialManipulatorJacobian.getAngularPart());
+      Vector3D vFromSpatialManipulatorJacobian = new Vector3D(twistFromSpatialManipulatorJacobian.getLinearPart());
 
       // compare to hand calculations
       double q1 = joint1.getQ();

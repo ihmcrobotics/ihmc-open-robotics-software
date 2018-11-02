@@ -153,7 +153,7 @@ public class PelvisRotationalStateUpdaterTest
       rootJoint.getJointTwist(twistEstimated);
       
       EuclidCoreTestTools.assertQuaternionGeometricallyEquals(rotationExpected, rotationEstimated, EPS);
-      EuclidCoreTestTools.assertTuple3DEquals(twistExpected.getAngularPartCopy(), twistEstimated.getAngularPartCopy(), EPS);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(twistExpected.getAngularPart()), new Vector3D(twistEstimated.getAngularPart()), EPS);
       
       for (int i = 0; i < 1000; i++)
       {
@@ -174,7 +174,7 @@ public class PelvisRotationalStateUpdaterTest
          rootJoint.getJointTwist(twistEstimated);
          
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals(rotationExpected, rotationEstimated, EPS);
-         EuclidCoreTestTools.assertTuple3DEquals(twistExpected.getAngularPartCopy(), twistEstimated.getAngularPartCopy(), EPS);
+         EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(twistExpected.getAngularPart()), new Vector3D(twistEstimated.getAngularPart()), EPS);
       }
    }
 
@@ -208,7 +208,7 @@ public class PelvisRotationalStateUpdaterTest
          twistIMU.changeFrame(imuSensors.get(i).getMeasurementFrame());
          twistIMU.setBodyFrame(imuSensors.get(i).getMeasurementFrame());
          
-         Vector3D sensorValue = twistIMU.getAngularPartCopy();
+         Vector3D sensorValue = new Vector3D(twistIMU.getAngularPart());
          jointAndIMUSensorDataSource.setAngularVelocitySensorValue(imuDefinition, sensorValue);
       }
    }

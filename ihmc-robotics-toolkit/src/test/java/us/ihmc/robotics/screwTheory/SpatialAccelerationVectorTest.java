@@ -65,18 +65,18 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 
          if (t > deltaT / 2.0)    // numerically differentiating, so don't do the first step
          {
-            Vector3D linearAccelerationNewFrameNumeric = numericallyDifferentiate(previousLinearVelocity, twistInA.getLinearPartCopy(), deltaT);
-            Vector3D angularAccelerationNewFrameNumeric = numericallyDifferentiate(previousAngularVelocity, twistInA.getAngularPartCopy(), deltaT);
+            Vector3D linearAccelerationNewFrameNumeric = numericallyDifferentiate(previousLinearVelocity, new Vector3D(twistInA.getLinearPart()), deltaT);
+            Vector3D angularAccelerationNewFrameNumeric = numericallyDifferentiate(previousAngularVelocity, new Vector3D(twistInA.getAngularPart()), deltaT);
 
-            Vector3D linearAccelerationNewFrameAnalytic = acceleration.getLinearPartCopy();
-            Vector3D angularAccelerationNewFrameAnalytic = acceleration.getAngularPartCopy();
+            Vector3D linearAccelerationNewFrameAnalytic = new Vector3D(acceleration.getLinearPart());
+            Vector3D angularAccelerationNewFrameAnalytic = new Vector3D(acceleration.getAngularPart());
 
             EuclidCoreTestTools.assertTuple3DEquals("t = " + t, linearAccelerationNewFrameNumeric, linearAccelerationNewFrameAnalytic, epsilon);
             EuclidCoreTestTools.assertTuple3DEquals("t = " + t, angularAccelerationNewFrameNumeric, angularAccelerationNewFrameAnalytic, epsilon);
          }
 
-         previousLinearVelocity.set(twistInA.getLinearPartCopy());
-         previousAngularVelocity.set(twistInA.getAngularPartCopy());
+         previousLinearVelocity.set(new Vector3D(twistInA.getLinearPart()));
+         previousAngularVelocity.set(new Vector3D(twistInA.getAngularPart()));
       }
    }
 
@@ -167,14 +167,14 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       accel.changeFrame(frameB, twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
 
       FrameVector3D expected = new FrameVector3D();
-      accel.getLinearPart(expected);
+      expected.setIncludingFrame(accel.getLinearPart());
 
       FrameVector3D crossPart = new FrameVector3D(expected.getReferenceFrame());
       twist.changeFrame(expected.getReferenceFrame());
       FrameVector3D omega = new FrameVector3D();
-      twist.getAngularPart(omega);
+      omega.setIncludingFrame(twist.getAngularPart());
       FrameVector3D v = new FrameVector3D();
-      twist.getLinearPart(v);
+      v.setIncludingFrame(twist.getLinearPart());
       crossPart.cross(omega, v);
       expected.add(crossPart);
       expected.changeFrame(accelerationOfPointFixedInFrameB.getReferenceFrame());
@@ -237,10 +237,10 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       linearVelocity1.add(linearVelocity2);
 
       double epsilon = 1e-14;
-      Vector3D angularVelocity1Plus2 = spatialMotionVector1.getAngularPartCopy();
+      Vector3D angularVelocity1Plus2 = new Vector3D(spatialMotionVector1.getAngularPart());
       EuclidCoreTestTools.assertTuple3DEquals(angularVelocity1, angularVelocity1Plus2, epsilon);
 
-      Vector3D linearVelocity1Plus2 = spatialMotionVector1.getLinearPartCopy();
+      Vector3D linearVelocity1Plus2 = new Vector3D(spatialMotionVector1.getLinearPart());
       EuclidCoreTestTools.assertTuple3DEquals(linearVelocity1, linearVelocity1Plus2, epsilon);
 
       // Should throw exception if try it the other way:

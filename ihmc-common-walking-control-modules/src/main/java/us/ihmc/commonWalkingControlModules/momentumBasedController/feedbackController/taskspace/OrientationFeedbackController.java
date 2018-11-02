@@ -395,7 +395,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    public void computeAchievedAcceleration()
    {
       spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector, endEffectorAchievedAcceleration);
-      endEffectorAchievedAcceleration.getAngularPart(achievedAngularAcceleration);
+      achievedAngularAcceleration.setIncludingFrame(endEffectorAchievedAcceleration.getAngularPart());
 
       yoAchievedAngularAcceleration.setMatchingFrame(achievedAngularAcceleration);
    }
@@ -461,7 +461,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    public void computeDerivativeTerm(FrameVector3D feedbackTermToPack)
    {
       endEffectorFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
-      currentTwist.getAngularPart(currentAngularVelocity);
+      currentAngularVelocity.setIncludingFrame(currentTwist.getAngularPart());
       currentAngularVelocity.changeFrame(worldFrame);
       yoCurrentAngularVelocity.set(currentAngularVelocity);
 

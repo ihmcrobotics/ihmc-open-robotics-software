@@ -139,8 +139,8 @@ public class MovingZUpFrameTest
             protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
             {
                twistRelativeToParentToPack.setToZero(this, getParent(), this);
-               twistRelativeToParentToPack.setAngularPart(originalAngularVelocity);
-               twistRelativeToParentToPack.setLinearPart(originalLinearVelocity);
+               twistRelativeToParentToPack.getAngularPart().set(originalAngularVelocity);
+               twistRelativeToParentToPack.getLinearPart().set(originalLinearVelocity);
             }
          };
 
@@ -152,7 +152,7 @@ public class MovingZUpFrameTest
          double[] yawPitchRoll = new double[3];
          originalTransform.getRotationYawPitchRoll(yawPitchRoll);
          Twist expectedTwist = new Twist(zUpFrame, ReferenceFrame.getWorldFrame(), randomMovingFrame);
-         expectedTwist.setLinearPart(originalLinearVelocity);
+         expectedTwist.getLinearPart().set(originalLinearVelocity);
          expectedTwist.changeFrame(zUpFrame);
          expectedTwist.setAngularPartZ(RotationTools.computeYawRate(yawPitchRoll, originalAngularVelocity, true));
 

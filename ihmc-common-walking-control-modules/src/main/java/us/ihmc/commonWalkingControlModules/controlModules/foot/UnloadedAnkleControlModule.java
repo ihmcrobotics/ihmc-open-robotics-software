@@ -93,7 +93,7 @@ public class UnloadedAnkleControlModule
       desiredOrientation.changeFrame(shinFrame);
       desiredAngularVelocity.changeFrame(shinFrame);
 
-      shinFrame.getTwistOfFrame().getAngularPart(shinAngularVelocity);
+      shinAngularVelocity.setIncludingFrame(shinFrame.getTwistOfFrame().getAngularPart());
       shinAngularVelocity.checkReferenceFrameMatch(desiredAngularVelocity);
       footAngularVelocityInShin.setToZero(shinFrame);
       footAngularVelocityInShin.sub(desiredAngularVelocity, shinAngularVelocity);

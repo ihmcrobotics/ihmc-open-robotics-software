@@ -4,12 +4,11 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.interfaces.Clearable;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
@@ -19,8 +18,8 @@ public abstract class SpatialMotionVector implements Clearable
    protected ReferenceFrame bodyFrame;
    protected ReferenceFrame baseFrame;
    protected ReferenceFrame expressedInFrame;
-   protected final Vector3D linearPart = new Vector3D();
-   protected final Vector3D angularPart = new Vector3D();
+   private final FrameVector3D linearPart = new FrameVector3D();
+   private final FrameVector3D angularPart = new FrameVector3D();
 
    public SpatialMotionVector()
    {
@@ -94,8 +93,8 @@ public abstract class SpatialMotionVector implements Clearable
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
-      this.angularPart.set(0, array);
-      this.linearPart.set(3, array);
+      this.getAngularPart().set(0, array);
+      this.getLinearPart().set(3, array);
    }
 
    /**
@@ -136,33 +135,8 @@ public abstract class SpatialMotionVector implements Clearable
       this.baseFrame = other.baseFrame;
       this.expressedInFrame = other.expressedInFrame;
 
-      this.linearPart.set(other.linearPart);
-      this.angularPart.set(other.angularPart);
-   }
-
-   /**
-    * Sets the angular velocity part of the spatial motion vector
-    */
-   public void setAngularPart(double x, double y, double z)
-   {
-      angularPart.set(x, y, z);
-   }
-
-   /**
-    * Sets the angular velocity part of the spatial motion vector
-    */
-   public void setAngularPart(Vector3DReadOnly newAngularVelocity)
-   {
-      angularPart.set(newAngularVelocity);
-   }
-
-   /**
-    * Sets the angular velocity part of the spatial motion vector
-    */
-   public void setAngularPart(FrameVector3DReadOnly newAngularVelocity)
-   {
-      expressedInFrame.checkReferenceFrameMatch(newAngularVelocity.getReferenceFrame());
-      angularPart.set(newAngularVelocity);
+      this.getLinearPart().set(other.getLinearPart());
+      this.getAngularPart().set(other.getAngularPart());
    }
 
    /**
@@ -170,7 +144,7 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public void setAngularPartX(double val)
    {
-      angularPart.setX(val);
+      getAngularPart().setX(val);
    }
 
    /**
@@ -178,7 +152,7 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public void setAngularPartY(double val)
    {
-      angularPart.setY(val);
+      getAngularPart().setY(val);
    }
 
    /**
@@ -186,7 +160,7 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public void setAngularPartZ(double val)
    {
-      angularPart.setZ(val);
+      getAngularPart().setZ(val);
    }
 
    /**
@@ -194,7 +168,7 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public void setLinearPartX(double val)
    {
-      linearPart.setX(val);
+      getLinearPart().setX(val);
    }
 
    /**
@@ -202,7 +176,7 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public void setLinearPartY(double val)
    {
-      linearPart.setY(val);
+      getLinearPart().setY(val);
    }
 
    /**
@@ -210,32 +184,7 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public void setLinearPartZ(double val)
    {
-      linearPart.setZ(val);
-   }
-
-   /**
-    * Sets the linear velocity part of the spatial motion vector
-    */
-   public void setLinearPart(double x, double y, double z)
-   {
-      linearPart.set(x, y, z);
-   }
-
-   /**
-    * Sets the linear velocity part of the spatial motion vector
-    */
-   public void setLinearPart(Vector3DReadOnly newLinearVelocity)
-   {
-      linearPart.set(newLinearVelocity);
-   }
-
-   /**
-    * Sets the linear velocity part of the spatial motion vector
-    */
-   public void setLinearPart(FrameVector3DReadOnly newLinearVelocity)
-   {
-      expressedInFrame.checkReferenceFrameMatch(newLinearVelocity.getReferenceFrame());
-      linearPart.set(newLinearVelocity);
+      getLinearPart().setZ(val);
    }
 
    /**
@@ -244,8 +193,8 @@ public abstract class SpatialMotionVector implements Clearable
    @Override
    public void setToZero()
    {
-      angularPart.setToZero();
-      linearPart.setToZero();
+      getAngularPart().setToZero();
+      getLinearPart().setToZero();
    }
 
    /**
@@ -254,8 +203,8 @@ public abstract class SpatialMotionVector implements Clearable
    @Override
    public void setToNaN()
    {
-      angularPart.setToNaN();
-      linearPart.setToNaN();
+      getAngularPart().setToNaN();
+      getLinearPart().setToNaN();
    }
 
    /**
@@ -264,7 +213,7 @@ public abstract class SpatialMotionVector implements Clearable
    @Override
    public boolean containsNaN()
    {
-      return angularPart.containsNaN() || linearPart.containsNaN();
+      return getAngularPart().containsNaN() || getLinearPart().containsNaN();
    }
 
    /**
@@ -278,13 +227,13 @@ public abstract class SpatialMotionVector implements Clearable
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
 
-      angularPart.setX(matrix.get(rowStart + 0, 0));
-      angularPart.setY(matrix.get(rowStart + 1, 0));
-      angularPart.setZ(matrix.get(rowStart + 2, 0));
+      getAngularPart().setX(matrix.get(rowStart + 0, 0));
+      getAngularPart().setY(matrix.get(rowStart + 1, 0));
+      getAngularPart().setZ(matrix.get(rowStart + 2, 0));
 
-      linearPart.setX(matrix.get(rowStart + 3, 0));
-      linearPart.setY(matrix.get(rowStart + 4, 0));
-      linearPart.setZ(matrix.get(rowStart + 5, 0));
+      getLinearPart().setX(matrix.get(rowStart + 3, 0));
+      getLinearPart().setY(matrix.get(rowStart + 4, 0));
+      getLinearPart().setZ(matrix.get(rowStart + 5, 0));
    }
 
    /**
@@ -297,8 +246,8 @@ public abstract class SpatialMotionVector implements Clearable
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
 
-      this.linearPart.set(linearPart);
-      this.angularPart.set(angularPart);
+      this.getLinearPart().set(linearPart);
+      this.getAngularPart().set(angularPart);
    }
 
    /**
@@ -313,8 +262,8 @@ public abstract class SpatialMotionVector implements Clearable
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
 
-      this.linearPart.set(linearPart);
-      this.angularPart.set(angularPart);
+      this.getLinearPart().set(linearPart);
+      this.getAngularPart().set(angularPart);
    }
 
    public void set(DenseMatrix64F matrix)
@@ -328,14 +277,14 @@ public abstract class SpatialMotionVector implements Clearable
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
 
-      this.linearPart.set(0.0, 0.0, 0.0);
-      this.angularPart.set(0.0, 0.0, 0.0);
+      this.getLinearPart().set(0.0, 0.0, 0.0);
+      this.getAngularPart().set(0.0, 0.0, 0.0);
    }
 
    /**
     * @return the angular part. For efficiency.
     */
-   protected Vector3DReadOnly getAngularPart()
+   public FixedFrameVector3DBasics getAngularPart()
    {
       return angularPart;
    }
@@ -343,7 +292,7 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * @return the linear part. For efficiency.
     */
-   protected Vector3DReadOnly getLinearPart()
+   public FixedFrameVector3DBasics getLinearPart()
    {
       return linearPart;
    }
@@ -353,7 +302,7 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public double getAngularPartX()
    {
-      return angularPart.getX();
+      return getAngularPart().getX();
    }
 
    /**
@@ -361,7 +310,7 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public double getAngularPartY()
    {
-      return angularPart.getY();
+      return getAngularPart().getY();
    }
 
    /**
@@ -369,7 +318,7 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public double getAngularPartZ()
    {
-      return angularPart.getZ();
+      return getAngularPart().getZ();
    }
 
    /**
@@ -377,7 +326,7 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public double getLinearPartX()
    {
-      return linearPart.getX();
+      return getLinearPart().getX();
    }
 
    /**
@@ -385,7 +334,7 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public double getLinearPartY()
    {
-      return linearPart.getY();
+      return getLinearPart().getY();
    }
 
    /**
@@ -393,23 +342,7 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public double getLinearPartZ()
    {
-      return linearPart.getZ();
-   }
-
-   /**
-    * @return a copy of the angular part
-    */
-   public Vector3D getAngularPartCopy()
-   {
-      return new Vector3D(angularPart);
-   }
-
-   /**
-    * @return a copy of the linear part
-    */
-   public Vector3D getLinearPartCopy()
-   {
-      return new Vector3D(linearPart);
+      return getLinearPart().getZ();
    }
 
    /**
@@ -435,87 +368,45 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public void get(int rowStart, int columnIndex, DenseMatrix64F matrixToPack)
    {
-      matrixToPack.set(rowStart + 0, columnIndex, angularPart.getX());
-      matrixToPack.set(rowStart + 1, columnIndex, angularPart.getY());
-      matrixToPack.set(rowStart + 2, columnIndex, angularPart.getZ());
+      matrixToPack.set(rowStart + 0, columnIndex, getAngularPart().getX());
+      matrixToPack.set(rowStart + 1, columnIndex, getAngularPart().getY());
+      matrixToPack.set(rowStart + 2, columnIndex, getAngularPart().getZ());
 
-      matrixToPack.set(rowStart + 3, columnIndex, linearPart.getX());
-      matrixToPack.set(rowStart + 4, columnIndex, linearPart.getY());
-      matrixToPack.set(rowStart + 5, columnIndex, linearPart.getZ());
+      matrixToPack.set(rowStart + 3, columnIndex, getLinearPart().getX());
+      matrixToPack.set(rowStart + 4, columnIndex, getLinearPart().getY());
+      matrixToPack.set(rowStart + 5, columnIndex, getLinearPart().getZ());
    }
 
    public void get(int offset, double[] array)
    {
-      array[offset + 0] = angularPart.getX();
-      array[offset + 1] = angularPart.getY();
-      array[offset + 2] = angularPart.getZ();
-      array[offset + 3] = linearPart.getX();
-      array[offset + 4] = linearPart.getY();
-      array[offset + 5] = linearPart.getZ();
-   }
-
-   /**
-    * Packs an existing Vector3d with the angular velocity part
-    */
-   public void getAngularPart(Vector3DBasics vectorToPack)
-   {
-      vectorToPack.set(this.angularPart);
-   }
-
-   /**
-    * Packs an existing Vector3d with the linear velocity part
-    */
-   public void getLinearPart(Vector3DBasics vectorToPack)
-   {
-      vectorToPack.set(this.linearPart);
+      array[offset + 0] = getAngularPart().getX();
+      array[offset + 1] = getAngularPart().getY();
+      array[offset + 2] = getAngularPart().getZ();
+      array[offset + 3] = getLinearPart().getX();
+      array[offset + 4] = getLinearPart().getY();
+      array[offset + 5] = getLinearPart().getZ();
    }
 
    public void limitLinearPartMagnitude(double maximumMagnitude)
    {
       if (maximumMagnitude < 1e-7)
-         linearPart.set(0.0, 0.0, 0.0);
+         getLinearPart().set(0.0, 0.0, 0.0);
 
-      if (linearPart.lengthSquared() > maximumMagnitude * maximumMagnitude)
+      if (getLinearPart().lengthSquared() > maximumMagnitude * maximumMagnitude)
       {
-         linearPart.scale(maximumMagnitude / linearPart.length());
+         getLinearPart().scale(maximumMagnitude / getLinearPart().length());
       }
    }
 
    public void limitAngularPartMagnitude(double maximumMagnitude)
    {
       if (maximumMagnitude < 1e-7)
-         angularPart.set(0.0, 0.0, 0.0);
+         getAngularPart().set(0.0, 0.0, 0.0);
 
-      if (angularPart.lengthSquared() > maximumMagnitude * maximumMagnitude)
+      if (getAngularPart().lengthSquared() > maximumMagnitude * maximumMagnitude)
       {
-         angularPart.scale(maximumMagnitude / angularPart.length());
+         getAngularPart().scale(maximumMagnitude / getAngularPart().length());
       }
-   }
-
-   public double getAngularPartMagnitude()
-   {
-      return angularPart.length();
-   }
-
-   public double getLinearPartMagnitude()
-   {
-      return linearPart.length();
-   }
-
-   /**
-    * Packs an existing FrameVector with the angular velocity part
-    */
-   public void getAngularPart(FrameVector3DBasics vectorToPack)
-   {
-      vectorToPack.setIncludingFrame(expressedInFrame, this.angularPart);
-   }
-
-   /**
-    * Packs an existing FrameVector with the linear velocity part
-    */
-   public void getLinearPart(FrameVector3DBasics vectorToPack)
-   {
-      vectorToPack.setIncludingFrame(expressedInFrame, this.linearPart);
    }
 
    /**
@@ -525,8 +416,8 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public void times(double scalar)
    {
-      this.angularPart.scale(scalar);
-      this.linearPart.scale(scalar);
+      this.getAngularPart().scale(scalar);
+      this.getLinearPart().scale(scalar);
    }
 
    /**
@@ -543,8 +434,8 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public void invert()
    {
-      angularPart.scale(-1.0);
-      linearPart.scale(-1.0);
+      getAngularPart().scale(-1.0);
+      getLinearPart().scale(-1.0);
       ReferenceFrame oldBaseFrame = baseFrame;
       baseFrame = bodyFrame;
       bodyFrame = oldBaseFrame;
@@ -558,17 +449,17 @@ public abstract class SpatialMotionVector implements Clearable
 
    public void scaleLinearPart(double scalar)
    {
-      this.linearPart.scale(scalar);
+      this.getLinearPart().scale(scalar);
    }
 
    public void scaleAngularPart(double scalar)
    {
-      this.angularPart.scale(scalar);
+      this.getAngularPart().scale(scalar);
    }
 
    public void normalize()
    {
-      double norm = Math.sqrt(linearPart.lengthSquared() + angularPart.lengthSquared());
+      double norm = Math.sqrt(getLinearPart().lengthSquared() + getAngularPart().lengthSquared());
       double scalar = 1.0 / norm;
       scaleLinearPart(scalar);
       scaleAngularPart(scalar);
@@ -590,9 +481,9 @@ public abstract class SpatialMotionVector implements Clearable
    {
       checkReferenceFramesMatch(spatialMotionVector);
 
-      if (!linearPart.epsilonEquals(spatialMotionVector.linearPart, epsilon))
+      if (!getLinearPart().epsilonEquals(spatialMotionVector.getLinearPart(), epsilon))
          return false;
-      if (!angularPart.epsilonEquals(spatialMotionVector.angularPart, epsilon))
+      if (!getAngularPart().epsilonEquals(spatialMotionVector.getAngularPart(), epsilon))
          return false;
 
       return true;
@@ -638,7 +529,7 @@ public abstract class SpatialMotionVector implements Clearable
    public String toString()
    {
       String ret = new String("Spatial motion of " + bodyFrame + ", with respect to " + baseFrame + ", expressed in frame " + expressedInFrame + "\n"
-            + "Angular part: " + angularPart + "\n" + "Linear part: " + linearPart);
+            + "Angular part: " + getAngularPart() + "\n" + "Linear part: " + getLinearPart());
 
       return ret;
    }

@@ -473,13 +473,13 @@ public class ScrewTestTools
    {
       twist.changeFrame(twist.getBodyFrame());
       Vector3D dPosition = new Vector3D();
-      twist.getLinearPart(dPosition); // velocity in body frame
+      dPosition.set(twist.getLinearPart()); // velocity in body frame
       rotationToPack.transform(dPosition); // velocity in base frame
       dPosition.scale(dt); // translation in base frame
       positionToPack.add(dPosition);
 
       Vector3D axis = new Vector3D();
-      twist.getAngularPart(axis);
+      axis.set(twist.getAngularPart());
       axis.scale(dt);
       double angle = axis.length();
       if (angle > 0.0)
@@ -509,8 +509,8 @@ public class ScrewTestTools
    {
       Twist jointTwist = new Twist();
       rootJoint.getJointTwist(jointTwist);
-      jointTwist.setAngularPart(RandomGeometry.nextVector3D(random));
-      jointTwist.setLinearPart(RandomGeometry.nextVector3D(random));
+      jointTwist.getAngularPart().set(RandomGeometry.nextVector3D(random));
+      jointTwist.getLinearPart().set(RandomGeometry.nextVector3D(random));
       rootJoint.setJointTwist(jointTwist);
    }
 
@@ -518,8 +518,8 @@ public class ScrewTestTools
    {
       SpatialAccelerationVector jointAcceleration = new SpatialAccelerationVector();
       rootJoint.getJointAcceleration(jointAcceleration);
-      jointAcceleration.setAngularPart(RandomGeometry.nextVector3D(random));
-      jointAcceleration.setLinearPart(RandomGeometry.nextVector3D(random));
+      jointAcceleration.getAngularPart().set(RandomGeometry.nextVector3D(random));
+      jointAcceleration.getLinearPart().set(RandomGeometry.nextVector3D(random));
       rootJoint.setAcceleration(jointAcceleration);
    }
 
@@ -546,8 +546,8 @@ public class ScrewTestTools
 
       Twist rootJointTwist = new Twist();
       sixDoFJoint.getJointTwist(rootJointTwist);
-      rootJointTwist.angularPart.add(deltaTwist.angularPart);
-      rootJointTwist.linearPart.add(deltaTwist.linearPart);
+      rootJointTwist.getAngularPart().add(deltaTwist.getAngularPart());
+      rootJointTwist.getLinearPart().add(deltaTwist.getLinearPart());
       sixDoFJoint.setJointTwist(rootJointTwist);
    }
 
@@ -559,8 +559,8 @@ public class ScrewTestTools
 
       Twist rootJointTwist = new Twist();
       sixDoFJoint.getJointTwist(rootJointTwist);
-      rootJointTwist.angularPart.add(deltaTwist.angularPart);
-      rootJointTwist.linearPart.add(deltaTwist.linearPart);
+      rootJointTwist.getAngularPart().add(deltaTwist.getAngularPart());
+      rootJointTwist.getLinearPart().add(deltaTwist.getLinearPart());
       sixDoFJoint.setJointTwist(rootJointTwist);
 
 
@@ -573,8 +573,8 @@ public class ScrewTestTools
       sixDoFJoint.getTranslation(position);
 
       deltaTwist.scale(0.5 * dt);
-      deltaConfiguration.angularPart.add(deltaTwist.getAngularPart());
-      deltaConfiguration.linearPart.add(deltaTwist.getLinearPart());
+      deltaConfiguration.getAngularPart().add(deltaTwist.getAngularPart());
+      deltaConfiguration.getLinearPart().add(deltaTwist.getLinearPart());
 
       integrate(rotation, position, dt, deltaConfiguration);
 

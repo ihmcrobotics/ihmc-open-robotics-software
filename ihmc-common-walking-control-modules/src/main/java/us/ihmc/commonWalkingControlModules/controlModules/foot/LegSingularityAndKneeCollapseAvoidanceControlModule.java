@@ -474,7 +474,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
       pelvis.getBodyFixedFrame().getTwistOfFrame(pelvisTwist);
       //      pelvisTwist.changeFrame(virtualLegTangentialFrameAnkleCentered);
-      pelvisTwist.getLinearPart(pelvisLinearVelocity);
+      pelvisLinearVelocity.setIncludingFrame(pelvisTwist.getLinearPart());
       pelvisLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
 
       isSwingMechanicalLimitAvoidanceUsed.set(true);
@@ -579,7 +579,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
       desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
       pelvis.getBodyFixedFrame().getTwistOfFrame(pelvisTwist);
-      pelvisTwist.getLinearPart(pelvisLinearVelocity);
+      pelvisLinearVelocity.setIncludingFrame(pelvisTwist.getLinearPart());
       pelvisLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
 
       if (checkVelocityForSwingSingularityAvoidance.getBooleanValue() && (desiredFootLinearVelocity.getZ() - pelvisLinearVelocity.getZ() > -1e-10))
