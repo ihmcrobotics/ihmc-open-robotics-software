@@ -99,7 +99,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     * Sets this spatial acceleration vector so that it is the same as another spatial acceleration
     * vector
     */
-   public void checkAndSet(SpatialAccelerationVector other)
+   public void set(SpatialAccelerationVector other)
    {
       super.checkAndSet(other);
    }
@@ -250,9 +250,9 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       }
    }
 
-   public void set(SpatialAccelerationVector other)
+   public void setIncludingFrame(SpatialAccelerationVector other)
    {
-      super.set(other);
+      super.setIncludingFrame(other);
    }
 
    /**

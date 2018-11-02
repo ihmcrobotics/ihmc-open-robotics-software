@@ -924,7 +924,7 @@ public class ScrewToolsTest
       assertTrue(external.keySet().contains(rigidBody3));
 
       Wrench expectedWrench = new Wrench();
-      expectedWrench.set(externalWrench2);
+      expectedWrench.setIncludingFrame(externalWrench2);
       expectedWrench.add(addedWrench2);
       
       assertTrue(expectedWrench.getAngularPartAsFrameVectorCopy().epsilonEquals(external.get(rigidBody3).getAngularPartAsFrameVectorCopy(), epsilon));

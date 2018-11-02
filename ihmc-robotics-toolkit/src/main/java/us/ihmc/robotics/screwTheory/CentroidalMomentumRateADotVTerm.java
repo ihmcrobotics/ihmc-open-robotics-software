@@ -80,7 +80,7 @@ public class CentroidalMomentumRateADotVTerm
          tempMomentum.compute(inertia, tempTwist); // I * J * v expressed in frame attached to CoM of rowRigidBody expressed as momentum 
          tempMomentum.changeFrame(centerOfMassFrame); // Adj^{T} * I * J * v
 
-         tempCoMTwist.set(comTwist);
+         tempCoMTwist.setIncludingFrame(comTwist);
 
          tempCoMTwist.changeFrame(tempTwist.getReferenceFrame());
          tempCoMTwist.sub(tempTwist); //Twist of the CoM w.r.t. body i expressed in CoM frame.
@@ -110,7 +110,7 @@ public class CentroidalMomentumRateADotVTerm
          DenseMatrix64F inertiaTimesSpatialAccel = MatrixTools.mult(inertia.toMatrix(), tempSpatialAcceleration.toMatrix());
 
          //Express as momentum to make multiplying by adjoint easier
-         tempMomentum.set(tempSpatialAcceleration.getReferenceFrame(), inertiaTimesSpatialAccel);
+         tempMomentum.setIncludingFrame(tempSpatialAcceleration.getReferenceFrame(), inertiaTimesSpatialAccel);
          // Ad^{T} * I * \dot{J} * v
          tempMomentum.changeFrame(centerOfMassFrame);
 

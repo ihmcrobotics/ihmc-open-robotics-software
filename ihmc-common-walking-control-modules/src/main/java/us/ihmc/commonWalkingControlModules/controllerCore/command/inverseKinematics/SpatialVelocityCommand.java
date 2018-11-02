@@ -720,7 +720,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    public void getDesiredSpatialVelocity(PoseReferenceFrame controlFrameToPack, Twist desiredSpatialVelocityToPack)
    {
       getControlFrame(controlFrameToPack);
-      desiredSpatialVelocityToPack.set(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(), controlFrameToPack, desiredAngularVelocity,
+      desiredSpatialVelocityToPack.setIncludingFrame(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(), controlFrameToPack, desiredAngularVelocity,
                                        desiredLinearVelocity);
    }
 

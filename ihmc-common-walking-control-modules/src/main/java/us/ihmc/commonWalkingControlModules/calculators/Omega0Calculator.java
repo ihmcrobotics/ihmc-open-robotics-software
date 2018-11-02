@@ -38,7 +38,7 @@ public class Omega0Calculator implements Omega0CalculatorInterface
 
    public double computeOmega0(SideDependentList<FramePoint2D> cop2ds, SpatialForceVector newTotalGroundReactionWrench)
    {
-      totalGroundReactionWrench.set(newTotalGroundReactionWrench);
+      totalGroundReactionWrench.setIncludingFrame(newTotalGroundReactionWrench);
       totalGroundReactionWrench.changeFrame(centerOfMassFrame);
       double fz = totalGroundReactionWrench.getLinearPartZ();
 

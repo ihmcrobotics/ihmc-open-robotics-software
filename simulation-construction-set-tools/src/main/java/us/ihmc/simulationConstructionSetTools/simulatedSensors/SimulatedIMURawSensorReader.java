@@ -199,7 +199,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
 
    protected void updatePerfectAngularVelocity()
    {
-      twistInIMUFrame.set(twist);
+      twistInIMUFrame.setIncludingFrame(twist);
       twistInIMUFrame.changeFrame(imuFrame);
       twistInIMUFrame.getAngularPart(angularVelocity);
 
@@ -210,7 +210,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
 
    protected void updatePerfectAcceleration()
    {
-      twistInWorldFrame.set(twist);
+      twistInWorldFrame.setIncludingFrame(twist);
       twistInWorldFrame.changeFrame(worldFrame);
 
       FramePoint3D imuFramePointInWorldFrame = new FramePoint3D(imuFramePoint);

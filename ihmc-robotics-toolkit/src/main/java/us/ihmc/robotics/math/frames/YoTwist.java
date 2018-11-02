@@ -55,7 +55,7 @@ public class YoTwist extends YoSpatialVector
    
    public void set(Twist twist)
    {
-      this.twist.checkAndSet(twist);
+      this.twist.set(twist);
       getYoValuesFromTwist();
    }
    

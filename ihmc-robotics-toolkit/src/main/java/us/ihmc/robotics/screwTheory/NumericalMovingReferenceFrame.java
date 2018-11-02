@@ -83,6 +83,6 @@ public class NumericalMovingReferenceFrame extends MovingReferenceFrame
          transformToRoot.inverseTransform(linearVelocity);
       }
 
-      twistRelativeToParentToPack.set(this, getParent(), this, angularVelocity, linearVelocity);
+      twistRelativeToParentToPack.setIncludingFrame(this, getParent(), this, angularVelocity, linearVelocity);
    }
 }

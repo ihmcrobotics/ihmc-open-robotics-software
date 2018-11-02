@@ -132,7 +132,7 @@ public class ProvidedMassMatrixToolRigidBody
 
       update();
 
-      toolAcceleration.set(handSpatialAccelerationVector);
+      toolAcceleration.setIncludingFrame(handSpatialAccelerationVector);
       toolAcceleration.changeFrameNoRelativeMotion(toolJoint.getFrameAfterJoint());
 
       // TODO: Take relative acceleration between uTorsoCoM and elevator in account

@@ -24,7 +24,7 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
    public void set(RigidBody rigidBody, Wrench externalWrench)
    {
       setRigidBody(rigidBody);
-      externalWrenchAppliedOnRigidBody.set(externalWrench);
+      externalWrenchAppliedOnRigidBody.setIncludingFrame(externalWrench);
       externalWrenchAppliedOnRigidBody.changeFrame(rigidBody.getBodyFixedFrame());
    }
 
@@ -48,7 +48,7 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
    {
       rigidBody = other.rigidBody;
       rigidBodyName = other.rigidBodyName;
-      externalWrenchAppliedOnRigidBody.set(other.externalWrenchAppliedOnRigidBody);
+      externalWrenchAppliedOnRigidBody.setIncludingFrame(other.externalWrenchAppliedOnRigidBody);
    }
 
    @Override

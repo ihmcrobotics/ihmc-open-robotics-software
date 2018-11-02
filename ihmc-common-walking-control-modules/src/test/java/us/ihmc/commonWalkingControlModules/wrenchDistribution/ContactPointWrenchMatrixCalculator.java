@@ -122,7 +122,7 @@ public class ContactPointWrenchMatrixCalculator
             CommonOps.mult(qBlock, rhoBlock, wrenchMatrix);
 
             Wrench wrench = new Wrench(rigidBody.getBodyFixedFrame(), centerOfMassFrame);
-            wrench.set(centerOfMassFrame, wrenchMatrix);
+            wrench.setIncludingFrame(centerOfMassFrame, wrenchMatrix);
             wrench.changeFrame(rigidBody.getBodyFixedFrame());
             wrenches.put(rigidBody, wrench);
             columnNumber += nColumns;

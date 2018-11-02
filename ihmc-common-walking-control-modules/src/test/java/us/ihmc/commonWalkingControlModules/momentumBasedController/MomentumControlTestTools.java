@@ -32,7 +32,7 @@ public class MomentumControlTestTools
       Wrench tempWrench = new Wrench();
       for (Wrench wrench : externalWrenches)
       {
-         tempWrench.set(wrench);
+         tempWrench.setIncludingFrame(wrench);
          tempWrench.changeFrame(centerOfMassFrame);
          totalWrench.add(tempWrench);
       }

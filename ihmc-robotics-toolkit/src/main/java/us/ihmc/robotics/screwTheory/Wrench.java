@@ -79,16 +79,16 @@ public class Wrench extends SpatialForceVector
       return bodyFrame;
    }
    
-   public void checkAndSet(Wrench other)
-   {
-      this.bodyFrame.checkReferenceFrameMatch(other.bodyFrame);
-      super.checkAndSet(other);
-   }
-
    public void set(Wrench other)
    {
+      this.bodyFrame.checkReferenceFrameMatch(other.bodyFrame);
+      super.set(other);
+   }
+
+   public void setIncludingFrame(Wrench other)
+   {
       this.bodyFrame = other.bodyFrame;
-      super.set(other.expressedInFrame, other.angularPart, other.linearPart);
+      super.setIncludingFrame(other.expressedInFrame, other.angularPart, other.linearPart);
    }
 
    /**
@@ -96,14 +96,14 @@ public class Wrench extends SpatialForceVector
     * @param bodyFrame the frame/body on which the wrench is exerted
     * @param expressedInFrame the frame in which the wrench is expressed
     */
-   public void set(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, DenseMatrix64F wrench)
+   public void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, DenseMatrix64F wrench)
    {
-      set(bodyFrame, expressedInFrame, wrench, 0);
+      setIncludingFrame(bodyFrame, expressedInFrame, wrench, 0);
    }
 
-   public void set(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, DenseMatrix64F wrench, int rowStart)
+   public void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, DenseMatrix64F wrench, int rowStart)
    {
-      set(expressedInFrame, wrench, rowStart);
+      setIncludingFrame(expressedInFrame, wrench, rowStart);
       this.bodyFrame = bodyFrame;
    }
 

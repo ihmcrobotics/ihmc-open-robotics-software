@@ -106,12 +106,12 @@ public class Twist extends SpatialMotionVector
    /**
     * Sets this twist so that it is the same as another twist
     */
-   public void checkAndSet(Twist other)
+   public void set(Twist other)
    {
       this.bodyFrame.checkReferenceFrameMatch(other.bodyFrame);
       this.baseFrame.checkReferenceFrameMatch(other.baseFrame);
       this.expressedInFrame.checkReferenceFrameMatch(other.expressedInFrame);
-      set(other);
+      setIncludingFrame(other);
    }
 
    /*
@@ -329,9 +329,9 @@ public class Twist extends SpatialMotionVector
       return power;
    }
 
-   public void set(Twist other)
+   public void setIncludingFrame(Twist other)
    {
-      super.set(other);
+      super.setIncludingFrame(other);
    }
 
    public void setScrew(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double angularVelocityMagnitude,

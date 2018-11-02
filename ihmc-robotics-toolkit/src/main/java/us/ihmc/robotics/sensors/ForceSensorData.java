@@ -70,7 +70,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly
    public void getWrench(Wrench wrenchToPack)
    {
       wrenchToPack.changeBodyFrameAttachedToSameBody(measurementFrame);
-      wrenchToPack.set(measurementFrame, wrench);
+      wrenchToPack.setIncludingFrame(measurementFrame, wrench);
    }
 
    @Override

@@ -147,7 +147,7 @@ public abstract class GeneralizedRigidBodyInertia
       this.mass = mass;
    }
 
-   public void set(GeneralizedRigidBodyInertia other)
+   public void setIncludingFrame(GeneralizedRigidBodyInertia other)
    {
       this.expressedInframe = other.expressedInframe;
       this.massMomentOfInertiaPart.set(other.massMomentOfInertiaPart);

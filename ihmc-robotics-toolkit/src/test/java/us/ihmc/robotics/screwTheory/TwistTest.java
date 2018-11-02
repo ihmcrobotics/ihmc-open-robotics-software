@@ -145,7 +145,7 @@ public class TwistTest extends SpatialMotionVectorTest
 
       // test that we're actually copying, not just using references
       inputMatrix = RandomMatrices.createRandom(Twist.SIZE, 1, random);
-      twist.set(frameD, frameA, frameC, inputMatrix, 0);
+      twist.setIncludingFrame(frameD, frameA, frameC, inputMatrix, 0);
       twist.getMatrix(twistMatrix, 0);
       twistCopy.getMatrix(twistCopyMatrix, 0);
 

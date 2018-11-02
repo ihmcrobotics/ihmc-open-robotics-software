@@ -99,7 +99,7 @@ public class ContactWrenchCommand implements InverseDynamicsCommand<ContactWrenc
    {
       this.constraintType = other.constraintType;
       this.rigidBody = other.rigidBody;
-      this.wrench.set(other.wrench);
+      this.wrench.setIncludingFrame(other.wrench);
       this.weightMatrix.set(other.weightMatrix);
       this.selectionMatrix.set(other.selectionMatrix);
    }
