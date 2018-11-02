@@ -38,12 +38,13 @@ public class FootstepPlannerUI
    private final FootPositionEditor footPositionEditor;
    private final StartGoalPositionViewer startGoalPositionViewer;
    private final StartGoalOrientationViewer startGoalOrientationViewer;
-   private final FootstepPathRenderer pathRenderer;
+   private final FootstepPathMeshViewer pathViewer;
    private final StartGoalOrientationEditor orientationEditor;
    private final NodeCheckerRenderer nodeCheckerRenderer;
    private final FootstepPlannerDataExporter dataExporter;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
+   private final OccupancyMapRenderer graphRenderer;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -123,30 +124,33 @@ public class FootstepPlannerUI
                                                          StartPositionTopic, GoalPositionTopic);
       this.footPositionEditor = new FootPositionEditor(messager, subScene);
       this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
-      this.pathRenderer = new FootstepPathRenderer(messager);
+      this.pathViewer = new FootstepPathMeshViewer(messager);
       this.nodeCheckerRenderer = new NodeCheckerRenderer(messager);
       this.dataExporter = new FootstepPlannerDataExporter(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
+      this.graphRenderer = new OccupancyMapRenderer(messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
-      view3dFactory.addNodeToView(pathRenderer.getRoot());
+      view3dFactory.addNodeToView(pathViewer.getRoot());
       view3dFactory.addNodeToView(nodeCheckerRenderer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
+      view3dFactory.addNodeToView(graphRenderer.getRoot());
 
       planarRegionViewer.start();
       startGoalPositionViewer.start();
       startGoalOrientationViewer.start();
       startGoalEditor.start();
       orientationEditor.start();
-      pathRenderer.start();
+      pathViewer.start();
       nodeCheckerRenderer.start();
       footPositionEditor.start();
       bodyPathMeshViewer.start();
       visibilityGraphsRenderer.start();
+      graphRenderer.start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -174,11 +178,12 @@ public class FootstepPlannerUI
       startGoalOrientationViewer.stop();
       startGoalEditor.stop();
       orientationEditor.stop();
-      pathRenderer.stop();
+      pathViewer.stop();
       nodeCheckerRenderer.stop();
       dataExporter.stop();
       bodyPathMeshViewer.stop();
       visibilityGraphsRenderer.stop();
+      graphRenderer.stop();
    }
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager) throws Exception

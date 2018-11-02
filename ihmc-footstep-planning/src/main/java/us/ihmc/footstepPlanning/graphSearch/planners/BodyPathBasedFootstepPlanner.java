@@ -83,7 +83,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
-      FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
+      FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
 
       footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, registry);
 

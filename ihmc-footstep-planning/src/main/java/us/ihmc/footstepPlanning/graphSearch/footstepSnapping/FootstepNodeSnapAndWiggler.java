@@ -21,20 +21,16 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
-   private final BipedalFootstepPlannerListener listener;
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
 
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private final PlanarRegion planarRegionToPack = new PlanarRegion();
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
 
-   public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParameters parameters,
-                                     BipedalFootstepPlannerListener listener)
+   public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParameters parameters)
    {
       super(parameters);
-
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
-      this.listener = listener;
    }
 
    @Override
@@ -62,7 +58,6 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       {
          if (parameters.getRejectIfCannotFullyWiggleInside())
          {
-            notifyListenerNodeUnderConsiderationWasRejected(footstepNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
             return FootstepNodeSnapData.emptyData();
          }
          else
@@ -157,21 +152,13 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
                   if (zPenetration > parameters.getMaximumZPenetrationOnValleyRegions())
                   {
-                     notifyListenerNodeUnderConsiderationWasRejected(node, BipedalFootstepPlannerNodeRejectionReason.TOO_MUCH_PENETRATION_AFTER_WIGGLE);
                      return true;
                   }
                }
             }
          }
       }
-      return false;
-   }
 
-   private void notifyListenerNodeUnderConsiderationWasRejected(FootstepNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
-   {
-      if (listener != null)
-      {
-         listener.nodeUnderConsiderationWasRejected(nodeToExpand, reason);
-      }
+      return false;
    }
 }

@@ -13,6 +13,8 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
@@ -27,7 +29,6 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepNodeSnapperReadOnly snapper;
 
-   private PlanarRegionsList planarRegionsList;
    private FootstepNode startNode;
 
    public PlanarRegionBaseOfCliffAvoider(FootstepPlannerParameters parameters, FootstepNodeSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> footPolygons)
@@ -81,7 +82,10 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
 
       double maximumCliffZInSoleFrame = findHighestPointInFrame(planarRegionsList, soleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame, new Point3D());
 
-      return maximumCliffZInSoleFrame < cliffHeightToAvoid;
+      boolean tooCloseToCliff = maximumCliffZInSoleFrame < cliffHeightToAvoid;
+      if(tooCloseToCliff)
+         rejectNode(node, BipedalFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
+      return tooCloseToCliff;
    }
    
    public static double findHighestPointInFrame(PlanarRegionsList planarRegionsList, RigidBodyTransform soleTransform, ArrayList<LineSegment2D> lineSegmentsInSoleFrame,
