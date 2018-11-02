@@ -144,7 +144,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    public void setDesiredAcceleration(DenseMatrix64F matrix, int rowStart)
    {
       jointAccelerationDesired.setIncludingFrame(jointAccelerationDesired.getBodyFrame(), jointAccelerationDesired.getBaseFrame(),
-                                   jointAccelerationDesired.getReferenceFrame(), matrix, rowStart);
+                                   jointAccelerationDesired.getReferenceFrame(), rowStart, matrix);
    }
 
    @Override
@@ -339,7 +339,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void setVelocity(DenseMatrix64F matrix, int rowStart)
    {
-      jointTwist.setIncludingFrame(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getReferenceFrame(), matrix, rowStart);
+      jointTwist.setIncludingFrame(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getReferenceFrame(), rowStart, matrix);
    }
 
    //FIXME: FIX THIS!!!!

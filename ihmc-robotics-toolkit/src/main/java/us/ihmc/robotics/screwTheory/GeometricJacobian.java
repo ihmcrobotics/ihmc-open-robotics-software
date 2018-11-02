@@ -178,7 +178,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    public void getTwist(DenseMatrix64F jointVelocities, Twist twistToPack)
    {
       CommonOps.mult(jacobian, jointVelocities, tempMatrix);
-      twistToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, tempMatrix, 0);
+      twistToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, 0, tempMatrix);
    }
 
    /**

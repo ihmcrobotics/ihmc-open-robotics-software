@@ -151,7 +151,7 @@ public class ForceSensorDistalMassCompensator
       yoSensorToDistalCoMvectorInWorld.sub(distalCoMInWorld, yoSensorPositionInWorld);
 
       distalMassWrench.setToZero(world);
-      distalMassWrench.setUsingArm(world, distalMassForceInWorld, yoSensorToDistalCoMvectorInWorld);
+      distalMassWrench.setIncludingFrame(null, distalMassForceInWorld, new FramePoint3D(yoSensorToDistalCoMvectorInWorld));
 
       yoSensorForceFromDistalMass.set(distalMassWrench.getReferenceFrame(), distalMassWrench.getLinearPartX(), distalMassWrench.getLinearPartY(), distalMassWrench.getLinearPartZ());
       yoSensorTorqueFromDistalMass.set(distalMassWrench.getReferenceFrame(), distalMassWrench.getAngularPartX(), distalMassWrench.getAngularPartY(), distalMassWrench.getAngularPartZ());

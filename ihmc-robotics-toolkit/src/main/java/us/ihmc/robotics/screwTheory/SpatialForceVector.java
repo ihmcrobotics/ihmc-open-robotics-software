@@ -3,10 +3,11 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -86,34 +87,7 @@ public class SpatialForceVector
       angularPart = new FrameVector3D(other.getAngularPart());
    }
 
-   /**
-    * Construct using linear part and arm
-    */
-   public static SpatialForceVector createUsingArm(ReferenceFrame expressedInFrame, Vector3DReadOnly linearPart, Vector3DReadOnly arm)
-   {
-      Vector3D moment = new Vector3D();
-      moment.cross(arm, linearPart);
-      SpatialForceVector ret = new SpatialForceVector(expressedInFrame, moment, linearPart);
-      return ret;
-   }
-
-   public void setUsingArm(ReferenceFrame expressedInFrame, Vector3DReadOnly linearPart, Vector3DReadOnly arm)
-   {
-      this.expressedInFrame = expressedInFrame;
-      this.getLinearPart().set(linearPart);
-      getAngularPart().cross(arm, linearPart);
-   }
-
-   public void setIncludingFrame(FrameVector3D force, FramePoint3D pointOfApplication)
-   {
-      force.checkReferenceFrameMatch(pointOfApplication);
-      expressedInFrame = force.getReferenceFrame();
-      getLinearPart().set(force);
-      tempVector.set(pointOfApplication);
-      getAngularPart().cross(tempVector, getLinearPart());
-   }
-
-   public void setIncludingFrame(FrameVector3D force, FrameVector3D moment, FramePoint3D pointOfApplication)
+   public void setIncludingFrame(FrameVector3DReadOnly moment, FrameVector3DReadOnly force, FramePoint3DReadOnly pointOfApplication)
    {
       force.checkReferenceFrameMatch(pointOfApplication);
       expressedInFrame = force.getReferenceFrame();
@@ -229,10 +203,10 @@ public class SpatialForceVector
 
    public void setIncludingFrame(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
-      setIncludingFrame(expressedInFrame, matrix, 0);
+      setIncludingFrame(expressedInFrame, 0, matrix);
    }
 
-   public void setIncludingFrame(ReferenceFrame expressedInFrame, DenseMatrix64F matrix, int rowStart)
+   public void setIncludingFrame(ReferenceFrame expressedInFrame, int rowStart, DenseMatrix64F matrix)
    {
       MathTools.checkEquals(matrix.getNumRows(), SIZE);
       MathTools.checkEquals(matrix.getNumCols(), 1);
@@ -294,17 +268,6 @@ public class SpatialForceVector
       matrix.set(3, column, getLinearPart().getX());
       matrix.set(4, column, getLinearPart().getY());
       matrix.set(5, column, getLinearPart().getZ());
-   }
-
-   /**
-    * Multiplies this spatial force vector by a scalar
-    * 
-    * @param scalar the scaling factor
-    */
-   public void times(double scalar)
-   {
-      getAngularPart().scale(scalar);
-      getLinearPart().scale(scalar);
    }
 
    /**
