@@ -98,10 +98,10 @@ public class Wrench extends SpatialForceVector
     */
    public void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, DenseMatrix64F wrench)
    {
-      setIncludingFrame(bodyFrame, expressedInFrame, wrench, 0);
+      setIncludingFrame(bodyFrame, expressedInFrame, 0, wrench);
    }
 
-   public void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, DenseMatrix64F wrench, int rowStart)
+   public void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, int rowStart, DenseMatrix64F wrench)
    {
       setIncludingFrame(expressedInFrame, rowStart, wrench);
       this.bodyFrame = bodyFrame;
