@@ -33,7 +33,7 @@ import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAcceleration;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -378,7 +378,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       yoDesiredLinearForce.setMatchingFrame(desiredLinearForce);
    }
 
-   private final SpatialAccelerationVector achievedSpatialAccelerationVector = new SpatialAccelerationVector();
+   private final SpatialAcceleration achievedSpatialAccelerationVector = new SpatialAcceleration();
 
    @Override
    public void computeAchievedAcceleration()

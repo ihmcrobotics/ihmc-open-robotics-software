@@ -16,7 +16,7 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAcceleration;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
 import us.ihmc.simulationConstructionSetTools.simulatedSensors.PerfectSimulatedIMURawSensorReader;
@@ -73,7 +73,7 @@ public class SimulatedIMURawSensorReaderTest
       Vector3D linearAcceleration = new Vector3D(0.0, 0.0, GRAVITY);
       Vector3D angularAcceleration = new Vector3D();
       ReferenceFrame rootBodyFrame = fullRobotModel.getElevatorFrame();
-      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBodyFrame, ReferenceFrame.getWorldFrame(), rootBodyFrame,
+      SpatialAcceleration rootAcceleration = new SpatialAcceleration(rootBodyFrame, ReferenceFrame.getWorldFrame(), rootBodyFrame,
                                                                                  angularAcceleration, linearAcceleration);
       simulatedIMURawSensorReader = new PerfectSimulatedIMURawSensorReader(rawSensors, IMU_INDEX, rigidBody, imuFrame, fullRobotModel.getElevator(),
                                                                            rootAcceleration);
@@ -337,7 +337,7 @@ public class SimulatedIMURawSensorReaderTest
          rootJoint.setJointTwist(bodyTwist);
 
          // Update Body Acceleration
-         SpatialAccelerationVector accelerationOfChestWithRespectToWorld = new SpatialAccelerationVector(bodyFrame, worldFrame, bodyFrame,
+         SpatialAcceleration accelerationOfChestWithRespectToWorld = new SpatialAcceleration(bodyFrame, worldFrame, bodyFrame,
                                                                                                          angularAcceleration,
                                                                                                          linearAcceleration);
          accelerationOfChestWithRespectToWorld.setBaseFrame(getElevatorFrame());

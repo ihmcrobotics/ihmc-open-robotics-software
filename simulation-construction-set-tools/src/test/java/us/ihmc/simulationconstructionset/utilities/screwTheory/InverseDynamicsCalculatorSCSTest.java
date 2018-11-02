@@ -30,7 +30,7 @@ import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAcceleration;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -328,7 +328,7 @@ public class InverseDynamicsCalculatorSCSTest
    
    private InverseDynamicsCalculator createInverseDynamicsCalculatorAndCompute(RigidBody elevator, double gravity, ReferenceFrame worldFrame, boolean doVelocityTerms, boolean doAcceleration)
    {
-      SpatialAccelerationVector rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(elevator, -gravity);
+      SpatialAcceleration rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(elevator, -gravity);
       ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
       InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, rootAcceleration, jointsToIgnore, doVelocityTerms, doAcceleration);
 //      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -gravity);
@@ -594,7 +594,7 @@ public class InverseDynamicsCalculatorSCSTest
       floatingJoint.getAngularAccelerationInBody(angularAcceleration);
       originAcceleration.changeFrame(sixDoFJoint.getFrameBeforeJoint());
 
-      SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector(sixDoFJoint.getFrameAfterJoint(), sixDoFJoint.getFrameBeforeJoint(), sixDoFJoint.getFrameAfterJoint());
+      SpatialAcceleration spatialAccelerationVector = new SpatialAcceleration(sixDoFJoint.getFrameAfterJoint(), sixDoFJoint.getFrameBeforeJoint(), sixDoFJoint.getFrameAfterJoint());
       
       spatialAccelerationVector.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
       sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);

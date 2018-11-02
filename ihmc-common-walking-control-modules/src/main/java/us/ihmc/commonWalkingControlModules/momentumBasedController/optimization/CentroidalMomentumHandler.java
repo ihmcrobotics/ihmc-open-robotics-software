@@ -11,14 +11,14 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Momentum;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialForce;
 
 /**
  * @author twan Date: 5/1/13
  */
 public class CentroidalMomentumHandler
 {
-   private final SpatialForceVector centroidalMomentumRate;
+   private final SpatialForce centroidalMomentumRate;
    private final Momentum centroidalMomentum;
 
    private final DenseMatrix64F centroidalMomentumEquationRightHandSide = new DenseMatrix64F(Momentum.SIZE, 1);
@@ -33,7 +33,7 @@ public class CentroidalMomentumHandler
 
    public CentroidalMomentumHandler(InverseDynamicsJoint[] jointsToConsider, ReferenceFrame centerOfMassFrame)
    {
-      centroidalMomentumRate = new SpatialForceVector(centerOfMassFrame);
+      centroidalMomentumRate = new SpatialForce(centerOfMassFrame);
       centroidalMomentum = new Momentum(centerOfMassFrame);
       this.centerOfMassFrame = centerOfMassFrame;
       this.centroidalMomentumRateTermCalculator = new CentroidalMomentumRateTermCalculator(jointsToConsider, centerOfMassFrame);
@@ -95,7 +95,7 @@ public class CentroidalMomentumHandler
       centroidalMomentumRateTermCalculator.getMomentum(jointVelocities, centroidalMomentum);
    }
 
-   public SpatialForceVector getCentroidalMomentumRate()
+   public SpatialForce getCentroidalMomentumRate()
    {
       return centroidalMomentumRate;
    }

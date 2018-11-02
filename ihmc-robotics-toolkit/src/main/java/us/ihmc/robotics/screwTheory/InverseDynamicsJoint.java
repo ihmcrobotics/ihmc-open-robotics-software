@@ -100,7 +100,7 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
     * @param accelerationToPack the {@code SpatialAccelerationVector} in which the acceleration of
     *           this joint is stored. Modified.
     */
-   public abstract void getJointAcceleration(SpatialAccelerationVector accelerationToPack);
+   public abstract void getJointAcceleration(SpatialAcceleration accelerationToPack);
 
    /**
     * Packs the {@code SpatialAccelerationVector} (the 3D angular and linear accelerations) of this
@@ -115,7 +115,7 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
     * @param jointAccelerationToPack the {@code SpatialAccelerationVector} in which the acceleration
     *           of this joint's {@code successor} is stored. Modified.
     */
-   public abstract void getSuccessorAcceleration(SpatialAccelerationVector jointAccelerationToPack);
+   public abstract void getSuccessorAcceleration(SpatialAcceleration jointAccelerationToPack);
 
    /**
     * Packs the desired acceleration of this joint in a {@code SpatialAccelerationVector} (the 3D
@@ -130,7 +130,7 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
     * @param jointAccelerationToPack the {@code SpatialAccelerationVector} in which the desired
     *           acceleration of this joint is stored. Modified.
     */
-   public abstract void getDesiredJointAcceleration(SpatialAccelerationVector jointAccelerationToPack);
+   public abstract void getDesiredJointAcceleration(SpatialAcceleration jointAccelerationToPack);
 
    /**
     * Packs the {@code SpatialAccelerationVector} (the 3D angular and linear accelerations) of this
@@ -147,7 +147,7 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
     *           of this joint's {@code successor} resulting from this joint desired acceleration is
     *           stored. Modified.
     */
-   public abstract void getDesiredSuccessorAcceleration(SpatialAccelerationVector jointAccelerationToPack);
+   public abstract void getDesiredSuccessorAcceleration(SpatialAcceleration jointAccelerationToPack);
 
    /**
     * Packs the {@code SpatialAccelerationVector} (the 3D angular and linear accelerations) of this
@@ -164,7 +164,7 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
     *           of this joint's {@code predecessor} resulting from this joint desired acceleration
     *           is stored. Modified.
     */
-   public abstract void getDesiredPredecessorAcceleration(SpatialAccelerationVector jointAccelerationToPack);
+   public abstract void getDesiredPredecessorAcceleration(SpatialAcceleration jointAccelerationToPack);
 
    /**
     * Packs this joint's configuration into a column vector {@code DenseMatrix64F}. Here are a few

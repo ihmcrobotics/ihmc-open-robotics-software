@@ -12,7 +12,7 @@ import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
 import us.ihmc.robotics.robotController.RawSensorReader;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAcceleration;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
@@ -41,7 +41,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    private final Twist twist = new Twist();
    private final Twist twistInIMUFrame = new Twist();
    private final Twist twistInWorldFrame = new Twist();
-   private final SpatialAccelerationVector spatialAcceleration;
+   private final SpatialAcceleration spatialAcceleration;
 
    protected final YoDouble perfM00;
    protected final YoDouble perfM01;
@@ -85,7 +85,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    protected final NoisyYoDouble[] gyroList;
    protected final NoisyYoDouble[] compassList;
 
-   public SimulatedIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBody rigidBody, ReferenceFrame imuFrame, RigidBody rootBody, SpatialAccelerationVector rootAcceleration)
+   public SimulatedIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBody rigidBody, ReferenceFrame imuFrame, RigidBody rootBody, SpatialAcceleration rootAcceleration)
    {
       this.rawSensors = rawSensors;
       this.imuIndex = imuIndex;
@@ -100,7 +100,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
       imuFramePoint = new FramePoint3D(imuFrame);
       bodyFrame = rigidBody.getBodyFixedFrame();
 
-      spatialAcceleration = new SpatialAccelerationVector(bodyFrame, worldFrame, bodyFrame);
+      spatialAcceleration = new SpatialAcceleration(bodyFrame, worldFrame, bodyFrame);
 
       perfM00 = new YoDouble("perf_imu_m00", registry);
       perfM01 = new YoDouble("perf_imu_m01", registry);

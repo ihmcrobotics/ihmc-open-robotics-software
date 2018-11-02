@@ -19,7 +19,7 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialForce;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -285,7 +285,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    @Override
    public void computeAchievedAcceleration()
    {
-      SpatialForceVector achievedMomentumRate = centroidalMomentumHandler.getCentroidalMomentumRate();
+      SpatialForce achievedMomentumRate = centroidalMomentumHandler.getCentroidalMomentumRate();
       achievedLinearAcceleration.setIncludingFrame(achievedMomentumRate.getLinearPart());
       achievedLinearAcceleration.changeFrame(worldFrame);
       achievedLinearAcceleration.scale(1.0 / totalRobotMass);

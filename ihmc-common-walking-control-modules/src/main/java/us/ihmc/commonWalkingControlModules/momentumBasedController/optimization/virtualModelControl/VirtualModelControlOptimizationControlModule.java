@@ -23,7 +23,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialForce;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -39,7 +39,7 @@ public class VirtualModelControlOptimizationControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ExternalWrenchHandler externalWrenchHandler;
-   private final SpatialForceVector centroidalMomentumRateSolution = new SpatialForceVector();
+   private final SpatialForce centroidalMomentumRateSolution = new SpatialForce();
 
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
@@ -59,12 +59,12 @@ public class VirtualModelControlOptimizationControlModule
 
    private final QPInput momentumQPInput;
 
-   private final DenseMatrix64F identityMatrix = CommonOps.identity(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
-   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
-   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
-   private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
-   private final DenseMatrix64F fullMomentumObjective = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
-   private final DenseMatrix64F totalWrench = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
+   private final DenseMatrix64F identityMatrix = CommonOps.identity(SpatialForce.SIZE, SpatialForce.SIZE);
+   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialForce.SIZE, SpatialForce.SIZE);
+   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialForce.SIZE, SpatialForce.SIZE);
+   private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialForce.SIZE, SpatialForce.SIZE);
+   private final DenseMatrix64F fullMomentumObjective = new DenseMatrix64F(SpatialForce.SIZE, 1);
+   private final DenseMatrix64F totalWrench = new DenseMatrix64F(SpatialForce.SIZE, 1);
 
    private final FrameVector3D angularMomentum = new FrameVector3D();
    private final FrameVector3D linearMomentum = new FrameVector3D();
@@ -79,7 +79,7 @@ public class VirtualModelControlOptimizationControlModule
 
       ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
       int rhoSize = optimizationSettings.getRhoSize();
-      momentumQPInput = new QPInput(SpatialForceVector.SIZE);
+      momentumQPInput = new QPInput(SpatialForce.SIZE);
 
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, toolbox.getYoGraphicsListRegistry(), registry);
@@ -159,7 +159,7 @@ public class VirtualModelControlOptimizationControlModule
       Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
-      SpatialForceVector centroidalMomentumRateSolution = computeCentroidalMomentumRateSolution(rhoSolution);
+      SpatialForce centroidalMomentumRateSolution = computeCentroidalMomentumRateSolution(rhoSolution);
       Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
       List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
 
@@ -210,9 +210,9 @@ public class VirtualModelControlOptimizationControlModule
       motionQPInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
 
       // Compute the weight: W = S * W * S^T
-      tempTaskWeight.reshape(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
+      tempTaskWeight.reshape(SpatialForce.SIZE, SpatialForce.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
-      tempTaskWeightSubspace.reshape(taskSize, SpatialForceVector.SIZE);
+      tempTaskWeightSubspace.reshape(taskSize, SpatialForce.SIZE);
       DiagonalMatrixTools.postMult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
       CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
 
@@ -239,7 +239,7 @@ public class VirtualModelControlOptimizationControlModule
       qpSolver.setupWrenchesEquilibriumConstraint(identityMatrix, rhoJacobian, additionalExternalWrench, gravityWrench);
    }
 
-   private SpatialForceVector computeCentroidalMomentumRateSolution(DenseMatrix64F rhoSolution)
+   private SpatialForce computeCentroidalMomentumRateSolution(DenseMatrix64F rhoSolution)
    {
       DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
       DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();

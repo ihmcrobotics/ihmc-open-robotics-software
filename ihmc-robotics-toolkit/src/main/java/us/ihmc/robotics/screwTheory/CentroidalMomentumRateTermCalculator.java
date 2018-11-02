@@ -33,7 +33,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
    private final Map<RigidBody, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
 
    private final DenseMatrix64F centroidalMomentumMatrix;
-   private final SpatialForceVector biasSpatialForce = new SpatialForceVector();
+   private final SpatialForce biasSpatialForce = new SpatialForce();
    private final DenseMatrix64F biasSpatialForceMatrix = new DenseMatrix64F(6, 1);
 
    private final DenseMatrix64F jointVelocityMatrix;
@@ -41,7 +41,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
    private final DenseMatrix64F momentumMatrix = new DenseMatrix64F(6, 1);
 
    private final Momentum momentum;
-   private final SpatialForceVector momentumRate;
+   private final SpatialForce momentumRate;
    private double totalMass = 0.0;
    private final FixedFrameVector3DBasics centerOfMassVelocity;
    private final FixedFrameVector3DBasics centerOfMassAcceleration;
@@ -82,7 +82,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       jointAccelerationMatrix = new DenseMatrix64F(nDegreesOfFreedom, 1);
 
       momentum = new Momentum(matrixFrame);
-      momentumRate = new SpatialForceVector(matrixFrame);
+      momentumRate = new SpatialForce(matrixFrame);
       centerOfMassVelocity = new FrameVector3D(matrixFrame);
       centerOfMassAcceleration = new FrameVector3D(matrixFrame);
    }
@@ -261,7 +261,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       }
    }
 
-   public SpatialForceVector getBiasSpatialForce()
+   public SpatialForce getBiasSpatialForce()
    {
       updateCentroidalMomentumMatrixAndBiasForce();
       return biasSpatialForce;
@@ -285,7 +285,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       return momentum;
    }
 
-   public SpatialForceVector getMomentumRate()
+   public SpatialForce getMomentumRate()
    {
       if (!isMomentumRateUpToDate)
       {
@@ -306,7 +306,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       momentumToPack.getLinearPart().set(3, momentumMatrix);
    }
 
-   public void getMomentumRate(DenseMatrix64F jointAccelerationMatrix, SpatialForceVector momentumRateToPack)
+   public void getMomentumRate(DenseMatrix64F jointAccelerationMatrix, SpatialForce momentumRateToPack)
    {
       CommonOps.mult(getCentroidalMomentumMatrix(), jointAccelerationMatrix, momentumMatrix);
       momentumRateToPack.setToZero(matrixFrame);
@@ -315,7 +315,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       momentumRateToPack.add(getBiasSpatialForce());
    }
 
-   public void getMomentumRate(InverseDynamicsJoint[] joints, DenseMatrix64F jointAccelerationMatrix, SpatialForceVector momentumRateToPack)
+   public void getMomentumRate(InverseDynamicsJoint[] joints, DenseMatrix64F jointAccelerationMatrix, SpatialForce momentumRateToPack)
    {
       CommonOps.mult(getCentroidalMomentumMatrix(joints), jointAccelerationMatrix, momentumMatrix);
       momentumRateToPack.setToZero(matrixFrame);
@@ -383,7 +383,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       /**
        * Coriolis acceleration.
        */
-      private final SpatialAccelerationVector biasAcceleration;
+      private final SpatialAcceleration biasAcceleration;
       private final Momentum unitMomentum;
       private final Momentum intermediateMomentum;
       private final Wrench biasWrench;
@@ -404,7 +404,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
          {
             jointUnitTwist = null;
             intermediateTwist = null;
-            biasAcceleration = new SpatialAccelerationVector(getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), getBodyFixedFrame());
+            biasAcceleration = new SpatialAcceleration(getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), getBodyFixedFrame());
             unitMomentum = null;
             intermediateMomentum = null;
             biasWrench = null;
@@ -414,7 +414,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
          {
             jointUnitTwist = new Twist();
             intermediateTwist = new Twist();
-            biasAcceleration = new SpatialAccelerationVector();
+            biasAcceleration = new SpatialAcceleration();
             unitMomentum = new Momentum(matrixFrame);
             intermediateMomentum = new Momentum();
             biasWrench = new Wrench();

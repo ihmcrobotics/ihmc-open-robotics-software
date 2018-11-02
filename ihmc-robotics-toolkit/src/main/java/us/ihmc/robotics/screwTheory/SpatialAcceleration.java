@@ -17,12 +17,12 @@ import us.ihmc.commons.MathTools;
  * @author Twan Koolen
  *
  */
-public class SpatialAccelerationVector extends SpatialMotionVector
+public class SpatialAcceleration extends SpatialMotionVector
 {
    private final Vector3D tempVector = new Vector3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   public SpatialAccelerationVector()
+   public SpatialAcceleration()
    {
       super();
    }
@@ -34,7 +34,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     * @param baseFrame with respect to what we're specifying the spatial acceleration
     * @param expressedInFrame in which reference frame the spatial acceleration is expressed
     */
-   public SpatialAccelerationVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
+   public SpatialAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
    {
       super(bodyFrame, baseFrame, expressedInFrame);
    }
@@ -46,7 +46,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     * @param angularAcceleration angular velocity part of the spatial acceleration
     * @param linearAcceleration linear acceleration part of the spatial acceleration
     */
-   public SpatialAccelerationVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularAcceleration,
+   public SpatialAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularAcceleration,
                                     Vector3DReadOnly linearAcceleration)
    {
       super(bodyFrame, baseFrame, expressedInFrame, angularAcceleration, linearAcceleration);
@@ -55,7 +55,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
    /**
     * Construct using a Matrix ([omegadot; a])
     */
-   public SpatialAccelerationVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
+   public SpatialAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
       super(bodyFrame, baseFrame, expressedInFrame, matrix);
    }
@@ -63,7 +63,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
    /**
     * Construct using a double array ([omegadot; a])
     */
-   public SpatialAccelerationVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double[] spatialAcceleration)
+   public SpatialAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double[] spatialAcceleration)
    {
       super(bodyFrame, baseFrame, expressedInFrame, spatialAcceleration);
    }
@@ -71,7 +71,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
    /**
     * Copy constructor
     */
-   public SpatialAccelerationVector(SpatialAccelerationVector other)
+   public SpatialAcceleration(SpatialAcceleration other)
    {
       super(other);
    }
@@ -80,7 +80,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     * Sets this spatial acceleration vector so that it is the same as another spatial acceleration
     * vector
     */
-   public void set(SpatialAccelerationVector other)
+   public void set(SpatialAcceleration other)
    {
       super.checkAndSet(other);
    }
@@ -193,7 +193,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     * Duindam proves this fact for twists, but differentiating the statement results in the same
     * thing for derivatives of twists, i.e. spatial accelerations
     */
-   public void add(SpatialAccelerationVector other)
+   public void add(SpatialAcceleration other)
    {
       // make sure they're expressed in the same reference frame
       expressedInFrame.checkReferenceFrameMatch(other.expressedInFrame);
@@ -207,7 +207,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       bodyFrame = other.bodyFrame;
    }
 
-   public void sub(SpatialAccelerationVector other)
+   public void sub(SpatialAcceleration other)
    {
       // make sure they're expressed in the same reference frame
       expressedInFrame.checkReferenceFrameMatch(other.expressedInFrame);
@@ -231,7 +231,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       }
    }
 
-   public void setIncludingFrame(SpatialAccelerationVector other)
+   public void setIncludingFrame(SpatialAcceleration other)
    {
       super.setIncludingFrame(other);
    }

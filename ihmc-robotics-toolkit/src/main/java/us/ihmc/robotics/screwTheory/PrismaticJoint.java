@@ -45,14 +45,14 @@ public class PrismaticJoint extends OneDoFJoint
       unitPredecessorTwist.invert();
       unitPredecessorTwist.changeFrame(predecessorFrame);
 
-      unitJointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3D(), jointAxis);
+      unitJointAcceleration = new SpatialAcceleration(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3D(), jointAxis);
 
-      unitSuccessorAcceleration = new SpatialAccelerationVector(unitJointAcceleration);
+      unitSuccessorAcceleration = new SpatialAcceleration(unitJointAcceleration);
       unitSuccessorAcceleration.setBaseFrame(predecessorFrame);
       unitSuccessorAcceleration.setBodyFrame(successorFrame);
       unitSuccessorAcceleration.changeFrame(successorFrame);
 
-      unitPredecessorAcceleration = new SpatialAccelerationVector(unitSuccessorAcceleration);
+      unitPredecessorAcceleration = new SpatialAcceleration(unitSuccessorAcceleration);
       unitPredecessorAcceleration.invert();
       unitPredecessorAcceleration.changeFrame(predecessorFrame); // actually, there is relative motion, but not in the directions that matter
 

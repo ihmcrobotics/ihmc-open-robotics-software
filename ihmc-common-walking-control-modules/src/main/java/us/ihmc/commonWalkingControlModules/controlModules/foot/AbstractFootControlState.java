@@ -11,7 +11,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAcceleration;
 import us.ihmc.robotics.stateMachine.core.State;
 
 public abstract class AbstractFootControlState implements State
@@ -31,7 +31,7 @@ public abstract class AbstractFootControlState implements State
    protected final FrameQuaternion desiredOrientation = new FrameQuaternion(worldFrame);
    protected final FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame);
    protected final FrameVector3D desiredAngularAcceleration = new FrameVector3D(worldFrame);
-   protected final SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
+   protected final SpatialAcceleration footAcceleration = new SpatialAcceleration();
 
    protected final HighLevelHumanoidControllerToolbox controllerToolbox;
 

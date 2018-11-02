@@ -5,7 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public class Wrench extends SpatialForceVector
+public class Wrench extends SpatialForce
 {
    ReferenceFrame bodyFrame;
 

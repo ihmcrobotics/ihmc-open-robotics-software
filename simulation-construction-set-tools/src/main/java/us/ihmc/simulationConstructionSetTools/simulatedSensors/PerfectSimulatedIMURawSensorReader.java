@@ -3,12 +3,12 @@ package us.ihmc.simulationConstructionSetTools.simulatedSensors;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.corruptors.NoisyYoDouble;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAcceleration;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
 
 public class PerfectSimulatedIMURawSensorReader extends SimulatedIMURawSensorReader
 {
-   public PerfectSimulatedIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBody rigidBody, ReferenceFrame imuFrame, RigidBody rootBody, SpatialAccelerationVector rootAcceleration)
+   public PerfectSimulatedIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBody rigidBody, ReferenceFrame imuFrame, RigidBody rootBody, SpatialAcceleration rootAcceleration)
    {
       super(rawSensors, imuIndex, rigidBody, imuFrame, rootBody, rootAcceleration);
    }

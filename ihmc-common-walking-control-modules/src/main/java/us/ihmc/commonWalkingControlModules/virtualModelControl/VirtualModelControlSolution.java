@@ -10,11 +10,11 @@ public class VirtualModelControlSolution
 {
    private DenseMatrix64F jointTorques;
 
-   private SpatialForceVector centroidalMomentumRateSolution;
+   private SpatialForce centroidalMomentumRateSolution;
    private Map<RigidBody, Wrench> externalWrenchSolution;
    private List<RigidBody> rigidBodiesWithExternalWrench;
 
-   public void setCentroidalMomentumRateSolution(SpatialForceVector centroidalMomentumRateSolution)
+   public void setCentroidalMomentumRateSolution(SpatialForce centroidalMomentumRateSolution)
    {
       this.centroidalMomentumRateSolution = centroidalMomentumRateSolution;
    }
@@ -35,7 +35,7 @@ public class VirtualModelControlSolution
       return externalWrenchSolution;
    }
 
-   public SpatialForceVector getCentroidalMomentumRateSolution()
+   public SpatialForce getCentroidalMomentumRateSolution()
    {
       return centroidalMomentumRateSolution;
    }

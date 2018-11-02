@@ -48,8 +48,8 @@ public class GeometricJacobianCalculator
    private final Twist tempTwist = new Twist();
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(6, 1);
 
-   private final SpatialAccelerationVector zeroAcceleration = new SpatialAccelerationVector();
-   private final SpatialAccelerationVector biasAcceleration = new SpatialAccelerationVector();
+   private final SpatialAcceleration zeroAcceleration = new SpatialAcceleration();
+   private final SpatialAcceleration biasAcceleration = new SpatialAcceleration();
    private final Twist twistOfCurrentBodyRelativeToEndEffector = new Twist();
    private final Twist twistOfCurrentBodyRelativeToPredecessor = new Twist();
 
@@ -347,7 +347,7 @@ public class GeometricJacobianCalculator
     * @throws RuntimeException if the Jacobian matrix or the convective term has not been computed
     *            yet.
     */
-   public void getEndEffectorAcceleration(DenseMatrix64F jointAccelerations, SpatialAccelerationVector spatialAccelerationToPack)
+   public void getEndEffectorAcceleration(DenseMatrix64F jointAccelerations, SpatialAcceleration spatialAccelerationToPack)
    {
       if (jacobianMatrix.getNumRows() == 0 || convectiveTerm.getNumRows() == 0)
          throw new RuntimeException("The Jacobian matrix and the convective term have to be computed first.");
@@ -538,7 +538,7 @@ public class GeometricJacobianCalculator
       CommonOps.mult(selectionMatrix, convectiveTerm, convectiveTermToPack);
    }
 
-   public void getConvectiveTerm(SpatialAccelerationVector convectiveTermToPack)
+   public void getConvectiveTerm(SpatialAcceleration convectiveTermToPack)
    {
       if (convectiveTerm.getNumRows() == 0)
          throw new RuntimeException("The convective term has to be computed first.");

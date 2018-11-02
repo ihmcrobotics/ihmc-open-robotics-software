@@ -24,7 +24,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialForce;
 import us.ihmc.tools.MemoryTools;
 
 public class CenterOfPressureResolverTest
@@ -128,7 +128,7 @@ public class CenterOfPressureResolverTest
          Vector3D centerOfMassTorque = new Vector3D(0.0, 0.0, 0.0);
 
          PoseReferenceFrame centerOfMassFrame = createTranslatedZUpFrame("centerOfMassFrame", centerOfMassPoint);
-         SpatialForceVector spatialForceVector = new SpatialForceVector(centerOfMassFrame, centerOfMassTorque, centerOfMassForce);
+         SpatialForce spatialForceVector = new SpatialForce(centerOfMassFrame, centerOfMassTorque, centerOfMassForce);
 
          ImmutablePair<FramePoint3D, Double> centerOfPressureAndNormalTorque = computeCenterOfPressureAndNormalTorque(groundPoint, groundNormal,
                centerOfMassFrame, spatialForceVector);
@@ -159,7 +159,7 @@ public class CenterOfPressureResolverTest
          Vector3D centerOfMassForce, Vector3D centerOfMassTorque, Vector3D expectedCenterOfPressure, double expectedNormalTorque)
    {
       PoseReferenceFrame centerOfMassFrame = createTranslatedZUpFrame("centerOfMassFrame", centerOfMassPoint);
-      SpatialForceVector spatialForceVector = new SpatialForceVector(centerOfMassFrame, centerOfMassTorque, centerOfMassForce);
+      SpatialForce spatialForceVector = new SpatialForce(centerOfMassFrame, centerOfMassTorque, centerOfMassForce);
 
       ImmutablePair<FramePoint3D, Double> centerOfPressureAndNormalTorque = computeCenterOfPressureAndNormalTorque(groundPoint, groundNormal, centerOfMassFrame,
             spatialForceVector);
@@ -179,7 +179,7 @@ public class CenterOfPressureResolverTest
    }
 
    private static ImmutablePair<FramePoint3D, Double> computeCenterOfPressureAndNormalTorque(Point3D groundPoint, Vector3D groundNormal,
-         ReferenceFrame centerOfMassFrame, SpatialForceVector spatialForceVector)
+         ReferenceFrame centerOfMassFrame, SpatialForce spatialForceVector)
    {
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 

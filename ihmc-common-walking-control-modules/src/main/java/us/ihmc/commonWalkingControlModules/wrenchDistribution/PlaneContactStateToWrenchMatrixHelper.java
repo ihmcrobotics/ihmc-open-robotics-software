@@ -22,7 +22,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialForce;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -115,7 +115,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       basisVectorAngleIncrement = 2.0 * Math.PI / numberOfBasisVectorsPerContactPoint;
 
       rhoMatrix = new DenseMatrix64F(rhoSize, 1);
-      wrenchJacobianInCoMFrame = new DenseMatrix64F(SpatialForceVector.SIZE, rhoSize);
+      wrenchJacobianInCoMFrame = new DenseMatrix64F(SpatialForce.SIZE, rhoSize);
       copRegularizationJacobian = new DenseMatrix64F(2, rhoSize);
       copRegularizationObjective = new DenseMatrix64F(2, 1);
       copRegularizationObjective.zero();
@@ -418,7 +418,7 @@ public class PlaneContactStateToWrenchMatrixHelper
    }
 
    private final Wrench wrenchFromRho = new Wrench();
-   private final DenseMatrix64F totalWrenchMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
+   private final DenseMatrix64F totalWrenchMatrix = new DenseMatrix64F(SpatialForce.SIZE, 1);
 
    public void computeWrenchFromRho(int startIndex, DenseMatrix64F allRobotRho)
    {
@@ -445,7 +445,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       return wrenchFromRho;
    }
 
-   private final SpatialForceVector unitSpatialForceVector = new SpatialForceVector();
+   private final SpatialForce unitSpatialForceVector = new SpatialForce();
 
    public void computeWrenchJacobianInFrame(ReferenceFrame frame, DenseMatrix64F matrixToPack)
    {

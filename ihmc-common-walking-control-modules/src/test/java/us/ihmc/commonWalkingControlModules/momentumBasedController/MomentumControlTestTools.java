@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialForce;
 import us.ihmc.robotics.screwTheory.SpatialForceVectorTest;
 import us.ihmc.robotics.screwTheory.Wrench;
 
@@ -25,10 +25,10 @@ import us.ihmc.robotics.screwTheory.Wrench;
  */
 public class MomentumControlTestTools
 {
-   public static void assertWrenchesSumUpToMomentumDot(Collection<Wrench> externalWrenches, SpatialForceVector desiredCentroidalMomentumRate, double gravityZ,
+   public static void assertWrenchesSumUpToMomentumDot(Collection<Wrench> externalWrenches, SpatialForce desiredCentroidalMomentumRate, double gravityZ,
          double mass, ReferenceFrame centerOfMassFrame, double epsilon)
    {
-      SpatialForceVector totalWrench = new SpatialForceVector(centerOfMassFrame);
+      SpatialForce totalWrench = new SpatialForce(centerOfMassFrame);
       Wrench tempWrench = new Wrench();
       for (Wrench wrench : externalWrenches)
       {
@@ -84,7 +84,7 @@ public class MomentumControlTestTools
       Wrench wrench = new Wrench();
       rootJoint.getWrench(wrench);
 
-      SpatialForceVector zeroWrench = new SpatialForceVector(wrench.getReferenceFrame());
+      SpatialForce zeroWrench = new SpatialForce(wrench.getReferenceFrame());
       SpatialForceVectorTest.assertSpatialForceVectorEquals(wrench, zeroWrench, epsilon);
    }
 }

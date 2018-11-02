@@ -36,7 +36,7 @@ import us.ihmc.robotics.math.frames.YoSpatialVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAcceleration;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -112,7 +112,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final FrameVector3D desiredAngularTorque = new FrameVector3D();
 
    private final Twist currentTwist = new Twist();
-   private final SpatialAccelerationVector endEffectorAchievedAcceleration = new SpatialAccelerationVector();
+   private final SpatialAcceleration endEffectorAchievedAcceleration = new SpatialAcceleration();
 
    private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
    private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();

@@ -25,8 +25,8 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    private final Quaternion jointRotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
    private final Vector3D jointTranslation = new Vector3D();
    private final Twist jointTwist;
-   private final SpatialAccelerationVector jointAcceleration;
-   private final SpatialAccelerationVector jointAccelerationDesired;
+   private final SpatialAcceleration jointAcceleration;
+   private final SpatialAcceleration jointAccelerationDesired;
 
    private List<Twist> unitTwists;
 
@@ -41,8 +41,8 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    {
       super(name, predecessor, transformToParent);
       jointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame);
-      jointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
-      jointAccelerationDesired = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
+      jointAcceleration = new SpatialAcceleration(afterJointFrame, beforeJointFrame, afterJointFrame);
+      jointAccelerationDesired = new SpatialAcceleration(afterJointFrame, beforeJointFrame, afterJointFrame);
    }
 
    @Override
@@ -58,13 +58,13 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getJointAcceleration(SpatialAcceleration accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(jointAcceleration);
    }
 
    @Override
-   public void getDesiredJointAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getDesiredJointAcceleration(SpatialAcceleration accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(jointAccelerationDesired);
    }
@@ -204,13 +204,13 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setAcceleration(SpatialAccelerationVector jointAcceleration)
+   public void setAcceleration(SpatialAcceleration jointAcceleration)
    {
       this.jointAcceleration.set(jointAcceleration);
    }
 
    @Override
-   public void setDesiredAcceleration(SpatialAccelerationVector jointAcceleration)
+   public void setDesiredAcceleration(SpatialAcceleration jointAcceleration)
    {
       jointAccelerationDesired.set(jointAcceleration);
    }

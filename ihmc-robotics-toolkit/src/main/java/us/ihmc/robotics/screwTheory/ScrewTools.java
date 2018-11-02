@@ -704,11 +704,11 @@ public class ScrewTools
       return ret;
    }
 
-   public static SpatialAccelerationVector createGravitationalSpatialAcceleration(RigidBody rootBody, double gravity)
+   public static SpatialAcceleration createGravitationalSpatialAcceleration(RigidBody rootBody, double gravity)
    {
       Vector3D gravitationalAcceleration = new Vector3D(0.0, 0.0, gravity);
       Vector3D zero = new Vector3D();
-      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(),
+      SpatialAcceleration rootAcceleration = new SpatialAcceleration(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(),
                                                                                  rootBody.getBodyFixedFrame(), zero, gravitationalAcceleration);
 
       return rootAcceleration;
