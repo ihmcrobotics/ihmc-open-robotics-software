@@ -1,24 +1,24 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -405,26 +405,6 @@ public class TwistTest extends SpatialMotionVectorTest
       assertEquals(linearVelocity1.getZ(), twistMatrix.get(5, 0), epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testVelocityOfPointConsistency()
-   {
-      Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Twist twist1 = new Twist(frameB, frameA, frameB, angularVelocity1, linearVelocity1);
-
-      FrameVector3D expectedFrameVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
-      twist1.getBodyOriginLinearPartInBaseFrame(expectedFrameVector);
-
-      FrameVector3D actual = new FrameVector3D(ReferenceFrame.getWorldFrame());
-      twist1.changeFrame(twist1.getBaseFrame());
-      FramePoint3D bodyFrameOrigin = new FramePoint3D(twist1.getBodyFrame());
-      bodyFrameOrigin.changeFrame(twist1.getBaseFrame());
-      twist1.getLinearVelocityOfPointFixedInBodyFrame(actual, bodyFrameOrigin);
-
-      EuclidCoreTestTools.assertTuple3DEquals(expectedFrameVector, actual, 1e-6);
-   }
-
    /**
     * This test is used to prove that the reference frame in which the linear velocity of a body fixed point in computed in does not matter.
     */
@@ -453,62 +433,17 @@ public class TwistTest extends SpatialMotionVectorTest
          // Compute the linear velocity while in bodyFrame
          pointFixedInBodyFrame.changeFrame(bodyFrame);
          twist.changeFrame(bodyFrame);
-         twist.getLinearVelocityOfPointFixedInBodyFrame(bodyFixedPointLinearVelocityInBody, pointFixedInBodyFrame);
+         twist.getLinearVelocityAt(pointFixedInBodyFrame, bodyFixedPointLinearVelocityInBody);
 
          // Compute the linear velocity while in baseFrame
          pointFixedInBodyFrame.changeFrame(baseFrame);
          twist.changeFrame(baseFrame);
-         twist.getLinearVelocityOfPointFixedInBodyFrame(bodyFixedPointLinearVelocityInBase, pointFixedInBodyFrame);
+         twist.getLinearVelocityAt(pointFixedInBodyFrame, bodyFixedPointLinearVelocityInBase);
 
          // Verify that they are the same
          bodyFixedPointLinearVelocityInBody.changeFrame(baseFrame);
          EuclidCoreTestTools.assertTuple3DEquals(bodyFixedPointLinearVelocityInBase, bodyFixedPointLinearVelocityInBody, 1.0e-12);
       }
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testBodyOriginLinearPartInBaseFrameAndAngularVelocity()
-   {
-      Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Twist twist = new Twist(frameA, frameB, frameC, angularVelocity1, linearVelocity1);
-
-      Vector3D angularVelocityInBaseFrame = new Vector3D();
-      twist.getAngularVelocityInBaseFrame(angularVelocityInBaseFrame);
-      FrameVector3D bodyOriginLinearPart = new FrameVector3D();
-      twist.getBodyOriginLinearPartInBaseFrame(bodyOriginLinearPart);
-      assertEquals(twist.getBaseFrame(), bodyOriginLinearPart.getReferenceFrame());
-
-      double dt = 1e-8;
-      RigidBodyTransform transform = twist.getBodyFrame().getTransformToDesiredFrame(twist.getBaseFrame());
-
-      RotationMatrix oldRotation = new RotationMatrix();
-      RotationMatrix newRotation = new RotationMatrix();
-      transform.getRotation(oldRotation);
-      transform.getRotation(newRotation);
-
-      Vector3D oldPosition = new Vector3D();
-      Vector3D newPosition = new Vector3D();
-      transform.getTranslation(oldPosition);
-      transform.getTranslation(newPosition);
-
-      ScrewTestTools.integrate(newRotation, newPosition, dt, twist);
-
-      Vector3D velocityNumerical = new Vector3D(newPosition);
-      velocityNumerical.sub(oldPosition);
-      velocityNumerical.scale(1.0 / dt);
-      EuclidCoreTestTools.assertTuple3DEquals(velocityNumerical, bodyOriginLinearPart, 1e-5);
-
-      Matrix3D angularVelocityMatrix = new Matrix3D(newRotation);
-      angularVelocityMatrix.sub(oldRotation);
-      angularVelocityMatrix.scale(1.0 / dt);
-      angularVelocityMatrix.multiplyTransposeOther(oldRotation);
-
-      Assert.assertTrue(angularVelocityMatrix.isMatrixSkewSymmetric(1.0e-5));
-      Vector3D angularVelocityNumerical = new Vector3D();
-      fromTildeForm(angularVelocityNumerical, angularVelocityMatrix);
-      EuclidCoreTestTools.assertTuple3DEquals(angularVelocityNumerical, angularVelocityInBaseFrame, 1e-5);
    }
 
    /**

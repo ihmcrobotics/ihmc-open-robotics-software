@@ -428,7 +428,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          tempCoP.setIncludingFrame(tempCoP2d, 0.0);
          footTwistInWorld.changeFrame(footTwistInWorld.getBaseFrame());
          tempCoP.changeFrame(footTwistInWorld.getReferenceFrame());
-         footTwistInWorld.getLinearVelocityOfPointFixedInBodyFrame(tempFrameVector, tempCoP);
+         footTwistInWorld.getLinearVelocityAt(tempCoP, tempFrameVector);
 
          tempFrameVector.changeFrame(worldFrame);
          footVelocityInWorld.set(tempFrameVector);

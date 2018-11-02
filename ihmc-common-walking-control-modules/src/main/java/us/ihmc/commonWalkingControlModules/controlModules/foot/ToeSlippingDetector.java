@@ -112,7 +112,7 @@ public class ToeSlippingDetector
       toeForceFiltered.update(footWrench.getLinearPart().length());
 
       foot.getBodyFixedFrame().getTwistOfFrame(footTwist);
-      footTwist.getLinearVelocityOfPointFixedInBodyFrame(toeLinearVelocity, toeContactPointPosition);
+      footTwist.getLinearVelocityAt(toeContactPointPosition, toeLinearVelocity);
       toeLinearVelocity.changeFrame(worldFrame);
       toeLinearVelocityFiltered.update(toeLinearVelocity);
 

@@ -258,7 +258,7 @@ public class TwistCalculator
       localTwist.changeFrame(baseFrame);
       localPoint.changeFrame(baseFrame);
 
-      localTwist.getLinearVelocityOfPointFixedInBodyFrame(linearVelocityToPack, localPoint);
+      localTwist.getLinearVelocityAt(localPoint, linearVelocityToPack);
    }
 
    /**
@@ -288,7 +288,7 @@ public class TwistCalculator
       localTwist.changeFrame(baseFrame);
       localPoint.changeFrame(baseFrame);
 
-      localTwist.getLinearVelocityOfPointFixedInBodyFrame(linearVelocityToPack, localPoint);
+      localTwist.getLinearVelocityAt(localPoint, linearVelocityToPack);
    }
 
    /**
