@@ -81,7 +81,7 @@ public abstract class SpatialMotionVector implements Clearable
    public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
       MatrixTools.checkMatrixDimensions(matrix, SIZE, 1);
-      setIncludingFrame(bodyFrame, baseFrame, expressedInFrame, matrix, 0);
+      setIncludingFrame(bodyFrame, baseFrame, expressedInFrame, 0, matrix);
    }
 
    /**
@@ -218,10 +218,9 @@ public abstract class SpatialMotionVector implements Clearable
 
    /**
     * Sets this spatial motion vector based on a matrix ([angular part; linear part]).
-    * 
     * @param matrix
     */
-   public void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix, int rowStart)
+   public void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, int rowStart, DenseMatrix64F matrix)
    {
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
@@ -268,7 +267,7 @@ public abstract class SpatialMotionVector implements Clearable
 
    public void set(DenseMatrix64F matrix)
    {
-      setIncludingFrame(getBodyFrame(), getBaseFrame(), getReferenceFrame(), matrix, 0);
+      setIncludingFrame(getBodyFrame(), getBaseFrame(), getReferenceFrame(), 0, matrix);
    }
 
    public void setToZero(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)

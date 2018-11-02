@@ -333,7 +333,7 @@ public class GeometricJacobianCalculator
 
       tempMatrix.reshape(6, 1);
       CommonOps.mult(jacobianMatrix, jointVelocities, tempMatrix);
-      twistToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, tempMatrix, 0);
+      twistToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, 0, tempMatrix);
    }
 
    /**
@@ -355,7 +355,7 @@ public class GeometricJacobianCalculator
       tempMatrix.reshape(6, 1);
       CommonOps.mult(jacobianMatrix, jointAccelerations, tempMatrix);
       CommonOps.addEquals(tempMatrix, convectiveTerm);
-      spatialAccelerationToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, tempMatrix, 0);
+      spatialAccelerationToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, 0, tempMatrix);
    }
 
    /**
@@ -543,7 +543,7 @@ public class GeometricJacobianCalculator
       if (convectiveTerm.getNumRows() == 0)
          throw new RuntimeException("The convective term has to be computed first.");
 
-      convectiveTermToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, convectiveTerm, 0);
+      convectiveTermToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, 0, convectiveTerm);
    }
 
    /**

@@ -458,7 +458,7 @@ public class PlaneContactStateToWrenchMatrixHelper
             FrameVector3D basisVector = basisVectors[rhoIndex];
             basisVectorOrigin.changeFrame(frame);
             basisVector.changeFrame(frame);
-            unitSpatialForceVector.setIncludingFrame(basisVector, basisVectorOrigin);
+            unitSpatialForceVector.setIncludingFrame(null, basisVector, basisVectorOrigin);
             unitSpatialForceVector.get(0, rhoIndex, matrixToPack);
          }
          else
