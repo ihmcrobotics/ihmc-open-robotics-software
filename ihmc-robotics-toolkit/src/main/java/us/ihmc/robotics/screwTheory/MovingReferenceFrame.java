@@ -240,7 +240,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
       if (!isFixedInParent)
       {
          updateTwistRelativeToParent(twistRelativeToParent);
-         twistRelativeToParent.checkReferenceFramesMatch(this, getParent(), this);
+         twistRelativeToParent.checkReferenceFrameMatch(this, getParent(), this);
       }
 
       isTwistOfFrameUpToDate = false;

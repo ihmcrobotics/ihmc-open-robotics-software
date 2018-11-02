@@ -104,7 +104,7 @@ public class TwistCalculatorTest
             cumulatedAngularVelocity.changeFrame(bodyFrame);
             expectedTwist.getAngularPart().set(cumulatedAngularVelocity);
 
-            expectedTwist.checkReferenceFramesMatch(actualTwist);
+            expectedTwist.checkReferenceFrameMatch(actualTwist);
 
             assertTrue(expectedTwist.getAngularPart().epsilonEquals(actualTwist.getAngularPart(), 1.0e-12));
          }
@@ -194,7 +194,7 @@ public class TwistCalculatorTest
             cumulatedAngularVelocity.changeFrame(bodyFrame);
             expectedTwist.getAngularPart().set(cumulatedAngularVelocity);
 
-            expectedTwist.checkReferenceFramesMatch(actualTwist);
+            expectedTwist.checkReferenceFrameMatch(actualTwist);
 
             assertTrue(expectedTwist.getAngularPart().epsilonEquals(actualTwist.getAngularPart(), 1.0e-12));
          }

@@ -149,7 +149,7 @@ public class SpatialAccelerationCalculatorTest
             cumulatedAngularAcceleration.changeFrame(bodyFrame);
             expectedAcceleration.getAngularPart().set(cumulatedAngularAcceleration);
 
-            expectedAcceleration.checkReferenceFramesMatch(actualAcceleration);
+            expectedAcceleration.checkReferenceFrameMatch(actualAcceleration);
 
             EuclidCoreTestTools.assertTuple3DEquals(expectedAcceleration.getAngularPart(), actualAcceleration.getAngularPart(), 1.0e-12);
          }
@@ -209,7 +209,7 @@ public class SpatialAccelerationCalculatorTest
             }
 
             expectedAcceleration.getAngularPart().set(cumulatedAngularAcceleration);
-            expectedAcceleration.checkReferenceFramesMatch(bodyFrame, worldFrame, bodyFrame);
+            expectedAcceleration.checkReferenceFrameMatch(bodyFrame, worldFrame, bodyFrame);
 
             EuclidCoreTestTools.assertTuple3DEquals(expectedAcceleration.getAngularPart(), actualAcceleration.getAngularPart(), 1.0e-10);
          }
