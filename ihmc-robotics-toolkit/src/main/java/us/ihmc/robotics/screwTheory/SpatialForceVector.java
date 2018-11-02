@@ -557,7 +557,7 @@ public class SpatialForceVector
       setToZero();
    }
 
-   public void getMatrix(double[] matrix)
+   public void get(double[] matrix)
    {
       matrix[0] = angularPart.getX();
       matrix[1] = angularPart.getY();
