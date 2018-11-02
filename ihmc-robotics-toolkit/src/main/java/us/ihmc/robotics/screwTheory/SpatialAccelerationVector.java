@@ -69,25 +69,6 @@ public class SpatialAccelerationVector extends SpatialMotionVector
    }
 
    /**
-    * Construct based on a screw representation of the twist
-    *
-    * @param bodyFrame what we're specifying the twist of
-    * @param baseFrame with respect to what we're specifying the twist
-    * @param expressedInFrame in which reference frame the twist is expressed
-    * @param angularVelocityMagnitude magnitude of angular velocity about axisOfRotation
-    * @param linearVelocityMagnitude magnitude of linear velocity in the direction of axisOfRotation
-    * @param axisOfRotation axis of rotation
-    * @param offset any vector from the origin of expressedInFrame to axisOfRotation
-    */
-   public SpatialAccelerationVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double angularVelocityMagnitude,
-                                    double angularAccelerationMagnitude, double linearVelocityMagnitude, double linearAccelerationMagnitude,
-                                    Vector3DReadOnly axisOfRotation, Vector3DReadOnly axisOfRotationDot, Vector3DReadOnly offset, Vector3DReadOnly offsetDot)
-   {
-      setScrew(bodyFrame, baseFrame, expressedInFrame, angularVelocityMagnitude, angularAccelerationMagnitude, linearVelocityMagnitude,
-               linearAccelerationMagnitude, axisOfRotation, axisOfRotationDot, offset, offsetDot);
-   }
-
-   /**
     * Copy constructor
     */
    public SpatialAccelerationVector(SpatialAccelerationVector other)
@@ -316,45 +297,6 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       linearAccelerationToPack.setToZero(bodyFrame);
       linearAccelerationToPack.cross(twistOfBodyWithRespectToBase.getAngularPart(), twistOfBodyWithRespectToBase.getLinearPart());
       linearAccelerationToPack.add(getLinearPart());
-   }
-
-   public void setScrew(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double angularVelocityMagnitude,
-                        double angularAccelerationMagnitude, double linearVelocityMagnitude, double linearAccelerationMagnitude,
-                        Vector3DReadOnly axisOfRotation, Vector3DReadOnly axisOfRotationDot, Vector3DReadOnly offset, Vector3DReadOnly offsetDot)
-   {
-      double epsilon = 1e-12;
-      if (!MathTools.epsilonEquals(1.0, axisOfRotation.lengthSquared(), epsilon))
-         throw new RuntimeException("axis of rotation must be of unit magnitude. axisOfRotation: " + axisOfRotation);
-
-      if (!MathTools.epsilonEquals(0.0, axisOfRotation.dot(axisOfRotationDot), epsilon))
-         throw new RuntimeException("derivative of axis of rotation has a component along the axis of rotation");
-
-      this.bodyFrame = bodyFrame;
-      this.baseFrame = baseFrame;
-      this.expressedInFrame = expressedInFrame;
-
-      getLinearPart().cross(offsetDot, axisOfRotation);
-      tempVector.cross(offset, axisOfRotationDot);
-      getLinearPart().add(tempVector);
-      getLinearPart().scale(angularVelocityMagnitude);
-
-      tempVector.set(axisOfRotation);
-      tempVector.scale(linearAccelerationMagnitude);
-      getLinearPart().add(tempVector);
-
-      tempVector.set(axisOfRotationDot);
-      tempVector.scale(linearVelocityMagnitude);
-      getLinearPart().add(tempVector);
-
-      tempVector.cross(offset, axisOfRotation);
-      tempVector.scale(angularAccelerationMagnitude);
-      getLinearPart().add(tempVector);
-
-      getAngularPart().set(axisOfRotation);
-      getAngularPart().scale(angularAccelerationMagnitude);
-      tempVector.set(axisOfRotationDot);
-      tempVector.scale(angularVelocityMagnitude);
-      getAngularPart().add(tempVector);
    }
 
    ///CLOVER:OFF
