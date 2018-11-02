@@ -230,6 +230,9 @@ public abstract class ToolboxModule
 
    public void receivedPacket(ToolboxStateMessage message)
    {
+      if (DEBUG)
+         PrintTools.info("Received a state message.");
+      
       if (toolboxTaskScheduled != null)
       {
          return;
@@ -263,6 +266,7 @@ public abstract class ToolboxModule
 
       createToolboxRunnable();
       toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, updatePeriodMilliseconds, TimeUnit.MILLISECONDS);
+      getToolboxController().setFutureToListenTo(toolboxTaskScheduled);
       reinitialize();
       receivedInput.set(true);
    }
@@ -287,6 +291,7 @@ public abstract class ToolboxModule
          return;
       }
 
+      getToolboxController().setFutureToListenTo(null);
       toolboxTaskScheduled.cancel(true);
       toolboxTaskScheduled = null;
    }
