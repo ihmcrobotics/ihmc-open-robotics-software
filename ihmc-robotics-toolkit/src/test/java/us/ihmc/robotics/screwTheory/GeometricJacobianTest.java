@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 import java.util.Random;
@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -216,10 +217,10 @@ public class GeometricJacobianTest
       assertEquals(0.0, vSpatialError.length(), epsilon);
 
       // rotate components of twistFromBodyManipulatorJacobian to base frame and compare to hand calculations again
-      Vector3D omegaInBaseFrame = new Vector3D();
-      twistFromBodyManipulatorJacobian.getAngularVelocityInBaseFrame(omegaInBaseFrame);
-      Vector3D vInBaseFrame = new Vector3D();
-      twistFromBodyManipulatorJacobian.getBodyOriginLinearPartInBaseFrame(vInBaseFrame);
+      FrameVector3D omegaInBaseFrame = new FrameVector3D(twistFromBodyManipulatorJacobian.getAngularPart());
+      omegaInBaseFrame.changeFrame(twistFromBodyManipulatorJacobian.getBaseFrame());
+      FrameVector3D vInBaseFrame = new FrameVector3D(twistFromBodyManipulatorJacobian.getLinearPart());
+      vInBaseFrame.changeFrame(twistFromBodyManipulatorJacobian.getBaseFrame());
 
       Vector3D omegaInBaseFrameByHand = new Vector3D(-q2d, 0.0, 0.0);
       Vector3D vInBaseFrameByHand = new Vector3D(0.0, -q1d + Math.cos(q2) * q3 * q2d + Math.sin(q2) * q3d, -Math.sin(q2) * q3 * q2d + Math.cos(q2) * q3d);

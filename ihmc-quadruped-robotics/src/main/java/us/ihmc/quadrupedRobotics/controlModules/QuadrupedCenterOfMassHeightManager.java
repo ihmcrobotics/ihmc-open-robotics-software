@@ -312,7 +312,7 @@ public class QuadrupedCenterOfMassHeightManager
       if (controlBodyHeight.getBooleanValue())
       {
          currentPosition.setToZero(bodyFrame);
-         bodyFrame.getTwistOfFrame().getLinearVelocityOfPointFixedInBodyFrame(currentVelocity, currentPosition);
+         bodyFrame.getTwistOfFrame().getLinearVelocityAt(currentPosition, currentVelocity);
       }
       else
       {

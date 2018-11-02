@@ -231,7 +231,7 @@ public class HexapodStepController
          pointFixedInBodyFrame.setToZero(footFrame);
          pointFixedInBodyFrame.changeFrame(currentTwist.getBaseFrame());
 
-         currentTwist.getLinearVelocityOfPointFixedInBodyFrame(currentVelocity, pointFixedInBodyFrame);
+         currentTwist.getLinearVelocityAt(pointFixedInBodyFrame, currentVelocity);
          currentVelocity.changeFrame(ReferenceFrame.getWorldFrame());
 
          //get desired footstep position

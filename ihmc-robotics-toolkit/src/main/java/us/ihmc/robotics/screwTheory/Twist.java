@@ -4,16 +4,13 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -97,100 +94,14 @@ public class Twist extends SpatialMotionVector
       setIncludingFrame(other);
    }
 
-   /*
-    * TODO: check if the *InBaseFrame methods generalize to SpatialMotionVector
-    */
-
-   /**
-    * Packs the angular velocity of the body frame with respect to the base frame, expressed in the base frame.
-    * The vector is computed by simply rotating the angular velocity part of this twist to base frame.
-    */
-   public void getAngularVelocityInBaseFrame(Vector3DBasics vectorToPack)
-   {
-      vectorToPack.set(getAngularPart());
-
-      if (expressedInFrame == baseFrame)
-      {
-         return;    // shortcut for special case
-      }
-      else
-      {
-         expressedInFrame.getTransformToDesiredFrame(freeTransform, baseFrame);
-         freeTransform.transform(vectorToPack);    // only does rotation
-      }
-   }
-
-   /**
-    * Packs the angular velocity of the body frame with respect to the base frame, expressed in the base frame.
-    * The vector is computed by simply rotating the angular velocity part of this twist to base frame.
-    */
-   public void getAngularVelocityInBaseFrame(FrameVector3DBasics vectorToPack)
-   {
-      vectorToPack.setToZero(baseFrame);
-      getAngularVelocityInBaseFrame((Vector3DBasics) vectorToPack);
-   }
-
-   /**
-    * Packs a version of the linear velocity, rotated to the base frame.
-    */
-   public void getBodyOriginLinearPartInBaseFrame(Vector3DBasics linearVelocityAtBodyOriginToPack)
-   {
-      if (expressedInFrame == bodyFrame)
-      {
-         linearVelocityAtBodyOriginToPack.set(getLinearPart());    // shortcut for special case
-      }
-      else
-      {
-         bodyFrame.getTransformToDesiredFrame(freeTransform, expressedInFrame);
-         freeTransform.getTranslation(freeVector);
-
-         linearVelocityAtBodyOriginToPack.cross(getAngularPart(), freeVector);    // omega x p
-         linearVelocityAtBodyOriginToPack.add(getLinearPart());    // omega x p + v
-      }
-
-      if (expressedInFrame == baseFrame)
-      {
-         return;    // shortcut for special case
-      }
-      else
-      {
-         expressedInFrame.getTransformToDesiredFrame(freeTransform, baseFrame);
-         freeTransform.transform(linearVelocityAtBodyOriginToPack);    // only does rotation
-      }
-   }
-
-   /**
-    * Packs a version of the linear velocity, rotated to the base frame.
-    */
-   public void getBodyOriginLinearPartInBaseFrame(FrameVector3DBasics linearVelocityAtBodyOriginToPack)
-   {
-      linearVelocityAtBodyOriginToPack.setToZero(baseFrame);
-      getBodyOriginLinearPartInBaseFrame((Vector3DBasics) linearVelocityAtBodyOriginToPack);
-   }
-
    /**
     * Packs the linear velocity of a point that is fixed in bodyFrame,
     * with respect to baseFrame. The resulting vector is expressed in {@code this.getExpressedInFrame()}.
     */
-   public void getLinearVelocityOfPointFixedInBodyFrame(FrameVector3DBasics linearVelocityToPack, FixedFramePoint3DBasics pointFixedInBodyFrame)
+   public void getLinearVelocityAt(FixedFramePoint3DBasics pointFixedInBodyFrame, FrameVector3DBasics linearVelocityToPack)
    {
       pointFixedInBodyFrame.checkReferenceFrameMatch(expressedInFrame);
       freeVector.set(pointFixedInBodyFrame);
-
-      linearVelocityToPack.setToZero(expressedInFrame);
-      linearVelocityToPack.cross(getAngularPart(), freeVector);
-      linearVelocityToPack.add(getLinearPart());
-   }
-
-   /**
-    * Packs the linear velocity of a 2D point that is fixed in bodyFrame,
-    * with respect to baseFrame. The resulting vector is expressed in {@code this.getExpressedInFrame()}.
-    */
-   public void getLinearVelocityOfPoint2dFixedInBodyFrame(FrameVector3DBasics linearVelocityToPack, FixedFramePoint2DBasics point2dFixedInBodyFrame)
-   {
-      point2dFixedInBodyFrame.checkReferenceFrameMatch(expressedInFrame);
-
-      freeVector.set(point2dFixedInBodyFrame, 0.0);
 
       linearVelocityToPack.setToZero(expressedInFrame);
       linearVelocityToPack.cross(getAngularPart(), freeVector);
