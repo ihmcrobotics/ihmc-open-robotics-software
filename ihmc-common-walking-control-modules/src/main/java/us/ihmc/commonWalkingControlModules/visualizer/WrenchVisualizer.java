@@ -95,7 +95,7 @@ public class WrenchVisualizer
          Wrench wrench;
          if ((wrench = wrenches.get(rigidBody)) != null)
          {
-            tempWrench.set(wrench);
+            tempWrench.setIncludingFrame(wrench);
             tempWrench.changeFrame(tempWrench.getBodyFrame());
 
             YoFrameVector3D force = forces.get(rigidBody);

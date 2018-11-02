@@ -30,7 +30,7 @@ public class CenterOfPressureResolver
          ReferenceFrame centerOfPressurePlaneFrame)
    {
       // First resolve the wrench at the plane origin:
-      wrenchResolvedOnPlane.set(spatialForceVector);
+      wrenchResolvedOnPlane.setIncludingFrame(spatialForceVector);
       wrenchResolvedOnPlane.changeFrame(centerOfPressurePlaneFrame);
 
       wrenchResolvedOnPlane.getAngularPart(torqueAtZeroInPlaneFrame);
@@ -63,7 +63,7 @@ public class CenterOfPressureResolver
          ReferenceFrame centerOfPressurePlaneFrame)
    {
       // First resolve the wrench at the plane origin:
-      wrenchResolvedOnPlane.set(spatialForceVector);
+      wrenchResolvedOnPlane.setIncludingFrame(spatialForceVector);
       wrenchResolvedOnPlane.changeFrame(centerOfPressurePlaneFrame);
 
       wrenchResolvedOnPlane.getAngularPart(torqueAtZeroInPlaneFrame);

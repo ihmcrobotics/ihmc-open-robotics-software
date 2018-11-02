@@ -62,7 +62,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       // // TODO: 1/1/17  does this ever change?
       for (int i = 0; i < allBodiesExceptRoot.length; i++)
       {
-         crbInertiasInOrder[i].set(allBodiesExceptRoot[i].getInertia());
+         crbInertiasInOrder[i].setIncludingFrame(allBodiesExceptRoot[i].getInertia());
       }
 
       for (int bodyIndex = allBodiesExceptRoot.length - 1; bodyIndex >= 0; bodyIndex--)

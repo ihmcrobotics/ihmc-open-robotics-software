@@ -528,7 +528,7 @@ public class TwistCalculatorTest
       baseTwist.changeFrame(bodyFrame);
 
       Twist relativeTwist = new Twist(bodyFrame, baseFrame, bodyFrame);
-      relativeTwist.set(bodyTwist);
+      relativeTwist.setIncludingFrame(bodyTwist);
       relativeTwist.sub(baseTwist);
       return relativeTwist;
    }

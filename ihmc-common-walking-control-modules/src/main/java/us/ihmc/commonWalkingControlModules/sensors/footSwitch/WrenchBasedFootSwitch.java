@@ -335,7 +335,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       footForceMagnitude.set(footForce.length());
 
       // Now change to frame after the parent joint (ankle or wrist for example):
-      footWrenchInBodyFixedFrame.set(footWrenchToPack);
+      footWrenchInBodyFixedFrame.setIncludingFrame(footWrenchToPack);
       footWrenchInBodyFixedFrame.changeFrame(contactablePlaneBody.getRigidBody().getBodyFixedFrame());
 
       footForce.setToZero(footWrenchInBodyFixedFrame.getReferenceFrame());

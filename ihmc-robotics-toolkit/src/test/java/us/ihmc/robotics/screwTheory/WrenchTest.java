@@ -312,7 +312,7 @@ public class WrenchTest
          fail();
       }
 
-      wrench2.checkAndSet(wrench1);
+      wrench2.set(wrench1);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -330,7 +330,7 @@ public class WrenchTest
          fail();
       }
 
-      wrench2.checkAndSet(wrench1);
+      wrench2.set(wrench1);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

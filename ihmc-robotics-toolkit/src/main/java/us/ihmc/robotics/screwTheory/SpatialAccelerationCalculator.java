@@ -175,7 +175,7 @@ public class SpatialAccelerationCalculator
    {
       ReferenceFrame rootBodyFrame = rootBody.getBodyFixedFrame();
       newRootAcceleration.checkReferenceFramesMatch(rootBodyFrame, inertialFrame, rootBodyFrame);
-      assignedAccelerations.get(0).set(newRootAcceleration);
+      assignedAccelerations.get(0).setIncludingFrame(newRootAcceleration);
    }
 
    /**
@@ -228,7 +228,7 @@ public class SpatialAccelerationCalculator
     */
    public void getAccelerationOfBody(RigidBody body, SpatialAccelerationVector accelerationToPack)
    {
-      accelerationToPack.set(computeOrGetAccelerationOfBody(body));
+      accelerationToPack.setIncludingFrame(computeOrGetAccelerationOfBody(body));
    }
 
    /**
@@ -548,7 +548,7 @@ public class SpatialAccelerationCalculator
             localJointAcceleration.setToZero(bodyFrame, predecessorFrame, bodyFrame);
          }
 
-         acceleration.set(accelerationOfPredecessor);
+         acceleration.setIncludingFrame(accelerationOfPredecessor);
          acceleration.changeFrame(bodyFrame, localJointTwist, localPredecessorTwist);
          acceleration.add(localJointAcceleration);
       }

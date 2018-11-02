@@ -428,7 +428,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       if (yoPlaneContactState.inContact())
       {
          CommonOps.mult(wrenchJacobianInPlaneFrame, rhoMatrix, totalWrenchMatrix);
-         wrenchFromRho.set(bodyFixedFrame, planeFrame, totalWrenchMatrix);
+         wrenchFromRho.setIncludingFrame(bodyFixedFrame, planeFrame, totalWrenchMatrix);
 
          previousCoP.setX(-wrenchFromRho.getAngularPartY() / wrenchFromRho.getLinearPartZ());
          previousCoP.setY(wrenchFromRho.getAngularPartX() / wrenchFromRho.getLinearPartZ());

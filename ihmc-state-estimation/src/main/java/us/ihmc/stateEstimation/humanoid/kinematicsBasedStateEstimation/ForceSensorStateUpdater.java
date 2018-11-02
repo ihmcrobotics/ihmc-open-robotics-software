@@ -348,7 +348,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          wristTorquesSubtreeWeightCancelled.get(robotSide).setMatchingFrame(tempTorque);
 
          if (wrenches != null)
-            wrenches.get(measurementLink).set(tempWrench);
+            wrenches.get(measurementLink).setIncludingFrame(tempWrench);
 
          outputForceSensorDataHolderWithGravityCancelled.setForceSensorValue(wristForceSensorDefinition, tempWrench);
       }

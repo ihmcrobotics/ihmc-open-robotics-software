@@ -139,7 +139,7 @@ public class TwistCalculator
     */
    public void getTwistOfBody(RigidBody body, Twist twistToPack)
    {
-      twistToPack.set(computeOrGetTwistOfBody(body));
+      twistToPack.setIncludingFrame(computeOrGetTwistOfBody(body));
    }
 
    /**
@@ -173,8 +173,8 @@ public class TwistCalculator
     */
    public void getRelativeTwist(RigidBody base, RigidBody body, Twist twistToPack)
    {
-      twistToPack.set(computeOrGetTwistOfBody(body));
-      twistForGetRelativeTwist.set(computeOrGetTwistOfBody(base));
+      twistToPack.setIncludingFrame(computeOrGetTwistOfBody(body));
+      twistForGetRelativeTwist.setIncludingFrame(computeOrGetTwistOfBody(base));
       twistForGetRelativeTwist.changeFrame(twistToPack.getReferenceFrame());
       twistToPack.sub(twistForGetRelativeTwist);
    }
@@ -360,7 +360,7 @@ public class TwistCalculator
 
          parentJoint.getSuccessorTwist(twistForComputeOrGetTwistOfBody);
 
-         twist.set(twistOfPredecessor);
+         twist.setIncludingFrame(twistOfPredecessor);
          twist.changeFrame(bodyFrame);
          twist.add(twistForComputeOrGetTwistOfBody);
       }

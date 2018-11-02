@@ -117,9 +117,9 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
       return ret;
    }
    
-   public void set(RigidBodyInertia other)
+   public void setIncludingFrame(RigidBodyInertia other)
    {
-      super.set(other);
+      super.setIncludingFrame(other);
       this.bodyFrame = other.bodyFrame;
    }
 

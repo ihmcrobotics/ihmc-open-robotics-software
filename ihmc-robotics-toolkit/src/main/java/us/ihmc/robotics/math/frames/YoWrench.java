@@ -52,7 +52,7 @@ public class YoWrench extends YoSpatialVector
    
    public void set(Wrench wrench)
    {
-      this.wrench.checkAndSet(wrench);
+      this.wrench.set(wrench);
       getYoValuesFromWrench();
    }
    

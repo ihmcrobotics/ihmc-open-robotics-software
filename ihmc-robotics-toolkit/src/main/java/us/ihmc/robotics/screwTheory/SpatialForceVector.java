@@ -62,7 +62,7 @@ public class SpatialForceVector
    {
       angularPart = new Vector3D();
       linearPart = new Vector3D();
-      set(expressedInFrame, matrix);
+      setIncludingFrame(expressedInFrame, matrix);
    }
 
    /**
@@ -212,15 +212,15 @@ public class SpatialForceVector
       linearPart.setZ(val);
    }
 
-   public void checkAndSet(SpatialForceVector other)
-   {
-      expressedInFrame.checkReferenceFrameMatch(other.expressedInFrame);
-      set(other);
-   }
-
    public void set(SpatialForceVector other)
    {
-      set(other.expressedInFrame, other.angularPart, other.linearPart);
+      expressedInFrame.checkReferenceFrameMatch(other.expressedInFrame);
+      setIncludingFrame(other);
+   }
+
+   public void setIncludingFrame(SpatialForceVector other)
+   {
+      setIncludingFrame(other.expressedInFrame, other.angularPart, other.linearPart);
    }
 
    /**
@@ -254,19 +254,19 @@ public class SpatialForceVector
       this.angularPart.set(angularPart);
    }
 
-   public void set(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
+   public void setIncludingFrame(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
       this.expressedInFrame = expressedInFrame;
       this.linearPart.set(linearPart);
       this.angularPart.set(angularPart);
    }
 
-   public void set(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
+   public void setIncludingFrame(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
-      set(expressedInFrame, matrix, 0);
+      setIncludingFrame(expressedInFrame, matrix, 0);
    }
 
-   public void set(ReferenceFrame expressedInFrame, DenseMatrix64F matrix, int rowStart)
+   public void setIncludingFrame(ReferenceFrame expressedInFrame, DenseMatrix64F matrix, int rowStart)
    {
       MathTools.checkEquals(matrix.getNumRows(), SIZE);
       MathTools.checkEquals(matrix.getNumCols(), 1);
@@ -276,7 +276,7 @@ public class SpatialForceVector
       linearPart.set(matrix.get(3 + rowStart, 0), matrix.get(4 + rowStart, 0), matrix.get(5 + rowStart, 0));
    }
 
-   public void set(ReferenceFrame expressedInFrame, double[] doubleArray)
+   public void setIncludingFrame(ReferenceFrame expressedInFrame, double[] doubleArray)
    {
       MathTools.checkEquals(doubleArray.length, SIZE);
 

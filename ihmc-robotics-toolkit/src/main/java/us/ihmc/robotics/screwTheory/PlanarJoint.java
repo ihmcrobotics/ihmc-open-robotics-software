@@ -454,7 +454,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    {
       if (dofIndex < 0 || dofIndex >= getDegreesOfFreedom())
          throw new ArrayIndexOutOfBoundsException("Illegal index: " + dofIndex + ", was expecting dofIndex in [0, " + getDegreesOfFreedom() + "[.");
-      unitTwistToPack.set(unitTwists.get(dofIndex));
+      unitTwistToPack.setIncludingFrame(unitTwists.get(dofIndex));
    }
 
    private PlanarJoint checkAndGetAsPlanarJoint(InverseDynamicsJoint originalJoint)

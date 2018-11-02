@@ -148,7 +148,7 @@ public class GroundContactForceOptimizationControlModule
          Wrench solutionWrench = solutionWrenches.get(rigidBody);
 
          if (groundReactionWrenchesToPack.containsKey(rigidBody))
-            groundReactionWrenchesToPack.get(rigidBody).set(solutionWrench);
+            groundReactionWrenchesToPack.get(rigidBody).setIncludingFrame(solutionWrench);
          else
             groundReactionWrenchesToPack.put(rigidBody, solutionWrench);
       }

@@ -29,7 +29,7 @@ public abstract class SpatialMotionVector implements Clearable
 
    protected SpatialMotionVector(SpatialMotionVector other)
    {
-      set(other);
+      setIncludingFrame(other);
    }
 
    /**
@@ -56,7 +56,7 @@ public abstract class SpatialMotionVector implements Clearable
    public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart,
                               Vector3DReadOnly linearPart)
    {
-      set(bodyFrame, baseFrame, expressedInFrame, angularPart, linearPart);
+      setIncludingFrame(bodyFrame, baseFrame, expressedInFrame, angularPart, linearPart);
    }
 
    /**
@@ -73,7 +73,7 @@ public abstract class SpatialMotionVector implements Clearable
    {
       linearPart.checkReferenceFrameMatch(angularPart);
 
-      set(bodyFrame, baseFrame, linearPart.getReferenceFrame(), angularPart, linearPart);
+      setIncludingFrame(bodyFrame, baseFrame, linearPart.getReferenceFrame(), angularPart, linearPart);
    }
 
    /**
@@ -82,7 +82,7 @@ public abstract class SpatialMotionVector implements Clearable
    public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
       MatrixTools.checkMatrixDimensions(matrix, SIZE, 1);
-      set(bodyFrame, baseFrame, expressedInFrame, matrix, 0);
+      setIncludingFrame(bodyFrame, baseFrame, expressedInFrame, matrix, 0);
    }
 
    /**
@@ -127,10 +127,10 @@ public abstract class SpatialMotionVector implements Clearable
       this.bodyFrame.checkReferenceFrameMatch(other.bodyFrame);
       this.baseFrame.checkReferenceFrameMatch(other.baseFrame);
       this.expressedInFrame.checkReferenceFrameMatch(other.expressedInFrame);
-      set(other);
+      setIncludingFrame(other);
    }
 
-   protected void set(SpatialMotionVector other)
+   protected void setIncludingFrame(SpatialMotionVector other)
    {
       this.bodyFrame = other.bodyFrame;
       this.baseFrame = other.baseFrame;
@@ -272,7 +272,7 @@ public abstract class SpatialMotionVector implements Clearable
     * 
     * @param matrix
     */
-   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix, int rowStart)
+   public void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix, int rowStart)
    {
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
@@ -290,7 +290,7 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * Sets this spatial motion vector based
     */
-   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart,
+   public void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart,
                    Vector3DReadOnly linearPart)
    {
       this.bodyFrame = bodyFrame;
@@ -304,7 +304,7 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * Sets this spatial motion vector based
     */
-   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
+   public void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
       linearPart.checkReferenceFrameMatch(expressedInFrame);
       angularPart.checkReferenceFrameMatch(expressedInFrame);
@@ -319,7 +319,7 @@ public abstract class SpatialMotionVector implements Clearable
 
    public void set(DenseMatrix64F matrix)
    {
-      set(getBodyFrame(), getBaseFrame(), getReferenceFrame(), matrix, 0);
+      setIncludingFrame(getBodyFrame(), getBaseFrame(), getReferenceFrame(), matrix, 0);
    }
 
    public void setToZero(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)

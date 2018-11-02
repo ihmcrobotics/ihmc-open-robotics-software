@@ -249,7 +249,7 @@ public class VirtualModelControlOptimizationControlModule
       CommonOps.addEquals(totalWrench, additionalExternalWrench);
       CommonOps.addEquals(totalWrench, gravityWrench);
 
-      centroidalMomentumRateSolution.set(centerOfMassFrame, totalWrench);
+      centroidalMomentumRateSolution.setIncludingFrame(centerOfMassFrame, totalWrench);
 
       return centroidalMomentumRateSolution;
    }

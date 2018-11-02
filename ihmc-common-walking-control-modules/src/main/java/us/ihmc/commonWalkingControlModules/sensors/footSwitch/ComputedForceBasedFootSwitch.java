@@ -94,7 +94,7 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
       solver.invert(jacobianInverse);
       
       CommonOps.multTransA(jacobianInverse, jointTorques, footWrench);
-      wrench.set(jacobian.getJacobianFrame(), footWrench);
+      wrench.setIncludingFrame(jacobian.getJacobianFrame(), footWrench);
       
       footForce.setToZero(jacobian.getJacobianFrame());
       wrench.getLinearPart(footForce);
@@ -133,7 +133,7 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
    @Override
    public void computeAndPackFootWrench(Wrench footWrenchToPack)
    {
-      footWrenchToPack.set(wrench);
+      footWrenchToPack.setIncludingFrame(wrench);
    }
 
    @Override

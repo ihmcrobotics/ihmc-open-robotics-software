@@ -14,7 +14,7 @@ public class TotalWrenchCalculator
 
       for (Wrench wrench : wrenches)
       {
-         temporaryWrench.set(wrench);
+         temporaryWrench.setIncludingFrame(wrench);
          temporaryWrench.changeFrame(referenceFrame);
          temporaryWrench.changeBodyFrameAttachedToSameBody(referenceFrame);
          totalGroundReactionWrenchToPack.add(temporaryWrench);

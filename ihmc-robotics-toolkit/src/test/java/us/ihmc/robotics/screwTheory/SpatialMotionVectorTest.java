@@ -195,7 +195,7 @@ public class SpatialMotionVectorTest
       public GenericSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3D linearPart,
                                         Vector3D angularPart)
       {
-         set(bodyFrame, baseFrame, expressedInFrame, angularPart, linearPart);
+         setIncludingFrame(bodyFrame, baseFrame, expressedInFrame, angularPart, linearPart);
       }
 
       /**
@@ -204,7 +204,7 @@ public class SpatialMotionVectorTest
       public GenericSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F twistMatrix)
       {
          MatrixTools.checkMatrixDimensions(twistMatrix, SIZE, 1);
-         set(bodyFrame, baseFrame, expressedInFrame, twistMatrix, 0);
+         setIncludingFrame(bodyFrame, baseFrame, expressedInFrame, twistMatrix, 0);
       }
    }
 

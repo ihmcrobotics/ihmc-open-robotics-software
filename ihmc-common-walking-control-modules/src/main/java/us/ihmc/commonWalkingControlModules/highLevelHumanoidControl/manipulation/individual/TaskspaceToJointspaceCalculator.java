@@ -398,7 +398,7 @@ public class TaskspaceToJointspaceCalculator
    public void compute(FramePoint3D desiredPosition, FrameQuaternion desiredOrientation, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity)
    {
       desiredControlFramePose.setIncludingFrame(desiredPosition, desiredOrientation);
-      desiredControlFrameTwist.set(originalEndEffectorFrame, originalBaseFrame, originalControlFrame, desiredAngularVelocity, desiredLinearVelocity);
+      desiredControlFrameTwist.setIncludingFrame(originalEndEffectorFrame, originalBaseFrame, originalControlFrame, desiredAngularVelocity, desiredLinearVelocity);
 
       compute(desiredControlFramePose, desiredControlFrameTwist);
    }
@@ -408,7 +408,7 @@ public class TaskspaceToJointspaceCalculator
       jacobian.compute();
 
       desiredControlFramePose.setIncludingFrame(desiredPose);
-      desiredControlFrameTwist.set(desiredTwist);
+      desiredControlFrameTwist.setIncludingFrame(desiredTwist);
       computeJointAnglesAndVelocities(desiredControlFramePose, desiredControlFrameTwist);
    }
    

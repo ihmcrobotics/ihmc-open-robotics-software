@@ -75,7 +75,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
 
    public void setExternalWrench(RigidBody rigidBody, Wrench externalWrench)
    {
-      externalWrenches.get(rigidBody).set(externalWrench);
+      externalWrenches.get(rigidBody).setIncludingFrame(externalWrench);
    }
 
    public SpatialAccelerationCalculator getSpatialAccelerationCalculator()
@@ -112,7 +112,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
          RigidBody successor = joint.getSuccessor();
 
          Wrench jointWrench = jointWrenches.get(joint);
-         jointWrench.set(netWrenches.get(successor));
+         jointWrench.setIncludingFrame(netWrenches.get(successor));
 
          Wrench externalWrench = externalWrenches.get(successor);
          jointWrench.sub(externalWrench);
@@ -127,7 +127,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
                Wrench wrenchExertedOnChild = jointWrenches.get(child);
                ReferenceFrame successorFrame = successor.getBodyFixedFrame();
 
-               wrenchExertedByChild.set(wrenchExertedOnChild);
+               wrenchExertedByChild.setIncludingFrame(wrenchExertedOnChild);
                wrenchExertedByChild.changeBodyFrameAttachedToSameBody(successorFrame);
                wrenchExertedByChild.scale(-1.0); // Action = -reaction
                wrenchExertedByChild.changeFrame(jointWrench.getReferenceFrame());

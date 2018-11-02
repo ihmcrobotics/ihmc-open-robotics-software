@@ -301,7 +301,7 @@ public class GeometricJacobianCalculator
          // The following line is where the jacobianFrame is assumed to be rigidly attached to the end-effector.
          zeroAcceleration.changeFrameNoRelativeMotion(jacobianFrame);
          zeroAcceleration.add(biasAcceleration);
-         biasAcceleration.set(zeroAcceleration);
+         biasAcceleration.setIncludingFrame(zeroAcceleration);
 
          // This is now the twist of the predecessor relative to the current body expressed in the current body frame.
          twistOfCurrentBodyRelativeToPredecessor.invert();
@@ -333,7 +333,7 @@ public class GeometricJacobianCalculator
 
       tempMatrix.reshape(6, 1);
       CommonOps.mult(jacobianMatrix, jointVelocities, tempMatrix);
-      twistToPack.set(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, tempMatrix, 0);
+      twistToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, tempMatrix, 0);
    }
 
    /**
@@ -355,7 +355,7 @@ public class GeometricJacobianCalculator
       tempMatrix.reshape(6, 1);
       CommonOps.mult(jacobianMatrix, jointAccelerations, tempMatrix);
       CommonOps.addEquals(tempMatrix, convectiveTerm);
-      spatialAccelerationToPack.set(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, tempMatrix, 0);
+      spatialAccelerationToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, tempMatrix, 0);
    }
 
    /**
@@ -543,7 +543,7 @@ public class GeometricJacobianCalculator
       if (convectiveTerm.getNumRows() == 0)
          throw new RuntimeException("The convective term has to be computed first.");
 
-      convectiveTermToPack.set(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, convectiveTerm, 0);
+      convectiveTermToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, convectiveTerm, 0);
    }
 
    /**

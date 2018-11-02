@@ -77,10 +77,10 @@ public class ExternalWrenchHandler
     */
    public final DenseMatrix64F computeWrenchEquationRightHandSide(DenseMatrix64F momentumConvectiveTerm, DenseMatrix64F b, DenseMatrix64F bHat)
    {
-      totalWrenchAlreadyApplied.set(gravitationalWrench);
+      totalWrenchAlreadyApplied.setIncludingFrame(gravitationalWrench);
       for (int i = 0; i < externalWrenchesToCompensateForList.size(); i++)
       {
-         tempWrench.set(externalWrenchesToCompensateForList.get(i));
+         tempWrench.setIncludingFrame(externalWrenchesToCompensateForList.get(i));
          tempWrench.changeFrame(gravitationalWrench.getReferenceFrame());
          totalWrenchAlreadyApplied.add(tempWrench);
       }
@@ -99,7 +99,7 @@ public class ExternalWrenchHandler
 
       for (int i = 0; i < externalWrenchesToCompensateForList.size(); i++)
       {
-         tempWrench.set(externalWrenchesToCompensateForList.get(i));
+         tempWrench.setIncludingFrame(externalWrenchesToCompensateForList.get(i));
          tempWrench.changeFrame(centerOfMassFrame);
          totalWrenchAlreadyApplied.add(tempWrench);
       }
@@ -122,7 +122,7 @@ public class ExternalWrenchHandler
       wrench.getBodyFrame().checkReferenceFrameMatch(bodyFixedFrame);
       wrench.getReferenceFrame().checkReferenceFrameMatch(bodyFixedFrame);
 
-      externalWrenchesToCompensateFor.get(rigidBody).set(wrench);
+      externalWrenchesToCompensateFor.get(rigidBody).setIncludingFrame(wrench);
    }
 
    public void computeExternalWrenches(Map<RigidBody, Wrench> groundReactionWrenches)
