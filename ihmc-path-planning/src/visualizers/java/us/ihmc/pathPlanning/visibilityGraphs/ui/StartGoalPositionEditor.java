@@ -17,7 +17,7 @@ import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 
 public class StartGoalPositionEditor extends AnimationTimer
 {
-   private static final boolean VERBOSE = true;
+   private static final boolean VERBOSE = false;
 
    private final EventHandler<MouseEvent> rayCastInterceptor;
    private boolean isRayCastInterceptorAttached = false;
