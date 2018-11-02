@@ -144,13 +144,13 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    public void setDesiredAcceleration(DenseMatrix64F matrix, int rowStart)
    {
       jointAccelerationDesired.set(jointAccelerationDesired.getBodyFrame(), jointAccelerationDesired.getBaseFrame(),
-                                   jointAccelerationDesired.getExpressedInFrame(), matrix, rowStart);
+                                   jointAccelerationDesired.getReferenceFrame(), matrix, rowStart);
    }
 
    @Override
    public void setJointTorque(DenseMatrix64F matrix, int rowStart)
    {
-      successorWrench.set(successorWrench.getBodyFrame(), successorWrench.getExpressedInFrame(), matrix, rowStart);
+      successorWrench.set(successorWrench.getBodyFrame(), successorWrench.getReferenceFrame(), matrix, rowStart);
    }
 
    public void setPositionAndRotation(RigidBodyTransform transform)
@@ -339,7 +339,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void setVelocity(DenseMatrix64F matrix, int rowStart)
    {
-      jointTwist.set(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getExpressedInFrame(), matrix, rowStart);
+      jointTwist.set(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getReferenceFrame(), matrix, rowStart);
    }
 
    //FIXME: FIX THIS!!!!
@@ -364,7 +364,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    {
       Twist newTwist = new Twist(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), ReferenceFrame.getWorldFrame());
       newTwist.setLinearPart(linearVelocityInWorld);
-      newTwist.changeFrame(jointTwist.getExpressedInFrame());
+      newTwist.changeFrame(jointTwist.getReferenceFrame());
       newTwist.setAngularPart(jointTwist.getAngularPart());
 
       jointTwist.set(newTwist);

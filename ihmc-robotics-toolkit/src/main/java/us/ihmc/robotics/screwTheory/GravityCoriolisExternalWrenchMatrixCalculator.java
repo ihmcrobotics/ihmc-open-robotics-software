@@ -130,7 +130,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
                wrenchExertedByChild.set(wrenchExertedOnChild);
                wrenchExertedByChild.changeBodyFrameAttachedToSameBody(successorFrame);
                wrenchExertedByChild.scale(-1.0); // Action = -reaction
-               wrenchExertedByChild.changeFrame(jointWrench.getExpressedInFrame());
+               wrenchExertedByChild.changeFrame(jointWrench.getReferenceFrame());
                jointWrench.sub(wrenchExertedByChild);
             }
          }
@@ -198,7 +198,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
       for (int i = 0; i < listOfBodiesWithExternalWrenches.size(); i++)
       {
          Wrench externalWrench = externalWrenches.get(listOfBodiesWithExternalWrenches.get(i));
-         externalWrench.setToZero(externalWrench.getBodyFrame(), externalWrench.getExpressedInFrame());
+         externalWrench.setToZero(externalWrench.getBodyFrame(), externalWrench.getReferenceFrame());
       }
    }
 

@@ -81,7 +81,7 @@ public class ExternalWrenchHandler
       for (int i = 0; i < externalWrenchesToCompensateForList.size(); i++)
       {
          tempWrench.set(externalWrenchesToCompensateForList.get(i));
-         tempWrench.changeFrame(gravitationalWrench.getExpressedInFrame());
+         tempWrench.changeFrame(gravitationalWrench.getReferenceFrame());
          totalWrenchAlreadyApplied.add(tempWrench);
       }
 
@@ -120,7 +120,7 @@ public class ExternalWrenchHandler
       }
       ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();
       wrench.getBodyFrame().checkReferenceFrameMatch(bodyFixedFrame);
-      wrench.getExpressedInFrame().checkReferenceFrameMatch(bodyFixedFrame);
+      wrench.getReferenceFrame().checkReferenceFrameMatch(bodyFixedFrame);
 
       externalWrenchesToCompensateFor.get(rigidBody).set(wrench);
    }

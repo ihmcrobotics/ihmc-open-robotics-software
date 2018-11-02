@@ -111,7 +111,7 @@ public class RigidBodyInertiaTest
 	@Test(timeout = 30000)
    public void testChangeFrame()
    {
-      ReferenceFrame oldFrame = inertia.getExpressedInFrame();
+      ReferenceFrame oldFrame = inertia.getReferenceFrame();
       SimpleMatrix inertiaOld = new SimpleMatrix(6, 6);
       inertia.getMatrix(inertiaOld.getMatrix());
 
@@ -119,7 +119,7 @@ public class RigidBodyInertiaTest
       DenseMatrix64F inertiaCheap = new DenseMatrix64F(6, 6);
       inertia.getMatrix(inertiaCheap);
 
-      RigidBodyTransform newToOld = inertia.getExpressedInFrame().getTransformToDesiredFrame(oldFrame);
+      RigidBodyTransform newToOld = inertia.getReferenceFrame().getTransformToDesiredFrame(oldFrame);
       SimpleMatrix newToOldAdjoint = SimpleMatrix.wrap(adjoint(newToOld));
       SimpleMatrix newToOldAdjointTranspose = newToOldAdjoint.transpose();
       SimpleMatrix inertiaExpensive = newToOldAdjointTranspose.mult(inertiaOld).mult(newToOldAdjoint);

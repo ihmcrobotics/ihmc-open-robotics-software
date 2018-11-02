@@ -175,7 +175,7 @@ public class TwistCalculator
    {
       twistToPack.set(computeOrGetTwistOfBody(body));
       twistForGetRelativeTwist.set(computeOrGetTwistOfBody(base));
-      twistForGetRelativeTwist.changeFrame(twistToPack.getExpressedInFrame());
+      twistForGetRelativeTwist.changeFrame(twistToPack.getReferenceFrame());
       twistToPack.sub(twistForGetRelativeTwist);
    }
 

@@ -147,7 +147,7 @@ public class RigidBody implements NameBasedHashCodeHolder
       ReferenceFrame frameAfterJoint = parentJoint.getFrameAfterJoint();
       bodyFixedFrame = MovingReferenceFrame.constructFrameFixedInParent(bodyName + "CoM", frameAfterJoint, inertiaPose);
       inertia = new RigidBodyInertia(bodyFixedFrame, momentOfInertia, mass);
-      inertia.getBodyFrame().checkReferenceFrameMatch(inertia.getExpressedInFrame()); // inertia should be expressed in body frame, otherwise it will change
+      inertia.getBodyFrame().checkReferenceFrameMatch(inertia.getReferenceFrame()); // inertia should be expressed in body frame, otherwise it will change
       parentJoint.setSuccessor(this);
    }
 

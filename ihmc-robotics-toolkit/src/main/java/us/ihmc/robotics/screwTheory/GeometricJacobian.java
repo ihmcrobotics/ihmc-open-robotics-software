@@ -212,7 +212,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    public void computeJointTorques(Wrench wrench, DenseMatrix64F jointTorquesToPack)
    {
       // reference frame check
-      wrench.getExpressedInFrame().checkReferenceFrameMatch(this.jacobianFrame);
+      wrench.getReferenceFrame().checkReferenceFrameMatch(this.jacobianFrame);
       // FIXME add the following reference frame check
       //      wrench.getBodyFrame().checkReferenceFrameMatch(getEndEffectorFrame());
       wrench.getMatrix(tempMatrix);

@@ -87,7 +87,7 @@ public abstract class GeneralizedRigidBodyInertia
    /**
     * @return the frame in which this inertia is expressed
     */
-   public ReferenceFrame getExpressedInFrame()
+   public ReferenceFrame getReferenceFrame()
    {
       return expressedInframe;
    }

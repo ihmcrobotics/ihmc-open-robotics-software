@@ -408,7 +408,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       rootJoint.getJointTwist(tempRootBodyTwist);
 
       tempFrameVector.setIncludingFrame(rootJointLinearVelocityNewTwist);
-      tempFrameVector.changeFrame(tempRootBodyTwist.getExpressedInFrame());
+      tempFrameVector.changeFrame(tempRootBodyTwist.getReferenceFrame());
 
       tempRootBodyTwist.setLinearPart(tempFrameVector);
       rootJoint.setJointTwist(tempRootBodyTwist);
@@ -427,7 +427,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          tempCoP2d.setIncludingFrame(this.copsFilteredInFootFrame.get(foot));
          tempCoP.setIncludingFrame(tempCoP2d, 0.0);
          footTwistInWorld.changeFrame(footTwistInWorld.getBaseFrame());
-         tempCoP.changeFrame(footTwistInWorld.getExpressedInFrame());
+         tempCoP.changeFrame(footTwistInWorld.getReferenceFrame());
          footTwistInWorld.getLinearVelocityOfPointFixedInBodyFrame(tempFrameVector, tempCoP);
 
          tempFrameVector.changeFrame(worldFrame);

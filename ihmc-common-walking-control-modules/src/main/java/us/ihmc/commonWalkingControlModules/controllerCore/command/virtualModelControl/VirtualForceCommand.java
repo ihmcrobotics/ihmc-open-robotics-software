@@ -178,7 +178,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    public void setLinearForce(ReferenceFrame controlFrame, Wrench desiredWrench)
    {
       desiredWrench.getBodyFrame().checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
-      desiredWrench.getExpressedInFrame().checkReferenceFrameMatch(controlFrame);
+      desiredWrench.getReferenceFrame().checkReferenceFrameMatch(controlFrame);
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());

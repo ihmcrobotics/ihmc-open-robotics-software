@@ -359,7 +359,7 @@ public class SpatialAccelerationCalculator
        * more expensive changeFrame(ReferenceFrame, Twist, Twist).
        */
       getRelativeAcceleration(base, body, localAcceleration);
-      localAcceleration.getExpressedInFrame().checkReferenceFrameMatch(localAcceleration.getBodyFrame());
+      localAcceleration.getReferenceFrame().checkReferenceFrameMatch(localAcceleration.getBodyFrame());
       localAcceleration.changeFrameNoRelativeMotion(baseFrame);
 
       localAcceleration.getAccelerationOfPointFixedInBodyFrame(localTwist, localPoint, linearAccelerationToPack);
@@ -409,7 +409,7 @@ public class SpatialAccelerationCalculator
        * By changing the expressedInFrame from bodyFrame to baseFrame, there is no need to use the
        * more expensive changeFrame(ReferenceFrame, Twist, Twist).
        */
-      localAcceleration.getExpressedInFrame().checkReferenceFrameMatch(localAcceleration.getBodyFrame());
+      localAcceleration.getReferenceFrame().checkReferenceFrameMatch(localAcceleration.getBodyFrame());
       localAcceleration.changeFrameNoRelativeMotion(inertialFrame);
 
       localAcceleration.getAccelerationOfPointFixedInBodyFrame(localTwist, localPoint, linearAccelerationToPack);

@@ -117,7 +117,7 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * @return the reference frame *in which this spatial motion vector is expressed
     */
-   public ReferenceFrame getExpressedInFrame()
+   public ReferenceFrame getReferenceFrame()
    {
       return expressedInFrame;
    }
@@ -319,7 +319,7 @@ public abstract class SpatialMotionVector implements Clearable
 
    public void set(DenseMatrix64F matrix)
    {
-      set(getBodyFrame(), getBaseFrame(), getExpressedInFrame(), matrix, 0);
+      set(getBodyFrame(), getBaseFrame(), getReferenceFrame(), matrix, 0);
    }
 
    public void setToZero(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)

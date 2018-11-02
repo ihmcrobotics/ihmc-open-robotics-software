@@ -84,7 +84,7 @@ public class MomentumControlTestTools
       Wrench wrench = new Wrench();
       rootJoint.getWrench(wrench);
 
-      SpatialForceVector zeroWrench = new SpatialForceVector(wrench.getExpressedInFrame());
+      SpatialForceVector zeroWrench = new SpatialForceVector(wrench.getReferenceFrame());
       SpatialForceVectorTest.assertSpatialForceVectorEquals(wrench, zeroWrench, epsilon);
    }
 }

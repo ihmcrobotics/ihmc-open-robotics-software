@@ -254,7 +254,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    {
       desiredSpatialAcceleration.getBodyFrame().checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
       desiredSpatialAcceleration.getBaseFrame().checkReferenceFrameMatch(base.getBodyFixedFrame());
-      desiredSpatialAcceleration.getExpressedInFrame().checkReferenceFrameMatch(controlFrame);
+      desiredSpatialAcceleration.getReferenceFrame().checkReferenceFrameMatch(controlFrame);
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());

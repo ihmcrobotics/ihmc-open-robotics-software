@@ -140,8 +140,8 @@ public class SE3PIDController
 
    private void checkExpressedInFrames(Twist desiredTwist, Twist currentTwist)
    {
-      desiredTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
-      currentTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
+      desiredTwist.getReferenceFrame().checkReferenceFrameMatch(bodyFrame);
+      currentTwist.getReferenceFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
    private void checkBodyFrames(Twist desiredTwist, SpatialAccelerationVector feedForwardAcceleration, Twist currentTwist)
@@ -159,7 +159,7 @@ public class SE3PIDController
    private void checkExpressedInFrames(Twist desiredTwist, SpatialAccelerationVector feedForwardAcceleration, Twist currentTwist)
    {
       checkExpressedInFrames(desiredTwist, currentTwist);
-      feedForwardAcceleration.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
+      feedForwardAcceleration.getReferenceFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
    public void setPositionProportionalGains(double kpx, double kpy, double kpz)

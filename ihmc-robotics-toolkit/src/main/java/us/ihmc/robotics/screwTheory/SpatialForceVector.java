@@ -125,7 +125,7 @@ public class SpatialForceVector
    /**
     * @return the frame *in which this spatial force vector is expressed
     */
-   public ReferenceFrame getExpressedInFrame()
+   public ReferenceFrame getReferenceFrame()
    {
       return expressedInFrame;
    }
@@ -441,7 +441,7 @@ public class SpatialForceVector
     */
    public void getAngularPart(FrameVector3D vectorToPack)
    {
-      getExpressedInFrame().checkReferenceFrameMatch(vectorToPack.getReferenceFrame());
+      getReferenceFrame().checkReferenceFrameMatch(vectorToPack.getReferenceFrame());
       vectorToPack.set(angularPart);
    }
 
@@ -450,7 +450,7 @@ public class SpatialForceVector
     */
    public void getAngularPartIncludingFrame(FrameVector3D vectorToPack)
    {
-      vectorToPack.setIncludingFrame(getExpressedInFrame(), angularPart);
+      vectorToPack.setIncludingFrame(getReferenceFrame(), angularPart);
    }
 
    /**
@@ -467,7 +467,7 @@ public class SpatialForceVector
     */
    public void getLinearPart(FrameVector3D vectorToPack)
    {
-      getExpressedInFrame().checkReferenceFrameMatch(vectorToPack.getReferenceFrame());
+      getReferenceFrame().checkReferenceFrameMatch(vectorToPack.getReferenceFrame());
       vectorToPack.set(linearPart);
    }
 
@@ -476,7 +476,7 @@ public class SpatialForceVector
     */
    public void getLinearPartIncludingFrame(FrameVector3D vectorToPack)
    {
-      vectorToPack.setIncludingFrame(getExpressedInFrame(), linearPart);
+      vectorToPack.setIncludingFrame(getReferenceFrame(), linearPart);
    }
 
    /**

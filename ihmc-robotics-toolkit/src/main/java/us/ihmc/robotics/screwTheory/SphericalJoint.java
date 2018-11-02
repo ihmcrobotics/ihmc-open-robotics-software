@@ -111,7 +111,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    public void setTorqueFromWrench(Wrench jointWrench)
    {
       jointWrench.getBodyFrame().checkReferenceFrameMatch(successor.getBodyFixedFrame());
-      jointWrench.getExpressedInFrame().checkReferenceFrameMatch(jointTorque.getReferenceFrame());
+      jointWrench.getReferenceFrame().checkReferenceFrameMatch(jointTorque.getReferenceFrame());
       jointTorque.set(jointWrench.getAngularPart());
    }
 

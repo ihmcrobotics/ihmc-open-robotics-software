@@ -99,13 +99,13 @@ public class WrenchVisualizer
             tempWrench.changeFrame(tempWrench.getBodyFrame());
 
             YoFrameVector3D force = forces.get(rigidBody);
-            tempVector.setToZero(tempWrench.getExpressedInFrame());
+            tempVector.setToZero(tempWrench.getReferenceFrame());
             tempWrench.getLinearPart(tempVector);
             tempVector.changeFrame(ReferenceFrame.getWorldFrame());
             force.set(tempVector);
 
             YoFrameVector3D torque = torques.get(rigidBody);
-            tempVector.setToZero(tempWrench.getExpressedInFrame());
+            tempVector.setToZero(tempWrench.getReferenceFrame());
             tempWrench.getAngularPart(tempVector);
             tempVector.changeFrame(ReferenceFrame.getWorldFrame());
             torque.set(tempVector);

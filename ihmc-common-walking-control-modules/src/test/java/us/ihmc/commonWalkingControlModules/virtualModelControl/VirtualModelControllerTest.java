@@ -585,7 +585,7 @@ public class VirtualModelControllerTest
 
       VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
       virtualWrenchCommand.set(pelvis, endEffector);
-      virtualWrenchCommand.setWrench(desiredWrench.getExpressedInFrame(), desiredWrench);
+      virtualWrenchCommand.setWrench(desiredWrench.getReferenceFrame(), desiredWrench);
 
       virtualModelController.submitControlledBodyVirtualWrench(virtualWrenchCommand);
 

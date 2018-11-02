@@ -85,7 +85,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       for (int i = 0; i < nMomentaInUse; i++)
       {
          joint.getUnitTwist(i, tempTwist);
-         tempTwist.changeFrame(currentBodyInertia.getExpressedInFrame());
+         tempTwist.changeFrame(currentBodyInertia.getReferenceFrame());
          unitMomenta[i].compute(currentBodyInertia, tempTwist);
       }
    }
@@ -101,7 +101,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       int bodyIndex = currentBodyIndex;
       while (isValidParentIndex(parentIndex = parentMap[bodyIndex]))
       {
-         ReferenceFrame parentFrame = allBodiesExceptRoot[parentIndex].getInertia().getExpressedInFrame();
+         ReferenceFrame parentFrame = allBodiesExceptRoot[parentIndex].getInertia().getReferenceFrame();
          changeFrameOfMomenta(parentFrame);
          bodyIndex = parentIndex;
          setMassMatrixPart(currentBodyIndex, bodyIndex, allBodiesExceptRoot[bodyIndex].getParentJoint());
@@ -114,7 +114,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       if (isValidParentIndex(parentMap[currentBodyIndex]))
       {
          CompositeRigidBodyInertia parentBodyInertia = crbInertiasInOrder[parentMap[currentBodyIndex]];
-         ReferenceFrame parentFrame = parentBodyInertia.getExpressedInFrame();
+         ReferenceFrame parentFrame = parentBodyInertia.getReferenceFrame();
          currentBodyInertia.changeFrame(parentFrame);
          parentBodyInertia.add(currentBodyInertia);
       }
@@ -162,7 +162,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
          for (int subspaceIndex = 0; subspaceIndex < joint.getDegreesOfFreedom(); subspaceIndex++)
          {
             joint.getUnitTwist(subspaceIndex, tempUnitTwist);
-            tempUnitTwist.changeFrame(unitMomentum.getExpressedInFrame());
+            tempUnitTwist.changeFrame(unitMomentum.getReferenceFrame());
             double entry = unitMomentum.computeKineticCoEnergy(tempUnitTwist);
             int massMatrixCol = colStart + subspaceIndex;
             setMassMatrixSymmetrically(massMatrixRow, massMatrixCol, entry);

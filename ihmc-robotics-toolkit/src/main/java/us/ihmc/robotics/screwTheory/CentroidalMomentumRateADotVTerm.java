@@ -75,14 +75,14 @@ public class CentroidalMomentumRateADotVTerm
 
          rigidBody.getBodyFixedFrame().getTwistRelativeToOther(rootBody.getBodyFixedFrame(), tempTwist);
 
-         tempTwist.changeFrame(inertia.getExpressedInFrame());
+         tempTwist.changeFrame(inertia.getReferenceFrame());
 
          tempMomentum.compute(inertia, tempTwist); // I * J * v expressed in frame attached to CoM of rowRigidBody expressed as momentum 
          tempMomentum.changeFrame(centerOfMassFrame); // Adj^{T} * I * J * v
 
          tempCoMTwist.set(comTwist);
 
-         tempCoMTwist.changeFrame(tempTwist.getExpressedInFrame());
+         tempCoMTwist.changeFrame(tempTwist.getReferenceFrame());
          tempCoMTwist.sub(tempTwist); //Twist of the CoM w.r.t. body i expressed in CoM frame.
          tempCoMTwist.changeFrame(centerOfMassFrame);
 
@@ -104,13 +104,13 @@ public class CentroidalMomentumRateADotVTerm
          // \dot{J} * v : Note: during creation of spatialAccelerationCalculator, the boolean for setting acceleration term to zero was set to true.
          spatialAccelerationCalculator.getAccelerationOfBody(rigidBody, tempSpatialAcceleration);
 
-         inertia.changeFrame(tempSpatialAcceleration.getExpressedInFrame()); // easier to change the frame of inertia than the spatial acceleration
+         inertia.changeFrame(tempSpatialAcceleration.getReferenceFrame()); // easier to change the frame of inertia than the spatial acceleration
 
          // I * \dot{J} * v
          DenseMatrix64F inertiaTimesSpatialAccel = MatrixTools.mult(inertia.toMatrix(), tempSpatialAcceleration.toMatrix());
 
          //Express as momentum to make multiplying by adjoint easier
-         tempMomentum.set(tempSpatialAcceleration.getExpressedInFrame(), inertiaTimesSpatialAccel);
+         tempMomentum.set(tempSpatialAcceleration.getReferenceFrame(), inertiaTimesSpatialAccel);
          // Ad^{T} * I * \dot{J} * v
          tempMomentum.changeFrame(centerOfMassFrame);
 

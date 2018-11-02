@@ -49,8 +49,8 @@ public class YoTwist extends YoSpatialVector
    
    protected void getYoValuesFromTwist()
    {
-      linearPart.set(twist.getExpressedInFrame(), twist.getLinearPartX(), twist.getLinearPartY(), twist.getLinearPartZ());
-      angularPart.set(twist.getExpressedInFrame(), twist.getAngularPartX(), twist.getAngularPartY(), twist.getAngularPartZ());
+      linearPart.set(twist.getReferenceFrame(), twist.getLinearPartX(), twist.getLinearPartY(), twist.getLinearPartZ());
+      angularPart.set(twist.getReferenceFrame(), twist.getAngularPartX(), twist.getAngularPartY(), twist.getAngularPartZ());
    }
    
    public void set(Twist twist)

@@ -78,7 +78,7 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
          YoDouble torqueAboutJointAxis = pair.getRight();
 
          tempWrench.changeFrame(jointAxis.getReferenceFrame());
-         tempFrameVector.setToZero(tempWrench.getExpressedInFrame());
+         tempFrameVector.setToZero(tempWrench.getReferenceFrame());
          tempWrench.getAngularPart(tempFrameVector);
          torqueAboutJointAxis.set(-tempFrameVector.dot(jointAxis));
       }

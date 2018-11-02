@@ -141,11 +141,11 @@ public class SpatialAccelerationVector extends SpatialMotionVector
    public void changeFrame(ReferenceFrame newReferenceFrame, Twist twistOfCurrentWithRespectToNew, Twist twistOfBodyWithRespectToBase)
    {
       // reference frame checks
-      expressedInFrame.checkReferenceFrameMatch(twistOfCurrentWithRespectToNew.getExpressedInFrame());
+      expressedInFrame.checkReferenceFrameMatch(twistOfCurrentWithRespectToNew.getReferenceFrame());
       expressedInFrame.checkReferenceFrameMatch(twistOfCurrentWithRespectToNew.getBodyFrame());
       newReferenceFrame.checkReferenceFrameMatch(twistOfCurrentWithRespectToNew.getBaseFrame());
 
-      expressedInFrame.checkReferenceFrameMatch(twistOfBodyWithRespectToBase.getExpressedInFrame());
+      expressedInFrame.checkReferenceFrameMatch(twistOfBodyWithRespectToBase.getReferenceFrame());
       bodyFrame.checkReferenceFrameMatch(twistOfBodyWithRespectToBase.getBodyFrame());
       baseFrame.checkReferenceFrameMatch(twistOfBodyWithRespectToBase.getBaseFrame());
 
@@ -263,7 +263,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
    {
       pointFixedInBodyFrame.checkReferenceFrameMatch(expressedInFrame);
 
-      expressedInFrame.checkReferenceFrameMatch(twist.getExpressedInFrame());
+      expressedInFrame.checkReferenceFrameMatch(twist.getReferenceFrame());
       bodyFrame.checkReferenceFrameMatch(twist.getBodyFrame());
       baseFrame.checkReferenceFrameMatch(twist.getBaseFrame());
 
