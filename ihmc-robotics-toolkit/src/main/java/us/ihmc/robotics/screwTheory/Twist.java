@@ -87,23 +87,6 @@ public class Twist extends SpatialMotionVector
    }
 
    /**
-    * Construct based on a screw representation of the twist
-    *
-    * @param bodyFrame what we're specifying the twist of
-    * @param baseFrame with respect to what we're specifying the twist
-    * @param expressedInFrame in which reference frame the twist is expressed
-    * @param angularVelocityMagnitude magnitude of angular velocity about axisOfRotation
-    * @param linearVelocityMagnitude magnitude of linear velocity in the direction of axisOfRotation
-    * @param axisOfRotation axis of rotation
-    * @param offset any vector from the origin of expressedInFrame to axisOfRotation
-    */
-   public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double angularVelocityMagnitude,
-                double linearVelocityMagnitude, Vector3DReadOnly axisOfRotation, Vector3DReadOnly offset)
-   {
-      setScrew(bodyFrame, baseFrame, expressedInFrame, angularVelocityMagnitude, linearVelocityMagnitude, axisOfRotation, offset);
-   }
-
-   /**
     * Sets this twist so that it is the same as another twist
     */
    public void set(Twist other)
@@ -332,28 +315,6 @@ public class Twist extends SpatialMotionVector
    public void setIncludingFrame(Twist other)
    {
       super.setIncludingFrame(other);
-   }
-
-   public void setScrew(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double angularVelocityMagnitude,
-         double linearVelocityMagnitude, Vector3DReadOnly axisOfRotation, Vector3DReadOnly offset)
-   {
-      double epsilon = 1e-12;
-      if (!MathTools.epsilonEquals(1.0, axisOfRotation.lengthSquared(), epsilon))
-         throw new RuntimeException("axis of rotation must be of unit magnitude. axisOfRotation: " + axisOfRotation);
-
-      this.bodyFrame = bodyFrame;
-      this.baseFrame = baseFrame;
-      this.expressedInFrame = expressedInFrame;
-
-      this.freeVector.cross(offset, axisOfRotation);
-      this.freeVector.scale(angularVelocityMagnitude);
-
-      this.getLinearPart().set(axisOfRotation);
-      this.getLinearPart().scale(linearVelocityMagnitude);
-      this.getLinearPart().add(freeVector);
-
-      this.getAngularPart().set(axisOfRotation);
-      this.getAngularPart().scale(angularVelocityMagnitude);
    }
 
    ///CLOVER:OFF

@@ -312,60 +312,6 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       vector1.sub(vector2);
    }
 
-   /**
-    * Compares setScrew method in SpatialAccelerationVector to numerical derivative based method
-    */
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testSetScrew()
-   {
-      ReferenceFrame bodyFrame = frameA;
-      ReferenceFrame baseFrame = frameB;
-      ReferenceFrame expressedInFrame = frameC;
-
-      double angularVelocityMagnitude = random.nextDouble();
-      double angularAccelerationMagnitude = random.nextDouble();
-      double linearVelocityMagnitude = random.nextDouble();
-      double linearAccelerationMagnitude = random.nextDouble();
-      Vector3D axisOfRotation = RandomGeometry.nextVector3D(random);
-      axisOfRotation.normalize();
-      Vector3D axisOfRotationDot = new Vector3D();
-      axisOfRotationDot.cross(axisOfRotation, RandomGeometry.nextVector3D(random));
-      Vector3D offset = RandomGeometry.nextVector3D(random);
-      Vector3D offsetDot = RandomGeometry.nextVector3D(random);
-      SpatialAccelerationVector acceleration = new SpatialAccelerationVector(bodyFrame, baseFrame, expressedInFrame, angularVelocityMagnitude,
-                                                  angularAccelerationMagnitude, linearVelocityMagnitude, linearAccelerationMagnitude, axisOfRotation,
-                                                  axisOfRotationDot, offset, offsetDot);
-
-      Twist twist0 = new Twist();
-      twist0.setScrew(bodyFrame, baseFrame, expressedInFrame, angularVelocityMagnitude, linearVelocityMagnitude, axisOfRotation, offset);
-
-      double dt = 1e-8;
-      angularVelocityMagnitude += angularAccelerationMagnitude * dt;
-      linearVelocityMagnitude += linearAccelerationMagnitude * dt;
-      Vector3D axisOfRotationDelta = new Vector3D(axisOfRotationDot);
-      axisOfRotationDelta.scale(dt);
-      axisOfRotation.add(axisOfRotationDelta);
-      Vector3D offsetDelta = new Vector3D(offsetDot);
-      offsetDelta.scale(dt);
-      offset.add(offsetDelta);
-      Twist twist1 = new Twist();
-      twist1.setScrew(bodyFrame, baseFrame, expressedInFrame, angularVelocityMagnitude, linearVelocityMagnitude, axisOfRotation, offset);
-
-      DenseMatrix64F numericalDerivative = new DenseMatrix64F(Twist.SIZE, 1);
-      DenseMatrix64F twist1Matrix = new DenseMatrix64F(6, 1);
-      DenseMatrix64F twist0Matrix = new DenseMatrix64F(6, 1);
-      twist1.get(0, twist1Matrix);
-      twist0.get(0, twist0Matrix);
-      CommonOps.subtract(twist1Matrix, twist0Matrix, numericalDerivative);
-      CommonOps.scale(1.0 / dt, numericalDerivative);
-
-      DenseMatrix64F accelerationMatrix = new DenseMatrix64F(6, 1);
-      acceleration.get(0, accelerationMatrix);
-      JUnitTools.assertMatrixEquals(numericalDerivative, accelerationMatrix, 1e-4);
-   }
-
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetBasedOnOriginAcceleration()

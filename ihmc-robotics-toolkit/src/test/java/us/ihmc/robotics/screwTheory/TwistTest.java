@@ -511,32 +511,6 @@ public class TwistTest extends SpatialMotionVectorTest
       EuclidCoreTestTools.assertTuple3DEquals(angularVelocityNumerical, angularVelocityInBaseFrame, 1e-5);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testScrewConstruction()
-   {
-      double angularVelocityMagnitude = random.nextDouble();
-      double linearVelocityMagnitude = 0.0;
-      Vector3D axisOfRotation = RandomGeometry.nextVector3D(random);
-      axisOfRotation.normalize();
-      Vector3D offset = RandomGeometry.nextVector3D(random);
-
-      Twist twist = new Twist(frameB, frameA, frameB, angularVelocityMagnitude, linearVelocityMagnitude, axisOfRotation, offset);
-      twist.changeFrame(frameA);
-
-      FrameVector3D offsetAlongAxis = new FrameVector3D(frameB, axisOfRotation);
-      offsetAlongAxis.scale(random.nextDouble());
-      FramePoint3D pointThatShouldBeStationary = new FramePoint3D(frameB, offset);
-      pointThatShouldBeStationary.add(offsetAlongAxis);
-      pointThatShouldBeStationary.changeFrame(frameA);
-
-      FrameVector3D velocityOfStationaryPoint = new FrameVector3D(frameB);
-      twist.getLinearVelocityOfPointFixedInBodyFrame(velocityOfStationaryPoint, pointThatShouldBeStationary);
-
-      double delta = 1e-15;
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), velocityOfStationaryPoint, delta);
-   }
-
    /**
     * Converts the twist to 'tilde' form, i.e.:
     * [tilde(omega), v;
