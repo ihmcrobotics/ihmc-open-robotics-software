@@ -231,8 +231,8 @@ public abstract class HumanoidControllerWarmup
       frameAngularVelocity.scale(velocityDecay);
       frameLinearVelocity.changeFrame(rootJoint.getFrameAfterJoint());
       frameAngularVelocity.changeFrame(rootJoint.getFrameAfterJoint());
-      rootJointTwist.set(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(), frameLinearVelocity,
-                         frameAngularVelocity);
+      rootJointTwist.set(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(), frameAngularVelocity,
+                         frameLinearVelocity);
       rootJoint.setJointTwist(rootJointTwist);
    }
 

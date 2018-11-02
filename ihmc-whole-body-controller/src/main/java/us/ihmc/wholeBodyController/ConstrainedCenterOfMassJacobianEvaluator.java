@@ -175,8 +175,8 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
 
       projector.setA(constrainedCentroidalMomentumMatrix);
       DenseMatrix64F centroidalMomentumPlusDenseMatrix = new DenseMatrix64F(momentumSelectionMatrix.getNumRows(), 1);
-      Momentum centroidalMomentum = new Momentum(centerOfMassFrame, centroidalLinearMomentum,
-                                       centroidalAngularMomentum);
+      Momentum centroidalMomentum = new Momentum(centerOfMassFrame, centroidalAngularMomentum,
+                                       centroidalLinearMomentum);
       DenseMatrix64F centroidalMomentumSelection = new DenseMatrix64F(momentumSelectionMatrix.getNumRows(), 1);
       CommonOps.mult(momentumSelectionMatrix, centroidalMomentum.toDenseMatrix(), centroidalMomentumSelection);
       projector.project(centroidalMomentumSelection, centroidalMomentumPlusDenseMatrix);

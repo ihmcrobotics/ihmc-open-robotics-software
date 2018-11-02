@@ -132,7 +132,7 @@ public class VirtualModelControllerTestHelper
          FrameVector3D torqueFrameVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), desiredTorque);
          forceFrameVector.changeFrame(endEffectorFrame);
          torqueFrameVector.changeFrame(endEffectorFrame);
-         desiredWrench.set(forceFrameVector, torqueFrameVector);
+         desiredWrench.set(torqueFrameVector, forceFrameVector);
          desiredWrench.changeFrame(ReferenceFrame.getWorldFrame());
 
          YoWrench yoDesiredWrench = new YoWrench("desiredWrench" + i, endEffectorFrame, ReferenceFrame.getWorldFrame(), registry);

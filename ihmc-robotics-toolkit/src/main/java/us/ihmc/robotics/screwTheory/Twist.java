@@ -42,12 +42,12 @@ public class Twist extends SpatialMotionVector
     * @param bodyFrame what we're specifying the twist of
     * @param baseFrame with respect to what we're specifying the twist
     * @param expressedInFrame in which reference frame the twist is expressed
-    * @param linearVelocity linear velocity part of the twist
     * @param angularVelocity angular velocity part of the twist
+    * @param linearVelocity linear velocity part of the twist
     */
-   public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
+   public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularVelocity, Vector3DReadOnly linearVelocity)
    {
-      super(bodyFrame, baseFrame, expressedInFrame, linearVelocity, angularVelocity);
+      super(bodyFrame, baseFrame, expressedInFrame, angularVelocity, linearVelocity);
    }
 
    /**
@@ -57,9 +57,9 @@ public class Twist extends SpatialMotionVector
     * @param angularPart angular part of the spatial motion vector expressed in the {@code expressedInFrame} to use.
     * @throws ReferenceFrameMismatchException if the linear and angular parts are not expressed in the same reference frame.
     */
-   public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3DReadOnly linearVelocity, FrameVector3DReadOnly angularVelocity)
+   public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3DReadOnly angularVelocity, FrameVector3DReadOnly linearVelocity)
    {
-      super(bodyFrame, baseFrame, linearVelocity, angularVelocity);
+      super(bodyFrame, baseFrame, angularVelocity, linearVelocity);
    }
 
    /**

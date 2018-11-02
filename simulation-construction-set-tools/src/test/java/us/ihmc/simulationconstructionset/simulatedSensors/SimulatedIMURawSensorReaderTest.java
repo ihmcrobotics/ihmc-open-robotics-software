@@ -74,7 +74,7 @@ public class SimulatedIMURawSensorReaderTest
       Vector3D angularAcceleration = new Vector3D();
       ReferenceFrame rootBodyFrame = fullRobotModel.getElevatorFrame();
       SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBodyFrame, ReferenceFrame.getWorldFrame(), rootBodyFrame,
-                                                                                 linearAcceleration, angularAcceleration);
+                                                                                 angularAcceleration, linearAcceleration);
       simulatedIMURawSensorReader = new PerfectSimulatedIMURawSensorReader(rawSensors, IMU_INDEX, rigidBody, imuFrame, fullRobotModel.getElevator(),
                                                                            rootAcceleration);
 
@@ -333,13 +333,13 @@ public class SimulatedIMURawSensorReaderTest
          updateFrames();
 
          // Update Body Velocity
-         Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocity, angularVelocity);
+         Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, angularVelocity, linearVelocity);
          rootJoint.setJointTwist(bodyTwist);
 
          // Update Body Acceleration
          SpatialAccelerationVector accelerationOfChestWithRespectToWorld = new SpatialAccelerationVector(bodyFrame, worldFrame, bodyFrame,
-                                                                                                         linearAcceleration,
-                                                                                                         angularAcceleration);
+                                                                                                         angularAcceleration,
+                                                                                                         linearAcceleration);
          accelerationOfChestWithRespectToWorld.changeBaseFrameNoRelativeAcceleration(getElevatorFrame());
          rootJoint.setAcceleration(accelerationOfChestWithRespectToWorld);
 

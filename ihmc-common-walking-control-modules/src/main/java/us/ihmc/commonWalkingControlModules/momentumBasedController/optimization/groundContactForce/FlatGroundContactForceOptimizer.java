@@ -191,7 +191,7 @@ public class FlatGroundContactForceOptimizer
          }
          indexOffset += contactPointsInPlane;
 
-         Wrench wrench = new Wrench(planeFrame, ReferenceFrame.getWorldFrame(), resultForce, resultTorque);
+         Wrench wrench = new Wrench(planeFrame, ReferenceFrame.getWorldFrame(), resultTorque, resultForce);
          wrenches.add(wrench);
       }
 

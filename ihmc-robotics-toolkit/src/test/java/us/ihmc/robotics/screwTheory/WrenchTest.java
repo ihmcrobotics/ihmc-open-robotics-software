@@ -81,11 +81,11 @@ public class WrenchTest
       {
          Vector3D angularVelocity = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          Vector3D linearVelocity = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-         Twist twist = new Twist(frameC, frameA, frameA, linearVelocity, angularVelocity);
+         Twist twist = new Twist(frameC, frameA, frameA, angularVelocity, linearVelocity);
 
          Vector3D torque = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          Vector3D force = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-         Wrench wrench = new Wrench(frameC, frameA, force, torque);    // baseFrame doesn't matter
+         Wrench wrench = new Wrench(frameC, frameA, torque, force);    // baseFrame doesn't matter
 
          double power1 = twist.dot(wrench);
 

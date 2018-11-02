@@ -43,13 +43,13 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     * @param bodyFrame what we're specifying the spatial acceleration of
     * @param baseFrame with respect to what we're specifying the spatial acceleration
     * @param expressedInFrame in which reference frame the spatial acceleration is expressed
-    * @param linearAcceleration linear acceleration part of the spatial acceleration
     * @param angularAcceleration angular velocity part of the spatial acceleration
+    * @param linearAcceleration linear acceleration part of the spatial acceleration
     */
-   public SpatialAccelerationVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly linearAcceleration,
-                                    Vector3DReadOnly angularAcceleration)
+   public SpatialAccelerationVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularAcceleration,
+                                    Vector3DReadOnly linearAcceleration)
    {
-      super(bodyFrame, baseFrame, expressedInFrame, linearAcceleration, angularAcceleration);
+      super(bodyFrame, baseFrame, expressedInFrame, angularAcceleration, linearAcceleration);
    }
 
    /**

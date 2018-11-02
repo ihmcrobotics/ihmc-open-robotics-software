@@ -292,8 +292,8 @@ public class VirtualModelController
          for (RigidBody rigidBody : allBodies)
          {
             Wrench gravityWrench = gravityWrenchMap.get(rigidBody);
-            gravityWrench.set(new FrameVector3D(ReferenceFrame.getWorldFrame(), 0, 0, -9.81 * rigidBody.getInertia().getMass()),
-                              new FrameVector3D(ReferenceFrame.getWorldFrame(), 0, 0, 0));
+            gravityWrench.set(new FrameVector3D(ReferenceFrame.getWorldFrame(), 0, 0, 0),
+                              new FrameVector3D(ReferenceFrame.getWorldFrame(), 0, 0, -9.81 * rigidBody.getInertia().getMass()));
          }
          gravityWrenchVisualizer.visualize(gravityWrenchMap);
       }

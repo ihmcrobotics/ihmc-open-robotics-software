@@ -58,7 +58,7 @@ public class VirtualModelControllerTest
 
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench wrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench wrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       InverseDynamicsJoint[] controlledJoints = ScrewTools.createJointPath(pelvis, foot);
       GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, pelvis.getBodyFixedFrame());
@@ -111,7 +111,7 @@ public class VirtualModelControllerTest
       // send in the correct frame and no selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       submitAndCheckVMC(pelvis, foot, centerOfMassFrame, desiredWrench, null);
    }
@@ -136,7 +136,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       submitAndCheckVMC(pelvis, foot, centerOfMassFrame, desiredWrench, CommonOps.identity(Wrench.SIZE, Wrench.SIZE));
    }
@@ -161,7 +161,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only force
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -192,7 +192,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -222,7 +222,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
@@ -250,7 +250,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
@@ -278,7 +278,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
@@ -306,7 +306,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
@@ -334,7 +334,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
@@ -362,7 +362,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
@@ -390,7 +390,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(2, 6);
@@ -419,7 +419,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -449,7 +449,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -479,7 +479,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), pelvis.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), pelvis.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -509,7 +509,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(pelvis.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(pelvis.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -536,7 +536,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(pelvis.getBodyFixedFrame(), pelvis.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(pelvis.getBodyFixedFrame(), pelvis.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -566,7 +566,7 @@ public class VirtualModelControllerTest
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
 

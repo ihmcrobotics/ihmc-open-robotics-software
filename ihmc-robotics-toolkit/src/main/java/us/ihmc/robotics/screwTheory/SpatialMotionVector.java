@@ -50,30 +50,30 @@ public abstract class SpatialMotionVector implements Clearable
     * @param bodyFrame what we're specifying the motion of
     * @param baseFrame with respect to what we're specifying the motion
     * @param expressedInFrame in which reference frame the motion is expressed
-    * @param linearPart linear part of the spatial motion vector
     * @param angularPart angular part of the spatial motion vector
+    * @param linearPart linear part of the spatial motion vector
     */
-   public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly linearPart,
-                              Vector3DReadOnly angularPart)
+   public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart,
+                              Vector3DReadOnly linearPart)
    {
-      set(bodyFrame, baseFrame, expressedInFrame, linearPart, angularPart);
+      set(bodyFrame, baseFrame, expressedInFrame, angularPart, linearPart);
    }
 
    /**
     * @param bodyFrame what we're specifying the motion of
     * @param baseFrame with respect to what we're specifying the motion
-    * @param linearPart linear part of the spatial motion vector expressed in the
-    *           {@code expressedInFrame} to use.
     * @param angularPart angular part of the spatial motion vector expressed in the
+    *           {@code expressedInFrame} to use.
+    * @param linearPart linear part of the spatial motion vector expressed in the
     *           {@code expressedInFrame} to use.
     * @throws ReferenceFrameMismatchException if the linear and angular parts are not expressed in
     *            the same reference frame.
     */
-   public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3DReadOnly linearPart, FrameVector3DReadOnly angularPart)
+   public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
       linearPart.checkReferenceFrameMatch(angularPart);
 
-      set(bodyFrame, baseFrame, linearPart.getReferenceFrame(), linearPart, angularPart);
+      set(bodyFrame, baseFrame, linearPart.getReferenceFrame(), angularPart, linearPart);
    }
 
    /**
@@ -290,8 +290,8 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * Sets this spatial motion vector based
     */
-   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly linearPart,
-                   Vector3DReadOnly angularPart)
+   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart,
+                   Vector3DReadOnly linearPart)
    {
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
@@ -304,7 +304,7 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * Sets this spatial motion vector based
     */
-   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, FrameVector3DReadOnly linearPart, FrameVector3DReadOnly angularPart)
+   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
       linearPart.checkReferenceFrameMatch(expressedInFrame);
       angularPart.checkReferenceFrameMatch(expressedInFrame);
