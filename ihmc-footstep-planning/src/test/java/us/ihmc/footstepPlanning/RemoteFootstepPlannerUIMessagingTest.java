@@ -397,7 +397,8 @@ public class RemoteFootstepPlannerUIMessagingTest
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength);
 
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, randomParameters);
+         // TODO convert parameters to message-based parameters
+//         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, randomParameters);
 
          messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
 

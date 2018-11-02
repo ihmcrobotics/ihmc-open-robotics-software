@@ -40,7 +40,7 @@ import java.util.*;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
-   private static final boolean debug = false;
+   private static final boolean debug = true;
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
    private final String name = getClass().getSimpleName();

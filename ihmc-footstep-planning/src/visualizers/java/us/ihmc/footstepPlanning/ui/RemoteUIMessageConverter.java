@@ -53,7 +53,7 @@ public class RemoteUIMessageConverter
 
    private final String robotName;
 
-   private final AtomicReference<FootstepPlannerParameters> plannerParametersReference;
+   private final AtomicReference<FootstepPlannerParameters> plannerParametersReference = new AtomicReference<>(null);
    private final AtomicReference<Point3D> plannerStartPositionReference;
    private final AtomicReference<Quaternion> plannerStartOrientationReference;
    private final AtomicReference<Point3D> plannerGoalPositionReference;
@@ -94,7 +94,10 @@ public class RemoteUIMessageConverter
       this.robotName = robotName;
       this.ros2Node = ros2Node;
 
-      plannerParametersReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerParametersTopic, null);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, message ->
+      {
+         // TODO set parameters from message-based parameters
+      });
       plannerStartPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic);
       plannerStartOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion());
       plannerGoalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic);
@@ -300,6 +303,15 @@ public class RemoteUIMessageConverter
          return;
       }
 
+      PrintTools.info("Body box height sending : " + parameters.getBodyBoxHeight());
+      PrintTools.info("Body box depth sending : " + parameters.getBodyBoxDepth());
+      PrintTools.info("Body box width sending : " + parameters.getBodyBoxWidth());
+      PrintTools.info("Body box z sending : " + parameters.getBodyBoxBaseZ());
+      PrintTools.info("Body box x sending : " + parameters.getBodyBoxBaseX());
+      PrintTools.info("Body box y sending : " + parameters.getBodyBoxBaseY());
+
+
+      
       packet.setCheckForBodyBoxCollisions(parameters.checkForBodyBoxCollisions());
       packet.setIdealFootstepWidth(parameters.getIdealFootstepWidth());
       packet.setIdealFootstepLength(parameters.getIdealFootstepLength());

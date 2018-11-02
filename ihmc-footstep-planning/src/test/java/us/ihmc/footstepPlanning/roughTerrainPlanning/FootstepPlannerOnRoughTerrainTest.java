@@ -127,7 +127,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       this.bodyBoxOffsetX = bodyBoxOffsetX;
    }
 
-   protected AtomicReference<FootstepPlannerParameters> parametersReference;
+   protected AtomicReference<FootstepPlannerParameters> parametersReference = new AtomicReference<>(getDefaultPlannerParameters());
 
    protected abstract void setupInternal();
 
@@ -322,7 +322,10 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       if (messager != null && visualize())
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerStatusTopic, FootstepPlannerStatus.PLANNING_STEPS);
-         parametersReference = messager.createInput(PlannerParametersTopic, getDefaultPlannerParameters());
+         messager.registerTopicListener(PlannerParametersTopic, message ->
+         {
+            // TODO set parameters from message
+         });
 
          messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerStatusTopic, FootstepPlannerStatus.IDLE);

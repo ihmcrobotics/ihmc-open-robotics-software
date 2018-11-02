@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.ui.components;
+package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -8,7 +8,12 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.ui.components.FootstepPlannerCostParametersProperty;
+import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
+import us.ihmc.footstepPlanning.ui.components.SettableFootstepPlannerCostParameters;
+import us.ihmc.footstepPlanning.ui.components.SettableFootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.javaFXToolkit.messager.TopicListener;
@@ -18,7 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class FootstepPlannerCostsUIController
 {
    private JavaFXMessager messager;
-   private final FootstepPlannerParametersProperty property = new FootstepPlannerParametersProperty(this, "footstepPlannerCostParametersProperty");
+   private final FootstepPlannerCostParametersProperty property = new FootstepPlannerCostParametersProperty(this, "footstepPlannerCostParametersProperty");
 
    @FXML
    private ToggleButton useQuadraticHeightCost;
@@ -55,7 +60,7 @@ public class FootstepPlannerCostsUIController
 
    public void setPlannerParameters(FootstepPlannerParameters parameters)
    {
-      property.setPlannerParameters(parameters);
+      property.setPlannerParameters(parameters.getCostParameters());
    }
 
    public void setupControls()
@@ -80,7 +85,7 @@ public class FootstepPlannerCostsUIController
       heuristicsWeightValueFactory = heuristicsWeight.getValueFactory();
 
       AtomicReference<FootstepPlannerType> plannerType = messager.createInput(FootstepPlannerMessagerAPI.PlannerTypeTopic);
-      AtomicReference<FootstepPlannerParameters> plannerParameters = messager.createInput(FootstepPlannerMessagerAPI.PlannerParametersTopic);
+      AtomicReference<FootstepPlannerCostParameters> plannerParameters = messager.createInput(FootstepPlannerMessagerAPI.PlannerCostParametersTopic);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerTypeTopic, createPlannerTypeChangeListener(plannerType, plannerParameters));
 
@@ -100,28 +105,28 @@ public class FootstepPlannerCostsUIController
       property.bidirectionalBindStepUpWeight(stepUpWeight.getValueFactory().valueProperty());
       property.bidirectionalBindStepDownWeight(stepDownWeight.getValueFactory().valueProperty());
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, property, createConverter(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerCostParametersTopic, property, createConverter(), true);
    }
 
-   private PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters> createConverter()
+   private PropertyToMessageTypeConverter<FootstepPlannerCostParameters, SettableFootstepPlannerCostParameters> createConverter()
    {
-      return new PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters>()
+      return new PropertyToMessageTypeConverter<FootstepPlannerCostParameters, SettableFootstepPlannerCostParameters>()
       {
          @Override
-         public FootstepPlannerParameters convert(SettableFootstepPlannerParameters propertyValue)
+         public FootstepPlannerCostParameters convert(SettableFootstepPlannerCostParameters propertyValue)
          {
             return propertyValue;
          }
 
          @Override
-         public SettableFootstepPlannerParameters interpret(FootstepPlannerParameters messageContent)
+         public SettableFootstepPlannerCostParameters interpret(FootstepPlannerCostParameters messageContent)
          {
-            return new SettableFootstepPlannerParameters(messageContent);
+            return new SettableFootstepPlannerCostParameters(messageContent);
          }
       };
    }
 
-   private TopicListener<FootstepPlannerType> createPlannerTypeChangeListener(AtomicReference<FootstepPlannerType> plannerType, AtomicReference<FootstepPlannerParameters> plannerParameters)
+   private TopicListener<FootstepPlannerType> createPlannerTypeChangeListener(AtomicReference<FootstepPlannerType> plannerType, AtomicReference<FootstepPlannerCostParameters> plannerParameters)
    {
       return new TopicListener<FootstepPlannerType>()
       {
@@ -136,16 +141,16 @@ public class FootstepPlannerCostsUIController
             switch (footstepPlannerType)
             {
             case A_STAR:
-               weight = plannerParameters.get().getCostParameters().getAStarHeuristicsWeight().getValue();
+               weight = plannerParameters.get().getAStarHeuristicsWeight().getValue();
                break;
             case VIS_GRAPH_WITH_A_STAR:
-               weight = plannerParameters.get().getCostParameters().getVisGraphWithAStarHeuristicsWeight().getValue();
+               weight = plannerParameters.get().getVisGraphWithAStarHeuristicsWeight().getValue();
                break;
             case PLANAR_REGION_BIPEDAL:
-               weight = plannerParameters.get().getCostParameters().getDepthFirstHeuristicsWeight().getValue();
+               weight = plannerParameters.get().getDepthFirstHeuristicsWeight().getValue();
                break;
             case SIMPLE_BODY_PATH:
-               weight = plannerParameters.get().getCostParameters().getBodyPathBasedHeuristicsWeight().getValue();
+               weight = plannerParameters.get().getBodyPathBasedHeuristicsWeight().getValue();
                break;
             default:
                weight = 0.0;
