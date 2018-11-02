@@ -8,17 +8,16 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.GraphVisualization;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.NodeComparator;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -52,7 +51,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    private final FootstepGraph graph;
    private final FootstepNodeChecker nodeChecker;
-   private final GraphVisualization visualization;
+   private final BipedalFootstepPlannerListener listener;
    private final CostToGoHeuristics heuristics;
    private final FootstepNodeExpansion nodeExpansion;
    private final FootstepCost stepCostCalculator;
@@ -74,14 +73,14 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    public AStarFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics,
                                FootstepNodeExpansion nodeExpansion, FootstepCost stepCostCalculator, FootstepNodeSnapper snapper,
-                               GraphVisualization visualization, YoVariableRegistry parentRegistry)
+                               BipedalFootstepPlannerListener listener, YoVariableRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.nodeChecker = nodeChecker;
       this.heuristics = heuristics;
       this.nodeExpansion = nodeExpansion;
       this.stepCostCalculator = stepCostCalculator;
-      this.visualization = visualization;
+      this.listener = listener;
       this.snapper = snapper;
       this.graph = new FootstepGraph();
 
@@ -156,6 +155,10 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       planInternal();
       FootstepPlanningResult result = checkResult();
+
+      if(result.validForExecution() && listener != null)
+         listener.plannerFinished(null);
+
       if (debug)
       {
          PrintTools.info("A* Footstep planning statistics for " + result);
@@ -231,20 +234,14 @@ public class AStarFootstepPlanner implements FootstepPlanner
          this.validGoalNode.set(validGoalNode && this.validGoalNode.getBooleanValue());
       }
 
-//      RigidBodyTransform snapTransform = snapper.snapFootstepNode(startNode).getSnapTransform();
-//      FootstepNodeSnappingTools.constructGroundPlaneAroundFeet(planarRegionsList, startNode, snapTransform, parameters.getIdealFootstepWidth(), 0.5, 0.2,  0.5);
-
-
       stack.add(startNode);
       expandedNodes = new HashSet<>();
       endNode = null;
 
-      if (visualization != null)
+      if (listener != null)
       {
-         visualization.addNode(startNode, true);
-         for (RobotSide side : RobotSide.values)
-            visualization.addNode(goalNodes.get(side), true);
-         visualization.tickAndUpdate();
+         listener.addNode(startNode, null);
+         listener.tickAndUpdate();
       }
    }
 
@@ -265,12 +262,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
             continue;
          expandedNodes.add(nodeToExpand);
 
-         if (visualization != null)
-         {
-            visualization.addNode(nodeToExpand, false);
-            visualization.tickAndUpdate();
-         }
-
          if (checkAndHandleNodeAtGoal(nodeToExpand))
             break;
 
@@ -280,7 +271,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
          expandedNodesCount += neighbors.size();
          for (FootstepNode neighbor : neighbors)
          {
-            /** Checks if the footstep (center of the foot) is on a planar region*/
+            if (listener != null)
+               listener.addNode(neighbor, nodeToExpand);
+
             if (!nodeChecker.isNodeValid(neighbor, nodeToExpand))
             {
                rejectedNodesCount++;
@@ -290,9 +283,12 @@ public class AStarFootstepPlanner implements FootstepPlanner
             double cost = stepCostCalculator.compute(nodeToExpand, neighbor);
             graph.checkAndSetEdge(nodeToExpand, neighbor, cost);
 
-            if(endNode == null || stack.comparator().compare(neighbor, endNode) < 0)
+            if(!parameters.getReturnBestEffortPlan() || endNode == null || stack.comparator().compare(neighbor, endNode) < 0)
                stack.add(neighbor);
          }
+
+         if(listener != null)
+            listener.tickAndUpdate();
 
          long timeInNano = System.nanoTime();
          if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime) > timeout.getDoubleValue())
@@ -324,7 +320,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    private void checkAndHandleBestEffortNode(FootstepNode nodeToExpand)
    {
-      if(!parameters.getReturnBestEffortPlan())
+      if(!parameters.getReturnBestEffortPlan() && listener == null)
          return;
 
       if(graph.getPathFromStart(nodeToExpand).size() - 1 < parameters.getMinimumStepsForBestEffortPlan())
@@ -332,6 +328,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       if(endNode == null || heuristics.compute(nodeToExpand, goalNodes.get(nodeToExpand.getRobotSide())) < heuristics.compute(endNode, goalNodes.get(endNode.getRobotSide())))
       {
+         if(listener != null)
+            listener.reportLowestCostNodeList(graph.getPathFromStart(nodeToExpand));
          endNode = nodeToExpand;
       }
   }
@@ -342,14 +340,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
          return FootstepPlanningResult.NO_PATH_EXISTS;
       if (!graph.doesNodeExist(endNode))
          return FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
-
-      if (visualization != null)
-      {
-         List<FootstepNode> path = graph.getPathFromStart(endNode);
-         for (FootstepNode node : path)
-            visualization.setNodeActive(node);
-         visualization.tickAndUpdate();
-      }
 
       if (heuristics.getWeight() <= 1.0)
          return FootstepPlanningResult.OPTIMAL_SOLUTION;
@@ -364,12 +354,12 @@ public class AStarFootstepPlanner implements FootstepPlanner
          throw new RuntimeException("Planner does not support goals other then " + supportedGoalType);
    }
 
-   public static AStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, GraphVisualization viz,
+   public static AStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, BipedalFootstepPlannerListener listener,
                                                     SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion,
                                                     YoVariableRegistry registry)
    {
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
-      FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
+      FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(parameters, snapper);
@@ -378,6 +368,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getAStarHeuristicsWeight(), parameters);
 
       FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
+      nodeChecker.addPlannerListener(listener);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
@@ -388,7 +379,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, viz,
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, listener,
                                                               registry);
       return planner;
    }

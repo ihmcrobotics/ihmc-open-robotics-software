@@ -62,6 +62,21 @@ public class FootstepNode
       return robotSide;
    }
 
+   public int getXIndex()
+   {
+      return xIndex;
+   }
+
+   public int getYIndex()
+   {
+      return yIndex;
+   }
+
+   public int getYawIndex()
+   {
+      return yawIndex;
+   }
+
    public double euclideanDistance(FootstepNode other)
    {
       double dx = getX() - other.getX();

@@ -1,22 +1,18 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+
+import java.util.List;
 
 public interface BipedalFootstepPlannerListener
 {
-   public abstract void goalWasSet(RigidBodyTransform goalLeftFootPose, RigidBodyTransform goalRightFootPose);
-   public abstract void startNodeWasAdded(FootstepNode startNode);
-   public abstract void planarRegionsListSet(PlanarRegionsList planarRegionsList);
-   
-   public abstract void nodeIsBeingExpanded(FootstepNode nodeToExpand);
+   void addNode(FootstepNode node, FootstepNode previousNode);
 
-   public abstract void nodeUnderConsideration(FootstepNode nodeToExpand);
-   public abstract void nodeUnderConsiderationWasRejected(FootstepNode rejectedNode, BipedalFootstepPlannerNodeRejectionReason reason);
-   public abstract void nodeUnderConsiderationWasSuccessful(FootstepNode node);
+   void rejectNode(FootstepNode rejectedNode, BipedalFootstepPlannerNodeRejectionReason reason);
 
-   public abstract void solutionWasFound(FootstepPlan footstepPlan);
-   public abstract void solutionWasNotFound();
+   void plannerFinished(List<FootstepNode> plan);
+
+   void reportLowestCostNodeList(List<FootstepNode> plan);
+
+   void tickAndUpdate();
 }
