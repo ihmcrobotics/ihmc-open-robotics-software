@@ -374,7 +374,7 @@ public class GeometricJacobianCalculator
       if (jacobianMatrix.getNumRows() == 0)
          throw new RuntimeException("The Jacobian matrix has to be computed first.");
 
-      endEffectorWrench.getExpressedInFrame().checkReferenceFrameMatch(this.jacobianFrame);
+      endEffectorWrench.getReferenceFrame().checkReferenceFrameMatch(this.jacobianFrame);
       endEffectorWrench.getBodyFrame().checkReferenceFrameMatch(getEndEffectorFrame());
 
       endEffectorWrench.getMatrix(tempMatrix);

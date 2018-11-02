@@ -339,7 +339,7 @@ public class InverseDynamicsCalculatorSCSTest
    private void compareWrenches(Wrench inputWrench, Wrench outputWrench)
    {
       inputWrench.getBodyFrame().checkReferenceFrameMatch(outputWrench.getBodyFrame());
-      inputWrench.getExpressedInFrame().checkReferenceFrameMatch(outputWrench.getExpressedInFrame());
+      inputWrench.getReferenceFrame().checkReferenceFrameMatch(outputWrench.getReferenceFrame());
 
       double epsilon = 1e-12; //3;
       EuclidCoreTestTools.assertTuple3DEquals(inputWrench.getAngularPartCopy(), outputWrench.getAngularPartCopy(), epsilon);

@@ -150,8 +150,8 @@ public class AxisAngleOrientationController
 
    private void checkExpressedInFrames(Twist desiredTwist, Twist currentTwist)
    {
-      desiredTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
-      currentTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
+      desiredTwist.getReferenceFrame().checkReferenceFrameMatch(bodyFrame);
+      currentTwist.getReferenceFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
    private void computeProportionalTerm(FrameQuaternion desiredOrientation)

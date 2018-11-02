@@ -322,7 +322,7 @@ public class Twist extends SpatialMotionVector
    public double dot(Wrench wrench)
    {
       this.bodyFrame.checkReferenceFrameMatch(wrench.getBodyFrame());
-      this.expressedInFrame.checkReferenceFrameMatch(wrench.getExpressedInFrame());
+      this.expressedInFrame.checkReferenceFrameMatch(wrench.getReferenceFrame());
 
       double power = this.angularPart.dot(wrench.getAngularPart()) + this.linearPart.dot(wrench.getLinearPart());
 

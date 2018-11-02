@@ -149,7 +149,7 @@ public class VirtualModelMomentumController
          return false;
 
       // Gets the M-by-6 selection matrix S.
-      selectionMatrix.getCompactSelectionMatrixInFrame(wrench.getExpressedInFrame(), tempSelectionMatrix);
+      selectionMatrix.getCompactSelectionMatrixInFrame(wrench.getReferenceFrame(), tempSelectionMatrix);
 
       int taskSize = tempSelectionMatrix.getNumRows();
 
@@ -158,7 +158,7 @@ public class VirtualModelMomentumController
 
       jacobianCalculator.clear();
       jacobianCalculator.setKinematicChain(base, endEffector);
-      jacobianCalculator.setJacobianFrame(wrench.getExpressedInFrame());
+      jacobianCalculator.setJacobianFrame(wrench.getReferenceFrame());
       jacobianCalculator.computeJacobianMatrix();
 
       // Compute the M-by-N task Jacobian: J = S * J

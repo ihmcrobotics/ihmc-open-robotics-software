@@ -77,7 +77,7 @@ public class TwistTest extends SpatialMotionVectorTest
       Twist twist = new Twist();
       assertNull(twist.getBaseFrame());
       assertNull(twist.getBodyFrame());
-      assertNull(twist.getExpressedInFrame());
+      assertNull(twist.getReferenceFrame());
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), twist.getAngularPart(), 0.0);
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), twist.getLinearPart(), 0.0);
    }
@@ -140,7 +140,7 @@ public class TwistTest extends SpatialMotionVectorTest
       // test that they're the same
       JUnitTools.assertMatrixEquals(twistMatrix, twistCopyMatrix, 0.0);
       assertEquals(twist.getBodyFrame(), twistCopy.getBodyFrame());
-      assertEquals(twist.getExpressedInFrame(), twistCopy.getExpressedInFrame());
+      assertEquals(twist.getReferenceFrame(), twistCopy.getReferenceFrame());
       assertEquals(twist.getBaseFrame(), twistCopy.getBaseFrame());
 
       // test that we're actually copying, not just using references
@@ -156,7 +156,7 @@ public class TwistTest extends SpatialMotionVectorTest
       }
 
       assertNotSame(twist.getBodyFrame(), twistCopy.getBodyFrame());
-      assertNotSame(twist.getExpressedInFrame(), twistCopy.getExpressedInFrame());
+      assertNotSame(twist.getReferenceFrame(), twistCopy.getReferenceFrame());
       assertNotSame(twist.getBaseFrame(), twistCopy.getBaseFrame());
    }
 
@@ -233,7 +233,7 @@ public class TwistTest extends SpatialMotionVectorTest
 
       twist1.add(twist2);
 
-      assertEquals(frameD, twist1.getExpressedInFrame());
+      assertEquals(frameD, twist1.getReferenceFrame());
       assertEquals(frameA, twist1.getBaseFrame());
       assertEquals(frameC, twist1.getBodyFrame());
 
@@ -350,7 +350,7 @@ public class TwistTest extends SpatialMotionVectorTest
 
          // then transform using 2.8 (c)
          twist1.changeFrame(frameC);
-         assertEquals(frameC, twist1.getExpressedInFrame());
+         assertEquals(frameC, twist1.getReferenceFrame());
 
          Vector3D omega1InC2 = twist1.getAngularPartCopy();
          Vector3D v1InC2 = twist1.getLinearPartCopy();
@@ -369,7 +369,7 @@ public class TwistTest extends SpatialMotionVectorTest
       Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Twist twist1 = new Twist(frameB, frameA, frameA, angularVelocity1, linearVelocity1);
       Twist twist2 = new Twist(twist1);
-      twist1.changeFrame(twist1.getExpressedInFrame());
+      twist1.changeFrame(twist1.getReferenceFrame());
 
       DenseMatrix64F twist1Matrix = new DenseMatrix64F(Twist.SIZE, 1);
       twist1.getMatrix(twist1Matrix, 0);
@@ -380,7 +380,7 @@ public class TwistTest extends SpatialMotionVectorTest
       // test that they're the same
       JUnitTools.assertMatrixEquals(twist1Matrix, twist2Matrix, 0.0);
       assertEquals(twist1.getBodyFrame(), twist2.getBodyFrame());
-      assertEquals(twist1.getExpressedInFrame(), twist2.getExpressedInFrame());
+      assertEquals(twist1.getReferenceFrame(), twist2.getReferenceFrame());
       assertEquals(twist1.getBaseFrame(), twist2.getBaseFrame());
    }
 

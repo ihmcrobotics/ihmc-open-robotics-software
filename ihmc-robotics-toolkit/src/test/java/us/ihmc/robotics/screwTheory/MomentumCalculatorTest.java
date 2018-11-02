@@ -52,8 +52,8 @@ public class MomentumCalculatorTest
       Momentum momentum = computeMomentum(elevator, world);
 
       momentum.changeFrame(world);
-      FrameVector3D linearMomentum = new FrameVector3D(momentum.getExpressedInFrame(), momentum.getLinearPartCopy());
-      FrameVector3D angularMomentum = new FrameVector3D(momentum.getExpressedInFrame(), momentum.getAngularPartCopy());
+      FrameVector3D linearMomentum = new FrameVector3D(momentum.getReferenceFrame(), momentum.getLinearPartCopy());
+      FrameVector3D angularMomentum = new FrameVector3D(momentum.getReferenceFrame(), momentum.getAngularPartCopy());
 
       FrameVector3D linearMomentumCheck = new FrameVector3D(joint.getFrameBeforeJoint(), jointAxis);
       linearMomentumCheck.scale(body.getInertia().getMass() * joint.getQd());
@@ -85,15 +85,15 @@ public class MomentumCalculatorTest
       Momentum momentum = computeMomentum(elevator, world);
 
       momentum.changeFrame(world);
-      FrameVector3D linearMomentum = new FrameVector3D(momentum.getExpressedInFrame(), momentum.getLinearPartCopy());
-      FrameVector3D angularMomentum = new FrameVector3D(momentum.getExpressedInFrame(), momentum.getAngularPartCopy());
+      FrameVector3D linearMomentum = new FrameVector3D(momentum.getReferenceFrame(), momentum.getLinearPartCopy());
+      FrameVector3D angularMomentum = new FrameVector3D(momentum.getReferenceFrame(), momentum.getAngularPartCopy());
 
       FrameVector3D linearMomentumCheck = new FrameVector3D(world);
       Matrix3D inertia = body.getInertia().getMassMomentOfInertiaPartCopy();
       Vector3D angularMomentumCheckVector = new Vector3D(jointAxis);
       angularMomentumCheckVector.scale(joint.getQd());
       inertia.transform(angularMomentumCheckVector);
-      FrameVector3D angularMomentumCheck = new FrameVector3D(body.getInertia().getExpressedInFrame(), angularMomentumCheckVector);
+      FrameVector3D angularMomentumCheck = new FrameVector3D(body.getInertia().getReferenceFrame(), angularMomentumCheckVector);
       angularMomentumCheck.changeFrame(world);
 
       double epsilon = 1e-9;
@@ -143,7 +143,7 @@ public class MomentumCalculatorTest
       CommonOps.mult(centroidalMomentumMatrixMatrix, jointVelocitiesMatrix, momentumFromCentroidalMomentumMatrix);
 
       double epsilon = 1e-9;
-      assertEquals(momentum.getExpressedInFrame(), centerOfMassFrame);
+      assertEquals(momentum.getReferenceFrame(), centerOfMassFrame);
       JUnitTools.assertMatrixEquals(momentumFromCentroidalMomentumMatrix, momentumMatrix, epsilon);
       double norm = NormOps.normP2(momentumMatrix);
       assertTrue(norm > epsilon);

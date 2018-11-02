@@ -60,14 +60,14 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
 
       acceleration.getBodyFrame().checkReferenceFrameMatch(this.bodyFrame);
       acceleration.getBaseFrame().checkIsAStationaryFrame();
-      acceleration.getExpressedInFrame().checkReferenceFrameMatch(this.expressedInframe);
+      acceleration.getReferenceFrame().checkReferenceFrameMatch(this.expressedInframe);
 
       twist.getBodyFrame().checkReferenceFrameMatch(this.bodyFrame);
       twist.getBaseFrame().checkIsWorldFrame();
-      twist.getExpressedInFrame().checkReferenceFrameMatch(this.expressedInframe);
+      twist.getReferenceFrame().checkReferenceFrameMatch(this.expressedInframe);
 
       dynamicWrenchToPack.getBodyFrame().checkReferenceFrameMatch(this.bodyFrame);
-      dynamicWrenchToPack.getExpressedInFrame().checkReferenceFrameMatch(this.expressedInframe);
+      dynamicWrenchToPack.getReferenceFrame().checkReferenceFrameMatch(this.expressedInframe);
 
       massMomentOfInertiaPart.transform(acceleration.getAngularPart(), tempVector);    // J * omegad
       dynamicWrenchToPack.setAngularPart(tempVector);    // [J * omegad; 0]
@@ -98,7 +98,7 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
     */
    public double computeKineticCoEnergy(Twist twist)
    {
-      this.expressedInframe.checkReferenceFrameMatch(twist.getExpressedInFrame());
+      this.expressedInframe.checkReferenceFrameMatch(twist.getReferenceFrame());
       this.bodyFrame.checkReferenceFrameMatch(twist.getBodyFrame());
       twist.getBaseFrame().checkIsAStationaryFrame();
 

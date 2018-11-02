@@ -629,7 +629,7 @@ public class VirtualModelMomentumControllerTest
 
       VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
       virtualWrenchCommand.set(base, endEffector);
-      virtualWrenchCommand.setWrench(desiredWrench.getExpressedInFrame(), desiredWrench);
+      virtualWrenchCommand.setWrench(desiredWrench.getReferenceFrame(), desiredWrench);
 
       if (selectionMatrix != null)
          virtualWrenchCommand.setSelectionMatrix(selectionMatrix);

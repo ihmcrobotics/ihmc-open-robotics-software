@@ -63,8 +63,8 @@ public class Momentum extends SpatialForceVector
     */
    public void compute(GeneralizedRigidBodyInertia inertia, Twist twist)
    {
-      ReferenceFrame frame = inertia.getExpressedInFrame();
-      frame.checkReferenceFrameMatch(twist.getExpressedInFrame());
+      ReferenceFrame frame = inertia.getReferenceFrame();
+      frame.checkReferenceFrameMatch(twist.getReferenceFrame());
 
       tempVector.set(twist.getAngularPart());
       inertia.massMomentOfInertiaPart.transform(tempVector);    // J * omegad
@@ -91,7 +91,7 @@ public class Momentum extends SpatialForceVector
 
    public double computeKineticCoEnergy(Twist twist)
    {
-      getExpressedInFrame().checkReferenceFrameMatch(twist.getExpressedInFrame());
+      getReferenceFrame().checkReferenceFrameMatch(twist.getReferenceFrame());
       double ret = linearPart.dot(twist.linearPart) + angularPart.dot(twist.angularPart);
 
       return ret;

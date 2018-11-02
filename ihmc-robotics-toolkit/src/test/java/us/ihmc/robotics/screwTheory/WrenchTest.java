@@ -104,7 +104,7 @@ public class WrenchTest
    {
       Wrench wrench = new Wrench();
       assertNull(wrench.getBodyFrame());
-      assertNull(wrench.getExpressedInFrame());
+      assertNull(wrench.getReferenceFrame());
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), wrench.getAngularPart(), 0.0);
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), wrench.getLinearPart(), 0.0);
    }
@@ -165,7 +165,7 @@ public class WrenchTest
 
       Wrench wrench = new Wrench(frameC, frameA, array);
       assertEquals(wrench.getBodyFrame(), frameC);
-      assertEquals(wrench.getExpressedInFrame(), frameA);
+      assertEquals(wrench.getReferenceFrame(), frameA);
       double epsilon = 0.0;
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(angularArray), wrench.getAngularPartCopy(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(linearArray), wrench.getLinearPartCopy(), epsilon);
@@ -410,7 +410,7 @@ public class WrenchTest
       Wrench wrench = new Wrench(frameA, frameB, RandomMatrices.createRandom(Wrench.SIZE, 1, random));
       wrench.setToZero(frameC, frameA);
       assertEquals(frameC, wrench.getBodyFrame());
-      assertEquals(frameA, wrench.getExpressedInFrame());
+      assertEquals(frameA, wrench.getReferenceFrame());
       DenseMatrix64F matrix = RandomMatrices.createRandom(Wrench.SIZE, 1, random);
       double epsilon = 1e-12;
       assertTrue(NormOps.normP2(matrix) > epsilon);

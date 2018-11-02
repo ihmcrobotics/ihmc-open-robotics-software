@@ -428,7 +428,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
             return;
 
          RigidBodyInertia inertia = rigidBody.getInertia();
-         ReferenceFrame inertiaFrame = inertia.getExpressedInFrame();
+         ReferenceFrame inertiaFrame = inertia.getReferenceFrame();
 
          biasAcceleration.set(parent.biasAcceleration);
          getJoint().getPredecessorTwist(intermediateTwist);
@@ -459,7 +459,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       {
          RigidBodyInertia inertia = rigidBody.getInertia();
 
-         ReferenceFrame inertiaFrame = inertia.getExpressedInFrame();
+         ReferenceFrame inertiaFrame = inertia.getReferenceFrame();
 
          intermediateTwist.set(ancestorUnitTwist);
          intermediateTwist.changeFrame(inertiaFrame);

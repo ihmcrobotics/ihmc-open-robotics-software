@@ -628,7 +628,7 @@ public class SpatialAccelerationCalculatorTest
       pointLinearAcceleration.scale(1.0 / dt);
 
       // Need to account for the root acceleration
-      rootAcceleration.getBodyFrame().checkReferenceFrameMatch(rootAcceleration.getExpressedInFrame());
+      rootAcceleration.getBodyFrame().checkReferenceFrameMatch(rootAcceleration.getReferenceFrame());
       FrameVector3D rootAngularAcceleration = new FrameVector3D();
       FrameVector3D rootLinearAcceleration = new FrameVector3D();
       rootAcceleration.getAngularPart(rootAngularAcceleration);
@@ -707,14 +707,14 @@ public class SpatialAccelerationCalculatorTest
       expectedAcceleration.setLinearPart(linearAcceleration);
 
       // Need to account for the root acceleration
-      FrameVector3D rootAngularAcceleration = new FrameVector3D(rootAcceleration.getExpressedInFrame(), rootAcceleration.getAngularPart());
-      FrameVector3D rootLinearAcceleration = new FrameVector3D(rootAcceleration.getExpressedInFrame(), rootAcceleration.getLinearPart());
-      rootAngularAcceleration.changeFrame(expectedAcceleration.getExpressedInFrame());
-      rootLinearAcceleration.changeFrame(expectedAcceleration.getExpressedInFrame());
+      FrameVector3D rootAngularAcceleration = new FrameVector3D(rootAcceleration.getReferenceFrame(), rootAcceleration.getAngularPart());
+      FrameVector3D rootLinearAcceleration = new FrameVector3D(rootAcceleration.getReferenceFrame(), rootAcceleration.getLinearPart());
+      rootAngularAcceleration.changeFrame(expectedAcceleration.getReferenceFrame());
+      rootLinearAcceleration.changeFrame(expectedAcceleration.getReferenceFrame());
       expectedAcceleration.angularPart.add(rootAngularAcceleration);
 
-      FramePoint3D rootToBody = new FramePoint3D(rootAcceleration.getExpressedInFrame());
-      rootToBody.changeFrame(expectedAcceleration.getExpressedInFrame());
+      FramePoint3D rootToBody = new FramePoint3D(rootAcceleration.getReferenceFrame());
+      rootToBody.changeFrame(expectedAcceleration.getReferenceFrame());
       Vector3D crossPart = new Vector3D();
       crossPart.cross(rootToBody, rootAngularAcceleration);
       expectedAcceleration.linearPart.add(crossPart);
@@ -753,7 +753,7 @@ public class SpatialAccelerationCalculatorTest
          {
             assertEquals(expected.getBodyFrame().getName(), actual.getBodyFrame().getName());
             assertEquals(expected.getBaseFrame().getName(), actual.getBaseFrame().getName());
-            assertEquals(expected.getExpressedInFrame().getName(), actual.getExpressedInFrame().getName());
+            assertEquals(expected.getReferenceFrame().getName(), actual.getReferenceFrame().getName());
             EuclidCoreTestTools.assertTuple3DEquals(expected.getAngularPart(), actual.getAngularPart(), epsilon);
             EuclidCoreTestTools.assertTuple3DEquals(expected.getLinearPart(), actual.getLinearPart(), epsilon);
          }

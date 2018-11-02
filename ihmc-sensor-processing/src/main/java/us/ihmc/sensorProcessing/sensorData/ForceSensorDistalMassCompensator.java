@@ -134,8 +134,8 @@ public class ForceSensorDistalMassCompensator
    {
       sensorWrench.changeFrame(world);
 
-      yoSensorForce.set(sensorWrench.getExpressedInFrame(), sensorWrench.getLinearPartX(), sensorWrench.getLinearPartY(), sensorWrench.getLinearPartZ());
-      yoSensorTorque.set(sensorWrench.getExpressedInFrame(), sensorWrench.getAngularPartX(), sensorWrench.getAngularPartY(), sensorWrench.getAngularPartZ());
+      yoSensorForce.set(sensorWrench.getReferenceFrame(), sensorWrench.getLinearPartX(), sensorWrench.getLinearPartY(), sensorWrench.getLinearPartZ());
+      yoSensorTorque.set(sensorWrench.getReferenceFrame(), sensorWrench.getAngularPartX(), sensorWrench.getAngularPartY(), sensorWrench.getAngularPartZ());
 
       if (addSimulatedSensorNoise.getBooleanValue())
       {
@@ -153,8 +153,8 @@ public class ForceSensorDistalMassCompensator
       distalMassWrench.setToZero(world);
       distalMassWrench.setUsingArm(world, distalMassForceInWorld, yoSensorToDistalCoMvectorInWorld);
 
-      yoSensorForceFromDistalMass.set(distalMassWrench.getExpressedInFrame(), distalMassWrench.getLinearPartX(), distalMassWrench.getLinearPartY(), distalMassWrench.getLinearPartZ());
-      yoSensorTorqueFromDistalMass.set(distalMassWrench.getExpressedInFrame(), distalMassWrench.getAngularPartX(), distalMassWrench.getAngularPartY(), distalMassWrench.getAngularPartZ());
+      yoSensorForceFromDistalMass.set(distalMassWrench.getReferenceFrame(), distalMassWrench.getLinearPartX(), distalMassWrench.getLinearPartY(), distalMassWrench.getLinearPartZ());
+      yoSensorTorqueFromDistalMass.set(distalMassWrench.getReferenceFrame(), distalMassWrench.getAngularPartX(), distalMassWrench.getAngularPartY(), distalMassWrench.getAngularPartZ());
 
       yoSensorForceMassCompensated.sub(yoSensorForce, yoSensorForceFromDistalMass);
       yoSensorTorqueMassCompensated.sub(yoSensorTorque, yoSensorTorqueFromDistalMass);

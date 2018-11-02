@@ -94,7 +94,7 @@ public class SpatialMotionVectorTest
       double epsilon = 1e-10;
       EuclidCoreTestTools.assertTuple3DEquals(angularPartInverse, twist1.getAngularPartCopy(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(linearPartInverse, twist1.getLinearPartCopy(), epsilon);
-      assertEquals(frameA, twist1.getExpressedInFrame());
+      assertEquals(frameA, twist1.getReferenceFrame());
       assertEquals(frameB, twist1.getBaseFrame());
       assertEquals(frameA, twist1.getBodyFrame());
 
@@ -102,7 +102,7 @@ public class SpatialMotionVectorTest
       twist2.invert();
       EuclidCoreTestTools.assertTuple3DEquals(angularPartInverse, twist2.getAngularPartCopy(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(linearPartInverse, twist2.getLinearPartCopy(), epsilon);
-      assertEquals(frameB, twist2.getExpressedInFrame());
+      assertEquals(frameB, twist2.getReferenceFrame());
       assertEquals(frameB, twist2.getBaseFrame());
       assertEquals(frameA, twist2.getBodyFrame());
    }
@@ -235,7 +235,7 @@ public class SpatialMotionVectorTest
       {
          assertEquals(vector1.getBodyFrame(), vector2.getBodyFrame());
          assertEquals(vector1.getBaseFrame(), vector2.getBaseFrame());
-         assertEquals(vector1.getExpressedInFrame(), vector2.getExpressedInFrame());
+         assertEquals(vector1.getReferenceFrame(), vector2.getReferenceFrame());
 
          EuclidCoreTestTools.assertTuple3DEquals(vector1.getAngularPartCopy(), vector2.getAngularPartCopy(), epsilon);
          EuclidCoreTestTools.assertTuple3DEquals(vector1.getLinearPartCopy(), vector2.getLinearPartCopy(), epsilon);

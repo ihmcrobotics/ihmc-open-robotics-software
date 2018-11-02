@@ -29,7 +29,7 @@ public class MomentumCalculator
          RigidBodyInertia inertia = rigidBody.getInertia();
          rigidBody.getBodyFixedFrame().getTwistOfFrame(tempTwist);
          tempMomentum.compute(inertia, tempTwist);
-         tempMomentum.changeFrame(momentum.getExpressedInFrame());
+         tempMomentum.changeFrame(momentum.getReferenceFrame());
          momentum.add(tempMomentum);
       }
    }

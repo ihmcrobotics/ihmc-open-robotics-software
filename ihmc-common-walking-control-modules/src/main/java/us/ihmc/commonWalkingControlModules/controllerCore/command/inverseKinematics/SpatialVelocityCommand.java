@@ -274,7 +274,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    {
       desiredSpatialVelocity.getBodyFrame().checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
       desiredSpatialVelocity.getBaseFrame().checkReferenceFrameMatch(base.getBodyFixedFrame());
-      desiredSpatialVelocity.getExpressedInFrame().checkReferenceFrameMatch(controlFrame);
+      desiredSpatialVelocity.getReferenceFrame().checkReferenceFrameMatch(controlFrame);
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());

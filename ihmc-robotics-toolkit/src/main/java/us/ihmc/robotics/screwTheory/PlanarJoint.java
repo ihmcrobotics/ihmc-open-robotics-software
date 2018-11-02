@@ -98,7 +98,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void getJointTwist(Twist twistToPack)
    {
-      twistToPack.setToZero(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getExpressedInFrame());
+      twistToPack.setToZero(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getReferenceFrame());
 
       twistToPack.setAngularPartY(jointTwist.getAngularPartY());
       twistToPack.setLinearPartX(jointTwist.getLinearPartX());
@@ -108,7 +108,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
-      accelerationToPack.setToZero(jointAcceleration.getBodyFrame(), jointAcceleration.getBaseFrame(), jointAcceleration.getExpressedInFrame());
+      accelerationToPack.setToZero(jointAcceleration.getBodyFrame(), jointAcceleration.getBaseFrame(), jointAcceleration.getReferenceFrame());
 
       accelerationToPack.setAngularPartY(jointAcceleration.getAngularPartY());
       accelerationToPack.setLinearPartX(jointAcceleration.getLinearPartX());
@@ -119,7 +119,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    public void getDesiredJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.setToZero(jointAccelerationDesired.getBodyFrame(), jointAccelerationDesired.getBaseFrame(),
-                                   jointAccelerationDesired.getExpressedInFrame());
+                                   jointAccelerationDesired.getReferenceFrame());
 
       accelerationToPack.setAngularPartY(jointAccelerationDesired.getAngularPartY());
       accelerationToPack.setLinearPartX(jointAccelerationDesired.getLinearPartX());
@@ -154,7 +154,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    public void setTorqueFromWrench(Wrench jointWrench)
    {
       jointWrench.getBodyFrame().checkReferenceFrameMatch(successor.getBodyFixedFrame());
-      jointWrench.setToZero(successor.getBodyFixedFrame(), successorWrench.getExpressedInFrame());
+      jointWrench.setToZero(successor.getBodyFixedFrame(), successorWrench.getReferenceFrame());
       jointWrench.setAngularPartY(successorWrench.getAngularPartY());
       jointWrench.setLinearPartX(successorWrench.getLinearPartX());
       jointWrench.setLinearPartZ(successorWrench.getLinearPartZ());
@@ -223,7 +223,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void setJointTwist(Twist jointTwist)
    {
-      this.jointTwist.checkReferenceFramesMatch(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getExpressedInFrame());
+      this.jointTwist.checkReferenceFramesMatch(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getReferenceFrame());
       this.jointTwist.setAngularPartY(jointTwist.getAngularPartY());
       this.jointTwist.setLinearPartX(jointTwist.getLinearPartX());
       this.jointTwist.setLinearPartZ(jointTwist.getLinearPartZ());
@@ -251,7 +251,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    public void setWrench(Wrench jointWrench)
    {
       successorWrench.getBodyFrame().checkReferenceFrameMatch(jointWrench.getBodyFrame());
-      successorWrench.getExpressedInFrame().checkReferenceFrameMatch(jointWrench.getExpressedInFrame());
+      successorWrench.getReferenceFrame().checkReferenceFrameMatch(jointWrench.getReferenceFrame());
       successorWrench.setAngularPartY(jointWrench.getAngularPartY());
       successorWrench.setLinearPartX(jointWrench.getLinearPartX());
       successorWrench.setLinearPartZ(jointWrench.getLinearPartZ());
@@ -335,7 +335,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void getWrench(Wrench wrenchToPack)
    {
-      wrenchToPack.setToZero(successorWrench.getBodyFrame(), successorWrench.getExpressedInFrame());
+      wrenchToPack.setToZero(successorWrench.getBodyFrame(), successorWrench.getReferenceFrame());
 
       wrenchToPack.setAngularPartY(successorWrench.getAngularPartY());
       wrenchToPack.setLinearPartX(successorWrench.getLinearPartX());

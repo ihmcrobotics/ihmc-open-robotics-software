@@ -499,8 +499,8 @@ public class VirtualModelControllerTestHelper
    static void compareWrenches(Wrench inputWrench, Wrench outputWrench, DenseMatrix64F selectionMatrix)
    {
       inputWrench.getBodyFrame().checkReferenceFrameMatch(outputWrench.getBodyFrame());
-      outputWrench.changeFrame(inputWrench.getExpressedInFrame());
-      inputWrench.getExpressedInFrame().checkReferenceFrameMatch(outputWrench.getExpressedInFrame());
+      outputWrench.changeFrame(inputWrench.getReferenceFrame());
+      inputWrench.getReferenceFrame().checkReferenceFrameMatch(outputWrench.getReferenceFrame());
 
       DenseMatrix64F inputWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
       DenseMatrix64F outputWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
@@ -528,8 +528,8 @@ public class VirtualModelControllerTestHelper
    public static void compareWrenches(Wrench inputWrench, Wrench outputWrench, SelectionMatrix6D selectionMatrix)
    {
       inputWrench.getBodyFrame().checkReferenceFrameMatch(outputWrench.getBodyFrame());
-      outputWrench.changeFrame(inputWrench.getExpressedInFrame());
-      inputWrench.getExpressedInFrame().checkReferenceFrameMatch(outputWrench.getExpressedInFrame());
+      outputWrench.changeFrame(inputWrench.getReferenceFrame());
+      inputWrench.getReferenceFrame().checkReferenceFrameMatch(outputWrench.getReferenceFrame());
 
       DenseMatrix64F inputWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
       DenseMatrix64F outputWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
@@ -557,8 +557,8 @@ public class VirtualModelControllerTestHelper
    public static void compareWrenches(Wrench inputWrench, Wrench outputWrench)
    {
       inputWrench.getBodyFrame().checkReferenceFrameMatch(outputWrench.getBodyFrame());
-      outputWrench.changeFrame(inputWrench.getExpressedInFrame());
-      inputWrench.getExpressedInFrame().checkReferenceFrameMatch(outputWrench.getExpressedInFrame());
+      outputWrench.changeFrame(inputWrench.getReferenceFrame());
+      inputWrench.getReferenceFrame().checkReferenceFrameMatch(outputWrench.getReferenceFrame());
 
       double epsilon = 1e-4;
       EuclidCoreTestTools.assertTuple3DEquals(inputWrench.getAngularPartCopy(), outputWrench.getAngularPartCopy(), epsilon);

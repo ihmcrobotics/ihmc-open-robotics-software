@@ -46,8 +46,8 @@ public class YoWrench extends YoSpatialVector
    
    protected void getYoValuesFromWrench()
    {
-      linearPart.set(wrench.getExpressedInFrame(), wrench.getLinearPartX(), wrench.getLinearPartY(), wrench.getLinearPartZ());
-      angularPart.set(wrench.getExpressedInFrame(), wrench.getAngularPartX(), wrench.getAngularPartY(), wrench.getAngularPartZ());
+      linearPart.set(wrench.getReferenceFrame(), wrench.getLinearPartX(), wrench.getLinearPartY(), wrench.getLinearPartZ());
+      angularPart.set(wrench.getReferenceFrame(), wrench.getAngularPartX(), wrench.getAngularPartY(), wrench.getAngularPartZ());
    }
    
    public void set(Wrench wrench)

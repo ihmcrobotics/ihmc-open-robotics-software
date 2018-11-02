@@ -177,7 +177,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    public void setTorqueFromWrench(Wrench jointWrench)
    {
       unitSuccessorTwist.getBodyFrame().checkReferenceFrameMatch(jointWrench.getBodyFrame());
-      unitSuccessorTwist.getExpressedInFrame().checkReferenceFrameMatch(jointWrench.getExpressedInFrame());
+      unitSuccessorTwist.getReferenceFrame().checkReferenceFrameMatch(jointWrench.getReferenceFrame());
       this.tau = unitSuccessorTwist.dot(jointWrench);
 
       // cheating a little bit; tau = J^T * wrench. J maps joint velocities to joint twists.
@@ -266,7 +266,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
     */
    protected void setMotionSubspace()
    {
-      this.motionSubspace = new GeometricJacobian(this, unitSuccessorTwist.getExpressedInFrame());
+      this.motionSubspace = new GeometricJacobian(this, unitSuccessorTwist.getReferenceFrame());
       this.motionSubspace.compute();
    }
 
