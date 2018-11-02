@@ -759,7 +759,7 @@ public class SwingState extends AbstractFootControlState
       // change twist
       desiredLinearVelocity.changeFrame(desiredSoleFrame);
       desiredAngularVelocity.changeFrame(desiredSoleFrame);
-      desiredTwist.set(desiredSoleFrame, worldFrame, desiredSoleFrame, desiredLinearVelocity, desiredAngularVelocity);
+      desiredTwist.set(desiredSoleFrame, worldFrame, desiredSoleFrame, desiredAngularVelocity, desiredLinearVelocity);
       desiredTwist.changeFrame(desiredControlFrame);
       desiredTwist.getLinearPart(desiredLinearVelocity);
       desiredTwist.getAngularPart(desiredAngularVelocity);
@@ -769,7 +769,7 @@ public class SwingState extends AbstractFootControlState
       // change spatial acceleration
       desiredLinearAcceleration.changeFrame(desiredSoleFrame);
       desiredAngularAcceleration.changeFrame(desiredSoleFrame);
-      desiredSpatialAcceleration.set(desiredSoleFrame, worldFrame, desiredSoleFrame, desiredLinearAcceleration, desiredAngularAcceleration);
+      desiredSpatialAcceleration.set(desiredSoleFrame, worldFrame, desiredSoleFrame, desiredAngularAcceleration, desiredLinearAcceleration);
       desiredSpatialAcceleration.changeFrameNoRelativeMotion(desiredControlFrame);
       desiredSpatialAcceleration.getLinearPart(desiredLinearAcceleration);
       desiredSpatialAcceleration.getAngularPart(desiredAngularAcceleration);

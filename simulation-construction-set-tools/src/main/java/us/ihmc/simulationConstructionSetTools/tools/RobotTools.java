@@ -175,7 +175,7 @@ public class RobotTools
             scsFloatingJoint.getVelocity(linearVelocity);
             linearVelocity.changeFrame(rootBodyFrame);
             scsFloatingJoint.getAngularVelocity(angularVelocity, rootBodyFrame);
-            rootJointTwist.set(rootBodyFrame, elevatorFrame, rootBodyFrame, linearVelocity, angularVelocity);
+            rootJointTwist.set(rootBodyFrame, elevatorFrame, rootBodyFrame, angularVelocity, linearVelocity);
             idFloatingJoint.setJointTwist(rootJointTwist);
          }
 

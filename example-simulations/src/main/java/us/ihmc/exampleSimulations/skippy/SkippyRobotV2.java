@@ -263,7 +263,7 @@ public class SkippyRobotV2 extends Robot
       scsRootJoint.getVelocity(linearVelocity);
       linearVelocity.changeFrame(rootBodyFrame);
       scsRootJoint.getAngularVelocity(angularVelocity, rootBodyFrame);
-      Twist rootJointTwist = new Twist(rootBodyFrame, elevatorFrame, rootBodyFrame, linearVelocity, angularVelocity);
+      Twist rootJointTwist = new Twist(rootBodyFrame, elevatorFrame, rootBodyFrame, angularVelocity, linearVelocity);
       rootJoint.setJointTwist(rootJointTwist);
 
       // update all the frames

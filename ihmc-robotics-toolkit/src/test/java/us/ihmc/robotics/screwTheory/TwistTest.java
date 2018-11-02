@@ -40,7 +40,7 @@ public class TwistTest extends SpatialMotionVectorTest
       // construct a random twist that expresses the motion of frame A with respect to B, expressed in frame C
       Vector3D angularVelocity = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Vector3D linearVelocity = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Twist twist = new Twist(frameB, frameA, frameC, linearVelocity, angularVelocity);
+      Twist twist = new Twist(frameB, frameA, frameC, angularVelocity, linearVelocity);
 
       // test getters
       double epsilon = 1e-14;
@@ -225,11 +225,11 @@ public class TwistTest extends SpatialMotionVectorTest
    {
       Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Twist twist1 = new Twist(frameB, frameA, frameD, linearVelocity1, angularVelocity1);
+      Twist twist1 = new Twist(frameB, frameA, frameD, angularVelocity1, linearVelocity1);
 
       Vector3D angularVelocity2 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Vector3D linearVelocity2 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Twist twist2 = new Twist(frameC, frameB, frameD, linearVelocity2, angularVelocity2);
+      Twist twist2 = new Twist(frameC, frameB, frameD, angularVelocity2, linearVelocity2);
 
       twist1.add(twist2);
 
@@ -249,8 +249,8 @@ public class TwistTest extends SpatialMotionVectorTest
 
       // Should throw exception if try it the other way:
 
-      twist1 = new Twist(frameB, frameA, frameD, linearVelocity1, angularVelocity1);
-      twist2 = new Twist(frameC, frameB, frameD, linearVelocity2, angularVelocity2);
+      twist1 = new Twist(frameB, frameA, frameD, angularVelocity1, linearVelocity1);
+      twist2 = new Twist(frameC, frameB, frameD, angularVelocity2, linearVelocity2);
 
       try
       {
@@ -262,7 +262,7 @@ public class TwistTest extends SpatialMotionVectorTest
       {
       }
 
-      twist1 = new Twist(frameB, frameA, frameD, linearVelocity1, angularVelocity1);
+      twist1 = new Twist(frameB, frameA, frameD, angularVelocity1, linearVelocity1);
 
       try
       {
@@ -329,7 +329,7 @@ public class TwistTest extends SpatialMotionVectorTest
       {
          Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-         Twist twist1 = new Twist(frameB, frameA, frameA, linearVelocity1, angularVelocity1);
+         Twist twist1 = new Twist(frameB, frameA, frameA, angularVelocity1, linearVelocity1);
 
          // first transform using 2.8 (b)
          DenseMatrix64F twist1TildeInA = toTildeForm(twist1);
@@ -367,7 +367,7 @@ public class TwistTest extends SpatialMotionVectorTest
    {
       Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Twist twist1 = new Twist(frameB, frameA, frameA, linearVelocity1, angularVelocity1);
+      Twist twist1 = new Twist(frameB, frameA, frameA, angularVelocity1, linearVelocity1);
       Twist twist2 = new Twist(twist1);
       twist1.changeFrame(twist1.getExpressedInFrame());
 
@@ -390,7 +390,7 @@ public class TwistTest extends SpatialMotionVectorTest
    {
       Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Twist twist1 = new Twist(frameB, frameA, frameA, linearVelocity1, angularVelocity1);
+      Twist twist1 = new Twist(frameB, frameA, frameA, angularVelocity1, linearVelocity1);
 
       DenseMatrix64F twistMatrix = twist1.toMatrix();
 
@@ -410,7 +410,7 @@ public class TwistTest extends SpatialMotionVectorTest
    {
       Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Twist twist1 = new Twist(frameB, frameA, frameB, linearVelocity1, angularVelocity1);
+      Twist twist1 = new Twist(frameB, frameA, frameB, angularVelocity1, linearVelocity1);
 
       FrameVector3D expectedFrameVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
       twist1.getBodyOriginLinearPartInBaseFrame(expectedFrameVector);
@@ -443,7 +443,7 @@ public class TwistTest extends SpatialMotionVectorTest
          Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0);
          Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0);
 
-         Twist twist = new Twist(bodyFrame, baseFrame, bodyFrame, linearVelocity, angularVelocity);
+         Twist twist = new Twist(bodyFrame, baseFrame, bodyFrame, angularVelocity, linearVelocity);
 
          FramePoint3D pointFixedInBodyFrame = new FramePoint3D(bodyFrame, EuclidCoreRandomTools.nextPoint3D(random, 1.0));
          FrameVector3D bodyFixedPointLinearVelocityInBody = new FrameVector3D();
@@ -471,7 +471,7 @@ public class TwistTest extends SpatialMotionVectorTest
    {
       Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Twist twist = new Twist(frameA, frameB, frameC, linearVelocity1, angularVelocity1);
+      Twist twist = new Twist(frameA, frameB, frameC, angularVelocity1, linearVelocity1);
 
       Vector3D angularVelocityInBaseFrame = new Vector3D();
       twist.getAngularVelocityInBaseFrame(angularVelocityInBaseFrame);
@@ -572,7 +572,7 @@ public class TwistTest extends SpatialMotionVectorTest
    protected Twist createSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3D linearPart,
            Vector3D angularPart)
    {
-      return new Twist(bodyFrame, baseFrame, expressedInFrame, linearPart, angularPart);
+      return new Twist(bodyFrame, baseFrame, expressedInFrame, angularPart, linearPart);
    }
 
    @Override

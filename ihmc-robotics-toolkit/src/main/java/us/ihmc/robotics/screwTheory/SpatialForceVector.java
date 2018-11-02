@@ -45,10 +45,10 @@ public class SpatialForceVector
 
    /**
     * @param expressedInFrame the frame in which the spatial acceleration vector is expressed
-    * @param linearPart linear part part of the spatial acceleration vector
     * @param angularPart angular part of the spatial acceleration vector
+    * @param linearPart linear part part of the spatial acceleration vector
     */
-   public SpatialForceVector(ReferenceFrame expressedInFrame, Vector3DReadOnly linearPart, Vector3DReadOnly angularPart)
+   public SpatialForceVector(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
       this.expressedInFrame = expressedInFrame;
       this.linearPart = new Vector3D(linearPart);
@@ -93,7 +93,7 @@ public class SpatialForceVector
    {
       Vector3D moment = new Vector3D();
       moment.cross(arm, linearPart);
-      SpatialForceVector ret = new SpatialForceVector(expressedInFrame, linearPart, moment);
+      SpatialForceVector ret = new SpatialForceVector(expressedInFrame, moment, linearPart);
       return ret;
    }
 
@@ -220,7 +220,7 @@ public class SpatialForceVector
 
    public void set(SpatialForceVector other)
    {
-      set(other.expressedInFrame, other.linearPart, other.angularPart);
+      set(other.expressedInFrame, other.angularPart, other.linearPart);
    }
 
    /**
@@ -246,7 +246,7 @@ public class SpatialForceVector
       angularPart.sub(other.angularPart);
    }
 
-   public void set(FrameVector3D linearPart, FrameVector3D angularPart)
+   public void set(FrameVector3D angularPart, FrameVector3D linearPart)
    {
       expressedInFrame.checkReferenceFrameMatch(linearPart);
       expressedInFrame.checkReferenceFrameMatch(angularPart);
@@ -254,7 +254,7 @@ public class SpatialForceVector
       this.angularPart.set(angularPart);
    }
 
-   public void set(ReferenceFrame expressedInFrame, Vector3DReadOnly linearPart, Vector3DReadOnly angularPart)
+   public void set(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
       this.expressedInFrame = expressedInFrame;
       this.linearPart.set(linearPart);

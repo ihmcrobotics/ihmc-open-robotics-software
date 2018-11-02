@@ -195,7 +195,7 @@ public class SpatialMotionVectorTest
       public GenericSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3D linearPart,
                                         Vector3D angularPart)
       {
-         set(bodyFrame, baseFrame, expressedInFrame, linearPart, angularPart);
+         set(bodyFrame, baseFrame, expressedInFrame, angularPart, linearPart);
       }
 
       /**

@@ -128,7 +128,7 @@ public class CenterOfPressureResolverTest
          Vector3D centerOfMassTorque = new Vector3D(0.0, 0.0, 0.0);
 
          PoseReferenceFrame centerOfMassFrame = createTranslatedZUpFrame("centerOfMassFrame", centerOfMassPoint);
-         SpatialForceVector spatialForceVector = new SpatialForceVector(centerOfMassFrame, centerOfMassForce, centerOfMassTorque);
+         SpatialForceVector spatialForceVector = new SpatialForceVector(centerOfMassFrame, centerOfMassTorque, centerOfMassForce);
 
          ImmutablePair<FramePoint3D, Double> centerOfPressureAndNormalTorque = computeCenterOfPressureAndNormalTorque(groundPoint, groundNormal,
                centerOfMassFrame, spatialForceVector);
@@ -159,7 +159,7 @@ public class CenterOfPressureResolverTest
          Vector3D centerOfMassForce, Vector3D centerOfMassTorque, Vector3D expectedCenterOfPressure, double expectedNormalTorque)
    {
       PoseReferenceFrame centerOfMassFrame = createTranslatedZUpFrame("centerOfMassFrame", centerOfMassPoint);
-      SpatialForceVector spatialForceVector = new SpatialForceVector(centerOfMassFrame, centerOfMassForce, centerOfMassTorque);
+      SpatialForceVector spatialForceVector = new SpatialForceVector(centerOfMassFrame, centerOfMassTorque, centerOfMassForce);
 
       ImmutablePair<FramePoint3D, Double> centerOfPressureAndNormalTorque = computeCenterOfPressureAndNormalTorque(groundPoint, groundNormal, centerOfMassFrame,
             spatialForceVector);

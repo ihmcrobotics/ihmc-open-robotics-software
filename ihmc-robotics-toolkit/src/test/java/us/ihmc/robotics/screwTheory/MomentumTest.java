@@ -43,7 +43,7 @@ public class MomentumTest
 
       Vector3D linearVelocity = RandomGeometry.nextVector3D(random);
       Vector3D angularVelocity = RandomGeometry.nextVector3D(random);
-      Twist twist = new Twist(frame, world, world, linearVelocity, angularVelocity);
+      Twist twist = new Twist(frame, world, world, angularVelocity, linearVelocity);
 
       DenseMatrix64F inertiaMatrix = new DenseMatrix64F(6, 6);
       inertia.getMatrix(inertiaMatrix);

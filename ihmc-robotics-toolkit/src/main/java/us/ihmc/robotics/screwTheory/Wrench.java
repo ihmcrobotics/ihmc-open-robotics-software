@@ -23,12 +23,12 @@ public class Wrench extends SpatialForceVector
    /**
     * @param bodyFrame the frame/body on which the wrench is exerted
     * @param expressedInFrame the frame in which the wrench is expressed
-    * @param force force part of the wrench
     * @param torque torque part of the wrench
+    * @param force force part of the wrench
     */
-   public Wrench(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly force, Vector3DReadOnly torque)
+   public Wrench(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly torque, Vector3DReadOnly force)
    {
-      super(expressedInFrame, force, torque);
+      super(expressedInFrame, torque, force);
       this.bodyFrame = bodyFrame;
    }
 
@@ -88,7 +88,7 @@ public class Wrench extends SpatialForceVector
    public void set(Wrench other)
    {
       this.bodyFrame = other.bodyFrame;
-      super.set(other.expressedInFrame, other.linearPart, other.angularPart);
+      super.set(other.expressedInFrame, other.angularPart, other.linearPart);
    }
 
    /**

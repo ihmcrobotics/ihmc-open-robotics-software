@@ -112,7 +112,7 @@ public class InverseDynamicsCalculatorSCSTest
       RigidBodyTransform worldToBody = elevatorFrame.getTransformToDesiredFrame(forceApplicationFrame);
       worldToBody.transform(externalForce);
 
-      Wrench inputWrench = new Wrench(forceApplicationFrame, forceApplicationFrame, externalForce, new Vector3D());
+      Wrench inputWrench = new Wrench(forceApplicationFrame, forceApplicationFrame, new Vector3D(), externalForce);
       doRobotDynamics(robot);
 
       copyAccelerationFromForwardToInverse(rootJoint, rootInverseDynamicsJoint);
@@ -574,7 +574,7 @@ public class InverseDynamicsCalculatorSCSTest
 
       floatingJoint.getAngularVelocity(angularVelocityFrameVector, bodyFrame);
 
-      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocityFrameVector, angularVelocityFrameVector);
+      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, angularVelocityFrameVector, linearVelocityFrameVector);
       sixDoFJoint.setJointTwist(bodyTwist);
    }
 

@@ -212,7 +212,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 
             floatingJoint.getAngularVelocity(angularVelocity, pelvisFrame);
 
-            Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity, angularVelocity);
+            Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, angularVelocity, linearVelocity);
             sixDoFJoint.setJointTwist(bodyTwist);
             sixDoFJoint.updateFramesRecursively();
          }

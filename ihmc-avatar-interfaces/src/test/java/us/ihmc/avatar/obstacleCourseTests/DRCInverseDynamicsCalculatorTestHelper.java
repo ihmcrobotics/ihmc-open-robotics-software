@@ -566,7 +566,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       linearVelocityFrameVector.changeFrame(bodyFrame);
       floatingJoint.getAngularVelocity(angularVelocityFrameVector, bodyFrame);
 
-      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocityFrameVector, angularVelocityFrameVector);
+      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, angularVelocityFrameVector, linearVelocityFrameVector);
       sixDoFJoint.setJointTwist(bodyTwist);
    }
 
@@ -741,8 +741,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          ReferenceFrame bodyFixedFrame = foot.getBodyFixedFrame();
 
-         Wrench wrench = new Wrench(bodyFixedFrame, bodyFixedFrame, RandomGeometry.nextVector3D(random, maxFeetExternalForce),
-               RandomGeometry.nextVector3D(random, maxFeetExternalTorque));
+         Wrench wrench = new Wrench(bodyFixedFrame, bodyFixedFrame, RandomGeometry.nextVector3D(random, maxFeetExternalTorque),
+               RandomGeometry.nextVector3D(random, maxFeetExternalForce));
          inverseDynamicsCalculator.setExternalWrench(foot, wrench);
       }
    }

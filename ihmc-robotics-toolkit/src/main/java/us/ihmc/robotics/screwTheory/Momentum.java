@@ -33,12 +33,12 @@ public class Momentum extends SpatialForceVector
 
    /**
     * @param expressedInFrame the frame in which the momentum is expressed
-    * @param linearPart linear momentum
     * @param angularPart angular momentum
+    * @param linearPart linear momentum
     */
-   public Momentum(ReferenceFrame expressedInFrame, Vector3DReadOnly linearPart, Vector3DReadOnly angularPart)
+   public Momentum(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
-      super(expressedInFrame, linearPart, angularPart);
+      super(expressedInFrame, angularPart, linearPart);
    }
 
    /**
