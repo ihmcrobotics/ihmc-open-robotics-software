@@ -78,7 +78,7 @@ public class CentroidalMomentumMatrix
       for (int i = 0; i < unitMomenta.length; i++)
       {
          Momentum unitMomentum = unitMomenta[i];
-         unitMomentum.getMatrix(tempMatrix);
+         unitMomentum.get(tempMatrix);
          MatrixTools.setMatrixBlock(centroidalMomentumMatrix, 0, i, tempMatrix, 0, 0, 6, 1, 1.0);
       }
    }

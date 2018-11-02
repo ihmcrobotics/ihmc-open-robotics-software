@@ -160,7 +160,7 @@ public abstract class GeneralizedRigidBodyInertia
     * @return a 6 x 6 matrix representing this generalized inertia in matrix form
     *         [massMomentOfInertia, crossTranspose; cross, mI]
     */
-   public void getMatrix(DenseMatrix64F matrixToPack)
+   public void get(DenseMatrix64F matrixToPack)
    {
 
       // upper left block
@@ -179,17 +179,6 @@ public abstract class GeneralizedRigidBodyInertia
       {
          matrixToPack.set(i, i, mass);
       }
-   }
-
-   /**
-    * @return a 6 x 6 matrix representing this generalized inertia in matrix form
-    *         [massMomentOfInertia, crossTranspose; cross, mI]
-    */
-   public DenseMatrix64F toMatrix()
-   {
-      DenseMatrix64F matrix = new DenseMatrix64F(6, 6);
-      getMatrix(matrix);
-      return matrix;
    }
 
    /**
@@ -302,7 +291,7 @@ public abstract class GeneralizedRigidBodyInertia
    public String toString()
    {
       DenseMatrix64F mat = new DenseMatrix64F(6, 6);
-      getMatrix(mat);
+      get(mat);
 
       return mat.toString();
    }

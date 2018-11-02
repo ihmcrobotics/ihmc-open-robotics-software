@@ -85,7 +85,7 @@ public class ExternalWrenchHandler
          totalWrenchAlreadyApplied.add(tempWrench);
       }
 
-      totalWrenchAlreadyApplied.getMatrix(wrenchEquationRightHandSide);
+      totalWrenchAlreadyApplied.get(wrenchEquationRightHandSide);
       CommonOps.changeSign(wrenchEquationRightHandSide);
       CommonOps.addEquals(wrenchEquationRightHandSide, momentumConvectiveTerm);
       CommonOps.addEquals(wrenchEquationRightHandSide, b);
@@ -104,7 +104,7 @@ public class ExternalWrenchHandler
          totalWrenchAlreadyApplied.add(tempWrench);
       }
 
-      totalWrenchAlreadyApplied.getMatrix(totalWrenchAlreadyAppliedMatrix);
+      totalWrenchAlreadyApplied.get(totalWrenchAlreadyAppliedMatrix);
       return totalWrenchAlreadyAppliedMatrix;
    }
 
@@ -159,7 +159,7 @@ public class ExternalWrenchHandler
 
    public DenseMatrix64F getGravitationalWrench()
    {
-      gravitationalWrench.getMatrix(gravitationalWrenchMatrix);
+      gravitationalWrench.get(gravitationalWrenchMatrix);
       return gravitationalWrenchMatrix;
    }
 }

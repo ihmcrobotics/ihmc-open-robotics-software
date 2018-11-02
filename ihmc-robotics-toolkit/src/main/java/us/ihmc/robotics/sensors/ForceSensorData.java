@@ -45,7 +45,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly
    {
       measurementFrame.checkReferenceFrameMatch(newWrench.getReferenceFrame());
       measurementFrame.checkReferenceFrameMatch(newWrench.getBodyFrame());
-      newWrench.getMatrix(wrench);
+      newWrench.get(wrench);
    }
 
    @Override

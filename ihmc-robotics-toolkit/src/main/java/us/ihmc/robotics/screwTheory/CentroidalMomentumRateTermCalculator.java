@@ -171,7 +171,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
          biasSpatialForce.add(recursionStep.biasWrench);
       }
 
-      biasSpatialForce.getMatrix(biasSpatialForceMatrix);
+      biasSpatialForce.get(biasSpatialForceMatrix);
 
       isCentroidalMomentumMatrixUpToDate = true;
    }
@@ -451,7 +451,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
             getJoint().getUnitTwist(i, jointUnitTwist);
             jointUnitTwist.changeFrame(matrixFrame);
             addToUnitMomentumRecursively(jointUnitTwist, unitMomentum);
-            unitMomentum.getMatrixColumn(centroidalMomentumMatrixBlock, i);
+            unitMomentum.get(0, i, centroidalMomentumMatrixBlock);
          }
       }
 

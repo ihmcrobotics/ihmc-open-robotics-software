@@ -132,7 +132,7 @@ public class MomentumCalculatorTest
 
       Momentum momentum = computeMomentum(elevator, centerOfMassFrame);
       DenseMatrix64F momentumMatrix = new DenseMatrix64F(Momentum.SIZE, 1);
-      momentum.getMatrix(momentumMatrix);
+      momentum.get(momentumMatrix);
 
       CentroidalMomentumMatrix centroidalMomentumMatrix = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
       centroidalMomentumMatrix.compute();

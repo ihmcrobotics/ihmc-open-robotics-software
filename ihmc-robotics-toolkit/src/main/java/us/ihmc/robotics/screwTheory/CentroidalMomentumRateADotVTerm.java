@@ -99,22 +99,29 @@ public class CentroidalMomentumRateADotVTerm
          tempVector.cross(tempMomentum.getLinearPart(), tempCoMTwist.getAngularPart());
          leftSide.addLinearPart(tempVector);
          //
-         CommonOps.add(aDotV, leftSide.toDenseMatrix(), aDotV);
+         DenseMatrix64F leftSideMatrix = new DenseMatrix64F(6, 1);
+         leftSide.get(leftSideMatrix);
+         CommonOps.add(aDotV, leftSideMatrix, aDotV);
          //Right Side
          // \dot{J} * v : Note: during creation of spatialAccelerationCalculator, the boolean for setting acceleration term to zero was set to true.
          spatialAccelerationCalculator.getAccelerationOfBody(rigidBody, tempSpatialAcceleration);
 
          inertia.changeFrame(tempSpatialAcceleration.getReferenceFrame()); // easier to change the frame of inertia than the spatial acceleration
 
+         DenseMatrix64F inertiaMatrix = new DenseMatrix64F(6, 6);
+         inertia.get(inertiaMatrix);
+         DenseMatrix64F tempSpatialAccelerationMatrix = new DenseMatrix64F(6, 1);
+         tempSpatialAcceleration.get(0, tempSpatialAccelerationMatrix);
          // I * \dot{J} * v
-         DenseMatrix64F inertiaTimesSpatialAccel = MatrixTools.mult(inertia.toMatrix(), tempSpatialAcceleration.toMatrix());
+         DenseMatrix64F inertiaTimesSpatialAccel = MatrixTools.mult(inertiaMatrix, tempSpatialAccelerationMatrix);
 
          //Express as momentum to make multiplying by adjoint easier
          tempMomentum.setIncludingFrame(tempSpatialAcceleration.getReferenceFrame(), inertiaTimesSpatialAccel);
          // Ad^{T} * I * \dot{J} * v
          tempMomentum.changeFrame(centerOfMassFrame);
-
-         CommonOps.add(aDotV, tempMomentum.toDenseMatrix(), aDotV);
+         DenseMatrix64F tempMomentumMatrix = new DenseMatrix64F(6, 1);
+         tempMomentum.get(tempMomentumMatrix);
+         CommonOps.add(aDotV, tempMomentumMatrix, aDotV);
       }
    }
 

@@ -46,14 +46,16 @@ public class MomentumTest
       Twist twist = new Twist(frame, world, world, angularVelocity, linearVelocity);
 
       DenseMatrix64F inertiaMatrix = new DenseMatrix64F(6, 6);
-      inertia.getMatrix(inertiaMatrix);
-      DenseMatrix64F twistMatrix = twist.toMatrix();
+      inertia.get(inertiaMatrix);
+      DenseMatrix64F twistMatrix = new DenseMatrix64F(6, 1);
+      twist.get(0, twistMatrix);
       DenseMatrix64F expensive = new DenseMatrix64F(inertiaMatrix.getNumRows(), twistMatrix.getNumCols());
       CommonOps.mult(inertiaMatrix, twistMatrix, expensive);
 
       Momentum momentum = new Momentum();
       momentum.compute(inertia, twist);
-      DenseMatrix64F cheap = momentum.toDenseMatrix();
+      DenseMatrix64F cheap = new DenseMatrix64F(6, 1);
+      momentum.get(cheap);
 
       JUnitTools.assertMatrixEquals(expensive, cheap, 1e-12);
    }

@@ -178,7 +178,7 @@ public class VirtualModelMomentumController
        * @formatter:on
        */
       tempTaskObjective.reshape(taskSize, 1);
-      wrench.getMatrix(tempFullObjective);
+      wrench.get(tempFullObjective);
       CommonOps.mult(tempSelectionMatrix, tempFullObjective, tempTaskObjective);
 
       // Add these forces to the effort matrix t = J' w

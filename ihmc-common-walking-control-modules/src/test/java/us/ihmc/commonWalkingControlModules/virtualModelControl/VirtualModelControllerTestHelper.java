@@ -506,8 +506,8 @@ public class VirtualModelControllerTestHelper
       DenseMatrix64F outputWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
       DenseMatrix64F selectedValues = new DenseMatrix64F(Wrench.SIZE, 1);
 
-      inputWrench.getMatrix(inputWrenchMatrix);
-      outputWrench.getMatrix(outputWrenchMatrix);
+      inputWrench.get(inputWrenchMatrix);
+      outputWrench.get(outputWrenchMatrix);
 
       double epsilon = 1e-4;
       int taskSize = selectionMatrix.getNumRows();
@@ -534,8 +534,8 @@ public class VirtualModelControllerTestHelper
       DenseMatrix64F inputWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
       DenseMatrix64F outputWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
 
-      inputWrench.getMatrix(inputWrenchMatrix);
-      outputWrench.getMatrix(outputWrenchMatrix);
+      inputWrench.get(inputWrenchMatrix);
+      outputWrench.get(outputWrenchMatrix);
 
       double epsilon = 1e-4;
 

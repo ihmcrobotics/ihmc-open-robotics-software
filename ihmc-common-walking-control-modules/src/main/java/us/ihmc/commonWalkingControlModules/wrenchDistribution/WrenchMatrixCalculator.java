@@ -304,7 +304,7 @@ public class WrenchMatrixCalculator
 
       // Get the matrices without considering the selection:
       wrench.changeFrame(planeFrame);
-      wrench.getMatrix(tempTaskObjective);
+      wrench.get(tempTaskObjective);
       tempTaskJacobian.set(helper.getWrenchJacobianMatrix());
 
       SelectionMatrix6D selectionMatrix = command.getSelectionMatrix();

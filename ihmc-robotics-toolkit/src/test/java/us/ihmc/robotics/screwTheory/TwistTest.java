@@ -98,7 +98,7 @@ public class TwistTest extends SpatialMotionVectorTest
 
       Twist twist = new Twist(frameC, frameD, frameA, array);
       DenseMatrix64F matrixBack = new DenseMatrix64F(Twist.SIZE, 1);
-      twist.getMatrix(matrixBack, 0);
+      twist.get(0, matrixBack);
       double[] arrayBack = matrixBack.getData();
       assertArrayEquals(array, arrayBack, 0.0);
    }
@@ -132,10 +132,10 @@ public class TwistTest extends SpatialMotionVectorTest
       Twist twistCopy = new Twist(twist);
 
       DenseMatrix64F twistMatrix = new DenseMatrix64F(Twist.SIZE, 1);
-      twist.getMatrix(twistMatrix, 0);
+      twist.get(0, twistMatrix);
 
       DenseMatrix64F twistCopyMatrix = new DenseMatrix64F(Twist.SIZE, 1);
-      twistCopy.getMatrix(twistCopyMatrix, 0);
+      twistCopy.get(0, twistCopyMatrix);
 
       // test that they're the same
       JUnitTools.assertMatrixEquals(twistMatrix, twistCopyMatrix, 0.0);
@@ -146,8 +146,8 @@ public class TwistTest extends SpatialMotionVectorTest
       // test that we're actually copying, not just using references
       inputMatrix = RandomMatrices.createRandom(Twist.SIZE, 1, random);
       twist.setIncludingFrame(frameD, frameA, frameC, inputMatrix, 0);
-      twist.getMatrix(twistMatrix, 0);
-      twistCopy.getMatrix(twistCopyMatrix, 0);
+      twist.get(0, twistMatrix);
+      twistCopy.get(0, twistCopyMatrix);
 
       for (int i = 0; i < twistMatrix.getNumElements(); i++)
       {
@@ -372,10 +372,10 @@ public class TwistTest extends SpatialMotionVectorTest
       twist1.changeFrame(twist1.getReferenceFrame());
 
       DenseMatrix64F twist1Matrix = new DenseMatrix64F(Twist.SIZE, 1);
-      twist1.getMatrix(twist1Matrix, 0);
+      twist1.get(0, twist1Matrix);
 
       DenseMatrix64F twist2Matrix = new DenseMatrix64F(Twist.SIZE, 1);
-      twist2.getMatrix(twist2Matrix, 0);
+      twist2.get(0, twist2Matrix);
 
       // test that they're the same
       JUnitTools.assertMatrixEquals(twist1Matrix, twist2Matrix, 0.0);
@@ -392,7 +392,8 @@ public class TwistTest extends SpatialMotionVectorTest
       Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Twist twist1 = new Twist(frameB, frameA, frameA, angularVelocity1, linearVelocity1);
 
-      DenseMatrix64F twistMatrix = twist1.toMatrix();
+      DenseMatrix64F twistMatrix = new DenseMatrix64F(6, 1);
+      twist1.get(0, twistMatrix);
 
       double epsilon = 1e-14;
 
