@@ -362,7 +362,7 @@ public class SpatialAccelerationCalculator
       localAcceleration.getReferenceFrame().checkReferenceFrameMatch(localAcceleration.getBodyFrame());
       localAcceleration.changeFrame(baseFrame);
 
-      localAcceleration.getAccelerationOfPointFixedInBodyFrame(localTwist, localPoint, linearAccelerationToPack);
+      localAcceleration.getLinearAccelerationAt(localTwist, localPoint, linearAccelerationToPack);
    }
 
    /**
@@ -412,7 +412,7 @@ public class SpatialAccelerationCalculator
       localAcceleration.getReferenceFrame().checkReferenceFrameMatch(localAcceleration.getBodyFrame());
       localAcceleration.changeFrame(inertialFrame);
 
-      localAcceleration.getAccelerationOfPointFixedInBodyFrame(localTwist, localPoint, linearAccelerationToPack);
+      localAcceleration.getLinearAccelerationAt(localTwist, localPoint, linearAccelerationToPack);
    }
 
    /**

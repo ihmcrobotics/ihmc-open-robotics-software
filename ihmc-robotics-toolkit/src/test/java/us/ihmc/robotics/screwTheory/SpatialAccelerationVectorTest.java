@@ -94,7 +94,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       Twist twist = new Twist(frameB, frameA, frameA, getRandomVector(random), new Vector3D());    // pure rotational velocity
       FramePoint3D pointFixedInFrameB = new FramePoint3D(frameA, getRandomVector(random));
       FrameVector3D accelerationOfPointFixedInFrameB = new FrameVector3D(ReferenceFrame.getWorldFrame());
-      accel.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
+      accel.getLinearAccelerationAt(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
 
       Vector3D expected = new Vector3D(pointFixedInFrameB);
       expected.cross(twist.getAngularPart(), expected);
@@ -133,13 +133,13 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
          
          // Compute the linear acceleration while in bodyFrame
          pointFixedInBodyFrame.changeFrame(bodyFrame);
-         spatialAccelerationVector.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInBodyFrame, bodyFixedPointLinearAccelerationInBody);
+         spatialAccelerationVector.getLinearAccelerationAt(twist, pointFixedInBodyFrame, bodyFixedPointLinearAccelerationInBody);
          
          // Compute the linear acceleration while in bodyFrame
          pointFixedInBodyFrame.changeFrame(baseFrame);
          spatialAccelerationVector.changeFrame(baseFrame, twist, twist);
          twist.changeFrame(baseFrame);
-         spatialAccelerationVector.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInBodyFrame, bodyFixedPointLinearAccelerationInBase);
+         spatialAccelerationVector.getLinearAccelerationAt(twist, pointFixedInBodyFrame, bodyFixedPointLinearAccelerationInBase);
          
          // Verify that they are the same
          bodyFixedPointLinearAccelerationInBody.changeFrame(baseFrame);
@@ -159,7 +159,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       Twist twist = new Twist(frameB, frameA, frameA, getRandomVector(random), RandomGeometry.nextVector3D(random));
       FramePoint3D pointFixedInFrameB = new FramePoint3D(frameA);    // , getRandomVector(random));
       FrameVector3D accelerationOfPointFixedInFrameB = new FrameVector3D(ReferenceFrame.getWorldFrame());
-      accel.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
+      accel.getLinearAccelerationAt(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
 
       Twist twistOfCurrentWithRespectToNew = new Twist(twist);
       twistOfCurrentWithRespectToNew.invert();
@@ -324,7 +324,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       acceleration.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, twistOfBodyWithRespectToBase);
 
       FrameVector3D linearAccelerationCheck = new FrameVector3D();
-      acceleration.getLinearAccelerationFromOriginAcceleration(twistOfBodyWithRespectToBase, linearAccelerationCheck);
+      acceleration.getLinearAccelerationAtBodyOrigin(twistOfBodyWithRespectToBase, linearAccelerationCheck);
       linearAccelerationCheck.changeFrame(originAcceleration.getReferenceFrame());
 
       EuclidCoreTestTools.assertTuple3DEquals(linearAccelerationCheck, originAcceleration, 1e-12);
@@ -334,7 +334,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       origin.changeFrame(acceleration.getBaseFrame());
       acceleration.changeFrame(acceleration.getBaseFrame(), twistOfBodyWithRespectToBase, twistOfBodyWithRespectToBase);
       twistOfBodyWithRespectToBase.changeFrame(acceleration.getBaseFrame());
-      acceleration.getAccelerationOfPointFixedInBodyFrame(twistOfBodyWithRespectToBase, origin, originAccelerationBack);
+      acceleration.getLinearAccelerationAt(twistOfBodyWithRespectToBase, origin, originAccelerationBack);
 
       originAccelerationBack.changeFrame(originAcceleration.getReferenceFrame());
       EuclidCoreTestTools.assertTuple3DEquals(originAccelerationBack, originAcceleration, 1e-12);
