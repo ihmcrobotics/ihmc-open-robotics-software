@@ -88,7 +88,7 @@ public class Wrench extends SpatialForceVector
    public void setIncludingFrame(Wrench other)
    {
       this.bodyFrame = other.bodyFrame;
-      super.setIncludingFrame(other.expressedInFrame, other.angularPart, other.linearPart);
+      super.setIncludingFrame(other.expressedInFrame, other.getAngularPart(), other.getLinearPart());
    }
 
    /**
@@ -116,8 +116,8 @@ public class Wrench extends SpatialForceVector
    {
       this.bodyFrame = bodyFrame;
       this.expressedInFrame = expressedInFrame;
-      angularPart.set(0.0, 0.0, 0.0);
-      linearPart.set(0.0, 0.0, 0.0);
+      getAngularPart().set(0.0, 0.0, 0.0);
+      getLinearPart().set(0.0, 0.0, 0.0);
    }
 
    /**
@@ -158,8 +158,8 @@ public class Wrench extends SpatialForceVector
    @Override
    public String toString()
    {
-      String ret = new String("Wrench exerted on " + bodyFrame + ", expressed in frame " + expressedInFrame + "\n" + "Torque part: " + angularPart + "\n"
-                              + "Force part: " + linearPart);
+      String ret = new String("Wrench exerted on " + bodyFrame + ", expressed in frame " + expressedInFrame + "\n" + "Torque part: " + getAngularPart() + "\n"
+                              + "Force part: " + getLinearPart());
 
       return ret;
    }

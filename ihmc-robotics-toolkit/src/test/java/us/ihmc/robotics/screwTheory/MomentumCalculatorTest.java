@@ -52,8 +52,8 @@ public class MomentumCalculatorTest
       Momentum momentum = computeMomentum(elevator, world);
 
       momentum.changeFrame(world);
-      FrameVector3D linearMomentum = new FrameVector3D(momentum.getReferenceFrame(), momentum.getLinearPartCopy());
-      FrameVector3D angularMomentum = new FrameVector3D(momentum.getReferenceFrame(), momentum.getAngularPartCopy());
+      FrameVector3D linearMomentum = new FrameVector3D(momentum.getReferenceFrame(), new Vector3D(momentum.getLinearPart()));
+      FrameVector3D angularMomentum = new FrameVector3D(momentum.getReferenceFrame(), new Vector3D(momentum.getAngularPart()));
 
       FrameVector3D linearMomentumCheck = new FrameVector3D(joint.getFrameBeforeJoint(), jointAxis);
       linearMomentumCheck.scale(body.getInertia().getMass() * joint.getQd());
@@ -85,8 +85,8 @@ public class MomentumCalculatorTest
       Momentum momentum = computeMomentum(elevator, world);
 
       momentum.changeFrame(world);
-      FrameVector3D linearMomentum = new FrameVector3D(momentum.getReferenceFrame(), momentum.getLinearPartCopy());
-      FrameVector3D angularMomentum = new FrameVector3D(momentum.getReferenceFrame(), momentum.getAngularPartCopy());
+      FrameVector3D linearMomentum = new FrameVector3D(momentum.getReferenceFrame(), new Vector3D(momentum.getLinearPart()));
+      FrameVector3D angularMomentum = new FrameVector3D(momentum.getReferenceFrame(), new Vector3D(momentum.getAngularPart()));
 
       FrameVector3D linearMomentumCheck = new FrameVector3D(world);
       Matrix3D inertia = body.getInertia().getMassMomentOfInertiaPartCopy();

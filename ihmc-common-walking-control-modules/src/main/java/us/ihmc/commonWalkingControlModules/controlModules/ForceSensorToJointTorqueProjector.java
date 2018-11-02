@@ -79,7 +79,7 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
 
          tempWrench.changeFrame(jointAxis.getReferenceFrame());
          tempFrameVector.setToZero(tempWrench.getReferenceFrame());
-         tempWrench.getAngularPart(tempFrameVector);
+         tempFrameVector.set(tempWrench.getAngularPart());
          torqueAboutJointAxis.set(-tempFrameVector.dot(jointAxis));
       }
 

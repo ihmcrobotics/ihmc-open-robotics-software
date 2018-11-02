@@ -68,22 +68,22 @@ public class Momentum extends SpatialForceVector
 
       tempVector.set(twist.getAngularPart());
       inertia.massMomentOfInertiaPart.transform(tempVector);    // J * omegad
-      setAngularPart(tempVector);
+      getAngularPart().set(tempVector);
 
       if (!inertia.isCrossPartZero())
       {
          tempVector.cross(twist.getLinearPart(), inertia.crossPart);
-         addAngularPart(tempVector);    // J * omegad - c x vd
+         this.getAngularPart().add(tempVector);    // J * omegad - c x vd
       }
 
       tempVector.set(twist.getLinearPart());
       tempVector.scale(inertia.getMass());
-      setLinearPart(tempVector);    // m * vd
+      getLinearPart().set(tempVector);    // m * vd
 
       if (!inertia.isCrossPartZero())
       {
          tempVector.cross(inertia.crossPart, twist.getAngularPart());
-         addLinearPart(tempVector);    // m * vd + c x omegad
+         this.getLinearPart().add(tempVector);    // m * vd + c x omegad
       }
 
       this.expressedInFrame = frame;
@@ -92,7 +92,7 @@ public class Momentum extends SpatialForceVector
    public double computeKineticCoEnergy(Twist twist)
    {
       getReferenceFrame().checkReferenceFrameMatch(twist.getReferenceFrame());
-      double ret = linearPart.dot(twist.getLinearPart()) + angularPart.dot(twist.getAngularPart());
+      double ret = getLinearPart().dot(twist.getLinearPart()) + getAngularPart().dot(twist.getAngularPart());
 
       return ret;
    }
@@ -100,8 +100,8 @@ public class Momentum extends SpatialForceVector
    @Override
    public String toString()
    {
-      String ret = new String("Momentum expressed in frame " + expressedInFrame + "\n" + "Angular part: " + angularPart + "\n"
-                              + "Linear part: " + linearPart);
+      String ret = new String("Momentum expressed in frame " + expressedInFrame + "\n" + "Angular part: " + getAngularPart() + "\n"
+                              + "Linear part: " + getLinearPart());
 
       return ret;
    }

@@ -93,11 +93,11 @@ public class CentroidalMomentumRateADotVTerm
          // so -a x b = b x a.
          leftSide.setToZero();
          tempVector.cross(tempMomentum.getLinearPart(), tempCoMTwist.getLinearPart());
-         leftSide.addAngularPart(tempVector);
+         leftSide.getAngularPart().add(tempVector);
          tempVector.cross(tempMomentum.getAngularPart(), tempCoMTwist.getAngularPart());
-         leftSide.addAngularPart(tempVector);
+         leftSide.getAngularPart().add(tempVector);
          tempVector.cross(tempMomentum.getLinearPart(), tempCoMTwist.getAngularPart());
-         leftSide.addLinearPart(tempVector);
+         leftSide.getLinearPart().add(tempVector);
          //
          DenseMatrix64F leftSideMatrix = new DenseMatrix64F(6, 1);
          leftSide.get(leftSideMatrix);

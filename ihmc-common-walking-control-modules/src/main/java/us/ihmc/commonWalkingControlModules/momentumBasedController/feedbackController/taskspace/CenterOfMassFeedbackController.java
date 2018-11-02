@@ -286,7 +286,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    public void computeAchievedAcceleration()
    {
       SpatialForceVector achievedMomentumRate = centroidalMomentumHandler.getCentroidalMomentumRate();
-      achievedMomentumRate.getLinearPartIncludingFrame(achievedLinearAcceleration);
+      achievedLinearAcceleration.setIncludingFrame(achievedMomentumRate.getLinearPart());
       achievedLinearAcceleration.changeFrame(worldFrame);
       achievedLinearAcceleration.scale(1.0 / totalRobotMass);
       yoAchievedLinearAcceleration.set(achievedLinearAcceleration);

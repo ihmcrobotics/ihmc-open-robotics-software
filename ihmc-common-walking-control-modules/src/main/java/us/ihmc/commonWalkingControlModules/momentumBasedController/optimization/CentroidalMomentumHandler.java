@@ -62,12 +62,12 @@ public class CentroidalMomentumHandler
 
    public void getAngularMomentum(FrameVector3D angularMomentumToPack)
    {
-      centroidalMomentumRateTermCalculator.getMomentum().getAngularPartIncludingFrame(angularMomentumToPack);
+      angularMomentumToPack.setIncludingFrame(centroidalMomentumRateTermCalculator.getMomentum().getAngularPart());
    }
 
    public void getLinearMomentum(FrameVector3D linearMomentumToPack)
    {
-      centroidalMomentumRateTermCalculator.getMomentum().getLinearPartIncludingFrame(linearMomentumToPack);
+      linearMomentumToPack.setIncludingFrame(centroidalMomentumRateTermCalculator.getMomentum().getLinearPart());
    }
 
    public void getCenterOfMassVelocity(FrameVector3D centerOfMassVelocityToPack)

@@ -878,9 +878,9 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
          tempFrameVector.setToZero(footSwitch.getMeasurementFrame());
 
          footSwitch.computeAndPackFootWrench(tempWrench);
-         tempWrench.getLinearPart(tempFrameVector);
+         tempFrameVector.set(tempWrench.getLinearPart());
          footForcesRaw.get(robotSide).set(tempFrameVector);
-         tempWrench.getAngularPart(tempFrameVector);
+         tempFrameVector.set(tempWrench.getAngularPart());
          footTorquesRaw.get(robotSide).set(tempFrameVector);
 
          footForcesRawFiltered.get(robotSide).update();

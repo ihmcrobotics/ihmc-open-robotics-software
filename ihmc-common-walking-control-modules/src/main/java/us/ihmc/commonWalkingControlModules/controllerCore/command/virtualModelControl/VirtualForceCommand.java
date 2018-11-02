@@ -182,7 +182,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
-      desiredWrench.getLinearPart(desiredLinearForce);
+      desiredLinearForce.set(desiredWrench.getLinearPart());
    }
 
    /**
@@ -316,7 +316,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    {
       getControlFrame(controlFrameToPack);
       desiredWrenchToPack.setToZero(endEffector.getBodyFixedFrame(), controlFrameToPack);
-      desiredWrenchToPack.setLinearPart(desiredLinearForce);
+      desiredWrenchToPack.getLinearPart().set(desiredLinearForce);
    }
 
    /** {@inheritDoc} */

@@ -2,22 +2,22 @@ package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.commons.MathTools;
 
 public class SpatialForceVector
 {
    public static final int SIZE = 6;
    public static final String[] AXIS_NAMES = new String[] {"xAngular", "yAngular", "zAngular", "xLinear", "yLinear", "zLinear"};
    protected ReferenceFrame expressedInFrame;
-   protected final Vector3D linearPart;
-   protected final Vector3D angularPart;
+   private final FrameVector3D linearPart;
+   private final FrameVector3D angularPart;
    protected final Vector3D tempVector = new Vector3D();
    private RigidBodyTransform temporaryTransformHToDesiredFrame = new RigidBodyTransform();
 
@@ -27,8 +27,8 @@ public class SpatialForceVector
    public SpatialForceVector()
    {
       expressedInFrame = null;
-      linearPart = new Vector3D();
-      angularPart = new Vector3D();
+      linearPart = new FrameVector3D();
+      angularPart = new FrameVector3D();
    }
 
    /**
@@ -39,8 +39,8 @@ public class SpatialForceVector
    public SpatialForceVector(ReferenceFrame expressedInFrame)
    {
       this.expressedInFrame = expressedInFrame;
-      linearPart = new Vector3D();
-      angularPart = new Vector3D();
+      linearPart = new FrameVector3D();
+      angularPart = new FrameVector3D();
    }
 
    /**
@@ -51,8 +51,8 @@ public class SpatialForceVector
    public SpatialForceVector(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
       this.expressedInFrame = expressedInFrame;
-      this.linearPart = new Vector3D(linearPart);
-      this.angularPart = new Vector3D(angularPart);
+      this.linearPart = new FrameVector3D (expressedInFrame,  linearPart);
+      this.angularPart = new FrameVector3D(expressedInFrame,  angularPart);
    }
 
    /**
@@ -60,8 +60,8 @@ public class SpatialForceVector
     */
    public SpatialForceVector(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
-      angularPart = new Vector3D();
-      linearPart = new Vector3D();
+      angularPart = new FrameVector3D();
+      linearPart = new FrameVector3D();
       setIncludingFrame(expressedInFrame, matrix);
    }
 
@@ -72,8 +72,8 @@ public class SpatialForceVector
    {
       MathTools.checkIntervalContains(matrix.length, SIZE, SIZE);
       this.expressedInFrame = expressedInFrame;
-      angularPart = new Vector3D(matrix[0], matrix[1], matrix[2]);
-      linearPart = new Vector3D(matrix[3], matrix[4], matrix[5]);
+      angularPart = new FrameVector3D(expressedInFrame, matrix[0], matrix[1], matrix[2]);
+      linearPart = new FrameVector3D (expressedInFrame, matrix[3], matrix[4], matrix[5]);
    }
 
    /**
@@ -82,8 +82,8 @@ public class SpatialForceVector
    public SpatialForceVector(SpatialForceVector other)
    {
       expressedInFrame = other.expressedInFrame;
-      linearPart = new Vector3D(other.linearPart);
-      angularPart = new Vector3D(other.angularPart);
+      linearPart = new FrameVector3D(other.getLinearPart());
+      angularPart = new FrameVector3D(other.getAngularPart());
    }
 
    /**
@@ -100,26 +100,26 @@ public class SpatialForceVector
    public void setUsingArm(ReferenceFrame expressedInFrame, Vector3DReadOnly linearPart, Vector3DReadOnly arm)
    {
       this.expressedInFrame = expressedInFrame;
-      this.linearPart.set(linearPart);
-      angularPart.cross(arm, linearPart);
+      this.getLinearPart().set(linearPart);
+      getAngularPart().cross(arm, linearPart);
    }
 
    public void setIncludingFrame(FrameVector3D force, FramePoint3D pointOfApplication)
    {
       force.checkReferenceFrameMatch(pointOfApplication);
       expressedInFrame = force.getReferenceFrame();
-      linearPart.set(force);
+      getLinearPart().set(force);
       tempVector.set(pointOfApplication);
-      angularPart.cross(tempVector, linearPart);
+      getAngularPart().cross(tempVector, getLinearPart());
    }
 
    public void setIncludingFrame(FrameVector3D force, FrameVector3D moment, FramePoint3D pointOfApplication)
    {
       force.checkReferenceFrameMatch(pointOfApplication);
       expressedInFrame = force.getReferenceFrame();
-      linearPart.set(force);
-      angularPart.cross(pointOfApplication, linearPart);
-      angularPart.add(moment);
+      getLinearPart().set(force);
+      getAngularPart().cross(pointOfApplication, getLinearPart());
+      getAngularPart().add(moment);
    }
 
    /**
@@ -131,45 +131,11 @@ public class SpatialForceVector
    }
 
    /**
-    * Sets the angular part of the twist
-    */
-   public void setAngularPart(FrameVector3D angularPart)
-   {
-      expressedInFrame.checkReferenceFrameMatch(angularPart);
-      this.angularPart.set(angularPart);
-   }
-
-   /**
-    * Sets the angular part of the twist
-    */
-   public void setAngularPart(Vector3DReadOnly angularPart)
-   {
-      this.angularPart.set(angularPart);
-   }
-
-   /**
-    * Sets the linear part of the spatial force vector
-    */
-   public void setLinearPart(FrameVector3D linearPart)
-   {
-      expressedInFrame.checkReferenceFrameMatch(linearPart);
-      this.linearPart.set(linearPart);
-   }
-
-   /**
-    * Sets the linear part of the spatial force vector
-    */
-   public void setLinearPart(Vector3DReadOnly linearPart)
-   {
-      this.linearPart.set(linearPart);
-   }
-
-   /**
     * Sets the X coordinate of the angular part of the spatial force vector
     */
    public void setAngularPartX(double val)
    {
-      angularPart.setX(val);
+      getAngularPart().setX(val);
    }
 
    /**
@@ -177,7 +143,7 @@ public class SpatialForceVector
     */
    public void setAngularPartY(double val)
    {
-      angularPart.setY(val);
+      getAngularPart().setY(val);
    }
 
    /**
@@ -185,7 +151,7 @@ public class SpatialForceVector
     */
    public void setAngularPartZ(double val)
    {
-      angularPart.setZ(val);
+      getAngularPart().setZ(val);
    }
 
    /**
@@ -193,7 +159,7 @@ public class SpatialForceVector
     */
    public void setLinearPartX(double val)
    {
-      linearPart.setX(val);
+      getLinearPart().setX(val);
    }
 
    /**
@@ -201,7 +167,7 @@ public class SpatialForceVector
     */
    public void setLinearPartY(double val)
    {
-      linearPart.setY(val);
+      getLinearPart().setY(val);
    }
 
    /**
@@ -209,7 +175,7 @@ public class SpatialForceVector
     */
    public void setLinearPartZ(double val)
    {
-      linearPart.setZ(val);
+      getLinearPart().setZ(val);
    }
 
    public void set(SpatialForceVector other)
@@ -220,7 +186,7 @@ public class SpatialForceVector
 
    public void setIncludingFrame(SpatialForceVector other)
    {
-      setIncludingFrame(other.expressedInFrame, other.angularPart, other.linearPart);
+      setIncludingFrame(other.expressedInFrame, other.getAngularPart(), other.getLinearPart());
    }
 
    /**
@@ -230,8 +196,8 @@ public class SpatialForceVector
    {
       expressedInFrame.checkReferenceFrameMatch(other.expressedInFrame);
 
-      linearPart.add(other.linearPart);
-      angularPart.add(other.angularPart);
+      getLinearPart().add(other.getLinearPart());
+      getAngularPart().add(other.getAngularPart());
    }
 
    /**
@@ -242,23 +208,23 @@ public class SpatialForceVector
    {
       expressedInFrame.checkReferenceFrameMatch(other.expressedInFrame);
 
-      linearPart.sub(other.linearPart);
-      angularPart.sub(other.angularPart);
+      getLinearPart().sub(other.getLinearPart());
+      getAngularPart().sub(other.getAngularPart());
    }
 
    public void set(FrameVector3D angularPart, FrameVector3D linearPart)
    {
       expressedInFrame.checkReferenceFrameMatch(linearPart);
       expressedInFrame.checkReferenceFrameMatch(angularPart);
-      this.linearPart.set(linearPart);
-      this.angularPart.set(angularPart);
+      this.getLinearPart().set(linearPart);
+      this.getAngularPart().set(angularPart);
    }
 
    public void setIncludingFrame(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
       this.expressedInFrame = expressedInFrame;
-      this.linearPart.set(linearPart);
-      this.angularPart.set(angularPart);
+      this.getLinearPart().set(linearPart);
+      this.getAngularPart().set(angularPart);
    }
 
    public void setIncludingFrame(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
@@ -272,8 +238,8 @@ public class SpatialForceVector
       MathTools.checkEquals(matrix.getNumCols(), 1);
 
       this.expressedInFrame = expressedInFrame;
-      angularPart.set(matrix.get(0, 0), matrix.get(1 + rowStart, 0), matrix.get(2 + rowStart, 0));
-      linearPart.set(matrix.get(3 + rowStart, 0), matrix.get(4 + rowStart, 0), matrix.get(5 + rowStart, 0));
+      getAngularPart().set(matrix.get(0, 0), matrix.get(1 + rowStart, 0), matrix.get(2 + rowStart, 0));
+      getLinearPart().set(matrix.get(3 + rowStart, 0), matrix.get(4 + rowStart, 0), matrix.get(5 + rowStart, 0));
    }
 
    public void setIncludingFrame(ReferenceFrame expressedInFrame, double[] doubleArray)
@@ -281,90 +247,14 @@ public class SpatialForceVector
       MathTools.checkEquals(doubleArray.length, SIZE);
 
       this.expressedInFrame = expressedInFrame;
-      angularPart.set(doubleArray[0], doubleArray[1], doubleArray[2]);
-      linearPart.set(doubleArray[3], doubleArray[4], doubleArray[5]);
-   }
-
-   /**
-    * Adds to the angular part of the spatial force vector
-    */
-   public void addAngularPart(Vector3DReadOnly angularPart)
-   {
-      this.angularPart.add(angularPart);
-   }
-
-   public void subAngularPart(Vector3DReadOnly angularPart)
-   {
-      this.angularPart.sub(angularPart);
-   }
-
-   public void subAngularPart(FrameVector3D angularPart)
-   {
-      expressedInFrame.checkReferenceFrameMatch(angularPart);
-      this.angularPart.sub(angularPart);
-   }
-
-   /**
-    * Adds to the force part of the spatial force vector
-    */
-   public void addLinearPart(Vector3DReadOnly linearPart)
-   {
-      this.linearPart.add(linearPart);
-   }
-
-   public void addLinearPart(FrameVector3D linearPart)
-   {
-      expressedInFrame.checkReferenceFrameMatch(linearPart);
-      this.linearPart.add(linearPart);
-   }
-
-   public void subLinearPart(Vector3DReadOnly linearPart)
-   {
-      this.linearPart.sub(linearPart);
-   }
-
-   public void subLinearPart(FrameVector3D linearPart)
-   {
-      expressedInFrame.checkReferenceFrameMatch(linearPart);
-      this.linearPart.sub(linearPart);
-   }
-
-   /**
-    * @return copy of the angular part as a FrameVector
-    */
-   public FrameVector3D getAngularPartAsFrameVectorCopy()
-   {
-      return new FrameVector3D(expressedInFrame, angularPart);
-   }
-
-   /**
-    * @return copy of the angular part as a FrameVector
-    */
-   public FrameVector3D getLinearPartAsFrameVectorCopy()
-   {
-      return new FrameVector3D(expressedInFrame, linearPart);
-   }
-
-   /**
-    * @return copy of the angular part
-    */
-   public Vector3D getAngularPartCopy()
-   {
-      return new Vector3D(angularPart);
-   }
-
-   /**
-    * @return copy of the linear part
-    */
-   public Vector3D getLinearPartCopy()
-   {
-      return new Vector3D(linearPart);
+      getAngularPart().set(doubleArray[0], doubleArray[1], doubleArray[2]);
+      getLinearPart().set(doubleArray[3], doubleArray[4], doubleArray[5]);
    }
 
    /**
     * @return the angular part
     */
-   public Vector3DReadOnly getAngularPart()
+   public FixedFrameVector3DBasics getAngularPart()
    {
       return angularPart;
    }
@@ -372,7 +262,7 @@ public class SpatialForceVector
    /**
     * @return the linear part
     */
-   public Vector3DReadOnly getLinearPart()
+   public FixedFrameVector3DBasics getLinearPart()
    {
       return linearPart;
    }
@@ -386,86 +276,24 @@ public class SpatialForceVector
    {
       MathTools.checkIntervalContains(matrix.getNumRows(), SIZE, Integer.MAX_VALUE);
       MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);
-      matrix.set(0, 0, angularPart.getX());
-      matrix.set(1, 0, angularPart.getY());
-      matrix.set(2, 0, angularPart.getZ());
-      matrix.set(3, 0, linearPart.getX());
-      matrix.set(4, 0, linearPart.getY());
-      matrix.set(5, 0, linearPart.getZ());
+      matrix.set(0, 0, getAngularPart().getX());
+      matrix.set(1, 0, getAngularPart().getY());
+      matrix.set(2, 0, getAngularPart().getZ());
+      matrix.set(3, 0, getLinearPart().getX());
+      matrix.set(4, 0, getLinearPart().getY());
+      matrix.set(5, 0, getLinearPart().getZ());
    }
 
    public void get(int startRow, int column, DenseMatrix64F matrix)
    {
       MathTools.checkIntervalContains(matrix.getNumRows(), SIZE, Integer.MAX_VALUE);
       MathTools.checkIntervalContains(matrix.getNumCols(), column + 1, Integer.MAX_VALUE);
-      matrix.set(0, column, angularPart.getX());
-      matrix.set(1, column, angularPart.getY());
-      matrix.set(2, column, angularPart.getZ());
-      matrix.set(3, column, linearPart.getX());
-      matrix.set(4, column, linearPart.getY());
-      matrix.set(5, column, linearPart.getZ());
-   }
-
-   public double getAngularPartMagnitude()
-   {
-      return angularPart.length();
-   }
-
-   public double getLinearPartMagnitude()
-   {
-      return linearPart.length();
-   }
-
-   /**
-    * Packs an existing Vector3d with the angular part
-    */
-   public void getAngularPart(Vector3DBasics vectorToPack)
-   {
-      vectorToPack.set(angularPart);
-   }
-
-   /**
-    * Packs an existing FrameVector with the angular part. The FrameVector must be in the same frame
-    * as the expressedInFrame
-    */
-   public void getAngularPart(FrameVector3D vectorToPack)
-   {
-      getReferenceFrame().checkReferenceFrameMatch(vectorToPack.getReferenceFrame());
-      vectorToPack.set(angularPart);
-   }
-
-   /**
-    * Packs an existing FrameVector with the angular part.
-    */
-   public void getAngularPartIncludingFrame(FrameVector3D vectorToPack)
-   {
-      vectorToPack.setIncludingFrame(getReferenceFrame(), angularPart);
-   }
-
-   /**
-    * Packs an existing Vector3d with the linear part
-    */
-   public void getLinearPart(Vector3DBasics vectorToPack)
-   {
-      vectorToPack.set(linearPart);
-   }
-
-   /**
-    * Packs an existing FrameVector with the linear part. The FrameVector must be in the same frame
-    * as the expressedInFrame
-    */
-   public void getLinearPart(FrameVector3D vectorToPack)
-   {
-      getReferenceFrame().checkReferenceFrameMatch(vectorToPack.getReferenceFrame());
-      vectorToPack.set(linearPart);
-   }
-
-   /**
-    * Packs an existing FrameVector with the linear part.
-    */
-   public void getLinearPartIncludingFrame(FrameVector3D vectorToPack)
-   {
-      vectorToPack.setIncludingFrame(getReferenceFrame(), linearPart);
+      matrix.set(0, column, getAngularPart().getX());
+      matrix.set(1, column, getAngularPart().getY());
+      matrix.set(2, column, getAngularPart().getZ());
+      matrix.set(3, column, getLinearPart().getX());
+      matrix.set(4, column, getLinearPart().getY());
+      matrix.set(5, column, getLinearPart().getZ());
    }
 
    /**
@@ -475,8 +303,8 @@ public class SpatialForceVector
     */
    public void times(double scalar)
    {
-      angularPart.scale(scalar);
-      linearPart.scale(scalar);
+      getAngularPart().scale(scalar);
+      getLinearPart().scale(scalar);
    }
 
    /**
@@ -500,55 +328,45 @@ public class SpatialForceVector
       // transform the torques and forces so that they are expressed in newReferenceFrame
       if (temporaryTransformHToDesiredFrame.hasRotation())
       {
-         temporaryTransformHToDesiredFrame.transform(linearPart);
-         temporaryTransformHToDesiredFrame.transform(angularPart);
+         temporaryTransformHToDesiredFrame.transform(getLinearPart());
+         temporaryTransformHToDesiredFrame.transform(getAngularPart());
       }
 
       if (temporaryTransformHToDesiredFrame.hasTranslation())
       {
-         tempVector.cross(temporaryTransformHToDesiredFrame.getTranslationVector(), linearPart); // p x R * f
-         angularPart.add(tempVector);
+         tempVector.cross(temporaryTransformHToDesiredFrame.getTranslationVector(), getLinearPart()); // p x R * f
+         getAngularPart().add(tempVector);
       }
 
       // change this spatial force vector's expressedInFrame to newReferenceFrame
       expressedInFrame = newReferenceFrame;
    }
 
-   public void scaleLinearPart(double scalar)
-   {
-      linearPart.scale(scalar);
-   }
-
-   public void scaleAngularPart(double scalar)
-   {
-      angularPart.scale(scalar);
-   }
-
    public void scale(double scalar)
    {
-      scaleLinearPart(scalar);
-      scaleAngularPart(scalar);
+      getLinearPart().scale(scalar);
+      getAngularPart().scale(scalar);
    }
 
    public void negate()
    {
-      linearPart.negate();
-      angularPart.negate();
+      getLinearPart().negate();
+      getAngularPart().negate();
    }
 
    @Override
    public String toString()
    {
-      String ret = new String("SpatialForceVector expressed in frame " + expressedInFrame + "\n" + "Angular part: " + angularPart + "\n" + "Linear part: "
-            + linearPart);
+      String ret = new String("SpatialForceVector expressed in frame " + expressedInFrame + "\n" + "Angular part: " + getAngularPart() + "\n" + "Linear part: "
+            + getLinearPart());
 
       return ret;
    }
 
    public void setToZero()
    {
-      angularPart.set(0.0, 0.0, 0.0);
-      linearPart.set(0.0, 0.0, 0.0);
+      getAngularPart().set(0.0, 0.0, 0.0);
+      getLinearPart().set(0.0, 0.0, 0.0);
    }
 
    public void setToZero(ReferenceFrame expressedInFrame)
@@ -559,41 +377,41 @@ public class SpatialForceVector
 
    public void get(double[] matrix)
    {
-      matrix[0] = angularPart.getX();
-      matrix[1] = angularPart.getY();
-      matrix[2] = angularPart.getZ();
-      matrix[3] = linearPart.getX();
-      matrix[4] = linearPart.getY();
-      matrix[5] = linearPart.getZ();
+      matrix[0] = getAngularPart().getX();
+      matrix[1] = getAngularPart().getY();
+      matrix[2] = getAngularPart().getZ();
+      matrix[3] = getLinearPart().getX();
+      matrix[4] = getLinearPart().getY();
+      matrix[5] = getLinearPart().getZ();
    }
 
    public double getLinearPartX()
    {
-      return linearPart.getX();
+      return getLinearPart().getX();
    }
 
    public double getLinearPartY()
    {
-      return linearPart.getY();
+      return getLinearPart().getY();
    }
 
    public double getLinearPartZ()
    {
-      return linearPart.getZ();
+      return getLinearPart().getZ();
    }
 
    public double getAngularPartX()
    {
-      return angularPart.getX();
+      return getAngularPart().getX();
    }
 
    public double getAngularPartY()
    {
-      return angularPart.getY();
+      return getAngularPart().getY();
    }
 
    public double getAngularPartZ()
    {
-      return angularPart.getZ();
+      return getAngularPart().getZ();
    }
 }

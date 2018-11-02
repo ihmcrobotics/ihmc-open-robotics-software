@@ -70,20 +70,20 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
       dynamicWrenchToPack.getReferenceFrame().checkReferenceFrameMatch(this.expressedInframe);
 
       massMomentOfInertiaPart.transform(acceleration.getAngularPart(), tempVector);    // J * omegad
-      dynamicWrenchToPack.setAngularPart(tempVector);    // [J * omegad; 0]
+      dynamicWrenchToPack.getAngularPart().set(tempVector);    // [J * omegad; 0]
 
       massMomentOfInertiaPart.transform(twist.getAngularPart(), tempVector);    // J * omega
       tempVector.cross(twist.getAngularPart(), tempVector);    // omega x J * omega
-      dynamicWrenchToPack.addAngularPart(tempVector);    // [J * omegad + omega x J * omega; 0]
+      dynamicWrenchToPack.getAngularPart().add(tempVector);    // [J * omegad + omega x J * omega; 0]
 
       tempVector.set(acceleration.getLinearPart());    // vd
       tempVector.scale(mass);    // m * vd
-      dynamicWrenchToPack.setLinearPart(tempVector);    // [J * omegad + omega x J * omega; m * vd]
+      dynamicWrenchToPack.getLinearPart().set(tempVector);    // [J * omegad + omega x J * omega; m * vd]
 
       tempVector.set(twist.getLinearPart());    // v
       tempVector.scale(mass);    // m * v
       tempVector.cross(twist.getAngularPart(), tempVector);    // omega x m * v
-      dynamicWrenchToPack.addLinearPart(tempVector);    // [J * omegad + omega x J * omega; m * vd + omega x m * v]
+      dynamicWrenchToPack.getLinearPart().add(tempVector);    // [J * omegad + omega x J * omega; m * vd + omega x m * v]
    }
 
    /**

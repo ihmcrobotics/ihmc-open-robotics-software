@@ -180,8 +180,8 @@ public class WholeBodyVirtualModelControlSolver
       if (rootJoint != null)
       {
          rootJoint.getWrench(residualRootJointWrench);
-         residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
-         residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
+         residualRootJointTorque.setIncludingFrame(residualRootJointWrench.getAngularPart());
+         residualRootJointForce.setIncludingFrame(residualRootJointWrench.getLinearPart());
          yoResidualRootJointForce.setMatchingFrame(residualRootJointForce);
          yoResidualRootJointTorque.setMatchingFrame(residualRootJointTorque);
       }
@@ -261,8 +261,8 @@ public class WholeBodyVirtualModelControlSolver
       {
          commandToSubmit.getSelectionMatrix(tempSelectionMatrix);
          commandToSubmit.getDesiredWrench(controlFrame, tempWrench);
-         tempWrench.getAngularPart(tempTorque);
-         tempWrench.getLinearPart(tempForce);
+         tempTorque.set(tempWrench.getAngularPart());
+         tempForce.set(tempWrench.getLinearPart());
          tempTorque.changeFrame(worldFrame);
          tempForce.changeFrame(worldFrame);
 

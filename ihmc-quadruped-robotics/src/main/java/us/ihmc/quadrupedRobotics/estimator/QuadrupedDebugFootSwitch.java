@@ -89,7 +89,7 @@ public class QuadrupedDebugFootSwitch implements FootSwitchInterface
       updateMeasurement();
       ReferenceFrame bodyFixedFrame = contactablePlaneBody.getRigidBody().getBodyFixedFrame();
       footWrenchToPack.setToZero(bodyFixedFrame, measurementFrame);
-      footWrenchToPack.setLinearPart(measuredForce);
+      footWrenchToPack.getLinearPart().set(measuredForce);
    }
 
    @Override
