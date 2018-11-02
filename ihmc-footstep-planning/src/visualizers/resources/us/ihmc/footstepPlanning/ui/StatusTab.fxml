@@ -41,6 +41,7 @@
             </rowConstraints>
             <children>
                 <Button mnemonicParsing="false" onAction="#computePath" text="Compute path" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Button mnemonicParsing="false" onAction="#abortPlanning" text="Abort Planning" prefWidth="200" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
                 <Label text="Planner Type" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                 <Label text="Planner Status" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 

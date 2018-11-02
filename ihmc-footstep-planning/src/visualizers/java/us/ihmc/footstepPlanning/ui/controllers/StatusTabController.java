@@ -42,6 +42,15 @@ public class StatusTabController
 
       messager.submitMessage(ComputePathTopic, true);
    }
+   
+   @FXML
+   public void abortPlanning()
+   {
+      if (verbose)
+         PrintTools.info(this, "Clicked abort planning...");
+      
+      messager.submitMessage(AbortPlanningTopic, true);;
+   }
 
    private JavaFXMessager messager;
 

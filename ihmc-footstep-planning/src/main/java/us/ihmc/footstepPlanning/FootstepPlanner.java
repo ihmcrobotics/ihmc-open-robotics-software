@@ -104,4 +104,6 @@ public interface FootstepPlanner
    {
       return null;
    }
+   
+   default void cancelPlanning(){}
 }

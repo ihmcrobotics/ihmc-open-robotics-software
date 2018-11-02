@@ -94,7 +94,6 @@ public class RemoteUIMessageConverter
       this.robotName = robotName;
       this.ros2Node = ros2Node;
 
-      PrintTools.info("Converter robot name " + robotName);
       plannerParametersReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerParametersTopic, null);
       plannerStartPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic);
       plannerStartOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion());
@@ -155,6 +154,7 @@ public class RemoteUIMessageConverter
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, request -> requestNewPlan());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestPlannerStatistics, request -> requestPlannerStatistics());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.AbortPlanningTopic, request -> requestAbortPlanning());
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
@@ -271,15 +271,12 @@ public class RemoteUIMessageConverter
    private void requestNewPlan()
    {
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-      PrintTools.info("Told the toolbox to wake up.");;
       
       FootstepPlannerParametersPacket packet = new FootstepPlannerParametersPacket();
       FootstepPlannerParameters parameters = plannerParametersReference.get();
 
       copyFootstepPlannerParametersToPacket(packet, parameters);
       plannerParametersPublisher.publish(packet);
-      
-      PrintTools.info("Sent out some parameters");;
 
       submitFootstepPlanningRequestPacket();
    }
@@ -287,6 +284,13 @@ public class RemoteUIMessageConverter
    private void requestPlannerStatistics()
    {
       plannerStatisticsRequestPublisher.publish(new PlanningStatisticsRequestMessage());
+   }
+   
+   private void requestAbortPlanning()
+   {
+      if (verbose)
+         PrintTools.info("Sending out a sleep request.");
+      toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
    }
 
    public static void copyFootstepPlannerParametersToPacket(FootstepPlannerParametersPacket packet, FootstepPlannerParameters parameters)
@@ -296,6 +300,7 @@ public class RemoteUIMessageConverter
          return;
       }
 
+      packet.setCheckForBodyBoxCollisions(parameters.checkForBodyBoxCollisions());
       packet.setIdealFootstepWidth(parameters.getIdealFootstepWidth());
       packet.setIdealFootstepLength(parameters.getIdealFootstepLength());
       packet.setWiggleInsideDelta(parameters.getWiggleInsideDelta());
@@ -371,9 +376,7 @@ public class RemoteUIMessageConverter
       if (plannerPlanarRegionReference.get() != null)
          packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get()));
 
-      footstepPlanningRequestPublisher.publish(packet);
-      
-      PrintTools.info("Sent the new planning request.");
+      footstepPlanningRequestPublisher.publish(packet);      
    }
 
    private static FootstepPlan convertToFootstepPlan(FootstepDataListMessage footstepDataListMessage)

@@ -54,8 +54,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlanningToolboxController extends ToolboxController
 {
-   private static final boolean debug = false;
-
    private final YoEnum<FootstepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry, FootstepPlannerType.class);
    private final EnumMap<FootstepPlannerType, FootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
 
@@ -141,7 +139,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       toolboxTime.add(dt);
       if (toolboxTime.getDoubleValue() > 20.0)
       {
-         if (debug)
+         if (DEBUG)
             PrintTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
          reportMessage(packStepResult(null, null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
          isDone.set(true);
@@ -183,8 +181,16 @@ public class FootstepPlanningToolboxController extends ToolboxController
       sendMessageToUI("Result: " + planId.getIntegerValue() + ", " + status.toString());
 
       reportMessage(packStepResult(footstepPlan, bodyPathPlan, status));
+      
+      finishUp();
+   }
+   
+   public void finishUp()
+   {
+      if (DEBUG)
+         PrintTools.info("Finishing up the planner");
+      plannerMap.get(activePlanner.getEnumValue()).cancelPlanning();
       reportMessage(packStatus(FootstepPlannerStatus.IDLE));
-
       isDone.set(true);
    }
 
@@ -204,9 +210,13 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       FootstepPlannerParametersPacket parameters = latestParametersReference.getAndSet(null);
       if (parameters != null)
+      {
+         if (DEBUG)
+            PrintTools.info("Processing new planning parameters.");
          footstepPlanningParameters.set(parameters);
+      }
 
-      if (debug)
+      if (DEBUG)
       {
          PrintTools.info("Starting to plan. Plan id: " + request.getPlannerRequestId() + ". Timeout: " + request.getTimeout());
       }
@@ -253,7 +263,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
          planner.setTimeout(timeout);
          this.timeout.set(timeout);
 
-         if (debug)
+         if (DEBUG)
          {
             PrintTools.info("Setting timeout to " + timeout);
          }
@@ -279,7 +289,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private BodyPathPlanMessage packPathResult(BodyPathPlan bodyPathPlan, FootstepPlanningResult status)
    {
-      if (debug)
+      if (DEBUG)
       {
          PrintTools.info("Finished planning path. Result: " + status);
       }
@@ -302,7 +312,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private FootstepPlanningToolboxOutputStatus packStepResult(FootstepPlan footstepPlan, BodyPathPlan bodyPathPlan, FootstepPlanningResult status)
    {
-      if (debug)
+      if (DEBUG)
       {
          PrintTools.info("Finished planning. Result: " + status);
       }
@@ -355,6 +365,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    public void processPlannerParameters(FootstepPlannerParametersPacket parameters)
    {
+      if (DEBUG)
+         PrintTools.info("Received new planning parameters");
       latestParametersReference.set(parameters);
    }
 

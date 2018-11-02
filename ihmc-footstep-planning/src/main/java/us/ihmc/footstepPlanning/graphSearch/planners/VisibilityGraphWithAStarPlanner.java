@@ -401,6 +401,12 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    {
       return bodyPathPlanner;
    }
+   
+   @Override
+   public void cancelPlanning()
+   {
+      footstepPlanner.cancelPlanning();
+   }
 
    @Override
    public FootstepPlan getPlan()
