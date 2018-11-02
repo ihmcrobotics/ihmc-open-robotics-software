@@ -118,7 +118,7 @@ public class SpatialMotionVectorTest
       DenseMatrix64F matrix = RandomMatrices.createRandom(SpatialMotionVector.SIZE, 1, random);
       SpatialMotionVector spatialMotionVector = createSpatialMotionVector(frameC, frameD, frameA, matrix);
       DenseMatrix64F matrixBack = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
-      spatialMotionVector.getMatrix(matrixBack, 0);
+      spatialMotionVector.get(0, matrixBack);
       JUnitTools.assertMatrixEquals(matrix, matrixBack, 0.0);
    }
 
@@ -218,11 +218,11 @@ public class SpatialMotionVectorTest
       if (selectionMatrix != null)
       {
          DenseMatrix64F motionVectorOne = new DenseMatrix64F(6, 1);
-         vector1.getMatrix(motionVectorOne, 0);
+         vector1.get(0, motionVectorOne);
          DenseMatrix64F selectedVectorOne = new DenseMatrix64F(selectionMatrix.getNumRows(), 1);
 
          DenseMatrix64F motionVectorTwo = new DenseMatrix64F(6, 1);
-         vector2.getMatrix(motionVectorTwo, 0);
+         vector2.get(0, motionVectorTwo);
          DenseMatrix64F selectedVectorTwo = new DenseMatrix64F(selectionMatrix.getNumRows(), 1);
 
          CommonOps.mult(selectionMatrix, motionVectorOne, selectedVectorOne);

@@ -354,10 +354,16 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       twist1.setScrew(bodyFrame, baseFrame, expressedInFrame, angularVelocityMagnitude, linearVelocityMagnitude, axisOfRotation, offset);
 
       DenseMatrix64F numericalDerivative = new DenseMatrix64F(Twist.SIZE, 1);
-      CommonOps.subtract(twist1.toMatrix(), twist0.toMatrix(), numericalDerivative);
+      DenseMatrix64F twist1Matrix = new DenseMatrix64F(6, 1);
+      DenseMatrix64F twist0Matrix = new DenseMatrix64F(6, 1);
+      twist1.get(0, twist1Matrix);
+      twist0.get(0, twist0Matrix);
+      CommonOps.subtract(twist1Matrix, twist0Matrix, numericalDerivative);
       CommonOps.scale(1.0 / dt, numericalDerivative);
 
-      JUnitTools.assertMatrixEquals(numericalDerivative, acceleration.toMatrix(), 1e-4);
+      DenseMatrix64F accelerationMatrix = new DenseMatrix64F(6, 1);
+      acceleration.get(0, accelerationMatrix);
+      JUnitTools.assertMatrixEquals(numericalDerivative, accelerationMatrix, 1e-4);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

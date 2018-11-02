@@ -562,7 +562,7 @@ public class TaskspaceToJointspaceCalculator
 
       setSpatialVectorFromAngularAndLinearParts(spatialVelocityFromError, filteredAngularVelocityFromError, filteredLinearVelocityFromError);
 
-      desiredControlFrameTwist.getMatrix(spatialDesiredVelocityToPack, 0);
+      desiredControlFrameTwist.get(0, spatialDesiredVelocityToPack);
       CommonOps.add(spatialVelocityFromError, spatialDesiredVelocityToPack, spatialDesiredVelocityToPack);
    }
 

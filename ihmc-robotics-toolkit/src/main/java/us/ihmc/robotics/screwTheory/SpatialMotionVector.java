@@ -413,39 +413,27 @@ public abstract class SpatialMotionVector implements Clearable
    }
 
    /**
-    * @return a matrix representation of this spatial motion vector ([angular part; linear part]).
-    */
-   public DenseMatrix64F toMatrix()
-   {
-      DenseMatrix64F matrix = new DenseMatrix64F(SIZE, 1);
-      getMatrix(matrix, 0);
-      return matrix;
-   }
-
-   /**
     * Packs the components of this spatial motion vector {@code angularPart}, {@code linearPart} in
     * order in the first column of the given {@code matrix} starting at the
     * {@code startRow}<sup>th</sup> row.
-    *
-    * @param matrixToPack the matrix in which this vector is packed. Modified.
     * @param rowStart the first row index to start writing in the dense-matrix.
+    * @param matrixToPack the matrix in which this vector is packed. Modified.
     */
 
-   public void getMatrix(DenseMatrix64F matrixToPack, int rowStart)
+   public void get(int rowStart, DenseMatrix64F matrixToPack)
    {
-      getMatrix(matrixToPack, rowStart, 0);
+      get(rowStart, 0, matrixToPack);
    }
 
    /**
     * Packs the components of this spatial motion vector {@code angularPart}, {@code linearPart} in
     * order in the {@code columnIndex}<sup>th</sup> column of the given {@code matrix} starting at
     * the {@code startRow}<sup>th</sup> row.
-    *
-    * @param matrixToPack the matrix in which this vector is packed. Modified.
     * @param rowStart the first row index to start writing in the dense-matrix.
     * @param columnIndex the column index to write in the dense-matrix.
+    * @param matrixToPack the matrix in which this vector is packed. Modified.
     */
-   public void getMatrix(DenseMatrix64F matrixToPack, int rowStart, int columnIndex)
+   public void get(int rowStart, int columnIndex, DenseMatrix64F matrixToPack)
    {
       matrixToPack.set(rowStart + 0, columnIndex, angularPart.getX());
       matrixToPack.set(rowStart + 1, columnIndex, angularPart.getY());

@@ -141,7 +141,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
          {
             joint.getUnitTwist(dofIndex, tempTwist);
             tempTwist.changeFrame(jacobianFrame);
-            tempTwist.getMatrix(jacobian, 0, column++);
+            tempTwist.get(0, column++, jacobian);
          }
       }
    }
@@ -215,7 +215,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
       wrench.getReferenceFrame().checkReferenceFrameMatch(this.jacobianFrame);
       // FIXME add the following reference frame check
       //      wrench.getBodyFrame().checkReferenceFrameMatch(getEndEffectorFrame());
-      wrench.getMatrix(tempMatrix);
+      wrench.get(tempMatrix);
       jointTorquesToPack.reshape(1, jacobian.getNumCols());
       CommonOps.multTransA(tempMatrix, jacobian, jointTorquesToPack);
       CommonOps.transpose(jointTorquesToPack);

@@ -207,7 +207,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
                {
                   inverseDynamicsJoint.getUnitTwist(dofIndex, tempTwist);
                   tempTwist.changeFrame(rootJoint.getFrameAfterJoint());
-                  tempTwist.getMatrix(tempTwistMatrix, 0);
+                  tempTwist.get(0, tempTwistMatrix);
                   tempJacobianPart.reshape(selectionMatrix.getNumRows(), 1);
                   CommonOps.mult(selectionMatrix, tempTwistMatrix, tempJacobianPart);
                   CommonOps.insert(tempJacobianPart, Js, rowStartNumber, columnStartNumber++);

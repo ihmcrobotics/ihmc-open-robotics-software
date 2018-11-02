@@ -382,7 +382,7 @@ public class SpatialForceVector
     * 
     * @param matrix
     */
-   public void getMatrix(DenseMatrix64F matrix)
+   public void get(DenseMatrix64F matrix)
    {
       MathTools.checkIntervalContains(matrix.getNumRows(), SIZE, Integer.MAX_VALUE);
       MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);
@@ -394,7 +394,7 @@ public class SpatialForceVector
       matrix.set(5, 0, linearPart.getZ());
    }
 
-   public void getMatrixColumn(DenseMatrix64F matrix, int column)
+   public void get(int startRow, int column, DenseMatrix64F matrix)
    {
       MathTools.checkIntervalContains(matrix.getNumRows(), SIZE, Integer.MAX_VALUE);
       MathTools.checkIntervalContains(matrix.getNumCols(), column + 1, Integer.MAX_VALUE);
@@ -414,17 +414,6 @@ public class SpatialForceVector
    public double getLinearPartMagnitude()
    {
       return linearPart.length();
-   }
-
-   /**
-    * @return a matrix representation of this spatial force vector. [linearPart; angularPart]
-    */
-   public DenseMatrix64F toDenseMatrix()
-   {
-      DenseMatrix64F matrix = new DenseMatrix64F(SIZE, 1);
-      getMatrix(matrix);
-
-      return matrix;
    }
 
    /**

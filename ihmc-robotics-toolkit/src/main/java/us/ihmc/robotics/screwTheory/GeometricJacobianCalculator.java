@@ -226,7 +226,7 @@ public class GeometricJacobianCalculator
          {
             joint.getUnitTwist(dofIndex, tempTwist);
             tempTwist.changeFrame(jacobianFrame);
-            tempTwist.getMatrix(jacobianMatrix, 0, column++);
+            tempTwist.get(0, column++, jacobianMatrix);
          }
       }
    }
@@ -312,7 +312,7 @@ public class GeometricJacobianCalculator
       }
 
       convectiveTerm.reshape(6, 1);
-      biasAcceleration.getMatrix(convectiveTerm, 0);
+      biasAcceleration.get(0, convectiveTerm);
       return;
    }
 
@@ -377,7 +377,7 @@ public class GeometricJacobianCalculator
       endEffectorWrench.getReferenceFrame().checkReferenceFrameMatch(this.jacobianFrame);
       endEffectorWrench.getBodyFrame().checkReferenceFrameMatch(getEndEffectorFrame());
 
-      endEffectorWrench.getMatrix(tempMatrix);
+      endEffectorWrench.get(tempMatrix);
       jointTorquesToPack.reshape(1, jacobianMatrix.getNumCols());
       CommonOps.multTransA(tempMatrix, jacobianMatrix, jointTorquesToPack);
       CommonOps.transpose(jointTorquesToPack);

@@ -72,13 +72,13 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void getTauMatrix(DenseMatrix64F matrix)
    {
-      successorWrench.getMatrix(matrix);
+      successorWrench.get(matrix);
    }
 
    @Override
    public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
    {
-      jointTwist.getMatrix(matrix, rowStart);
+      jointTwist.get(rowStart, matrix);
    }
 
    @Override
@@ -108,7 +108,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
    {
-      jointAccelerationDesired.getMatrix(matrix, rowStart);
+      jointAccelerationDesired.get(rowStart, matrix);
    }
 
    @Override

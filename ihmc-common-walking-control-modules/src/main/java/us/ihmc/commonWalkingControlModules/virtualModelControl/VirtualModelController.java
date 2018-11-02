@@ -183,7 +183,7 @@ public class VirtualModelController
 
                   // apply selection matrix to wrench
                   tmpWrench.reshape(taskSize, 1);
-                  wrench.getMatrix(wrenchMatrix);
+                  wrench.get(wrenchMatrix);
                   CommonOps.mult(selectionMatrix, wrenchMatrix, tmpWrench);
 
                   // change wrench frame for yo variable
@@ -250,7 +250,7 @@ public class VirtualModelController
 
                // apply selection matrix to wrench
                tmpWrench.reshape(taskSize, 1);
-               wrench.getMatrix(wrenchMatrix);
+               wrench.get(wrenchMatrix);
                CommonOps.mult(selectionMatrix, wrenchMatrix, tmpWrench);
 
                // get jacobian
