@@ -102,7 +102,7 @@ public class MovingWalkingReferenceFrameTest
       expected.getTwistOfFrame(expectedTwist);
       actual.getTwistOfFrame(actualTwist);
 
-      expectedTwist.changeBodyFrameNoRelativeTwist(actual);
+      expectedTwist.setBodyFrame(actual);
       expectedTwist.changeFrame(actual);
 
       TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, epsilon);

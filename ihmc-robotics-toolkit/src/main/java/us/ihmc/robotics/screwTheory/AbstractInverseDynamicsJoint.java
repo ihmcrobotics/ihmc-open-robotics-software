@@ -204,8 +204,8 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
 
-      twistToPack.changeBaseFrameNoRelativeTwist(predecessorFrame);
-      twistToPack.changeBodyFrameNoRelativeTwist(successorFrame);
+      twistToPack.setBaseFrame(predecessorFrame);
+      twistToPack.setBodyFrame(successorFrame);
       twistToPack.changeFrame(successorFrame);
    }
 
@@ -218,8 +218,8 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
 
-      twistToPack.changeBaseFrameNoRelativeTwist(predecessorFrame);
-      twistToPack.changeBodyFrameNoRelativeTwist(successorFrame);
+      twistToPack.setBaseFrame(predecessorFrame);
+      twistToPack.setBodyFrame(successorFrame);
       twistToPack.invert();
       twistToPack.changeFrame(predecessorFrame);
    }
@@ -233,9 +233,9 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
 
-      accelerationToPack.changeBaseFrameNoRelativeAcceleration(predecessorFrame);
-      accelerationToPack.changeBodyFrameNoRelativeAcceleration(successorFrame);
-      accelerationToPack.changeFrameNoRelativeMotion(successorFrame);
+      accelerationToPack.setBaseFrame(predecessorFrame);
+      accelerationToPack.setBodyFrame(successorFrame);
+      accelerationToPack.changeFrame(successorFrame);
    }
 
    /** {@inheritDoc} */
@@ -247,9 +247,9 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
 
-      accelerationToPack.changeBaseFrameNoRelativeAcceleration(predecessorFrame);
-      accelerationToPack.changeBodyFrameNoRelativeAcceleration(successorFrame);
-      accelerationToPack.changeFrameNoRelativeMotion(successorFrame);
+      accelerationToPack.setBaseFrame(predecessorFrame);
+      accelerationToPack.setBodyFrame(successorFrame);
+      accelerationToPack.changeFrame(successorFrame);
    }
 
    /** {@inheritDoc} */
@@ -261,10 +261,10 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
 
-      accelerationToPack.changeBaseFrameNoRelativeAcceleration(predecessorFrame);
-      accelerationToPack.changeBodyFrameNoRelativeAcceleration(successorFrame);
+      accelerationToPack.setBaseFrame(predecessorFrame);
+      accelerationToPack.setBodyFrame(successorFrame);
       accelerationToPack.invert();
-      accelerationToPack.changeFrameNoRelativeMotion(predecessorFrame);
+      accelerationToPack.changeFrame(predecessorFrame);
    }
 
    /**

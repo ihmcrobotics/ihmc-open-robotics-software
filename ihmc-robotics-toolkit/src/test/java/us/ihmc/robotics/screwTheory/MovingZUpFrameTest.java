@@ -203,7 +203,7 @@ public class MovingZUpFrameTest
          {
             entry.getKey().getTwistOfFrame(expectedTwist);
             entry.getValue().getTwistOfFrame(actualTwist);
-            expectedTwist.changeBodyFrameNoRelativeTwist(entry.getValue());
+            expectedTwist.setBodyFrame(entry.getValue());
             expectedTwist.changeFrame(entry.getValue());
 
             TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);

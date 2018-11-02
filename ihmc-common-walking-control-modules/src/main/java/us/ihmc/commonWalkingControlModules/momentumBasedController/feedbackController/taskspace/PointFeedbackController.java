@@ -384,7 +384,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    public void computeAchievedAcceleration()
    {
       spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector, achievedSpatialAccelerationVector);
-      achievedSpatialAccelerationVector.changeFrameNoRelativeMotion(controlFrame);
+      achievedSpatialAccelerationVector.changeFrame(controlFrame);
       achievedSpatialAccelerationVector.getLinearPart(achievedLinearAcceleration);
       subtractCoriolisAcceleration(achievedLinearAcceleration);
       yoAchievedLinearAcceleration.setMatchingFrame(achievedLinearAcceleration);

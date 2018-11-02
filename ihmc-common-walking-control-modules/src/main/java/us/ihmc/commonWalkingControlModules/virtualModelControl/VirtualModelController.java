@@ -179,7 +179,7 @@ public class VirtualModelController
 
                   // check and set frames
                   wrench.changeFrame(defaultRootBody.getBodyFixedFrame());
-                  wrench.changeBodyFrameAttachedToSameBody(controlledBody.getBodyFixedFrame());
+                  wrench.setBodyFrame(controlledBody.getBodyFixedFrame());
 
                   // apply selection matrix to wrench
                   tmpWrench.reshape(taskSize, 1);
@@ -246,7 +246,7 @@ public class VirtualModelController
 
                // check and set frames
                wrench.changeFrame(defaultRootBody.getBodyFixedFrame());
-               wrench.changeBodyFrameAttachedToSameBody(controlledBody.getBodyFixedFrame());
+               wrench.setBodyFrame(controlledBody.getBodyFixedFrame());
 
                // apply selection matrix to wrench
                tmpWrench.reshape(taskSize, 1);

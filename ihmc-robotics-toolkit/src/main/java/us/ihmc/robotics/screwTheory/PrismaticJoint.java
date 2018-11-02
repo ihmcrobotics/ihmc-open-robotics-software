@@ -37,8 +37,8 @@ public class PrismaticJoint extends OneDoFJoint
       unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3D(), jointAxis);
 
       unitSuccessorTwist = new Twist(unitJointTwist);
-      unitSuccessorTwist.changeBaseFrameNoRelativeTwist(predecessorFrame);
-      unitSuccessorTwist.changeBodyFrameNoRelativeTwist(successorFrame);
+      unitSuccessorTwist.setBaseFrame(predecessorFrame);
+      unitSuccessorTwist.setBodyFrame(successorFrame);
       unitSuccessorTwist.changeFrame(successorFrame);
 
       unitPredecessorTwist = new Twist(unitSuccessorTwist);
@@ -48,13 +48,13 @@ public class PrismaticJoint extends OneDoFJoint
       unitJointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3D(), jointAxis);
 
       unitSuccessorAcceleration = new SpatialAccelerationVector(unitJointAcceleration);
-      unitSuccessorAcceleration.changeBaseFrameNoRelativeAcceleration(predecessorFrame);
-      unitSuccessorAcceleration.changeBodyFrameNoRelativeAcceleration(successorFrame);
-      unitSuccessorAcceleration.changeFrameNoRelativeMotion(successorFrame);
+      unitSuccessorAcceleration.setBaseFrame(predecessorFrame);
+      unitSuccessorAcceleration.setBodyFrame(successorFrame);
+      unitSuccessorAcceleration.changeFrame(successorFrame);
 
       unitPredecessorAcceleration = new SpatialAccelerationVector(unitSuccessorAcceleration);
       unitPredecessorAcceleration.invert();
-      unitPredecessorAcceleration.changeFrameNoRelativeMotion(predecessorFrame); // actually, there is relative motion, but not in the directions that matter
+      unitPredecessorAcceleration.changeFrame(predecessorFrame); // actually, there is relative motion, but not in the directions that matter
 
       setMotionSubspace();
    }

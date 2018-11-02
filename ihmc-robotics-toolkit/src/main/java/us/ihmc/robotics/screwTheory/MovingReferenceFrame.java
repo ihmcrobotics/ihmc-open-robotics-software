@@ -282,7 +282,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
          twistOfFrame.changeFrame(this);
 
          if (isFixedInParent)
-            twistOfFrame.changeBodyFrameNoRelativeTwist(this);
+            twistOfFrame.setBodyFrame(this);
          else
             twistOfFrame.add(twistRelativeToParent);
       }
@@ -345,7 +345,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
       if (base.isAStationaryFrame())
       {
          getTwistOfFrame(relativeTwistToPack);
-         relativeTwistToPack.changeBaseFrameNoRelativeTwist(base);
+         relativeTwistToPack.setBaseFrame(base);
       }
       else if (base instanceof MovingReferenceFrame)
       {

@@ -128,7 +128,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
                ReferenceFrame successorFrame = successor.getBodyFixedFrame();
 
                wrenchExertedByChild.setIncludingFrame(wrenchExertedOnChild);
-               wrenchExertedByChild.changeBodyFrameAttachedToSameBody(successorFrame);
+               wrenchExertedByChild.setBodyFrame(successorFrame);
                wrenchExertedByChild.scale(-1.0); // Action = -reaction
                wrenchExertedByChild.changeFrame(jointWrench.getReferenceFrame());
                jointWrench.sub(wrenchExertedByChild);

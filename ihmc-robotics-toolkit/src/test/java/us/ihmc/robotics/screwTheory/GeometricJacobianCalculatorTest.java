@@ -317,7 +317,7 @@ public class GeometricJacobianCalculatorTest
 
          SpatialAccelerationVector expectedConvectiveTerm = new SpatialAccelerationVector();
          spatialAccelerationCalculator.getRelativeAcceleration(randomBase, randomEndEffector, expectedConvectiveTerm);
-         expectedConvectiveTerm.changeFrameNoRelativeMotion(fixedInEndEffector);
+         expectedConvectiveTerm.changeFrame(fixedInEndEffector);
 
          SpatialMotionVectorTest.assertSpatialMotionVectorEquals(expectedConvectiveTerm, actualConvectiveTerm, 1.0e-11);
       }

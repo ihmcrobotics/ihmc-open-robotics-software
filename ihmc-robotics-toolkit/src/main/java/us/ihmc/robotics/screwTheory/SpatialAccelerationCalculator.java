@@ -290,7 +290,7 @@ public class SpatialAccelerationCalculator
       }
       else
       {
-         baseAcceleration.changeFrameNoRelativeMotion(bodyFrame);
+         baseAcceleration.changeFrame(bodyFrame);
       }
 
       accelerationToPack.sub(baseAcceleration);
@@ -360,7 +360,7 @@ public class SpatialAccelerationCalculator
        */
       getRelativeAcceleration(base, body, localAcceleration);
       localAcceleration.getReferenceFrame().checkReferenceFrameMatch(localAcceleration.getBodyFrame());
-      localAcceleration.changeFrameNoRelativeMotion(baseFrame);
+      localAcceleration.changeFrame(baseFrame);
 
       localAcceleration.getAccelerationOfPointFixedInBodyFrame(localTwist, localPoint, linearAccelerationToPack);
    }
@@ -410,7 +410,7 @@ public class SpatialAccelerationCalculator
        * more expensive changeFrame(ReferenceFrame, Twist, Twist).
        */
       localAcceleration.getReferenceFrame().checkReferenceFrameMatch(localAcceleration.getBodyFrame());
-      localAcceleration.changeFrameNoRelativeMotion(inertialFrame);
+      localAcceleration.changeFrame(inertialFrame);
 
       localAcceleration.getAccelerationOfPointFixedInBodyFrame(localTwist, localPoint, linearAccelerationToPack);
    }
