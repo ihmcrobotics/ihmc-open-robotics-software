@@ -121,7 +121,7 @@ public class FootstepPlannerParametersUIController
    private SpinnerValueFactory.DoubleSpinnerValueFactory createTimeoutValueFactory()
    {
       double min = 0.0;
-      double max = 100.0;
+      double max = 500.0;
       double amountToStepBy = 5;
       return new DoubleSpinnerValueFactory(min, max, 15.0, amountToStepBy);
    }

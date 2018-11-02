@@ -49,14 +49,14 @@
                 <Spinner fx:id="plannerTimeout" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
                 <Spinner fx:id="horizonLength" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
 
-                <Slider fx:id="maxStepLength" blockIncrement="0.05" majorTickUnit="0.05" max="0.5" minorTickCount="4" prefHeight="38.0" prefWidth="77.0"
+                <Slider fx:id="maxStepLength" blockIncrement="0.05" majorTickUnit="0.05" max="0.7" minorTickCount="4" prefHeight="38.0" prefWidth="77.0"
                         showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.01" GridPane.columnIndex="4" GridPane.rowIndex="2"/>
                 <Slider fx:id="maxStepWidth" blockIncrement="0.05" majorTickUnit="0.05" max="0.5" minorTickCount="4" prefHeight="38.0" prefWidth="77.0"
                         showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.01" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
                 <Slider fx:id="minStepWidth" blockIncrement="0.05" majorTickUnit="0.05" max="0.2" minorTickCount="4" prefHeight="38.0" prefWidth="77.0"
                         showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.01" GridPane.columnIndex="4" GridPane.rowIndex="4"/>
 
-                <Slider fx:id="minStepLength" blockIncrement="0.5" majorTickUnit="0.05" max="0.0" min="-0.5" minorTickCount="4" prefHeight="38.0"
+                <Slider fx:id="minStepLength" blockIncrement="0.5" majorTickUnit="0.05" max="0.0" min="-0.6" minorTickCount="4" prefHeight="38.0"
                         prefWidth="77.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.01" GridPane.columnIndex="6"
                         GridPane.rowIndex="2"/>
                 <Slider fx:id="maxStepZ" blockIncrement="0.05" majorTickUnit="0.05" max="0.5" minorTickCount="4" prefHeight="38.0" prefWidth="77.0"
