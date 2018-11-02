@@ -174,7 +174,7 @@ public class SpatialAccelerationCalculator
    public void setRootAcceleration(SpatialAccelerationVector newRootAcceleration)
    {
       ReferenceFrame rootBodyFrame = rootBody.getBodyFixedFrame();
-      newRootAcceleration.checkReferenceFramesMatch(rootBodyFrame, inertialFrame, rootBodyFrame);
+      newRootAcceleration.checkReferenceFrameMatch(rootBodyFrame, inertialFrame, rootBodyFrame);
       assignedAccelerations.get(0).setIncludingFrame(newRootAcceleration);
    }
 

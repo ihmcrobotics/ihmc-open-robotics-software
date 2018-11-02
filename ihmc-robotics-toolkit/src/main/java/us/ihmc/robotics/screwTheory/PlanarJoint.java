@@ -223,7 +223,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void setJointTwist(Twist jointTwist)
    {
-      this.jointTwist.checkReferenceFramesMatch(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getReferenceFrame());
+      this.jointTwist.checkReferenceFrameMatch(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getReferenceFrame());
       this.jointTwist.setAngularPartY(jointTwist.getAngularPartY());
       this.jointTwist.setLinearPartX(jointTwist.getLinearPartX());
       this.jointTwist.setLinearPartZ(jointTwist.getLinearPartZ());
@@ -232,7 +232,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void setAcceleration(SpatialAccelerationVector jointAcceleration)
    {
-      this.jointAcceleration.checkReferenceFramesMatch(jointAcceleration);
+      this.jointAcceleration.checkReferenceFrameMatch(jointAcceleration);
       this.jointAcceleration.setAngularPartY(jointAcceleration.getAngularPartY());
       this.jointAcceleration.setLinearPartX(jointAcceleration.getLinearPartX());
       this.jointAcceleration.setLinearPartZ(jointAcceleration.getLinearPartZ());
@@ -241,7 +241,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void setDesiredAcceleration(SpatialAccelerationVector jointAcceleration)
    {
-      jointAccelerationDesired.checkReferenceFramesMatch(jointAcceleration);
+      jointAccelerationDesired.checkReferenceFrameMatch(jointAcceleration);
       jointAccelerationDesired.setAngularPartY(jointAcceleration.getAngularPartY());
       jointAccelerationDesired.setLinearPartX(jointAcceleration.getLinearPartX());
       jointAccelerationDesired.setLinearPartZ(jointAcceleration.getLinearPartZ());

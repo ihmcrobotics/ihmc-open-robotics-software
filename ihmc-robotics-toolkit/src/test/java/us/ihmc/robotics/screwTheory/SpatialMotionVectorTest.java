@@ -161,8 +161,8 @@ public class SpatialMotionVectorTest
       double maximumLinearMagnitude = 100.0;
       double maximumAngularMagnitude = 72.0;
 
-      vector.limitLinearPartMagnitude(maximumLinearMagnitude);
-      vector.limitAngularPartMagnitude(maximumAngularMagnitude);
+      vector.getLinearPart().clipToMaxLength(maximumLinearMagnitude);
+      vector.getAngularPart().clipToMaxLength(maximumAngularMagnitude);
             
       assertEquals(linearLength, new Vector3D(vector.getLinearPart()).length(), 1e-7);
       assertEquals(angularLength, new Vector3D(vector.getAngularPart()).length(), 1e-7);
@@ -170,8 +170,8 @@ public class SpatialMotionVectorTest
       maximumLinearMagnitude = 1.9;
       maximumAngularMagnitude = 0.4;
       
-      vector.limitLinearPartMagnitude(maximumLinearMagnitude);
-      vector.limitAngularPartMagnitude(maximumAngularMagnitude);
+      vector.getLinearPart().clipToMaxLength(maximumLinearMagnitude);
+      vector.getAngularPart().clipToMaxLength(maximumAngularMagnitude);
             
       assertEquals(maximumLinearMagnitude, new Vector3D(vector.getLinearPart()).length(), 1e-7);
       assertEquals(maximumAngularMagnitude, new Vector3D(vector.getAngularPart()).length(), 1e-7);

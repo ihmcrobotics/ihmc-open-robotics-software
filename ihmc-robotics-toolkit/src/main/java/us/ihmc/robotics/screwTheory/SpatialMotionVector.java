@@ -387,39 +387,6 @@ public abstract class SpatialMotionVector implements Clearable
       array[offset + 5] = getLinearPart().getZ();
    }
 
-   public void limitLinearPartMagnitude(double maximumMagnitude)
-   {
-      if (maximumMagnitude < 1e-7)
-         getLinearPart().set(0.0, 0.0, 0.0);
-
-      if (getLinearPart().lengthSquared() > maximumMagnitude * maximumMagnitude)
-      {
-         getLinearPart().scale(maximumMagnitude / getLinearPart().length());
-      }
-   }
-
-   public void limitAngularPartMagnitude(double maximumMagnitude)
-   {
-      if (maximumMagnitude < 1e-7)
-         getAngularPart().set(0.0, 0.0, 0.0);
-
-      if (getAngularPart().lengthSquared() > maximumMagnitude * maximumMagnitude)
-      {
-         getAngularPart().scale(maximumMagnitude / getAngularPart().length());
-      }
-   }
-
-   /**
-    * Multiplies this spatial motion vector by a scalar
-    * 
-    * @param scalar the scaling factor
-    */
-   public void times(double scalar)
-   {
-      this.getAngularPart().scale(scalar);
-      this.getLinearPart().scale(scalar);
-   }
-
    /**
     * Inverts the spatial motion vector, i.e.: Given the spatial motion of frame A with respect to
     * frame B, expressed in frame C, this method computes the spatial motion of frame B with respect
@@ -443,17 +410,7 @@ public abstract class SpatialMotionVector implements Clearable
 
    public void scale(double scalar)
    {
-      scaleLinearPart(scalar);
-      scaleAngularPart(scalar);
-   }
-
-   public void scaleLinearPart(double scalar)
-   {
       this.getLinearPart().scale(scalar);
-   }
-
-   public void scaleAngularPart(double scalar)
-   {
       this.getAngularPart().scale(scalar);
    }
 
@@ -461,8 +418,8 @@ public abstract class SpatialMotionVector implements Clearable
    {
       double norm = Math.sqrt(getLinearPart().lengthSquared() + getAngularPart().lengthSquared());
       double scalar = 1.0 / norm;
-      scaleLinearPart(scalar);
-      scaleAngularPart(scalar);
+      this.getLinearPart().scale(scalar);
+      this.getAngularPart().scale(scalar);
    }
 
    /**
@@ -479,7 +436,7 @@ public abstract class SpatialMotionVector implements Clearable
     */
    public boolean epsilonEquals(SpatialMotionVector spatialMotionVector, double epsilon)
    {
-      checkReferenceFramesMatch(spatialMotionVector);
+      checkReferenceFrameMatch(spatialMotionVector);
 
       if (!getLinearPart().epsilonEquals(spatialMotionVector.getLinearPart(), epsilon))
          return false;
@@ -489,12 +446,12 @@ public abstract class SpatialMotionVector implements Clearable
       return true;
    }
 
-   public void checkReferenceFramesMatch(SpatialMotionVector spatialMotionVector)
+   public void checkReferenceFrameMatch(SpatialMotionVector spatialMotionVector)
    {
-      checkReferenceFramesMatch(spatialMotionVector.bodyFrame, spatialMotionVector.baseFrame, spatialMotionVector.expressedInFrame);
+      checkReferenceFrameMatch(spatialMotionVector.bodyFrame, spatialMotionVector.baseFrame, spatialMotionVector.expressedInFrame);
    }
 
-   public void checkReferenceFramesMatch(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
+   public void checkReferenceFrameMatch(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
    {
       if (this.bodyFrame != bodyFrame)
          throw new ReferenceFrameMismatchException("bodyFrame mismatch: this.bodyFrame = " + this.bodyFrame + ", other bodyFrame = " + bodyFrame);

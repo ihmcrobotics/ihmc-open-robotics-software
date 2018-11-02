@@ -445,7 +445,7 @@ public class TaskspaceToJointspaceCalculator
 
       updateLocalBaseFrame();
 
-      desiredControlFrameTwist.checkReferenceFramesMatch(originalEndEffectorFrame, originalBaseFrame, originalControlFrame);
+      desiredControlFrameTwist.checkReferenceFrameMatch(originalEndEffectorFrame, originalBaseFrame, originalControlFrame);
 
       yoDesiredControlFramePose.setMatchingFrame(desiredControlFramePose);
 
