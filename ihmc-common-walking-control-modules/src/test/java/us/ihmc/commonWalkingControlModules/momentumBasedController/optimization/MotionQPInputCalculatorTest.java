@@ -15,7 +15,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -23,7 +23,7 @@ import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculatorTest;
-import us.ihmc.robotics.screwTheory.SpatialAcceleration;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class MotionQPInputCalculatorTest
 {

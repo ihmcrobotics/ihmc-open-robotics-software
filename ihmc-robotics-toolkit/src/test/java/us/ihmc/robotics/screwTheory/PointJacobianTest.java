@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -17,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotics.random.RandomGeometry;
 
 /**
@@ -108,7 +109,7 @@ public class PointJacobianTest
       pointJacobian2.set(geometricJacobian, point2);
       pointJacobian2.compute();
 
-      DenseMatrix64F assembledJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, geometricJacobian.getNumberOfColumns());
+      DenseMatrix64F assembledJacobian = new DenseMatrix64F(SpatialVector.SIZE, geometricJacobian.getNumberOfColumns());
       CommonOps.insert(pointJacobian1.getJacobianMatrix(), assembledJacobian, 0, 0);
       CommonOps.insert(pointJacobian2.getJacobianMatrix(), assembledJacobian, 3, 0);
 

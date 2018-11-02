@@ -9,6 +9,10 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 
 /**
  * This class provides similar tools to {@link GeometricJacobian} but also support additional
@@ -214,7 +218,7 @@ public class GeometricJacobianCalculator
       if (base == null || endEffector == null)
          throw new RuntimeException("The base and end-effector have to be set first.");
 
-      jacobianMatrix.reshape(SpatialMotionVector.SIZE, numberOfDegreesOfFreedom);
+      jacobianMatrix.reshape(SpatialVectorReadOnly.SIZE, numberOfDegreesOfFreedom);
 
       int column = 0;
 

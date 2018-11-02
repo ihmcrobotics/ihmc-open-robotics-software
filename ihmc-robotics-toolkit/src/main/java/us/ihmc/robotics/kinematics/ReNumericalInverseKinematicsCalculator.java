@@ -8,18 +8,18 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.robotics.screwTheory.Twist;
 
 /**
  * @author twan
@@ -49,7 +49,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
    private final Vector3D axis = new Vector3D();
    private final Vector3D errorTranslationVector = new Vector3D();
 
-   private final DenseMatrix64F error = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+   private final DenseMatrix64F error = new DenseMatrix64F(SpatialVector.SIZE, 1);
    private final DenseMatrix64F correction;
    private final DenseMatrix64F current;
    private final DenseMatrix64F best;
@@ -64,7 +64,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
       if (jacobian.getJacobianFrame() != jacobian.getEndEffectorFrame())
          throw new RuntimeException("jacobian.getJacobianFrame() != jacobian.getEndEffectorFrame()");
       this.jacobian = jacobian;
-      this.solver = LinearSolverFactory.leastSquares(SpatialMotionVector.SIZE, jacobian.getNumberOfColumns()); // new DampedLeastSquaresSolver(jacobian.getNumberOfColumns());
+      this.solver = LinearSolverFactory.leastSquares(SpatialVector.SIZE, jacobian.getNumberOfColumns()); // new DampedLeastSquaresSolver(jacobian.getNumberOfColumns());
 
       this.oneDoFJoints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
       oneDoFJointsSeed = oneDoFJoints.clone();

@@ -9,8 +9,10 @@ import java.util.Set;
 
 import org.junit.After;
 import org.junit.Test;
+
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.mecano.spatial.Twist;
 
 public class MovingMidFrameTest
 {

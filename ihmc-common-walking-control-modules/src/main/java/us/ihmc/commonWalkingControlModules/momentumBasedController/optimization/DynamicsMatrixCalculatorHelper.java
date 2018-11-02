@@ -1,11 +1,16 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import gnu.trove.list.array.TIntArrayList;
+import java.util.LinkedHashMap;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.screwTheory.*;
 
-import java.util.LinkedHashMap;
+import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class DynamicsMatrixCalculatorHelper
 {

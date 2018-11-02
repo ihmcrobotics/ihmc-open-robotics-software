@@ -16,6 +16,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.kinematics.InverseJacobianSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -25,7 +27,10 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -68,7 +73,7 @@ public class TaskspaceToJointspaceCalculator
    private final YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities solver;
    private final InverseJacobianSolver inverseJacobianSolver;
    private final int numberOfDoF;
-   private final int maxNumberOfConstraints = SpatialMotionVector.SIZE;
+   private final int maxNumberOfConstraints = SpatialVector.SIZE;
 
    private final YoDouble jointAngleRegularizationWeight;
    private final YoInteger exponentForPNorm;
@@ -578,7 +583,7 @@ public class TaskspaceToJointspaceCalculator
 
       // Clip the angular part of the spatialVectorToClip
       subspaceSpatialVector.reshape(selectionMatrix.getNumRows(), 1);
-      tempSpatialVector.reshape(SpatialMotionVector.SIZE, 1);
+      tempSpatialVector.reshape(SpatialVector.SIZE, 1);
       MatrixTools.insertFrameTupleIntoEJMLVector(angularPart, tempSpatialVector, 0);
       CommonOps.mult(selectionMatrix, tempSpatialVector, subspaceSpatialVector);
 
@@ -588,7 +593,7 @@ public class TaskspaceToJointspaceCalculator
 
       // Clip the linear part of the spatialVectorToClip
       subspaceSpatialVector.reshape(selectionMatrix.getNumRows(), 1);
-      tempSpatialVector.reshape(SpatialMotionVector.SIZE, 1);
+      tempSpatialVector.reshape(SpatialVector.SIZE, 1);
       MatrixTools.insertFrameTupleIntoEJMLVector(linearPart, tempSpatialVector, 3);
       CommonOps.mult(selectionMatrix, tempSpatialVector, subspaceSpatialVector);
 
@@ -698,8 +703,8 @@ public class TaskspaceToJointspaceCalculator
 
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D tempPositionError = new FrameVector3D();
-   private final DenseMatrix64F tempSpatialError = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
-   private final DenseMatrix64F tempSubspaceError = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+   private final DenseMatrix64F tempSpatialError = new DenseMatrix64F(SpatialVector.SIZE, 1);
+   private final DenseMatrix64F tempSubspaceError = new DenseMatrix64F(SpatialVector.SIZE, 1);
 
    public double getNormPositionError(FramePoint3D desiredPosition)
    {
@@ -708,7 +713,7 @@ public class TaskspaceToJointspaceCalculator
       tempPositionError.setIncludingFrame(tempPoint);
 
       DenseMatrix64F selectionMatrix = inverseJacobianSolver.getSelectionMatrix();
-      tempSpatialError.reshape(SpatialMotionVector.SIZE, 1);
+      tempSpatialError.reshape(SpatialVector.SIZE, 1);
       tempSubspaceError.reshape(selectionMatrix.getNumRows(), 1);
 
       MatrixTools.insertFrameTupleIntoEJMLVector(tempPositionError, tempSpatialError, 3);
@@ -728,7 +733,7 @@ public class TaskspaceToJointspaceCalculator
       errorRotationVector.scale(errorAxisAngle.getAngle());
 
       DenseMatrix64F selectionMatrix = inverseJacobianSolver.getSelectionMatrix();
-      tempSpatialError.reshape(SpatialMotionVector.SIZE, 1);
+      tempSpatialError.reshape(SpatialVector.SIZE, 1);
       tempSubspaceError.reshape(selectionMatrix.getNumRows(), 1);
 
       errorRotationVector.get(tempSpatialError);

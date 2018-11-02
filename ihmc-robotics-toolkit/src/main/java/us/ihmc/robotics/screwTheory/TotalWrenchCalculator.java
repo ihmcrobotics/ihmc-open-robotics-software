@@ -3,6 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import java.util.Collection;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.spatial.Wrench;
 
 public class TotalWrenchCalculator
 {

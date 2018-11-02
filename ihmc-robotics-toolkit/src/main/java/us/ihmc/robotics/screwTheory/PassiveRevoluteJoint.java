@@ -2,9 +2,10 @@ package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.spatial.Wrench;
 
 public class PassiveRevoluteJoint extends RevoluteJoint
 {

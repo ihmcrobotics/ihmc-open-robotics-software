@@ -8,9 +8,10 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.mecano.spatial.Wrench;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PassiveRevoluteJointTest

@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.calculators;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.SpatialForce;
 
 public interface Omega0CalculatorInterface
 {

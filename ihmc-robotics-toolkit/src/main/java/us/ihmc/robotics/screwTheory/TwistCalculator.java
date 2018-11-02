@@ -9,6 +9,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
 
 /**
  * This class is a tool that can be used to compute the twist of each {@code RigidBody} composing a

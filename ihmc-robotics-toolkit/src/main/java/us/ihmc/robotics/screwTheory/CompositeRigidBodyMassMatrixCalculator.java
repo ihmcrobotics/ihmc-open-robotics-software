@@ -8,12 +8,15 @@ import org.ejml.data.DenseMatrix64F;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.SpatialInertia;
+import us.ihmc.mecano.spatial.Twist;
 
 public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalculator
 {
    private final RigidBody[] allBodiesExceptRoot;
    private final InverseDynamicsJoint[] jointsInOrder;
-   private final CompositeRigidBodyInertia[] crbInertiasInOrder;
+   private final SpatialInertia[] crbInertiasInOrder;
    private final int[] parentMap;
    private final int[] massMatrixIndices;
    private final DenseMatrix64F massMatrix;
@@ -69,7 +72,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       {
          RigidBody currentBody = allBodiesExceptRoot[bodyIndex];
          InverseDynamicsJoint parentJoint = currentBody.getParentJoint();
-         CompositeRigidBodyInertia currentBodyInertia = crbInertiasInOrder[bodyIndex];
+         SpatialInertia currentBodyInertia = crbInertiasInOrder[bodyIndex];
 
          setUnitMomenta(currentBodyInertia, parentJoint);
          setDiagonalTerm(bodyIndex, parentJoint);
@@ -78,7 +81,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       }
    }
 
-   private void setUnitMomenta(CompositeRigidBodyInertia currentBodyInertia, InverseDynamicsJoint joint)
+   private void setUnitMomenta(SpatialInertia currentBodyInertia, InverseDynamicsJoint joint)
    {
       nMomentaInUse = joint.getDegreesOfFreedom();
 
@@ -110,10 +113,10 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
 
    private void buildCompositeRigidBodyInertia(int currentBodyIndex)
    {
-      CompositeRigidBodyInertia currentBodyInertia = crbInertiasInOrder[currentBodyIndex];
+      SpatialInertia currentBodyInertia = crbInertiasInOrder[currentBodyIndex];
       if (isValidParentIndex(parentMap[currentBodyIndex]))
       {
-         CompositeRigidBodyInertia parentBodyInertia = crbInertiasInOrder[parentMap[currentBodyIndex]];
+         SpatialInertia parentBodyInertia = crbInertiasInOrder[parentMap[currentBodyIndex]];
          ReferenceFrame parentFrame = parentBodyInertia.getReferenceFrame();
          currentBodyInertia.changeFrame(parentFrame);
          parentBodyInertia.add(currentBodyInertia);
@@ -176,12 +179,12 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       massMatrix.set(column, row, entry);
    }
 
-   private static CompositeRigidBodyInertia[] createCompositeRigidBodyInertiasInOrder(int length)
+   private static SpatialInertia[] createCompositeRigidBodyInertiasInOrder(int length)
    {
-      CompositeRigidBodyInertia[] ret = new CompositeRigidBodyInertia[length];
+      SpatialInertia[] ret = new SpatialInertia[length];
       for (int i = 0; i < ret.length; i++)
       {
-         ret[i] = new CompositeRigidBodyInertia();
+         ret[i] = new SpatialInertia();
       }
 
       return ret;
@@ -233,7 +236,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }
 
-   public CompositeRigidBodyInertia getBaseBodyCompositeInertia()
+   public SpatialInertia getBaseBodyCompositeInertia()
    {
       return crbInertiasInOrder[0];
    }

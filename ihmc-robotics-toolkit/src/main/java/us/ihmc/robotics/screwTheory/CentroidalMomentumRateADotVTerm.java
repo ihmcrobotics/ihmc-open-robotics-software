@@ -5,6 +5,10 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class CentroidalMomentumRateADotVTerm
@@ -71,7 +75,7 @@ public class CentroidalMomentumRateADotVTerm
       {
          RigidBody rigidBody = jointsInOrder[i].getSuccessor();
 
-         RigidBodyInertia inertia = rigidBody.getInertia(); // I
+         SpatialInertiaBasics inertia = rigidBody.getInertia(); // I
 
          rigidBody.getBodyFixedFrame().getTwistRelativeToOther(rootBody.getBodyFixedFrame(), tempTwist);
 

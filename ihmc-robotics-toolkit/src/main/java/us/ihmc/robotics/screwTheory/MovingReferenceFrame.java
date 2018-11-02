@@ -3,6 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.spatial.Twist;
 
 /**
  * In addition of having a defined pose in space as a {@code ReferenceFrame}, a

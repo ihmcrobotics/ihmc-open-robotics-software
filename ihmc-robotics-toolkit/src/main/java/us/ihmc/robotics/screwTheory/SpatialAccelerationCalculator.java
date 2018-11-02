@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.screwTheory.ScrewTools.*;
+import static us.ihmc.robotics.screwTheory.ScrewTools.createGravitationalSpatialAcceleration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +12,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
 
 /**
  * This class is a tool that can be used to compute the spatial acceleration of each

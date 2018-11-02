@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
 
 /**
  * Computes joint torques based on desired joint accelerations.
@@ -119,7 +122,7 @@ public class InverseDynamicsCalculator
          if (!doVelocityTerms)
             tempTwist.setToZero();
          spatialAccelerationCalculator.getAccelerationOfBody(body, tempAcceleration);
-         body.getInertia().computeDynamicWrenchInBodyCoordinates(tempAcceleration, tempTwist, netWrench);
+         body.getInertia().computeDynamicWrench(tempAcceleration, tempTwist, netWrench);
       }
    }
 

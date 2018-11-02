@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 
 public class MovingMidFootZUpGroundFrameTest

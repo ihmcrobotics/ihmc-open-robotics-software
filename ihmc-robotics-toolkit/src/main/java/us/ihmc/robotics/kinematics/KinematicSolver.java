@@ -9,15 +9,15 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
 public class KinematicSolver implements InverseKinematicsCalculator
 {
@@ -77,7 +77,7 @@ public class KinematicSolver implements InverseKinematicsCalculator
       jacobianJacobianTranspose = new DenseMatrix64F(nDoF, nDoF);
       jJTe = new DenseMatrix64F(nDoF, 1);
       correction = new DenseMatrix64F(nDoF, 1);
-      spatialError = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+      spatialError = new DenseMatrix64F(SpatialVector.SIZE, 1);
       dampingSquaredDiagonal = new DenseMatrix64F(nDoF, nDoF);
       inverseTerm = new DenseMatrix64F(nDoF, nDoF);
 

@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
-import us.ihmc.robotics.screwTheory.Wrench;
 
 public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly
 {

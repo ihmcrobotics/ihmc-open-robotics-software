@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +21,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
@@ -317,8 +319,8 @@ public class TwistCalculatorTest
       {
          floatingJoint.setRotation(RandomGeometry.nextQuaternion(random));
          floatingJoint.setPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
-         Twist floatingJointTwist = Twist.generateRandomTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
-                                                              floatingJoint.getFrameAfterJoint());
+         Twist floatingJointTwist = MecanoRandomTools.nextTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
+                                                                floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
 
          floatingJointInFuture.setJointPositionVelocityAndAcceleration(floatingJoint);
@@ -394,8 +396,8 @@ public class TwistCalculatorTest
       {
          floatingJoint.setRotation(RandomGeometry.nextQuaternion(random));
          floatingJoint.setPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
-         Twist floatingJointTwist = Twist.generateRandomTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
-                                                              floatingJoint.getFrameAfterJoint());
+         Twist floatingJointTwist = MecanoRandomTools.nextTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
+                                                                floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
 
          floatingJointInFuture.setJointPositionVelocityAndAcceleration(floatingJoint);
@@ -446,7 +448,7 @@ public class TwistCalculatorTest
                FrameVector3D actualLinearVelocity = new FrameVector3D();
                twistCalculator.getLinearVelocityOfBodyFixedPoint(base, body, frameBodyFixedPoint, actualLinearVelocity);
                FrameVector3D expectedLinearVelocity = computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, baseFrame,
-                                                                                                    baseFrameInFuture, bodyFixedPoint);
+                                                                                                      baseFrameInFuture, bodyFixedPoint);
 
                expectedLinearVelocity.checkReferenceFrameMatch(actualLinearVelocity);
                EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity, actualLinearVelocity, 2.0e-5);
@@ -482,19 +484,20 @@ public class TwistCalculatorTest
          difference.sub(expectedTwist.getAngularPart(), actualTwist.getAngularPart());
          double angularPartDifference = difference.length();
          messagePrefix = messagePrefix != null ? messagePrefix + " " : "";
-         throw new AssertionError(messagePrefix + "expected:\n<" + expectedTwist + ">\n but was:\n<" + actualTwist + ">\n difference: linear part: " + linearPartDifference
-               + ", angular part: " + angularPartDifference);
+         throw new AssertionError(messagePrefix + "expected:\n<" + expectedTwist + ">\n but was:\n<" + actualTwist + ">\n difference: linear part: "
+               + linearPartDifference + ", angular part: " + angularPartDifference);
       }
    }
 
    public static FrameVector3D computeExpectedLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture,
-                                                                             Point3D bodyFixedPoint)
+                                                                               Point3D bodyFixedPoint)
    {
       return computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, worldFrame, worldFrame, bodyFixedPoint);
    }
 
    public static FrameVector3D computeExpectedLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture,
-                                                                             ReferenceFrame baseFrame, ReferenceFrame baseFrameInFuture, Point3D bodyFixedPoint)
+                                                                               ReferenceFrame baseFrame, ReferenceFrame baseFrameInFuture,
+                                                                               Point3D bodyFixedPoint)
    {
       FramePoint3D point = new FramePoint3D(bodyFrame, bodyFixedPoint);
       FramePoint3D pointInFuture = new FramePoint3D(bodyFrameInFuture, bodyFixedPoint);

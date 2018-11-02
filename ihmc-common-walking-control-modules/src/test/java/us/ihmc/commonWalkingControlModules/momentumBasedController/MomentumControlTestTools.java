@@ -12,12 +12,13 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SpatialForce;
 import us.ihmc.robotics.screwTheory.SpatialForceVectorTest;
-import us.ihmc.robotics.screwTheory.Wrench;
 
 /**
  * @author twan
@@ -85,6 +86,6 @@ public class MomentumControlTestTools
       rootJoint.getWrench(wrench);
 
       SpatialForce zeroWrench = new SpatialForce(wrench.getReferenceFrame());
-      SpatialForceVectorTest.assertSpatialForceVectorEquals(wrench, zeroWrench, epsilon);
+      MecanoTestTools.assertSpatialForceEquals(wrench, zeroWrench, epsilon);
    }
 }

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.SpatialForce;
 
 /**
  * Created by nathan on 8/7/15.

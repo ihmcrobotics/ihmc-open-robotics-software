@@ -16,6 +16,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 
 /**
  * The centroidal momentum can be written as \dot{h} = A * \dot{v} + \dot{A} * v. This class
@@ -427,7 +433,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
          if (isRoot())
             return;
 
-         RigidBodyInertia inertia = rigidBody.getInertia();
+         SpatialInertiaBasics inertia = rigidBody.getInertia();
          ReferenceFrame inertiaFrame = inertia.getReferenceFrame();
 
          biasAcceleration.setIncludingFrame(parent.biasAcceleration);
@@ -436,7 +442,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
          biasAcceleration.setBodyFrame(getBodyFixedFrame());
 
          biasWrench.setToZero(inertiaFrame, inertiaFrame);
-         inertia.computeDynamicWrenchInBodyCoordinates(biasAcceleration, getBodyFixedFrame().getTwistOfFrame(), biasWrench);
+         inertia.computeDynamicWrench(biasAcceleration, getBodyFixedFrame().getTwistOfFrame(), biasWrench);
          biasWrench.changeFrame(matrixFrame);
       }
 
@@ -457,7 +463,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
 
       private void addToUnitMomentumRecursively(Twist ancestorUnitTwist, Momentum unitMomentumToAddTo)
       {
-         RigidBodyInertia inertia = rigidBody.getInertia();
+         SpatialInertiaBasics inertia = rigidBody.getInertia();
 
          ReferenceFrame inertiaFrame = inertia.getReferenceFrame();
 
