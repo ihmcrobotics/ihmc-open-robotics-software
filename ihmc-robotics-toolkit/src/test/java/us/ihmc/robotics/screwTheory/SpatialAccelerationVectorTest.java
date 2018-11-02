@@ -406,7 +406,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
                                                   twist.getLinearPart());
 
       twist.changeFrame(frameA);
-      acceleration.changeFrameNoRelativeMotion(twist.getReferenceFrame());
+      acceleration.changeFrame(twist.getReferenceFrame());
 
       double epsilon = 1e-12;
       assertEquals(twist.getReferenceFrame(), acceleration.getReferenceFrame());

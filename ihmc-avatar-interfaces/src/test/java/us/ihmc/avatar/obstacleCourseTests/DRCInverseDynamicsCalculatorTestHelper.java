@@ -499,7 +499,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
             ReferenceFrame frameAtJoint = rigidBodyToApplyWrenchTo.getParentJoint().getFrameAfterJoint();
 
             Wrench wrench = new Wrench(frameAtJoint, frameAtJoint, wrenchFromSimulation);
-            wrench.changeBodyFrameAttachedToSameBody(bodyFixedFrame);
+            wrench.setBodyFrame(bodyFixedFrame);
             wrench.changeFrame(bodyFixedFrame);
 
             inverseDynamicsCalculator.setExternalWrench(rigidBodyToApplyWrenchTo, wrench);

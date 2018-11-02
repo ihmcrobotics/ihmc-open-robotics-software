@@ -169,7 +169,7 @@ public class WholeBodyVirtualModelControlSolver
       for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
       {
          RigidBody rigidBody = rigidBodiesWithExternalWrench.get(i);
-         externalWrenchSolution.get(rigidBody).changeBodyFrameAttachedToSameBody(rigidBody.getBodyFixedFrame());
+         externalWrenchSolution.get(rigidBody).setBodyFrame(rigidBody.getBodyFixedFrame());
          externalWrenchSolution.get(rigidBody).negate();
       }
 

@@ -219,7 +219,7 @@ public class Twist extends SpatialMotionVector
     * A consequence of Duindam, Port-Based Modeling and Control for Efficient Bipedal Walking Robots, page 25, lemma 2.8 (a)
     * http://sites.google.com/site/vincentduindam/publications
     */
-   public void changeBodyFrameNoRelativeTwist(ReferenceFrame newBodyFrame)
+   public void setBodyFrame(ReferenceFrame newBodyFrame)
    {
       this.bodyFrame = newBodyFrame;
    }
@@ -229,7 +229,7 @@ public class Twist extends SpatialMotionVector
     * A consequence of Duindam, Port-Based Modeling and Control for Efficient Bipedal Walking Robots, page 25, lemma 2.8 (a)
     * http://sites.google.com/site/vincentduindam/publications
     */
-   public void changeBaseFrameNoRelativeTwist(ReferenceFrame newBaseFrame)
+   public void setBaseFrame(ReferenceFrame newBaseFrame)
    {
       this.baseFrame = newBaseFrame;
    }

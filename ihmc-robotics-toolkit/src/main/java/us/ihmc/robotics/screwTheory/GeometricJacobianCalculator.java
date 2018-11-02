@@ -299,7 +299,7 @@ public class GeometricJacobianCalculator
           */
          zeroAcceleration.changeFrame(endEffectorFrame, twistOfCurrentBodyRelativeToEndEffector, twistOfCurrentBodyRelativeToPredecessor);
          // The following line is where the jacobianFrame is assumed to be rigidly attached to the end-effector.
-         zeroAcceleration.changeFrameNoRelativeMotion(jacobianFrame);
+         zeroAcceleration.changeFrame(jacobianFrame);
          zeroAcceleration.add(biasAcceleration);
          biasAcceleration.setIncludingFrame(zeroAcceleration);
 

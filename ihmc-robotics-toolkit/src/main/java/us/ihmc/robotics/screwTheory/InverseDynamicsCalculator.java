@@ -150,7 +150,7 @@ public class InverseDynamicsCalculator
                ReferenceFrame successorFrame = successor.getBodyFixedFrame();
 
                wrenchExertedByChild.setIncludingFrame(wrenchExertedOnChild);
-               wrenchExertedByChild.changeBodyFrameAttachedToSameBody(successorFrame);
+               wrenchExertedByChild.setBodyFrame(successorFrame);
                wrenchExertedByChild.scale(-1.0); // Action = -reaction
                wrenchExertedByChild.changeFrame(jointWrench.getReferenceFrame());
                jointWrench.sub(wrenchExertedByChild);
@@ -228,7 +228,7 @@ public class InverseDynamicsCalculator
          Wrench externalWrench = externalWrenches.get(listOfBodiesWithExternalWrenches.get(i));
          temporaryWrench.setIncludingFrame(externalWrench);
          temporaryWrench.changeFrame(referenceFrame);
-         temporaryWrench.changeBodyFrameAttachedToSameBody(referenceFrame);
+         temporaryWrench.setBodyFrame(referenceFrame);
          totalGroundReactionWrench.add(temporaryWrench);
       }
 

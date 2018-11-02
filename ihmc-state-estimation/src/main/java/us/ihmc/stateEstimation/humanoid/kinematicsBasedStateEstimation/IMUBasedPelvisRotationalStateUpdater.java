@@ -251,7 +251,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       // T_{rootBody}^{rootJointFrame, measurementLink}
       twistRootJointFrameRelativeToMeasurementLink.changeFrame(rootJointFrame);
       // T_{rootJointFrame}^{rootJointFrame, measurementLink}
-      twistRootJointFrameRelativeToMeasurementLink.changeBodyFrameNoRelativeTwist(rootJointFrame);
+      twistRootJointFrameRelativeToMeasurementLink.setBodyFrame(rootJointFrame);
 
       // omega_{rootJointFrame}^{rootJointFrame, measurementLink}
       twistRootJointFrameRelativeToMeasurementLink.getAngularPart(angularVelocityRootJointFrameRelativeToMeasurementLink);

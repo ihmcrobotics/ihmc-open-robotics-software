@@ -770,7 +770,7 @@ public class SwingState extends AbstractFootControlState
       desiredLinearAcceleration.changeFrame(desiredSoleFrame);
       desiredAngularAcceleration.changeFrame(desiredSoleFrame);
       desiredSpatialAcceleration.setIncludingFrame(desiredSoleFrame, worldFrame, desiredSoleFrame, desiredAngularAcceleration, desiredLinearAcceleration);
-      desiredSpatialAcceleration.changeFrameNoRelativeMotion(desiredControlFrame);
+      desiredSpatialAcceleration.changeFrame(desiredControlFrame);
       desiredSpatialAcceleration.getLinearPart(desiredLinearAcceleration);
       desiredSpatialAcceleration.getAngularPart(desiredAngularAcceleration);
       desiredLinearAcceleration.changeFrame(worldFrame);

@@ -110,7 +110,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     * Bipedal Walking Robots, page 25, lemma 2.8 (a)
     * http://sites.google.com/site/vincentduindam/publications
     */
-   public void changeBodyFrameNoRelativeAcceleration(ReferenceFrame newBodyFrame)
+   public void setBodyFrame(ReferenceFrame newBodyFrame)
    {
       this.bodyFrame = newBodyFrame;
    }
@@ -121,7 +121,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     * Bipedal Walking Robots, page 25, lemma 2.8 (a)
     * http://sites.google.com/site/vincentduindam/publications
     */
-   public void changeBaseFrameNoRelativeAcceleration(ReferenceFrame newBaseFrame)
+   public void setBaseFrame(ReferenceFrame newBaseFrame)
    {
       this.baseFrame = newBaseFrame;
    }
@@ -169,7 +169,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
        * The relative motion being dealt with the acceleration can be now transformed as if there
        * was no relative motion.
        */
-      changeFrameNoRelativeMotion(newReferenceFrame);
+      changeFrame(newReferenceFrame);
    }
 
    /**
@@ -177,7 +177,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     * frame in which this acceleration should be expressed does not move with respect to the old
     * one.
     */
-   public void changeFrameNoRelativeMotion(ReferenceFrame newReferenceFrame)
+   public void changeFrame(ReferenceFrame newReferenceFrame)
    {
       // trivial case:
       if (this.expressedInFrame == newReferenceFrame)

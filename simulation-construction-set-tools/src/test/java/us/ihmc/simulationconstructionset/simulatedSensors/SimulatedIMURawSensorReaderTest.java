@@ -340,7 +340,7 @@ public class SimulatedIMURawSensorReaderTest
          SpatialAccelerationVector accelerationOfChestWithRespectToWorld = new SpatialAccelerationVector(bodyFrame, worldFrame, bodyFrame,
                                                                                                          angularAcceleration,
                                                                                                          linearAcceleration);
-         accelerationOfChestWithRespectToWorld.changeBaseFrameNoRelativeAcceleration(getElevatorFrame());
+         accelerationOfChestWithRespectToWorld.setBaseFrame(getElevatorFrame());
          rootJoint.setAcceleration(accelerationOfChestWithRespectToWorld);
 
          updateFrames();

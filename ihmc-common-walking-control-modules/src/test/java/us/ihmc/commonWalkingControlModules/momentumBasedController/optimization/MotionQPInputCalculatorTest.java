@@ -121,7 +121,7 @@ public class MotionQPInputCalculatorTest
          spatialAccelerationCalculator.compute();
          SpatialAccelerationVector achievedSpatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, rootFrame, endEffectorFrame);
          spatialAccelerationCalculator.getRelativeAcceleration(rootBody, endEffector, achievedSpatialAcceleration);
-         achievedSpatialAcceleration.changeFrameNoRelativeMotion(controlFrame);
+         achievedSpatialAcceleration.changeFrame(controlFrame);
          SpatialAccelerationCalculatorTest.assertSpatialAccelerationVectorEquals(achievedSpatialAcceleration, desiredSpatialAcceleration, 1.0e-10);
       }
    }

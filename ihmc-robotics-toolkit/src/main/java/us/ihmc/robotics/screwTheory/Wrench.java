@@ -138,7 +138,7 @@ public class Wrench extends SpatialForceVector
       super.sub(other);
    }
 
-   public void changeBodyFrameAttachedToSameBody(ReferenceFrame bodyFrame)
+   public void setBodyFrame(ReferenceFrame bodyFrame)
    {
       this.bodyFrame = bodyFrame;
    }

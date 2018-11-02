@@ -133,11 +133,11 @@ public class ProvidedMassMatrixToolRigidBody
       update();
 
       toolAcceleration.setIncludingFrame(handSpatialAccelerationVector);
-      toolAcceleration.changeFrameNoRelativeMotion(toolJoint.getFrameAfterJoint());
+      toolAcceleration.changeFrame(toolJoint.getFrameAfterJoint());
 
       // TODO: Take relative acceleration between uTorsoCoM and elevator in account
-      toolAcceleration.changeBaseFrameNoRelativeAcceleration(elevatorFrame);
-      toolAcceleration.changeBodyFrameNoRelativeAcceleration(toolJoint.getFrameAfterJoint());
+      toolAcceleration.setBaseFrame(elevatorFrame);
+      toolAcceleration.setBodyFrame(toolJoint.getFrameAfterJoint());
 
       toolJoint.setDesiredAcceleration(toolAcceleration);
       inverseDynamicsCalculator.compute();
@@ -145,7 +145,7 @@ public class ProvidedMassMatrixToolRigidBody
 
       toolWrench.negate();
       toolWrench.changeFrame(handFixedFrame);
-      toolWrench.changeBodyFrameAttachedToSameBody(handFixedFrame);
+      toolWrench.setBodyFrame(handFixedFrame);
 
       // Visualization
       temporaryVector.setIncludingFrame(handFixedFrame, toolWrench.getLinearPartX(), toolWrench.getLinearPartY(), toolWrench.getLinearPartZ());

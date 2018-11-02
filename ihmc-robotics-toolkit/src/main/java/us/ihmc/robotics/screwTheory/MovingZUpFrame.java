@@ -73,8 +73,8 @@ public class MovingZUpFrame extends MovingReferenceFrame
       double yawDot = (sinRoll * wy + cosRoll * wz) / cosPitch;
 
       twistRelativeToParentToPack.changeFrame(this);
-      twistRelativeToParentToPack.changeBodyFrameNoRelativeTwist(this);
-      twistRelativeToParentToPack.changeBaseFrameNoRelativeTwist(rootFrame);
+      twistRelativeToParentToPack.setBodyFrame(this);
+      twistRelativeToParentToPack.setBaseFrame(rootFrame);
       twistRelativeToParentToPack.setAngularPart(0.0, 0.0, yawDot);
    }
 }

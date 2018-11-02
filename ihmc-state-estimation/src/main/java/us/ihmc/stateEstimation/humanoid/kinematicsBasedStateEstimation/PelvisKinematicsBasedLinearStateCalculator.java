@@ -421,7 +421,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          YoFrameVector3D footVelocityInWorld = footVelocitiesInWorld.get(foot);
 
          foot.getBodyFixedFrame().getTwistOfFrame(footTwistInWorld);
-         footTwistInWorld.changeBodyFrameNoRelativeTwist(soleFrames.get(foot));
+         footTwistInWorld.setBodyFrame(soleFrames.get(foot));
          footTwistInWorld.changeFrame(soleFrames.get(foot));
 
          tempCoP2d.setIncludingFrame(this.copsFilteredInFootFrame.get(foot));

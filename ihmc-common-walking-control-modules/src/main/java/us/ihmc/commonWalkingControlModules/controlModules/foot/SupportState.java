@@ -298,7 +298,7 @@ public class SupportState extends AbstractFootControlState
       // assemble acceleration command
       ReferenceFrame bodyFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
       footAcceleration.setToZero(bodyFixedFrame, rootBody.getBodyFixedFrame(), controlFrame);
-      footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
+      footAcceleration.setBodyFrame(bodyFixedFrame);
       spatialAccelerationCommand.setSpatialAcceleration(controlFrame, footAcceleration);
       spatialAccelerationCommand.setWeights(angularWeight, linearWeight);
 

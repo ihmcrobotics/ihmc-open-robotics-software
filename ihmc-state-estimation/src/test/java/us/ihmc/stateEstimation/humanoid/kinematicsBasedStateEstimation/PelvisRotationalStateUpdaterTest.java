@@ -206,7 +206,7 @@ public class PelvisRotationalStateUpdaterTest
          Twist twistIMU = new Twist();
          measurementLink.getBodyFixedFrame().getTwistOfFrame(twistIMU);
          twistIMU.changeFrame(imuSensors.get(i).getMeasurementFrame());
-         twistIMU.changeBodyFrameNoRelativeTwist(imuSensors.get(i).getMeasurementFrame());
+         twistIMU.setBodyFrame(imuSensors.get(i).getMeasurementFrame());
          
          Vector3D sensorValue = twistIMU.getAngularPartCopy();
          jointAndIMUSensorDataSource.setAngularVelocitySensorValue(imuDefinition, sensorValue);

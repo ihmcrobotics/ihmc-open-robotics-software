@@ -433,7 +433,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
          biasAcceleration.setIncludingFrame(parent.biasAcceleration);
          getJoint().getPredecessorTwist(intermediateTwist);
          biasAcceleration.changeFrame(getBodyFixedFrame(), intermediateTwist, parent.getBodyFixedFrame().getTwistOfFrame());
-         biasAcceleration.changeBodyFrameNoRelativeAcceleration(getBodyFixedFrame());
+         biasAcceleration.setBodyFrame(getBodyFixedFrame());
 
          biasWrench.setToZero(inertiaFrame, inertiaFrame);
          inertia.computeDynamicWrenchInBodyCoordinates(biasAcceleration, getBodyFixedFrame().getTwistOfFrame(), biasWrench);

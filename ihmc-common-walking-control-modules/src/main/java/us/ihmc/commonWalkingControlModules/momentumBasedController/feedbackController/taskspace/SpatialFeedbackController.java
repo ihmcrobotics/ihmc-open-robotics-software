@@ -468,7 +468,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    public void computeAchievedAcceleration()
    {
       spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector, endEffectorAchievedAcceleration);
-      endEffectorAchievedAcceleration.changeFrameNoRelativeMotion(controlFrame);
+      endEffectorAchievedAcceleration.changeFrame(controlFrame);
       endEffectorAchievedAcceleration.getAngularPart(achievedAngularAcceleration);
       endEffectorAchievedAcceleration.getLinearPart(achievedLinearAcceleration);
       subtractCoriolisAcceleration(achievedLinearAcceleration);
