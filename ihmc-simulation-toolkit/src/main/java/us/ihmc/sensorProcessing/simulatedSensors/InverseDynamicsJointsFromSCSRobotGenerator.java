@@ -15,7 +15,7 @@ import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAcceleration;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -148,7 +148,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
       return scsToInverseDynamicsJointMap.getRigidBody(parentJoint);
    }
 
-   private final SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector();
+   private final SpatialAcceleration spatialAccelerationVector = new SpatialAcceleration();
 
    private final FrameVector3D linearVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
    private final FrameVector3D angularVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());

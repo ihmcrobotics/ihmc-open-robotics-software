@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAcceleration;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -103,8 +103,8 @@ public class SE3PIDController
     * @param feedForwardAcceleration feed forward acceleration from a reference trajectory.
     * @param currentTwist current twist of the rigid body.
     */
-   public void compute(SpatialAccelerationVector spatialAccelerationToPack, FramePose3D desiredPose, Twist desiredTwist,
-         SpatialAccelerationVector feedForwardAcceleration, Twist currentTwist)
+   public void compute(SpatialAcceleration spatialAccelerationToPack, FramePose3D desiredPose, Twist desiredTwist,
+         SpatialAcceleration feedForwardAcceleration, Twist currentTwist)
    {
       checkBodyFrames(desiredTwist, feedForwardAcceleration, currentTwist);
       checkBaseFrames(desiredTwist, feedForwardAcceleration, currentTwist);
@@ -144,19 +144,19 @@ public class SE3PIDController
       currentTwist.getReferenceFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
-   private void checkBodyFrames(Twist desiredTwist, SpatialAccelerationVector feedForwardAcceleration, Twist currentTwist)
+   private void checkBodyFrames(Twist desiredTwist, SpatialAcceleration feedForwardAcceleration, Twist currentTwist)
    {
       checkBodyFrames(desiredTwist, currentTwist);
       feedForwardAcceleration.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
-   private void checkBaseFrames(Twist desiredTwist, SpatialAccelerationVector feedForwardAcceleration, Twist currentTwist)
+   private void checkBaseFrames(Twist desiredTwist, SpatialAcceleration feedForwardAcceleration, Twist currentTwist)
    {
       checkBaseFrames(desiredTwist, currentTwist);
       desiredTwist.getBaseFrame().checkReferenceFrameMatch(feedForwardAcceleration.getBaseFrame());
    }
 
-   private void checkExpressedInFrames(Twist desiredTwist, SpatialAccelerationVector feedForwardAcceleration, Twist currentTwist)
+   private void checkExpressedInFrames(Twist desiredTwist, SpatialAcceleration feedForwardAcceleration, Twist currentTwist)
    {
       checkExpressedInFrames(desiredTwist, currentTwist);
       feedForwardAcceleration.getReferenceFrame().checkReferenceFrameMatch(bodyFrame);

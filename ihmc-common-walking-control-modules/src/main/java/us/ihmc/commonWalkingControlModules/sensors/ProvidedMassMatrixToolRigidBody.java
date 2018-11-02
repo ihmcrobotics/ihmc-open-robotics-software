@@ -25,7 +25,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAcceleration;
 import us.ihmc.robotics.screwTheory.Wrench;
 
 /**
@@ -54,7 +54,7 @@ public class ProvidedMassMatrixToolRigidBody
 
    private final FramePoint3D temporaryPoint = new FramePoint3D();
    private final FrameVector3D temporaryVector = new FrameVector3D();
-   private final SpatialAccelerationVector toolAcceleration = new SpatialAccelerationVector();
+   private final SpatialAcceleration toolAcceleration = new SpatialAcceleration();
 
    public ProvidedMassMatrixToolRigidBody(RobotSide robotSide, final FullHumanoidRobotModel fullRobotModel, double gravity, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -122,7 +122,7 @@ public class ProvidedMassMatrixToolRigidBody
       objectCenterOfMassInWorld.set(toolFramePoint);
    }
 
-   public void control(SpatialAccelerationVector handSpatialAccelerationVector, Wrench toolWrench)
+   public void control(SpatialAcceleration handSpatialAccelerationVector, Wrench toolWrench)
    {
       if (!hasBeenInitialized)
       {

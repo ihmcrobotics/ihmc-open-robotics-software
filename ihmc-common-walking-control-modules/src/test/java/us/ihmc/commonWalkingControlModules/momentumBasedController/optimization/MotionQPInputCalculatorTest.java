@@ -23,7 +23,7 @@ import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculatorTest;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAcceleration;
 
 public class MotionQPInputCalculatorTest
 {
@@ -74,7 +74,7 @@ public class MotionQPInputCalculatorTest
 
          centerOfMassFrame.update();
 
-         SpatialAccelerationVector desiredSpatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, rootFrame, endEffectorFrame);
+         SpatialAcceleration desiredSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, endEffectorFrame);
          desiredSpatialAcceleration.getLinearPart().set(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
          desiredSpatialAcceleration.getAngularPart().set(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
          spatialAccelerationCommand.setSpatialAcceleration(endEffectorFrame, desiredSpatialAcceleration);
@@ -88,7 +88,7 @@ public class MotionQPInputCalculatorTest
          ScrewTools.setDesiredAccelerations(joints, desiredJointAccelerations);
 
          spatialAccelerationCalculator.compute();
-         SpatialAccelerationVector achievedSpatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, rootFrame, endEffectorFrame);
+         SpatialAcceleration achievedSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, endEffectorFrame);
          spatialAccelerationCalculator.getRelativeAcceleration(rootBody, endEffector, achievedSpatialAcceleration);
          SpatialAccelerationCalculatorTest.assertSpatialAccelerationVectorEquals(achievedSpatialAcceleration, desiredSpatialAcceleration, 1.0e-10);
       }
@@ -105,7 +105,7 @@ public class MotionQPInputCalculatorTest
          controlFrameTransform.setTranslation(EuclidCoreRandomTools.nextPoint3D(random, 10.0));
          ReferenceFrame controlFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("controlFrame" + i, endEffectorFrame, controlFrameTransform);
 
-         SpatialAccelerationVector desiredSpatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, rootFrame, controlFrame);
+         SpatialAcceleration desiredSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, controlFrame);
          desiredSpatialAcceleration.getLinearPart().set(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
          desiredSpatialAcceleration.getAngularPart().set(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
          spatialAccelerationCommand.setSpatialAcceleration(controlFrame, desiredSpatialAcceleration);
@@ -119,7 +119,7 @@ public class MotionQPInputCalculatorTest
          ScrewTools.setDesiredAccelerations(joints, desiredJointAccelerations);
 
          spatialAccelerationCalculator.compute();
-         SpatialAccelerationVector achievedSpatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, rootFrame, endEffectorFrame);
+         SpatialAcceleration achievedSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, endEffectorFrame);
          spatialAccelerationCalculator.getRelativeAcceleration(rootBody, endEffector, achievedSpatialAcceleration);
          achievedSpatialAcceleration.changeFrame(controlFrame);
          SpatialAccelerationCalculatorTest.assertSpatialAccelerationVectorEquals(achievedSpatialAcceleration, desiredSpatialAcceleration, 1.0e-10);

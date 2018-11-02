@@ -28,7 +28,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialForce;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -109,7 +109,7 @@ public class WrenchMatrixCalculator
       rhoSize = toolbox.getRhoSize();
       copTaskSize = 2 * nContactableBodies;
 
-      rhoJacobianMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, rhoSize);
+      rhoJacobianMatrix = new DenseMatrix64F(SpatialForce.SIZE, rhoSize);
       copJacobianMatrix = new DenseMatrix64F(copTaskSize, rhoSize);
       rhoPreviousMatrix = new DenseMatrix64F(rhoSize, 1);
 

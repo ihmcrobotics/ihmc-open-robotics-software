@@ -226,7 +226,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
 
    /** {@inheritDoc} */
    @Override
-   public void getSuccessorAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getSuccessorAcceleration(SpatialAcceleration accelerationToPack)
    {
       getJointAcceleration(accelerationToPack);
 
@@ -240,7 +240,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredSuccessorAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getDesiredSuccessorAcceleration(SpatialAcceleration accelerationToPack)
    {
       getDesiredJointAcceleration(accelerationToPack);
 
@@ -254,7 +254,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredPredecessorAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getDesiredPredecessorAcceleration(SpatialAcceleration accelerationToPack)
    {
       getDesiredJointAcceleration(accelerationToPack);
 

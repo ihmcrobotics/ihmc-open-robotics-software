@@ -25,7 +25,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
 
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
-   private final SpatialAccelerationVector tempAcceleration = new SpatialAccelerationVector();
+   private final SpatialAcceleration tempAcceleration = new SpatialAcceleration();
    private final Twist tempTwist = new Twist();
 
    private final boolean doVelocityTerms;
@@ -40,7 +40,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
            DEFAULT_DO_VELOCITY_TERMS, DO_ACCELERATION_TERMS);
    }
 
-   public GravityCoriolisExternalWrenchMatrixCalculator(RigidBody body, SpatialAccelerationVector rootAcceleration, HashMap<RigidBody, Wrench> externalWrenches,
+   public GravityCoriolisExternalWrenchMatrixCalculator(RigidBody body, SpatialAcceleration rootAcceleration, HashMap<RigidBody, Wrench> externalWrenches,
                                                         ArrayList<InverseDynamicsJoint> jointsToIgnore, boolean doVelocityTerms, boolean doAccelerationTerms)
    {
       this(externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms, doAccelerationTerms,
@@ -61,7 +61,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
       populateMapsAndLists();
    }
 
-   public void setRootAcceleration(SpatialAccelerationVector newRootAcceleration)
+   public void setRootAcceleration(SpatialAcceleration newRootAcceleration)
    {
       spatialAccelerationCalculator.setRootAcceleration(newRootAcceleration);
    }

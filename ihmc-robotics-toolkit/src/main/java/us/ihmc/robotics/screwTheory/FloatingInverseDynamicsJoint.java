@@ -34,9 +34,9 @@ public interface FloatingInverseDynamicsJoint extends InverseDynamicsJoint
 
    public abstract void setJointTwist(Twist jointTwist);
 
-   public abstract void setAcceleration(SpatialAccelerationVector jointAcceleration);
+   public abstract void setAcceleration(SpatialAcceleration jointAcceleration);
 
-   public abstract void setDesiredAcceleration(SpatialAccelerationVector jointAcceleration);
+   public abstract void setDesiredAcceleration(SpatialAcceleration jointAcceleration);
 
    public abstract void setWrench(Wrench jointWrench);
 

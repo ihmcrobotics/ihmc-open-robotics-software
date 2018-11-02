@@ -5,7 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public class Momentum extends SpatialForceVector
+public class Momentum extends SpatialForce
 {
    /**
     * Default constructor. Sets reference frames to null and angular and linear parts to zero.

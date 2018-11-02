@@ -27,7 +27,7 @@ public class InverseDynamicsCalculator
    private final Map<InverseDynamicsJoint, Wrench> jointWrenches = new LinkedHashMap<InverseDynamicsJoint, Wrench>();
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
-   private final SpatialAccelerationVector tempAcceleration = new SpatialAccelerationVector();
+   private final SpatialAcceleration tempAcceleration = new SpatialAcceleration();
    private final Twist tempTwist = new Twist();
 
    private final boolean doVelocityTerms;
@@ -46,7 +46,7 @@ public class InverseDynamicsCalculator
    }
 
    // FIXME: doVelocityTerms = false does not seem to work
-   public InverseDynamicsCalculator(RigidBody body, SpatialAccelerationVector rootAcceleration, List<InverseDynamicsJoint> jointsToIgnore,
+   public InverseDynamicsCalculator(RigidBody body, SpatialAcceleration rootAcceleration, List<InverseDynamicsJoint> jointsToIgnore,
          boolean doVelocityTerms, boolean doAccelerationTerms)
    {
       this(jointsToIgnore, new SpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms,
@@ -65,7 +65,7 @@ public class InverseDynamicsCalculator
 
    }
 
-   public void setRootAcceleration(SpatialAccelerationVector newRootAcceleration)
+   public void setRootAcceleration(SpatialAcceleration newRootAcceleration)
    {
       spatialAccelerationCalculator.setRootAcceleration(newRootAcceleration);
    }

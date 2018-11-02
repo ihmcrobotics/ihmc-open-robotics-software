@@ -40,7 +40,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAcceleration;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
@@ -138,7 +138,7 @@ public class SwingState extends AbstractFootControlState
    private final PoseReferenceFrame desiredControlFrame = new PoseReferenceFrame("desiredControlFrame", desiredSoleFrame);
    private final FramePose3D desiredPose = new FramePose3D();
    private final Twist desiredTwist = new Twist();
-   private final SpatialAccelerationVector desiredSpatialAcceleration = new SpatialAccelerationVector();
+   private final SpatialAcceleration desiredSpatialAcceleration = new SpatialAcceleration();
 
    private final RigidBodyTransform transformFromToeToAnkle = new RigidBodyTransform();
 

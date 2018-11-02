@@ -12,9 +12,9 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    protected Twist unitSuccessorTwist;
    protected Twist unitPredecessorTwist;
 
-   protected SpatialAccelerationVector unitJointAcceleration;
-   protected SpatialAccelerationVector unitSuccessorAcceleration;
-   protected SpatialAccelerationVector unitPredecessorAcceleration;
+   protected SpatialAcceleration unitJointAcceleration;
+   protected SpatialAcceleration unitSuccessorAcceleration;
+   protected SpatialAcceleration unitPredecessorAcceleration;
 
    private double q;
    private double qd;
@@ -97,35 +97,35 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getJointAcceleration(SpatialAcceleration accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(unitJointAcceleration);
       accelerationToPack.scale(qdd);
    }
 
    @Override
-   public void getSuccessorAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getSuccessorAcceleration(SpatialAcceleration accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(unitSuccessorAcceleration);
       accelerationToPack.scale(qdd);
    }
 
    @Override
-   public void getDesiredJointAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getDesiredJointAcceleration(SpatialAcceleration accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(unitJointAcceleration);
       accelerationToPack.scale(qddDesired);
    }
 
    @Override
-   public void getDesiredSuccessorAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getDesiredSuccessorAcceleration(SpatialAcceleration accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(unitSuccessorAcceleration);
       accelerationToPack.scale(qddDesired);
    }
 
    @Override
-   public void getDesiredPredecessorAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getDesiredPredecessorAcceleration(SpatialAcceleration accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(unitPredecessorAcceleration);
       accelerationToPack.scale(qddDesired);
@@ -255,7 +255,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       twistToPack.setIncludingFrame(unitJointTwist);
    }
 
-   public void getUnitJointAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getUnitJointAcceleration(SpatialAcceleration accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(unitJointAcceleration);
    }

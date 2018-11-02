@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialForce;
 import us.ihmc.robotics.screwTheory.Wrench;
 
 /**
@@ -20,19 +20,19 @@ import us.ihmc.robotics.screwTheory.Wrench;
  */
 public class ExternalWrenchHandler
 {
-   private final SpatialForceVector gravitationalWrench;
+   private final SpatialForce gravitationalWrench;
    private final DenseMatrix64F gravitationalWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F wrenchEquationRightHandSide = new DenseMatrix64F(Wrench.SIZE, 1);
    private final Map<RigidBody, Wrench> externalWrenchesToCompensateFor = new LinkedHashMap<RigidBody, Wrench>();
    /** For garbage free iteration */
    private final List<Wrench> externalWrenchesToCompensateForList = new ArrayList<Wrench>();
-   private final SpatialForceVector totalWrenchAlreadyApplied; // gravity plus external wrenches to compensate for
+   private final SpatialForce totalWrenchAlreadyApplied; // gravity plus external wrenches to compensate for
    private final DenseMatrix64F totalWrenchAlreadyAppliedMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final List<RigidBody> rigidBodiesWithWrenchToCompensateFor = new ArrayList<>();
    private final List<RigidBody> rigidBodiesWithExternalWrench = new ArrayList<>();
    private final Map<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
-   private final SpatialForceVector tempWrench = new SpatialForceVector();
+   private final SpatialForce tempWrench = new SpatialForce();
    private final ReferenceFrame centerOfMassFrame;
 
    public ExternalWrenchHandler(double gravityZ, ReferenceFrame centerOfMassFrame, double robotTotalMass,
@@ -43,9 +43,9 @@ public class ExternalWrenchHandler
 
       this.contactablePlaneBodies = new ArrayList<>(contactablePlaneBodies);
 
-      gravitationalWrench = new SpatialForceVector(centerOfMassFrame);
+      gravitationalWrench = new SpatialForce(centerOfMassFrame);
       gravitationalWrench.setLinearPartZ(-gravityZ * robotTotalMass);
-      totalWrenchAlreadyApplied = new SpatialForceVector(centerOfMassFrame);
+      totalWrenchAlreadyApplied = new SpatialForce(centerOfMassFrame);
 
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {

@@ -45,7 +45,7 @@ public class DynamicsMatrixCalculatorHelper
       this.rhoSize = rhoSize;
    }
 
-   private final DenseMatrix64F tmpCoriolisMatrix = new DenseMatrix64F(SpatialForceVector.SIZE);
+   private final DenseMatrix64F tmpCoriolisMatrix = new DenseMatrix64F(SpatialForce.SIZE);
    public void computeCoriolisMatrix(DenseMatrix64F coriolisMatrix)
    {
       InverseDynamicsJoint[] jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();

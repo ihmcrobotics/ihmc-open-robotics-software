@@ -190,7 +190,7 @@ public class DynamicsMatrixCalculator
    private final DenseMatrix64F localFloatingCoriolisMatrix = new DenseMatrix64F(large, large);
    private final DenseMatrix64F localFloatingContactJacobian = new DenseMatrix64F(large, large);
 
-   private final DenseMatrix64F tmpMatrix = new DenseMatrix64F(SpatialForceVector.SIZE);
+   private final DenseMatrix64F tmpMatrix = new DenseMatrix64F(SpatialForce.SIZE);
 
    private final FloatingBaseRigidBodyDynamicsCalculator rbdCalculator = new FloatingBaseRigidBodyDynamicsCalculator();
 

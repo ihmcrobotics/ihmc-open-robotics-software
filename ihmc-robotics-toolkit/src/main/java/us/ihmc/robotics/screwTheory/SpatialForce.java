@@ -12,7 +12,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public class SpatialForceVector
+public class SpatialForce
 {
    public static final int SIZE = 6;
    public static final String[] AXIS_NAMES = new String[] {"xAngular", "yAngular", "zAngular", "xLinear", "yLinear", "zLinear"};
@@ -25,7 +25,7 @@ public class SpatialForceVector
    /**
     * Default constructor
     */
-   public SpatialForceVector()
+   public SpatialForce()
    {
       expressedInFrame = null;
       linearPart = new FrameVector3D();
@@ -37,7 +37,7 @@ public class SpatialForceVector
     * 
     * @param expressedInFrame the frame in which the spatial acceleration vector is expressed
     */
-   public SpatialForceVector(ReferenceFrame expressedInFrame)
+   public SpatialForce(ReferenceFrame expressedInFrame)
    {
       this.expressedInFrame = expressedInFrame;
       linearPart = new FrameVector3D();
@@ -49,7 +49,7 @@ public class SpatialForceVector
     * @param angularPart angular part of the spatial acceleration vector
     * @param linearPart linear part part of the spatial acceleration vector
     */
-   public SpatialForceVector(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
+   public SpatialForce(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
       this.expressedInFrame = expressedInFrame;
       this.linearPart = new FrameVector3D (expressedInFrame,  linearPart);
@@ -59,7 +59,7 @@ public class SpatialForceVector
    /**
     * Construct using a Matrix ([angularPart; linearPart])
     */
-   public SpatialForceVector(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
+   public SpatialForce(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
       angularPart = new FrameVector3D();
       linearPart = new FrameVector3D();
@@ -69,7 +69,7 @@ public class SpatialForceVector
    /**
     * Construct using a double array ([angularPart; linearPart])
     */
-   public SpatialForceVector(ReferenceFrame expressedInFrame, double[] matrix)
+   public SpatialForce(ReferenceFrame expressedInFrame, double[] matrix)
    {
       MathTools.checkIntervalContains(matrix.length, SIZE, SIZE);
       this.expressedInFrame = expressedInFrame;
@@ -80,7 +80,7 @@ public class SpatialForceVector
    /**
     * Copy constructor
     */
-   public SpatialForceVector(SpatialForceVector other)
+   public SpatialForce(SpatialForce other)
    {
       expressedInFrame = other.expressedInFrame;
       linearPart = new FrameVector3D(other.getLinearPart());
@@ -152,13 +152,13 @@ public class SpatialForceVector
       getLinearPart().setZ(val);
    }
 
-   public void set(SpatialForceVector other)
+   public void set(SpatialForce other)
    {
       expressedInFrame.checkReferenceFrameMatch(other.expressedInFrame);
       setIncludingFrame(other);
    }
 
-   public void setIncludingFrame(SpatialForceVector other)
+   public void setIncludingFrame(SpatialForce other)
    {
       setIncludingFrame(other.expressedInFrame, other.getAngularPart(), other.getLinearPart());
    }
@@ -166,7 +166,7 @@ public class SpatialForceVector
    /**
     * Adds another spatial force vector to this one, after performing some reference frame checks.
     */
-   public void add(SpatialForceVector other)
+   public void add(SpatialForce other)
    {
       expressedInFrame.checkReferenceFrameMatch(other.expressedInFrame);
 
@@ -178,7 +178,7 @@ public class SpatialForceVector
     * Subtracts another spatial force vector from this one, after performing some reference frame
     * checks.
     */
-   public void sub(SpatialForceVector other)
+   public void sub(SpatialForce other)
    {
       expressedInFrame.checkReferenceFrameMatch(other.expressedInFrame);
 

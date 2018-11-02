@@ -24,7 +24,7 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAcceleration;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -775,7 +775,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       floatingJoint.getLinearAcceleration(linearAccelerationInBody);
       linearAccelerationInBody.changeFrame(bodyFrame);
 
-      SpatialAccelerationVector jointAcceleration = new SpatialAccelerationVector(bodyFrame, elevatorFrame, bodyFrame);
+      SpatialAcceleration jointAcceleration = new SpatialAcceleration(bodyFrame, elevatorFrame, bodyFrame);
       jointAcceleration.getLinearPart().set(linearAccelerationInBody);
       jointAcceleration.getAngularPart().set(angularAccelerationInBody);
 
@@ -796,7 +796,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       FrameVector3D angularAcceleration = new FrameVector3D(bodyFrame, RandomGeometry.nextVector3D(random, maxRootJointAngularAcceleration));
       //      originAcceleration.changeFrame(elevatorFrame);
 
-      SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector(bodyFrame, elevatorFrame, bodyFrame);
+      SpatialAcceleration spatialAccelerationVector = new SpatialAcceleration(bodyFrame, elevatorFrame, bodyFrame);
 
       spatialAccelerationVector.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
       sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
@@ -818,7 +818,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       floatingJoint.getAngularAccelerationInBody(angularAcceleration);
       originAcceleration.changeFrame(elevatorFrame);
 
-      SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector(bodyFrame, elevatorFrame, bodyFrame);
+      SpatialAcceleration spatialAccelerationVector = new SpatialAcceleration(bodyFrame, elevatorFrame, bodyFrame);
 
       spatialAccelerationVector.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
       sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
@@ -845,10 +845,10 @@ public class DRCInverseDynamicsCalculatorTestHelper
       computedRootJointLinearAcceleration.set(originAcceleration);
       computedRootJointAngularAcceleration.set(angularAcceleration);
 
-      SpatialAccelerationVector spatialAccelerationVectorOfSimulatedRootJoint = new SpatialAccelerationVector(bodyFrame, elevatorFrame, bodyFrame);
+      SpatialAcceleration spatialAccelerationVectorOfSimulatedRootJoint = new SpatialAcceleration(bodyFrame, elevatorFrame, bodyFrame);
       spatialAccelerationVectorOfSimulatedRootJoint.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
 
-      SpatialAccelerationVector spatialAccelerationVectorOfInverseDynamicsRootJoint = new SpatialAccelerationVector();
+      SpatialAcceleration spatialAccelerationVectorOfInverseDynamicsRootJoint = new SpatialAcceleration();
       sixDoFJoint.getDesiredJointAcceleration(spatialAccelerationVectorOfInverseDynamicsRootJoint);
 
       return spatialAccelerationVectorOfInverseDynamicsRootJoint.epsilonEquals(spatialAccelerationVectorOfInverseDynamicsRootJoint, epsilon);

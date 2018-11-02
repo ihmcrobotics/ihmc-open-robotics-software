@@ -642,7 +642,7 @@ public class ScrewToolsTest
       chain.setRandomPositionsAndVelocities(random);
 
       double gravity = RandomNumbers.nextDouble(random, 100.0);
-      SpatialAccelerationVector result = ScrewTools.
+      SpatialAcceleration result = ScrewTools.
             createGravitationalSpatialAcceleration(chain.getElevator(), gravity);
 
       Vector3DReadOnly angularPart = result.getAngularPart();

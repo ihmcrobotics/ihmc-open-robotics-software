@@ -21,7 +21,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialAcceleration;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
@@ -250,7 +250,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     *            {@code baseFrame = base.getBodyFixedFrame()},
     *            {@code expressedInFrame = controlFrame}.
     */
-   public void setSpatialAcceleration(ReferenceFrame controlFrame, SpatialAccelerationVector desiredSpatialAcceleration)
+   public void setSpatialAcceleration(ReferenceFrame controlFrame, SpatialAcceleration desiredSpatialAcceleration)
    {
       desiredSpatialAcceleration.getBodyFrame().checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
       desiredSpatialAcceleration.getBaseFrame().checkReferenceFrameMatch(base.getBodyFixedFrame());
@@ -694,7 +694,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @param desiredSpatialAccelerationToPack the desired spatial acceleration of the end-effector
     *           with respect to the base, expressed in the control frame. Modified.
     */
-   public void getDesiredSpatialAcceleration(PoseReferenceFrame controlFrameToPack, SpatialAccelerationVector desiredSpatialAccelerationToPack)
+   public void getDesiredSpatialAcceleration(PoseReferenceFrame controlFrameToPack, SpatialAcceleration desiredSpatialAccelerationToPack)
    {
       getControlFrame(controlFrameToPack);
       desiredSpatialAccelerationToPack.setIncludingFrame(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(), controlFrameToPack, desiredAngularAcceleration,

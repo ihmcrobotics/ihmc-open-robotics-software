@@ -259,7 +259,7 @@ public class GeometricJacobianCalculatorTest
 
          RigidBody body = joints.get(0).getPredecessor();
          RigidBody rootBody = ScrewTools.getRootBody(body);
-         SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
+         SpatialAcceleration rootAcceleration = new SpatialAcceleration(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, rootAcceleration, true, false, false);
 
          spatialAccelerationCalculator.compute();
@@ -271,10 +271,10 @@ public class GeometricJacobianCalculatorTest
          jacobianCalculator.setKinematicChain(randomBase, randomEndEffector);
          jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
          jacobianCalculator.computeConvectiveTerm();
-         SpatialAccelerationVector actualConvectiveTerm = new SpatialAccelerationVector();
+         SpatialAcceleration actualConvectiveTerm = new SpatialAcceleration();
          jacobianCalculator.getConvectiveTerm(actualConvectiveTerm);
 
-         SpatialAccelerationVector expectedConvectiveTerm = new SpatialAccelerationVector();
+         SpatialAcceleration expectedConvectiveTerm = new SpatialAcceleration();
          spatialAccelerationCalculator.getRelativeAcceleration(randomBase, randomEndEffector, expectedConvectiveTerm);
 
          SpatialMotionVectorTest.assertSpatialMotionVectorEquals(expectedConvectiveTerm, actualConvectiveTerm, 1.0e-12);
@@ -293,7 +293,7 @@ public class GeometricJacobianCalculatorTest
          RigidBody rootBody = ScrewTools.getRootBody(body);
          rootBody.updateFramesRecursively();
 
-         SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
+         SpatialAcceleration rootAcceleration = new SpatialAcceleration(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, rootAcceleration, true, false, false);
 
          spatialAccelerationCalculator.compute();
@@ -312,10 +312,10 @@ public class GeometricJacobianCalculatorTest
          jacobianCalculator.setKinematicChain(randomBase, randomEndEffector);
          jacobianCalculator.setJacobianFrame(fixedInEndEffector);
          jacobianCalculator.computeConvectiveTerm();
-         SpatialAccelerationVector actualConvectiveTerm = new SpatialAccelerationVector();
+         SpatialAcceleration actualConvectiveTerm = new SpatialAcceleration();
          jacobianCalculator.getConvectiveTerm(actualConvectiveTerm);
 
-         SpatialAccelerationVector expectedConvectiveTerm = new SpatialAccelerationVector();
+         SpatialAcceleration expectedConvectiveTerm = new SpatialAcceleration();
          spatialAccelerationCalculator.getRelativeAcceleration(randomBase, randomEndEffector, expectedConvectiveTerm);
          expectedConvectiveTerm.changeFrame(fixedInEndEffector);
 
@@ -496,8 +496,8 @@ public class GeometricJacobianCalculatorTest
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(base, 0.0, true);
       spatialAccelerationCalculator.compute();
 
-      SpatialAccelerationVector expectedAcceleration = new SpatialAccelerationVector();
-      SpatialAccelerationVector actualAcceleration = new SpatialAccelerationVector();
+      SpatialAcceleration expectedAcceleration = new SpatialAcceleration();
+      SpatialAcceleration actualAcceleration = new SpatialAcceleration();
 
       DenseMatrix64F jointDesiredAccelerationsMatrix = new DenseMatrix64F(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
       ScrewTools.getDesiredJointAccelerationsMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointDesiredAccelerationsMatrix);

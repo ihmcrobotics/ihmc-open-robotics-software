@@ -12,7 +12,7 @@ public class SpatialForceVectorTest
 {
    //TODO
 
-   public static void assertSpatialForceVectorEquals(SpatialForceVector vector1, SpatialForceVector vector2, double epsilon)
+   public static void assertSpatialForceVectorEquals(SpatialForce vector1, SpatialForce vector2, double epsilon)
    {
       assertEquals(vector1.getReferenceFrame(), vector2.getReferenceFrame());
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(vector1.getAngularPart()), new Vector3D(vector2.getAngularPart()), epsilon);

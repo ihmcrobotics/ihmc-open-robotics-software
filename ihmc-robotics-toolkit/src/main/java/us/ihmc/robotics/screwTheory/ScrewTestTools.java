@@ -516,7 +516,7 @@ public class ScrewTestTools
 
    public static void setRandomAcceleration(SixDoFJoint rootJoint, Random random)
    {
-      SpatialAccelerationVector jointAcceleration = new SpatialAccelerationVector();
+      SpatialAcceleration jointAcceleration = new SpatialAcceleration();
       rootJoint.getJointAcceleration(jointAcceleration);
       jointAcceleration.getAngularPart().set(RandomGeometry.nextVector3D(random));
       jointAcceleration.getLinearPart().set(RandomGeometry.nextVector3D(random));
@@ -525,7 +525,7 @@ public class ScrewTestTools
 
    public static void copyDesiredAccelerationToActual(SixDoFJoint rootJoint)
    {
-      SpatialAccelerationVector rootJointAcceleration = new SpatialAccelerationVector();
+      SpatialAcceleration rootJointAcceleration = new SpatialAcceleration();
       rootJoint.getDesiredJointAcceleration(rootJointAcceleration);
       rootJoint.setAcceleration(rootJointAcceleration);
    }
@@ -540,7 +540,7 @@ public class ScrewTestTools
 
    public static void integrateAccelerations(SixDoFJoint sixDoFJoint, double dt)
    {
-      SpatialAccelerationVector deltaTwist = new SpatialAccelerationVector();
+      SpatialAcceleration deltaTwist = new SpatialAcceleration();
       sixDoFJoint.getJointAcceleration(deltaTwist);
       deltaTwist.scale(dt);
 
@@ -553,7 +553,7 @@ public class ScrewTestTools
 
    public static void doubleIntegrateFromAcceleration(SixDoFJoint sixDoFJoint, double dt)
    {
-      SpatialAccelerationVector deltaTwist = new SpatialAccelerationVector();
+      SpatialAcceleration deltaTwist = new SpatialAcceleration();
       sixDoFJoint.getJointAcceleration(deltaTwist);
       deltaTwist.scale(dt);
 

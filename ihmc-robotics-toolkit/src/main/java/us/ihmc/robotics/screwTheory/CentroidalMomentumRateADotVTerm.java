@@ -11,9 +11,9 @@ public class CentroidalMomentumRateADotVTerm
 {
    private final InverseDynamicsJoint[] jointsInOrder;
    private final ReferenceFrame centerOfMassFrame;
-   private final SpatialAccelerationVector rootAcceleration;
+   private final SpatialAcceleration rootAcceleration;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
-   private final SpatialAccelerationVector tempSpatialAcceleration;
+   private final SpatialAcceleration tempSpatialAcceleration;
    private final CentroidalMomentumMatrix centroidalMomentumMatrix;
    private final RigidBody rootBody;
    private final DenseMatrix64F v;
@@ -41,7 +41,7 @@ public class CentroidalMomentumRateADotVTerm
 
       this.centroidalMomentumMatrix = centroidalMomentumMatrix;
 
-      this.rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame());
+      this.rootAcceleration = new SpatialAcceleration(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame());
       this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, this.rootAcceleration, true, false, false);
 
       this.comTwist = new Twist(centerOfMassFrame, rootBody.getBodyFixedFrame(), centerOfMassFrame);
@@ -49,7 +49,7 @@ public class CentroidalMomentumRateADotVTerm
 
       this.comVelocityVector = new Vector3D();
       this.aDotV = new DenseMatrix64F(6, 1);
-      this.tempSpatialAcceleration = new SpatialAccelerationVector();
+      this.tempSpatialAcceleration = new SpatialAcceleration();
       this.tempMomentum = new Momentum();
       this.tempTwist = new Twist();
       this.tempCoMTwist = new Twist();
