@@ -240,7 +240,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     * Packs the linear acceleration of a point that is fixed in bodyFrame, with respect to
     * baseFrame. The resulting vector is expressed in {@code this.getExpressedInFrame()}.
     */
-   public void getAccelerationOfPointFixedInBodyFrame(Twist twist, FramePoint3D pointFixedInBodyFrame, FrameVector3D linearAccelerationToPack)
+   public void getLinearAccelerationAt(Twist twist, FramePoint3D pointFixedInBodyFrame, FrameVector3D linearAccelerationToPack)
    {
       pointFixedInBodyFrame.checkReferenceFrameMatch(expressedInFrame);
 
@@ -261,7 +261,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       linearAccelerationToPack.add(tempVector);
    }
 
-   public void setBasedOnOriginAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
+   public void setBasedOnOriginAccelerationIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
                                             FrameVector3D angularAcceleration, FrameVector3D originAcceleration, Twist twistOfBodyWithRespectToBase)
    {
       this.bodyFrame = bodyFrame;
@@ -286,7 +286,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       getLinearPart().sub(originAcceleration, getLinearPart());
    }
 
-   public void getLinearAccelerationFromOriginAcceleration(Twist twistOfBodyWithRespectToBase, FrameVector3D linearAccelerationToPack)
+   public void getLinearAccelerationAtBodyOrigin(Twist twistOfBodyWithRespectToBase, FrameVector3D linearAccelerationToPack)
    {
       bodyFrame.checkReferenceFrameMatch(expressedInFrame);
       twistOfBodyWithRespectToBase.getBodyFrame().checkReferenceFrameMatch(bodyFrame);

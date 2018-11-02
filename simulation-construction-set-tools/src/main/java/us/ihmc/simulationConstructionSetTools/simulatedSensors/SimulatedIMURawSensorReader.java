@@ -217,7 +217,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
       imuFramePointInWorldFrame.changeFrame(worldFrame);
 
       acceleration.setToZero(worldFrame);
-      spatialAcceleration.getAccelerationOfPointFixedInBodyFrame(twistInWorldFrame, imuFramePointInWorldFrame, acceleration);
+      spatialAcceleration.getLinearAccelerationAt(twistInWorldFrame, imuFramePointInWorldFrame, acceleration);
       acceleration.changeFrame(imuFrame);
 
       perfAccelX.set(acceleration.getX());
