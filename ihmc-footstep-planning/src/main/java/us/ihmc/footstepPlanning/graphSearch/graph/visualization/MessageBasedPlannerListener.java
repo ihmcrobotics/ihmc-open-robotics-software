@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.idl.IDLSequence.Object;
 
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    }
 
    @Override
-   public void rejectNode(FootstepNode rejectedNode, BipedalFootstepPlannerNodeRejectionReason reason)
+   public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       rejectionReasons.put(rejectedNode, reason);
    }

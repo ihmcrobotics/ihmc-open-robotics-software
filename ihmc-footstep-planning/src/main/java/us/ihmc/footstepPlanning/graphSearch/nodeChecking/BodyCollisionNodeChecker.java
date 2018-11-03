@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -11,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.geometry.polytope.ConvexPolytope;
@@ -42,6 +43,9 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
    private final FootstepNodeSnapper snapper;
    private final Vector3D bodyBoxDimensions = new Vector3D();
 
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+
    public BodyCollisionNodeChecker(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper)
    {
       this.parameters = parameters;
@@ -50,17 +54,15 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       bodyCollisionBox = new Box3D();
       bodyCollisionBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
 
-      bodyCollisionFrame.updateTranslation(new Vector3D(parameters.getBodyBoxBaseX(), parameters.getBodyBoxBaseY(), parameters.getBodyBoxBaseZ() + 0.5 * parameters.getBodyBoxHeight()));
+      bodyCollisionFrame.updateTranslation(
+            new Vector3D(parameters.getBodyBoxBaseX(), parameters.getBodyBoxBaseY(), parameters.getBodyBoxBaseZ() + 0.5 * parameters.getBodyBoxHeight()));
    }
-
-   private final FramePoint3D tempPoint = new FramePoint3D();
-   private final RigidBodyTransform tempTransform= new RigidBodyTransform();
 
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
       super.setPlanarRegions(planarRegions);
-      if(!hasPlanarRegions())
+      if (!hasPlanarRegions())
          return;
 
       planarRegionPolytopes.clear();
@@ -93,6 +95,23 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
          return true;
       }
 
+      if (!isNodeValidInternal(node, previousNode, 1.0))
+      {
+         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
+         return false;
+      }
+
+      return true;
+   }
+
+   @Override
+   public void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform)
+   {
+
+   }
+
+   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode, double scaleFactor)
+   {
       if (!findMidStanceFrame(node, previousNode))
          return true;
 
@@ -106,6 +125,8 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
          return true;
 
       bodyCollisionBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
+      if (!MathTools.epsilonEquals(1.0, scaleFactor, 1e-5))
+         bodyCollisionBox.scale(scaleFactor);
       bodyBoxDimensions.set(parameters.getBodyBoxBaseX(), parameters.getBodyBoxBaseY(), parameters.getBodyBoxBaseZ() + 0.5 * parameters.getBodyBoxHeight());
       bodyCollisionFrame.updateTranslation(bodyBoxDimensions);
       bodyCollisionPolytope.getVertices().clear();
@@ -121,18 +142,11 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
          ConvexPolytope planarRegionPolytope = planarRegionPolytopes.get(planarRegion);
          if (collisionDetector.arePolytopesColliding(bodyCollisionPolytope, planarRegionPolytope, pointToThrowAway1, pointToThrowAway2))
          {
-            rejectNode(node, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
             return false;
          }
       }
 
       return true;
-   }
-
-   @Override
-   public void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform)
-   {
-
    }
 
    private final FramePose3D midPose = new FramePose3D();

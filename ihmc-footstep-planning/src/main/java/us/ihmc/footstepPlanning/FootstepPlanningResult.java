@@ -32,6 +32,11 @@ public enum FootstepPlanningResult
       }
    }
 
+   public static FootstepPlanningResult getWorstResult(FootstepPlanningResult resultA, FootstepPlanningResult resultB)
+   {
+      return fromByte((byte) Math.max(resultA.toByte(), resultB.toByte()));
+   }
+
    public byte toByte()
    {
       return (byte) ordinal();
