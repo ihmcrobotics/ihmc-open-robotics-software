@@ -344,7 +344,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
             listener.tickAndUpdate();
 
          long timeInNano = System.nanoTime();
-         if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime) > 1000.0)
+         if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime) > timeout.getDoubleValue())
             break;
       }
 
