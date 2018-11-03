@@ -65,19 +65,13 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
-      List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
-      return commands;
+      return FootstepPlannerCommunicationProperties.getSupportedCommands();
    }
 
    @Override
    public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
    {
-      List<Class<? extends Settable<?>>> status = new ArrayList<>();
-      status.add(FootstepPlanningToolboxOutputStatus.class);
-      status.add(FootstepPlannerStatusMessage.class);
-      status.add(BodyPathPlanMessage.class);
-      status.add(BodyPathPlanStatisticsMessage.class);
-      return status;
+      return FootstepPlannerCommunicationProperties.getSupportedStatusMessages();
    }
 
    @Override

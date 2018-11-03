@@ -9,6 +9,22 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface FootstepPlanner
 {
+   default void setFootstepPlannerObjective(FootstepPlannerObjective info)
+   {
+      if (info.hasInitialStanceFootPose())
+         setInitialStanceFoot(info.getInitialStanceFootPose(), info.getInitialStanceFootSide());
+      if (info.hasHorizonLength())
+         setPlanningHorizonLength(info.getHorizonLength());
+      if (info.hasTimeout())
+         setTimeout(info.getTimeout());
+      if (info.hasGoal())
+         setGoal(info.getGoal());
+   }
+
+   default void requestInitialize()
+   {
+   }
+
    /**
     * Set the initial stance side and the pose of the initial stance foot for planning.
     * @param stanceFootPose      Pose of the sole frame of the initial stance foot
@@ -84,7 +100,7 @@ public interface FootstepPlanner
 
    double getPlanningDuration();
 
-   default PlannerStatistics getPlannerStatistics()
+   default PlannerStatistics<?> getPlannerStatistics()
    {
       return null;
    }

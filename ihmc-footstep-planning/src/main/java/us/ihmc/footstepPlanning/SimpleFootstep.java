@@ -17,6 +17,11 @@ public class SimpleFootstep
       foothold.clear();
    }
 
+   public SimpleFootstep(SimpleFootstep other)
+   {
+      set(other);
+   }
+
    public void set(SimpleFootstep other)
    {
       this.robotSide = other.robotSide;
