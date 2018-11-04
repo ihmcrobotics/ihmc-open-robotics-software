@@ -19,28 +19,30 @@ public class VisibilityGraphsParametersUIController
    private final VisibilityGraphsParametersProperty parametersProperty = new VisibilityGraphsParametersProperty(this, "visibilityGraphsParametersProperty");
 
    @FXML
+   private Slider clusterResolution;
+   @FXML
    private Slider maxInterRegionConnectionLength;
    @FXML
-   private Slider normalZThresholdForAccessibleRegions;
+   private Spinner<Double> explorationDistanceFromStartGoal;
+
    @FXML
    private Slider extrusionDistance;
    @FXML
    private Slider extrusionDistanceIfNotTooHighToStep;
    @FXML
    private Slider tooHighToStepDistance;
-   @FXML
-   private Slider clusterResolution;
-   @FXML
-   private Slider explorationDistanceFromStartGoal;
+
+
    @FXML
    private Slider planarRegionMinArea;
-
    @FXML
    private Spinner<Integer> planarRegionMinSize;
    @FXML
    private Slider regionOrthogonalAngle;
    @FXML
    private Slider searchHostRegionEpsilon;
+   @FXML
+   private Slider normalZThresholdForAccessibleRegions;
 
 
 
@@ -57,6 +59,7 @@ public class VisibilityGraphsParametersUIController
    private void setupControls()
    {
       planarRegionMinSize.setValueFactory(createPlanarRegionMinSizeValueFactory());
+      explorationDistanceFromStartGoal.setValueFactory(createExplorationDistanceFroStartGoal());
    }
 
    public void bindControls()
@@ -69,7 +72,7 @@ public class VisibilityGraphsParametersUIController
       parametersProperty.bidirectionalBindExtrusionDistanceIfNotTooHighToStep(extrusionDistanceIfNotTooHighToStep.valueProperty());
       parametersProperty.bidirectionalBindTooHighToStepDistance(tooHighToStepDistance.valueProperty());
       parametersProperty.bidirectionalBindClusterResolution(clusterResolution.valueProperty());
-      parametersProperty.bidirectionalBindExplorationDistanceFromStartGoal(explorationDistanceFromStartGoal.valueProperty());
+      parametersProperty.bidirectionalBindExplorationDistanceFromStartGoal(explorationDistanceFromStartGoal.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindPlanarRegionMinArea(planarRegionMinArea.valueProperty());
       parametersProperty.bidirectionalBindPlanarRegionMinSize(planarRegionMinSize.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindRegionOrthogonalAngle(regionOrthogonalAngle.valueProperty());
@@ -84,6 +87,14 @@ public class VisibilityGraphsParametersUIController
       int max = 100;
       int amountToStepBy = 1;
       return new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, 0, amountToStepBy);
+   }
+
+   private SpinnerValueFactory.DoubleSpinnerValueFactory createExplorationDistanceFroStartGoal()
+   {
+      double min = 0;
+      double max = Double.POSITIVE_INFINITY;
+      double amountToStepBy = 1.0;
+      return new SpinnerValueFactory.DoubleSpinnerValueFactory(min, max, 0, amountToStepBy);
    }
 
    private PropertyToMessageTypeConverter<VisibilityGraphsParameters, SettableVisibilityGraphsParameters> createConverter()
