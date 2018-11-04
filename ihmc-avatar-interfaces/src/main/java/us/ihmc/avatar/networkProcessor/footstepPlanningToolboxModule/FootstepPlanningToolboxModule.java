@@ -16,7 +16,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class FootstepPlanningToolboxModule extends ToolboxModule
@@ -49,7 +48,9 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> footstepPlanningToolboxController.processRequest(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlannerParametersPacket.class, getSubscriberTopicNameGenerator(),
-                                           s -> footstepPlanningToolboxController.processPlannerParameters(s.takeNextData()));
+                                           s -> footstepPlanningToolboxController.processFootstepPlannerParameters(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, VisibilityGraphsParametersPacket.class, getSubscriberTopicNameGenerator(),
+                                           s -> footstepPlanningToolboxController.processVisibilityGraphsParameters(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanningStatisticsRequestMessage.class, getSubscriberTopicNameGenerator(),
                                            s -> footstepPlanningToolboxController.processPlanningStatisticsRequest());
       textToSpeechPublisher = ROS2Tools.createPublisher(realtimeRos2Node, TextToSpeechPacket.class, ROS2Tools::generateDefaultTopicName);

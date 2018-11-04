@@ -54,7 +54,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final YoEnum<FootstepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry, FootstepPlannerType.class);
 
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<>(null);
-   private final AtomicReference<FootstepPlannerParametersPacket> latestParametersReference = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlannerParametersPacket> latestFootstepPlannerParametersReference = new AtomicReference<>(null);
+   private final AtomicReference<VisibilityGraphsParametersPacket> latestVisibilityGraphsParametersReference = new AtomicReference<>(null);
 
    private final AtomicReference<BodyPathPlan> bodyPathPlan = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlan> footstepPlan = new AtomicReference<>(null);
@@ -379,9 +380,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       planId.set(request.getPlannerRequestId());
       FootstepPlannerType requestedPlannerType = FootstepPlannerType.fromByte(request.getRequestedFootstepPlannerType());
 
-      FootstepPlannerParametersPacket parameters = latestParametersReference.getAndSet(null);
-      if (parameters != null)
-         footstepPlanningParameters.set(parameters);
+      FootstepPlannerParametersPacket footstepPlannerParameters = latestFootstepPlannerParametersReference.getAndSet(null);
+      if (footstepPlannerParameters != null)
+         footstepPlanningParameters.set(footstepPlannerParameters);
+
+      VisibilityGraphsParametersPacket visibilityGraphsParameters = latestVisibilityGraphsParametersReference.getAndSet(null);
+      if (visibilityGraphsParameters != null)
+         this.visibilityGraphsParameters.set(visibilityGraphsParameters);
 
       if (debug)
       {
@@ -623,9 +628,14 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       latestRequestReference.set(request);
    }
 
-   public void processPlannerParameters(FootstepPlannerParametersPacket parameters)
+   public void processFootstepPlannerParameters(FootstepPlannerParametersPacket parameters)
    {
-      latestParametersReference.set(parameters);
+      latestFootstepPlannerParametersReference.set(parameters);
+   }
+
+   public void processVisibilityGraphsParameters(VisibilityGraphsParametersPacket parameters)
+   {
+      latestVisibilityGraphsParametersReference.set(parameters);
    }
 
    public void processPlanningStatisticsRequest()

@@ -15,6 +15,7 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
@@ -26,7 +27,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MultiStageFootstepPlanningModule
 {
@@ -93,7 +93,10 @@ public class MultiStageFootstepPlanningModule
                                            s -> footstepPlanningController.processRequest(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlannerParametersPacket.class,
                                            FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
-                                           s -> footstepPlanningController.processPlannerParameters(s.takeNextData()));
+                                           s -> footstepPlanningController.processFootstepPlannerParameters(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, VisibilityGraphsParametersPacket.class,
+                                           FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
+                                           s -> footstepPlanningController.processVisibilityGraphsParameters(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanningStatisticsRequestMessage.class,
                                            FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
                                            s -> footstepPlanningController.processPlanningStatisticsRequest());

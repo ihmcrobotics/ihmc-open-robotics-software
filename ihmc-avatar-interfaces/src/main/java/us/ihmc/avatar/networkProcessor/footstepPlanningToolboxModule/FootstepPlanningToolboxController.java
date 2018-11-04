@@ -68,7 +68,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final EnumMap<FootstepPlannerType, FootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
 
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<>(null);
-   private final AtomicReference<FootstepPlannerParametersPacket> latestParametersReference = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlannerParametersPacket> latestFootstepPlannerParametersReference = new AtomicReference<>(null);
+   private final AtomicReference<VisibilityGraphsParametersPacket> latestVisibilityGraphsParametersReference = new AtomicReference<>(null);
    private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
@@ -251,13 +252,13 @@ public class FootstepPlanningToolboxController extends ToolboxController
       planId.set(request.getPlannerRequestId());
       FootstepPlannerType requestedPlannerType = FootstepPlannerType.fromByte(request.getRequestedFootstepPlannerType());
 
-      FootstepPlannerParametersPacket parameters = latestParametersReference.getAndSet(null);
-      if (parameters != null)
-      {
-         if (DEBUG)
-            PrintTools.info("Processing new planning parameters.");
-         footstepPlanningParameters.set(parameters);
-      }
+      FootstepPlannerParametersPacket footstepPlannerParameters = latestFootstepPlannerParametersReference.getAndSet(null);
+      if (footstepPlannerParameters != null)
+         footstepPlanningParameters.set(footstepPlannerParameters);
+
+      VisibilityGraphsParametersPacket visibilityGraphParameters = latestVisibilityGraphsParametersReference.getAndSet(null);
+      if (visibilityGraphParameters != null)
+         this.visibilityGraphsParameters.set(visibilityGraphParameters);
 
       if (DEBUG)
       {
@@ -406,11 +407,16 @@ public class FootstepPlanningToolboxController extends ToolboxController
       latestRequestReference.set(request);
    }
 
-   public void processPlannerParameters(FootstepPlannerParametersPacket parameters)
+   public void processFootstepPlannerParameters(FootstepPlannerParametersPacket parameters)
+   {
+      latestFootstepPlannerParametersReference.set(parameters);
+   }
+
+   public void processVisibilityGraphsParameters(VisibilityGraphsParametersPacket parameters)
    {
       if (DEBUG)
          PrintTools.info("Received new planning parameters");
-      latestParametersReference.set(parameters);
+      latestVisibilityGraphsParametersReference.set(parameters);
    }
 
    public void processPlanningStatisticsRequest()
