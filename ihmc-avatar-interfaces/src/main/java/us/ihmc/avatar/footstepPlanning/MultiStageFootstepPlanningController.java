@@ -3,9 +3,9 @@ package us.ihmc.avatar.footstepPlanning;
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -20,7 +20,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MultiStageFootstepPlanningController
 {
@@ -72,9 +71,14 @@ public class MultiStageFootstepPlanningController
       stageManager.processRequest(request);
    }
 
-   public void processPlannerParameters(FootstepPlannerParametersPacket parameters)
+   public void processFootstepPlannerParameters(FootstepPlannerParametersPacket parameters)
    {
-      stageManager.processPlannerParameters(parameters);
+      stageManager.processFootstepPlannerParameters(parameters);
+   }
+
+   public void processVisibilityGraphsParameters(VisibilityGraphsParametersPacket parameters)
+   {
+      stageManager.processVisibilityGraphsParameters(parameters);
    }
 
    public void processPlanningStatisticsRequest()
