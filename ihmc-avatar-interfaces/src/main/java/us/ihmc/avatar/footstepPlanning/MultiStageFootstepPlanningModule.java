@@ -80,7 +80,8 @@ public class MultiStageFootstepPlanningModule
       commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
 
       footstepPlanningController = new MultiStageFootstepPlanningController(drcRobotModel.getContactPointParameters(),
-                                                                            drcRobotModel.getFootstepPlannerParameters(), commandInputManager,
+                                                                            drcRobotModel.getFootstepPlannerParameters(),
+                                                                            drcRobotModel.getVisibilityGraphsParameters(), commandInputManager,
                                                                             statusOutputManager, executorService, registry, yoGraphicsListRegistry,
                                                                             DEFAULT_UPDATE_PERIOD_MILLISECONDS);
 

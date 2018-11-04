@@ -42,6 +42,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
+import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
@@ -80,11 +82,12 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private double dt;
 
    private final YoFootstepPlannerParameters footstepPlanningParameters;
+   private final YoVisibilityGraphParameters visibilityGraphsParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
    public FootstepPlanningToolboxController(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
-                                            StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry,
-                                            YoGraphicsListRegistry graphicsListRegistry, double dt)
+                                            VisibilityGraphsParameters visibilityGraphsParameters, StatusMessageOutputManager statusOutputManager,
+                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, double dt)
    {
       super(statusOutputManager, parentRegistry);
       this.dt = dt;
@@ -97,6 +100,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
          contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
 
       footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
+      this.visibilityGraphsParameters = new YoVisibilityGraphParameters(visibilityGraphsParameters, registry);
 
       plannerMap.put(FootstepPlannerType.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
@@ -104,7 +108,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
       plannerMap
             .put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedFootstepPlanner(footstepPlanningParameters, contactPointsInSoleFrame, parentRegistry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
-                     new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, graphicsListRegistry, parentRegistry));
+                     new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, this.visibilityGraphsParameters, contactPointsInSoleFrame,
+                                                         graphicsListRegistry, parentRegistry));
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
 
       graphicsListRegistry.registerYoGraphic("footstepPlanningToolbox", yoGraphicPlanarRegionsList);
@@ -422,7 +427,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
          sendListOfStatistics((ListOfStatistics) plannerStatistics);
          break;
       case VISIBILITY_GRAPH:
-         reportMessage(VisibilityGraphMessagesConverter.convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(), (VisibilityGraphStatistics) plannerStatistics));
+         reportMessage(VisibilityGraphMessagesConverter
+                             .convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(), (VisibilityGraphStatistics) plannerStatistics));
          break;
       }
    }
@@ -432,7 +438,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
       while (listOfStatistics.getNumberOfStatistics() > 0)
          sendPlannerStatistics(listOfStatistics.pollStatistics());
    }
-
 
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> publisher)
    {

@@ -46,6 +46,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -78,6 +79,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    private final NavigableRegionsManager navigableRegionsManager;
 
    private final FootstepPlannerParameters parameters;
+   private final VisibilityGraphsParameters visibilityGraphsParameters;
    private final WaypointDefinedBodyPathPlanner bodyPathPlanner;
    private final BodyPathHeuristics heuristics;
    private final FootstepPlanner footstepPlanner;
@@ -94,17 +96,20 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    private final ListOfStatistics listOfStatistics = new ListOfStatistics();
    private final VisibilityGraphStatistics visibilityGraphStatistics = new VisibilityGraphStatistics();
 
-   public VisibilityGraphWithAStarPlanner(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons,
-                                          YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   public VisibilityGraphWithAStarPlanner(FootstepPlannerParameters parameters, VisibilityGraphsParameters visibilityGraphsParameters,
+                                          SideDependentList<ConvexPolygon2D> footPolygons, YoGraphicsListRegistry graphicsListRegistry,
+                                          YoVariableRegistry parentRegistry)
    {
-      this("", parameters, footPolygons, graphicsListRegistry, parentRegistry);
+      this("", parameters, visibilityGraphsParameters, footPolygons, graphicsListRegistry, parentRegistry);
    }
 
-   public VisibilityGraphWithAStarPlanner(String prefix, FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons,
-                                          YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   public VisibilityGraphWithAStarPlanner(String prefix, FootstepPlannerParameters parameters, VisibilityGraphsParameters visibilityGraphsParameters,
+                                          SideDependentList<ConvexPolygon2D> footPolygons, YoGraphicsListRegistry graphicsListRegistry,
+                                          YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.parameters = parameters;
+      this.visibilityGraphsParameters = visibilityGraphsParameters;
       bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
       heuristics = new BodyPathHeuristics(parameters.getCostParameters().getVisGraphWithAStarHeuristicsWeight(), parameters, bodyPathPlanner);
 
@@ -125,7 +130,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
       footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, registry);
 
-      this.navigableRegionsManager = new NavigableRegionsManager(new YoVisibilityGraphParameters(new DefaultVisibilityGraphParameters(), registry));
+      this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters);
 
       timeout.set(defaultTimeout);
       visualizing = graphicsListRegistry != null;

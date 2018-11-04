@@ -35,9 +35,11 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
+import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -71,7 +73,8 @@ public class FootstepPathCalculatorModule
    private final AtomicReference<Double> plannerTimeoutReference;
    private final AtomicReference<Double> plannerHorizonLengthReference;
 
-   private final AtomicReference<FootstepPlannerParameters> parameters = new AtomicReference<>(new DefaultFootstepPlanningParameters());
+   private final AtomicReference<FootstepPlannerParameters> parameters;
+   private final AtomicReference<VisibilityGraphsParameters> visibilityGraphsParameters;
 
    private final Messager messager;
 
@@ -87,11 +90,9 @@ public class FootstepPathCalculatorModule
       initialStanceSideReference = messager.createInput(InitialSupportSideTopic, RobotSide.LEFT);
       goalPositionReference = messager.createInput(GoalPositionTopic);
       goalOrientationReference = messager.createInput(GoalOrientationTopic, new Quaternion());
-      messager.registerTopicListener(PlannerParametersTopic, message ->
-      {
-         // TODO convert message-based parameters to standard parameters object
-      });
-      
+
+      parameters = messager.createInput(PlannerParametersTopic, new DefaultFootstepPlanningParameters());
+      visibilityGraphsParameters = messager.createInput(VisibilityGraphsParametersTopic, new DefaultVisibilityGraphParameters());
       footstepPlannerTypeReference = messager.createInput(PlannerTypeTopic, FootstepPlannerType.A_STAR);
       plannerTimeoutReference = messager.createInput(PlannerTimeoutTopic, 5.0);
       plannerHorizonLengthReference = messager.createInput(PlannerHorizonLengthTopic, 1.0);
@@ -310,7 +311,7 @@ public class FootstepPathCalculatorModule
       case SIMPLE_BODY_PATH:
          return new BodyPathBasedFootstepPlanner(parameters.get(), contactPointsInSoleFrame, registry);
       case VIS_GRAPH_WITH_A_STAR:
-         return new VisibilityGraphWithAStarPlanner(parameters.get(), contactPointsInSoleFrame, null, registry);
+         return new VisibilityGraphWithAStarPlanner(parameters.get(), visibilityGraphsParameters.get(), contactPointsInSoleFrame, null, registry);
       default:
          throw new RuntimeException("Planner type " + footstepPlannerTypeReference.get() + " is not valid!");
       }

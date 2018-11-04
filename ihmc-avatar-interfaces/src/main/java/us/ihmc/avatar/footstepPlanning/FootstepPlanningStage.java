@@ -35,6 +35,7 @@ import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -89,16 +90,19 @@ public class FootstepPlanningStage implements FootstepPlanner
    private final List<PlannerCompletionCallback> completionCallbackList = new ArrayList<>();
 
    private final FootstepPlannerParameters footstepPlanningParameters;
+   private final VisibilityGraphsParameters visibilityGraphsParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
    private final PlannerGoalRecommendationHolder plannerGoalRecommendationHolder;
 
    public FootstepPlanningStage(int stageId, RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
-                                EnumProvider<FootstepPlannerType> activePlanner, MultiStagePlannerListener plannerListener, IntegerProvider planId,
-                                YoGraphicsListRegistry graphicsListRegistry, long tickDurationMs)
+                                VisibilityGraphsParameters visibilityGraphsParameters, EnumProvider<FootstepPlannerType> activePlanner, MultiStagePlannerListener plannerListener,
+                                IntegerProvider planId, YoGraphicsListRegistry graphicsListRegistry, long tickDurationMs)
+
    {
       this.stageId = stageId;
       this.footstepPlanningParameters = footstepPlannerParameters;
+      this.visibilityGraphsParameters = visibilityGraphsParameters;
       this.planId = planId;
       this.tickDurationMs = tickDurationMs;
       this.activePlannerEnum = activePlanner;
@@ -122,7 +126,8 @@ public class FootstepPlanningStage implements FootstepPlanner
       plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame, plannerListener));
       plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedFootstepPlanner(footstepPlanningParameters, contactPointsInSoleFrame, registry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
-                     new VisibilityGraphWithAStarPlanner(stageId + "", footstepPlanningParameters, contactPointsInSoleFrame, graphicsListRegistry, registry));
+                     new VisibilityGraphWithAStarPlanner(stageId + "", footstepPlanningParameters, visibilityGraphsParameters, contactPointsInSoleFrame,
+                                                         graphicsListRegistry, registry));
 
       initialize.set(true);
    }
