@@ -11,6 +11,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -44,14 +45,15 @@ public class MultiStageFootstepPlanningController
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
    public MultiStageFootstepPlanningController(RobotContactPointParameters<RobotSide> contactPointParameters,
-                                               FootstepPlannerParameters footstepPlannerParameters, CommandInputManager commandInputManager,
-                                               StatusMessageOutputManager statusOutputManager, ScheduledExecutorService executorService,
-                                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
+                                               FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+                                               CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
+                                               ScheduledExecutorService executorService, YoVariableRegistry parentRegistry,
+                                               YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {
       this.tickTimeMs = tickTimeMs;
       this.executorService = executorService;
-      stageManager = new MultiStageFootstepPlanningManager(contactPointParameters, footstepPlannerParameters, statusOutputManager, parentRegistry,
-                                                           graphicsListRegistry, tickTimeMs);
+      stageManager = new MultiStageFootstepPlanningManager(contactPointParameters, footstepPlannerParameters, visibilityGraphsParameters, statusOutputManager,
+                                                           parentRegistry, graphicsListRegistry, tickTimeMs);
 
       commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
 
