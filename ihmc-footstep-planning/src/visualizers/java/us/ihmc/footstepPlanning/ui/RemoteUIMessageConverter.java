@@ -383,12 +383,12 @@ public class RemoteUIMessageConverter
       }
 
       packet.setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
-      packet.setNormalZThresholdForAccessibleRegions(packet.getNormalZThresholdForAccessibleRegions());
+      packet.setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
       packet.setExtrusionDistance(parameters.getExtrusionDistance());
       packet.setExtrusionDistanceIfNotTooHighToStep(parameters.getExtrusionDistanceIfNotTooHighToStep());
       packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());
       packet.setClusterResolution(parameters.getClusterResolution());
-      packet.setExtrusionDistanceIfNotTooHighToStep(parameters.getExtrusionDistanceIfNotTooHighToStep());
+      packet.setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());
       packet.setPlanarRegionMinArea(parameters.getPlanarRegionMinArea());
       packet.setPlanarRegionMinSize(parameters.getPlanarRegionMinSize());
       packet.setRegionOrthogonalAngle(parameters.getRegionOrthogonalAngle());
