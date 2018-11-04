@@ -207,6 +207,12 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       planningObjectivePool.clear();
    }
 
+   private void cancelAllActiveStages()
+   {
+      for (FootstepPlanningStage stage : stepPlanningStagesInProgress.iterator())
+         stage.cancelPlanning();
+   }
+
    private void assignGoalsToAvailablePlanners()
    {
       if (planningObjectivePool.isEmpty())
@@ -677,9 +683,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void sleep()
    {
+
       if (debug)
          PrintTools.debug(this, "Going to sleep");
 
+      cancelAllActiveStages();
       cleanupAllPlanningStages();
 
       for (FootstepPlanningStage planningTask : planningTasks.iterator())

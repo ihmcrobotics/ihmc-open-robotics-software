@@ -158,7 +158,7 @@ public class MultiStageFootstepPlanningModule
 
    public void destroy()
    {
-      footstepPlanningController.sleep();
+      footstepPlanningController.destroy();
 
       if (yoVariableServerScheduled != null)
       {

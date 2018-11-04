@@ -114,6 +114,8 @@ public class MultiStageFootstepPlanningController
       if (debug)
          PrintTools.debug(this, "Going to sleep");
 
+      stageManager.sleep();
+
       managerRunnable = null;
 
       if (managerTask == null)
@@ -131,6 +133,8 @@ public class MultiStageFootstepPlanningController
 
    public void destroy()
    {
+      stageManager.destroy();
+
       sleep();
 
       if (debug)

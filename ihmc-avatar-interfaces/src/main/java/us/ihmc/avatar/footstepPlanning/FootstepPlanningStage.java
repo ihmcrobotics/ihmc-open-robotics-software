@@ -347,6 +347,21 @@ public class FootstepPlanningStage implements FootstepPlanner
       return true;
    }
 
+   @Override
+   public void cancelPlanning()
+   {
+      getPlanner().cancelPlanning();
+      pathPlanResult = null;
+      stepPlanResult = null;
+      pathPlan.set(null);
+      stepPlan.set(null);
+      for (PlannerCompletionCallback completionCallback : completionCallbackList)
+      {
+         completionCallback.pathPlanningIsComplete(pathPlanResult, this);
+         completionCallback.stepPlanningIsComplete(stepPlanResult, this);
+      }
+   }
+
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher)
    {
       this.textToSpeechPublisher = textToSpeechPublisher;
