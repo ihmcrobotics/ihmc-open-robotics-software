@@ -13,6 +13,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -107,7 +108,7 @@ public class ProvidedMassMatrixToolRigidBody
       objectCenterOfMassInWorld.set(toolFramePoint);
    }
 
-   public void control(SpatialAcceleration handSpatialAccelerationVector, Wrench toolWrench)
+   public void control(SpatialAccelerationReadOnly handSpatialAccelerationVector, Wrench toolWrench)
    {
       if (!hasBeenInitialized)
       {
