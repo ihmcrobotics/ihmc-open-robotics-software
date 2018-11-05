@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -41,7 +42,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly
       }
    }
 
-   public void setWrench(Wrench newWrench)
+   public void setWrench(WrenchReadOnly newWrench)
    {
       measurementFrame.checkReferenceFrameMatch(newWrench.getReferenceFrame());
       measurementFrame.checkReferenceFrameMatch(newWrench.getBodyFrame());

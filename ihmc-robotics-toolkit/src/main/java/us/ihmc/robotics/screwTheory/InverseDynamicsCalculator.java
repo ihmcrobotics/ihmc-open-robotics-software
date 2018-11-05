@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 /**
  * Computes joint torques based on desired joint accelerations.
@@ -92,7 +93,7 @@ public class InverseDynamicsCalculator
       if (inverseDynamicsCalculatorListener != null) inverseDynamicsCalculatorListener.inverseDynamicsCalculatorIsDone(this);
    }
 
-   public void setExternalWrench(RigidBody rigidBody, Wrench externalWrench)
+   public void setExternalWrench(RigidBody rigidBody, WrenchReadOnly externalWrench)
    {
       externalWrenches.get(rigidBody).setIncludingFrame(externalWrench);
    }
@@ -139,7 +140,7 @@ public class InverseDynamicsCalculator
          Wrench jointWrench = jointWrenches.get(joint);
          jointWrench.setIncludingFrame(netWrenches.get(successor));
 
-         Wrench externalWrench = externalWrenches.get(successor);
+         WrenchReadOnly externalWrench = externalWrenches.get(successor);
          jointWrench.sub(externalWrench);
 
          List<InverseDynamicsJoint> childrenJoints = successor.getChildrenJoints();
@@ -149,7 +150,7 @@ public class InverseDynamicsCalculator
             InverseDynamicsJoint child = childrenJoints.get(childIndex);
             if (!jointsToIgnore.contains(child))
             {
-               Wrench wrenchExertedOnChild = jointWrenches.get(child);
+               WrenchReadOnly wrenchExertedOnChild = jointWrenches.get(child);
                ReferenceFrame successorFrame = successor.getBodyFixedFrame();
 
                wrenchExertedByChild.setIncludingFrame(wrenchExertedOnChild);
@@ -222,13 +223,13 @@ public class InverseDynamicsCalculator
       }
    }
 
-   public Wrench computeTotalExternalWrench(ReferenceFrame referenceFrame)
+   public WrenchReadOnly computeTotalExternalWrench(ReferenceFrame referenceFrame)
    {
       Wrench totalGroundReactionWrench = new Wrench(referenceFrame, referenceFrame);
       Wrench temporaryWrench = new Wrench();
       for (int i = 0; i < listOfBodiesWithExternalWrenches.size(); i++)
       {
-         Wrench externalWrench = externalWrenches.get(listOfBodiesWithExternalWrenches.get(i));
+         WrenchReadOnly externalWrench = externalWrenches.get(listOfBodiesWithExternalWrenches.get(i));
          temporaryWrench.setIncludingFrame(externalWrench);
          temporaryWrench.changeFrame(referenceFrame);
          temporaryWrench.setBodyFrame(referenceFrame);

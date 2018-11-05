@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWrenchCommand>, VirtualModelControlCommand<ExternalWrenchCommand>
@@ -21,7 +22,7 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
       rigidBodyName = rigidBody.getName();
    }
 
-   public void set(RigidBody rigidBody, Wrench externalWrench)
+   public void set(RigidBody rigidBody, WrenchReadOnly externalWrench)
    {
       setRigidBody(rigidBody);
       externalWrenchAppliedOnRigidBody.setIncludingFrame(externalWrench);
@@ -38,7 +39,7 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
       return rigidBodyName;
    }
 
-   public Wrench getExternalWrench()
+   public WrenchReadOnly getExternalWrench()
    {
       return externalWrenchAppliedOnRigidBody;
    }
