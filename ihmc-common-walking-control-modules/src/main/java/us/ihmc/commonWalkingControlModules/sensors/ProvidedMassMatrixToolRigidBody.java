@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
-import java.util.ArrayList;
-
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -17,12 +15,8 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -48,7 +42,6 @@ public class ProvidedMassMatrixToolRigidBody
    private final YoDouble objectMass;
 
    private final double gravity;
-   private InverseDynamicsCalculator inverseDynamicsCalculator;
    private final SixDoFJoint toolJoint;
    private final ReferenceFrame elevatorFrame;
 
@@ -57,7 +50,7 @@ public class ProvidedMassMatrixToolRigidBody
    private final SpatialAcceleration toolAcceleration = new SpatialAcceleration();
 
    public ProvidedMassMatrixToolRigidBody(RobotSide robotSide, final FullHumanoidRobotModel fullRobotModel, double gravity, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+                                          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       String name = robotSide.getCamelCaseNameForStartOfExpression() + "Tool";
       this.registry = new YoVariableRegistry(name);
@@ -97,14 +90,6 @@ public class ProvidedMassMatrixToolRigidBody
    private void initialize()
    {
       hasBeenInitialized = true;
-
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(toolBody, gravity, false);
-
-      ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
-      jointsToIgnore.addAll(ScrewTools.getRootBody(toolBody).getChildrenJoints());
-      jointsToIgnore.remove(toolJoint);
-
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(jointsToIgnore, spatialAccelerationCalculator);
    }
 
    private final FramePoint3D toolFramePoint = new FramePoint3D();
@@ -132,16 +117,18 @@ public class ProvidedMassMatrixToolRigidBody
 
       update();
 
+      temporaryVector.setIncludingFrame(elevatorFrame, 0.0, 0.0, gravity);
+      temporaryVector.changeFrame(handSpatialAccelerationVector.getReferenceFrame());
       toolAcceleration.setIncludingFrame(handSpatialAccelerationVector);
-      toolAcceleration.changeFrame(toolJoint.getFrameAfterJoint());
+      toolAcceleration.getLinearPart().add(temporaryVector);
+      toolAcceleration.changeFrame(toolBody.getBodyFixedFrame());
 
       // TODO: Take relative acceleration between uTorsoCoM and elevator in account
       toolAcceleration.setBaseFrame(elevatorFrame);
-      toolAcceleration.setBodyFrame(toolJoint.getFrameAfterJoint());
+      toolAcceleration.setBodyFrame(toolBody.getBodyFixedFrame());
 
-      toolJoint.setDesiredAcceleration(toolAcceleration);
-      inverseDynamicsCalculator.compute();
-      inverseDynamicsCalculator.getJointWrench(toolJoint, toolWrench);
+      toolWrench.setToZero(handFixedFrame, handFixedFrame);
+      toolBody.getInertia().computeDynamicWrench(toolAcceleration, toolBody.getBodyFixedFrame().getTwistOfFrame(), toolWrench);
 
       toolWrench.negate();
       toolWrench.changeFrame(handFixedFrame);
