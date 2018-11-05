@@ -122,7 +122,7 @@ public class InverseDynamicsCalculator
          if (!doVelocityTerms)
             tempTwist.setToZero();
          spatialAccelerationCalculator.getAccelerationOfBody(body, tempAcceleration);
-         body.getInertia().computeDynamicWrench(tempAcceleration, tempTwist, netWrench);
+         body.getInertia().computeDynamicWrenchFast(tempAcceleration, tempTwist, netWrench);
       }
    }
 
