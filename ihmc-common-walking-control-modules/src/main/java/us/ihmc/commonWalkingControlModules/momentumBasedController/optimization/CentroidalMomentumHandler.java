@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -96,7 +97,7 @@ public class CentroidalMomentumHandler
       centroidalMomentumRateTermCalculator.getMomentum(jointVelocities, centroidalMomentum);
    }
 
-   public SpatialForce getCentroidalMomentumRate()
+   public SpatialForceReadOnly getCentroidalMomentumRate()
    {
       return centroidalMomentumRate;
    }

@@ -35,8 +35,8 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalcul
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
@@ -185,7 +185,7 @@ public class WholeBodyInverseDynamicsSolver
       DenseMatrix64F rhoSolution = momentumModuleSolution.getRhoSolution();
       Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
       List<RigidBody> rigidBodiesWithExternalWrench = momentumModuleSolution.getRigidBodiesWithExternalWrench();
-      SpatialForce centroidalMomentumRateSolution = momentumModuleSolution.getCentroidalMomentumRateSolution();
+      SpatialForceReadOnly centroidalMomentumRateSolution = momentumModuleSolution.getCentroidalMomentumRateSolution();
 
       yoAchievedMomentumRateLinear.setMatchingFrame(centroidalMomentumRateSolution.getLinearPart());
       achievedMomentumRateLinear.setIncludingFrame(yoAchievedMomentumRateLinear);

@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -160,7 +161,7 @@ public class VirtualModelControlOptimizationControlModule
       Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
-      SpatialForce centroidalMomentumRateSolution = computeCentroidalMomentumRateSolution(rhoSolution);
+      SpatialForceReadOnly centroidalMomentumRateSolution = computeCentroidalMomentumRateSolution(rhoSolution);
       Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
       List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
 
@@ -240,7 +241,7 @@ public class VirtualModelControlOptimizationControlModule
       qpSolver.setupWrenchesEquilibriumConstraint(identityMatrix, rhoJacobian, additionalExternalWrench, gravityWrench);
    }
 
-   private SpatialForce computeCentroidalMomentumRateSolution(DenseMatrix64F rhoSolution)
+   private SpatialForceReadOnly computeCentroidalMomentumRateSolution(DenseMatrix64F rhoSolution)
    {
       DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
       DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();

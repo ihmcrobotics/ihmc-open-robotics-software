@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.referenceFrames.OriginAndPointFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -36,7 +37,7 @@ public class Omega0Calculator implements Omega0CalculatorInterface
 
    private final FramePoint3D tempCoP3d = new FramePoint3D();
 
-   public double computeOmega0(SideDependentList<FramePoint2D> cop2ds, SpatialForce newTotalGroundReactionWrench)
+   public double computeOmega0(SideDependentList<FramePoint2D> cop2ds, SpatialForceReadOnly newTotalGroundReactionWrench)
    {
       totalGroundReactionWrench.setIncludingFrame(newTotalGroundReactionWrench);
       totalGroundReactionWrench.changeFrame(centerOfMassFrame);
