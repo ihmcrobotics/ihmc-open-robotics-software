@@ -400,11 +400,11 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
       setPosition(sixDoFOriginalJoint.jointTranslation);
       setRotation(sixDoFOriginalJoint.jointRotation);
 
-      jointTwist.getAngularPart().set(sixDoFOriginalJoint.jointTwist.getAngularPart());
-      jointTwist.getLinearPart().set(sixDoFOriginalJoint.jointTwist.getLinearPart());
+      jointTwist.getAngularPart().set((Vector3DReadOnly) sixDoFOriginalJoint.jointTwist.getAngularPart());
+      jointTwist.getLinearPart().set((Vector3DReadOnly) sixDoFOriginalJoint.jointTwist.getLinearPart());
 
-      jointAcceleration.getAngularPart().set(sixDoFOriginalJoint.jointAcceleration.getAngularPart());
-      jointAcceleration.getLinearPart().set(sixDoFOriginalJoint.jointAcceleration.getLinearPart());
+      jointAcceleration.getAngularPart().set((Vector3DReadOnly) sixDoFOriginalJoint.jointAcceleration.getAngularPart());
+      jointAcceleration.getLinearPart().set((Vector3DReadOnly) sixDoFOriginalJoint.jointAcceleration.getLinearPart());
    }
 
    @Override
