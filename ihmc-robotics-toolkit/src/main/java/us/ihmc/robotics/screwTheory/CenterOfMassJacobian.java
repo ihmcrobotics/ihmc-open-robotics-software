@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
 public class CenterOfMassJacobian
 {
@@ -201,7 +202,7 @@ public class CenterOfMassJacobian
       centerOfMassVelocityToPack.setIncludingFrame(tempFrameVector);
    }
 
-   private void setColumn(Twist twist, FramePoint3D comPositionScaledByMass, double subTreeMass, int column)
+   private void setColumn(TwistReadOnly twist, FramePoint3D comPositionScaledByMass, double subTreeMass, int column)
    {
       tempVector.set(comPositionScaledByMass);
       tempVector.cross(twist.getAngularPart(), tempVector);

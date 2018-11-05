@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
 /**
  * This class is a tool that can be used to compute the twist of each {@code RigidBody} composing a
@@ -342,7 +343,7 @@ public class TwistCalculator
     * @param body the rigid-body to get the twist of.
     * @return the twist of the rigid-body with respect to the inertial frame.
     */
-   private Twist computeOrGetTwistOfBody(RigidBody body)
+   private TwistReadOnly computeOrGetTwistOfBody(RigidBody body)
    {
       Twist twist = retrieveAssignedTwist(body);
 
@@ -356,7 +357,7 @@ public class TwistCalculator
          ReferenceFrame bodyFrame = body.getBodyFixedFrame();
          InverseDynamicsJoint parentJoint = body.getParentJoint();
          RigidBody predecessor = parentJoint.getPredecessor();
-         Twist twistOfPredecessor = computeOrGetTwistOfBody(predecessor);
+         TwistReadOnly twistOfPredecessor = computeOrGetTwistOfBody(predecessor);
          twist = assignAndGetEmptyTwist(body);
 
          parentJoint.getSuccessorTwist(twistForComputeOrGetTwistOfBody);

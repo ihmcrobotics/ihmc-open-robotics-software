@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -270,7 +271,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     *            {@code baseFrame = base.getBodyFixedFrame()},
     *            {@code expressedInFrame = controlFrame}.
     */
-   public void setSpatialVelocity(ReferenceFrame controlFrame, Twist desiredSpatialVelocity)
+   public void setSpatialVelocity(ReferenceFrame controlFrame, TwistReadOnly desiredSpatialVelocity)
    {
       desiredSpatialVelocity.getBodyFrame().checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
       desiredSpatialVelocity.getBaseFrame().checkReferenceFrameMatch(base.getBodyFixedFrame());

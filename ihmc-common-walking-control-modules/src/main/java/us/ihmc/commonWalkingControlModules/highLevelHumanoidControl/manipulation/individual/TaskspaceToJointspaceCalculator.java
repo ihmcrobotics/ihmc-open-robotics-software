@@ -18,6 +18,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.kinematics.InverseJacobianSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -408,7 +409,7 @@ public class TaskspaceToJointspaceCalculator
       compute(desiredControlFramePose, desiredControlFrameTwist);
    }
 
-   public void compute(FramePose3D desiredPose, Twist desiredTwist)
+   public void compute(FramePose3D desiredPose, TwistReadOnly desiredTwist)
    {
       jacobian.compute();
 
@@ -419,7 +420,7 @@ public class TaskspaceToJointspaceCalculator
    
    private final AxisAngle tempAxisAngle = new AxisAngle();
    
-   public boolean computeIteratively(FramePose3D desiredPose, Twist desiredTwist, double maxIterations, double epsilon)
+   public boolean computeIteratively(FramePose3D desiredPose, TwistReadOnly desiredTwist, double maxIterations, double epsilon)
    {
       for(int i = 0; i < maxIterations; i++)
       {
@@ -443,7 +444,7 @@ public class TaskspaceToJointspaceCalculator
       return false;
    }
 
-   private void computeJointAnglesAndVelocities(FramePose3D desiredControlFramePose, Twist desiredControlFrameTwist)
+   private void computeJointAnglesAndVelocities(FramePose3D desiredControlFramePose, TwistReadOnly desiredControlFrameTwist)
    {
       if (enableFeedbackControl.getBooleanValue())
          setLocalJointAnglesToCurrentJointAngles();
@@ -552,7 +553,7 @@ public class TaskspaceToJointspaceCalculator
    }
 
    private void computeDesiredSpatialVelocityToSolveFor(DenseMatrix64F spatialDesiredVelocityToPack, DenseMatrix64F spatialVelocityFromError,
-         Twist desiredControlFrameTwist)
+         TwistReadOnly desiredControlFrameTwist)
    {
       DenseMatrix64F selectionMatrix = inverseJacobianSolver.getSelectionMatrix();
       // Clip to maximum velocity
