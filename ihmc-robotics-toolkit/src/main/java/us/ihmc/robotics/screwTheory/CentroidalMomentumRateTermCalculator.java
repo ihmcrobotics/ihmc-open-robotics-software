@@ -22,6 +22,7 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
@@ -269,7 +270,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       }
    }
 
-   public SpatialForce getBiasSpatialForce()
+   public SpatialForceReadOnly getBiasSpatialForce()
    {
       updateCentroidalMomentumMatrixAndBiasForce();
       return biasSpatialForce;
@@ -293,7 +294,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       return momentum;
    }
 
-   public SpatialForce getMomentumRate()
+   public SpatialForceReadOnly getMomentumRate()
    {
       if (!isMomentumRateUpToDate)
       {

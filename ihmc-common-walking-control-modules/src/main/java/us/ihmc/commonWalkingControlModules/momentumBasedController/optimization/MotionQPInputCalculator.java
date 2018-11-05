@@ -19,9 +19,9 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -615,7 +615,7 @@ public class MotionQPInputCalculator
       return centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm();
    }
 
-   public SpatialForce computeCentroidalMomentumRateFromSolution(DenseMatrix64F jointAccelerations)
+   public SpatialForceReadOnly computeCentroidalMomentumRateFromSolution(DenseMatrix64F jointAccelerations)
    {
       centroidalMomentumHandler.computeCentroidalMomentumRate(jointAccelerations);
       return centroidalMomentumHandler.getCentroidalMomentumRate();

@@ -5,19 +5,19 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class VirtualModelControlSolution
 {
    private DenseMatrix64F jointTorques;
 
-   private SpatialForce centroidalMomentumRateSolution;
+   private SpatialForceReadOnly centroidalMomentumRateSolution;
    private Map<RigidBody, Wrench> externalWrenchSolution;
    private List<RigidBody> rigidBodiesWithExternalWrench;
 
-   public void setCentroidalMomentumRateSolution(SpatialForce centroidalMomentumRateSolution)
+   public void setCentroidalMomentumRateSolution(SpatialForceReadOnly centroidalMomentumRateSolution)
    {
       this.centroidalMomentumRateSolution = centroidalMomentumRateSolution;
    }
@@ -38,7 +38,7 @@ public class VirtualModelControlSolution
       return externalWrenchSolution;
    }
 
-   public SpatialForce getCentroidalMomentumRateSolution()
+   public SpatialForceReadOnly getCentroidalMomentumRateSolution()
    {
       return centroidalMomentumRateSolution;
    }
