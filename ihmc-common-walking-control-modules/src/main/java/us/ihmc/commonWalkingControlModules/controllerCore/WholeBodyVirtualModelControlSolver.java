@@ -8,6 +8,7 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
@@ -22,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlOptimizationControlModule;
@@ -55,6 +57,8 @@ public class WholeBodyVirtualModelControlSolver
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final WrenchVisualizer wrenchVisualizer;
+   private final JointAccelerationIntegrationCalculator jointAccelerationIntegrationCalculator;
+
 
    private final FloatingJointBasics rootJoint;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
@@ -108,6 +112,8 @@ public class WholeBodyVirtualModelControlSolver
       controlRootBody = toolbox.getVirtualModelControlMainBody();
       virtualModelController = new VirtualModelMomentumController(toolbox.getJointIndexHandler());
 
+
+
       yoDesiredMomentumRateLinear = toolbox.getYoDesiredMomentumRateLinear();
       yoAchievedMomentumRateLinear = toolbox.getYoAchievedMomentumRateLinear();
       yoDesiredMomentumRateAngular = toolbox.getYoDesiredMomentumRateAngular();
@@ -115,6 +121,8 @@ public class WholeBodyVirtualModelControlSolver
 
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
       wrenchVisualizer = toolbox.getWrenchVisualizer();
+
+      jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(toolbox.getControlDT(), registry);
 
       yoResidualRootJointForce = toolbox.getYoResidualRootJointForce();
       yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
@@ -182,7 +190,13 @@ public class WholeBodyVirtualModelControlSolver
          externalWrenchSolution.get(rigidBody).negate();
       }
 
-      updateLowLevelData(jointTorquesSolution);
+
+      // thing to get joint accelerations
+      DenseMatrix64F jointAccelerationsSolution = new DenseMatrix64F(jointTorquesSolution);
+
+
+
+      updateLowLevelData(jointTorquesSolution, jointAccelerationsSolution);
 
       boundCalculator.enforceJointTorqueLimits(lowLevelOneDoFJointDesiredDataHolder);
 
@@ -199,7 +213,7 @@ public class WholeBodyVirtualModelControlSolver
       wrenchVisualizer.visualize(externalWrenchSolution);
    }
 
-   private void updateLowLevelData(DenseMatrix64F jointTorquesSolution)
+   private void updateLowLevelData(DenseMatrix64F jointTorquesSolution, DenseMatrix64F jointAccelerationsSolution)
    {
       if (rootJoint != null)
          rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
@@ -212,8 +226,12 @@ public class WholeBodyVirtualModelControlSolver
          {
 
             lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorquesSolution.get(jointIndex));
+            lowLevelOneDoFJointDesiredDataHolder.setDesiredJointAcceleration(joint, jointAccelerationsSolution.get(jointIndex));
          }
       }
+
+      jointAccelerationIntegrationCalculator.computeAndUpdateDataHolder(lowLevelOneDoFJointDesiredDataHolder);
+
    }
 
    public void submitVirtualModelControlCommandList(VirtualModelControlCommandList virtualModelControlCommandList)
@@ -247,6 +265,9 @@ public class WholeBodyVirtualModelControlSolver
             break;
          case JOINT_LIMIT_ENFORCEMENT:
             boundCalculator.submitJointLimitEnforcementCommand((JointLimitEnforcementCommand) command);
+            break;
+         case JOINT_ACCELERATION_INTEGRATION:
+            jointAccelerationIntegrationCalculator.submitJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) command);
             break;
          case COMMAND_LIST:
             submitVirtualModelControlCommandList((VirtualModelControlCommandList) command);
