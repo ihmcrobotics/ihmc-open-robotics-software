@@ -108,8 +108,8 @@ public class WholeBodyInverseKinematicsSolver
       integrator.integrateJointVelocities(jointsToOptimizeFor, jointVelocities);
 
       Momentum centroidalMomentumSolution = inverseKinematicsSolution.getCentroidalMomentumSolution();
-      yoAchievedMomentumLinear.set(centroidalMomentumSolution.getLinearPart());
-      yoAchievedMomentumAngular.set(centroidalMomentumSolution.getAngularPart());
+      yoAchievedMomentumLinear.setMatchingFrame(centroidalMomentumSolution.getLinearPart());
+      yoAchievedMomentumAngular.setMatchingFrame(centroidalMomentumSolution.getAngularPart());
 
       DenseMatrix64F jointConfigurations = integrator.getJointConfigurations();
       jointVelocities = integrator.getJointVelocities();
