@@ -187,10 +187,10 @@ public class WholeBodyInverseDynamicsSolver
       List<RigidBody> rigidBodiesWithExternalWrench = momentumModuleSolution.getRigidBodiesWithExternalWrench();
       SpatialForce centroidalMomentumRateSolution = momentumModuleSolution.getCentroidalMomentumRateSolution();
 
-      yoAchievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
+      yoAchievedMomentumRateLinear.setMatchingFrame(centroidalMomentumRateSolution.getLinearPart());
       achievedMomentumRateLinear.setIncludingFrame(yoAchievedMomentumRateLinear);
 
-      yoAchievedMomentumRateAngular.set(centroidalMomentumRateSolution.getAngularPart());
+      yoAchievedMomentumRateAngular.setMatchingFrame(centroidalMomentumRateSolution.getAngularPart());
       achievedMomentumRateAngular.setIncludingFrame(yoAchievedMomentumRateAngular);
 
 
