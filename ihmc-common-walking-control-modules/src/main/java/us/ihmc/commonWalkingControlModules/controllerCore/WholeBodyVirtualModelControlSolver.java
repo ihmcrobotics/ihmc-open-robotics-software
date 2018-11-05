@@ -160,8 +160,8 @@ public class WholeBodyVirtualModelControlSolver
       List<RigidBody> rigidBodiesWithExternalWrench = virtualModelControlSolution.getRigidBodiesWithExternalWrench();
       SpatialForce centroidalMomentumRateSolution = virtualModelControlSolution.getCentroidalMomentumRateSolution();
 
-      yoAchievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
-      yoAchievedMomentumRateAngular.set(centroidalMomentumRateSolution.getAngularPart());
+      yoAchievedMomentumRateLinear.setMatchingFrame(centroidalMomentumRateSolution.getLinearPart());
+      yoAchievedMomentumRateAngular.setMatchingFrame(centroidalMomentumRateSolution.getAngularPart());
       achievedMomentumRateLinear.setIncludingFrame(yoAchievedMomentumRateLinear);
 
       // submit forces for contact forces
