@@ -88,7 +88,7 @@ public abstract class MassMatrixCalculatorTest
       SimpleMatrix kineticEnergy = jointVelocities.transpose().mult(massMatrix_).mult(jointVelocities);
 
 
-      return kineticEnergy.get(0, 0);
+      return 0.5 * kineticEnergy.get(0, 0);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 1.7)
