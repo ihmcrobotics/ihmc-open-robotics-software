@@ -18,7 +18,6 @@ import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SpatialForceVectorTest;
 
 /**
  * @author twan
@@ -42,7 +41,7 @@ public class MomentumControlTestTools
       gravitationalWrench.setLinearPartZ(-mass * gravityZ);
       totalWrench.add(gravitationalWrench);
 
-      SpatialForceVectorTest.assertSpatialForceVectorEquals(desiredCentroidalMomentumRate, totalWrench, epsilon);
+      MecanoTestTools.assertSpatialForceEquals(desiredCentroidalMomentumRate, totalWrench, epsilon);
    }
 
    public static void assertWrenchesInFrictionCones(Map<RigidBody, Wrench> externalWrenches,
