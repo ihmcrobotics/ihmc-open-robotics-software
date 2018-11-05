@@ -95,7 +95,6 @@ public class ICPQPConstraintCalculatorTest
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
 
-
          expectedConstraint.reset();
 
          maxXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
@@ -111,7 +110,6 @@ public class ICPQPConstraintCalculatorTest
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
 
-
          expectedConstraint.reset();
          expectedConstraint.reshape(0, 2);
 
@@ -121,12 +119,6 @@ public class ICPQPConstraintCalculatorTest
          inputCalculator.calculateMaxFeedbackMagnitudeConstraint(inequalityConstraint, maxXValue, maxYValue);
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
-
-
-
-
-
-
 
          indexHandler.setHasCMPFeedbackTask(true);
          indexHandler.computeProblemSize();
@@ -148,7 +140,6 @@ public class ICPQPConstraintCalculatorTest
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
 
-
          expectedConstraint.reset();
 
          maxXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
@@ -165,7 +156,6 @@ public class ICPQPConstraintCalculatorTest
          expectedConstraint.bineq.set(1, 0, maxXValue);
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
-
 
          expectedConstraint.reset();
          expectedConstraint.reshape(0, 4);
@@ -203,10 +193,7 @@ public class ICPQPConstraintCalculatorTest
 
          inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
 
-         double maxXValue = previousXValue + controlDT * maxXRate;
-         double maxYValue = previousYValue + controlDT * maxYRate;
-
-         testInequalityConstraint(expectedConstraint, inequalityConstraint, random, maxXValue, maxYValue, iter);
+         testInequalityRateConstraint(expectedConstraint, inequalityConstraint, random, previousXValue,previousYValue, maxXRate, maxYRate, controlDT, iter);
       }
    }
 
@@ -235,10 +222,7 @@ public class ICPQPConstraintCalculatorTest
 
          inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
 
-         double maxXValue = previousXValue + controlDT * maxXRate;
-         double maxYValue = previousYValue + controlDT * maxYRate;
-
-         testInequalityConstraintWithCMP(expectedConstraint, inequalityConstraint, random, maxXValue, maxYValue, iter);
+         testInequalityRateConstraintWithCMP(expectedConstraint, inequalityConstraint, random, previousXValue, previousYValue, maxXRate, maxYRate, controlDT, iter);
       }
    }
 
@@ -278,9 +262,6 @@ public class ICPQPConstraintCalculatorTest
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
 
-
-
-
          controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
 
          maxXRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
@@ -302,11 +283,6 @@ public class ICPQPConstraintCalculatorTest
          expectedConstraint.bineq.set(1, 0, maxYValue);
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
-
-
-
-
-
 
          expectedConstraint.reset();
 
@@ -330,9 +306,6 @@ public class ICPQPConstraintCalculatorTest
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
 
-
-
-
          expectedConstraint.reset();
 
          controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
@@ -355,12 +328,8 @@ public class ICPQPConstraintCalculatorTest
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
 
-
-
          expectedConstraint.reset();
          expectedConstraint.reshape(0, 2);
-
-
 
          controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
 
@@ -373,7 +342,6 @@ public class ICPQPConstraintCalculatorTest
          inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
-
 
          expectedConstraint.reset();
 
@@ -388,12 +356,6 @@ public class ICPQPConstraintCalculatorTest
          inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
-
-
-
-
-
-
 
          indexHandler.setHasCMPFeedbackTask(true);
          indexHandler.computeProblemSize();
@@ -422,7 +384,6 @@ public class ICPQPConstraintCalculatorTest
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
 
-
          expectedConstraint.reset();
 
          controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
@@ -447,9 +408,6 @@ public class ICPQPConstraintCalculatorTest
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
 
-
-
-
          expectedConstraint.reset();
 
          controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
@@ -473,9 +431,6 @@ public class ICPQPConstraintCalculatorTest
          expectedConstraint.bineq.set(1, 0, maxXValue);
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
-
-
-
 
          expectedConstraint.reset();
 
@@ -501,7 +456,6 @@ public class ICPQPConstraintCalculatorTest
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
 
-
          expectedConstraint.reset();
          expectedConstraint.reshape(0, 4);
 
@@ -514,8 +468,6 @@ public class ICPQPConstraintCalculatorTest
          inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
-
-
 
          expectedConstraint.reset();
 
@@ -531,9 +483,8 @@ public class ICPQPConstraintCalculatorTest
       }
    }
 
-
-   private static void testInequalityConstraint(ICPInequalityInput expectedConstraint, ICPInequalityInput inequalityConstraint, Random random, double maxXValue,
-                                         double maxYValue, int iter)
+   private static void testInequalityConstraint(ICPInequalityInput expectedConstraint, ICPInequalityInput inequalityConstraint, Random random,
+                                                double maxXValue, double maxYValue, int iter)
    {
       expectedConstraint.Aineq.set(0, 0, 1);
       expectedConstraint.Aineq.set(1, 0, -1);
@@ -711,9 +662,213 @@ public class ICPQPConstraintCalculatorTest
    }
 
 
+   private static void testInequalityRateConstraint(ICPInequalityInput expectedConstraint, ICPInequalityInput inequalityConstraint, Random random, double previousXValue,
+                                                double previousYValue, double maxXRate, double maxYRate, double controlDT, int iter)
+   {
+      double maxXValue = previousXValue + controlDT * maxXRate;
+      double minXValue = previousXValue - controlDT * maxXRate;
+      double maxYValue = previousYValue + controlDT * maxYRate;
+      double minYValue = previousYValue - controlDT * maxYRate;
 
-   private static void testInequalityConstraintWithCMP(ICPInequalityInput expectedConstraint, ICPInequalityInput inequalityConstraint, Random random, double maxXValue,
-                                         double maxYValue, int iter)
+      expectedConstraint.Aineq.set(0, 0, 1);
+      expectedConstraint.Aineq.set(1, 0, -1);
+      expectedConstraint.Aineq.set(2, 1, 1);
+      expectedConstraint.Aineq.set(3, 1, -1);
+
+      expectedConstraint.bineq.set(0, 0, maxXValue);
+      expectedConstraint.bineq.set(1, 0, -minXValue);
+      expectedConstraint.bineq.set(2, 0, maxYValue);
+      expectedConstraint.bineq.set(3, 0, -minYValue);
+
+      assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+      double distanceToBoundEdge = 1e-4;
+      double randomXRate = RandomNumbers.nextDouble(random, 0.0, maxXRate);
+      double randomYRate = RandomNumbers.nextDouble(random, 0.0, maxYRate);
+      double xValueNearUpperBound = previousXValue + controlDT * maxXRate - distanceToBoundEdge;
+      double xValueNearLowerBound = previousXValue - controlDT * maxXRate + distanceToBoundEdge;
+      double yValueNearUpperBound = previousYValue + controlDT * maxYRate - distanceToBoundEdge;
+      double yValueNearLowerBound = previousYValue - controlDT * maxYRate + distanceToBoundEdge;
+      double xValueJustPastUpperBound = maxXValue + distanceToBoundEdge;
+      double yValueJustPastUpperBound = maxYValue + distanceToBoundEdge;
+      double xValueJustPastLowerBound = minXValue - distanceToBoundEdge;
+      double yValueJustPastLowerBound = minYValue - distanceToBoundEdge;
+      double xValueWellPastUpperBound = maxXValue + 3.0;
+      double yValueWellPastUpperBound = maxYValue + 3.0;
+      double xValueWellPastLowerBound = minXValue - 3.0;
+      double yValueWellPastLowerBound = minYValue - 3.0;
+
+      DenseMatrix64F value = new DenseMatrix64F(2, 1);
+      value.set(0, 0, previousXValue);
+      value.set(1, 0, previousYValue);
+
+      assertInequalityHolds(inequalityConstraint, value);
+
+      // test inside
+      value.set(0, 0, previousXValue + controlDT * randomXRate);
+      value.set(1, 0, previousYValue + controlDT * randomYRate);
+
+      assertInequalityHolds(inequalityConstraint, value);
+
+      value.set(0, 0, previousXValue - controlDT * randomXRate);
+      value.set(1, 0, previousYValue - controlDT * randomYRate);
+
+      assertInequalityHolds(inequalityConstraint, value);
+
+      value.set(0, 0, previousXValue - controlDT * randomXRate);
+      value.set(1, 0, previousYValue + controlDT * randomYRate);
+
+      assertInequalityHolds(inequalityConstraint, value);
+
+      value.set(0, 0, previousXValue + controlDT * randomXRate);
+      value.set(1, 0, previousYValue - controlDT * randomYRate);
+
+      assertInequalityHolds(inequalityConstraint, value);
+
+
+
+
+
+
+      // test near bound positive
+      value.set(0, 0, xValueNearUpperBound);
+      value.set(1, 0, yValueNearUpperBound);
+
+      assertInequalityHolds("Iteration " + iter + ". Both positive inside ", inequalityConstraint, value);
+
+      value.set(0, 0, xValueNearLowerBound);
+      value.set(1, 0, yValueNearLowerBound);
+
+      assertInequalityHolds("Iteration " + iter + ". Both negative inside ", inequalityConstraint, value);
+
+      value.set(0, 0, xValueNearUpperBound);
+      value.set(1, 0, yValueNearLowerBound);
+
+      assertInequalityHolds("Iteration " + iter + ". Y negative inside ", inequalityConstraint, value);
+
+      value.set(0, 0, xValueNearLowerBound);
+      value.set(1, 0, yValueNearUpperBound);
+
+      assertInequalityHolds("Iteration " + iter + ". X negative inside ", inequalityConstraint, value);
+
+
+
+
+      // test at bound
+      value.set(0, 0, maxXValue);
+      value.set(1, 0, maxYValue);
+
+      assertInequalityEquals("Iteration " + iter + ". Both positive equal ", inequalityConstraint, value);
+
+      value.set(0, 0, minXValue);
+      value.set(1, 0, minYValue);
+
+      assertInequalityEquals("Iteration " + iter + ". Both negative equal ", inequalityConstraint, value);
+
+      value.set(0, 0, maxXValue);
+      value.set(1, 0, minYValue);
+
+      assertInequalityEquals("Iteration " + iter + ". Y negative equal ", inequalityConstraint, value);
+
+      value.set(0, 0, minXValue);
+      value.set(1, 0, maxYValue);
+
+      assertInequalityEquals("Iteration " + iter + ". X negative equal ", inequalityConstraint, value);
+
+      value.set(0, 0, maxXValue);
+      value.set(1, 0, yValueNearUpperBound);
+
+      assertInequalityEquals("Iteration " + iter + ". Y value near positive equal ", inequalityConstraint, value);
+
+      value.set(0, 0, minXValue);
+      value.set(1, 0, yValueNearUpperBound);
+
+      assertInequalityEquals("Iteration " + iter + ". Y value near negative equal ", inequalityConstraint, value);
+
+      value.set(0, 0, xValueNearUpperBound);
+      value.set(1, 0, maxYValue);
+
+      assertInequalityEquals("Iteration " + iter + ". X value near positive equal ", inequalityConstraint, value);
+
+      value.set(0, 0, xValueNearUpperBound);
+      value.set(1, 0, minYValue);
+
+      assertInequalityEquals("Iteration " + iter + ". X value near negative equal ", inequalityConstraint, value);
+
+
+
+
+      // test just outside bound
+      value.set(0, 0, xValueJustPastUpperBound);
+      value.set(1, 0, yValueJustPastUpperBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueJustPastLowerBound);
+      value.set(1, 0, yValueJustPastLowerBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueJustPastUpperBound);
+      value.set(1, 0, yValueJustPastLowerBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueJustPastLowerBound);
+      value.set(1, 0, yValueJustPastUpperBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueJustPastUpperBound);
+      value.set(1, 0, previousYValue);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueJustPastLowerBound);
+      value.set(1, 0, previousYValue);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, previousXValue);
+      value.set(1, 0, xValueJustPastUpperBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, previousXValue);
+      value.set(1, 0, xValueJustPastLowerBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+
+
+      // test far outside bound
+      value.set(0, 0, xValueWellPastUpperBound);
+      value.set(1, 0, yValueWellPastUpperBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueWellPastLowerBound);
+      value.set(1, 0, yValueWellPastLowerBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueWellPastUpperBound);
+      value.set(1, 0, yValueWellPastLowerBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueWellPastLowerBound);
+      value.set(1, 0, yValueWellPastUpperBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueWellPastUpperBound);
+      value.set(1, 0, previousYValue);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueWellPastLowerBound);
+      value.set(1, 0, previousYValue);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, previousXValue);
+      value.set(1, 0, yValueWellPastUpperBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, previousXValue);
+      value.set(1, 0, yValueWellPastLowerBound);
+      assertInequalityFails("", inequalityConstraint, value);
+   }
+
+   private static void testInequalityConstraintWithCMP(ICPInequalityInput expectedConstraint, ICPInequalityInput inequalityConstraint, Random random,
+                                                       double maxXValue, double maxYValue, int iter)
    {
       expectedConstraint.Aineq.set(0, 0, 1);
       expectedConstraint.Aineq.set(0, 2, 1);
@@ -970,6 +1125,217 @@ public class ICPQPConstraintCalculatorTest
       assertInequalityFails("", inequalityConstraint, value);
    }
 
+   private static void testInequalityRateConstraintWithCMP(ICPInequalityInput expectedConstraint, ICPInequalityInput inequalityConstraint, Random random, double previousXValue,
+                                                    double previousYValue, double maxXRate, double maxYRate, double controlDT, int iter)
+   {
+      double maxXValue = previousXValue + controlDT * maxXRate;
+      double minXValue = previousXValue - controlDT * maxXRate;
+      double maxYValue = previousYValue + controlDT * maxYRate;
+      double minYValue = previousYValue - controlDT * maxYRate;
+
+
+
+      expectedConstraint.Aineq.set(0, 0, 1);
+      expectedConstraint.Aineq.set(0, 2, 1);
+      expectedConstraint.Aineq.set(1, 0, -1);
+      expectedConstraint.Aineq.set(1, 2, -1);
+      expectedConstraint.Aineq.set(2, 1, 1);
+      expectedConstraint.Aineq.set(2, 3, 1);
+      expectedConstraint.Aineq.set(3, 1, -1);
+      expectedConstraint.Aineq.set(3, 3, -1);
+
+      expectedConstraint.bineq.set(0, 0, maxXValue);
+      expectedConstraint.bineq.set(1, 0, minXValue);
+      expectedConstraint.bineq.set(2, 0, maxYValue);
+      expectedConstraint.bineq.set(3, 0, minYValue);
+
+
+      assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+      double distanceToBoundEdge = 1e-4;
+      double randomXRate = RandomNumbers.nextDouble(random, 0.0, maxXRate);
+      double randomYRate = RandomNumbers.nextDouble(random, 0.0, maxYRate);
+      double xValueNearUpperBound = previousXValue + controlDT * maxXRate - distanceToBoundEdge;
+      double xValueNearLowerBound = previousXValue - controlDT * maxXRate + distanceToBoundEdge;
+      double yValueNearUpperBound = previousYValue + controlDT * maxYRate - distanceToBoundEdge;
+      double yValueNearLowerBound = previousYValue - controlDT * maxYRate + distanceToBoundEdge;
+      double xValueJustPastUpperBound = maxXValue + distanceToBoundEdge;
+      double yValueJustPastUpperBound = maxYValue + distanceToBoundEdge;
+      double xValueJustPastLowerBound = minXValue - distanceToBoundEdge;
+      double yValueJustPastLowerBound = minYValue - distanceToBoundEdge;
+      double xValueWellPastUpperBound = maxXValue + 3.0;
+      double yValueWellPastUpperBound = maxYValue + 3.0;
+      double xValueWellPastLowerBound = minXValue - 3.0;
+      double yValueWellPastLowerBound = minYValue - 3.0;
+
+      DenseMatrix64F value = new DenseMatrix64F(2, 1);
+      value.set(0, 0, previousXValue);
+      value.set(1, 0, previousYValue);
+
+      assertInequalityHolds(inequalityConstraint, value);
+
+      // test inside
+      value.set(0, 0, previousXValue + controlDT * randomXRate);
+      value.set(1, 0, previousYValue + controlDT * randomYRate);
+
+      assertInequalityHolds(inequalityConstraint, value);
+
+      value.set(0, 0, previousXValue - controlDT * randomXRate);
+      value.set(1, 0, previousYValue - controlDT * randomYRate);
+
+      assertInequalityHolds(inequalityConstraint, value);
+
+      value.set(0, 0, previousXValue - controlDT * randomXRate);
+      value.set(1, 0, previousYValue + controlDT * randomYRate);
+
+      assertInequalityHolds(inequalityConstraint, value);
+
+      value.set(0, 0, previousXValue + controlDT * randomXRate);
+      value.set(1, 0, previousYValue - controlDT * randomYRate);
+
+      assertInequalityHolds(inequalityConstraint, value);
+
+
+
+
+
+
+      // test near bound positive
+      value.set(0, 0, xValueNearUpperBound);
+      value.set(1, 0, yValueNearUpperBound);
+
+      assertInequalityHolds("Iteration " + iter + ". Both positive inside ", inequalityConstraint, value);
+
+      value.set(0, 0, xValueNearLowerBound);
+      value.set(1, 0, yValueNearLowerBound);
+
+      assertInequalityHolds("Iteration " + iter + ". Both negative inside ", inequalityConstraint, value);
+
+      value.set(0, 0, xValueNearUpperBound);
+      value.set(1, 0, yValueNearLowerBound);
+
+      assertInequalityHolds("Iteration " + iter + ". Y negative inside ", inequalityConstraint, value);
+
+      value.set(0, 0, xValueNearLowerBound);
+      value.set(1, 0, yValueNearUpperBound);
+
+      assertInequalityHolds("Iteration " + iter + ". X negative inside ", inequalityConstraint, value);
+
+
+
+
+      // test at bound
+      value.set(0, 0, maxXValue);
+      value.set(1, 0, maxYValue);
+
+      assertInequalityEquals("Iteration " + iter + ". Both positive equal ", inequalityConstraint, value);
+
+      value.set(0, 0, minXValue);
+      value.set(1, 0, minYValue);
+
+      assertInequalityEquals("Iteration " + iter + ". Both negative equal ", inequalityConstraint, value);
+
+      value.set(0, 0, maxXValue);
+      value.set(1, 0, minYValue);
+
+      assertInequalityEquals("Iteration " + iter + ". Y negative equal ", inequalityConstraint, value);
+
+      value.set(0, 0, minXValue);
+      value.set(1, 0, maxYValue);
+
+      assertInequalityEquals("Iteration " + iter + ". X negative equal ", inequalityConstraint, value);
+
+      value.set(0, 0, maxXValue);
+      value.set(1, 0, yValueNearUpperBound);
+
+      assertInequalityEquals("Iteration " + iter + ". Y value near positive equal ", inequalityConstraint, value);
+
+      value.set(0, 0, minXValue);
+      value.set(1, 0, yValueNearUpperBound);
+
+      assertInequalityEquals("Iteration " + iter + ". Y value near negative equal ", inequalityConstraint, value);
+
+      value.set(0, 0, xValueNearUpperBound);
+      value.set(1, 0, maxYValue);
+
+      assertInequalityEquals("Iteration " + iter + ". X value near positive equal ", inequalityConstraint, value);
+
+      value.set(0, 0, xValueNearUpperBound);
+      value.set(1, 0, minYValue);
+
+      assertInequalityEquals("Iteration " + iter + ". X value near negative equal ", inequalityConstraint, value);
+
+
+
+
+      // test just outside bound
+      value.set(0, 0, xValueJustPastUpperBound);
+      value.set(1, 0, yValueJustPastUpperBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueJustPastLowerBound);
+      value.set(1, 0, yValueJustPastLowerBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueJustPastUpperBound);
+      value.set(1, 0, yValueJustPastLowerBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueJustPastLowerBound);
+      value.set(1, 0, yValueJustPastUpperBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueJustPastUpperBound);
+      value.set(1, 0, previousYValue);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueJustPastLowerBound);
+      value.set(1, 0, previousYValue);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, previousXValue);
+      value.set(1, 0, xValueJustPastUpperBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, previousXValue);
+      value.set(1, 0, xValueJustPastLowerBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+
+
+      // test far outside bound
+      value.set(0, 0, xValueWellPastUpperBound);
+      value.set(1, 0, yValueWellPastUpperBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueWellPastLowerBound);
+      value.set(1, 0, yValueWellPastLowerBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueWellPastUpperBound);
+      value.set(1, 0, yValueWellPastLowerBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueWellPastLowerBound);
+      value.set(1, 0, yValueWellPastUpperBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueWellPastUpperBound);
+      value.set(1, 0, previousYValue);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, xValueWellPastLowerBound);
+      value.set(1, 0, previousYValue);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, previousXValue);
+      value.set(1, 0, yValueWellPastUpperBound);
+      assertInequalityFails("", inequalityConstraint, value);
+
+      value.set(0, 0, previousXValue);
+      value.set(1, 0, yValueWellPastLowerBound);
+      assertInequalityFails("", inequalityConstraint, value);
+   }
 
    private static void assertConstraintsEqual(String prefix, ICPInequalityInput expected, ICPInequalityInput actual)
    {
@@ -977,6 +1343,11 @@ public class ICPQPConstraintCalculatorTest
       assertEquals(prefix + " the number of variables are not equal.", expected.getNumberOfVariables(), actual.getNumberOfVariables());
       JUnitTools.assertMatrixEquals(prefix + " Aineq is not equal.", expected.Aineq, actual.Aineq, epsilon);
       JUnitTools.assertMatrixEquals(prefix + " bineq is not equal.", expected.bineq, actual.bineq, epsilon);
+   }
+
+   private static void assertInequalityHolds(ICPInequalityInput inequalityToTest, DenseMatrix64F variables)
+   {
+      assertInequalityHolds("", inequalityToTest, variables);
    }
 
    private static void assertInequalityHolds(String prefix, ICPInequalityInput inequalityToTest, DenseMatrix64F variables)
@@ -1015,7 +1386,7 @@ public class ICPQPConstraintCalculatorTest
    {
       for (int i = 0; i < vector.numRows; i++)
       {
-         assertTrue(prefix + " row " + i + "'s value " + vector.get(i) + " is not less than it's upper bound " + upperBound + ".",
+         assertTrue(prefix + " row " + i + "'s value " + vector.get(i) + " is not less than it's upper bound " + upperBound.get(i) + ".",
                     vector.get(i) < upperBound.get(i));
       }
    }
