@@ -69,6 +69,7 @@ public class CentroidalMomentumMatrix
                   SpatialInertiaBasics inertia = rowRigidBody.getInertia();
                   columnJoint.getUnitTwist(k, tempTwist);
                   tempTwist.changeFrame(inertia.getReferenceFrame());
+                  tempMomentum.setReferenceFrame(inertia.getReferenceFrame());
                   tempMomentum.compute(inertia, tempTwist);
                   tempMomentum.changeFrame(centerOfMassFrame);
                   unitMomenta[column].add(tempMomentum);

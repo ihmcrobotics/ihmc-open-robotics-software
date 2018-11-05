@@ -31,6 +31,7 @@ public class MomentumCalculator
       {
          SpatialInertiaBasics inertia = rigidBody.getInertia();
          rigidBody.getBodyFixedFrame().getTwistOfFrame(tempTwist);
+         tempMomentum.setReferenceFrame(inertia.getReferenceFrame());
          tempMomentum.compute(inertia, tempTwist);
          tempMomentum.changeFrame(momentum.getReferenceFrame());
          momentum.add(tempMomentum);
