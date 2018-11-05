@@ -44,48 +44,79 @@ public class ICPQPConstraintCalculator
     */
    public void calculateMaxFeedbackMagnitudeConstraint(ICPInequalityInput inputToPack, double maxXMagnitude, double maxYMagnitude)
    {
+      calculateMaxFeedbackMagnitudeConstraint(inputToPack, -maxXMagnitude, maxXMagnitude, -maxYMagnitude, maxYMagnitude);
+   }
+
+   public void calculateMaxFeedbackMagnitudeConstraint(ICPInequalityInput inputToPack, double minXMagnitude, double maxXMagnitude, double minYMagnitude,
+                                                       double maxYMagnitude)
+   {
       inputToPack.reset();
 
       int size = 0;
-      boolean hasX = Double.isFinite(maxXMagnitude);
-      boolean hasY = Double.isFinite(maxYMagnitude);
-      if (hasX)
-         size += 2;
-      if (hasY)
-         size += 2;
+      boolean hasXMax = Double.isFinite(maxXMagnitude);
+      boolean hasXMin = Double.isFinite(minXMagnitude);
+      boolean hasYMax = Double.isFinite(maxYMagnitude);
+      boolean hasYMin = Double.isFinite(minYMagnitude);
+      if (hasXMax)
+         size += 1;
+      if (hasXMin)
+         size += 1;
+      if (hasYMax)
+         size += 1;
+      if (hasYMin)
+         size += 1;
 
       inputToPack.reshape(size, indexHandler.getNumberOfFreeVariables());
 
       int offset = 0;
-      if (hasX)
-      { // set X CoP upper and lower bound in the multiplier
-         inputToPack.Aineq.set(0, indexHandler.getCoPFeedbackIndex(), 1.0);
-         inputToPack.Aineq.set(1, indexHandler.getCoPFeedbackIndex(), -1.0);
+      if (hasXMax)
+      { // set X CoP upper bound
+         inputToPack.Aineq.set(offset, indexHandler.getCoPFeedbackIndex(), 1.0);
 
          if (indexHandler.hasCMPFeedbackTask())
          { // add in the CMP effects
-            inputToPack.Aineq.set(0, indexHandler.getCMPFeedbackIndex(), 1.0);
-            inputToPack.Aineq.set(1, indexHandler.getCMPFeedbackIndex(), -1.0);
+            inputToPack.Aineq.set(offset, indexHandler.getCMPFeedbackIndex(), 1.0);
          }
+         inputToPack.bineq.set(offset, maxXMagnitude);
 
-         inputToPack.bineq.set(0, maxXMagnitude);
-         inputToPack.bineq.set(1, maxXMagnitude);
-
-         offset += 2;
+         offset += 1;
       }
 
-      if (hasY)
+      if (hasXMin)
+      { // set X CoP lower bound
+         inputToPack.Aineq.set(offset, indexHandler.getCoPFeedbackIndex(), -1.0);
+
+         if (indexHandler.hasCMPFeedbackTask())
+         { // add in the CMP effects
+            inputToPack.Aineq.set(offset, indexHandler.getCMPFeedbackIndex(), -1.0);
+         }
+         inputToPack.bineq.set(offset, -minXMagnitude);
+
+         offset += 1;
+      }
+
+      if (hasYMax)
       { // set X CoP upper and lower bound in the multiplier
          inputToPack.Aineq.set(offset, indexHandler.getCoPFeedbackIndex() + 1, 1.0);
-         inputToPack.Aineq.set(offset + 1, indexHandler.getCoPFeedbackIndex() + 1, -1.0);
 
          if (indexHandler.hasCMPFeedbackTask())
          { // add in the CMP effects
             inputToPack.Aineq.set(offset, indexHandler.getCMPFeedbackIndex() + 1, 1.0);
-            inputToPack.Aineq.set(offset + 1, indexHandler.getCMPFeedbackIndex() + 1, -1.0);
          }
          inputToPack.bineq.set(offset, maxYMagnitude);
-         inputToPack.bineq.set(offset + 1, maxYMagnitude);
+
+         offset += 1;
+      }
+
+      if (hasYMin)
+      { // set X CoP upper and lower bound in the multiplier
+         inputToPack.Aineq.set(offset, indexHandler.getCoPFeedbackIndex() + 1, -1.0);
+
+         if (indexHandler.hasCMPFeedbackTask())
+         { // add in the CMP effects
+            inputToPack.Aineq.set(offset, indexHandler.getCMPFeedbackIndex() + 1, -1.0);
+         }
+         inputToPack.bineq.set(offset, -minYMagnitude);
       }
    }
 
@@ -113,8 +144,7 @@ public class ICPQPConstraintCalculator
     * @param previousValue the value of the previous feedback term in X and Y.
     * @param controlDT the time delta at which this solver is run. Should be the control loop DT.
     */
-   public void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack, double maxRate, FrameTuple2DReadOnly previousValue,
-                                                  double controlDT)
+   public void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack, double maxRate, FrameTuple2DReadOnly previousValue, double controlDT)
    {
       calculateMaxFeedbackRateConstraint(inputToPack, maxRate, maxRate, previousValue.getX(), previousValue.getY(), controlDT);
    }
@@ -128,8 +158,7 @@ public class ICPQPConstraintCalculator
     * @param previousValue the value of the previous feedback term in X and Y.
     * @param controlDT the time delta at which this solver is run. Should be the control loop DT.
     */
-   public void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack, double maxRate, DenseMatrix64F previousValue,
-                                                  double controlDT)
+   public void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack, double maxRate, DenseMatrix64F previousValue, double controlDT)
    {
       calculateMaxFeedbackRateConstraint(inputToPack, maxRate, maxRate, previousValue.get(0), previousValue.get(1), controlDT);
    }
@@ -149,8 +178,10 @@ public class ICPQPConstraintCalculator
                                                   double previousYValue, double controlDT)
    {
       double maxXValue = previousXValue + controlDT * maxXRate;
+      double minXValue = previousXValue - controlDT * maxXRate;
       double maxYValue = previousYValue + controlDT * maxYRate;
+      double minYValue = previousYValue - controlDT * maxYRate;
 
-      calculateMaxFeedbackMagnitudeConstraint(inputToPack, maxXValue, maxYValue);
+      calculateMaxFeedbackMagnitudeConstraint(inputToPack, minXValue, maxXValue, minYValue, maxYValue);
    }
 }
