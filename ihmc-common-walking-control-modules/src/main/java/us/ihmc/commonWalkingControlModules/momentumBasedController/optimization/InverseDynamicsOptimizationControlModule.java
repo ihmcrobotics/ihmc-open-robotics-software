@@ -30,6 +30,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -356,7 +357,7 @@ public class InverseDynamicsOptimizationControlModule
    public void submitExternalWrenchCommand(ExternalWrenchCommand command)
    {
       RigidBody rigidBody = command.getRigidBody();
-      Wrench wrench = command.getExternalWrench();
+      WrenchReadOnly wrench = command.getExternalWrench();
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 

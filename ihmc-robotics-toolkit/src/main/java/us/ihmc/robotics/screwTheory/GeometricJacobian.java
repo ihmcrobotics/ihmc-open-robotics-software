@@ -9,6 +9,7 @@ import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 /**
  * This class provides a simple tool to compute the Jacobian matrix of a kinematic chain composed of
@@ -195,7 +196,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     *            {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
     *            {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
     */
-   public DenseMatrix64F computeJointTorques(Wrench wrench)
+   public DenseMatrix64F computeJointTorques(WrenchReadOnly wrench)
    {
       DenseMatrix64F jointTorques = new DenseMatrix64F(1, jacobian.getNumCols());
       computeJointTorques(wrench, jointTorques);
@@ -212,7 +213,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     *            {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
     *            {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
     */
-   public void computeJointTorques(Wrench wrench, DenseMatrix64F jointTorquesToPack)
+   public void computeJointTorques(WrenchReadOnly wrench, DenseMatrix64F jointTorquesToPack)
    {
       // reference frame check
       wrench.getReferenceFrame().checkReferenceFrameMatch(this.jacobianFrame);

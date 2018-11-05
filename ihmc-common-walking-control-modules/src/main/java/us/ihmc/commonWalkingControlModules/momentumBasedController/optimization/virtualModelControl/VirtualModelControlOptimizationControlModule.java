@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -187,7 +188,7 @@ public class VirtualModelControlOptimizationControlModule
       wrenchMatrixCalculator.submitPlaneContactStateCommand(command);
    }
 
-   public void submitExternalWrench(RigidBody rigidBody, Wrench wrench)
+   public void submitExternalWrench(RigidBody rigidBody, WrenchReadOnly wrench)
    {
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }

@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -179,7 +180,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     *            {@code baseFrame = base.getBodyFixedFrame()},
     *            {@code expressedInFrame = controlFrame}.
     */
-   public void setLinearForce(ReferenceFrame controlFrame, Wrench desiredWrench)
+   public void setLinearForce(ReferenceFrame controlFrame, WrenchReadOnly desiredWrench)
    {
       desiredWrench.getBodyFrame().checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
       desiredWrench.getReferenceFrame().checkReferenceFrameMatch(controlFrame);

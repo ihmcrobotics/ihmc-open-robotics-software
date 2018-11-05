@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -149,7 +150,7 @@ public class VirtualModelMomentumController
     *
     * @return true if the wrench was successfully added.
     */
-   public boolean addExternalWrench(RigidBody base, RigidBody endEffector, Wrench wrench, SelectionMatrix6D selectionMatrix)
+   public boolean addExternalWrench(RigidBody base, RigidBody endEffector, WrenchReadOnly wrench, SelectionMatrix6D selectionMatrix)
    {
       if (wrench.getLinearPart().length() < 1e-5 && wrench.getAngularPart().length() < 1e-5)
          return false;

@@ -11,8 +11,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 /**
  * This class provides similar tools to {@link GeometricJacobian} but also support additional
@@ -373,7 +373,7 @@ public class GeometricJacobianCalculator
     *            {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
     * @throws RuntimeException if the Jacobian matrix has not been computed yet.
     */
-   public void getJointTorques(Wrench endEffectorWrench, DenseMatrix64F jointTorquesToPack)
+   public void getJointTorques(WrenchReadOnly endEffectorWrench, DenseMatrix64F jointTorquesToPack)
    {
       if (jacobianMatrix.getNumRows() == 0)
          throw new RuntimeException("The Jacobian matrix has to be computed first.");

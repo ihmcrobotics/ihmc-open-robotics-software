@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
@@ -108,7 +109,7 @@ public class ExternalWrenchHandler
       return totalWrenchAlreadyAppliedMatrix;
    }
 
-   public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
+   public void setExternalWrenchToCompensateFor(RigidBody rigidBody, WrenchReadOnly wrench)
    {
       boolean containsRigidBody = externalWrenchesToCompensateFor.get(rigidBody) != null;
       if (!containsRigidBody)

@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -159,12 +160,12 @@ public class VirtualModelMomentumControllerTestHelper
       return VirtualModelControllerTestHelper.createPlanarArm();
    }
 
-   static void compareWrenches(Wrench wrench1, Wrench wrench2)
+   static void compareWrenches(WrenchReadOnly wrench1, Wrench wrench2)
    {
       VirtualModelControllerTestHelper.compareWrenches(wrench1, wrench2);
    }
 
-   static void compareWrenches(Wrench wrench1, Wrench wrench2, SelectionMatrix6D selectionMatrix)
+   static void compareWrenches(WrenchReadOnly wrench1, Wrench wrench2, SelectionMatrix6D selectionMatrix)
    {
       VirtualModelControllerTestHelper.compareWrenches(wrench1, wrench2, selectionMatrix);
    }

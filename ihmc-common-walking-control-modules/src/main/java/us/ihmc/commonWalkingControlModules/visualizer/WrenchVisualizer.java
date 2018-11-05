@@ -15,6 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableBody;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -87,12 +88,12 @@ public class WrenchVisualizer
       parentRegistry.addChild(registry);
    }
 
-   public void visualize(Map<RigidBody, Wrench> wrenches)
+   public void visualize(Map<RigidBody, ? extends WrenchReadOnly> wrenches)
    {
       for (int i = 0; i < rigidBodies.size(); i++)
       {
          RigidBody rigidBody = rigidBodies.get(i);
-         Wrench wrench;
+         WrenchReadOnly wrench;
          if ((wrench = wrenches.get(rigidBody)) != null)
          {
             tempWrench.setIncludingFrame(wrench);

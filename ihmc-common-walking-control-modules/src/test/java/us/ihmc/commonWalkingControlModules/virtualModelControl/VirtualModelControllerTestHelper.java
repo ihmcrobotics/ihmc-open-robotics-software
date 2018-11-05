@@ -28,6 +28,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
@@ -504,7 +505,7 @@ public class VirtualModelControllerTestHelper
       return ScrewTools.addRigidBody(bodyName, currentInverseDynamicsJoint, momentOfInertia, link.getMass(), comOffset);
    }
 
-   static void compareWrenches(Wrench inputWrench, Wrench outputWrench, DenseMatrix64F selectionMatrix)
+   static void compareWrenches(WrenchReadOnly inputWrench, Wrench outputWrench, DenseMatrix64F selectionMatrix)
    {
       inputWrench.getBodyFrame().checkReferenceFrameMatch(outputWrench.getBodyFrame());
       outputWrench.changeFrame(inputWrench.getReferenceFrame());
@@ -533,7 +534,7 @@ public class VirtualModelControllerTestHelper
       }
    }
 
-   public static void compareWrenches(Wrench inputWrench, Wrench outputWrench, SelectionMatrix6D selectionMatrix)
+   public static void compareWrenches(WrenchReadOnly inputWrench, Wrench outputWrench, SelectionMatrix6D selectionMatrix)
    {
       inputWrench.getBodyFrame().checkReferenceFrameMatch(outputWrench.getBodyFrame());
       outputWrench.changeFrame(inputWrench.getReferenceFrame());
@@ -562,7 +563,7 @@ public class VirtualModelControllerTestHelper
 
    }
 
-   public static void compareWrenches(Wrench inputWrench, Wrench outputWrench)
+   public static void compareWrenches(WrenchReadOnly inputWrench, Wrench outputWrench)
    {
       inputWrench.getBodyFrame().checkReferenceFrameMatch(outputWrench.getBodyFrame());
       outputWrench.changeFrame(inputWrench.getReferenceFrame());
