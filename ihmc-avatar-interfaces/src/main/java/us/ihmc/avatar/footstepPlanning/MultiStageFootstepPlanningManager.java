@@ -209,8 +209,14 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private void cancelAllActiveStages()
    {
+      isDonePlanningPath.set(true);
+      isDonePlanningSteps.set(true);
+      isDone.set(true);
+
       for (FootstepPlanningStage stage : stepPlanningStagesInProgress.iterator())
+      {
          stage.cancelPlanning();
+      }
    }
 
    private void assignGoalsToAvailablePlanners()
