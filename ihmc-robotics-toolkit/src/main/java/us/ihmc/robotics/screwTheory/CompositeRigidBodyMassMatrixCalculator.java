@@ -89,6 +89,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       {
          joint.getUnitTwist(i, tempTwist);
          tempTwist.changeFrame(currentBodyInertia.getReferenceFrame());
+         unitMomenta[i].setReferenceFrame(currentBodyInertia.getReferenceFrame());
          unitMomenta[i].compute(currentBodyInertia, tempTwist);
       }
    }
@@ -166,7 +167,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
          {
             joint.getUnitTwist(subspaceIndex, tempUnitTwist);
             tempUnitTwist.changeFrame(unitMomentum.getReferenceFrame());
-            double entry = unitMomentum.computeKineticCoEnergy(tempUnitTwist);
+            double entry = unitMomentum.dot(tempUnitTwist);
             int massMatrixCol = colStart + subspaceIndex;
             setMassMatrixSymmetrically(massMatrixRow, massMatrixCol, entry);
          }
