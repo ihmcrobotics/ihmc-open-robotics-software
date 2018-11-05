@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinema
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 
 public class InverseKinematicsSolution
@@ -10,7 +10,7 @@ public class InverseKinematicsSolution
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final DenseMatrix64F jointVelocities;
 
-   private Momentum centroidalMomentumSolution;
+   private MomentumReadOnly centroidalMomentumSolution;
 
    public InverseKinematicsSolution(InverseDynamicsJoint[] jointsToOptimizeFor, DenseMatrix64F jointVelocities)
    {
@@ -28,12 +28,12 @@ public class InverseKinematicsSolution
       return jointVelocities;
    }
 
-   public void setCentroidalMomentumSolution(Momentum centroidalMomentumSolution)
+   public void setCentroidalMomentumSolution(MomentumReadOnly centroidalMomentumSolution)
    {
       this.centroidalMomentumSolution = centroidalMomentumSolution;
    }
 
-   public Momentum getCentroidalMomentumSolution()
+   public MomentumReadOnly getCentroidalMomentumSolution()
    {
       return centroidalMomentumSolution;
    }

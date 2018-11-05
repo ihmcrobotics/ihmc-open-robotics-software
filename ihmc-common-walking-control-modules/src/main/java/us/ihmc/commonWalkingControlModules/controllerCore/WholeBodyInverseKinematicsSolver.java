@@ -21,7 +21,7 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOp
 import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOptimizationException;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
-import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -107,7 +107,7 @@ public class WholeBodyInverseKinematicsSolver
 
       integrator.integrateJointVelocities(jointsToOptimizeFor, jointVelocities);
 
-      Momentum centroidalMomentumSolution = inverseKinematicsSolution.getCentroidalMomentumSolution();
+      MomentumReadOnly centroidalMomentumSolution = inverseKinematicsSolution.getCentroidalMomentumSolution();
       yoAchievedMomentumLinear.setMatchingFrame(centroidalMomentumSolution.getLinearPart());
       yoAchievedMomentumAngular.setMatchingFrame(centroidalMomentumSolution.getAngularPart());
 
