@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 /**
@@ -50,7 +51,7 @@ public class InverseDynamicsCalculator
    }
 
    // FIXME: doVelocityTerms = false does not seem to work
-   public InverseDynamicsCalculator(RigidBody body, SpatialAcceleration rootAcceleration, List<InverseDynamicsJoint> jointsToIgnore,
+   public InverseDynamicsCalculator(RigidBody body, SpatialAccelerationReadOnly rootAcceleration, List<InverseDynamicsJoint> jointsToIgnore,
          boolean doVelocityTerms, boolean doAccelerationTerms)
    {
       this(jointsToIgnore, new SpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms,
@@ -69,7 +70,7 @@ public class InverseDynamicsCalculator
 
    }
 
-   public void setRootAcceleration(SpatialAcceleration newRootAcceleration)
+   public void setRootAcceleration(SpatialAccelerationReadOnly newRootAcceleration)
    {
       spatialAccelerationCalculator.setRootAcceleration(newRootAcceleration);
    }

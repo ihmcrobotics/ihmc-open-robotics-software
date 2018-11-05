@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.robotics.math.corruptors.NoisyYoDouble;
 import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
 import us.ihmc.robotics.robotController.RawSensorReader;
@@ -85,7 +86,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    protected final NoisyYoDouble[] gyroList;
    protected final NoisyYoDouble[] compassList;
 
-   public SimulatedIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBody rigidBody, ReferenceFrame imuFrame, RigidBody rootBody, SpatialAcceleration rootAcceleration)
+   public SimulatedIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBody rigidBody, ReferenceFrame imuFrame, RigidBody rootBody, SpatialAccelerationReadOnly rootAcceleration)
    {
       this.rawSensors = rawSensors;
       this.imuIndex = imuIndex;

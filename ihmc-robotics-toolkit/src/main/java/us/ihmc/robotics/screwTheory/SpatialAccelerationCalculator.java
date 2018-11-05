@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 
 /**
  * This class is a tool that can be used to compute the spatial acceleration of each
@@ -120,7 +121,7 @@ public class SpatialAccelerationCalculator
     * @param useDesiredAccelerations whether the desired or actual joint accelerations are used to
     *           compute the rigid-body accelerations.
     */
-   public SpatialAccelerationCalculator(RigidBody body, SpatialAcceleration rootAcceleration, boolean doVelocityTerms, boolean useDesiredAccelerations)
+   public SpatialAccelerationCalculator(RigidBody body, SpatialAccelerationReadOnly rootAcceleration, boolean doVelocityTerms, boolean useDesiredAccelerations)
    {
       this(body, rootAcceleration, doVelocityTerms, true, useDesiredAccelerations);
    }
@@ -142,7 +143,7 @@ public class SpatialAccelerationCalculator
     * @param useDesiredAccelerations whether the desired or actual joint accelerations are used to
     *           compute the rigid-body accelerations.
     */
-   public SpatialAccelerationCalculator(RigidBody body, SpatialAcceleration rootAcceleration, boolean doVelocityTerms, boolean doAccelerationTerms,
+   public SpatialAccelerationCalculator(RigidBody body, SpatialAccelerationReadOnly rootAcceleration, boolean doVelocityTerms, boolean doAccelerationTerms,
                                         boolean useDesiredAccelerations)
    {
       this.inertialFrame = rootAcceleration.getBaseFrame();
@@ -173,7 +174,7 @@ public class SpatialAccelerationCalculator
     *            {@code newRootAcceleration} does not match this calculator's root spatial
     *            acceleration's frames.
     */
-   public void setRootAcceleration(SpatialAcceleration newRootAcceleration)
+   public void setRootAcceleration(SpatialAccelerationReadOnly newRootAcceleration)
    {
       ReferenceFrame rootBodyFrame = rootBody.getBodyFixedFrame();
       newRootAcceleration.checkReferenceFrameMatch(rootBodyFrame, inertialFrame, rootBodyFrame);
@@ -504,7 +505,7 @@ public class SpatialAccelerationCalculator
     * @param body the rigid-body to get the twist of.
     * @return the acceleration of the rigid-body with respect to the inertial frame.
     */
-   private SpatialAcceleration computeOrGetAccelerationOfBody(RigidBody body)
+   private SpatialAccelerationReadOnly computeOrGetAccelerationOfBody(RigidBody body)
    {
       SpatialAcceleration acceleration = retrieveAssignedAcceleration(body);
 
@@ -518,7 +519,7 @@ public class SpatialAccelerationCalculator
          ReferenceFrame bodyFrame = body.getBodyFixedFrame();
          InverseDynamicsJoint parentJoint = body.getParentJoint();
          RigidBody predecessor = parentJoint.getPredecessor();
-         SpatialAcceleration accelerationOfPredecessor = computeOrGetAccelerationOfBody(predecessor);
+         SpatialAccelerationReadOnly accelerationOfPredecessor = computeOrGetAccelerationOfBody(predecessor);
          acceleration = assignAndGetEmptyAcceleration(body);
 
          Twist localJointTwist = twistForComputeOrGetTwistOfBody1;

@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 public class GravityCoriolisExternalWrenchMatrixCalculator
@@ -44,7 +45,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
            DEFAULT_DO_VELOCITY_TERMS, DO_ACCELERATION_TERMS);
    }
 
-   public GravityCoriolisExternalWrenchMatrixCalculator(RigidBody body, SpatialAcceleration rootAcceleration, HashMap<RigidBody, Wrench> externalWrenches,
+   public GravityCoriolisExternalWrenchMatrixCalculator(RigidBody body, SpatialAccelerationReadOnly rootAcceleration, HashMap<RigidBody, Wrench> externalWrenches,
                                                         ArrayList<InverseDynamicsJoint> jointsToIgnore, boolean doVelocityTerms, boolean doAccelerationTerms)
    {
       this(externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms, doAccelerationTerms,
@@ -65,7 +66,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
       populateMapsAndLists();
    }
 
-   public void setRootAcceleration(SpatialAcceleration newRootAcceleration)
+   public void setRootAcceleration(SpatialAccelerationReadOnly newRootAcceleration)
    {
       spatialAccelerationCalculator.setRootAcceleration(newRootAcceleration);
    }

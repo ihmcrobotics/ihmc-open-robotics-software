@@ -1,14 +1,14 @@
 package us.ihmc.simulationConstructionSetTools.simulatedSensors;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.robotics.math.corruptors.NoisyYoDouble;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
 
 public class PerfectSimulatedIMURawSensorReader extends SimulatedIMURawSensorReader
 {
-   public PerfectSimulatedIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBody rigidBody, ReferenceFrame imuFrame, RigidBody rootBody, SpatialAcceleration rootAcceleration)
+   public PerfectSimulatedIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBody rigidBody, ReferenceFrame imuFrame, RigidBody rootBody, SpatialAccelerationReadOnly rootAcceleration)
    {
       super(rawSensors, imuIndex, rigidBody, imuFrame, rootBody, rootAcceleration);
    }

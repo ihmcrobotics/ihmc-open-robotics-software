@@ -3,7 +3,7 @@ package us.ihmc.simulationConstructionSetTools.simulatedSensors;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.robotics.math.corruptors.NoisyYoDouble;
 import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -42,7 +42,7 @@ public class SimulatedMotionNodeIMURawSensorReader extends SimulatedIMURawSensor
    private final double localGravityZ;
 
    public SimulatedMotionNodeIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBody rigidBody, ReferenceFrame imuFrame,
-         RigidBody rootBody, SpatialAcceleration rootAcceleration, RotationMatrix imuMountingOffset, double localGravityPositiveZ)
+         RigidBody rootBody, SpatialAccelerationReadOnly rootAcceleration, RotationMatrix imuMountingOffset, double localGravityPositiveZ)
    {
       super(rawSensors, imuIndex, rigidBody, imuFrame, rootBody, rootAcceleration);
       
