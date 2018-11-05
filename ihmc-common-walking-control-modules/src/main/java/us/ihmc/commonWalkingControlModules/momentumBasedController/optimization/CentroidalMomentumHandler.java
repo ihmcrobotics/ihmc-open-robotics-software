@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -100,7 +101,7 @@ public class CentroidalMomentumHandler
       return centroidalMomentumRate;
    }
 
-   public Momentum getCentroidalMomentum()
+   public MomentumReadOnly getCentroidalMomentum()
    {
       return centroidalMomentum;
    }

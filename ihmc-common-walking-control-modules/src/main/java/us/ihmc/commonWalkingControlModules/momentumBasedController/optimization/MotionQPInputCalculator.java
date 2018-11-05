@@ -18,10 +18,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -621,7 +621,7 @@ public class MotionQPInputCalculator
       return centroidalMomentumHandler.getCentroidalMomentumRate();
    }
 
-   public Momentum computeCentroidalMomentumFromSolution(DenseMatrix64F jointVelocities)
+   public MomentumReadOnly computeCentroidalMomentumFromSolution(DenseMatrix64F jointVelocities)
    {
       centroidalMomentumHandler.computeCentroidalMomentum(jointVelocities);
       return centroidalMomentumHandler.getCentroidalMomentum();
