@@ -513,8 +513,8 @@ public class SpatialAccelerationCalculatorTest
 
          SpatialAcceleration rootAccelerationNoVelocity = new SpatialAcceleration(rootBodyNoVelocity.getBodyFixedFrame(), worldFrame,
                                                                                   rootBodyNoVelocity.getBodyFixedFrame());
-         rootAccelerationNoVelocity.getLinearPart().set(rootAcceleration.getLinearPart());
-         rootAccelerationNoVelocity.getAngularPart().set(rootAcceleration.getAngularPart());
+         rootAccelerationNoVelocity.getLinearPart().set( (Vector3DReadOnly) rootAcceleration.getLinearPart());
+         rootAccelerationNoVelocity.getAngularPart().set((Vector3DReadOnly) rootAcceleration.getAngularPart());
          SpatialAccelerationCalculator spatialAccelerationCalculatorNoVelocity = new SpatialAccelerationCalculator(randomBodyNoVelocity,
                                                                                                                    rootAccelerationNoVelocity, true, true,
                                                                                                                    false);
@@ -535,8 +535,8 @@ public class SpatialAccelerationCalculatorTest
          SpatialAcceleration floatJointAccelerationNoVelocity = new SpatialAcceleration(floatingJointNoVelocity.getFrameAfterJoint(),
                                                                                         floatingJointNoVelocity.getFrameBeforeJoint(),
                                                                                         floatingJointNoVelocity.getFrameAfterJoint());
-         floatJointAccelerationNoVelocity.getLinearPart().set(floatJointAcceleration.getLinearPart());
-         floatJointAccelerationNoVelocity.getAngularPart().set(floatJointAcceleration.getAngularPart());
+         floatJointAccelerationNoVelocity.getLinearPart().set((Vector3DReadOnly) floatJointAcceleration.getLinearPart());
+         floatJointAccelerationNoVelocity.getAngularPart().set((Vector3DReadOnly) floatJointAcceleration.getAngularPart());
          floatingJointNoVelocity.setAcceleration(floatJointAccelerationNoVelocity);
 
          Twist floatingJointTwist = MecanoRandomTools.nextTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
