@@ -22,6 +22,7 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
 /**
  * The centroidal momentum can be written as \dot{h} = A * \dot{v} + \dot{A} * v. This class
@@ -461,7 +462,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
          }
       }
 
-      private void addToUnitMomentumRecursively(Twist ancestorUnitTwist, Momentum unitMomentumToAddTo)
+      private void addToUnitMomentumRecursively(TwistReadOnly ancestorUnitTwist, Momentum unitMomentumToAddTo)
       {
          SpatialInertiaBasics inertia = rigidBody.getInertia();
 

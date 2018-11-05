@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
@@ -114,7 +115,7 @@ public class EuclideanPositionController implements PositionController
    /**
     * Computes linear portion of twist to pack
     */
-   public void compute(Twist twistToPack, FramePose3D desiredPose, Twist desiredTwist)
+   public void compute(Twist twistToPack, FramePose3D desiredPose, TwistReadOnly desiredTwist)
    {
       checkBodyFrames(desiredTwist, twistToPack);
       checkBaseFrames(desiredTwist, twistToPack);
@@ -129,18 +130,18 @@ public class EuclideanPositionController implements PositionController
       twistToPack.getLinearPart().set(actionFromPositionController);
    }
 
-   private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)
+   private void checkBodyFrames(TwistReadOnly desiredTwist, TwistReadOnly currentTwist)
    {
       desiredTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
       currentTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
-   private void checkBaseFrames(Twist desiredTwist, Twist currentTwist)
+   private void checkBaseFrames(TwistReadOnly desiredTwist, TwistReadOnly currentTwist)
    {
       desiredTwist.getBaseFrame().checkReferenceFrameMatch(currentTwist.getBaseFrame());
    }
 
-   private void checkExpressedInFrames(Twist desiredTwist, Twist currentTwist)
+   private void checkExpressedInFrames(TwistReadOnly desiredTwist, TwistReadOnly currentTwist)
    {
       desiredTwist.getReferenceFrame().checkReferenceFrameMatch(bodyFrame);
       currentTwist.getReferenceFrame().checkReferenceFrameMatch(bodyFrame);
