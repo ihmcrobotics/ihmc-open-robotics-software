@@ -80,7 +80,7 @@ public class CentroidalMomentumRateADotVTerm
          rigidBody.getBodyFixedFrame().getTwistRelativeToOther(rootBody.getBodyFixedFrame(), tempTwist);
 
          tempTwist.changeFrame(inertia.getReferenceFrame());
-
+         tempMomentum.setReferenceFrame(inertia.getReferenceFrame());
          tempMomentum.compute(inertia, tempTwist); // I * J * v expressed in frame attached to CoM of rowRigidBody expressed as momentum 
          tempMomentum.changeFrame(centerOfMassFrame); // Adj^{T} * I * J * v
 
