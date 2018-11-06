@@ -11,7 +11,6 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 {

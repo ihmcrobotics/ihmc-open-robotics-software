@@ -3,6 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 
 public class CenterOfMassAccelerationCalculator
 {

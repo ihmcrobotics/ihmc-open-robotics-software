@@ -1,6 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;

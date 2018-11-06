@@ -5,8 +5,8 @@ import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class RectangularContactableBody extends ListOfPointsContactablePlaneBody
 {

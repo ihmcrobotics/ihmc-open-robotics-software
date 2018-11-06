@@ -21,7 +21,6 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class SphericalJoint extends AbstractInverseDynamicsJoint
 {

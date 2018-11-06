@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.simpleArm;
 
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class SimpleArmSimulation

@@ -1,9 +1,9 @@
 package us.ihmc.simulationConstructionSetTools.simulatedSensors;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.robotics.math.corruptors.NoisyYoDouble;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
 
 public class PerfectSimulatedIMURawSensorReader extends SimulatedIMURawSensorReader

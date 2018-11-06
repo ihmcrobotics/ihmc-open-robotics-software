@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelC
 
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public interface VirtualEffortCommand<T extends VirtualEffortCommand> extends VirtualModelControlCommand<T>
 {

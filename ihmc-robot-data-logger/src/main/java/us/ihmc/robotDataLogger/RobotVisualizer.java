@@ -1,7 +1,7 @@
 package us.ihmc.robotDataLogger;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public interface RobotVisualizer
