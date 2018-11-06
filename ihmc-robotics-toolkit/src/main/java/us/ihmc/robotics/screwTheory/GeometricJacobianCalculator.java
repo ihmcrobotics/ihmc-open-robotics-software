@@ -229,7 +229,7 @@ public class GeometricJacobianCalculator
 
          for (int dofIndex = 0; dofIndex < joint.getDegreesOfFreedom(); dofIndex++)
          {
-            joint.getUnitTwist(dofIndex, tempTwist);
+            tempTwist.setIncludingFrame(joint.getUnitTwists().get(dofIndex));
             tempTwist.changeFrame(jacobianFrame);
             tempTwist.get(0, column++, jacobianMatrix);
          }

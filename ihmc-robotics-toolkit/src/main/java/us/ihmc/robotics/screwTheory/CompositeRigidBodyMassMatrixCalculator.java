@@ -88,7 +88,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
 
       for (int i = 0; i < nMomentaInUse; i++)
       {
-         joint.getUnitTwist(i, tempTwist);
+         tempTwist.setIncludingFrame(joint.getUnitTwists().get(i));
          tempTwist.changeFrame(currentBodyInertia.getReferenceFrame());
          unitMomenta[i].setReferenceFrame(currentBodyInertia.getReferenceFrame());
          unitMomenta[i].compute(currentBodyInertia, tempTwist);
@@ -166,7 +166,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
 
          for (int subspaceIndex = 0; subspaceIndex < joint.getDegreesOfFreedom(); subspaceIndex++)
          {
-            joint.getUnitTwist(subspaceIndex, tempUnitTwist);
+            tempUnitTwist.setIncludingFrame(joint.getUnitTwists().get(subspaceIndex));
             tempUnitTwist.changeFrame(unitMomentum.getReferenceFrame());
             double entry = unitMomentum.dot(tempUnitTwist);
             int massMatrixCol = colStart + subspaceIndex;

@@ -458,7 +458,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
          for (int i = 0; i < getJoint().getDegreesOfFreedom(); i++)
          {
             unitMomentum.setToZero();
-            getJoint().getUnitTwist(i, jointUnitTwist);
+            jointUnitTwist.setIncludingFrame(getJoint().getUnitTwists().get(i));
             jointUnitTwist.changeFrame(matrixFrame);
             addToUnitMomentumRecursively(jointUnitTwist, unitMomentum);
             unitMomentum.get(0, i, centroidalMomentumMatrixBlock);

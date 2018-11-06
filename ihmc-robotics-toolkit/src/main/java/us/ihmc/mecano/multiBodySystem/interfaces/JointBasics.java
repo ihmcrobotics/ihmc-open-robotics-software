@@ -1,5 +1,7 @@
 package us.ihmc.mecano.multiBodySystem.interfaces;
 
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
@@ -7,6 +9,7 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
@@ -364,6 +367,11 @@ public abstract interface JointBasics extends CommonJoint, NameBasedHashCodeHold
     * @param unitTwistToPack a twist used to stored one of the unit-twists of this joint. Modified.
     */
    public abstract void getUnitTwist(int dofIndex, Twist unitTwistToPack);
+
+   default List<TwistReadOnly> getUnitTwists()
+   {
+      return null;
+   }
 
    /**
     * Update the motion subspace of this joint. It is only necessary for when the motion subspace
