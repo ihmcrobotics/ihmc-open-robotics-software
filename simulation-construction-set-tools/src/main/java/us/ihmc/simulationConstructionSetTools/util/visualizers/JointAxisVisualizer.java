@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -32,7 +33,7 @@ public class JointAxisVisualizer implements RobotController
          JointBasics joint = jointStack.get(0);
          if(joint instanceof OneDoFJoint)
          {
-            FrameVector3D jAxis=((OneDoFJoint)joint).getJointAxis();
+            FrameVector3DReadOnly jAxis=((OneDoFJoint)joint).getJointAxis();
             ReferenceFrame referenceFrame = GeometryTools.constructReferenceFrameFromPointAndZAxis(joint.getName()+"JointAxis", new FramePoint3D(jAxis.getReferenceFrame()), new FrameVector3D(jAxis.getReferenceFrame(),jAxis));
             YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(referenceFrame , registry, false, length, YoAppearance.Gold());
             yoGraphicsList.add(yoGraphicReferenceFrame);
