@@ -24,12 +24,12 @@ public class InverseDynamicsCalculator
    private final RigidBody rootBody;
    private final List<RigidBody> listOfBodiesWithExternalWrenches = new ArrayList<>();
    private final Map<RigidBody, Wrench> externalWrenches = new LinkedHashMap<>();
-   private final List<InverseDynamicsJoint> jointsToIgnore;
+   private final List<JointBasics> jointsToIgnore;
 
    private final List<RigidBody> allBodiesExceptRoot = new ArrayList<RigidBody>();
-   private final List<InverseDynamicsJoint> allJoints = new ArrayList<InverseDynamicsJoint>();
+   private final List<JointBasics> allJoints = new ArrayList<JointBasics>();
    private final Map<RigidBody, Wrench> netWrenches = new LinkedHashMap<RigidBody, Wrench>();
-   private final Map<InverseDynamicsJoint, Wrench> jointWrenches = new LinkedHashMap<InverseDynamicsJoint, Wrench>();
+   private final Map<JointBasics, Wrench> jointWrenches = new LinkedHashMap<JointBasics, Wrench>();
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private final SpatialAcceleration tempAcceleration = new SpatialAcceleration();
@@ -41,27 +41,27 @@ public class InverseDynamicsCalculator
    
    public InverseDynamicsCalculator(RigidBody body, double gravity)
    {
-      this(body, gravity, new ArrayList<InverseDynamicsJoint>());
+      this(body, gravity, new ArrayList<JointBasics>());
    }
 
-   public InverseDynamicsCalculator(RigidBody body, double gravity, List<InverseDynamicsJoint> jointsToIgnore)
+   public InverseDynamicsCalculator(RigidBody body, double gravity, List<JointBasics> jointsToIgnore)
    {
       this(body, ScrewTools.createGravitationalSpatialAcceleration(ScrewTools.getRootBody(body), gravity),
             jointsToIgnore, true, true);
    }
 
    // FIXME: doVelocityTerms = false does not seem to work
-   public InverseDynamicsCalculator(RigidBody body, SpatialAccelerationReadOnly rootAcceleration, List<InverseDynamicsJoint> jointsToIgnore,
+   public InverseDynamicsCalculator(RigidBody body, SpatialAccelerationReadOnly rootAcceleration, List<JointBasics> jointsToIgnore,
          boolean doVelocityTerms, boolean doAccelerationTerms)
    {
       this(jointsToIgnore, new SpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms,
             doAccelerationTerms, true));
    }
 
-   public InverseDynamicsCalculator(List<InverseDynamicsJoint> jointsToIgnore, SpatialAccelerationCalculator spatialAccelerationCalculator)
+   public InverseDynamicsCalculator(List<JointBasics> jointsToIgnore, SpatialAccelerationCalculator spatialAccelerationCalculator)
    {
       this.rootBody = spatialAccelerationCalculator.getRootBody();
-      this.jointsToIgnore = new ArrayList<InverseDynamicsJoint>(jointsToIgnore);
+      this.jointsToIgnore = new ArrayList<JointBasics>(jointsToIgnore);
       this.spatialAccelerationCalculator = spatialAccelerationCalculator;
 
       this.doVelocityTerms = spatialAccelerationCalculator.areVelocitiesConsidered();
@@ -134,7 +134,7 @@ public class InverseDynamicsCalculator
    {
       for (int jointIndex = allJoints.size() - 1; jointIndex >= 0; jointIndex--)
       {
-         InverseDynamicsJoint joint = allJoints.get(jointIndex);
+         JointBasics joint = allJoints.get(jointIndex);
 
          RigidBody successor = joint.getSuccessor();
 
@@ -144,11 +144,11 @@ public class InverseDynamicsCalculator
          WrenchReadOnly externalWrench = externalWrenches.get(successor);
          jointWrench.sub(externalWrench);
 
-         List<InverseDynamicsJoint> childrenJoints = successor.getChildrenJoints();
+         List<JointBasics> childrenJoints = successor.getChildrenJoints();
 
          for (int childIndex = 0; childIndex < childrenJoints.size(); childIndex++)
          {
-            InverseDynamicsJoint child = childrenJoints.get(childIndex);
+            JointBasics child = childrenJoints.get(childIndex);
             if (!jointsToIgnore.contains(child))
             {
                WrenchReadOnly wrenchExertedOnChild = jointWrenches.get(child);
@@ -190,8 +190,8 @@ public class InverseDynamicsCalculator
 
          if (currentBody.hasChildrenJoints())
          {
-            List<InverseDynamicsJoint> childrenJoints = currentBody.getChildrenJoints();
-            for (InverseDynamicsJoint joint : childrenJoints)
+            List<JointBasics> childrenJoints = currentBody.getChildrenJoints();
+            for (JointBasics joint : childrenJoints)
             {
                if (!jointsToIgnore.contains(joint))
                {
@@ -240,7 +240,7 @@ public class InverseDynamicsCalculator
       return totalGroundReactionWrench;
    }
 
-   public void getJointWrench(InverseDynamicsJoint joint, Wrench wrenchToPack)
+   public void getJointWrench(JointBasics joint, Wrench wrenchToPack)
    {
       wrenchToPack.setIncludingFrame(jointWrenches.get(joint));
    }

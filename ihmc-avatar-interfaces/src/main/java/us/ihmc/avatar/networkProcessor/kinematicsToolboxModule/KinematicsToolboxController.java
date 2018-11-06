@@ -43,7 +43,7 @@ import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -298,10 +298,10 @@ public class KinematicsToolboxController extends ToolboxController
    private WholeBodyControllerCore createControllerCore(Collection<RigidBody> controllableRigidBodies)
    {
       KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
-      InverseDynamicsJoint[] controlledJoints;
+      JointBasics[] controlledJoints;
       if (rootJoint != null)
       {
-         controlledJoints = new InverseDynamicsJoint[oneDoFJoints.length + 1];
+         controlledJoints = new JointBasics[oneDoFJoints.length + 1];
          controlledJoints[0] = rootJoint;
          System.arraycopy(oneDoFJoints, 0, controlledJoints, 1, oneDoFJoints.length);
       }

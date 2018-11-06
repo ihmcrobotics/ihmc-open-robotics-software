@@ -22,7 +22,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
@@ -152,7 +152,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       centerOfPressureDataHolderForEstimator = threadDataSynchronizer.getControllerCenterOfPressureDataHolder();
 
-      InverseDynamicsJoint[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerFullRobotModel, robotModel, sensorInformation);
+      JointBasics[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerFullRobotModel, robotModel, sensorInformation);
 
       robotController = createHighLevelController(controllerFullRobotModel, controllerFactory, controllerTime, robotModel.getControllerDT(), gravity,
                                                   forceSensorDataHolderForController, centerOfMassDataHolderForController,
@@ -188,11 +188,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
    }
 
-   public static InverseDynamicsJoint[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel,
+   public static JointBasics[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel,
                                                                    WholeBodyControllerParameters<RobotSide> robotModel,
                                                                    DRCRobotSensorInformation sensorInformation)
    {
-      ArrayList<InverseDynamicsJoint> listOfJointsToIgnore = new ArrayList<>();
+      ArrayList<JointBasics> listOfJointsToIgnore = new ArrayList<>();
 
       DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
       if (lidarParameters != null)
@@ -208,7 +208,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
             listOfJointsToIgnore.add(controllerFullRobotModel.getOneDoFJointByName(jointToIgnore));
          }
       }
-      InverseDynamicsJoint[] arrayOfJointsToIgnore = listOfJointsToIgnore.toArray(new InverseDynamicsJoint[] {});
+      JointBasics[] arrayOfJointsToIgnore = listOfJointsToIgnore.toArray(new JointBasics[] {});
       return arrayOfJointsToIgnore;
    }
 
@@ -239,7 +239,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                             DRCRobotSensorInformation sensorInformation, JointDesiredOutputList lowLevelControllerOutput,
                                                             YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
-                                                            InverseDynamicsJoint... jointsToIgnore)
+                                                            JointBasics... jointsToIgnore)
    {
       if (CREATE_COM_CALIBRATION_TOOL)
       {

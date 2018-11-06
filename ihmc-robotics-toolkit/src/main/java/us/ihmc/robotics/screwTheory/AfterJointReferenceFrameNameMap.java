@@ -11,9 +11,9 @@ public class AfterJointReferenceFrameNameMap
    
    public AfterJointReferenceFrameNameMap(RigidBody base)
    {
-      InverseDynamicsJoint[] joints = ScrewTools.computeSubtreeJoints(base);
+      JointBasics[] joints = ScrewTools.computeSubtreeJoints(base);
       
-      for(InverseDynamicsJoint joint : joints)
+      for(JointBasics joint : joints)
       {
          afterJointReferenceFrames.put(joint.getFrameAfterJoint().getName(), joint.getFrameAfterJoint());
       }

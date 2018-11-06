@@ -40,7 +40,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -74,7 +74,7 @@ public class WholeBodyInverseDynamicsSolver
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private final OneDoFJoint[] controlledOneDoFJoints;
-   private final InverseDynamicsJoint[] jointsToOptimizeFor;
+   private final JointBasics[] jointsToOptimizeFor;
 
    private final YoFrameVector3D yoDesiredMomentumRateLinear;
    private final YoFrameVector3D yoDesiredMomentumRateAngular;
@@ -352,7 +352,7 @@ public class WholeBodyInverseDynamicsSolver
       return achievedMomentumRateAngular;
    }
 
-   public InverseDynamicsJoint[] getJointsToOptimizeFors()
+   public JointBasics[] getJointsToOptimizeFors()
    {
       return jointsToOptimizeFor;
    }

@@ -2,7 +2,7 @@ package us.ihmc.robotics.screwTheory;
 
 public abstract class AbstractInverseDynamicsChecksum
 {
-   private final InverseDynamicsJoint[] joints;
+   private final JointBasics[] joints;
    protected final GenericCRC32 checksum;
    
    public AbstractInverseDynamicsChecksum(RigidBody rootJoint, GenericCRC32 checksum)
@@ -13,12 +13,12 @@ public abstract class AbstractInverseDynamicsChecksum
    
    public void calculate()
    {
-      for(InverseDynamicsJoint joint : joints)
+      for(JointBasics joint : joints)
       {
          calculateJointChecksum(joint);
       }
    }
    
-   public abstract void calculateJointChecksum(InverseDynamicsJoint joint); 
+   public abstract void calculateJointChecksum(JointBasics joint); 
    
 }

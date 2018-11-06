@@ -8,7 +8,7 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -286,7 +286,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
          RigidBody hand = controllerRobotModel.getHand(robotSide);
          if (hand != null)
          {
-            InverseDynamicsJoint[] armJoints = ScrewTools.createJointPath(controllerRobotModel.getChest(), hand);
+            JointBasics[] armJoints = ScrewTools.createJointPath(controllerRobotModel.getChest(), hand);
             OneDoFJoint[] filterArmJoints = ScrewTools.filterJoints(armJoints, OneDoFJoint.class);
             for (OneDoFJoint armJoint : filterArmJoints)
                armOneDoFJoints.add(armJoint);

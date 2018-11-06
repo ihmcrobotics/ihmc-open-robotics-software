@@ -7,7 +7,7 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -23,7 +23,7 @@ public class GeometricJacobianHolder
 
    private final TLongObjectHashMap<GeometricJacobian> nameBasedHashCodeToJacobianMap = new TLongObjectHashMap<GeometricJacobian>();
    private final List<GeometricJacobian> geometricJacobians = new ArrayList<GeometricJacobian>();
-   private final InverseDynamicsJoint[] temporaryToStoreJointPath = new InverseDynamicsJoint[30];
+   private final JointBasics[] temporaryToStoreJointPath = new JointBasics[30];
 
    public void compute()
    {
@@ -55,12 +55,12 @@ public class GeometricJacobianHolder
     * @param jacobianFrame
     * @return
     */
-   public long getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
+   public long getOrCreateGeometricJacobian(JointBasics[] joints, ReferenceFrame jacobianFrame)
    {
       return getOrCreateGeometricJacobian(joints, joints.length, jacobianFrame);
    }
 
-   private long getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, int numberOfJointsToConsider, ReferenceFrame jacobianFrame)
+   private long getOrCreateGeometricJacobian(JointBasics[] joints, int numberOfJointsToConsider, ReferenceFrame jacobianFrame)
    {
       if (joints == null || numberOfJointsToConsider == 0)
          return NULL_JACOBIAN_ID;
@@ -80,7 +80,7 @@ public class GeometricJacobianHolder
          }
          else
          {
-            InverseDynamicsJoint[] jointsForNewJacobian = new InverseDynamicsJoint[numberOfJointsToConsider];
+            JointBasics[] jointsForNewJacobian = new JointBasics[numberOfJointsToConsider];
             System.arraycopy(joints, 0, jointsForNewJacobian, 0, numberOfJointsToConsider);
             jacobian = new GeometricJacobian(jointsForNewJacobian, jacobianFrame, allowChangeFrame);
          }

@@ -11,7 +11,7 @@ public class TotalMassCalculator
       SpatialInertiaBasics inertia = rootBody.getInertia();
       double ret = inertia == null ? 0.0 : inertia.getMass();
 
-      for (InverseDynamicsJoint childJoint : rootBody.getChildrenJoints())
+      for (JointBasics childJoint : rootBody.getChildrenJoints())
       {
          ret += computeSubTreeMass(childJoint.getSuccessor());
       }

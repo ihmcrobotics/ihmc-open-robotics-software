@@ -30,7 +30,7 @@ import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -62,7 +62,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
    private final HashMap<String, ReferenceFrame> cameraFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, ReferenceFrame> lidarBaseFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, RigidBodyTransform> lidarBaseToSensorTransform = new HashMap<String, RigidBodyTransform>();
-   private final HashMap<String, InverseDynamicsJoint> lidarJoints = new HashMap<>();
+   private final HashMap<String, JointBasics> lidarJoints = new HashMap<>();
    private final HashMap<String, ReferenceFrame> sensorFrames = new HashMap<String, ReferenceFrame>();
    private double totalMass = 0.0;
    private final boolean alignReferenceFramesWithJoints;
@@ -132,7 +132,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
 //      return sdfJointNameMap.getModelName();
 //   }
 
-   protected void addSensorDefinitions(InverseDynamicsJoint joint, JointDescription jointDescription)
+   protected void addSensorDefinitions(JointBasics joint, JointDescription jointDescription)
    {
       ArrayList<IMUSensorDescription> imuSensors = jointDescription.getIMUSensors();
 
@@ -215,7 +215,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    /** {@inheritDoc} */
    @Override
-   public InverseDynamicsJoint getLidarJoint(String lidarName)
+   public JointBasics getLidarJoint(String lidarName)
    {
       return lidarJoints.get(lidarName);
    }
@@ -338,13 +338,13 @@ public class FullRobotModelFromDescription implements FullRobotModel
    {
       if(head != null)
       {
-         InverseDynamicsJoint headJoint = head.getParentJoint();
+         JointBasics headJoint = head.getParentJoint();
          return headJoint.getFrameAfterJoint();
       }
       return null;
    }
 
-   protected void checkLinkIsNeededForSensor(InverseDynamicsJoint joint, JointDescription jointDescription)
+   protected void checkLinkIsNeededForSensor(JointBasics joint, JointDescription jointDescription)
    {
       if(sensorLinksToTrack != null)
       {
@@ -483,7 +483,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
    public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
    {
       oneDoFJointsToPack.clear();
-      InverseDynamicsJoint parent = oneDoFJointAtEndOfChain;
+      JointBasics parent = oneDoFJointAtEndOfChain;
 
       while (parent != rootJoint)
       {

@@ -20,7 +20,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -113,7 +113,7 @@ public class ReachabilityMapFileLoader
          currentCell = currentRow.getCell(currentIndexValue++);
       }
 
-      InverseDynamicsJoint[] joints = ScrewTools.findJointsWithNames(ScrewTools.computeSubtreeJoints(rootBody), jointNames.toArray(new String[0]));
+      JointBasics[] joints = ScrewTools.findJointsWithNames(ScrewTools.computeSubtreeJoints(rootBody), jointNames.toArray(new String[0]));
       OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
 
       if (oneDoFJoints.length != jointNames.size())
@@ -197,12 +197,12 @@ public class ReachabilityMapFileLoader
       if (parentFrameName.equals(worldFrame.getName()))
          return worldFrame;
       
-      InverseDynamicsJoint[] allInverseDynamicsJoints = ScrewTools.computeSubtreeJoints(rootBody);
+      JointBasics[] allInverseDynamicsJoints = ScrewTools.computeSubtreeJoints(rootBody);
 
       if (parentFrameName.equals(rootBody.getBodyFixedFrame().getName()))
          return rootBody.getBodyFixedFrame();
 
-      for (InverseDynamicsJoint joint : allInverseDynamicsJoints)
+      for (JointBasics joint : allInverseDynamicsJoints)
       {
          ReferenceFrame frameAfterJoint = joint.getFrameAfterJoint();
          ReferenceFrame frameBeforeJoint = joint.getFrameBeforeJoint();

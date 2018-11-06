@@ -10,7 +10,7 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -83,7 +83,7 @@ public interface FullRobotModel
     * @param lidarName TODO
     * @return TODO
     */
-   InverseDynamicsJoint getLidarJoint(String lidarName);
+   JointBasics getLidarJoint(String lidarName);
 
    ReferenceFrame getLidarBaseFrame(String name);
 

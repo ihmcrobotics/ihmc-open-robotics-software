@@ -20,7 +20,7 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -175,7 +175,7 @@ public class VirtualModelMomentumControllerTestHelper
    {
       private final YoVariableRegistry registry = new YoVariableRegistry("controller");
 
-      private final Map<InverseDynamicsJoint, YoDouble> yoJointTorques = new HashMap<>();
+      private final Map<JointBasics, YoDouble> yoJointTorques = new HashMap<>();
 
       private final SCSRobotFromInverseDynamicsRobotModel scsRobot;
       private final FullRobotModel controllerModel;
@@ -204,7 +204,7 @@ public class VirtualModelMomentumControllerTestHelper
          this.selectionMatrix = selectionMatrix;
          this.yoDesiredWrenches = yoDesiredWrenches;
 
-         for (InverseDynamicsJoint joint : controlledJoints)
+         for (JointBasics joint : controlledJoints)
             yoJointTorques.put(joint, new YoDouble(joint.getName() + "solutionTorque", registry));
 
          for (VirtualModelControllerTestHelper.ForcePointController forcePointController : forcePointControllers)

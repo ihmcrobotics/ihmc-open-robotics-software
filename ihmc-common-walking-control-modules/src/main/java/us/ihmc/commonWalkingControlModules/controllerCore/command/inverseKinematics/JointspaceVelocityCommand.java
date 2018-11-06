@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 
@@ -48,7 +48,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     */
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
    /** The list of joints for which desired velocities are assigned. */
-   private final List<InverseDynamicsJoint> joints = new ArrayList<>(initialCapacity);
+   private final List<JointBasics> joints = new ArrayList<>(initialCapacity);
    /**
     * The list of the desired velocities for each joint. The list follows the same ordering as the
     * {@link #joints} list. Each {@link DenseMatrix64F} in this list, is a N-by-1 vector where N is
@@ -152,7 +152,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     *           Not modified.
     * @throws RuntimeException if the {@code desiredAcceleration} is not a N-by-1 vector.
     */
-   public void addJoint(InverseDynamicsJoint joint, DenseMatrix64F desiredVelocity)
+   public void addJoint(JointBasics joint, DenseMatrix64F desiredVelocity)
    {
       checkConsistency(joint, desiredVelocity);
       joints.add(joint);
@@ -174,7 +174,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     * @param weight positive value that denotes the priority of the joint task.
     * @throws RuntimeException if the {@code desiredAcceleration} is not a N-by-1 vector.
     */
-   public void addJoint(InverseDynamicsJoint joint, DenseMatrix64F desiredVelocity, double weight)
+   public void addJoint(JointBasics joint, DenseMatrix64F desiredVelocity, double weight)
    {
       checkConsistency(joint, desiredVelocity);
       joints.add(joint);
@@ -229,7 +229,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     *           refer to. Not modified.
     * @throws RuntimeException if the given map does not have all this command's joints.
     */
-   public void retrieveJointsFromName(Map<String, ? extends InverseDynamicsJoint> nameToJointMap)
+   public void retrieveJointsFromName(Map<String, ? extends JointBasics> nameToJointMap)
    {
       for (int i = 0; i < getNumberOfJoints(); i++)
       {
@@ -273,7 +273,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
          weights.get(jointIdx).setValue(weight);
    }
 
-   private void checkConsistency(InverseDynamicsJoint joint, DenseMatrix64F desiredVelocity)
+   private void checkConsistency(JointBasics joint, DenseMatrix64F desiredVelocity)
    {
       MathTools.checkEquals(joint.getDegreesOfFreedom(), desiredVelocity.getNumRows());
    }
@@ -335,7 +335,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     * 
     * @return the list of joints to be controlled.
     */
-   public List<InverseDynamicsJoint> getJoints()
+   public List<JointBasics> getJoints()
    {
       return joints;
    }
@@ -346,7 +346,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     * @param jointIndex the index of the joint &in; [0, {@code getNumberOfJoints()}[.
     * @return one of the joints to be controlled.
     */
-   public InverseDynamicsJoint getJoint(int jointIndex)
+   public JointBasics getJoint(int jointIndex)
    {
       return joints.get(jointIndex);
    }

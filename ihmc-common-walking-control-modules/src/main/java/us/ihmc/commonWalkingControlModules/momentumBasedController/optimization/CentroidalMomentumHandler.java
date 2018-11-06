@@ -11,7 +11,7 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -33,7 +33,7 @@ public class CentroidalMomentumHandler
       this(ScrewTools.computeSubtreeJoints(rootBody), centerOfMassFrame);
    }
 
-   public CentroidalMomentumHandler(InverseDynamicsJoint[] jointsToConsider, ReferenceFrame centerOfMassFrame)
+   public CentroidalMomentumHandler(JointBasics[] jointsToConsider, ReferenceFrame centerOfMassFrame)
    {
       centroidalMomentumRate = new SpatialForce(centerOfMassFrame);
       centroidalMomentum = new Momentum(centerOfMassFrame);

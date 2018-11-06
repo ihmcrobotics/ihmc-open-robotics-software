@@ -27,7 +27,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -153,7 +153,7 @@ public class HexapodSimulationController implements RobotController
       controlledBodies[i] = fullRobotModel.getRootBody();
 
       //Joints to Control
-      InverseDynamicsJoint[] controlledJoints = ScrewTools.computeSubtreeJoints(fullRobotModel.getElevator());
+      JointBasics[] controlledJoints = ScrewTools.computeSubtreeJoints(fullRobotModel.getElevator());
 
       ControllerCoreOptimizationSettings momentumOptimizationSettings = getMomentumOptimizationSettings();
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();

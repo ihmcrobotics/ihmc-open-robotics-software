@@ -13,7 +13,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class CentroidalMomentumRateADotVTerm
 {
-   private final InverseDynamicsJoint[] jointsInOrder;
+   private final JointBasics[] jointsInOrder;
    private final ReferenceFrame centerOfMassFrame;
    private final SpatialAcceleration rootAcceleration;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;

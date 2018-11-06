@@ -2,7 +2,7 @@ package us.ihmc.robotics.sensors;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class ForceSensorDefinition
@@ -18,7 +18,7 @@ public class ForceSensorDefinition
    {
       this.sensorName = sensorName;
       this.rigidBody = rigidBody;
-      InverseDynamicsJoint parentJoint = rigidBody.getParentJoint();
+      JointBasics parentJoint = rigidBody.getParentJoint();
       this.parentJointName = parentJoint.getName();
       this.transformFromSensorToParentJoint = new RigidBodyTransform(transformFromSensorToParentJoint);
       ReferenceFrame frameAfterJoint = parentJoint.getFrameAfterJoint();

@@ -517,7 +517,7 @@ public class SpatialAccelerationCalculator
           * while updating twists.
           */
          ReferenceFrame bodyFrame = body.getBodyFixedFrame();
-         InverseDynamicsJoint parentJoint = body.getParentJoint();
+         JointBasics parentJoint = body.getParentJoint();
          RigidBody predecessor = parentJoint.getPredecessor();
          SpatialAccelerationReadOnly accelerationOfPredecessor = computeOrGetAccelerationOfBody(predecessor);
          acceleration = assignAndGetEmptyAcceleration(body);

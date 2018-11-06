@@ -7,7 +7,7 @@ import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.sensorProcessors.Foo
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ContactBasedFootSwitch;
 import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
@@ -47,7 +47,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
       for(RobotQuadrant quadrant : quadrants)
       {
          String prefix = quadrant.getCamelCaseNameForStartOfExpression();
-         InverseDynamicsJoint jointBeforeFoot = fullRobotModel.getFoot(quadrant).getParentJoint();
+         JointBasics jointBeforeFoot = fullRobotModel.getFoot(quadrant).getParentJoint();
 
          for(GroundContactPoint groundContactPoint : groundContactPoints)
          {

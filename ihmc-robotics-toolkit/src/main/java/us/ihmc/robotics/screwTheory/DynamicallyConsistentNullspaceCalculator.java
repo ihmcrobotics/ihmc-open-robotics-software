@@ -12,7 +12,7 @@ public interface DynamicallyConsistentNullspaceCalculator
 
    void addConstraint(RigidBody body, DenseMatrix64F selectionMatrix);
 
-   void addActuatedJoint(InverseDynamicsJoint joint);
+   void addActuatedJoint(JointBasics joint);
 
    void compute();
 

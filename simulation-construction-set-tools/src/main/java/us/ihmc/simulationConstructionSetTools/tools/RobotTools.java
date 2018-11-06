@@ -14,7 +14,7 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.robotics.robotDescription.Plane;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.PlanarJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -49,19 +49,19 @@ public class RobotTools
       private final FrameVector3D angularVelocity = new FrameVector3D();
       private final Twist rootJointTwist = new Twist();
 
-      public SCSRobotFromInverseDynamicsRobotModel(String name, InverseDynamicsJoint rootJoint)
+      public SCSRobotFromInverseDynamicsRobotModel(String name, JointBasics rootJoint)
       {
          super(name);
 
          Joint scsRootJoint = addSCSJointUsingIDJoint(rootJoint, this, true);
          this.addRootJoint(scsRootJoint);
 
-         ArrayList<InverseDynamicsJoint> idChildJoints = new ArrayList<InverseDynamicsJoint>();
+         ArrayList<JointBasics> idChildJoints = new ArrayList<JointBasics>();
          idChildJoints.addAll(rootJoint.getSuccessor().getChildrenJoints());
 
          while (!idChildJoints.isEmpty())
          {
-            InverseDynamicsJoint currentIDJoint = idChildJoints.remove(0);
+            JointBasics currentIDJoint = idChildJoints.remove(0);
             addSCSJointUsingIDJoint(currentIDJoint, this, false);
             idChildJoints.addAll(currentIDJoint.getSuccessor().getChildrenJoints());
          }
@@ -195,7 +195,7 @@ public class RobotTools
          }
       }
       
-      public void packIdJoints(InverseDynamicsJoint[] idJoints)
+      public void packIdJoints(JointBasics[] idJoints)
       {
          int jointIndx = 0;
          if(idFloatingJoint != null)
@@ -213,13 +213,13 @@ public class RobotTools
          
       }
            
-      public PinJoint findSCSPinJoint(InverseDynamicsJoint joint)
+      public PinJoint findSCSPinJoint(JointBasics joint)
       {
          return (PinJoint) idToSCSJointMap.get(joint);
       }
    }
 
-   public static Joint addSCSJointUsingIDJoint(InverseDynamicsJoint idJoint, Robot scsRobot, boolean isRootJoint)
+   public static Joint addSCSJointUsingIDJoint(JointBasics idJoint, Robot scsRobot, boolean isRootJoint)
    {
       Joint scsJoint;
       String jointName = idJoint.getName();

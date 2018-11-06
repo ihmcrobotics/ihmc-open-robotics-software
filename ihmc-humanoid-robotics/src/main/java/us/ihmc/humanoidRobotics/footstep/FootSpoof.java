@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -27,7 +27,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
  */
 public class FootSpoof implements ContactablePlaneBody
 {
-   private final InverseDynamicsJoint ankle;
+   private final JointBasics ankle;
    private final RigidBody shin;
    private final RigidBody foot;
    private final PoseReferenceFrame shinFrame;

@@ -22,7 +22,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -58,7 +58,7 @@ public class VirtualModelControllerTest
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       Wrench wrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
-      InverseDynamicsJoint[] controlledJoints = ScrewTools.createJointPath(pelvis, foot);
+      JointBasics[] controlledJoints = ScrewTools.createJointPath(pelvis, foot);
       GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, pelvis.getBodyFixedFrame());
       jacobian.compute();
 
@@ -568,7 +568,7 @@ public class VirtualModelControllerTest
 
       DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
 
-      InverseDynamicsJoint[] controlledJoints = ScrewTools.createJointPath(pelvis, endEffector);
+      JointBasics[] controlledJoints = ScrewTools.createJointPath(pelvis, endEffector);
       GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, pelvis.getBodyFixedFrame());
       jacobian.compute();
 

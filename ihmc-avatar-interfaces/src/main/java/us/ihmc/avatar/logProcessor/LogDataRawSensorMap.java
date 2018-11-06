@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -90,13 +90,13 @@ public class LogDataRawSensorMap
 
    private StateEstimatorSensorDefinitions buildStateEstimatorSensorDefinitions(FullRobotModel fullRobotModel)
    {
-      InverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      JointBasics rootJoint = fullRobotModel.getRootJoint();
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
 
       StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
-      for (InverseDynamicsJoint joint : ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()))
+      for (JointBasics joint : ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()))
       {
          if (joint instanceof OneDoFJoint)
          {

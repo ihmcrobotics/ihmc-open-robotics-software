@@ -126,7 +126,7 @@ public class MovingReferenceFrameTest
             joint.getFrameAfterJoint().getTwistOfFrame(actualTwist);
             TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
 
-            for (InverseDynamicsJoint child : body.getChildrenJoints())
+            for (JointBasics child : body.getChildrenJoints())
             {
                twistCalculator.getTwistOfBody(body, expectedTwist);
                expectedTwist.setBodyFrame(child.getFrameBeforeJoint());

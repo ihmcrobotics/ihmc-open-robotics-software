@@ -14,7 +14,7 @@ import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -148,7 +148,7 @@ public class SphereRobotModel implements FullRobotModel
       return null;
    }
 
-   public InverseDynamicsJoint getLidarJoint(String lidarName)
+   public JointBasics getLidarJoint(String lidarName)
    {
       return null;
    }

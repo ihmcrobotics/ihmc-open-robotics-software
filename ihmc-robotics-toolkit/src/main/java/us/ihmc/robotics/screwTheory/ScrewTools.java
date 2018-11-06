@@ -61,7 +61,7 @@ public class ScrewTools
       return new PrismaticJoint(jointName, parentBody, transformToParent, jointAxis);
    }
 
-   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, double Ixx, double Iyy, double Izz, double mass, Vector3D centerOfMassOffset)
+   public static RigidBody addRigidBody(String name, JointBasics parentJoint, double Ixx, double Iyy, double Izz, double mass, Vector3D centerOfMassOffset)
    {
       Matrix3D momentOfInertia = new Matrix3D();
       momentOfInertia.setIdentity();
@@ -71,42 +71,42 @@ public class ScrewTools
       return addRigidBody(name, parentJoint, momentOfInertia, mass, centerOfMassOffset);
    }
 
-   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, Vector3DReadOnly centerOfMassOffset)
+   public static RigidBody addRigidBody(String name, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, Vector3DReadOnly centerOfMassOffset)
    {
       RigidBodyTransform inertiaPose = new RigidBodyTransform();
       inertiaPose.setTranslation(centerOfMassOffset);
       return addRigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
    }
 
-   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
+   public static RigidBody addRigidBody(String name, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
    {
       return new RigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
    }
 
-   public static RigidBody[] computeSuccessors(InverseDynamicsJoint... joints)
+   public static RigidBody[] computeSuccessors(JointBasics... joints)
    {
       RigidBody[] ret = new RigidBody[joints.length];
       for (int i = 0; i < joints.length; i++)
       {
-         InverseDynamicsJoint joint = joints[i];
+         JointBasics joint = joints[i];
          ret[i] = joint.getSuccessor();
       }
       return ret;
    }
 
-   public static RigidBody[] computeSubtreeSuccessors(InverseDynamicsJoint... joints)
+   public static RigidBody[] computeSubtreeSuccessors(JointBasics... joints)
    {
       ArrayList<RigidBody> rigidBodySuccessors = new ArrayList<RigidBody>();
       ArrayList<RigidBody> rigidBodyStack = new ArrayList<RigidBody>();
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          rigidBodyStack.add(joint.getPredecessor());
       }
       while (!rigidBodyStack.isEmpty())
       {
          RigidBody currentBody = rigidBodyStack.remove(0);
-         List<InverseDynamicsJoint> childrenJoints = currentBody.getChildrenJoints();
-         for (InverseDynamicsJoint joint : childrenJoints)
+         List<JointBasics> childrenJoints = currentBody.getChildrenJoints();
+         for (JointBasics joint : childrenJoints)
          {
             rigidBodyStack.add(joint.getSuccessor());
             rigidBodySuccessors.add(joint.getSuccessor());
@@ -117,7 +117,7 @@ public class ScrewTools
       return rigidBodySuccessors.toArray(ret);
    }
 
-   public static RigidBody[] computeRigidBodiesAfterThisJoint(InverseDynamicsJoint... joints)
+   public static RigidBody[] computeRigidBodiesAfterThisJoint(JointBasics... joints)
    {
       ArrayList<RigidBody> rigidBodySuccessors = new ArrayList<RigidBody>();
       computeRigidBodiesAfterThisJoint(rigidBodySuccessors, joints);
@@ -126,27 +126,27 @@ public class ScrewTools
       return rigidBodySuccessors.toArray(ret);
    }
 
-   public static void computeRigidBodiesAfterThisJoint(ArrayList<RigidBody> rigidBodySuccessorsToPack, InverseDynamicsJoint... joints)
+   public static void computeRigidBodiesAfterThisJoint(ArrayList<RigidBody> rigidBodySuccessorsToPack, JointBasics... joints)
    {
-      ArrayList<InverseDynamicsJoint> jointStack = new ArrayList<InverseDynamicsJoint>();
-      for (InverseDynamicsJoint joint : joints)
+      ArrayList<JointBasics> jointStack = new ArrayList<JointBasics>();
+      for (JointBasics joint : joints)
       {
          jointStack.add(joint);
       }
       while (!jointStack.isEmpty())
       {
-         InverseDynamicsJoint currentJoint = jointStack.remove(0);
+         JointBasics currentJoint = jointStack.remove(0);
          rigidBodySuccessorsToPack.add(currentJoint.getSuccessor());
          RigidBody currentBody = currentJoint.getSuccessor();
-         List<InverseDynamicsJoint> childrenJoints = currentBody.getChildrenJoints();
-         for (InverseDynamicsJoint joint : childrenJoints)
+         List<JointBasics> childrenJoints = currentBody.getChildrenJoints();
+         for (JointBasics joint : childrenJoints)
          {
             jointStack.add(joint);
          }
       }
    }
 
-   public static void computeRigidBodiesFromRootToThisJoint(ArrayList<RigidBody> rigidBodySuccessorsToPack, InverseDynamicsJoint joint)
+   public static void computeRigidBodiesFromRootToThisJoint(ArrayList<RigidBody> rigidBodySuccessorsToPack, JointBasics joint)
    {
       RigidBody predecessorBody = joint.getPredecessor();
       if (predecessorBody == null)
@@ -155,7 +155,7 @@ public class ScrewTools
          return;
 
       rigidBodySuccessorsToPack.add(predecessorBody);
-      InverseDynamicsJoint parentJoint = predecessorBody.getParentJoint();
+      JointBasics parentJoint = predecessorBody.getParentJoint();
       if (parentJoint == null)
          return;
 
@@ -167,7 +167,7 @@ public class ScrewTools
       return computeSuccessors(computeSubtreeJoints(bodies));
    }
 
-   public static RigidBody[] computeSubtreeSuccessors(Set<InverseDynamicsJoint> jointsToExclude, RigidBody... bodies)
+   public static RigidBody[] computeSubtreeSuccessors(Set<JointBasics> jointsToExclude, RigidBody... bodies)
    {
       ArrayList<RigidBody> rigidBodySuccessors = new ArrayList<RigidBody>();
       ArrayList<RigidBody> rigidBodyStack = new ArrayList<RigidBody>();
@@ -178,8 +178,8 @@ public class ScrewTools
       while (!rigidBodyStack.isEmpty())
       {
          RigidBody currentBody = rigidBodyStack.remove(0);
-         List<InverseDynamicsJoint> childrenJoints = currentBody.getChildrenJoints();
-         for (InverseDynamicsJoint joint : childrenJoints)
+         List<JointBasics> childrenJoints = currentBody.getChildrenJoints();
+         for (JointBasics joint : childrenJoints)
          {
             if (!jointsToExclude.contains(joint))
             {
@@ -199,46 +199,46 @@ public class ScrewTools
       return computeSuccessors(computeSupportAndSubtreeJoints(bodies));
    }
 
-   public static InverseDynamicsJoint[] computeSupportAndSubtreeJoints(RigidBody... bodies)
+   public static JointBasics[] computeSupportAndSubtreeJoints(RigidBody... bodies)
    {
-      Set<InverseDynamicsJoint> ret = new LinkedHashSet<InverseDynamicsJoint>();
+      Set<JointBasics> ret = new LinkedHashSet<JointBasics>();
       for (RigidBody body : bodies)
       {
          ret.addAll(Arrays.asList(computeSupportJoints(body)));
          ret.addAll(Arrays.asList(computeSubtreeJoints(body)));
       }
-      return ret.toArray(new InverseDynamicsJoint[ret.size()]);
+      return ret.toArray(new JointBasics[ret.size()]);
    }
 
-   public static InverseDynamicsJoint[] computeSupportJoints(RigidBody... bodies)
+   public static JointBasics[] computeSupportJoints(RigidBody... bodies)
    {
-      Set<InverseDynamicsJoint> supportSet = new LinkedHashSet<InverseDynamicsJoint>();
+      Set<JointBasics> supportSet = new LinkedHashSet<JointBasics>();
       for (RigidBody rigidBody : bodies)
       {
          RigidBody rootBody = getRootBody(rigidBody);
-         InverseDynamicsJoint[] jointPath = createJointPath(rootBody, rigidBody);
+         JointBasics[] jointPath = createJointPath(rootBody, rigidBody);
          supportSet.addAll(Arrays.asList(jointPath));
       }
 
-      return supportSet.toArray(new InverseDynamicsJoint[supportSet.size()]);
+      return supportSet.toArray(new JointBasics[supportSet.size()]);
    }
 
-   public static InverseDynamicsJoint[] computeSubtreeJoints(RigidBody... rootBodies)
+   public static JointBasics[] computeSubtreeJoints(RigidBody... rootBodies)
    {
       return computeSubtreeJoints(Arrays.asList(rootBodies));
    }
 
-   public static InverseDynamicsJoint[] computeSubtreeJoints(List<RigidBody> rootBodies)
+   public static JointBasics[] computeSubtreeJoints(List<RigidBody> rootBodies)
    {
-      ArrayList<InverseDynamicsJoint> subtree = new ArrayList<InverseDynamicsJoint>();
+      ArrayList<JointBasics> subtree = new ArrayList<JointBasics>();
       ArrayList<RigidBody> rigidBodyStack = new ArrayList<RigidBody>();
       rigidBodyStack.addAll(rootBodies);
 
       while (!rigidBodyStack.isEmpty())
       {
          RigidBody currentBody = rigidBodyStack.remove(0);
-         List<InverseDynamicsJoint> childrenJoints = currentBody.getChildrenJoints();
-         for (InverseDynamicsJoint joint : childrenJoints)
+         List<JointBasics> childrenJoints = currentBody.getChildrenJoints();
+         for (JointBasics joint : childrenJoints)
          {
             RigidBody successor = joint.getSuccessor();
             rigidBodyStack.add(successor);
@@ -246,7 +246,7 @@ public class ScrewTools
          }
       }
 
-      InverseDynamicsJoint[] ret = new InverseDynamicsJoint[subtree.size()];
+      JointBasics[] ret = new JointBasics[subtree.size()];
       return subtree.toArray(ret);
    }
 
@@ -281,18 +281,18 @@ public class ScrewTools
       return parentMap;
    }
 
-   public static DenseMatrix64F getTauMatrix(InverseDynamicsJoint[] jointsInOrder)
+   public static DenseMatrix64F getTauMatrix(JointBasics[] jointsInOrder)
    {
       int size = 0;
-      for (InverseDynamicsJoint joint : jointsInOrder)
+      for (JointBasics joint : jointsInOrder)
       {
          size += joint.getDegreesOfFreedom();
       }
 
-      DenseMatrix64F tempMatrix = new DenseMatrix64F(InverseDynamicsJoint.maxDoF, 1);
+      DenseMatrix64F tempMatrix = new DenseMatrix64F(JointBasics.maxDoF, 1);
       DenseMatrix64F ret = new DenseMatrix64F(size, 1);
       int startIndex = 0;
-      for (InverseDynamicsJoint joint : jointsInOrder)
+      for (JointBasics joint : jointsInOrder)
       {
          int endIndex = startIndex + joint.getDegreesOfFreedom() - 1;
          joint.getTauMatrix(tempMatrix);
@@ -310,7 +310,7 @@ public class ScrewTools
       return filterJoints(createJointPath(start, end), OneDoFJoint.class);
    }
 
-   public static InverseDynamicsJoint[] createJointPath(RigidBody start, RigidBody end)
+   public static JointBasics[] createJointPath(RigidBody start, RigidBody end)
    {
       boolean flip = false;
       RigidBody descendant = start;
@@ -324,13 +324,13 @@ public class ScrewTools
          pathLength = computeDistanceToAncestor(end, start);
       }
 
-      InverseDynamicsJoint[] ret = new InverseDynamicsJoint[pathLength];
+      JointBasics[] ret = new JointBasics[pathLength];
       RigidBody currentBody = descendant;
       int i = 0;
       while (currentBody != ancestor)
       {
          int j = flip ? pathLength - 1 - i : i;
-         InverseDynamicsJoint parentJoint = currentBody.getParentJoint();
+         JointBasics parentJoint = currentBody.getParentJoint();
          ret[j] = parentJoint;
          currentBody = parentJoint.getPredecessor();
          i++;
@@ -350,7 +350,7 @@ public class ScrewTools
     * @return the length of the joint path, returns -1 if the the given jointPathToPack is too
     *         small.
     */
-   public static int createJointPath(InverseDynamicsJoint[] jointPathToPack, RigidBody start, RigidBody end)
+   public static int createJointPath(JointBasics[] jointPathToPack, RigidBody start, RigidBody end)
    {
       boolean flip = false;
       RigidBody descendant = start;
@@ -372,7 +372,7 @@ public class ScrewTools
       while (currentBody != ancestor)
       {
          int j = flip ? pathLength - 1 - i : i;
-         InverseDynamicsJoint parentJoint = currentBody.getParentJoint();
+         JointBasics parentJoint = currentBody.getParentJoint();
          jointPathToPack[j] = parentJoint;
          currentBody = parentJoint.getPredecessor();
          i++;
@@ -394,26 +394,26 @@ public class ScrewTools
       return cloneJointPathAndFilter(oneDoFJoints, OneDoFJoint.class);
    }
 
-   public static <T extends InverseDynamicsJoint> T[] cloneJointPathAndFilter(T[] joints, Class<T> clazz)
+   public static <T extends JointBasics> T[] cloneJointPathAndFilter(T[] joints, Class<T> clazz)
    {
       return filterJoints(cloneJointPath(joints), clazz);
    }
 
-   public static <T extends InverseDynamicsJoint> T[] cloneJointPathAndFilter(T[] joints, Class<T> clazz, String suffix)
+   public static <T extends JointBasics> T[] cloneJointPathAndFilter(T[] joints, Class<T> clazz, String suffix)
    {
       return filterJoints(cloneJointPath(joints, suffix), clazz);
    }
 
-   public static InverseDynamicsJoint[] cloneJointPath(InverseDynamicsJoint[] inverseDynamicsJoints)
+   public static JointBasics[] cloneJointPath(JointBasics[] inverseDynamicsJoints)
    {
       String clonedJointNameSuffix = "Copy";
 
       return cloneJointPath(inverseDynamicsJoints, clonedJointNameSuffix);
    }
 
-   public static InverseDynamicsJoint[] cloneJointPath(InverseDynamicsJoint[] inverseDynamicsJoints, String suffix)
+   public static JointBasics[] cloneJointPath(JointBasics[] inverseDynamicsJoints, String suffix)
    {
-      InverseDynamicsJoint[] cloned = new InverseDynamicsJoint[inverseDynamicsJoints.length];
+      JointBasics[] cloned = new JointBasics[inverseDynamicsJoints.length];
       Map<RigidBody, RigidBody> originalToClonedRigidBodies = new HashMap<>();
 
       for (int i = 0; i < inverseDynamicsJoints.length; i++)
@@ -482,16 +482,16 @@ public class ScrewTools
       return cloned;
    }
 
-   public static <T extends InverseDynamicsJoint> T[] cloneJointPathDisconnectedFromOriginalRobot(T[] joints, Class<T> clazz, String suffix,
+   public static <T extends JointBasics> T[] cloneJointPathDisconnectedFromOriginalRobot(T[] joints, Class<T> clazz, String suffix,
                                                                                                   ReferenceFrame rootBodyFrame)
    {
       return filterJoints(cloneJointPathDisconnectedFromOriginalRobot(joints, suffix, rootBodyFrame), clazz);
    }
 
-   public static InverseDynamicsJoint[] cloneJointPathDisconnectedFromOriginalRobot(InverseDynamicsJoint[] inverseDynamicsJoints, String suffix,
+   public static JointBasics[] cloneJointPathDisconnectedFromOriginalRobot(JointBasics[] inverseDynamicsJoints, String suffix,
                                                                                     ReferenceFrame rootBodyFrame)
    {
-      InverseDynamicsJoint[] cloned = new InverseDynamicsJoint[inverseDynamicsJoints.length];
+      JointBasics[] cloned = new JointBasics[inverseDynamicsJoints.length];
 
       for (int i = 0; i < inverseDynamicsJoints.length; i++)
       {
@@ -545,7 +545,7 @@ public class ScrewTools
       return clone;
    }
 
-   private static RigidBody cloneRigidBody(RigidBody original, String cloneSuffix, InverseDynamicsJoint parentJointOfClone)
+   private static RigidBody cloneRigidBody(RigidBody original, String cloneSuffix, JointBasics parentJointOfClone)
    {
       FramePoint3D comOffset = new FramePoint3D();
       original.getCoMOffset(comOffset);
@@ -597,10 +597,10 @@ public class ScrewTools
       return ret;
    }
 
-   public static void getJointVelocitiesMatrix(InverseDynamicsJoint[] joints, DenseMatrix64F jointVelocitiesMatrixToPack)
+   public static void getJointVelocitiesMatrix(JointBasics[] joints, DenseMatrix64F jointVelocitiesMatrixToPack)
    {
       int rowStart = 0;
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          int dof = joint.getDegreesOfFreedom();
          joint.getVelocityMatrix(jointVelocitiesMatrixToPack, rowStart);
@@ -608,10 +608,10 @@ public class ScrewTools
       }
    }
 
-   public static void getJointVelocitiesMatrix(Iterable<? extends InverseDynamicsJoint> joints, DenseMatrix64F jointVelocitiesMatrixToPack)
+   public static void getJointVelocitiesMatrix(Iterable<? extends JointBasics> joints, DenseMatrix64F jointVelocitiesMatrixToPack)
    {
       int rowStart = 0;
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          int dof = joint.getDegreesOfFreedom();
          joint.getVelocityMatrix(jointVelocitiesMatrixToPack, rowStart);
@@ -619,10 +619,10 @@ public class ScrewTools
       }
    }
 
-   public static void getDesiredJointAccelerationsMatrix(Iterable<? extends InverseDynamicsJoint> joints, DenseMatrix64F desiredJointAccelerationsMatrixToPack)
+   public static void getDesiredJointAccelerationsMatrix(Iterable<? extends JointBasics> joints, DenseMatrix64F desiredJointAccelerationsMatrixToPack)
    {
       int rowStart = 0;
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          int dof = joint.getDegreesOfFreedom();
          joint.getDesiredAccelerationMatrix(desiredJointAccelerationsMatrixToPack, rowStart);
@@ -630,10 +630,10 @@ public class ScrewTools
       }
    }
 
-   public static void getDesiredJointAccelerationsMatrix(InverseDynamicsJoint[] joints, DenseMatrix64F desiredJointAccelerationsMatrixToPack)
+   public static void getDesiredJointAccelerationsMatrix(JointBasics[] joints, DenseMatrix64F desiredJointAccelerationsMatrixToPack)
    {
       int rowStart = 0;
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          int dof = joint.getDegreesOfFreedom();
          joint.getDesiredAccelerationMatrix(desiredJointAccelerationsMatrixToPack, rowStart);
@@ -661,7 +661,7 @@ public class ScrewTools
 
       while (currentBody != ancestor)
       {
-         InverseDynamicsJoint parentJoint = currentBody.getParentJoint();
+         JointBasics parentJoint = currentBody.getParentJoint();
 
          if (parentJoint == null)
             throw new RuntimeException("Could not find the ancestor: " + ancestor.getName() + ", to the descendant: " + descendant.getName());
@@ -673,10 +673,10 @@ public class ScrewTools
       return nDoFs;
    }
 
-   public static int computeDegreesOfFreedom(InverseDynamicsJoint[] jointList)
+   public static int computeDegreesOfFreedom(JointBasics[] jointList)
    {
       int ret = 0;
-      for (InverseDynamicsJoint joint : jointList)
+      for (JointBasics joint : jointList)
       {
          ret += joint.getDegreesOfFreedom();
       }
@@ -684,10 +684,10 @@ public class ScrewTools
       return ret;
    }
 
-   public static int computeDegreesOfFreedom(Iterable<? extends InverseDynamicsJoint> jointList)
+   public static int computeDegreesOfFreedom(Iterable<? extends JointBasics> jointList)
    {
       int ret = 0;
-      for (InverseDynamicsJoint joint : jointList)
+      for (JointBasics joint : jointList)
       {
          ret += joint.getDegreesOfFreedom();
       }
@@ -695,7 +695,7 @@ public class ScrewTools
       return ret;
    }
 
-   public static int computeDegreesOfFreedom(List<? extends InverseDynamicsJoint> jointList)
+   public static int computeDegreesOfFreedom(List<? extends JointBasics> jointList)
    {
       int ret = 0;
       for (int i = 0; i < jointList.size(); i++)
@@ -715,10 +715,10 @@ public class ScrewTools
       return rootAcceleration;
    }
 
-   public static void getJointPositions(InverseDynamicsJoint[] joints, DenseMatrix64F jointPositionsToPack)
+   public static void getJointPositions(JointBasics[] joints, DenseMatrix64F jointPositionsToPack)
    {
       int rowStart = 0;
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          joint.getConfigurationMatrix(jointPositionsToPack, rowStart);
          rowStart += joint.getDegreesOfFreedom();
@@ -737,10 +737,10 @@ public class ScrewTools
       }
    }
 
-   public static void setJointPositions(InverseDynamicsJoint[] joints, DenseMatrix64F jointPositions)
+   public static void setJointPositions(JointBasics[] joints, DenseMatrix64F jointPositions)
    {
       int rowStart = 0;
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          joint.setConfiguration(jointPositions, rowStart);
          rowStart += joint.getDegreesOfFreedom();
@@ -769,40 +769,40 @@ public class ScrewTools
       }
    }
 
-   public static void setDesiredAccelerations(InverseDynamicsJoint[] jointList, DenseMatrix64F jointAccelerations)
+   public static void setDesiredAccelerations(JointBasics[] jointList, DenseMatrix64F jointAccelerations)
    {
       int rowStart = 0;
-      for (InverseDynamicsJoint joint : jointList)
+      for (JointBasics joint : jointList)
       {
          joint.setDesiredAcceleration(jointAccelerations, rowStart);
          rowStart += joint.getDegreesOfFreedom();
       }
    }
 
-   public static void setDesiredAccelerations(Iterable<? extends InverseDynamicsJoint> jointList, DenseMatrix64F jointAccelerations)
+   public static void setDesiredAccelerations(Iterable<? extends JointBasics> jointList, DenseMatrix64F jointAccelerations)
    {
       int rowStart = 0;
-      for (InverseDynamicsJoint joint : jointList)
+      for (JointBasics joint : jointList)
       {
          joint.setDesiredAcceleration(jointAccelerations, rowStart);
          rowStart += joint.getDegreesOfFreedom();
       }
    }
 
-   public static void setJointTorques(InverseDynamicsJoint[] jointList, DenseMatrix64F jointTorques)
+   public static void setJointTorques(JointBasics[] jointList, DenseMatrix64F jointTorques)
    {
       int rowStart = 0;
-      for (InverseDynamicsJoint joint : jointList)
+      for (JointBasics joint : jointList)
       {
          joint.setJointTorque(jointTorques, rowStart);
          rowStart += joint.getDegreesOfFreedom();
       }
    }
 
-   public static void setVelocities(InverseDynamicsJoint[] jointList, DenseMatrix64F jointVelocities)
+   public static void setVelocities(JointBasics[] jointList, DenseMatrix64F jointVelocities)
    {
       int rowStart = 0;
-      for (InverseDynamicsJoint joint : jointList)
+      for (JointBasics joint : jointList)
       {
          joint.setVelocity(jointVelocities, rowStart);
          rowStart += joint.getDegreesOfFreedom();
@@ -819,8 +819,8 @@ public class ScrewTools
       }
    }
 
-   public static void computeIndicesForJoint(InverseDynamicsJoint[] jointsInOrder, TIntArrayList listToPackIndices,
-                                             InverseDynamicsJoint... jointsToComputeIndicesFor)
+   public static void computeIndicesForJoint(JointBasics[] jointsInOrder, TIntArrayList listToPackIndices,
+                                             JointBasics... jointsToComputeIndicesFor)
    {
       int startIndex = 0;
       for (int i = 0; i < jointsInOrder.length; i++)
@@ -842,12 +842,12 @@ public class ScrewTools
       }
    }
 
-   public static void computeIndexForJoint(List<? extends InverseDynamicsJoint> jointsInOrder, TIntArrayList listToPackIndices, InverseDynamicsJoint jointToComputeIndicesFor)
+   public static void computeIndexForJoint(List<? extends JointBasics> jointsInOrder, TIntArrayList listToPackIndices, JointBasics jointToComputeIndicesFor)
    {
       int startIndex = 0;
       for (int i = 0; i < jointsInOrder.size(); i++)
       {
-         InverseDynamicsJoint joint = jointsInOrder.get(i);
+         JointBasics joint = jointsInOrder.get(i);
          int nDegreesOfFreedom = joint.getDegreesOfFreedom();
 
          if (joint == jointToComputeIndicesFor)
@@ -862,7 +862,7 @@ public class ScrewTools
       }
    }
 
-   public static void computeIndexForJoint(InverseDynamicsJoint[] jointsInOrder, TIntArrayList listToPackIndices, InverseDynamicsJoint jointToComputeIndicesFor)
+   public static void computeIndexForJoint(JointBasics[] jointsInOrder, TIntArrayList listToPackIndices, JointBasics jointToComputeIndicesFor)
    {
       int startIndex = 0;
       for (int i = 0; i < jointsInOrder.length; i++)
@@ -881,13 +881,13 @@ public class ScrewTools
       }
    }
 
-   public static RevoluteJoint[] extractRevoluteJoints(InverseDynamicsJoint[] allJoints)
+   public static RevoluteJoint[] extractRevoluteJoints(JointBasics[] allJoints)
    {
       if (allJoints == null)
          return null;
 
       ArrayList<RevoluteJoint> revoluteJointsList = new ArrayList<RevoluteJoint>();
-      for (InverseDynamicsJoint joint : allJoints)
+      for (JointBasics joint : allJoints)
       {
          if (joint instanceof RevoluteJoint)
             revoluteJointsList.add((RevoluteJoint) joint);
@@ -899,10 +899,10 @@ public class ScrewTools
       return revoluteJointArray;
    }
 
-   public static <T extends InverseDynamicsJoint> int computeNumberOfJointsOfType(Class<T> clazz, InverseDynamicsJoint[] joints)
+   public static <T extends JointBasics> int computeNumberOfJointsOfType(Class<T> clazz, JointBasics[] joints)
    {
       int ret = 0;
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          if (clazz.isAssignableFrom(joint.getClass()))
             ret++;
@@ -911,7 +911,7 @@ public class ScrewTools
       return ret;
    }
 
-   public static <T extends InverseDynamicsJoint> T[] filterJoints(InverseDynamicsJoint[] source, Class<T> clazz)
+   public static <T extends JointBasics> T[] filterJoints(JointBasics[] source, Class<T> clazz)
    {
       @SuppressWarnings("unchecked")
       T[] retArray = (T[]) Array.newInstance(clazz, ScrewTools.computeNumberOfJointsOfType(clazz, source));
@@ -920,10 +920,10 @@ public class ScrewTools
    }
 
    @SuppressWarnings("unchecked")
-   public static <T extends InverseDynamicsJoint> void filterJoints(InverseDynamicsJoint[] source, T[] dest, Class<T> clazz)
+   public static <T extends JointBasics> void filterJoints(JointBasics[] source, T[] dest, Class<T> clazz)
    {
       int index = 0;
-      for (InverseDynamicsJoint joint : source)
+      for (JointBasics joint : source)
       {
          if (clazz.isAssignableFrom(joint.getClass()))
          {
@@ -932,7 +932,7 @@ public class ScrewTools
       }
    }
 
-   public static <T extends InverseDynamicsJoint> List<T> filterJoints(List<InverseDynamicsJoint> source, Class<T> clazz)
+   public static <T extends JointBasics> List<T> filterJoints(List<JointBasics> source, Class<T> clazz)
    {
       List<T> retList = new ArrayList<>();
       filterJoints(source, retList, clazz);
@@ -940,9 +940,9 @@ public class ScrewTools
    }
 
    @SuppressWarnings("unchecked")
-   public static <T extends InverseDynamicsJoint> void filterJoints(List<InverseDynamicsJoint> source, List<T> dest, Class<T> clazz)
+   public static <T extends JointBasics> void filterJoints(List<JointBasics> source, List<T> dest, Class<T> clazz)
    {
-      for (InverseDynamicsJoint joint : source)
+      for (JointBasics joint : source)
       {
          if (clazz.isAssignableFrom(joint.getClass()))
          {
@@ -951,14 +951,14 @@ public class ScrewTools
       }
    }
 
-   public static InverseDynamicsJoint[] findJointsWithNames(InverseDynamicsJoint[] allJoints, String... jointNames)
+   public static JointBasics[] findJointsWithNames(JointBasics[] allJoints, String... jointNames)
    {
       if (jointNames == null)
          return null;
 
-      InverseDynamicsJoint[] ret = new InverseDynamicsJoint[jointNames.length];
+      JointBasics[] ret = new JointBasics[jointNames.length];
       int index = 0;
-      for (InverseDynamicsJoint joint : allJoints)
+      for (JointBasics joint : allJoints)
       {
          for (String jointName : jointNames)
          {
@@ -1014,10 +1014,10 @@ public class ScrewTools
       }
    }
 
-   public static long computeGeometricJacobianNameBasedHashCode(InverseDynamicsJoint joints[], ReferenceFrame jacobianFrame, boolean allowChangeFrame)
+   public static long computeGeometricJacobianNameBasedHashCode(JointBasics joints[], ReferenceFrame jacobianFrame, boolean allowChangeFrame)
    {
       long jointsHashCode = 1L;
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
          jointsHashCode = 31L * jointsHashCode + joint.getNameBasedHashCode();
       if (!allowChangeFrame)
          return 31L * jointsHashCode + jacobianFrame.hashCode();
@@ -1025,13 +1025,13 @@ public class ScrewTools
          return jointsHashCode;
    }
 
-   public static long computeGeometricJacobianNameBasedHashCode(InverseDynamicsJoint joints[], int firstIndex, int lastIndex, ReferenceFrame jacobianFrame,
+   public static long computeGeometricJacobianNameBasedHashCode(JointBasics joints[], int firstIndex, int lastIndex, ReferenceFrame jacobianFrame,
                                                                 boolean allowChangeFrame)
    {
       long jointsHashCode = 1L;
       for (int i = firstIndex; i <= lastIndex; i++)
       {
-         InverseDynamicsJoint joint = joints[i];
+         JointBasics joint = joints[i];
          jointsHashCode = 31L * jointsHashCode + joint.getNameBasedHashCode();
       }
       if (!allowChangeFrame)
@@ -1055,7 +1055,7 @@ public class ScrewTools
       {
          return startBody;
       }
-      InverseDynamicsJoint parentJoint = startBody.getParentJoint();
+      JointBasics parentJoint = startBody.getParentJoint();
       if (parentJoint == null)
       {
          throw new RuntimeException("Reached root body. Can not move up the chain any further.");

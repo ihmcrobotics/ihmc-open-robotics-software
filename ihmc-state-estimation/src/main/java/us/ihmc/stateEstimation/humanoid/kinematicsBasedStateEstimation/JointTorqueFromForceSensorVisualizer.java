@@ -9,7 +9,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -73,7 +73,7 @@ public class JointTorqueFromForceSensorVisualizer
          jacobian.compute();
          jacobian.computeJointTorques(wrench, jointTorquesMatrix);
 
-         InverseDynamicsJoint[] joints = jacobian.getJointsInOrder();
+         JointBasics[] joints = jacobian.getJointsInOrder();
 
          for (int j = 0; j < joints.length; j++)
          {

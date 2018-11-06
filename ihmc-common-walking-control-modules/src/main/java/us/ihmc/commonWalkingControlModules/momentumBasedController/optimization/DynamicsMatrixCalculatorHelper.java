@@ -8,7 +8,7 @@ import org.ejml.ops.CommonOps;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -17,7 +17,7 @@ public class DynamicsMatrixCalculatorHelper
    private final GravityCoriolisExternalWrenchMatrixCalculator coriolisMatrixCalculator;
    private final JointIndexHandler jointIndexHandler;
 
-   private final LinkedHashMap<InverseDynamicsJoint, int[]> bodyOnlyIndices = new LinkedHashMap<>();
+   private final LinkedHashMap<JointBasics, int[]> bodyOnlyIndices = new LinkedHashMap<>();
 
    private final int degreesOfFreedom;
    private final int bodyDoFs;
@@ -35,7 +35,7 @@ public class DynamicsMatrixCalculatorHelper
       bodyDoFs = ScrewTools.computeDegreesOfFreedom(bodyJoints);
       floatingBaseDoFs = degreesOfFreedom - bodyDoFs;
 
-      for (InverseDynamicsJoint joint : bodyJoints)
+      for (JointBasics joint : bodyJoints)
       {
          TIntArrayList listToPackIndices = new TIntArrayList();
          ScrewTools.computeIndexForJoint(bodyJoints, listToPackIndices, joint);
@@ -53,11 +53,11 @@ public class DynamicsMatrixCalculatorHelper
    private final DenseMatrix64F tmpCoriolisMatrix = new DenseMatrix64F(SpatialForce.SIZE);
    public void computeCoriolisMatrix(DenseMatrix64F coriolisMatrix)
    {
-      InverseDynamicsJoint[] jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
+      JointBasics[] jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
 
       for (int jointID = 0; jointID < jointsToOptimizeFor.length; jointID++)
       {
-         InverseDynamicsJoint joint = jointsToOptimizeFor[jointID];
+         JointBasics joint = jointsToOptimizeFor[jointID];
          int jointDoFs = joint.getDegreesOfFreedom();
          tmpCoriolisMatrix.reshape(jointDoFs, 1);
          coriolisMatrixCalculator.getJointCoriolisMatrix(joint, tmpCoriolisMatrix);

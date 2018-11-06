@@ -305,8 +305,8 @@ public class TwistCalculatorTest
       RandomFloatingChain floatingChain = new RandomFloatingChain(random, numberOfRevoluteJoints);
       SixDoFJoint floatingJoint = floatingChain.getRootJoint();
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
-      List<InverseDynamicsJoint> joints = floatingChain.getInverseDynamicsJoints();
-      List<InverseDynamicsJoint> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new InverseDynamicsJoint[numberOfRevoluteJoints
+      List<JointBasics> joints = floatingChain.getInverseDynamicsJoints();
+      List<JointBasics> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new JointBasics[numberOfRevoluteJoints
             + 1])));
       SixDoFJoint floatingJointInFuture = (SixDoFJoint) jointsInFuture.get(0);
       List<RevoluteJoint> revoluteJointsInFuture = ScrewTools.filterJoints(jointsInFuture, RevoluteJoint.class);
@@ -342,7 +342,7 @@ public class TwistCalculatorTest
 
          for (int jointIndex = 0; jointIndex < numberOfRevoluteJoints + 1; jointIndex++)
          {
-            InverseDynamicsJoint joint = joints.get(jointIndex);
+            JointBasics joint = joints.get(jointIndex);
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
             twistCalculator.getTwistOfBody(body, actualTwist);
@@ -382,8 +382,8 @@ public class TwistCalculatorTest
       RandomFloatingChain floatingChain = new RandomFloatingChain(random, numberOfRevoluteJoints);
       SixDoFJoint floatingJoint = floatingChain.getRootJoint();
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
-      List<InverseDynamicsJoint> joints = floatingChain.getInverseDynamicsJoints();
-      List<InverseDynamicsJoint> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new InverseDynamicsJoint[numberOfRevoluteJoints
+      List<JointBasics> joints = floatingChain.getInverseDynamicsJoints();
+      List<JointBasics> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new JointBasics[numberOfRevoluteJoints
             + 1])));
       SixDoFJoint floatingJointInFuture = (SixDoFJoint) jointsInFuture.get(0);
       List<RevoluteJoint> revoluteJointsInFuture = ScrewTools.filterJoints(jointsInFuture, RevoluteJoint.class);
@@ -419,7 +419,7 @@ public class TwistCalculatorTest
 
          for (int jointIndex = 0; jointIndex < numberOfRevoluteJoints + 1; jointIndex++)
          {
-            InverseDynamicsJoint joint = joints.get(jointIndex);
+            JointBasics joint = joints.get(jointIndex);
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
             twistCalculator.getTwistOfBody(body, actualTwist);

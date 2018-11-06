@@ -176,7 +176,7 @@ public class ScrewTestTools
          potentialInverseDynamicsParentJoints.add(currentJoint);
       }
 
-      InverseDynamicsJoint[] idJoints = ScrewTools.computeSubtreeJoints(rootBody);
+      JointBasics[] idJoints = ScrewTools.computeSubtreeJoints(rootBody);
       for (int i = 0; i < idJoints.length; i++)
       {
          if (idJoints[i] instanceof RevoluteJoint)
@@ -285,7 +285,7 @@ public class ScrewTestTools
       return ret;
    }
 
-   public static RigidBody addRandomRigidBody(String name, Random random, InverseDynamicsJoint parentJoint)
+   public static RigidBody addRandomRigidBody(String name, Random random, JointBasics parentJoint)
    {
       Matrix3D momentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
       double mass = random.nextDouble();
@@ -592,9 +592,9 @@ public class ScrewTestTools
       }
    }
 
-   public static void setRandomVelocities(InverseDynamicsJoint[] joints, Random random)
+   public static void setRandomVelocities(JointBasics[] joints, Random random)
    {
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          DenseMatrix64F jointVelocity = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
          RandomMatrices.setRandom(jointVelocity, random);
@@ -607,7 +607,7 @@ public class ScrewTestTools
       private final RigidBody elevator;
       private final SixDoFJoint rootJoint;
       private final List<RevoluteJoint> revoluteJoints;
-      private final List<InverseDynamicsJoint> inverseDynamicsJoints = new ArrayList<>();
+      private final List<JointBasics> inverseDynamicsJoints = new ArrayList<>();
 
       public RandomFloatingChain(Random random, int numberOfRevoluteJoints)
       {
@@ -659,7 +659,7 @@ public class ScrewTestTools
          return revoluteJoints;
       }
 
-      public List<InverseDynamicsJoint> getInverseDynamicsJoints()
+      public List<JointBasics> getInverseDynamicsJoints()
       {
          return inverseDynamicsJoints;
       }

@@ -24,7 +24,7 @@ import us.ihmc.robotModels.FullRobotModelTestTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -73,10 +73,10 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
 
       ArrayList<OneDoFJoint> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
-      InverseDynamicsJoint[] allJoints = jointIndexHandler.getIndexedJoints();
+      JointBasics[] allJoints = jointIndexHandler.getIndexedJoints();
 
-      HashMap<InverseDynamicsJoint, DenseMatrix64F> noAccelCoriolisMatrices = new HashMap<>();
-      HashMap<InverseDynamicsJoint, DenseMatrix64F> coriolisMatrices = new HashMap<>();
+      HashMap<JointBasics, DenseMatrix64F> noAccelCoriolisMatrices = new HashMap<>();
+      HashMap<JointBasics, DenseMatrix64F> coriolisMatrices = new HashMap<>();
 
       for (int i = 0; i < iters; i++)
       {
@@ -87,7 +87,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
 
          for (int j = 0; j < allJoints.length; j++)
          {
-            InverseDynamicsJoint joint = allJoints[j];
+            JointBasics joint = allJoints[j];
 
             DenseMatrix64F noAccelCoriolisMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
             coriolisMatrixCalculator.getJointCoriolisMatrix(joint, noAccelCoriolisMatrix);
@@ -101,7 +101,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
 
          for (int j = 0; j < allJoints.length; j++)
          {
-            InverseDynamicsJoint joint = allJoints[j];
+            JointBasics joint = allJoints[j];
 
             DenseMatrix64F coriolisMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
             coriolisMatrixCalculator.getJointCoriolisMatrix(joint, coriolisMatrix);
@@ -110,7 +110,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
 
          for (int j = 0; j < allJoints.length; j++)
          {
-            InverseDynamicsJoint joint = allJoints[j];
+            JointBasics joint = allJoints[j];
             JUnitTools.assertMatrixEquals(noAccelCoriolisMatrices.get(joint), coriolisMatrices.get(joint), tolerance);
          }
       }
@@ -145,7 +145,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
          contactablePlaneBodies.add(ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(footBody, soleFrame));
       }
 
-      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullHumanoidRobotModel, new InverseDynamicsJoint[0]);
+      JointBasics[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullHumanoidRobotModel, new JointBasics[0]);
       FloatingInverseDynamicsJoint rootJoint = fullHumanoidRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame, momentumOptimizationSettings,

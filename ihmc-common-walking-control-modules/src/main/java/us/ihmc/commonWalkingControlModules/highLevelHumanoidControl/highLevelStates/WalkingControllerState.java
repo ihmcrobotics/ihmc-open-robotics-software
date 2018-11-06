@@ -17,7 +17,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -60,7 +60,7 @@ public class WalkingControllerState extends HighLevelControllerState
 
       // create controller core
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      InverseDynamicsJoint[] jointsToOptimizeFor = controllerToolbox.getControlledJoints();
+      JointBasics[] jointsToOptimizeFor = controllerToolbox.getControlledJoints();
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();

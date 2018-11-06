@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -143,10 +143,10 @@ public class SCSToInverseDynamicsJointMap
    {
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = new SCSToInverseDynamicsJointMap();
 
-      InverseDynamicsJoint[] inverseDynamicsJoints = ScrewTools.computeSubtreeJoints(sixDoFRootJoint.getSuccessor());
+      JointBasics[] inverseDynamicsJoints = ScrewTools.computeSubtreeJoints(sixDoFRootJoint.getSuccessor());
       LinkedHashMap<String, OneDoFJoint> inverseDynamicsJointsByName = new LinkedHashMap<String, OneDoFJoint>();
 
-      for (InverseDynamicsJoint inverseDynamicsJoint : inverseDynamicsJoints)
+      for (JointBasics inverseDynamicsJoint : inverseDynamicsJoints)
       {
          if (inverseDynamicsJoint instanceof OneDoFJoint)
          {

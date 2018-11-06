@@ -1,12 +1,12 @@
 package us.ihmc.robotDataLogger.jointState;
 
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class JointHolderFactory
 {
-   public static JointHolder getJointHolder(InverseDynamicsJoint joint)
+   public static JointHolder getJointHolder(JointBasics joint)
    {
       if(joint instanceof SixDoFJoint)
       {

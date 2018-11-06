@@ -12,7 +12,7 @@ import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
@@ -41,7 +41,7 @@ public class HexapodReferenceFrames implements ReferenceFrames
       for (RobotSextant robotSextant : RobotSextant.values)
       {
          RigidBody endEffector = fullRobotModel.getEndEffector(robotSextant);
-         InverseDynamicsJoint parentJoint = endEffector.getParentJoint();
+         JointBasics parentJoint = endEffector.getParentJoint();
          ReferenceFrame frameAfterJoint = parentJoint.getFrameAfterJoint();
          TranslationReferenceFrame footFrame = new TranslationReferenceFrame(robotSextant.name() + "footFrame", frameAfterJoint);
          Vector3D offsetFromJointBeforeFootToSole = offsetsFromJointBeforeFootToSole.get(robotSextant);

@@ -19,7 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.robotics.robotDescription.InertiaTools;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -93,9 +93,9 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
       if (body.hasChildrenJoints())
       {
-         List<InverseDynamicsJoint> childJoints = body.getChildrenJoints();
+         List<JointBasics> childJoints = body.getChildrenJoints();
 
-         for (InverseDynamicsJoint joint : childJoints)
+         for (JointBasics joint : childJoints)
          {
             RigidBody nextBody = joint.getSuccessor();
             if (nextBody != null)
@@ -155,9 +155,9 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
       if (currentRigidBody.hasChildrenJoints())
       {
-         List<InverseDynamicsJoint> childJoints = currentRigidBody.getChildrenJoints();
+         List<JointBasics> childJoints = currentRigidBody.getChildrenJoints();
 
-         for (InverseDynamicsJoint joint : childJoints)
+         for (JointBasics joint : childJoints)
          {
             RigidBody nextRigidBody = joint.getSuccessor();
             if (nextRigidBody != null)

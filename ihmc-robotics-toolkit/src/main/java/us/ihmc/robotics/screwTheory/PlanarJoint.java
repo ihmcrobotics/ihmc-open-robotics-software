@@ -68,7 +68,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint)
+   public void setJointPositionVelocityAndAcceleration(JointBasics originalJoint)
    {
       PlanarJoint floatingJoint = checkAndGetAsPlanarJoint(originalJoint);
 
@@ -80,7 +80,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setQddDesired(InverseDynamicsJoint originalJoint)
+   public void setQddDesired(JointBasics originalJoint)
    {
       PlanarJoint floatingJoint = checkAndGetAsPlanarJoint(originalJoint);
 
@@ -461,7 +461,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
       unitTwistToPack.setIncludingFrame(unitTwists.get(dofIndex));
    }
 
-   private PlanarJoint checkAndGetAsPlanarJoint(InverseDynamicsJoint originalJoint)
+   private PlanarJoint checkAndGetAsPlanarJoint(JointBasics originalJoint)
    {
       if (originalJoint instanceof PlanarJoint)
       {

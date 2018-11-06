@@ -8,7 +8,7 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.GraphicsObjectsHolder;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.simulationconstructionset.graphics.joints.GraphicsJoint;
@@ -24,7 +24,7 @@ public class GraphicsIDRobot extends GraphicsRobot
    {
       super(new Graphics3DNode(name, Graphics3DNodeType.TRANSFORM));
 
-      for (InverseDynamicsJoint joint : rootBody.getChildrenJoints())
+      for (JointBasics joint : rootBody.getChildrenJoints())
       {
          GraphicsJoint rootGraphicsJoint = createJoint(joint, Graphics3DNodeType.ROOTJOINT, graphicsObjectsHolder, useCollisionMeshes);
          getRootNode().addChild(rootGraphicsJoint);
@@ -34,10 +34,10 @@ public class GraphicsIDRobot extends GraphicsRobot
       update();
    }
 
-   private void addInverseDynamicsJoints(List<InverseDynamicsJoint> joints, GraphicsJoint parentJoint, GraphicsObjectsHolder graphicsObjectsHolder,
+   private void addInverseDynamicsJoints(List<JointBasics> joints, GraphicsJoint parentJoint, GraphicsObjectsHolder graphicsObjectsHolder,
                                          boolean useCollisionMeshes)
    {
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          GraphicsJoint graphicsJoint = createJoint(joint, Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
          parentJoint.addChild(graphicsJoint);
@@ -45,7 +45,7 @@ public class GraphicsIDRobot extends GraphicsRobot
       }
    }
 
-   private GraphicsJoint createJoint(InverseDynamicsJoint inverseDynamicsJoint, Graphics3DNodeType nodeType, GraphicsObjectsHolder graphicsObjectsHolder,
+   private GraphicsJoint createJoint(JointBasics inverseDynamicsJoint, Graphics3DNodeType nodeType, GraphicsObjectsHolder graphicsObjectsHolder,
                                      boolean useCollisionMeshes)
    {
       Graphics3DObject graphics3DObject;

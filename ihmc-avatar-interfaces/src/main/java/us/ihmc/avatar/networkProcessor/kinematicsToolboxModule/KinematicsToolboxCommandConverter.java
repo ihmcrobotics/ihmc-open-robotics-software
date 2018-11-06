@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -43,7 +43,7 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
    public KinematicsToolboxCommandConverter(RigidBody rootBody)
    {
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
-      for (InverseDynamicsJoint joint : ScrewTools.computeSubtreeJoints(rootBody))
+      for (JointBasics joint : ScrewTools.computeSubtreeJoints(rootBody))
       {
          referenceFrames.add(joint.getFrameAfterJoint());
          referenceFrames.add(joint.getFrameBeforeJoint());

@@ -16,7 +16,7 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -88,7 +88,7 @@ public class VirtualModelMomentumController
       jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
-      List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+      List<JointBasics> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, tempFullJacobian);
 
       /*
@@ -122,7 +122,7 @@ public class VirtualModelMomentumController
 
       for (int jointNumber = 0; jointNumber < commandToAdd.getNumberOfJoints(); jointNumber++)
       {
-         InverseDynamicsJoint joint = commandToAdd.getJoint(jointNumber);
+         JointBasics joint = commandToAdd.getJoint(jointNumber);
          int[] jointIndices = jointIndexHandler.getJointIndices(joint);
          if (jointIndices == null)
             return false;
@@ -174,7 +174,7 @@ public class VirtualModelMomentumController
       jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
-      List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+      List<JointBasics> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, tempFullJacobian);
 
       /*

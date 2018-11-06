@@ -11,7 +11,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class CentroidalMomentumMatrix
 {
-   private final InverseDynamicsJoint[] jointList;
+   private final JointBasics[] jointList;
    private final ReferenceFrame centerOfMassFrame;
    private final DenseMatrix64F centroidalMomentumMatrix;
 
@@ -56,7 +56,7 @@ public class CentroidalMomentumMatrix
       int column = 0;
       for (int j = 0; j < jointList.length; j++)
       {
-         InverseDynamicsJoint columnJoint = jointList[j];
+         JointBasics columnJoint = jointList[j];
          int columnJointDegreesOfFreedom = columnJoint.getDegreesOfFreedom();
 
          for (int k = 0; k < columnJointDegreesOfFreedom; k++)

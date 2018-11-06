@@ -26,7 +26,7 @@ public class CenterOfMassJacobian
    private final ReferenceFrame rootFrame;
    private final List<RigidBody> rigidBodyList = new ArrayList<>();
    private final Set<RigidBody> rigidBodySet = new HashSet<>();
-   private final InverseDynamicsJoint[] joints;
+   private final JointBasics[] joints;
 
    private final DenseMatrix64F jacobianMatrix;
    private final Twist tempUnitTwist = new Twist();
@@ -52,7 +52,7 @@ public class CenterOfMassJacobian
       this(rigidBodies, ScrewTools.computeSupportJoints(rigidBodies), rootFrame);
    }
 
-   public CenterOfMassJacobian(RigidBody[] rigidBodies, InverseDynamicsJoint[] joints, ReferenceFrame rootFrame)
+   public CenterOfMassJacobian(RigidBody[] rigidBodies, JointBasics[] joints, ReferenceFrame rootFrame)
    {
       this.rigidBodyList.addAll(Arrays.asList(rigidBodies));
       rigidBodySet.addAll(rigidBodyList);
@@ -92,7 +92,7 @@ public class CenterOfMassJacobian
          comScaledByMassMapIsUpdated.get(rigidBodyList.get(i)).setValue(false);
       }
 
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          RigidBody childBody = joint.getSuccessor();
 
@@ -127,7 +127,7 @@ public class CenterOfMassJacobian
       else
       {
          double curSubTreeMass = (rigidBodySet.contains(rigidBody) ? rigidBody.getInertia().getMass() : 0.0);
-         List<InverseDynamicsJoint> childrenJoints = rigidBody.getChildrenJoints();
+         List<JointBasics> childrenJoints = rigidBody.getChildrenJoints();
          for (int i = 0; i < childrenJoints.size(); i++)
          {
             double childSubTreeMass = getSubTreeMass(childrenJoints.get(i).getSuccessor());
@@ -166,7 +166,7 @@ public class CenterOfMassJacobian
          double massToScale = (rigidBodySet.contains(rigidBody) ? rigidBody.getInertia().getMass() : 0.0);
          curChildCoMScaledByMass.scale(massToScale);
 
-         final List<InverseDynamicsJoint> childrenJoints = rigidBody.getChildrenJoints();
+         final List<JointBasics> childrenJoints = rigidBody.getChildrenJoints();
          for (int i = 0; i < childrenJoints.size(); i++)
          {
             curChildCoMScaledByMass.add(getCoMScaledByMass(childrenJoints.get(i).getSuccessor()));
