@@ -373,7 +373,7 @@ public class DynamicsMatrixCalculator
          JointBasics joint = filteredJoints[i];
          int jointDoF = joint.getDegreesOfFreedom();
          tmpMatrix.reshape(jointDoF, 1);
-         joint.getTauMatrix(tmpMatrix);
+         joint.getJointTau(0, tmpMatrix);
 
          for (int dof = 0; dof < jointDoF; dof++)
             torqueMatrixToPack.set(startIndex + dof, 0, tmpMatrix.get(dof, 0));

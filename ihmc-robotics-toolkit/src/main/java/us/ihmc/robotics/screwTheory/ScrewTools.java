@@ -304,7 +304,7 @@ public class ScrewTools
       for (JointBasics joint : jointsInOrder)
       {
          int endIndex = startIndex + joint.getDegreesOfFreedom() - 1;
-         joint.getTauMatrix(tempMatrix);
+         joint.getJointTau(0, tempMatrix);
 
          MatrixTools.setMatrixBlock(ret, startIndex, 0, tempMatrix, 0, 0, joint.getDegreesOfFreedom(), 1, 1.0);
 
@@ -609,7 +609,7 @@ public class ScrewTools
       for (JointBasics joint : joints)
       {
          int dof = joint.getDegreesOfFreedom();
-         joint.getVelocityMatrix(jointVelocitiesMatrixToPack, rowStart);
+         joint.getJointVelocity(rowStart, jointVelocitiesMatrixToPack);
          rowStart += dof;
       }
    }
@@ -620,7 +620,7 @@ public class ScrewTools
       for (JointBasics joint : joints)
       {
          int dof = joint.getDegreesOfFreedom();
-         joint.getVelocityMatrix(jointVelocitiesMatrixToPack, rowStart);
+         joint.getJointVelocity(rowStart, jointVelocitiesMatrixToPack);
          rowStart += dof;
       }
    }
@@ -726,7 +726,7 @@ public class ScrewTools
       int rowStart = 0;
       for (JointBasics joint : joints)
       {
-         joint.getConfigurationMatrix(jointPositionsToPack, rowStart);
+         joint.getJointConfiguration(rowStart, jointPositionsToPack);
          rowStart += joint.getDegreesOfFreedom();
          if (joint instanceof SixDoFJoint || joint instanceof SphericalJoint)
             rowStart++; // Because of stupid quaternions
@@ -738,7 +738,7 @@ public class ScrewTools
       int rowStart = 0;
       for (JointBasics joint : joints)
       {
-         joint.setConfiguration(jointPositions, rowStart);
+         joint.setJointConfiguration(rowStart, jointPositions);
          rowStart += joint.getDegreesOfFreedom();
          if (joint instanceof SixDoFJoint || joint instanceof SphericalJoint)
             rowStart++; // Because of stupid quaternions
@@ -770,7 +770,7 @@ public class ScrewTools
       int rowStart = 0;
       for (JointBasics joint : jointList)
       {
-         joint.setJointTorque(jointTorques, rowStart);
+         joint.setJointTau(rowStart, jointTorques);
          rowStart += joint.getDegreesOfFreedom();
       }
    }
@@ -780,7 +780,7 @@ public class ScrewTools
       int rowStart = 0;
       for (JointBasics joint : jointList)
       {
-         joint.setVelocity(jointVelocities, rowStart);
+         joint.setJointVelocity(rowStart, jointVelocities);
          rowStart += joint.getDegreesOfFreedom();
       }
    }

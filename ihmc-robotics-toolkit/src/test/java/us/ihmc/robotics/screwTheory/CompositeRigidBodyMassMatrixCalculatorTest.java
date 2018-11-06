@@ -56,7 +56,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
 
       sixDoFJoint.setJointConfiguration(EuclidCoreRandomTools.nextRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
-      sixDoFJoint.getJointTwist(sixDoFJointTwist);
+      sixDoFJointTwist.setIncludingFrame(sixDoFJoint.getJointTwist());
       sixDoFJointTwist.getLinearPart().set(RandomGeometry.nextVector3D(random));
       sixDoFJointTwist.getAngularPart().set(RandomGeometry.nextVector3D(random));
       sixDoFJoint.setJointTwist(sixDoFJointTwist);
@@ -85,7 +85,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
 
       sixDoFJoint.setJointConfiguration(EuclidCoreRandomTools.nextRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
-      sixDoFJoint.getJointTwist(sixDoFJointTwist);
+      sixDoFJointTwist.setIncludingFrame(sixDoFJoint.getJointTwist());
       sixDoFJointTwist.getLinearPart().set(EuclidCoreRandomTools.nextVector3D(random));
       sixDoFJointTwist.getAngularPart().set(EuclidCoreRandomTools.nextVector3D(random));
       sixDoFJoint.setJointTwist(sixDoFJointTwist);

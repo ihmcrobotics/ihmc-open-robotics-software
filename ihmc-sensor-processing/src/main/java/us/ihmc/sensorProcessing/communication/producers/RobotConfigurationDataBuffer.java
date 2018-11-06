@@ -194,7 +194,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
 
       Twist rootJointTwist = new Twist();
-      rootJoint.getJointTwist(rootJointTwist);
+      rootJointTwist.setIncludingFrame(rootJoint.getJointTwist());
       Vector3D pelvisAngularVelocity = robotConfigurationData.getPelvisAngularVelocity();
       Vector3D pelvisLinearVelocity = robotConfigurationData.getPelvisLinearVelocity();
       rootJointTwist.getAngularPart().set(pelvisAngularVelocity);

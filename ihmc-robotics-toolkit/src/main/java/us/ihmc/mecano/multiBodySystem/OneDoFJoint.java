@@ -44,41 +44,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void getJointTwist(Twist twistToPack)
-   {
-      twistToPack.setIncludingFrame(unitJointTwist);
-      twistToPack.scale(qd);
-   }
-
-   @Override
-   public void getSuccessorTwist(Twist twistToPack)
-   {
-      twistToPack.setIncludingFrame(unitSuccessorTwist);
-      twistToPack.scale(qd);
-   }
-
-   @Override
-   public void getPredecessorTwist(Twist twistToPack)
-   {
-      twistToPack.setIncludingFrame(unitPredecessorTwist);
-      twistToPack.scale(qd);
-   }
-
-   @Override
-   public void getJointAcceleration(SpatialAcceleration accelerationToPack)
-   {
-      accelerationToPack.setIncludingFrame(unitJointAcceleration);
-      accelerationToPack.scale(qdd);
-   }
-
-   @Override
-   public void getSuccessorAcceleration(SpatialAcceleration accelerationToPack)
-   {
-      accelerationToPack.setIncludingFrame(unitSuccessorAcceleration);
-      accelerationToPack.scale(qdd);
-   }
-
-   @Override
    public void getDesiredJointAcceleration(SpatialAcceleration accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(unitJointAcceleration);
@@ -86,27 +51,13 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void getDesiredSuccessorAcceleration(SpatialAcceleration accelerationToPack)
-   {
-      accelerationToPack.setIncludingFrame(unitSuccessorAcceleration);
-      accelerationToPack.scale(qddDesired);
-   }
-
-   @Override
-   public void getDesiredPredecessorAcceleration(SpatialAcceleration accelerationToPack)
-   {
-      accelerationToPack.setIncludingFrame(unitPredecessorAcceleration);
-      accelerationToPack.scale(qddDesired);
-   }
-
-   @Override
-   public void setJointTorque(DenseMatrix64F matrix, int rowStart)
+   public void setJointTau(int rowStart, DenseMatrix64F matrix)
    {
       setTau(matrix.get(rowStart, 0));
    }
 
    @Override
-   public void getTauMatrix(DenseMatrix64F matrix)
+   public void getJointTau(int rowStart, DenseMatrix64F matrix)
    {
       MathTools.checkIntervalContains(matrix.getNumRows(), 1, Integer.MAX_VALUE);
       MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);
@@ -114,7 +65,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getJointVelocity(int rowStart, DenseMatrix64F matrix)
    {
       MathTools.checkIntervalContains(matrix.getNumRows(), 1, Integer.MAX_VALUE);
       MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);
@@ -142,7 +93,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void setTorqueFromWrench(Wrench jointWrench)
+   public void setJointWrench(Wrench jointWrench)
    {
       unitSuccessorTwist.getBodyFrame().checkReferenceFrameMatch(jointWrench.getBodyFrame());
       unitSuccessorTwist.getReferenceFrame().checkReferenceFrameMatch(jointWrench.getReferenceFrame());
@@ -247,19 +198,19 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getJointConfiguration(int rowStart, DenseMatrix64F matrix)
    {
       matrix.set(rowStart, q);
    }
 
    @Override
-   public void setConfiguration(DenseMatrix64F matrix, int rowStart)
+   public void setJointConfiguration(int rowStart, DenseMatrix64F matrix)
    {
       setQ(matrix.get(rowStart, 0));
    }
 
    @Override
-   public void setVelocity(DenseMatrix64F matrix, int rowStart)
+   public void setJointVelocity(int rowStart, DenseMatrix64F matrix)
    {
       setQd(matrix.get(rowStart, 0));
    }

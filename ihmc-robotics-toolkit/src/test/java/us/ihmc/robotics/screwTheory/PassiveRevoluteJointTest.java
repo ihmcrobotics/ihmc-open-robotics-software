@@ -45,7 +45,7 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.getTauMatrix(null);
+         joint.getJointTau(0, null);
       }
       catch(RuntimeException e)
       {
@@ -60,7 +60,7 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.setTorqueFromWrench(jointWrench);
+         joint.setJointWrench(jointWrench);
       }
       catch(RuntimeException e)
       {
@@ -165,7 +165,7 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.setConfiguration(matrix, rowStart);
+         joint.setJointConfiguration(rowStart, matrix);
       }
       catch(RuntimeException e)
       {
@@ -180,7 +180,7 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.setVelocity(matrix, rowStart);
+         joint.setJointVelocity(rowStart, matrix);
       }
       catch(RuntimeException e)
       {

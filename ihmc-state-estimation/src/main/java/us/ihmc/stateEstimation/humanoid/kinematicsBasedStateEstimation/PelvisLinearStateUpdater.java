@@ -291,7 +291,7 @@ public class PelvisLinearStateUpdater
       rootJoint.setJointPosition(tempRootJointTranslation);
 
       // Set the rootJoint twist to zero.
-      rootJoint.getJointTwist(rootJointTwist);
+      rootJointTwist.setIncludingFrame(rootJoint.getJointTwist());
       rootJointTwist.setToZero();
       rootJoint.setJointTwist(rootJointTwist);
       rootJoint.updateFramesRecursively();
@@ -379,7 +379,7 @@ public class PelvisLinearStateUpdater
       rootJoint.setJointPosition(tempRootJointTranslation);
 
       tempVelocity.setIncludingFrame(rootJointVelocity);
-      rootJoint.getJointTwist(rootJointTwist);
+      rootJointTwist.setIncludingFrame(rootJoint.getJointTwist());
       tempVelocity.changeFrame(rootJointTwist.getReferenceFrame());
       rootJointTwist.getLinearPart().set(tempVelocity);
       rootJoint.setJointTwist(rootJointTwist);

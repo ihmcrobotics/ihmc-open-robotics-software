@@ -52,7 +52,7 @@ public class ConstantPelvisRotationalStateUpdater implements PelvisRotationalSta
       yoRootJointFrameOrientation.getQuaternion(rootJointOrientation);
       rootJoint.setJointOrientation(rootJointOrientation);
 
-      rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
+      twistRootBodyRelativeToWorld.setIncludingFrame(rootJoint.getJointTwist());
       twistRootBodyRelativeToWorld.setToZero();
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
    }

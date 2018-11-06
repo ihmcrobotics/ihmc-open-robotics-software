@@ -100,26 +100,6 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void getJointTwist(Twist twistToPack)
-   {
-      twistToPack.setToZero(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getReferenceFrame());
-
-      twistToPack.setAngularPartY(jointTwist.getAngularPartY());
-      twistToPack.setLinearPartX(jointTwist.getLinearPartX());
-      twistToPack.setLinearPartZ(jointTwist.getLinearPartZ());
-   }
-
-   @Override
-   public void getJointAcceleration(SpatialAcceleration accelerationToPack)
-   {
-      accelerationToPack.setToZero(jointAcceleration.getBodyFrame(), jointAcceleration.getBaseFrame(), jointAcceleration.getReferenceFrame());
-
-      accelerationToPack.setAngularPartY(jointAcceleration.getAngularPartY());
-      accelerationToPack.setLinearPartX(jointAcceleration.getLinearPartX());
-      accelerationToPack.setLinearPartZ(jointAcceleration.getLinearPartZ());
-   }
-
-   @Override
    public void getDesiredJointAcceleration(SpatialAcceleration accelerationToPack)
    {
       accelerationToPack.setToZero(jointAccelerationDesired.getBodyFrame(), jointAccelerationDesired.getBaseFrame(),
@@ -131,7 +111,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void getTauMatrix(DenseMatrix64F matrix)
+   public void getJointTau(int rowStart, DenseMatrix64F matrix)
    {
       matrix.set(0, 0, successorWrench.getAngularPartY());
       matrix.set(1, 0, successorWrench.getLinearPartX());
@@ -139,7 +119,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getJointVelocity(int rowStart, DenseMatrix64F matrix)
    {
       matrix.set(rowStart + 0, 0, jointTwist.getAngularPartY());
       matrix.set(rowStart + 1, 0, jointTwist.getLinearPartX());
@@ -155,7 +135,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setTorqueFromWrench(Wrench jointWrench)
+   public void setJointWrench(Wrench jointWrench)
    {
       jointWrench.getBodyFrame().checkReferenceFrameMatch(successor.getBodyFixedFrame());
       jointWrench.setToZero(successor.getBodyFixedFrame(), successorWrench.getReferenceFrame());
@@ -181,7 +161,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setJointTorque(DenseMatrix64F matrix, int rowStart)
+   public void setJointTau(int rowStart, DenseMatrix64F matrix)
    {
       successorWrench.setAngularPartY(matrix.get(rowStart + 0));
       successorWrench.setLinearPartX(matrix.get(rowStart + 1));
@@ -254,7 +234,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getJointConfiguration(int rowStart, DenseMatrix64F matrix)
    {
       int index = rowStart;
       matrix.set(index++, 0, jointRotation.getPitch());
@@ -263,7 +243,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setConfiguration(DenseMatrix64F matrix, int rowStart)
+   public void setJointConfiguration(int rowStart, DenseMatrix64F matrix)
    {
       int index = rowStart;
       double qRot = matrix.get(index++, 0);
@@ -274,7 +254,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setVelocity(DenseMatrix64F matrix, int rowStart)
+   public void setJointVelocity(int rowStart, DenseMatrix64F matrix)
    {
       int index = rowStart;
       double qdRot = matrix.get(index++, 0);

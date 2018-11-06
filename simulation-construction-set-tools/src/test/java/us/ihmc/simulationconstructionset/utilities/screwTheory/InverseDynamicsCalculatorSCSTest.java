@@ -586,7 +586,7 @@ public class InverseDynamicsCalculatorSCSTest
       // TODO: Get this to work when the FloatingJoint has an offset.
 
       Twist bodyTwist = new Twist();
-      sixDoFJoint.getJointTwist(bodyTwist);
+      bodyTwist.setIncludingFrame(sixDoFJoint.getJointTwist());
 
       FrameVector3D originAcceleration = new FrameVector3D(sixDoFJoint.getFrameBeforeJoint());
       FrameVector3D angularAcceleration = new FrameVector3D(sixDoFJoint.getFrameAfterJoint());

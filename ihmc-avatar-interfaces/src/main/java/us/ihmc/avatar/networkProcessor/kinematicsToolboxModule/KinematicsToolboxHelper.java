@@ -94,8 +94,8 @@ public class KinematicsToolboxHelper
 
       if (rootJoint != null)
       {
-         rootJoint.setConfiguration(outputForRootJoint.getDesiredConfiguration(), 0);
-         rootJoint.setVelocity(outputForRootJoint.getDesiredVelocity(), 0);
+         rootJoint.setJointConfiguration(0, outputForRootJoint.getDesiredConfiguration());
+         rootJoint.setJointVelocity(0, outputForRootJoint.getDesiredVelocity());
       }
 
       JointDesiredOutputListReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
@@ -145,7 +145,7 @@ public class KinematicsToolboxHelper
          desiredRootJoint.getJointPose().setPosition(translation.getX(), translation.getY(), translation.getZ());
          Quaternion orientation = robotConfigurationData.getRootOrientation();
          desiredRootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
-         desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
+         desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
          
          desiredRootJoint.getPredecessor().updateFramesRecursively();
       }
@@ -189,7 +189,7 @@ public class KinematicsToolboxHelper
       if (hasPrivilegedRooJointPosition)
       {
          desiredRootJoint.setJointPosition(commandWithPrivilegedConfiguration.getPrivilegedRootJointPosition());
-         desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
+         desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
       }
 
       boolean hasPrivilegedRooJointOrientation = commandWithPrivilegedConfiguration.hasPrivilegedRootJointOrientation();
@@ -197,7 +197,7 @@ public class KinematicsToolboxHelper
       if (hasPrivilegedRooJointOrientation)
       {
          desiredRootJoint.setJointOrientation(commandWithPrivilegedConfiguration.getPrivilegedRootJointOrientation());
-         desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
+         desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
       }
 
       desiredRootJoint.getPredecessor().updateFramesRecursively();

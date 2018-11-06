@@ -34,7 +34,7 @@ public class PassiveRevoluteJoint extends RevoluteJoint
     * Torque on a passive joint is always zero
     */
    @Override
-   public void getTauMatrix(DenseMatrix64F matrix)
+   public void getJointTau(int rowStart, DenseMatrix64F matrix)
    {
       MathTools.checkIntervalContains(matrix.getNumRows(), 1, Integer.MAX_VALUE);
       MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);
@@ -48,7 +48,7 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    }
 
    @Override
-   public void setTorqueFromWrench(Wrench jointWrench)
+   public void setJointWrench(Wrench jointWrench)
    {
       throw new RuntimeException("Cannot set torque of a passive joint");
    }
@@ -99,13 +99,13 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    }
 
    @Override
-   public void setConfiguration(DenseMatrix64F matrix, int rowStart)
+   public void setJointConfiguration(int rowStart, DenseMatrix64F matrix)
    {
       throw new RuntimeException("Cannot set position of a passive joint");
    }
 
    @Override
-   public void setVelocity(DenseMatrix64F matrix, int rowStart)
+   public void setJointVelocity(int rowStart, DenseMatrix64F matrix)
    {
       throw new RuntimeException("Cannot set velocity of a passive joint");
    }

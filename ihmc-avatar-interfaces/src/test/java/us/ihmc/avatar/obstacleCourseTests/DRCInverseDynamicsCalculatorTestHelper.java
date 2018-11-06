@@ -573,7 +573,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    public void setRobotRootJointVelocityAndAngularVelocityToMatchFullRobotModel(FloatingInverseDynamicsJoint sixDoFJoint, FloatingJoint floatingJoint)
    {
       Twist rootJointTwist = new Twist();
-      sixDoFJoint.getJointTwist(rootJointTwist);
+      rootJointTwist.setIncludingFrame(sixDoFJoint.getJointTwist());
 
       floatingJoint.setAngularVelocityInBody(new Vector3D(rootJointTwist.getAngularPart()));
 
@@ -790,7 +790,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       ReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
-      sixDoFJoint.getJointTwist(bodyTwist);
+      bodyTwist.setIncludingFrame(sixDoFJoint.getJointTwist());
 
       FrameVector3D originAcceleration = new FrameVector3D(elevatorFrame, RandomGeometry.nextVector3D(random, maxRootJointLinearAcceleration));
       FrameVector3D angularAcceleration = new FrameVector3D(bodyFrame, RandomGeometry.nextVector3D(random, maxRootJointAngularAcceleration));
@@ -809,7 +809,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       ReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
-      sixDoFJoint.getJointTwist(bodyTwist);
+      bodyTwist.setIncludingFrame(sixDoFJoint.getJointTwist());
 
       FrameVector3D originAcceleration = new FrameVector3D(elevatorFrame);
       FrameVector3D angularAcceleration = new FrameVector3D(bodyFrame);
@@ -831,7 +831,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       ReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
-      sixDoFJoint.getJointTwist(bodyTwist);
+      bodyTwist.setIncludingFrame(sixDoFJoint.getJointTwist());
 
       FrameVector3D originAcceleration = new FrameVector3D(elevatorFrame);
       FrameVector3D angularAcceleration = new FrameVector3D(bodyFrame);

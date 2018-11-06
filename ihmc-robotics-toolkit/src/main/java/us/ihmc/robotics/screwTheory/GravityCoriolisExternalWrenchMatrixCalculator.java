@@ -142,11 +142,11 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
             }
          }
 
-         joint.setTorqueFromWrench(jointWrench);
+         joint.setJointWrench(jointWrench);
 
          DenseMatrix64F coriolisWrench = coriolisWrenches.get(joint);
          coriolisWrench.zero();
-         joint.getTauMatrix(coriolisWrench);
+         joint.getJointTau(0, coriolisWrench);
       }
    }
 
