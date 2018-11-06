@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
 {

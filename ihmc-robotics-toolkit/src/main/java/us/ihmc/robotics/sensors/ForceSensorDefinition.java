@@ -2,7 +2,7 @@ package us.ihmc.robotics.sensors;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.screwTheory.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class ForceSensorDefinition

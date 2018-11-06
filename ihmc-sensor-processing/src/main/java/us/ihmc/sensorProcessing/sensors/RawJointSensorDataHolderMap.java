@@ -2,8 +2,8 @@ package us.ihmc.sensorProcessing.sensors;
 
 import java.util.LinkedHashMap;
 
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class RawJointSensorDataHolderMap extends LinkedHashMap<OneDoFJoint, RawJointSensorDataHolder>
 {

@@ -14,6 +14,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.kinematics.fourbar.ConstantSideFourBarCalculatorWithDerivatives;
@@ -153,7 +155,7 @@ public class FourBarKinematicLoop
 
       if (DEBUG)
       {
-         System.out.println("\nOutput joint: " + fourBarOutputJoint.name + "\n");
+         System.out.println("\nOutput joint: " + fourBarOutputJoint.getName() + "\n");
          double qA = masterJointA.getQ();
          double qB = passiveJointB.getQ();
          double qC = passiveJointC.getQ();

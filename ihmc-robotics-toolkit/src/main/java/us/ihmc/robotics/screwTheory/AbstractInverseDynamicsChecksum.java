@@ -1,5 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+
 public abstract class AbstractInverseDynamicsChecksum
 {
    private final JointBasics[] joints;

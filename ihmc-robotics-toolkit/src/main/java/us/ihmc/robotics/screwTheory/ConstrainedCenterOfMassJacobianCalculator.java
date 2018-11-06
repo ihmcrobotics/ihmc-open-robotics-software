@@ -3,6 +3,8 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+
 /**
  * @author twan
  *         Date: 4/15/13

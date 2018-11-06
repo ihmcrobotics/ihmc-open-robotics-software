@@ -4,11 +4,11 @@ import java.util.LinkedHashMap;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class PosePlaybackExampleSequence
 {

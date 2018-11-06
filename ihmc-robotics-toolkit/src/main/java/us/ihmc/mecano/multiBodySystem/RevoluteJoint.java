@@ -1,4 +1,4 @@
-package us.ihmc.robotics.screwTheory;
+package us.ihmc.mecano.multiBodySystem;
 
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class RevoluteJoint extends OneDoFJoint
 {

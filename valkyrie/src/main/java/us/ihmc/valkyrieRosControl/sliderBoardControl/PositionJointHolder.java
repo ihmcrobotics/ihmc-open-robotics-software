@@ -1,8 +1,8 @@
 package us.ihmc.valkyrieRosControl.sliderBoardControl;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 
 /**

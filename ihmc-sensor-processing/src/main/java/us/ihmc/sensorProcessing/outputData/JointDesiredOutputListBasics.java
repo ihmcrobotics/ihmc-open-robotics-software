@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-
 import java.util.List;
+
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 
 public interface JointDesiredOutputListBasics extends JointDesiredOutputListReadOnly
 {

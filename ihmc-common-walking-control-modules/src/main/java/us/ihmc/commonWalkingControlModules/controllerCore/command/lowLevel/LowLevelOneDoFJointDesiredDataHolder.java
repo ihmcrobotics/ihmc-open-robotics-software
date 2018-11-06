@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.*;
 
 import java.util.ArrayList;

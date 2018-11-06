@@ -1,12 +1,16 @@
-package us.ihmc.robotics.screwTheory;
+package us.ihmc.mecano.multiBodySystem;
 
 import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
  * Base implementation for any {@link JointBasics} that gathers all the basic setup for a

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.kinematics;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 
 /** This class is replaced with JointLimitData. It will be removed on 02/04/2018 (April 2). */
 @Deprecated

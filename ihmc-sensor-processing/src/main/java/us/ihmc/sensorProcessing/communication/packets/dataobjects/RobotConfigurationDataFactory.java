@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.zip.CRC32;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 

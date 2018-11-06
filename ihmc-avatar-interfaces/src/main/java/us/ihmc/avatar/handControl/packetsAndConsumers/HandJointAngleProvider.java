@@ -10,10 +10,10 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePacket>
 {

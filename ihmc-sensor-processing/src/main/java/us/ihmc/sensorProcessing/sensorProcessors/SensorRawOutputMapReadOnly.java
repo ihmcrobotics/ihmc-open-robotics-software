@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.sensorProcessors;
 import java.util.List;
 
 import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 

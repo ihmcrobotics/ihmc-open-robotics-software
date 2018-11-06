@@ -2,7 +2,7 @@ package us.ihmc.avatar.posePlayback;
 
 import java.util.Map;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 
 public interface PosePlaybackPacket
 {

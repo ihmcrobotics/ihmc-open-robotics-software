@@ -2,8 +2,8 @@ package us.ihmc.robotDataLogger.jointState;
 
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.robotDataLogger.JointType;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class SiXDoFJointHolder implements JointHolder
 {

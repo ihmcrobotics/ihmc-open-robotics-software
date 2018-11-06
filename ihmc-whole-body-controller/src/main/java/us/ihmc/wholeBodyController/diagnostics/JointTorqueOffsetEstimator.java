@@ -2,7 +2,7 @@ package us.ihmc.wholeBodyController.diagnostics;
 
 import java.util.List;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 
 public interface JointTorqueOffsetEstimator
 {
