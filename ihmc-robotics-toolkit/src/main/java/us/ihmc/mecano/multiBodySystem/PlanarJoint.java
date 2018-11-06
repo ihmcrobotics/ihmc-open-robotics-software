@@ -128,7 +128,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setDesiredAcceleration(DenseMatrix64F matrix, int rowStart)
+   public void setJointAcceleration(int rowStart, DenseMatrix64F matrix)
    {
       jointAccelerationDesired.setToZero();
       jointAccelerationDesired.setAngularPartY(matrix.get(rowStart + 0, 0));

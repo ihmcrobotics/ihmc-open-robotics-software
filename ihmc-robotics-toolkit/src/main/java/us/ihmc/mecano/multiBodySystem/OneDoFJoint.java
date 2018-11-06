@@ -103,7 +103,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void setDesiredAcceleration(DenseMatrix64F matrix, int rowStart)
+   public void setJointAcceleration(int rowStart, DenseMatrix64F matrix)
    {
       setQddDesired(matrix.get(rowStart + 0, 0));
    }

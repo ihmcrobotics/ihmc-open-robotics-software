@@ -232,24 +232,7 @@ public abstract interface JointBasics extends CommonJoint
     */
    public abstract void setJointVelocity(int rowStart, DenseMatrix64F jointVelocity);
 
-   /**
-    * Sets this joint desired acceleration from the given column vector {@code DenseMAtrix64F}. Here
-    * are a few examples:
-    * <ul>
-    * <li>For a {@code RevoluteJoint}, the {@code rowStart}<sup>th</sup> row of the given column
-    * vector is used to set the joint desired angular acceleration {@code qddDesired}.
-    * <li>For a {@code SixDoFJoint}, the 6 rows starting from {@code rowStart} are use to set the
-    * desired spatial acceleration of this joint starting with the angular acceleration. Note: the
-    * joint spatial acceleration is the acceleration of the {@code afterJointFrame} with respect to
-    * the {@code beforeJointFrame} expressed in the {@code afterJointFrame}.
-    * </ul>
-    * 
-    * @param jointDesiredAcceleration the column vector from which the desired acceleration of this
-    *           joint is to be extracted. Not modified.
-    * @param rowStart row index of the first component of this joint acceleration.
-    */
-   @Deprecated // TODO
-   public abstract void setDesiredAcceleration(DenseMatrix64F jointDesiredAcceleration, int rowStart);
+   public abstract void setJointAcceleration(int rowStart, DenseMatrix64F jointDesiredAcceleration);
 
    /**
     * Attach the {@code RigidBody} located after this joint, i.e. the {@code successor}. "After"
