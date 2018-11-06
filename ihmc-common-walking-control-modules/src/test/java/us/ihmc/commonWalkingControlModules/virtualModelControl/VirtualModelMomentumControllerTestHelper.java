@@ -18,8 +18,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -45,7 +45,7 @@ public class VirtualModelMomentumControllerTestHelper
 
       VirtualModelMomentumController virtualModelController = new VirtualModelMomentumController(new JointIndexHandler(controllerModel.getOneDoFJoints()));
 
-      List<YoWrench> desiredWrenches = new ArrayList<>();
+      List<YoFixedFrameWrench> desiredWrenches = new ArrayList<>();
       List<VirtualModelControllerTestHelper.ForcePointController> forcePointControllers = new ArrayList<>();
 
       for (int i = 0; i < endEffectors.size(); i++)
@@ -67,7 +67,7 @@ public class VirtualModelMomentumControllerTestHelper
          desiredWrench.set(torqueFrameVector, forceFrameVector);
          desiredWrench.changeFrame(ReferenceFrame.getWorldFrame());
 
-         YoWrench yoDesiredWrench = new YoWrench("desiredWrench" + i, endEffectorFrame, ReferenceFrame.getWorldFrame(), registry);
+         YoFixedFrameWrench yoDesiredWrench = new YoFixedFrameWrench("desiredWrench" + i, endEffectorFrame, ReferenceFrame.getWorldFrame(), registry);
          yoDesiredWrench.set(desiredWrench);
 
          desiredWrenches.add(yoDesiredWrench);
@@ -186,14 +186,14 @@ public class VirtualModelMomentumControllerTestHelper
       private Wrench desiredWrench = new Wrench();
 
       private List<VirtualModelControllerTestHelper.ForcePointController> forcePointControllers = new ArrayList<>();
-      private List<YoWrench> yoDesiredWrenches = new ArrayList<>();
+      private List<YoFixedFrameWrench> yoDesiredWrenches = new ArrayList<>();
       private List<RigidBody> endEffectors = new ArrayList<>();
       private final SelectionMatrix6D selectionMatrix;
 
       DummyArmMomentumController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJoint[] controlledJoints,
                                         List<VirtualModelControllerTestHelper.ForcePointController> forcePointControllers,
                                         VirtualModelMomentumController virtualModelController, List<RigidBody> endEffectors,
-                                        List<YoWrench> yoDesiredWrenches, SelectionMatrix6D selectionMatrix)
+                                        List<YoFixedFrameWrench> yoDesiredWrenches, SelectionMatrix6D selectionMatrix)
       {
          this.scsRobot = scsRobot;
          this.controllerModel = controllerModel;
@@ -236,7 +236,7 @@ public class VirtualModelMomentumControllerTestHelper
          virtualModelController.reset();
          for (int i = 0; i < endEffectors.size(); i++)
          {
-            desiredWrench = yoDesiredWrenches.get(i).getWrench();
+            desiredWrench.setIncludingFrame(yoDesiredWrenches.get(i));
             virtualModelController.addExternalWrench(controllerModel.getRootBody(), endEffectors.get(i), desiredWrench, selectionMatrix);
          }
          virtualModelController.populateTorqueSolution(virtualModelControlSolution);

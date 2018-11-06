@@ -29,11 +29,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
@@ -120,7 +120,7 @@ public class VirtualModelControllerTestHelper
       VirtualModelController virtualModelController = new VirtualModelController(controllerModel.getElevator(),
                                                                                  centerOfMassFrame, registry, yoGraphicsListRegistry);
 
-      List<YoWrench> desiredWrenches = new ArrayList<>();
+      List<YoFixedFrameWrench> desiredWrenches = new ArrayList<>();
       List<ForcePointController> forcePointControllers = new ArrayList<>();
 
       for (int i = 0; i < endEffectors.size(); i++)
@@ -144,7 +144,7 @@ public class VirtualModelControllerTestHelper
          desiredWrench.set(torqueFrameVector, forceFrameVector);
          desiredWrench.changeFrame(ReferenceFrame.getWorldFrame());
 
-         YoWrench yoDesiredWrench = new YoWrench("desiredWrench" + i, endEffectorFrame, ReferenceFrame.getWorldFrame(), registry);
+         YoFixedFrameWrench yoDesiredWrench = new YoFixedFrameWrench("desiredWrench" + i, endEffectorFrame, ReferenceFrame.getWorldFrame(), registry);
          yoDesiredWrench.set(desiredWrench);
 
          desiredWrenches.add(yoDesiredWrench);
@@ -2467,13 +2467,13 @@ public class VirtualModelControllerTestHelper
       private Wrench desiredWrench = new Wrench();
 
       private List<ForcePointController> forcePointControllers = new ArrayList<>();
-      private List<YoWrench> yoDesiredWrenches = new ArrayList<>();
+      private List<YoFixedFrameWrench> yoDesiredWrenches = new ArrayList<>();
       private List<RigidBody> endEffectors = new ArrayList<>();
       private final DenseMatrix64F selectionMatrix;
 
       DummyArmController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJoint[] controlledJoints,
             List<ForcePointController> forcePointControllers, VirtualModelController virtualModelController, List<RigidBody> endEffectors,
-            List<YoWrench> yoDesiredWrenches, DenseMatrix64F selectionMatrix)
+            List<YoFixedFrameWrench> yoDesiredWrenches, DenseMatrix64F selectionMatrix)
       {
          this.scsRobot = scsRobot;
          this.controllerModel = controllerModel;
@@ -2516,7 +2516,7 @@ public class VirtualModelControllerTestHelper
          virtualModelController.clear();
          for (int i = 0; i < endEffectors.size(); i++)
          {
-            desiredWrench = yoDesiredWrenches.get(i).getWrench();
+            desiredWrench.setIncludingFrame(yoDesiredWrenches.get(i));
             virtualModelController.submitControlledBodyVirtualWrench(endEffectors.get(i), desiredWrench, selectionMatrix);
          }
          virtualModelController.compute(virtualModelControlSolution);
