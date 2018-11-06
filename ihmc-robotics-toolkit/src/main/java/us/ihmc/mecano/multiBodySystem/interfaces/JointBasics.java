@@ -432,15 +432,16 @@ public abstract interface JointBasics extends CommonJoint
     */
    public abstract int getConfigurationMatrixSize();
 
-   /**
-    * Copies the actual state of {@code originalJoint} into this joint without copying the desireds,
-    * such as desired acceleration or force/torque.
-    * 
-    * @param originalJoint the joint to copy the actual (not desired) state of. Not modified.
-    */
-   @Deprecated // TODO
-   public abstract void setJointPositionVelocityAndAcceleration(JointBasics originalJoint);
-
+   default void setJointConfiguration(JointBasics other)
+   {
+   }
+   default void setJointTwist(JointBasics other)
+   {
+   }
+   default void setJointAcceleration(JointBasics other)
+   {
+   }
+   
    /**
     * Copies the desired acceleration of {@code originalJoint} into this joint
     * 

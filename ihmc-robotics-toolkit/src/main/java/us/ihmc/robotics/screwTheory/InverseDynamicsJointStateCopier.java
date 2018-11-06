@@ -14,7 +14,9 @@ public class InverseDynamicsJointStateCopier extends AbstractInverseDynamicsCopi
    @Override
    protected void copyJoint(JointBasics originalJoint, JointBasics targetJoint)
    {
-      targetJoint.setJointPositionVelocityAndAcceleration(originalJoint);
+      targetJoint.setJointConfiguration(originalJoint);
+      targetJoint.setJointTwist(originalJoint);
+      targetJoint.setJointAcceleration(originalJoint);
    }  
 
 }

@@ -195,7 +195,9 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.setJointPositionVelocityAndAcceleration(joint);
+         joint.setJointConfiguration(joint);
+         joint.setJointTwist(joint);
+         joint.setJointAcceleration(joint);
       }
       catch(RuntimeException e)
       {

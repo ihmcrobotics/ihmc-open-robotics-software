@@ -30,7 +30,7 @@ public class InverseDynamicsJointStateChecksum
       }
    }
 
-   public ChecksumUpdater newJointChecksumUpdater(GenericCRC32 checksum, JointBasics joint)
+   public static ChecksumUpdater newJointChecksumUpdater(GenericCRC32 checksum, JointBasics joint)
    {
       if (joint instanceof SixDoFJoint)
          return newJointChecksumUpdater(checksum, (SixDoFJoint) joint);
@@ -43,7 +43,7 @@ public class InverseDynamicsJointStateChecksum
       throw new RuntimeException("Unhandled type of joint: " + joint.getClass().getSimpleName());
    }
 
-   public ChecksumUpdater newJointChecksumUpdater(GenericCRC32 checksum, SixDoFJoint joint)
+   public static ChecksumUpdater newJointChecksumUpdater(GenericCRC32 checksum, SixDoFJoint joint)
    {
       return () -> {
          checksum.update(joint.getJointPose().getOrientation());
@@ -55,7 +55,7 @@ public class InverseDynamicsJointStateChecksum
       };
    }
 
-   public ChecksumUpdater newJointChecksumUpdater(GenericCRC32 checksum, PlanarJoint joint)
+   public static ChecksumUpdater newJointChecksumUpdater(GenericCRC32 checksum, PlanarJoint joint)
    {
       return () -> {
          checksum.update(joint.getJointPose().getOrientation().getPitch());
@@ -70,7 +70,7 @@ public class InverseDynamicsJointStateChecksum
       };
    }
 
-   public ChecksumUpdater newJointChecksumUpdater(GenericCRC32 checksum, OneDoFJoint joint)
+   public static ChecksumUpdater newJointChecksumUpdater(GenericCRC32 checksum, OneDoFJoint joint)
    {
       return () -> {
          checksum.update(joint.getQ());
@@ -79,7 +79,7 @@ public class InverseDynamicsJointStateChecksum
       };
    }
 
-   public ChecksumUpdater newJointChecksumUpdater(GenericCRC32 checksum, SphericalJoint joint)
+   public static ChecksumUpdater newJointChecksumUpdater(GenericCRC32 checksum, SphericalJoint joint)
    {
       return () -> {
          checksum.update(joint.getJointOrientation());
