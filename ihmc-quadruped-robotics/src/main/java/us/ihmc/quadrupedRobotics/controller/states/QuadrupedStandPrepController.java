@@ -27,7 +27,8 @@ public class QuadrupedStandPrepController implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleParameter trajectoryTimeParameter = new DoubleParameter("trajectoryTime", registry, 1.0);
+//   private final DoubleParameter trajectoryTimeParameter = new DoubleParameter("trajectoryTime", registry, 1.0);
+   private final double trajectoryTime = 5.0;
    private final QuadrupedInitialPositionParameters initialPositionParameters;
 
    private final FullQuadrupedRobotModel fullRobotModel;
@@ -38,8 +39,10 @@ public class QuadrupedStandPrepController implements QuadrupedController
 
    private final DoubleParameter standPrepJointStiffness = new DoubleParameter("standPrepJointStiffness", registry, 500.0);
    private final DoubleParameter standPrepJointDamping = new DoubleParameter("standPrepJointDamping", registry, 25.0);
+   private final double[] previousPositionJointAngles = new double[12];
 
    private final YoBoolean yoUseForceFeedbackControl;
+   private final YoBoolean goToPreviousPosition = new YoBoolean("goToPreviousPosition", registry);
 
    /**
     * The time from the beginning of the current preparation trajectory in seconds.
@@ -62,6 +65,7 @@ public class QuadrupedStandPrepController implements QuadrupedController
 
       yoUseForceFeedbackControl = new YoBoolean("useForceControlStandPrep", registry);
       yoUseForceFeedbackControl.set(controlMode == QuadrupedControlMode.FORCE);
+      goToPreviousPosition.set(false);
 
       parentRegistry.addChild(registry);
    }
@@ -80,17 +84,15 @@ public class QuadrupedStandPrepController implements QuadrupedController
          // Start the trajectory from the current pos/vel/acc.
          MinimumJerkTrajectory trajectory = trajectories.get(i);
 
-         double initialPosition = jointDesiredOutput.hasDesiredPosition() ? jointDesiredOutput.getDesiredPosition() : joint.getQ();
-         double initialVelocity = jointDesiredOutput.hasDesiredVelocity() ? jointDesiredOutput.getDesiredVelocity() : joint.getQd();
+         double initialPosition = joint.getQ();
+         double initialVelocity = 0.0;
          double initialAcceleration = 0.0;
 
-         trajectory.setMoveParameters(initialPosition, initialVelocity, initialAcceleration, desiredPosition, 0.0, 0.0, trajectoryTimeParameter.getValue());
+         trajectory.setMoveParameters(initialPosition, initialVelocity, initialAcceleration, desiredPosition, 0.0, 0.0, trajectoryTime);
 
          jointDesiredOutput.clear();
-         if (yoUseForceFeedbackControl.getBooleanValue())
-            jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
-         else
-            jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
+         jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
+         previousPositionJointAngles[i] = initialPosition;
       }
 
       // This is a new trajectory. We start at time 0.
@@ -100,6 +102,19 @@ public class QuadrupedStandPrepController implements QuadrupedController
    @Override
    public void doAction(double timeInState)
    {
+      if(goToPreviousPosition.getBooleanValue())
+      {
+         for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
+         {
+            OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
+            double qDesiredCurrent = jointDesiredOutputList.getJointDesiredOutput(joint).getDesiredPosition();
+            trajectories.get(i).setMoveParameters(qDesiredCurrent, 0.0, 0.0, previousPositionJointAngles[i], 0.0, 0.0, trajectoryTime);
+         }
+
+         timeInTrajectory = 0.0;
+         goToPreviousPosition.set(false);
+      }
+
       fullRobotModel.updateFrames();
 
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
@@ -133,7 +148,7 @@ public class QuadrupedStandPrepController implements QuadrupedController
 
    private boolean isMotionExpired()
    {
-      return timeInTrajectory > trajectoryTimeParameter.getValue();
+      return timeInTrajectory > trajectoryTime;
    }
 }
 

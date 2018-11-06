@@ -325,7 +325,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
       // Add automatic transitions that lead into the stand state.
       factory.addTransition(ControllerEvent.DONE, QuadrupedControllerEnum.JOINT_INITIALIZATION, QuadrupedControllerEnum.DO_NOTHING);
-      factory.addTransition(ControllerEvent.DONE, QuadrupedControllerEnum.STAND_PREP, QuadrupedControllerEnum.STAND_READY);
+//      factory.addTransition(ControllerEvent.DONE, QuadrupedControllerEnum.STAND_PREP, QuadrupedControllerEnum.STAND_READY);
       factory.addTransition(ControllerEvent.FAIL, QuadrupedControllerEnum.STEPPING, QuadrupedControllerEnum.FREEZE);
 
       // Manually triggered events to transition to main controllers.

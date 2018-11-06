@@ -62,8 +62,6 @@ public class QuadrupedFreezeController implements QuadrupedController
          }
       }
 
-
-
       parentRegistry.addChild(registry);
    }
 
@@ -76,10 +74,7 @@ public class QuadrupedFreezeController implements QuadrupedController
 
       for (int i = 0; i < joints.size(); i++)
       {
-         OneDoFJoint joint = joints.get(i);
-         JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
-         double desiredPosition = jointDesiredOutput.hasDesiredPosition() ? jointDesiredOutput.getDesiredPosition() : joint.getQ();
-         desiredFreezePositions.get(i).set(desiredPosition);
+         desiredFreezePositions.get(i).set(joints.get(i).getQ());
       }
 
       jointDesiredOutputList.clear();
@@ -97,15 +92,8 @@ public class QuadrupedFreezeController implements QuadrupedController
       {
          OneDoFJoint oneDoFJoint = joints.get(i);
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint);
-         jointDesiredOutput.clear();
-         jointDesiredOutput.setStiffness(freezeJointStiffness.getValue());
-         jointDesiredOutput.setDamping(freezeJointDamping.getValue());
          jointDesiredOutput.setDesiredPosition(desiredFreezePositions.get(i).getDoubleValue());
-
-         if (yoUseForceFeedbackControl.getBooleanValue())
-            jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
-         else
-            jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
+         jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
       }
    }
 
@@ -118,14 +106,5 @@ public class QuadrupedFreezeController implements QuadrupedController
    @Override
    public void onExit()
    {
-      yoUseForceFeedbackControl.set(true);
-      for (OneDoFJoint oneDoFJoint : fullRobotModel.getOneDoFJoints())
-      {
-         QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
-         if (jointName.getRole().equals(JointRole.LEG))
-         {
-            jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.EFFORT);
-         }
-      }
    }
 }
