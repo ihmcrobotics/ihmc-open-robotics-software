@@ -745,22 +745,22 @@ public class ScrewTools
       }
    }
 
-   public static void setDesiredAccelerations(JointBasics[] jointList, DenseMatrix64F jointAccelerations)
+   public static void setJointAccelerations(JointBasics[] jointList, DenseMatrix64F jointAccelerations)
    {
       int rowStart = 0;
       for (JointBasics joint : jointList)
       {
-         joint.setDesiredAcceleration(jointAccelerations, rowStart);
+         joint.setJointAcceleration(rowStart, jointAccelerations);
          rowStart += joint.getDegreesOfFreedom();
       }
    }
 
-   public static void setDesiredAccelerations(Iterable<? extends JointBasics> jointList, DenseMatrix64F jointAccelerations)
+   public static void setJointAccelerations(Iterable<? extends JointBasics> jointList, DenseMatrix64F jointAccelerations)
    {
       int rowStart = 0;
       for (JointBasics joint : jointList)
       {
-         joint.setDesiredAcceleration(jointAccelerations, rowStart);
+         joint.setJointAcceleration(rowStart, jointAccelerations);
          rowStart += joint.getDegreesOfFreedom();
       }
    }

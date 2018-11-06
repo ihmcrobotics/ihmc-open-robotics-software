@@ -413,7 +413,7 @@ public class DynamicsMatrixCalculatorTest
       dynamicsMatrixCalculator.computeJointTorques(dynamicsMatrixTauSolution, qddotSolution, rhoSolution);
 
       // compute torques using inverse dynamics calculator
-      ScrewTools.setDesiredAccelerations(jointIndexHandler.getIndexedJoints(), qddotSolution);
+      ScrewTools.setJointAccelerations(jointIndexHandler.getIndexedJoints(), qddotSolution);
       inverseDynamicsCalculator.compute();
 
       dynamicsMatrixCalculator.extractTorqueMatrix(jointIndexHandler.getIndexedJoints(), inverseDynamicsTauSolution);

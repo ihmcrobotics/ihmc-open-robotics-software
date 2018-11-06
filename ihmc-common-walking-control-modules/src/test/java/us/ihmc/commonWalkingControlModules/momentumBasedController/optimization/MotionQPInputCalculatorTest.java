@@ -85,7 +85,7 @@ public class MotionQPInputCalculatorTest
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.solve(motionQPInput.taskObjective, desiredJointAccelerations);
 
-         ScrewTools.setDesiredAccelerations(joints, desiredJointAccelerations);
+         ScrewTools.setJointAccelerations(joints, desiredJointAccelerations);
 
          spatialAccelerationCalculator.compute();
          SpatialAcceleration achievedSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, endEffectorFrame);
@@ -116,7 +116,7 @@ public class MotionQPInputCalculatorTest
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.solve(motionQPInput.taskObjective, desiredJointAccelerations);
 
-         ScrewTools.setDesiredAccelerations(joints, desiredJointAccelerations);
+         ScrewTools.setJointAccelerations(joints, desiredJointAccelerations);
 
          spatialAccelerationCalculator.compute();
          SpatialAcceleration achievedSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, endEffectorFrame);

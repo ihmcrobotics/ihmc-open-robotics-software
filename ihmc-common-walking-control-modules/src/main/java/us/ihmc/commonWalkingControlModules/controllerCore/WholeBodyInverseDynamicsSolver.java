@@ -201,7 +201,7 @@ public class WholeBodyInverseDynamicsSolver
          dynamicsMatrixCalculator.compute();
          DenseMatrix64F tauSolution = dynamicsMatrixCalculator.computeJointTorques(jointAccelerations, rhoSolution);
 
-         ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
+         ScrewTools.setJointAccelerations(jointsToOptimizeFor, jointAccelerations);
          ScrewTools.setJointTorques(controlledOneDoFJoints, tauSolution);
       }
       else
@@ -212,7 +212,7 @@ public class WholeBodyInverseDynamicsSolver
             inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenchSolution.get(rigidBody));
          }
 
-         ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
+         ScrewTools.setJointAccelerations(jointsToOptimizeFor, jointAccelerations);
          inverseDynamicsCalculator.compute();
       }
 

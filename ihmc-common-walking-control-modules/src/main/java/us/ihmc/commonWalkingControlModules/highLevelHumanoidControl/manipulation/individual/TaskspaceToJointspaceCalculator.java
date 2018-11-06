@@ -757,7 +757,7 @@ public class TaskspaceToJointspaceCalculator
 
    public void getDesiredJointAccelerationsIntoOneDoFJoints(OneDoFJoint[] joints)
    {
-      ScrewTools.setDesiredAccelerations(joints, desiredJointAccelerations);
+      ScrewTools.setJointAccelerations(joints, desiredJointAccelerations);
    }
 
    public double computeDeterminant()

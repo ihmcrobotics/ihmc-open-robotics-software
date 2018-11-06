@@ -54,7 +54,7 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    }
 
    @Override
-   public void setDesiredAcceleration(DenseMatrix64F matrix, int rowStart)
+   public void setJointAcceleration(int rowStart, DenseMatrix64F matrix)
    {
       throw new RuntimeException("Cannot set acceleration of a passive joint");
    }

@@ -593,7 +593,7 @@ public class ScrewToolsTest
       {       //create original matrix
          originalAccel.set(i, random.nextDouble());
       }
-      ScrewTools.setDesiredAccelerations(jointsArray, originalAccel); //set velocities from matrix
+      ScrewTools.setJointAccelerations(jointsArray, originalAccel); //set velocities from matrix
       DenseMatrix64F newAccelerations = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
 
       ScrewTools.getDesiredJointAccelerationsMatrix(jointsArray, newAccelerations);//pack new matrix
@@ -683,7 +683,7 @@ public class ScrewToolsTest
          jointAccelerations.set(i, random.nextDouble());
       }
 
-      ScrewTools.setDesiredAccelerations(jointsArray, jointAccelerations);
+      ScrewTools.setJointAccelerations(jointsArray, jointAccelerations);
 
       DenseMatrix64F sixDoFAccel = new DenseMatrix64F(6, 1);
       jointsArray[0].getDesiredAccelerationMatrix(sixDoFAccel, 0);

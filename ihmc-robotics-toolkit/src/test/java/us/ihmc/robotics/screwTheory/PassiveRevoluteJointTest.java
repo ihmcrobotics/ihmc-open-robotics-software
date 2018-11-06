@@ -75,7 +75,7 @@ public class PassiveRevoluteJointTest
    {
       try
       {
-         joint.setDesiredAcceleration(matrix, rowStart);
+         joint.setJointAcceleration(rowStart, matrix);
       }
       catch(RuntimeException e)
       {
