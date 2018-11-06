@@ -81,7 +81,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
    {
       for (JointBasics joint : jointsInOrder)
       {
-         joint.setDesiredAccelerationToZero();
+         joint.setJointAccelerationToZero();
          joint.setJointVelocity(0, new DenseMatrix64F(joint.getDegreesOfFreedom(), 1));
       }
    }

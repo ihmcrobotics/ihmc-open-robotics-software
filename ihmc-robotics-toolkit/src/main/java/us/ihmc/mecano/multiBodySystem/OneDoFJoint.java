@@ -43,13 +43,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void getDesiredJointAcceleration(SpatialAcceleration accelerationToPack)
-   {
-      accelerationToPack.setIncludingFrame(unitJointAcceleration);
-      accelerationToPack.scale(qddDesired);
-   }
-
-   @Override
    public void setJointTau(int rowStart, DenseMatrix64F matrix)
    {
       setTau(matrix.get(rowStart, 0));
@@ -80,7 +73,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void setDesiredAccelerationToZero()
+   public void setJointAccelerationToZero()
    {
       qddDesired = 0.0;
    }

@@ -64,13 +64,6 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void getDesiredJointAcceleration(SpatialAcceleration jointAcceleration)
-   {
-      jointAcceleration.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
-      jointAcceleration.getAngularPart().set(jointAngularAccelerationDesired);
-   }
-
-   @Override
    public void getJointTau(int rowStart, DenseMatrix64F matrix)
    {
       matrix.set(0, 0, jointTorque.getX());
@@ -95,7 +88,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void setDesiredAccelerationToZero()
+   public void setJointAccelerationToZero()
    {
       jointAngularAccelerationDesired.setToZero(jointAngularAccelerationDesired.getReferenceFrame());
    }

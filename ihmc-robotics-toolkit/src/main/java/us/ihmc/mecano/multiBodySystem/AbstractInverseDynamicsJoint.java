@@ -240,7 +240,7 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
    @Override
    public void getDesiredSuccessorAcceleration(SpatialAcceleration accelerationToPack)
    {
-      getDesiredJointAcceleration(accelerationToPack);
+      accelerationToPack.setIncludingFrame(getJointAcceleration());
 
       ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
@@ -254,7 +254,7 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
    @Override
    public void getDesiredPredecessorAcceleration(SpatialAcceleration accelerationToPack)
    {
-      getDesiredJointAcceleration(accelerationToPack);
+      accelerationToPack.setIncludingFrame(getJointAcceleration());
 
       ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();

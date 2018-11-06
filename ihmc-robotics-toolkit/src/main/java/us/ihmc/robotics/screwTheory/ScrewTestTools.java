@@ -532,21 +532,6 @@ public class ScrewTestTools
       rootJoint.setJointAcceleration(jointAcceleration);
    }
 
-   public static void copyDesiredAccelerationToActual(SixDoFJoint rootJoint)
-   {
-      SpatialAcceleration rootJointAcceleration = new SpatialAcceleration();
-      rootJoint.getDesiredJointAcceleration(rootJointAcceleration);
-      rootJoint.setJointAcceleration(rootJointAcceleration);
-   }
-
-   public static void copyDesiredAccelerationsToActual(Iterable<? extends OneDoFJoint> joints)
-   {
-      for (OneDoFJoint joint : joints)
-      {
-         joint.setQdd(joint.getQddDesired());
-      }
-   }
-
    public static void integrateAccelerations(SixDoFJoint sixDoFJoint, double dt)
    {
       SpatialAcceleration deltaTwist = new SpatialAcceleration();
