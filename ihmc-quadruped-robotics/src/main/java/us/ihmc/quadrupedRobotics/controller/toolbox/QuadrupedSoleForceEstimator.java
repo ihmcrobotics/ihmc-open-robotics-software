@@ -123,7 +123,7 @@ public class QuadrupedSoleForceEstimator
 
          for (int i = 0; i < legJoints.get(robotQuadrant).length; ++i)
          {
-            jointTorqueVector.get(robotQuadrant).set(i, 0, legJoints.get(robotQuadrant)[i].getTauMeasured());
+            jointTorqueVector.get(robotQuadrant).set(i, 0, legJoints.get(robotQuadrant)[i].getTau());
          }
       }
 

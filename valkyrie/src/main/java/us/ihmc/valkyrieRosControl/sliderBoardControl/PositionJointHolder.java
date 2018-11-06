@@ -29,11 +29,11 @@ class PositionJointHolder extends ValkyrieSliderBoardJointHolder
       joint.setQ(handle.getPosition());
       joint.setQd(handle.getVelocity());
       bl_qd.update();
-      joint.setTauMeasured(handle.getEffort());
+      joint.setTau(handle.getEffort());
 
       q.set(joint.getQ());
       qd.set(joint.getQd());
-      tau.set(joint.getTauMeasured());
+      tau.set(joint.getTau());
 
       positionStepSizeLimiter.updateOutput(q.getDoubleValue(), q_d.getDoubleValue());
       handle.setDesiredPosition(positionStepSizeLimiter.getDoubleValue());

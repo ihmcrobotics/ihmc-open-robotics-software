@@ -139,7 +139,7 @@ public class JointStateUpdater
 
          oneDoFJoint.setQ(positionSensorData);
          oneDoFJoint.setQd(velocitySensorData);
-         oneDoFJoint.setTauMeasured(torqueSensorData);
+         oneDoFJoint.setTau(torqueSensorData);
       }
 
       rootBody.updateFramesRecursively();

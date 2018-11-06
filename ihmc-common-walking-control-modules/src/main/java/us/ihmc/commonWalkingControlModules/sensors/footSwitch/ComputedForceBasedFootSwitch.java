@@ -85,7 +85,7 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
       for(int i = 0; i < jointsFromRootToSole.length; i++)
       {
          OneDoFJoint oneDoFJoint = jointsFromRootToSole[i];
-         jointTorques.set(i, 0, oneDoFJoint.getTauMeasured());
+         jointTorques.set(i, 0, oneDoFJoint.getTau());
       }
       
       jacobian.compute();

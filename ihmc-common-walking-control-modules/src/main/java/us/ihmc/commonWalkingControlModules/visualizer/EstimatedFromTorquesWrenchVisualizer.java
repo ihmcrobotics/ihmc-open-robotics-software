@@ -151,7 +151,7 @@ public class EstimatedFromTorquesWrenchVisualizer
 
          OneDoFJoint[] joints = jointLists.get(rigidBody);
          for (int jointIndex = 0; jointIndex < jointLists.get(rigidBody).length; jointIndex++)
-            jointChainTorquesVector.set(jointIndex, 0, joints[jointIndex].getTauMeasured());
+            jointChainTorquesVector.set(jointIndex, 0, joints[jointIndex].getTau());
 
          CommonOps.multTransA(jacobianInverseMatrix, jointChainTorquesVector, wrenchVector);
          CommonOps.scale(-1.0, wrenchVector);

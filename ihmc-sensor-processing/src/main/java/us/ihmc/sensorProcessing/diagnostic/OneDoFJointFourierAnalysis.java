@@ -91,7 +91,7 @@ public class OneDoFJointFourierAnalysis implements DiagnosticUpdatable
       else
       {
          velocityFourierAnalysis.update(joint.getQd());
-         tauFourierAnalysis.update(joint.getTauMeasured());
+         tauFourierAnalysis.update(joint.getTau());
          tauDesiredFourierAnalysis.update(output.getDesiredTorque());
       }
    }

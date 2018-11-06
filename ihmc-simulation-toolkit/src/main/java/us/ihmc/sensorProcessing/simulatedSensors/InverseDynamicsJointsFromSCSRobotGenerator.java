@@ -280,7 +280,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
                if (useDesiredTorque)
                   jointTorque = revoluteJoint.getTau();
                else
-                  jointTorque = revoluteJoint.getTauMeasured();
+                  jointTorque = revoluteJoint.getTau();
                pinJoint.setTau(jointTorque);
             }
 

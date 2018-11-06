@@ -72,7 +72,7 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       for(int i = 0; i < legOneDoFJoints.size(); i++)
       {
          OneDoFJoint oneDoFJoint = legOneDoFJoints.get(i);
-         jointTorques.set(i, 0, oneDoFJoint.getTauMeasured());
+         jointTorques.set(i, 0, oneDoFJoint.getTau());
       }
       
       footJacobian.compute();
