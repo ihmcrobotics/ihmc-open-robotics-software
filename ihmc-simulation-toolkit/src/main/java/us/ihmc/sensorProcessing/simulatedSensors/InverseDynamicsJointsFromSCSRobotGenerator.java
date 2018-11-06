@@ -232,11 +232,9 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
     *           robot or not.
     * @param updateTorques whether the joint forces/torques should be copied over to the SCS robot
     *           or not.
-    * @param useDesiredTorque whether to extract the desired or measured joint forces/torques.
-    *           Unused when {@code updateTorques == false}.
     */
    public void updateRobotFromInverseDynamicsRobotModel(boolean updateRootJoints, boolean updatePositions, boolean updateVelocities,
-                                                        boolean updateAccelerations, boolean updateTorques, boolean useDesiredTorque)
+                                                        boolean updateAccelerations, boolean updateTorques)
    {
 
       Collection<OneDegreeOfFreedomJoint> pinJoints = scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints();
@@ -271,10 +269,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 
             if (updateTorques)
             {
-               if (useDesiredTorque)
-                  jointTorque = revoluteJoint.getTau();
-               else
-                  jointTorque = revoluteJoint.getTau();
+               jointTorque = revoluteJoint.getTau();
                pinJoint.setTau(jointTorque);
             }
 
