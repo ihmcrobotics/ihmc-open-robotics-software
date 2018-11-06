@@ -555,7 +555,7 @@ public class ScrewTools
    private static RigidBody cloneRigidBody(RigidBody original, String cloneSuffix, JointBasics parentJointOfClone)
    {
       FramePoint3D comOffset = new FramePoint3D();
-      original.getCoMOffset(comOffset);
+      original.getCenterOfMass(comOffset);
       comOffset.changeFrame(original.getParentJoint().getFrameAfterJoint());
       String nameOriginal = original.getName();
       Matrix3D massMomentOfInertiaPartCopy = new Matrix3D(original.getInertia().getMomentOfInertia());

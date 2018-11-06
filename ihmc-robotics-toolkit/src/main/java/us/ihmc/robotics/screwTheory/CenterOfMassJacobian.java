@@ -163,7 +163,7 @@ public class CenterOfMassJacobian
          FramePoint3D curChildCoMScaledByMass = comScaledByMassMap.get(rigidBody);
 
          curChildCoMScaledByMass.setToZero(rootFrame);
-         rigidBody.getCoMOffset(curChildCoMScaledByMass);
+         rigidBody.getCenterOfMass(curChildCoMScaledByMass);
          curChildCoMScaledByMass.changeFrame(rootFrame);
          double massToScale = (rigidBodySet.contains(rigidBody) ? rigidBody.getInertia().getMass() : 0.0);
          curChildCoMScaledByMass.scale(massToScale);

@@ -293,7 +293,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     * @param comOffsetToPack the {@code FramePoint} in which the center of mass position is stored.
     *           Modified.
     */
-   public void getCoMOffset(FramePoint3D comOffsetToPack)
+   public void getCenterOfMass(FramePoint3D comOffsetToPack)
    {
       comOffsetToPack.setIncludingFrame(inertia.getCenterOfMassOffset());
    }
@@ -312,7 +312,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     * @throws ReferenceFrameMismatchException if the argument is not expressed in the
     *            {@code bodyFixedFrame}.
     */
-   public void setCoMOffset(FramePoint3D comOffset)
+   public void setCenterOfMass(FramePoint3D comOffset)
    {
       inertia.getCenterOfMassOffset().set(comOffset);
    }
