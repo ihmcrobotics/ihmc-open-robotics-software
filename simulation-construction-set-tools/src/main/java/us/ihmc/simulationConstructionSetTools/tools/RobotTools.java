@@ -156,7 +156,7 @@ public class RobotTools
          {
             scsFloatingJoint.getTransformToWorld(transformToWorld);
             transformToWorld.normalizeRotationPart();
-            idFloatingJoint.setPositionAndRotation(transformToWorld);
+            idFloatingJoint.setJointConfiguration(transformToWorld);
          }
 
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)

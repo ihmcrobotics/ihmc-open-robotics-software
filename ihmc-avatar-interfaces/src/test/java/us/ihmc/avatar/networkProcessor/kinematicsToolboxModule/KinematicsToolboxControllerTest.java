@@ -414,8 +414,8 @@ public class KinematicsToolboxControllerTest
       FloatingInverseDynamicsJoint rootJoint = initialFullRobotModel.getLeft();
       if (rootJoint != null)
       {
-         robotConfigurationData.getRootTranslation().set(rootJoint.getTranslationForReading());
-         robotConfigurationData.getRootOrientation().set(rootJoint.getRotationForReading());
+         robotConfigurationData.getRootTranslation().set(rootJoint.getJointPose().getPosition());
+         robotConfigurationData.getRootOrientation().set(rootJoint.getJointPose().getOrientation());
       }
       return robotConfigurationData;
    }

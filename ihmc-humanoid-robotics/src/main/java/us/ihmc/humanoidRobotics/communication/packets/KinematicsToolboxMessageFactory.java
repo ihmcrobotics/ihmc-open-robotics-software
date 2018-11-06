@@ -167,9 +167,9 @@ public class KinematicsToolboxMessageFactory
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       Point3D privilegedRootJointPosition = new Point3D();
-      rootJoint.getTranslation(privilegedRootJointPosition);
+      privilegedRootJointPosition.set(rootJoint.getJointPose().getPosition());
       Quaternion privilegedRootJointOrientation = new Quaternion();
-      rootJoint.getRotation(privilegedRootJointOrientation);
+      privilegedRootJointOrientation.set(rootJoint.getJointPose().getOrientation());
 
       MessageTools.packPrivilegedRobotConfiguration(message, privilegedRootJointPosition, privilegedRootJointOrientation, jointHashCodes, privilegedJointAngles);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());

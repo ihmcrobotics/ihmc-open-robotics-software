@@ -262,7 +262,7 @@ public class PelvisLinearStateUpdater
          footPositionInWorld.changeFrame(worldFrame);
          yoInitialFootPosition.set(footPositionInWorld);
 
-         rootJointPosition.set(rootJoint.getTranslationForReading());
+         rootJointPosition.set(rootJoint.getJointPose().getPosition());
          rootJointPosition.setZ(-footPositionInWorld.getZ());
          yoRootJointPosition.set(rootJointPosition);
       }
@@ -288,7 +288,7 @@ public class PelvisLinearStateUpdater
    {
       // Keep setting the position so the localization updater works properly.
       tempRootJointTranslation.set(yoRootJointPosition);
-      rootJoint.setPosition(tempRootJointTranslation);
+      rootJoint.setJointPosition(tempRootJointTranslation);
 
       // Set the rootJoint twist to zero.
       rootJoint.getJointTwist(rootJointTwist);
@@ -376,7 +376,7 @@ public class PelvisLinearStateUpdater
    private void updateRootJoint()
    {
       tempRootJointTranslation.set(yoRootJointPosition);
-      rootJoint.setPosition(tempRootJointTranslation);
+      rootJoint.setJointPosition(tempRootJointTranslation);
 
       tempVelocity.setIncludingFrame(rootJointVelocity);
       rootJoint.getJointTwist(rootJointTwist);

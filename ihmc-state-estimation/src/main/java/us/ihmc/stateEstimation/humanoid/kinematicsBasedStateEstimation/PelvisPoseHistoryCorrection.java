@@ -252,7 +252,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
          correctPelvisPose(pelvisPose);
          correctedPelvis.setAndUpdate(pelvisPose);
 
-         rootJoint.setPositionAndRotation(pelvisPose);
+         rootJoint.setJointConfiguration(pelvisPose);
          pelvisReferenceFrame.update();
          checkForNeedToSendCorrectionUpdate();
       }

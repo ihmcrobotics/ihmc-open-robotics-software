@@ -323,8 +323,8 @@ public class TwistCalculatorTest
 
       for (int i = 0; i < 100; i++)
       {
-         floatingJoint.setRotation(RandomGeometry.nextQuaternion(random));
-         floatingJoint.setPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
+         floatingJoint.setJointOrientation(RandomGeometry.nextQuaternion(random));
+         floatingJoint.setJointPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
          Twist floatingJointTwist = MecanoRandomTools.nextTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
                                                                 floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
@@ -400,8 +400,8 @@ public class TwistCalculatorTest
 
       for (int i = 0; i < 50; i++)
       {
-         floatingJoint.setRotation(RandomGeometry.nextQuaternion(random));
-         floatingJoint.setPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
+         floatingJoint.setJointOrientation(RandomGeometry.nextQuaternion(random));
+         floatingJoint.setJointPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
          Twist floatingJointTwist = MecanoRandomTools.nextTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
                                                                 floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);

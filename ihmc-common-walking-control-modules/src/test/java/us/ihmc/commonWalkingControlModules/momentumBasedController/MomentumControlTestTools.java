@@ -82,7 +82,7 @@ public class MomentumControlTestTools
       }
       inverseDynamicsCalculator.compute();
       Wrench wrench = new Wrench();
-      rootJoint.getWrench(wrench);
+      wrench.setIncludingFrame(rootJoint.getJointWrench());
 
       SpatialForce zeroWrench = new SpatialForce(wrench.getReferenceFrame());
       MecanoTestTools.assertSpatialForceEquals(wrench, zeroWrench, epsilon);

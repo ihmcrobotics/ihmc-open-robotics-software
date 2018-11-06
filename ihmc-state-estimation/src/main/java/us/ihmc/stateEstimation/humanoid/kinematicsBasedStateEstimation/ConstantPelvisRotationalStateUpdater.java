@@ -50,7 +50,7 @@ public class ConstantPelvisRotationalStateUpdater implements PelvisRotationalSta
    public void updateRootJointOrientationAndAngularVelocity()
    {
       yoRootJointFrameOrientation.getQuaternion(rootJointOrientation);
-      rootJoint.setRotation(rootJointOrientation);
+      rootJoint.setJointOrientation(rootJointOrientation);
 
       rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
       twistRootBodyRelativeToWorld.setToZero();

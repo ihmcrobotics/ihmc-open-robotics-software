@@ -138,18 +138,18 @@ public class PelvisRotationalStateUpdaterTest
 
       setRandomRobotConfigurationAndUpdateSensors(joints, inverseDynamicsStructure, stateEstimatorSensorDefinitions, jointAndIMUSensorDataSource);
       
-      rootJoint.getRotation(rotationExpected);
+      rotationExpected.set(rootJoint.getJointPose().getOrientation());
       rootJoint.getJointTwist(twistExpected);
       
       // Reset the root joint state configuration so the test fails if the PelvisRotationalStateUpdater actually does not do anything.
-      rootJoint.setPositionAndRotation(new RigidBodyTransform());
+      rootJoint.setJointConfiguration(new RigidBodyTransform());
       rootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
       
       // Need to initialize the sensor data source manually
       jointAndIMUSensorDataSource.initialize();
       pelvisRotationalStateUpdater.initialize();
 
-      rootJoint.getRotation(rotationEstimated);
+      rotationEstimated.set(rootJoint.getJointPose().getOrientation());
       rootJoint.getJointTwist(twistEstimated);
       
       EuclidCoreTestTools.assertQuaternionGeometricallyEquals(rotationExpected, rotationEstimated, EPS);
@@ -159,18 +159,18 @@ public class PelvisRotationalStateUpdaterTest
       {
          setRandomRobotConfigurationAndUpdateSensors(joints, inverseDynamicsStructure, stateEstimatorSensorDefinitions, jointAndIMUSensorDataSource);
          
-         rootJoint.getRotation(rotationExpected);
+         rotationExpected.set(rootJoint.getJointPose().getOrientation());
          rootJoint.getJointTwist(twistExpected);
          
          // Reset the root joint state configuration so the test fails if the PelvisRotationalStateUpdater actually does not do anything.
-         rootJoint.setPositionAndRotation(new RigidBodyTransform());
+         rootJoint.setJointConfiguration(new RigidBodyTransform());
          rootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
          
          // Need to run the sensor data source manually
          jointAndIMUSensorDataSource.startComputation(0, 0, -1);
          pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
 
-         rootJoint.getRotation(rotationEstimated);
+         rotationEstimated.set(rootJoint.getJointPose().getOrientation());
          rootJoint.getJointTwist(twistEstimated);
          
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals(rotationExpected, rotationEstimated, EPS);

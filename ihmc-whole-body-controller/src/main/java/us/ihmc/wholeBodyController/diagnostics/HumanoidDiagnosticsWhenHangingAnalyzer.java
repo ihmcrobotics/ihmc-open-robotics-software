@@ -460,7 +460,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
             transform.setTranslation(new Vector3D(q_x.getDoubleValue(), q_y.getDoubleValue(), q_z.getDoubleValue()));
             transform.setRotation(new Quaternion(q_qx.getDoubleValue(), q_qy.getDoubleValue(), q_qz.getDoubleValue(), q_qs.getDoubleValue()));
 
-            fullRobotModel.getRootJoint().setPositionAndRotation(transform);
+            fullRobotModel.getRootJoint().setJointConfiguration(transform);
             fullRobotModel.updateFrames();
 
             controller.updateDiagnosticsWhenHangingHelpers();

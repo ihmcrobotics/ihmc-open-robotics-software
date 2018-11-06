@@ -134,7 +134,7 @@ public class PelvisPoseNoiseGenerator
       
       updateAfterYoVariables();
       
-      rootJoint.setPositionAndRotation(pelvisPose);
+      rootJoint.setJointConfiguration(pelvisPose);
       rootJointFrame.update();
    }
 

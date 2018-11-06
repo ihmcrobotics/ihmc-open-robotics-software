@@ -320,8 +320,8 @@ public class SpatialAccelerationCalculatorTest
          rootAcceleration.getAngularPart().set(EuclidCoreRandomTools.nextVector3D(random));
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, rootAcceleration, true, true, false);
 
-         floatingJoint.setRotation(RandomGeometry.nextQuaternion(random));
-         floatingJoint.setPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
+         floatingJoint.setJointOrientation(RandomGeometry.nextQuaternion(random));
+         floatingJoint.setJointPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
          Twist floatingJointTwist = MecanoRandomTools.nextTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
                                                                 floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
@@ -411,8 +411,8 @@ public class SpatialAccelerationCalculatorTest
          rootAcceleration.getAngularPart().set(EuclidCoreRandomTools.nextVector3D(random));
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, rootAcceleration, true, true, false);
 
-         floatingJoint.setRotation(RandomGeometry.nextQuaternion(random));
-         floatingJoint.setPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
+         floatingJoint.setJointOrientation(RandomGeometry.nextQuaternion(random));
+         floatingJoint.setJointPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
          Twist floatingJointTwist = MecanoRandomTools.nextTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
                                                                 floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
@@ -528,22 +528,22 @@ public class SpatialAccelerationCalculatorTest
          Quaternion floatingJointRotation = RandomGeometry.nextQuaternion(random);
          Point3D floatingJointPosition = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
 
-         floatingJoint.setRotation(floatingJointRotation);
-         floatingJoint.setPosition(floatingJointPosition);
-         floatingJointNoVelocity.setRotation(floatingJointRotation);
-         floatingJointNoVelocity.setPosition(floatingJointPosition);
+         floatingJoint.setJointOrientation(floatingJointRotation);
+         floatingJoint.setJointPosition(floatingJointPosition);
+         floatingJointNoVelocity.setJointOrientation(floatingJointRotation);
+         floatingJointNoVelocity.setJointPosition(floatingJointPosition);
 
          SpatialAcceleration floatJointAcceleration = new SpatialAcceleration(floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
                                                                               floatingJoint.getFrameAfterJoint());
          floatJointAcceleration.getLinearPart().set(EuclidCoreRandomTools.nextVector3D(random));
          floatJointAcceleration.getAngularPart().set(EuclidCoreRandomTools.nextVector3D(random));
-         floatingJoint.setAcceleration(floatJointAcceleration);
+         floatingJoint.setJointAcceleration(floatJointAcceleration);
          SpatialAcceleration floatJointAccelerationNoVelocity = new SpatialAcceleration(floatingJointNoVelocity.getFrameAfterJoint(),
                                                                                         floatingJointNoVelocity.getFrameBeforeJoint(),
                                                                                         floatingJointNoVelocity.getFrameAfterJoint());
          floatJointAccelerationNoVelocity.getLinearPart().set((Vector3DReadOnly) floatJointAcceleration.getLinearPart());
          floatJointAccelerationNoVelocity.getAngularPart().set((Vector3DReadOnly) floatJointAcceleration.getAngularPart());
-         floatingJointNoVelocity.setAcceleration(floatJointAccelerationNoVelocity);
+         floatingJointNoVelocity.setJointAcceleration(floatJointAccelerationNoVelocity);
 
          Twist floatingJointTwist = MecanoRandomTools.nextTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
                                                                 floatingJoint.getFrameAfterJoint());

@@ -330,7 +330,7 @@ public class SimulatedIMURawSensorReaderTest
                          FrameVector3D angularAcceleration)
       {
          // Update Body Pose
-         rootJoint.setPositionAndRotation(transformBodyToWorld); // TODO correct?
+         rootJoint.setJointConfiguration(transformBodyToWorld); // TODO correct?
          updateFrames();
 
          // Update Body Velocity
@@ -342,7 +342,7 @@ public class SimulatedIMURawSensorReaderTest
                                                                                                          angularAcceleration,
                                                                                                          linearAcceleration);
          accelerationOfChestWithRespectToWorld.setBaseFrame(getElevatorFrame());
-         rootJoint.setAcceleration(accelerationOfChestWithRespectToWorld);
+         rootJoint.setJointAcceleration(accelerationOfChestWithRespectToWorld);
 
          updateFrames();
       }

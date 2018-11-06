@@ -204,8 +204,8 @@ public abstract class HumanoidControllerWarmup
       desiredLinearAcceleration.set(desiredAcceleration.get(3), desiredAcceleration.get(4), desiredAcceleration.get(5));
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
-      rootJoint.getTranslation(position);
-      rootJoint.getLinearVelocity(linearVelocity);
+      position.set(rootJoint.getJointPose().getPosition());
+      linearVelocity.set(rootJoint.getJointTwist().getLinearPart());
 
       newPosition.set(desiredLinearAcceleration);
       newPosition.scale(0.5 * controlDT);
@@ -222,8 +222,8 @@ public abstract class HumanoidControllerWarmup
       newAngularVelocity.scale(controlDT);
       newAngularVelocity.add(angularVelocity);
 
-      rootJoint.setRotation(newOrientation);
-      rootJoint.setPosition(newPosition);
+      rootJoint.setJointOrientation(newOrientation);
+      rootJoint.setJointPosition(newPosition);
       rootJoint.updateFramesRecursively();
       frameLinearVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), newLinearVelocity);
       frameAngularVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), newAngularVelocity);

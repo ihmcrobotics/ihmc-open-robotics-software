@@ -87,11 +87,11 @@ public class JointConfigurationGatherer
          return;
       }
 
-      rootJoint.getTranslation(rootTranslation);
-      rootJoint.getRotation(rootOrientation);
-      rootJoint.getAngularVelocity(rootAngularVelocity);
-      rootJoint.getLinearVelocity(rootLinearVelocity);
-      rootJoint.getLinearAcceleration(rootLinearAcceleration);
+      rootTranslation.set(rootJoint.getJointPose().getPosition());
+      rootOrientation.set(rootJoint.getJointPose().getOrientation());
+      rootAngularVelocity.set(rootJoint.getJointTwist().getAngularPart());
+      rootLinearVelocity.set(rootJoint.getJointTwist().getLinearPart());
+      rootLinearAcceleration.set(rootJoint.getJointAcceleration().getLinearPart());
 
       jointConfigurationData.getPelvisAngularVelocity().set(rootAngularVelocity);
       jointConfigurationData.getPelvisLinearVelocity().set(rootLinearVelocity);

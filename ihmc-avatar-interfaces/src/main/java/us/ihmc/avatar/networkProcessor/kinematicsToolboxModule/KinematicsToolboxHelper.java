@@ -143,9 +143,9 @@ public class KinematicsToolboxHelper
       if (desiredRootJoint != null)
       {
          Vector3D translation = robotConfigurationData.getRootTranslation();
-         desiredRootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
+         desiredRootJoint.getJointPose().setPosition(translation.getX(), translation.getY(), translation.getZ());
          Quaternion orientation = robotConfigurationData.getRootOrientation();
-         desiredRootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
+         desiredRootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
          
          desiredRootJoint.getPredecessor().updateFramesRecursively();
@@ -189,7 +189,7 @@ public class KinematicsToolboxHelper
 
       if (hasPrivilegedRooJointPosition)
       {
-         desiredRootJoint.setPosition(commandWithPrivilegedConfiguration.getPrivilegedRootJointPosition());
+         desiredRootJoint.setJointPosition(commandWithPrivilegedConfiguration.getPrivilegedRootJointPosition());
          desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
       }
 
@@ -197,7 +197,7 @@ public class KinematicsToolboxHelper
 
       if (hasPrivilegedRooJointOrientation)
       {
-         desiredRootJoint.setRotation(commandWithPrivilegedConfiguration.getPrivilegedRootJointOrientation());
+         desiredRootJoint.setJointOrientation(commandWithPrivilegedConfiguration.getPrivilegedRootJointOrientation());
          desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
       }
 

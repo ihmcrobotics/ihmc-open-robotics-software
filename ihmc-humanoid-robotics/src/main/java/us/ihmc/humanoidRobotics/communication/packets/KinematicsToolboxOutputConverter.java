@@ -59,9 +59,9 @@ public class KinematicsToolboxOutputConverter
          joint.setQ(q);
       }
       Vector3D translation = solution.getDesiredRootTranslation();
-      rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
+      rootJoint.getJointPose().setPosition(translation.getX(), translation.getY(), translation.getZ());
       Quaternion orientation = solution.getDesiredRootOrientation();
-      rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
+      rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
       fullRobotModelToUseForConversion.updateFrames();
    }
 

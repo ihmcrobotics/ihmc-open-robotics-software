@@ -93,8 +93,8 @@ public class RobotJointVelocityAccelerationIntegrator
          else if (joints[i] instanceof SixDoFJoint)
          {
             SixDoFJoint joint = (SixDoFJoint) joints[i];
-            joint.getRotation(previousOrientation);
-            joint.getTranslation(previousTranslation);
+            previousOrientation.set(joint.getJointPose().getOrientation());
+            previousTranslation.set(joint.getJointPose().getPosition());
 
             MatrixTools.extractTuple3dFromEJMLVector(angularVelocity, jointVelocitiesToIntegrate, jointStartIndex);
             double angularVelocityMagnitude = angularVelocity.length();
@@ -160,10 +160,10 @@ public class RobotJointVelocityAccelerationIntegrator
          else if (joints[i] instanceof SixDoFJoint)
          {
             SixDoFJoint joint = (SixDoFJoint) joints[i];
-            joint.getRotation(previousOrientation);
-            joint.getTranslation(previousTranslation);
-            joint.getLinearVelocity(previousLinearVelocity);
-            joint.getAngularVelocity(previousAngularVelocity);
+            previousOrientation.set(joint.getJointPose().getOrientation());
+            previousTranslation.set(joint.getJointPose().getPosition());
+            previousLinearVelocity.set(joint.getJointTwist().getLinearPart());
+            previousAngularVelocity.set(joint.getJointTwist().getAngularPart());
 
             MatrixTools.extractTuple3dFromEJMLVector(angularAcceleration, jointAccelerationsToIntegrate, jointStartIndex);
             double angularAccelerationMagnitude = angularAcceleration.length();

@@ -122,7 +122,7 @@ public class InverseDynamicsCalculatorSCSTest
       inverseDynamicsCalculator.compute();
 
       Wrench outputWrench = new Wrench(null, null);
-      rootInverseDynamicsJoint.getWrench(outputWrench);
+      outputWrench.setIncludingFrame(rootInverseDynamicsJoint.getJointWrench());
       
       outputWrench.setBodyFrame(forceApplicationFrame);
       outputWrench.changeFrame(forceApplicationFrame);
@@ -552,8 +552,8 @@ public class InverseDynamicsCalculatorSCSTest
       floatingJoint.setPosition(rootPosition);
       floatingJoint.setYawPitchRoll(yaw, pitch, roll);
 
-      sixDoFJoint.setPosition(rootPosition);
-      sixDoFJoint.setRotation(yaw, pitch, roll);
+      sixDoFJoint.setJointPosition(rootPosition);
+      sixDoFJoint.getJointPose().setOrientationYawPitchRoll(yaw, pitch, roll);
    }
    
    private final FrameVector3D linearVelocityFrameVector = new FrameVector3D();

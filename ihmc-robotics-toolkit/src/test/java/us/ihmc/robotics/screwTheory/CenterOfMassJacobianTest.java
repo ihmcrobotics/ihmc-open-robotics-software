@@ -122,7 +122,7 @@ public class CenterOfMassJacobianTest
 
       CenterOfMassJacobian jacobian = new CenterOfMassJacobian(elevator);
 
-      sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+      sixDoFJoint.setJointConfiguration(EuclidCoreRandomTools.nextRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
       sixDoFJoint.getJointTwist(sixDoFJointTwist);
       sixDoFJointTwist.getLinearPart().set(RandomGeometry.nextVector3D(random));
@@ -142,7 +142,7 @@ public class CenterOfMassJacobianTest
                                          ScrewTools.computeSupportAndSubtreeSuccessors(rootBody), elevator.getBodyFixedFrame());
 
       RotationMatrix rotation = new RotationMatrix();
-      sixDoFJoint.getRotation(rotation);
+      rotation.set(sixDoFJoint.getJointPose().getOrientation());
 
       EuclidCoreTestTools.assertTuple3DEquals(velocityNumerical, velocityFromJacobian, 4e-5);
    }

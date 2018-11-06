@@ -190,7 +190,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             FloatingInverseDynamicsJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint);
 
             floatingJoint.getTransformToWorld(positionAndRotation);
-            sixDoFJoint.setPositionAndRotation(positionAndRotation);
+            sixDoFJoint.setJointConfiguration(positionAndRotation);
          }
       }
 
@@ -304,10 +304,10 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 
             if (updateVelocities)
             {
-               linearVelocity.setIncludingFrame(pelvisFrame, sixDoFJoint.getLinearVelocityForReading());
+               linearVelocity.setIncludingFrame(pelvisFrame, sixDoFJoint.getJointTwist().getLinearPart());
                linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
                floatingJoint.setVelocity(linearVelocity);
-               floatingJoint.setAngularVelocityInBody(sixDoFJoint.getAngularVelocityForReading());
+               floatingJoint.setAngularVelocityInBody(sixDoFJoint.getJointTwist().getAngularPart());
             }
 
             if (updateAccelerations)

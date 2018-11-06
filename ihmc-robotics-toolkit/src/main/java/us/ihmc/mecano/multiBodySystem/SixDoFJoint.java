@@ -6,17 +6,13 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -90,30 +86,6 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
-   {
-      angularVelocityToPack.set(jointTwist.getAngularPart());
-   }
-
-   @Override
-   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
-   {
-      linearVelocityToPack.set(jointTwist.getLinearPart());
-   }
-
-   @Override
-   public Vector3DReadOnly getLinearVelocityForReading()
-   {
-      return jointTwist.getLinearPart();
-   }
-
-   @Override
-   public Vector3DReadOnly getAngularVelocityForReading()
-   {
-      return jointTwist.getAngularPart();
-   }
-
-   @Override
    public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       jointAccelerationDesired.get(rowStart, matrix);
@@ -161,48 +133,30 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
       successorWrench.setIncludingFrame(successorWrench.getBodyFrame(), successorWrench.getReferenceFrame(), rowStart, matrix);
    }
 
-   public void setPositionAndRotation(RigidBodyTransform transform)
+   public void setJointConfiguration(RigidBodyTransform transform)
    {
       transform.getRotation(jointRotation);
       jointRotation.checkIfUnitary();
 
       transform.getTranslation(jointTranslation);
    }
-
+   
    @Override
-   public void setRotation(double yaw, double pitch, double roll)
-   {
-      jointRotation.setYawPitchRoll(yaw, pitch, roll);
-   }
-
-   @Override
-   public void setRotation(QuaternionReadOnly jointRotation)
+   public void setJointOrientation(QuaternionReadOnly jointRotation)
    {
       this.jointRotation.set(jointRotation);
    }
 
    @Override
-   public void setRotation(double x, double y, double z, double w)
-   {
-      jointRotation.set(x, y, z, w);
-   }
-
-   @Override
-   public void setRotation(RotationMatrixReadOnly jointRotation)
+   public void setJointOrientation(RotationMatrixReadOnly jointRotation)
    {
       this.jointRotation.set(jointRotation);
    }
 
    @Override
-   public void setPosition(Tuple3DReadOnly jointTranslation)
+   public void setJointPosition(Tuple3DReadOnly jointTranslation)
    {
       this.jointTranslation.set(jointTranslation);
-   }
-
-   @Override
-   public void setPosition(double x, double y, double z)
-   {
-      jointTranslation.set(x, y, z);
    }
 
    @Override
@@ -212,7 +166,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setAcceleration(SpatialAcceleration jointAcceleration)
+   public void setJointAcceleration(SpatialAcceleration jointAcceleration)
    {
       this.jointAcceleration.set(jointAcceleration);
    }
@@ -227,48 +181,6 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    public void setWrench(Wrench jointWrench)
    {
       successorWrench.set(jointWrench);
-   }
-
-   @Override
-   public void getRotation(QuaternionBasics rotationToPack)
-   {
-      rotationToPack.set(jointRotation);
-   }
-
-   @Override
-   public void getRotation(RotationMatrix rotationToPack)
-   {
-      rotationToPack.set(jointRotation);
-   }
-
-   @Override
-   public void getRotation(double[] yawPitchRollToPack)
-   {
-      jointRotation.getYawPitchRoll(yawPitchRollToPack);
-   }
-
-   @Override
-   public void getTranslation(Tuple3DBasics translationToPack)
-   {
-      translationToPack.set(jointTranslation);
-   }
-
-   @Override
-   public Tuple3DReadOnly getTranslationForReading()
-   {
-      return jointTranslation;
-   }
-
-   @Override
-   public QuaternionReadOnly getRotationForReading()
-   {
-      return jointRotation;
-   }
-
-   @Override
-   public void getWrench(Wrench wrenchToPack)
-   {
-      wrenchToPack.setIncludingFrame(successorWrench);
    }
 
    private void setMotionSubspace()
@@ -402,8 +314,8 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    public void setJointPositionVelocityAndAcceleration(JointBasics originalJoint)
    {
       SixDoFJoint sixDoFOriginalJoint = checkAndGetAsSiXDoFJoint(originalJoint);
-      setPosition(sixDoFOriginalJoint.jointTranslation);
-      setRotation(sixDoFOriginalJoint.jointRotation);
+      setJointPosition(sixDoFOriginalJoint.jointTranslation);
+      setJointOrientation(sixDoFOriginalJoint.jointRotation);
 
       jointTwist.getAngularPart().set((Vector3DReadOnly) sixDoFOriginalJoint.jointTwist.getAngularPart());
       jointTwist.getLinearPart().set((Vector3DReadOnly) sixDoFOriginalJoint.jointTwist.getLinearPart());
@@ -431,12 +343,4 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
       checksum.update(jointAcceleration.getLinearPart());
    }
 
-
-   @Override
-   public void getLinearAcceleration(Vector3DBasics linearAccelerationToPack)
-   {
-      linearAccelerationToPack.setX(jointAcceleration.getLinearPartX());
-      linearAccelerationToPack.setY(jointAcceleration.getLinearPartY());
-      linearAccelerationToPack.setZ(jointAcceleration.getLinearPartZ());
-   }
 }

@@ -150,7 +150,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       ReferenceFrame bodyFixedFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
 
       Wrench rootJointWrench = new Wrench(bodyFixedFrame, bodyFixedFrame);
-      rootJoint.getWrench(rootJointWrench);
+      rootJointWrench.setIncludingFrame(rootJoint.getJointWrench());
 
       FrameVector3D rootJointForce = new FrameVector3D(rootJointWrench.getLinearPart());
       FrameVector3D rootJointTorque = new FrameVector3D(rootJointWrench.getAngularPart());
@@ -278,7 +278,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       Wrench rootJointWrench = new Wrench(rootJoint.getFrameAfterJoint(), rootJoint.getFrameAfterJoint());
-      rootJoint.getWrench(rootJointWrench);
+      rootJointWrench.setIncludingFrame(rootJoint.getJointWrench());
 
       FrameVector3D rootJointForce = new FrameVector3D(rootJointWrench.getLinearPart());
       FrameVector3D rootJointTorque = new FrameVector3D(rootJointWrench.getAngularPart());
@@ -588,7 +588,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       floatingJoint.getTransformToWorld(transformToWorld);
-      sixDoFJoint.setPositionAndRotation(transformToWorld);
+      sixDoFJoint.setJointConfiguration(transformToWorld);
    }
 
    public void setRobotRootJointPositionAndOrientationToMatchFullRobotModel(FloatingInverseDynamicsJoint sixDoFJoint, FloatingJoint floatingJoint)
@@ -608,12 +608,12 @@ public class DRCInverseDynamicsCalculatorTestHelper
             RandomGeometry.nextVector3D(random, maxRootJointLinearAndAngularVelocity));
       rootJoint.setJointTwist(bodyTwist);
 
-      rootJoint.setPosition(RandomGeometry.nextVector3D(random));
+      rootJoint.setJointPosition(RandomGeometry.nextVector3D(random));
 
       double yaw = RandomNumbers.nextDouble(random, Math.PI / 20.0);
       double pitch = RandomNumbers.nextDouble(random, Math.PI / 20.0);
       double roll = RandomNumbers.nextDouble(random, Math.PI / 20.0);
-      rootJoint.setRotation(yaw, pitch, roll);
+      rootJoint.getJointPose().setOrientationYawPitchRoll(yaw, pitch, roll);
 
       ArrayList<OneDoFJoint> oneDoFJoints = new ArrayList<OneDoFJoint>();
       fullRobotModel.getOneDoFJoints(oneDoFJoints);

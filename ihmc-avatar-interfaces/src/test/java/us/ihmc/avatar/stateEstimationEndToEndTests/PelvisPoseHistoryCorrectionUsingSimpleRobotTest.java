@@ -873,7 +873,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       public void doControl()
       {
          refFrame.update();
-         sixDofPelvisJoint.setPositionAndRotation(robotPose);
+         sixDofPelvisJoint.setJointConfiguration(robotPose);
          pelvisPoseHistoryCorrection.doControl(Conversions.secondsToNanoseconds(scs.getTime()));
          floatingJoint.setRotationAndTranslation(sixDofPelvisJoint.getJointTransform3D());
       }

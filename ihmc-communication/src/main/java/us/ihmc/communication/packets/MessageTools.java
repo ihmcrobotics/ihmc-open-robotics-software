@@ -731,8 +731,8 @@ public class MessageTools
       for (int i = 0; i < kinematicsToolboxOutputStatus.getDesiredJointAngles().size(); i++)
          jointsToUpdate[i].setQ(kinematicsToolboxOutputStatus.getDesiredJointAngles().get(i));
 
-      rootJointToUpdate.setPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
-      rootJointToUpdate.setRotation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
+      rootJointToUpdate.setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
+      rootJointToUpdate.setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
    }
 
    public static void packDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingInverseDynamicsJoint rootJoint,
@@ -762,8 +762,8 @@ public class MessageTools
 
       if (rootJoint != null)
       {
-         rootJoint.getTranslation(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
-         rootJoint.getRotation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
+         kinematicsToolboxOutputStatus.getDesiredRootTranslation().set(rootJoint.getJointPose().getPosition());
+         kinematicsToolboxOutputStatus.getDesiredRootOrientation().set(rootJoint.getJointPose().getOrientation());
       }
    }
 

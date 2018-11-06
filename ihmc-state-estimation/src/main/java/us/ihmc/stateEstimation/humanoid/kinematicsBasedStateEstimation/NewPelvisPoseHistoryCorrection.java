@@ -232,7 +232,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       errorBetweenCorrectedAndLocalizationTransform.setTranslation(errorBetweenCorrectedAndLocalizationTransform_Translation);
       errorBetweenCorrectedAndLocalizationTransform.setRotation(errorBetweenCorrectedAndLocalizationQuaternion_Rotation);
       
-      rootJoint.setPositionAndRotation(correctedPelvisTransformInWorldFrame);
+      rootJoint.setJointConfiguration(correctedPelvisTransformInWorldFrame);
    }
 
    /**

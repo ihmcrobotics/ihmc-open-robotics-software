@@ -456,7 +456,7 @@ public class MomentumRecoveryControlModuleTest
          footPolygon.update();
          defaultFootPolygons.put(robotSide, footPolygon);
 
-         footJoint.setPosition(footPositions.get(robotSide));
+         footJoint.setJointPosition(footPositions.get(robotSide));
       }
       elevator.updateFramesRecursively();
 
