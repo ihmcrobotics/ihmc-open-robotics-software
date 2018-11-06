@@ -105,8 +105,7 @@ public class KinematicsToolboxHelper
          {
             JointDesiredOutputReadOnly data = output.getJointDesiredOutput(joint); 
 
-            joint.setQ(data.getDesiredPosition()); // ?????
-            joint.setqDesired(data.getDesiredPosition());
+            joint.setQ(data.getDesiredPosition());
             joint.setQd(data.getDesiredVelocity());
          }
       }

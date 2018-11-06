@@ -122,12 +122,6 @@ public class PassiveRevoluteJoint extends RevoluteJoint
       throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
 
-   @Override
-   public boolean isPassiveJoint()
-   {
-      return true;
-   }
-
    public boolean isPartOfClosedKinematicLoop()
    {
       return isPartOfClosedKinematicLoop;

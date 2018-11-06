@@ -41,37 +41,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 
    //   private double tauDamping;
 
-   /*
-    * VRC HACKS
-    */
-   @Deprecated
-   private boolean integrateDesiredAccelerations = true; // Hack even more...
-   @Deprecated
-   private boolean resetDesiredAccelerationIntegrator = false; // Hack even more more...
-
-   @Deprecated
-   private boolean resetIntegrator = false;
-
-   @Deprecated
-   private double qDesired;
-   @Deprecated
-   private double qdDesired;
-   /** Remove April 2nd, 2018. */
-   @Deprecated
-   private double kp;
-   /** Remove April 2nd, 2018. */
-   @Deprecated
-   private double kd;
-
-   /** Remove April 2nd, 2018. */
-   @Deprecated
-   private boolean isUnderPositionControl = false;
-
-   private boolean enabled = true;
-   /** Remove April 2nd, 2018. */
-   @Deprecated
-   private boolean useFeedBackForceControl = true;
-
    /**
     * Describes if a joint is online
     */
@@ -329,7 +298,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       setQd(oneDoFOriginalJoint.getQd());
       setQdd(oneDoFOriginalJoint.getQdd());
       setTauMeasured(oneDoFOriginalJoint.getTauMeasured());
-      setEnabled(oneDoFOriginalJoint.isEnabled());
    }
 
    @Override
@@ -401,108 +369,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       return effortLimitUpper;
    }
 
-   @Deprecated
-   public boolean getIntegrateDesiredAccelerations()
-   {
-      return integrateDesiredAccelerations;
-   }
-
-   @Deprecated
-   public void setIntegrateDesiredAccelerations(boolean integrateDesiredAccelerations)
-   {
-      this.integrateDesiredAccelerations = integrateDesiredAccelerations;
-   }
-
-   @Deprecated
-   public boolean getResetDesiredAccelerationIntegrator()
-   {
-      boolean ret = resetDesiredAccelerationIntegrator;
-      resetDesiredAccelerationIntegrator = false;
-      return ret;
-   }
-
-   @Deprecated
-   public void resetDesiredAccelerationIntegrator()
-   {
-      resetDesiredAccelerationIntegrator = true;
-   }
-
-   @Deprecated
-   public boolean getResetIntegrator()
-   {
-      boolean ret = resetIntegrator;
-      resetIntegrator = false;
-      return ret;
-   }
-
-   @Deprecated
-   public void resetIntegrator()
-   {
-      resetIntegrator = true;
-   }
-
-
-   @Deprecated
-   public double getqDesired()
-   {
-      return qDesired;
-   }
-
-
-   @Deprecated
-   public double getQdDesired()
-   {
-      return qdDesired;
-   }
-
-   /** Remove April 2nd, 2018. */
-   @Deprecated
-   public double getKp()
-   {
-      return kp;
-   }
-
-   /** Remove April 2nd, 2018. */
-   @Deprecated
-   public double getKd()
-   {
-      return kd;
-   }
-
-   /** Remove April 2nd, 2018. */
-   @Deprecated
-   public abstract boolean isPassiveJoint();
-
-   /*
-    * VRC HACKS
-    */
-
-   @Deprecated
-   public void setqDesired(double qDesired)
-   {
-      this.qDesired = qDesired;
-   }
-
-   @Deprecated
-   public void setQdDesired(double qdDesired)
-   {
-      this.qdDesired = qdDesired;
-   }
-
-   /** Remove April 2nd, 2018. */
-   @Deprecated
-   public void setKp(double kp)
-   {
-      this.kp = kp;
-   }
-
-   /** Remove April 2nd, 2018. */
-   @Deprecated
-   public void setKd(double kd)
-   {
-      this.kd = kd;
-   }
-
    @Override
    public void calculateJointStateChecksum(GenericCRC32 checksum)
    {
@@ -511,25 +377,9 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       checksum.update(qdd);
    }
 
-
    public abstract FrameVector3D getJointAxis();
 
    public abstract void getJointAxis(FrameVector3D axisToPack);
-
-   // DRC Hack
-   /** Remove April 2nd, 2018. */
-   @Deprecated
-   public boolean isUnderPositionControl()
-   {
-      return isUnderPositionControl;
-   }
-
-   /** Remove April 2nd, 2018. */
-   @Deprecated
-   public void setUnderPositionControl(boolean val)
-   {
-      isUnderPositionControl = val;
-   }
 
    public double getTauMeasured()
    {
@@ -541,16 +391,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.tauMeasured = tauMeasured;
    }
 
-   public boolean isEnabled()
-   {
-      return enabled;
-   }
-
-   public void setEnabled(boolean enabled)
-   {
-      this.enabled = enabled;
-   }
-
    public boolean isOnline()
    {
       return isOnline;
@@ -559,19 +399,5 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    public void setOnline(boolean isOnline)
    {
       this.isOnline = isOnline;
-   }
-
-   /** Remove April 2nd, 2018. */
-   @Deprecated
-   public boolean isUseFeedBackForceControl()
-   {
-      return useFeedBackForceControl;
-   }
-
-   /** Remove April 2nd, 2018. */
-   @Deprecated
-   public void setUseFeedBackForceControl(boolean useFeedBackForceControl)
-   {
-      this.useFeedBackForceControl = useFeedBackForceControl;
    }
 }

@@ -733,16 +733,6 @@ public class ScrewTools
       }
    }
 
-   public static void getJointDesiredPositions(OneDoFJoint[] joints, DenseMatrix64F jointPositionsToPack)
-   {
-      int rowStart = 0;
-      for (OneDoFJoint joint : joints)
-      {
-         jointPositionsToPack.set(rowStart, 0, joint.getqDesired());
-         rowStart += joint.getDegreesOfFreedom();
-      }
-   }
-
    public static void setJointPositions(JointBasics[] joints, DenseMatrix64F jointPositions)
    {
       int rowStart = 0;
@@ -752,26 +742,6 @@ public class ScrewTools
          rowStart += joint.getDegreesOfFreedom();
          if (joint instanceof SixDoFJoint || joint instanceof SphericalJoint)
             rowStart++; // Because of stupid quaternions
-      }
-   }
-
-   public static void setDesiredJointPositions(OneDoFJoint[] joints, DenseMatrix64F jointPositions)
-   {
-      int rowStart = 0;
-      for (OneDoFJoint joint : joints)
-      {
-         joint.setqDesired(jointPositions.get(rowStart, 0));
-         rowStart += joint.getDegreesOfFreedom();
-      }
-   }
-
-   public static void setDesiredJointVelocities(OneDoFJoint[] joints, DenseMatrix64F jointVelocities)
-   {
-      int rowStart = 0;
-      for (OneDoFJoint joint : joints)
-      {
-         joint.setQdDesired(jointVelocities.get(rowStart, 0));
-         rowStart += joint.getDegreesOfFreedom();
       }
    }
 

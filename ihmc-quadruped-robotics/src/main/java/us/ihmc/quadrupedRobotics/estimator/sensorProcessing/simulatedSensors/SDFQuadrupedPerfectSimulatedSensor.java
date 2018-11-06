@@ -69,7 +69,8 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    {
       for(int i = 0; i < sensorOneDoFJoints.length; i++)
       {
-        sensorOneDoFJoints[i].setEnabled(enableDrives.getBooleanValue());
+         // FIXME
+//        sensorOneDoFJoints[i].setEnabled(enableDrives.getBooleanValue());
       }
 
       super.read();
@@ -140,7 +141,9 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
       {
          if(sensorOneDoFJoints[i] == oneDoFJoint)
          {
-            return sensorOneDoFJoints[i].isEnabled();
+            return true;
+            // FIXME
+//            return sensorOneDoFJoints[i].isEnabled();
          }
       }
       return false;

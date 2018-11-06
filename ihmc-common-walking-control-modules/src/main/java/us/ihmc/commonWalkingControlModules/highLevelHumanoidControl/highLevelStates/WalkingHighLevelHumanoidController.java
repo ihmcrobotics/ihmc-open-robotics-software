@@ -27,7 +27,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.DoubSuppToSingSuppCond4DistRecov;
@@ -70,8 +69,6 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -693,41 +690,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
-
-      /*
-       * FIXME: This is mainly used for resetting the integrators at touchdown. It is done in
-       * SingleSupportState.doTransitionOutOfAction. Need to figure out how to use directly the joint data
-       * holder instead of OneDoFJoint.
-       */
-      LowLevelOneDoFJointDesiredDataHolder jointDesiredDataHolder = controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder();
-
-      for (int i = 0; i < allOneDoFjoints.length; i++)
-      {
-         OneDoFJoint joint = allOneDoFjoints[i];
-         if (joint.getResetDesiredAccelerationIntegrator())
-         {
-            JointDesiredOutputBasics jointData = jointDesiredDataHolder.getJointDesiredOutput(joint);
-            if (jointData == null)
-               jointData = jointDesiredDataHolder.registerJointWithEmptyData(joint);
-            jointData.setResetIntegrators(true);
-         }
-      }
    }
 
    public void reinitializePelvisOrientation(boolean reinitialize)
    {
       pelvisOrientationManager.initialize();
-   }
-
-   @Deprecated
-   public void resetJointIntegrators()
-   {
-      for (int i = 0; i < allOneDoFjoints.length; i++)
-      {
-         allOneDoFjoints[i].resetDesiredAccelerationIntegrator();
-         allOneDoFjoints[i].setQddDesired(0.0);
-         allOneDoFjoints[i].setTau(0.0);
-      }
    }
 
    public ControllerCoreCommand getControllerCoreCommand()

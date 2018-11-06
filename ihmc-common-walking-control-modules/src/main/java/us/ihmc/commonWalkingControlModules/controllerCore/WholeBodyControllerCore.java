@@ -241,8 +241,6 @@ public class WholeBodyControllerCore
          throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
       }
 
-      clearOnEDoFJointOutputs();
-
       if (rootJointDesiredConfigurationData != null)
          controllerCoreOutput.setRootJointDesiredConfigurationData(rootJointDesiredConfigurationData);
       controllerCoreOutput.setLowLevelOneDoFJointDesiredDataHolder(jointDesiredOutputList);
@@ -299,41 +297,6 @@ public class WholeBodyControllerCore
    {
       numberOfFBControllerEnabled.set(0);
       jointDesiredOutputList.insertDesiredTorquesIntoOneDoFJoints(controlledOneDoFJoints);
-   }
-
-   //TODO: Clear OneDoFJoint of these fields and get rid of this.
-   private void clearOnEDoFJointOutputs()
-   {
-      for (int i = 0; i < controlledOneDoFJoints.length; i++)
-      {
-         OneDoFJoint joint = controlledOneDoFJoints[i];
-         //         System.out.println("Checking " + joint.getName());
-
-         // Zero out joint for testing purposes
-         joint.setqDesired(Double.NaN);
-         joint.setQdDesired(Double.NaN);
-         joint.setQddDesired(Double.NaN);
-         joint.setTau(Double.NaN);
-
-         if (joint.getKp() != 0.0)
-         {
-            throw new RuntimeException(joint.toString() + " is not zero kp " + joint.getKp() + " - function is removed");
-         }
-         if (joint.getKd() != 0.0)
-         {
-            throw new RuntimeException(joint.toString() + " is not zero kd " + joint.getKd() + " - function is removed");
-         }
-
-         if (joint.isUnderPositionControl())
-         {
-            throw new RuntimeException(joint.toString() + " is under position control - function is removed");
-         }
-
-         if (!joint.isUseFeedBackForceControl())
-         {
-            throw new RuntimeException(joint.toString() + " disabled feedback force control - function is removed");
-         }
-      }
    }
 
    public ControllerCoreOutput getControllerCoreOutput()

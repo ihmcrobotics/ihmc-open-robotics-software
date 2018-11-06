@@ -146,7 +146,7 @@ public class KinematicsToolboxMessageFactory
     * @return the message containing the new privileged configuration ready to be sent to the
     *         {@code KinematicsToolboxModule}.
     */
-   public static KinematicsToolboxConfigurationMessage privilegedConfigurationFromFullRobotModel(FullRobotModel fullRobotModel, boolean useDesiredJointAngles)
+   public static KinematicsToolboxConfigurationMessage privilegedConfigurationFromFullRobotModel(FullRobotModel fullRobotModel)
    {
       KinematicsToolboxConfigurationMessage message = new KinematicsToolboxConfigurationMessage();
 
@@ -158,11 +158,7 @@ public class KinematicsToolboxMessageFactory
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          jointHashCodes[i] = oneDoFJoints[i].hashCode();
-
-         if (useDesiredJointAngles)
-            privilegedJointAngles[i] = (float) oneDoFJoints[i].getqDesired();
-         else
-            privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
+         privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
       }
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();

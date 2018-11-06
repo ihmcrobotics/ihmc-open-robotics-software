@@ -2209,7 +2209,8 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    {
       for (OneDoFJoint oneDofJoint : oneDoFJointsActual)
       {
-         oneDofJoint.setUnderPositionControl(true);
+         // FIXME
+//         oneDofJoint.setUnderPositionControl(true);
       }
 
       actualFullRobotModel.updateFrames();
