@@ -10,7 +10,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
 public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
@@ -309,14 +308,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    public double getEffortLimitUpper()
    {
       return effortLimitUpper;
-   }
-
-   @Override
-   public void calculateJointStateChecksum(GenericCRC32 checksum)
-   {
-      checksum.update(q);
-      checksum.update(qd);
-      checksum.update(qdd);
    }
 
    public abstract FrameVector3D getJointAxis();

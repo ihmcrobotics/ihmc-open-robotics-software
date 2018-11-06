@@ -20,7 +20,6 @@ import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
 public class PlanarJoint extends AbstractInverseDynamicsJoint implements FloatingInverseDynamicsJoint
@@ -264,22 +263,6 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
       jointTwist.setAngularPartY(qdRot);
       jointTwist.getLinearPart().set(xd, 0.0, zd);
    }
-
-   @Override
-   public void calculateJointStateChecksum(GenericCRC32 checksum)
-   {
-      checksum.update(jointRotation.getPitch());
-      checksum.update(jointTwist.getAngularPartY());
-      checksum.update(jointAcceleration.getAngularPartY());
-
-      checksum.update(jointTranslation.getX());
-      checksum.update(jointTranslation.getY());
-      checksum.update(jointTwist.getLinearPartX());
-      checksum.update(jointTwist.getLinearPartZ());
-      checksum.update(jointAcceleration.getLinearPartX());
-      checksum.update(jointAcceleration.getLinearPartZ());
-   }
-
 
    @Override
    public int getConfigurationMatrixSize()
