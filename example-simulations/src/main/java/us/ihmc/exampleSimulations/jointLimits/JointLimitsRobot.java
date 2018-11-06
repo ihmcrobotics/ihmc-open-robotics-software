@@ -93,7 +93,7 @@ public class JointLimitsRobot extends Robot
    public void setQdd(double qdd)
    {
       updateInverseDynamicsStructureFromSimulation();
-      idJoint.setQddDesired(qdd);
+      idJoint.setQdd(qdd);
       inverseDynamicsCalculator.compute();
       joint.setTau(idJoint.getTau());
    }

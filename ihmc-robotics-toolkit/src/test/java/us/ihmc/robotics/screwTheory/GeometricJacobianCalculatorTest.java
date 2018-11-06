@@ -351,7 +351,7 @@ public class GeometricJacobianCalculatorTest
       {
          ScrewTestTools.setRandomPositions(joints, random);
          ScrewTestTools.setRandomVelocities(joints, random, -10.0, 10.0);
-         ScrewTestTools.setRandomDesiredAccelerations(joints, random, -10.0, 10.0);
+         ScrewTestTools.setRandomAccelerations(joints, random, -10.0, 10.0);
          rootBody.updateFramesRecursively();
 
          int randomEndEffectorIndex = random.nextInt(numberOfJoints);

@@ -131,21 +131,6 @@ public class PassiveRevoluteJointTest
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSetQddDesired()
-   {
-      try
-      {
-         joint.setQddDesired(qddDesired);
-      }
-      catch(RuntimeException e)
-      {
-         return; 
-      }     
-      Assert.fail();
-   }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testSetTau()
    {
       try

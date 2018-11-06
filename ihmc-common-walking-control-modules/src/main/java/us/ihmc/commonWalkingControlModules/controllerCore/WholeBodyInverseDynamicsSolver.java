@@ -230,7 +230,7 @@ public class WholeBodyInverseDynamicsSolver
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
          OneDoFJoint joint = controlledOneDoFJoints[i];
-         jointAccelerationsSolution.get(joint).set(joint.getQddDesired());
+         jointAccelerationsSolution.get(joint).set(joint.getQdd());
       }
 
       planeContactWrenchProcessor.compute(externalWrenchSolution);

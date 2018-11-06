@@ -86,12 +86,6 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    }
 
    @Override
-   public void setQddDesired(double qddDesired)
-   {
-      throw new RuntimeException("Cannot set acceleration of a passive joint");
-   }
-
-   @Override
    public void setTau(double tau)
    {
       throw new RuntimeException("Cannot set torque of a passive joint");

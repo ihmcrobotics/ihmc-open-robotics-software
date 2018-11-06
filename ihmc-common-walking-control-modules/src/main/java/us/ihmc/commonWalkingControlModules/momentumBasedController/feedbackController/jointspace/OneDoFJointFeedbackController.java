@@ -279,7 +279,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    @Override
    public void computeAchievedAcceleration()
    {
-      qDDAchieved.set(joint.getQddDesired());
+      qDDAchieved.set(joint.getQdd());
    }
 
    public OneDoFJoint getJoint()

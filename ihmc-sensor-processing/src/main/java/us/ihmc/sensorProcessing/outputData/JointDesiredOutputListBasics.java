@@ -89,7 +89,7 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
       for (int i = 0; i < joints.length; i++)
       {
          OneDoFJoint joint = joints[i];
-         setDesiredJointAcceleration(joint, joint.getQddDesired());
+         setDesiredJointAcceleration(joint, joint.getQdd());
       }
    }
 

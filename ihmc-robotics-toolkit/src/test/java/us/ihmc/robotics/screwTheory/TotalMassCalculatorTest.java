@@ -77,7 +77,7 @@ public class TotalMassCalculatorTest
          double jointPosition = random.nextDouble();
          currentJoint.setQ(jointPosition);
          currentJoint.setQd(0.0);
-         currentJoint.setQddDesired(0.0);
+         currentJoint.setQdd(0.0);
          ScrewTools.addRigidBody("bodyID" + i, currentJoint, momentOfInertia, mass, comOffset);
 
          potentialInverseDynamicsParentJoints.add(currentJoint);
