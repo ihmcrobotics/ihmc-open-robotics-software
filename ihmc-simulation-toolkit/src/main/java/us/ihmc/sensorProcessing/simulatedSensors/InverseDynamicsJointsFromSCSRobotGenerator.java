@@ -313,7 +313,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             if (updateAccelerations)
             {
                if (useDesiredAcceleration)
-                  sixDoFJoint.getDesiredJointAcceleration(spatialAccelerationVector);
+                  spatialAccelerationVector.setIncludingFrame(sixDoFJoint.getJointAcceleration());
                else
                   spatialAccelerationVector.setIncludingFrame(sixDoFJoint.getJointAcceleration());
                originAcceleration.setIncludingFrame(spatialAccelerationVector.getLinearPart());

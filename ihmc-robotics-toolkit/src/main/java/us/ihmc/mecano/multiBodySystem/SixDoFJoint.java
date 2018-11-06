@@ -55,12 +55,6 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void getDesiredJointAcceleration(SpatialAcceleration accelerationToPack)
-   {
-      accelerationToPack.setIncludingFrame(jointAccelerationDesired);
-   }
-
-   @Override
    public void getJointTau(int rowStart, DenseMatrix64F matrix)
    {
       successorWrench.get(matrix);
@@ -79,7 +73,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setDesiredAccelerationToZero()
+   public void setJointAccelerationToZero()
    {
       jointAccelerationDesired.setToZero();
    }

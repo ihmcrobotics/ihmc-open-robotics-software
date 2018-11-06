@@ -849,7 +849,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       spatialAccelerationVectorOfSimulatedRootJoint.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
 
       SpatialAcceleration spatialAccelerationVectorOfInverseDynamicsRootJoint = new SpatialAcceleration();
-      sixDoFJoint.getDesiredJointAcceleration(spatialAccelerationVectorOfInverseDynamicsRootJoint);
+      spatialAccelerationVectorOfInverseDynamicsRootJoint.setIncludingFrame(sixDoFJoint.getJointAcceleration());
 
       return spatialAccelerationVectorOfInverseDynamicsRootJoint.epsilonEquals(spatialAccelerationVectorOfInverseDynamicsRootJoint, epsilon);
    }

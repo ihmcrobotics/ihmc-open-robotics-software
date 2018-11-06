@@ -42,7 +42,7 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    }
 
    @Override
-   public void setDesiredAccelerationToZero()
+   public void setJointAccelerationToZero()
    {
       throw new RuntimeException("Cannot set acceleration of a passive joint");
    }

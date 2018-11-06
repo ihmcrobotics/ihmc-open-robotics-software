@@ -113,21 +113,6 @@ public abstract interface JointBasics extends CommonJoint
    public abstract void getSuccessorAcceleration(SpatialAcceleration jointAccelerationToPack);
 
    /**
-    * Packs the desired acceleration of this joint in a {@code SpatialAccelerationVector} (the 3D
-    * angular and linear accelerations). The reference frames of the resulting
-    * {@code SpatialAccelerationVector} are as follows:
-    * <ul>
-    * <li>{@code bodyFrame} is {@code afterJointFrame}.
-    * <li>{@code baseFrame} is {@code beforeJointFrame}.
-    * <li>{@code expressedInFrame} is {@code afterJointFrame}.
-    * </ul>
-    * 
-    * @param jointAccelerationToPack the {@code SpatialAccelerationVector} in which the desired
-    *           acceleration of this joint is stored. Modified.
-    */
-   public abstract void getDesiredJointAcceleration(SpatialAcceleration jointAccelerationToPack);
-
-   /**
     * Packs the {@code SpatialAccelerationVector} (the 3D angular and linear accelerations) of this
     * joint's {@code successor} with respect to this joint's {@code predecessor} resulting from the
     * desired acceleration of this joint. The reference frames of the resulting
@@ -229,11 +214,7 @@ public abstract interface JointBasics extends CommonJoint
    @Deprecated // TODO
    public abstract void getDesiredAccelerationMatrix(DenseMatrix64F matrixToPack, int rowStart);
 
-   /**
-    * Sets the desired acceleration stored in this joint to zero.
-    */
-   @Deprecated // TODO
-   public abstract void setDesiredAccelerationToZero();
+   public abstract void setJointAccelerationToZero();
 
    /**
     * Sets the joint current configuration from the given column vector {@code DenseMatrix64F}. Here
