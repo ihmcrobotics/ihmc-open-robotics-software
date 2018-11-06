@@ -102,7 +102,7 @@ public class CenterOfMassJacobian
 
          for (int dofIndex = 0; dofIndex < joint.getDegreesOfFreedom(); dofIndex++)
          {
-            joint.getUnitTwist(dofIndex, tempUnitTwist);
+            tempUnitTwist.setIncludingFrame(joint.getUnitTwists().get(dofIndex));
             tempUnitTwist.changeFrame(rootFrame);
 
             setColumn(tempUnitTwist, comPositionScaledByMass, subTreeMass, column);
