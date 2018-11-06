@@ -271,7 +271,7 @@ public class GeometricJacobianCalculatorTest
          RigidBodyBasics body = joints.get(0).getPredecessor();
          RigidBodyBasics rootBody = ScrewTools.getRootBody(body);
          SpatialAcceleration rootAcceleration = new SpatialAcceleration(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, rootAcceleration, true, false, false);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, rootAcceleration, true, false);
 
          spatialAccelerationCalculator.compute();
 
@@ -305,7 +305,7 @@ public class GeometricJacobianCalculatorTest
          rootBody.updateFramesRecursively();
 
          SpatialAcceleration rootAcceleration = new SpatialAcceleration(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, rootAcceleration, true, false, false);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, rootAcceleration, true, false);
 
          spatialAccelerationCalculator.compute();
 
@@ -504,7 +504,7 @@ public class GeometricJacobianCalculatorTest
                                                                                       GeometricJacobianCalculator jacobianCalculator, double epsilon)
          throws AssertionError
    {
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(base, 0.0, true);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(base, 0.0);
       spatialAccelerationCalculator.compute();
 
       SpatialAcceleration expectedAcceleration = new SpatialAcceleration();
