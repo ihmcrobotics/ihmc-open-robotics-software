@@ -391,12 +391,12 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       setEffortLimits(-effortLimit, effortLimit);
    }
 
-   public double getMinEffortLimit()
+   public double getEffortLimitLower()
    {
       return effortLimitLower;
    }
 
-   public double getMaxEffortLimit()
+   public double getEffortLimitUpper()
    {
       return effortLimitUpper;
    }
