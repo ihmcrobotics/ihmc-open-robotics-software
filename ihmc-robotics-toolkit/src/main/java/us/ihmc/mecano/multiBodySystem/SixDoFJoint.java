@@ -21,7 +21,6 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
 public class SixDoFJoint extends AbstractInverseDynamicsJoint implements FloatingInverseDynamicsJoint
@@ -319,16 +318,4 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
       jointAccelerationDesired.getAngularPart().set(sixDoFOriginalJoint.jointAccelerationDesired.getAngularPart());
       jointAccelerationDesired.getLinearPart().set(sixDoFOriginalJoint.jointAccelerationDesired.getLinearPart());
    }
-
-   @Override
-   public void calculateJointStateChecksum(GenericCRC32 checksum)
-   {
-      checksum.update(jointTranslation);
-      checksum.update(jointRotation);
-      checksum.update(jointTwist.getAngularPart());
-      checksum.update(jointTwist.getLinearPart());
-      checksum.update(jointAcceleration.getAngularPart());
-      checksum.update(jointAcceleration.getLinearPart());
-   }
-
 }

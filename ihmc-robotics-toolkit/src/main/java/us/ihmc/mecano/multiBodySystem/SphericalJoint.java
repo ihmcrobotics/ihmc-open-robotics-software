@@ -10,6 +10,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
@@ -45,6 +46,21 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    protected void updateJointTransform(RigidBodyTransform jointTransform)
    {
       jointTransform.setRotationAndZeroTranslation(jointRotation);
+   }
+
+   public QuaternionBasics getJointOrientation()
+   {
+      return jointRotation;
+   }
+
+   public FixedFrameVector3DBasics getJointAngularVelocity()
+   {
+      return jointAngularVelocity;
+   }
+
+   public FixedFrameVector3DBasics getJointAngularAcceleration()
+   {
+      return jointAngularAcceleration;
    }
 
    @Override
@@ -290,13 +306,4 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
       SphericalJoint originalSphericalJoint = checkAndGetAsSphericalJoint(originalJoint);
       jointAngularAccelerationDesired.set(originalSphericalJoint.jointAngularAccelerationDesired);
    }
-
-   @Override
-   public void calculateJointStateChecksum(GenericCRC32 checksum)
-   {
-      checksum.update(jointRotation);
-      checksum.update(jointAngularVelocity);
-      checksum.update(jointAngularAcceleration);
-   }
-
 }

@@ -12,7 +12,6 @@ import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
-import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -449,9 +448,6 @@ public abstract interface JointBasics extends CommonJoint
     */
    @Deprecated // TODO
    public abstract void setQddDesired(JointBasics originalJoint);
-
-   @Deprecated // TODO
-   public abstract void calculateJointStateChecksum(GenericCRC32 checksum);
 
    public int hashCode();
 }
