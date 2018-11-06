@@ -67,7 +67,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getJointAcceleration(int rowStart, DenseMatrix64F matrix)
    {
       jointAccelerationDesired.get(rowStart, matrix);
    }

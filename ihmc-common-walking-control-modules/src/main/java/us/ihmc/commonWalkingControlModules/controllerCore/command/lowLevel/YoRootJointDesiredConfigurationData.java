@@ -127,7 +127,7 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
    public void setDesiredAccelerationFromJoint(FloatingInverseDynamicsJoint sixDoFJoint)
    {
       desiredAcceleration.reshape(6, 1);
-      sixDoFJoint.getDesiredAccelerationMatrix(desiredAcceleration, 0);
+      sixDoFJoint.getJointAcceleration(0, desiredAcceleration);
       setDesiredAcceleration(desiredAcceleration);
    }
 

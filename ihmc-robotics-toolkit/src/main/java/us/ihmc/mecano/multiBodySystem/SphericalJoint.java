@@ -80,7 +80,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getJointAcceleration(int rowStart, DenseMatrix64F matrix)
    {
       matrix.set(rowStart + 0, 0, jointAngularAccelerationDesired.getX());
       matrix.set(rowStart + 1, 0, jointAngularAccelerationDesired.getY());
