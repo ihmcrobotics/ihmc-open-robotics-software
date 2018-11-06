@@ -13,7 +13,6 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -181,7 +180,8 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
          YoDouble qd_d_joint = desiredVelocities.get(jointData);
          YoDouble q_d_joint = desiredPositions.get(jointData);
 
-         boolean integrateDesiredAccelerations = jointState.getIntegrateDesiredAccelerations();
+         // FIXME See Jira ticket EOD-965
+         boolean integrateDesiredAccelerations = true; //jointState.getIntegrateDesiredAccelerations();
          // Don't call the listener there, we want to be able to set those both from the controller and SCS.
          doAccelerationIntegrationMap.get(jointData).set(integrateDesiredAccelerations, false);
 
@@ -220,7 +220,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       double currentPosition = jointState.getQ();
       double currentVelocity = jointState.getQd();
 
-      if (jointState.getResetDesiredAccelerationIntegrator())
+      if (lowLevelJointData.pollResetIntegratorsRequest())
       {
          //       qd_d_joint.set(currentVelocity);
          qd_d_joint.set(0.0);
@@ -344,7 +344,8 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
             @Override
             public void notifyOfVariableChange(YoVariable<?> v)
             {
-               jointState.setIntegrateDesiredAccelerations(doAccelerationIntegration.getBooleanValue());
+               // FIXME
+//               jointState.setIntegrateDesiredAccelerations(doAccelerationIntegration.getBooleanValue());
             }
          });
 
@@ -354,24 +355,25 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
          doAccelerationIntegrationMap.put(jointData, doAccelerationIntegration);
       }
 
-      if (runningOnRealRobot)
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            for (LegJointName legJointName : legJointsForIntegratingAcceleration)
-               controllerRobotModel.getLegJoint(robotSide, legJointName).setIntegrateDesiredAccelerations(true);
-
-            for (ArmJointName armJointName : armJointsForIntegratingAcceleration)
-            {
-               OneDoFJoint armJoint = controllerRobotModel.getArmJoint(robotSide, armJointName);
-               if(armJoint!=null)
-                  armJoint.setIntegrateDesiredAccelerations(true);
-            }
-         }
-
-         for (SpineJointName spineJointName : spineJointsForIntegratingAcceleration)
-            controllerRobotModel.getSpineJoint(spineJointName).setIntegrateDesiredAccelerations(true);
-      }
+      // FIXME
+//      if (runningOnRealRobot)
+//      {
+//         for (RobotSide robotSide : RobotSide.values)
+//         {
+//            for (LegJointName legJointName : legJointsForIntegratingAcceleration)
+//               controllerRobotModel.getLegJoint(robotSide, legJointName).setIntegrateDesiredAccelerations(true);
+//
+//            for (ArmJointName armJointName : armJointsForIntegratingAcceleration)
+//            {
+//               OneDoFJoint armJoint = controllerRobotModel.getArmJoint(robotSide, armJointName);
+//               if(armJoint!=null)
+//                  armJoint.setIntegrateDesiredAccelerations(true);
+//            }
+//         }
+//
+//         for (SpineJointName spineJointName : spineJointsForIntegratingAcceleration)
+//            controllerRobotModel.getSpineJoint(spineJointName).setIntegrateDesiredAccelerations(true);
+//      }
    }
 
    @Override

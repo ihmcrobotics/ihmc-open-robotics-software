@@ -101,12 +101,6 @@ public class RevoluteJoint extends OneDoFJoint
       axisToPack.setIncludingFrame(jointAxis);
    }
 
-   @Override
-   public boolean isPassiveJoint()
-   {
-      return false;
-   }
-
    private static interface JointTransformCalculator
    {
       void updateJointTransform(RigidBodyTransform jointTransformToUpdate);

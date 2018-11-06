@@ -328,12 +328,11 @@ public class MessageTools
       return message;
    }
 
-   public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] newJointData,
-                                                                                   boolean useQDesired)
+   public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] newJointData)
    {
       KinematicsToolboxOutputStatus message = new KinematicsToolboxOutputStatus();
       message.setJointNameHash(Arrays.hashCode(newJointData));
-      MessageTools.packDesiredJointState(message, rootJoint, newJointData, useQDesired);
+      MessageTools.packDesiredJointState(message, rootJoint, newJointData);
       return message;
    }
 
@@ -736,7 +735,7 @@ public class MessageTools
    }
 
    public static void packDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingInverseDynamicsJoint rootJoint,
-                                            OneDoFJoint[] newJointData, boolean useQDesired)
+                                            OneDoFJoint[] newJointData)
    {
       int jointNameHash = Arrays.hashCode(newJointData);
 
@@ -745,19 +744,9 @@ public class MessageTools
 
       kinematicsToolboxOutputStatus.getDesiredJointAngles().reset();
 
-      if (useQDesired)
+      for (int i = 0; i < newJointData.length; i++)
       {
-         for (int i = 0; i < newJointData.length; i++)
-         {
-            kinematicsToolboxOutputStatus.getDesiredJointAngles().add((float) newJointData[i].getqDesired());
-         }
-      }
-      else
-      {
-         for (int i = 0; i < newJointData.length; i++)
-         {
-            kinematicsToolboxOutputStatus.getDesiredJointAngles().add((float) newJointData[i].getQ());
-         }
+         kinematicsToolboxOutputStatus.getDesiredJointAngles().add((float) newJointData[i].getQ());
       }
 
       if (rootJoint != null)
@@ -814,8 +803,8 @@ public class MessageTools
     *           {@link #privilegedJointAngles} belongs to. The hash code can be obtained from
     *           {@link OneDoFJoint#hashCode()}. Not modified.
     * @param jointAngles the privileged joint angles. Not modified.
-    * @throws IllegalArgumentException if the lengths of {@code jointAngles} and
-    *            {@code jointHashCodes} are different.
+    * @throws IllegalArgumentException if the lengths of {@code jointAngles} and {@code jointHashCodes}
+    *            are different.
     */
    public static void packPrivilegedRobotConfiguration(KinematicsToolboxConfigurationMessage kinematicsToolboxConfigurationMessage,
                                                        Tuple3DReadOnly rootJointPosition, QuaternionReadOnly rootJointOrientation, int[] jointHashCodes,

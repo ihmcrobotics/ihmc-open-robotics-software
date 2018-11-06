@@ -84,24 +84,6 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
       }
    }
 
-   default void setDesiredPositionFromJoints(OneDoFJoint[] joints)
-   {
-      for (int i = 0; i < joints.length; i++)
-      {
-         OneDoFJoint joint = joints[i];
-         setDesiredJointPosition(joint, joint.getqDesired());
-      }
-   }
-
-   default void setDesiredVelocityFromJoints(OneDoFJoint[] joints)
-   {
-      for (int i = 0; i < joints.length; i++)
-      {
-         OneDoFJoint joint = joints[i];
-         setDesiredJointVelocity(joint, joint.getQdDesired());
-      }
-   }
-
    default void setDesiredAccelerationFromJoints(OneDoFJoint[] joints)
    {
       for (int i = 0; i < joints.length; i++)

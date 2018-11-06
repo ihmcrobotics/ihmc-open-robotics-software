@@ -302,25 +302,10 @@ public class TaskspaceToJointspaceCalculator
       localJoints[0].updateFramesRecursively();
    }
 
-   public void initializeFromDesiredJointAngles()
-   {
-      setLocalBaseFrameToActualAndResetFilters();
-      setLocalJointAnglesToDesiredJointAngles();
-   }
-
    public void initializeFromCurrentJointAngles()
    {
       setLocalBaseFrameToActualAndResetFilters();
       setLocalJointAnglesToCurrentJointAngles();
-   }
-
-   private void setLocalJointAnglesToDesiredJointAngles()
-   {
-      for (int i = 0; i < numberOfDoF; i++)
-      {
-         localJoints[i].setQ(originalJoints[i].getqDesired());
-         localJoints[i].getFrameAfterJoint().update();
-      }
    }
 
    private void setLocalJointAnglesToCurrentJointAngles()
@@ -768,16 +753,6 @@ public class TaskspaceToJointspaceCalculator
    {
       desiredJointVelocitiesToPack.reshape(numberOfDoF, 1);
       desiredJointVelocitiesToPack.set(desiredJointVelocities);
-   }
-
-   public void getDesiredJointAnglesIntoOneDoFJoints(OneDoFJoint[] joints)
-   {
-      ScrewTools.setDesiredJointPositions(joints, desiredJointAngles);
-   }
-
-   public void getDesiredJointVelocitiesIntoOneDoFJoints(OneDoFJoint[] joints)
-   {
-      ScrewTools.setDesiredJointVelocities(joints, desiredJointVelocities);
    }
 
    public void getDesiredJointAccelerationsIntoOneDoFJoints(OneDoFJoint[] joints)

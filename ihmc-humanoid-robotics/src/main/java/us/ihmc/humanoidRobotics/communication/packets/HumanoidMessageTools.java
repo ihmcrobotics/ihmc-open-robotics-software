@@ -1182,8 +1182,7 @@ public class HumanoidMessageTools
 
    public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(FullHumanoidRobotModel fullRobotModel)
    {
-      return MessageTools.createKinematicsToolboxOutputStatus(fullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel),
-                                                              false);
+      return MessageTools.createKinematicsToolboxOutputStatus(fullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
    }
 
    public static HumanoidBehaviorTypePacket createHumanoidBehaviorTypePacket(HumanoidBehaviorType behaviorType)

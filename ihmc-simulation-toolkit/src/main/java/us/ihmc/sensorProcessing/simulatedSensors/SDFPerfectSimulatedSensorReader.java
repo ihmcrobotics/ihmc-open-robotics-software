@@ -285,7 +285,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    @Override
    public boolean isJointEnabled(OneDoFJoint oneDoFJoint)
    {
-      return oneDoFJoint.isEnabled();
+      return true; //oneDoFJoint.isEnabled();
    }
 
    @Override

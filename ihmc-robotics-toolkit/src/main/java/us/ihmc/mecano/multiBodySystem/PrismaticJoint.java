@@ -73,10 +73,4 @@ public class PrismaticJoint extends OneDoFJoint
    {
       axisToPack.setIncludingFrame(jointAxis);
    }
-
-   @Override
-   public boolean isPassiveJoint()
-   {
-      return false;
-   }
 }

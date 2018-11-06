@@ -55,8 +55,6 @@ public class RigidBodyControlManager
 
    private final OneDoFJoint[] jointsToControl;
 
-   private final YoBoolean allJointsEnabled;
-
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final YoBoolean stateSwitched;
 
@@ -135,9 +133,6 @@ public class RigidBodyControlManager
                                                     defaultControlMode);
       this.defaultControlMode.addParameterChangedListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
 
-      allJointsEnabled = new YoBoolean(namePrefix + "AllJointsEnabled", registry);
-      allJointsEnabled.set(true);
-
       stateMachine = setupStateMachine(namePrefix, yoTime);
       parentRegistry.addChild(registry);
    }
@@ -201,8 +196,6 @@ public class RigidBodyControlManager
 
    public void compute()
    {
-      checkForDisabledJoints();
-
       if (stateMachine.getCurrentState().abortState())
          hold();
 
@@ -446,8 +439,9 @@ public class RigidBodyControlManager
 
    public void resetJointIntegrators()
    {
-      for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
-         jointsToControl[jointIdx].resetIntegrator();
+      // FIXME
+//      for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
+//         jointsToControl[jointIdx].resetIntegrator();
    }
 
    private void computeDesiredJointPositions(double[] desiredJointPositionsToPack)
@@ -473,31 +467,6 @@ public class RigidBodyControlManager
    public RigidBodyControlMode getActiveControlMode()
    {
       return stateMachine.getCurrentStateKey();
-   }
-
-   private void checkForDisabledJoints()
-   {
-      boolean isAtLeastOneJointDisabled = checkIfAtLeastOneJointIsDisabled();
-
-      if (isAtLeastOneJointDisabled && allJointsEnabled.getBooleanValue())
-      {
-         holdInJointspace();
-         allJointsEnabled.set(false);
-      }
-      else if (!isAtLeastOneJointDisabled)
-      {
-         allJointsEnabled.set(true);
-      }
-   }
-
-   private boolean checkIfAtLeastOneJointIsDisabled()
-   {
-      for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
-      {
-         if (!jointsToControl[jointIdx].isEnabled())
-            return true;
-      }
-      return false;
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
