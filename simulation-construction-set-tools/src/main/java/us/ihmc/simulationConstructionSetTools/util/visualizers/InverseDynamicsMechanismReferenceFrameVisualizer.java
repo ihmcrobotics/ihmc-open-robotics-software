@@ -7,8 +7,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.RobotController;
 
@@ -18,7 +18,7 @@ public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotCo
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final List<YoGraphicReferenceFrame> yoGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
 
-   public InverseDynamicsMechanismReferenceFrameVisualizer(RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public InverseDynamicsMechanismReferenceFrameVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry,
          double length)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(name);

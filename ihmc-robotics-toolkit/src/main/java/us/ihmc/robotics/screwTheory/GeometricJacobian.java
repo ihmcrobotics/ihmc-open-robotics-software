@@ -6,8 +6,8 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
@@ -18,7 +18,7 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
  * {@link JointBasics}s.
  * <p>
  * To use this tool, one can create an object by using the constructor
- * {@link #GeometricJacobian(RigidBody, RigidBody, ReferenceFrame)}. The Jacobian computed will
+ * {@link #GeometricJacobian(RigidBodyBasics, RigidBodyBasics, ReferenceFrame)}. The Jacobian computed will
  * include all the joints from {@code ancestor} to {@code descendant} and will be expressed in
  * {@code jacobianFrame}. Then the method {@link #compute()} is to be called every time the joint
  * configuration has changed and Jacobian matrix is to be updated. Finally several options are
@@ -122,7 +122,7 @@ public class GeometricJacobian
     *           to the base frame will be expressed.
     * @throws RuntimeException if the joint ordering is incorrect.
     */
-   public GeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
+   public GeometricJacobian(RigidBodyBasics ancestor, RigidBodyBasics descendant, ReferenceFrame jacobianFrame)
    {
       this(ScrewTools.createJointPath(ancestor, descendant), jacobianFrame, true);
    }
@@ -295,7 +295,7 @@ public class GeometricJacobian
     * 
     * @return the base of this Jacobian.
     */
-   public RigidBody getBase()
+   public RigidBodyBasics getBase()
    {
       return joints[0].getPredecessor();
    }
@@ -306,7 +306,7 @@ public class GeometricJacobian
     * 
     * @return the end-effector of this jacobian.
     */
-   public RigidBody getEndEffector()
+   public RigidBodyBasics getEndEffector()
    {
       return joints[joints.length - 1].getSuccessor();
    }

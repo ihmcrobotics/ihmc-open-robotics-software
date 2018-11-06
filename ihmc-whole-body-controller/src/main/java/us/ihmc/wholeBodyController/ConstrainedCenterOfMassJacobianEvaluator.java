@@ -14,8 +14,8 @@ import com.google.common.primitives.Doubles;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -89,7 +89,7 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
          DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialVector.SIZE, SpatialVector.SIZE);
          CommonOps.setIdentity(selectionMatrix);
          constrainedCenterOfMassJacobianCalculator.addConstraint(foot, selectionMatrix);

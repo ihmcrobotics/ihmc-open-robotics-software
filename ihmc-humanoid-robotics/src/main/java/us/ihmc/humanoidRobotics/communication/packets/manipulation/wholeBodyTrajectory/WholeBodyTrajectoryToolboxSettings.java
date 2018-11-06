@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 
 import java.util.Random;
 
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -13,7 +13,7 @@ public class WholeBodyTrajectoryToolboxSettings
    public static Random randomManager = new Random(1);
 
    // TODO : this is useless..?
-   public static ConfigurationSpaceName[] getDefaultExplorationConfiguratSpaces(FullHumanoidRobotModel fullRobotModel, RigidBody rigidBody)
+   public static ConfigurationSpaceName[] getDefaultExplorationConfiguratSpaces(FullHumanoidRobotModel fullRobotModel, RigidBodyBasics rigidBody)
    {
       ConfigurationSpaceName[] configurationSpaces;
 

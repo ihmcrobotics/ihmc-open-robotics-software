@@ -25,10 +25,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationconstructionset.Robot;
@@ -36,6 +33,10 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.FAST})
 public class NewPelvisPoseHistoryCorrectionTest
@@ -102,7 +103,7 @@ public class NewPelvisPoseHistoryCorrectionTest
             transformToParent.set(pelvisTransformInWorldFrame);
          }
       };
-      RigidBody rigidBody = new RigidBody("pelvis", pelvisReferenceFrame);
+      RigidBodyBasics rigidBody = new RigidBody("pelvis", pelvisReferenceFrame);
       sixDofPelvisJoint = new SixDoFJoint("pelvis", rigidBody);
    }
 

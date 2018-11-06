@@ -21,7 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
@@ -74,7 +74,7 @@ public class RigidBodyPositionControlHelper
 
    private final String warningPrefix;
 
-   public RigidBodyPositionControlHelper(String warningPrefix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
+   public RigidBodyPositionControlHelper(String warningPrefix, RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator,
                                          Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
                                          BooleanProvider useBaseFrameForControl, BooleanProvider useWeightFromMessage, YoVariableRegistry registry,
                                          YoGraphicsListRegistry graphicsListRegistry)

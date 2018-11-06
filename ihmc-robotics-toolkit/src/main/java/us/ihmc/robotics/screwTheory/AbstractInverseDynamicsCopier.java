@@ -4,20 +4,20 @@ import java.util.ArrayList;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public abstract class AbstractInverseDynamicsCopier
 {  
    private final ArrayList<ImmutablePair<JointBasics, JointBasics>> jointPairs = new ArrayList<ImmutablePair<JointBasics,JointBasics>>();
    
    
-   public AbstractInverseDynamicsCopier(RigidBody originalBody, RigidBody targetBody)
+   public AbstractInverseDynamicsCopier(RigidBodyBasics originalBody, RigidBodyBasics targetBody)
    {
       setRigidBodies(originalBody, targetBody);
    }
 
-   public void setRigidBodies(RigidBody originalBody, RigidBody targetBody)
+   public void setRigidBodies(RigidBodyBasics originalBody, RigidBodyBasics targetBody)
    {
       jointPairs.clear();
       JointBasics[] originalJoints = ScrewTools.computeSubtreeJoints(originalBody);

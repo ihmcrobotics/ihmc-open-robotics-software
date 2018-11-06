@@ -2,13 +2,13 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.List;
 
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 
 public class TotalMassCalculator
 {
-   public static double computeSubTreeMass(RigidBody rootBody)
+   public static double computeSubTreeMass(RigidBodyBasics rootBody)
    {
       SpatialInertiaBasics inertia = rootBody.getInertia();
       double ret = inertia == null ? 0.0 : inertia.getMass();
@@ -21,7 +21,7 @@ public class TotalMassCalculator
       return ret;
    }
 
-   public static double computeMass(RigidBody[] rigidBodies)
+   public static double computeMass(RigidBodyBasics[] rigidBodies)
    {
       double ret = 0.0;
       for (int i = 0; i < rigidBodies.length; i++)
@@ -31,17 +31,17 @@ public class TotalMassCalculator
       return ret;
    }
 
-   public static double computeMass(Iterable<RigidBody> rigidBodies)
+   public static double computeMass(Iterable<RigidBodyBasics> rigidBodies)
    {
       double ret = 0.0;
-      for (RigidBody rigidBody : rigidBodies)
+      for (RigidBodyBasics rigidBody : rigidBodies)
       {
          ret += rigidBody.getInertia().getMass();
       }
       return ret;
    }
 
-   public static double computeMass(List<RigidBody> rigidBodies)
+   public static double computeMass(List<RigidBodyBasics> rigidBodies)
    {
       double ret = 0.0;
       for (int i = 0; i < rigidBodies.size(); i++)

@@ -9,8 +9,8 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
@@ -21,8 +21,8 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
  * features.
  * <p>
  * The kinematic chain this Jacobian represents is mutable: The base, end-effector, and the Jacobian
- * reference frame can all be set via: {@link #setBase(RigidBody)},
- * {@link #setEndEffector(RigidBody)}, and {@link #setJacobianFrame(ReferenceFrame)}, respectively.
+ * reference frame can all be set via: {@link #setBase(RigidBodyBasics)},
+ * {@link #setEndEffector(RigidBodyBasics)}, and {@link #setJacobianFrame(ReferenceFrame)}, respectively.
  * </p>
  * <p>
  * Finally, this calculator can calculate to what is referred here as convective term. When the
@@ -41,9 +41,9 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 public class GeometricJacobianCalculator
 {
    /** The base is the predecessor of the first joint that the Jacobian considers. */
-   private RigidBody base;
+   private RigidBodyBasics base;
    /** The end-effector is the successor of the last joint that the Jacobian considers. */
-   private RigidBody endEffector;
+   private RigidBodyBasics endEffector;
    private final List<JointBasics> jointsFromBaseToEndEffector = new ArrayList<>();
    private ReferenceFrame jacobianFrame;
 
@@ -110,7 +110,7 @@ public class GeometricJacobianCalculator
     * @param base the new base to use.
     * @param endEffector the new end-effector.
     */
-   public void setKinematicChain(RigidBody base, RigidBody endEffector)
+   public void setKinematicChain(RigidBodyBasics base, RigidBodyBasics endEffector)
    {
       this.base = base;
       this.endEffector = endEffector;
@@ -128,7 +128,7 @@ public class GeometricJacobianCalculator
 
       numberOfDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(base, endEffector);
 
-      RigidBody currentBody = endEffector;
+      RigidBodyBasics currentBody = endEffector;
       int index = jointsFromBaseToEndEffector.size() - 1;
 
       while (currentBody != base)
@@ -282,13 +282,13 @@ public class GeometricJacobianCalculator
       twistOfCurrentBodyRelativeToEndEffector.setToZero(endEffectorFrame, endEffectorFrame, endEffectorFrame);
       biasAcceleration.setToZero(endEffectorFrame, endEffectorFrame, jacobianFrame);
 
-      RigidBody currentBody = endEffector;
+      RigidBodyBasics currentBody = endEffector;
 
       while (currentBody != base)
       {
          JointBasics joint = currentBody.getParentJoint();
          ReferenceFrame currentBodyFrame = currentBody.getBodyFixedFrame();
-         RigidBody predecessor = joint.getPredecessor();
+         RigidBodyBasics predecessor = joint.getPredecessor();
          ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
 
          // This is now the velocity of the current body relative to the end-effector expressed in the current body frame.
@@ -395,7 +395,7 @@ public class GeometricJacobianCalculator
     * 
     * @return the base of the Jacobian.
     */
-   public RigidBody getBase()
+   public RigidBodyBasics getBase()
    {
       return base;
    }
@@ -417,7 +417,7 @@ public class GeometricJacobianCalculator
     * 
     * @return the end-effector of the jacobian.
     */
-   public RigidBody getEndEffector()
+   public RigidBodyBasics getEndEffector()
    {
       return endEffector;
    }
@@ -565,7 +565,7 @@ public class GeometricJacobianCalculator
       StringBuilder builder = new StringBuilder();
       builder.append("Jacobian. jacobianFrame = " + jacobianFrame + ". Joints:\n");
 
-      RigidBody currentBody = endEffector;
+      RigidBodyBasics currentBody = endEffector;
 
       while (currentBody != base)
       {

@@ -51,7 +51,7 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -166,7 +166,7 @@ public class MessageTools
     * 
     * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
     */
-   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBody endEffector)
+   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(endEffector.hashCode());
@@ -188,7 +188,7 @@ public class MessageTools
     * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin should
     *           reach. The data is assumed to be expressed in world frame. Not modified.
     */
-   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBody endEffector, Point3DReadOnly desiredPosition)
+   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, Point3DReadOnly desiredPosition)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(endEffector.hashCode());
@@ -217,7 +217,7 @@ public class MessageTools
     * @param desiredOrientation the orientation that {@code endEffector.getBodyFixedFrame()} should
     *           reach. The data is assumed to be expressed in world frame. Not modified.
     */
-   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBody endEffector, QuaternionReadOnly desiredOrientation)
+   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, QuaternionReadOnly desiredOrientation)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(endEffector.hashCode());
@@ -245,7 +245,7 @@ public class MessageTools
     * @param desiredOrientation the orientation that {@code endEffector.getBodyFixedFrame()} should
     *           reach. The data is assumed to be expressed in world frame. Not modified.
     */
-   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBody endEffector, Point3DReadOnly desiredPosition,
+   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, Point3DReadOnly desiredPosition,
                                                                                            QuaternionReadOnly desiredOrientation)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
@@ -271,7 +271,7 @@ public class MessageTools
     * @param desiredOrientation the orientation that {@code endEffector.getBodyFixedFrame()} should
     *           reach. The data is assumed to be expressed in world frame. Not modified.
     */
-   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBody endEffector, ReferenceFrame controlFrame,
+   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, ReferenceFrame controlFrame,
                                                                                            Point3DReadOnly desiredPosition,
                                                                                            QuaternionReadOnly desiredOrientation)
    {

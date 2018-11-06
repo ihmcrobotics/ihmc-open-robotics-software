@@ -13,6 +13,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.Link;
@@ -24,12 +25,12 @@ public class RobotArm extends Robot
    private static final RobotArmJointParameters[] allJointNames = RobotArmJointParameters.values();
    private final EnumMap<RobotArmJointParameters, PinJoint> robotArmPinJoints = new EnumMap<>(RobotArmJointParameters.class);
    private final EnumMap<RobotArmJointParameters, RevoluteJoint> robotArmRevoluteJoints = new EnumMap<>(RobotArmJointParameters.class);
-   private final EnumMap<RobotArmLinkParameters, RigidBody> robotArmRigidBodies = new EnumMap<>(RobotArmLinkParameters.class);
+   private final EnumMap<RobotArmLinkParameters, RigidBodyBasics> robotArmRigidBodies = new EnumMap<>(RobotArmLinkParameters.class);
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final RigidBodyTransform elevatorFrameTransformToWorld = new RigidBodyTransform(new AxisAngle(), RobotArmJointParameters.getRootJoint().getJointOffset());
    private final ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevatorFrame", worldFrame, elevatorFrameTransformToWorld);
-   private final RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+   private final RigidBodyBasics elevator = new RigidBody("elevator", elevatorFrame);
 
    private final RigidBodyTransform transformFromControlFrameToEndEffectorBodyFixedFrame = new RigidBodyTransform(new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), new Vector3D(0.0, 0.0, -0.08));
 
@@ -65,7 +66,7 @@ public class RobotArm extends Robot
       }
 
       
-      RigidBody parentBody = null;
+      RigidBodyBasics parentBody = null;
       RevoluteJoint parentJoint = new RevoluteJoint(rootJoint.getJointName(false), elevator, rootJoint.getJointAxis());
       robotArmRevoluteJoints.put(rootJoint, parentJoint);
       
@@ -89,7 +90,7 @@ public class RobotArm extends Robot
          robotArmRevoluteJoint.setJointLimitUpper(armJoint.getJointUpperLimit());
       }
 
-      RigidBody endEffector = robotArmRigidBodies.get(RobotArmLinkParameters.getEndEffector());
+      RigidBodyBasics endEffector = robotArmRigidBodies.get(RobotArmLinkParameters.getEndEffector());
       controlFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("controlFrame", endEffector.getBodyFixedFrame(), transformFromControlFrameToEndEffectorBodyFixedFrame);
       jacobian = new GeometricJacobian(elevator, endEffector, robotArmRigidBodies.get(RobotArmLinkParameters.HAND).getBodyFixedFrame());
    }

@@ -6,6 +6,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
@@ -76,7 +77,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
     */
    private boolean isOnline = true;
 
-   public OneDoFJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
+   public OneDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
    {
       super(name, predecessor, transformToParent);
    }

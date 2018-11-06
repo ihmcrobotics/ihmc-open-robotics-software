@@ -55,7 +55,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
@@ -125,8 +125,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       for (RobotSide robotSide : RobotSide.values)
       {
          double trajectoryTime = 1.0;
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
 
          OneDoFJoint[] armOriginal = ScrewTools.createOneDoFJointPath(chest, hand);
          OneDoFJoint[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
@@ -143,7 +143,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             clone.setQ(randomQ);
          }
 
-         RigidBody handClone = armClone[armClone.length - 1].getSuccessor();
+         RigidBodyBasics handClone = armClone[armClone.length - 1].getSuccessor();
          FramePose3D desiredRandomHandPose = new FramePose3D(handClone.getBodyFixedFrame());
          humanoidReferenceFrames.updateFrames();
          desiredRandomHandPose.changeFrame(HumanoidReferenceFrames.getWorldFrame());
@@ -283,7 +283,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       SideDependentList<FrameSE3TrajectoryPoint> lastTrajectoryPoints = new SideDependentList<>();
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      RigidBody chest = fullRobotModel.getChest();
+      RigidBodyBasics chest = fullRobotModel.getChest();
       ReferenceFrame chestFrame = chest.getBodyFixedFrame();
 
       // This test was originally made for Atlas, a robot with a leg length of ~0.8m
@@ -694,7 +694,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
+         RigidBodyBasics chest = fullRobotModel.getChest();
 
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
          FramePoint3D sphereCenter = new FramePoint3D(chestFrame);
@@ -819,7 +819,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
+         RigidBodyBasics chest = fullRobotModel.getChest();
 
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
          FramePoint3D sphereCenter = new FramePoint3D(chestFrame);
@@ -950,8 +950,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    public static FrameQuaternion computeBestOrientationForDesiredPosition(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide,
          FramePoint3D desiredPosition, TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator, int numberOfIterations)
    {
-      RigidBody chest = fullRobotModel.getChest();
-      RigidBody hand = fullRobotModel.getHand(robotSide);
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
       ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
       ReferenceFrame chestFrame = chest.getBodyFixedFrame();
 
@@ -970,8 +970,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
    public static TaskspaceToJointspaceCalculator createTaskspaceToJointspaceCalculator(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide)
    {
-      RigidBody chest = fullRobotModel.getChest();
-      RigidBody hand = fullRobotModel.getHand(robotSide);
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
       ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
       TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator = new TaskspaceToJointspaceCalculator("blop", chest, hand, 0.005, new YoVariableRegistry("Dummy"));
       taskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
@@ -1004,8 +1004,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       for (RobotSide robotSide : RobotSide.values)
       {
          double trajectoryTime = 5.0;
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          String handName = fullRobotModel.getHand(robotSide).getName();
 
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);

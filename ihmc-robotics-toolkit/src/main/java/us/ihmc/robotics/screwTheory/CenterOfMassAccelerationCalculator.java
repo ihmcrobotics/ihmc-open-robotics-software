@@ -3,22 +3,22 @@ package us.ihmc.robotics.screwTheory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class CenterOfMassAccelerationCalculator
 {
    private final FramePoint3D comLocation = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final FrameVector3D linkLinearMomentumDot = new FrameVector3D(ReferenceFrame.getWorldFrame());
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
-   private final RigidBody[] rigidBodies;
-   private final RigidBody base;
+   private final RigidBodyBasics[] rigidBodies;
+   private final RigidBodyBasics base;
 
-   public CenterOfMassAccelerationCalculator(RigidBody rootBody, SpatialAccelerationCalculator spatialAccelerationCalculator)
+   public CenterOfMassAccelerationCalculator(RigidBodyBasics rootBody, SpatialAccelerationCalculator spatialAccelerationCalculator)
    {
       this(rootBody, ScrewTools.computeSupportAndSubtreeSuccessors(rootBody), spatialAccelerationCalculator);
    }
 
-   public CenterOfMassAccelerationCalculator(RigidBody base, RigidBody[] rigidBodies, SpatialAccelerationCalculator spatialAccelerationCalculator)
+   public CenterOfMassAccelerationCalculator(RigidBodyBasics base, RigidBodyBasics[] rigidBodies, SpatialAccelerationCalculator spatialAccelerationCalculator)
    {
       this.spatialAccelerationCalculator = spatialAccelerationCalculator;
       this.rigidBodies = rigidBodies;
@@ -30,7 +30,7 @@ public class CenterOfMassAccelerationCalculator
       boolean firstIteration = true;
       double totalMass = 0.0;
 
-      for (RigidBody rigidBody : rigidBodies)
+      for (RigidBodyBasics rigidBody : rigidBodies)
       {
          double mass = rigidBody.getInertia().getMass();
          rigidBody.getCenterOfMass(comLocation);

@@ -23,6 +23,7 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -48,13 +49,13 @@ public class AtlasRobotConfigurationDataTest
       new IHMCCommunicationKryoNetClassList().registerWithKryo(kryo);
 
       OneDoFJoint[] joints = new OneDoFJoint[31];
-      RigidBody body = new RigidBody("aap", ReferenceFrame.getWorldFrame());
+      RigidBodyBasics body = new RigidBody("aap", ReferenceFrame.getWorldFrame());
       for (int i = 0; i < joints.length; i++)
       {
          joints[i] = new RevoluteJoint("noot", body, new RigidBodyTransform(), new Vector3D(1, 0, 0));
       }
       
-      RigidBody body2 = ScrewTools.addRigidBody("mies", joints[0], new Matrix3D(), 0.0, new RigidBodyTransform());
+      RigidBodyBasics body2 = ScrewTools.addRigidBody("mies", joints[0], new Matrix3D(), 0.0, new RigidBodyTransform());
       IMUDefinition imuSensorDefinitions[] = new IMUDefinition[3];
       for (int i = 0; i < imuSensorDefinitions.length; i++)
       {

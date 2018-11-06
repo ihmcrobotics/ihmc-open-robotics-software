@@ -13,6 +13,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
@@ -31,7 +32,7 @@ public class ProvidedMassMatrixToolRigidBody
 {
    private final YoVariableRegistry registry;
 
-   private final RigidBody toolBody;
+   private final RigidBodyBasics toolBody;
 
    private final ReferenceFrame handFixedFrame;
    private final ReferenceFrame handControlFrame;

@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -66,7 +66,7 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
       estimatorRobotMotionStatusHolder = new RobotMotionStatusHolder();
       estimatorDesiredJointDataHolder = new JointDesiredOutputList(estimatorFullRobotModel.getControllableOneDoFJoints());
 
-      LinkedHashMap<RigidBody, ReferenceFrame> soleFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
+      LinkedHashMap<RigidBodyBasics, ReferenceFrame> soleFrames = new LinkedHashMap<RigidBodyBasics, ReferenceFrame>();
       for(RobotSide robotSide : RobotSide.values)
       {
          soleFrames.put(estimatorFullRobotModel.getFoot(robotSide), estimatorFullRobotModel.getSoleFrame(robotSide));

@@ -36,7 +36,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
@@ -147,8 +147,8 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
          armsJoints.put(robotSide, armJoints);
          int numberOfJoints = ScrewTools.computeDegreesOfFreedom(armJoints);

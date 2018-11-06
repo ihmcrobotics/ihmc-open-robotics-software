@@ -24,9 +24,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MecanoRandomTools;
@@ -51,8 +51,8 @@ public class SpatialAccelerationCalculatorTest
       Random random = new Random(234234L);
       int numberOfJoints = 20;
       List<PrismaticJoint> prismaticJoints = ScrewTestTools.createRandomChainRobotWithPrismaticJoints(numberOfJoints, random);
-      RigidBody randomBody = prismaticJoints.get(random.nextInt(numberOfJoints)).getPredecessor();
-      RigidBody rootBody = ScrewTools.getRootBody(randomBody);
+      RigidBodyBasics randomBody = prismaticJoints.get(random.nextInt(numberOfJoints)).getPredecessor();
+      RigidBodyBasics rootBody = ScrewTools.getRootBody(randomBody);
       boolean doAccelerationTerms = true;
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -80,7 +80,7 @@ public class SpatialAccelerationCalculatorTest
 
          for (PrismaticJoint joint : prismaticJoints)
          {
-            RigidBody body = joint.getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
             SpatialAcceleration actualAcceleration = new SpatialAcceleration();
             spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
@@ -116,8 +116,8 @@ public class SpatialAccelerationCalculatorTest
       Random random = new Random(234234L);
       int numberOfJoints = 20;
       List<RevoluteJoint> revoluteJoints = ScrewTestTools.createRandomChainRobot(numberOfJoints, random);
-      RigidBody randomBody = revoluteJoints.get(random.nextInt(numberOfJoints)).getPredecessor();
-      RigidBody rootBody = ScrewTools.getRootBody(randomBody);
+      RigidBodyBasics randomBody = revoluteJoints.get(random.nextInt(numberOfJoints)).getPredecessor();
+      RigidBodyBasics rootBody = ScrewTools.getRootBody(randomBody);
       boolean doAccelerationTerms = true;
 
       // No velocity
@@ -145,7 +145,7 @@ public class SpatialAccelerationCalculatorTest
 
          for (RevoluteJoint joint : revoluteJoints)
          {
-            RigidBody body = joint.getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
             SpatialAcceleration actualAcceleration = new SpatialAcceleration();
             spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
@@ -192,7 +192,7 @@ public class SpatialAccelerationCalculatorTest
          for (int j = 0; j < revoluteJoints.size(); j++)
          {
             RevoluteJoint joint = revoluteJoints.get(j);
-            RigidBody body = joint.getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
             SpatialAcceleration actualAcceleration = new SpatialAcceleration();
             spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
@@ -236,8 +236,8 @@ public class SpatialAccelerationCalculatorTest
       List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
       List<OneDoFJoint> jointsInFuture = Arrays.asList(ScrewTools.cloneOneDoFJointPath(joints.toArray(new OneDoFJoint[numberOfJoints])));
 
-      RigidBody randomBody = joints.get(random.nextInt(joints.size())).getPredecessor();
-      RigidBody rootBody = ScrewTools.getRootBody(randomBody);
+      RigidBodyBasics randomBody = joints.get(random.nextInt(joints.size())).getPredecessor();
+      RigidBodyBasics rootBody = ScrewTools.getRootBody(randomBody);
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, randomBody);
       TwistCalculator twistCalculatorInFuture = new TwistCalculator(worldFrame, jointsInFuture.get(random.nextInt(joints.size())).getPredecessor());
 
@@ -276,8 +276,8 @@ public class SpatialAccelerationCalculatorTest
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {
             OneDoFJoint joint = joints.get(jointIndex);
-            RigidBody body = joint.getSuccessor();
-            RigidBody bodyInFuture = jointsInFuture.get(jointIndex).getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
+            RigidBodyBasics bodyInFuture = jointsInFuture.get(jointIndex).getSuccessor();
 
             SpatialAcceleration actualAcceleration = new SpatialAcceleration();
             spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
@@ -305,9 +305,9 @@ public class SpatialAccelerationCalculatorTest
       SixDoFJoint floatingJointInFuture = (SixDoFJoint) jointsInFuture.get(0);
       List<RevoluteJoint> revoluteJointsInFuture = ScrewTools.filterJoints(jointsInFuture, RevoluteJoint.class);
 
-      RigidBody randomBody = joints.get(0).getPredecessor();
-      RigidBody randomBodyInFuture = jointsInFuture.get(0).getPredecessor();
-      RigidBody rootBody = ScrewTools.getRootBody(randomBody);
+      RigidBodyBasics randomBody = joints.get(0).getPredecessor();
+      RigidBodyBasics randomBodyInFuture = jointsInFuture.get(0).getPredecessor();
+      RigidBodyBasics rootBody = ScrewTools.getRootBody(randomBody);
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, randomBody);
       TwistCalculator twistCalculatorInFuture = new TwistCalculator(worldFrame, randomBodyInFuture);
 
@@ -356,8 +356,8 @@ public class SpatialAccelerationCalculatorTest
          for (int jointIndex = 0; jointIndex < numberOfRevoluteJoints + 1; jointIndex++)
          {
             JointBasics joint = joints.get(jointIndex);
-            RigidBody body = joint.getSuccessor();
-            RigidBody bodyInFuture = jointsInFuture.get(jointIndex).getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
+            RigidBodyBasics bodyInFuture = jointsInFuture.get(jointIndex).getSuccessor();
             SpatialAcceleration actualAcceleration = new SpatialAcceleration();
             spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
@@ -396,9 +396,9 @@ public class SpatialAccelerationCalculatorTest
       SixDoFJoint floatingJointInFuture = (SixDoFJoint) jointsInFuture.get(0);
       List<RevoluteJoint> revoluteJointsInFuture = ScrewTools.filterJoints(jointsInFuture, RevoluteJoint.class);
 
-      RigidBody randomBody = joints.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor();
-      RigidBody randomBodyInFuture = jointsInFuture.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor();
-      RigidBody rootBody = ScrewTools.getRootBody(randomBody);
+      RigidBodyBasics randomBody = joints.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor();
+      RigidBodyBasics randomBodyInFuture = jointsInFuture.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor();
+      RigidBodyBasics rootBody = ScrewTools.getRootBody(randomBody);
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, randomBody);
       TwistCalculator twistCalculatorInFuture = new TwistCalculator(worldFrame, randomBodyInFuture);
 
@@ -447,8 +447,8 @@ public class SpatialAccelerationCalculatorTest
          for (int jointIndex = 0; jointIndex < numberOfRevoluteJoints + 1; jointIndex++)
          {
             JointBasics joint = joints.get(jointIndex);
-            RigidBody body = joint.getSuccessor();
-            RigidBody bodyInFuture = jointsInFuture.get(jointIndex).getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
+            RigidBodyBasics bodyInFuture = jointsInFuture.get(jointIndex).getSuccessor();
             SpatialAcceleration actualAcceleration = new SpatialAcceleration();
             spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
@@ -459,8 +459,8 @@ public class SpatialAccelerationCalculatorTest
             // Assert relative twist
             for (int baseJointIndex = 0; baseJointIndex < numberOfRevoluteJoints + 1; baseJointIndex++)
             {
-               RigidBody base = joints.get(baseJointIndex).getSuccessor();
-               RigidBody baseInFuture = jointsInFuture.get(baseJointIndex).getSuccessor();
+               RigidBodyBasics base = joints.get(baseJointIndex).getSuccessor();
+               RigidBodyBasics baseInFuture = jointsInFuture.get(baseJointIndex).getSuccessor();
                SpatialAcceleration actualRelativeAcceleration = new SpatialAcceleration();
                spatialAccelerationCalculator.getRelativeAcceleration(base, body, actualRelativeAcceleration);
 
@@ -503,10 +503,10 @@ public class SpatialAccelerationCalculatorTest
       SixDoFJoint floatingJointNoVelocity = (SixDoFJoint) jointsNoVelocity.get(0);
       List<RevoluteJoint> revoluteJointsNoVelocity = ScrewTools.filterJoints(jointsNoVelocity, RevoluteJoint.class);
 
-      RigidBody randomBody = joints.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor();
-      RigidBody randomBodyNoVelocity = jointsNoVelocity.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor();
-      RigidBody rootBody = ScrewTools.getRootBody(randomBody);
-      RigidBody rootBodyNoVelocity = ScrewTools.getRootBody(randomBodyNoVelocity);
+      RigidBodyBasics randomBody = joints.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor();
+      RigidBodyBasics randomBodyNoVelocity = jointsNoVelocity.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor();
+      RigidBodyBasics rootBody = ScrewTools.getRootBody(randomBody);
+      RigidBodyBasics rootBodyNoVelocity = ScrewTools.getRootBody(randomBodyNoVelocity);
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, randomBody);
       TwistCalculator twistCalculatorNoVelocity = new TwistCalculator(worldFrame, randomBodyNoVelocity);
 
@@ -573,8 +573,8 @@ public class SpatialAccelerationCalculatorTest
          for (int jointIndex = 0; jointIndex < numberOfRevoluteJoints + 1; jointIndex++)
          {
             JointBasics joint = joints.get(jointIndex);
-            RigidBody body = joint.getSuccessor();
-            RigidBody bodyNoVelocity = jointsNoVelocity.get(jointIndex).getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
+            RigidBodyBasics bodyNoVelocity = jointsNoVelocity.get(jointIndex).getSuccessor();
             SpatialAcceleration actualAcceleration = new SpatialAcceleration();
             spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
@@ -596,8 +596,8 @@ public class SpatialAccelerationCalculatorTest
             // Assert relative twist
             for (int baseJointIndex = 0; baseJointIndex < numberOfRevoluteJoints + 1; baseJointIndex++)
             {
-               RigidBody base = joints.get(baseJointIndex).getSuccessor();
-               RigidBody baseNoVelocity = jointsNoVelocity.get(baseJointIndex).getSuccessor();
+               RigidBodyBasics base = joints.get(baseJointIndex).getSuccessor();
+               RigidBodyBasics baseNoVelocity = jointsNoVelocity.get(baseJointIndex).getSuccessor();
                SpatialAcceleration actualRelativeAcceleration = new SpatialAcceleration();
                spatialAccelerationCalculator.getRelativeAcceleration(base, body, actualRelativeAcceleration);
 
@@ -620,7 +620,7 @@ public class SpatialAccelerationCalculatorTest
       }
    }
 
-   public static FrameVector3D computeExpectedLinearAccelerationByFiniteDifference(double dt, RigidBody body, RigidBody bodyInFuture,
+   public static FrameVector3D computeExpectedLinearAccelerationByFiniteDifference(double dt, RigidBodyBasics body, RigidBodyBasics bodyInFuture,
                                                                                    TwistCalculator twistCalculator, TwistCalculator twistCalculatorInFuture,
                                                                                    Point3D bodyFixedPoint, SpatialAcceleration rootAcceleration)
    {
@@ -657,8 +657,8 @@ public class SpatialAccelerationCalculatorTest
 
    }
 
-   public static FrameVector3D computeExpectedLinearAccelerationByFiniteDifference(double dt, RigidBody body, RigidBody bodyInFuture, RigidBody base,
-                                                                                   RigidBody baseInFuture, TwistCalculator twistCalculator,
+   public static FrameVector3D computeExpectedLinearAccelerationByFiniteDifference(double dt, RigidBodyBasics body, RigidBodyBasics bodyInFuture, RigidBodyBasics base,
+                                                                                   RigidBodyBasics baseInFuture, TwistCalculator twistCalculator,
                                                                                    TwistCalculator twistCalculatorInFuture, Point3D bodyFixedPoint)
    {
       FrameVector3D pointLinearVelocity = new FrameVector3D();
@@ -678,8 +678,8 @@ public class SpatialAccelerationCalculatorTest
 
    }
 
-   private SpatialAcceleration computeExpectedRelativeAccelerationByFiniteDifference(double dt, RigidBody body, RigidBody bodyInFuture, RigidBody base,
-                                                                                     RigidBody baseInFuture, TwistCalculator twistCalculator,
+   private SpatialAcceleration computeExpectedRelativeAccelerationByFiniteDifference(double dt, RigidBodyBasics body, RigidBodyBasics bodyInFuture, RigidBodyBasics base,
+                                                                                     RigidBodyBasics baseInFuture, TwistCalculator twistCalculator,
                                                                                      TwistCalculator twistCalculatorInFuture,
                                                                                      SpatialAcceleration rootAcceleration)
    {
@@ -699,7 +699,7 @@ public class SpatialAccelerationCalculatorTest
       return expectedAcceleration;
    }
 
-   private static SpatialAcceleration computeExpectedAccelerationByFiniteDifference(double dt, RigidBody body, RigidBody bodyInFuture,
+   private static SpatialAcceleration computeExpectedAccelerationByFiniteDifference(double dt, RigidBodyBasics body, RigidBodyBasics bodyInFuture,
                                                                                     SpatialAcceleration rootAcceleration)
    {
       SpatialAcceleration expectedAcceleration = new SpatialAcceleration(body.getBodyFixedFrame(), worldFrame, body.getBodyFixedFrame());

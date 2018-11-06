@@ -67,7 +67,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.FunctionTrajectory;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -251,7 +251,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       {
          if (robotSide == RobotSide.LEFT)
          {
-            RigidBody hand = fullRobotModel.getHand(robotSide);
+            RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
 
             boolean ccw;
             if (robotSide == RobotSide.RIGHT)
@@ -316,7 +316,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
 
          boolean ccw;
          if (robotSide == RobotSide.RIGHT)
@@ -378,7 +378,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
 
          // orientation is defined
          boolean ccw;
@@ -525,9 +525,9 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             WaypointBasedTrajectoryMessage trajectory = wayPointBasedTrajectoryMessages.get(i);
             RigidBodyExplorationConfigurationMessage explorationMessage = getRigidBodyExplorationConfigurationMessageHasSameHashCode(message.getExplorationConfigurations(),
                                                                                                                                      trajectory);
-            RigidBody rigidBodyOftrajectory = commandConversionHelper.getRigidBody(trajectory.getEndEffectorHashCode());
+            RigidBodyBasics rigidBodyOftrajectory = commandConversionHelper.getRigidBody(trajectory.getEndEffectorHashCode());
 
-            RigidBody rigidBodyOfOutputFullRobotModel = getRigidBodyHasSameName(outputFullRobotModel, rigidBodyOftrajectory);
+            RigidBodyBasics rigidBodyOfOutputFullRobotModel = getRigidBodyHasSameName(outputFullRobotModel, rigidBodyOftrajectory);
 
             if (rigidBodyOfOutputFullRobotModel == null)
             {
@@ -567,11 +567,11 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       }
    }
 
-   private RigidBody getRigidBodyHasSameName(FullHumanoidRobotModel fullRobotModel, RigidBody givenRigidBody)
+   private RigidBodyBasics getRigidBodyHasSameName(FullHumanoidRobotModel fullRobotModel, RigidBodyBasics givenRigidBody)
    {
-      RigidBody rootBody = ScrewTools.getRootBody(fullRobotModel.getElevator());
-      RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
-      for (RigidBody rigidBody : allRigidBodies)
+      RigidBodyBasics rootBody = ScrewTools.getRootBody(fullRobotModel.getElevator());
+      RigidBodyBasics[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
+      for (RigidBodyBasics rigidBody : allRigidBodies)
          if (givenRigidBody.getName().equals(rigidBody.getName()))
             return rigidBody;
       return null;
@@ -607,7 +607,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody hand = desiredFullRobotModel.getHand(robotSide);
+         RigidBodyBasics hand = desiredFullRobotModel.getHand(robotSide);
          KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(hand, desiredPositions.get(robotSide));
          message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
          message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
@@ -637,7 +637,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       {
          Pose3D handPose = new Pose3D();
          handPoses.put(robotSide, handPose);
-         RigidBody hand = desiredFullRobotModel.getHand(robotSide);
+         RigidBodyBasics hand = desiredFullRobotModel.getHand(robotSide);
          RigidBodyTransform transformToWorldFrame = hand.getBodyFixedFrame().getTransformToWorldFrame();
          handPose.set(transformToWorldFrame);
       }
@@ -832,8 +832,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       FullHumanoidRobotModel robot = createFullRobotModelAtInitialConfiguration();
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = robot.getChest();
-         RigidBody hand = robot.getHand(robotSide);
+         RigidBodyBasics chest = robot.getChest();
+         RigidBodyBasics hand = robot.getHand(robotSide);
          Arrays.stream(ScrewTools.createOneDoFJointPath(chest, hand)).forEach(j -> setJointPositionToMidRange(j));
       }
       return robot;

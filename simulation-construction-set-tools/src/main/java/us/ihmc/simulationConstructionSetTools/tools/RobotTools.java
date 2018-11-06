@@ -13,9 +13,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PlanarJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.robotics.robotDescription.Plane;
@@ -255,7 +255,7 @@ public class RobotTools
          throw new RuntimeException("Not implemented yet for joint of the type: " + idJoint.getClass().getSimpleName());
       }
 
-      RigidBody idRigidBody = idJoint.getSuccessor();
+      RigidBodyBasics idRigidBody = idJoint.getSuccessor();
       SpatialInertiaBasics idInertia = idRigidBody.getInertia();
 
       String bodyName = idRigidBody.getName();

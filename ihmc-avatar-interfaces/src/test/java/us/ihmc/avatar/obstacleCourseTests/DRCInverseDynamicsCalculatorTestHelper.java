@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
@@ -491,7 +491,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
             else
                throw new RuntimeException("Force sensor is only supported for OneDegreeOfFreedomJoint.");
 
-            RigidBody rigidBodyToApplyWrenchTo = oneDoFJoint.getSuccessor();
+            RigidBodyBasics rigidBodyToApplyWrenchTo = oneDoFJoint.getSuccessor();
             ReferenceFrame bodyFixedFrame = rigidBodyToApplyWrenchTo.getBodyFixedFrame();
 
             groundContactPointBasedWrenchCalculator.calculate();
@@ -508,7 +508,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
 
          Wrench wrench = new Wrench();
          inverseDynamicsCalculator.getExternalWrench(foot, wrench);
@@ -709,7 +709,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
 
          Wrench wrench = new Wrench();
          inverseDynamicsCalculator.getExternalWrench(foot, wrench);
@@ -738,7 +738,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
          ReferenceFrame bodyFixedFrame = foot.getBodyFixedFrame();
 
          Wrench wrench = new Wrench(bodyFixedFrame, bodyFixedFrame, RandomGeometry.nextVector3D(random, maxFeetExternalTorque),

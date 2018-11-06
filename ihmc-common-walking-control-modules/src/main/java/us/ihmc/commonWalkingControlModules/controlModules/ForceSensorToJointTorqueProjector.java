@@ -6,7 +6,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -27,7 +27,7 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
    private final ArrayList<ImmutablePair<FrameVector3D,YoDouble>> yoTorqueInJoints;
    private final int numberOfJointFromSensor = 2;
 
-   public ForceSensorToJointTorqueProjector(String namePrefix, ForceSensorData forceSensorData, RigidBody sensorLinkBody) 
+   public ForceSensorToJointTorqueProjector(String namePrefix, ForceSensorData forceSensorData, RigidBodyBasics sensorLinkBody) 
    {
       registry = new YoVariableRegistry(namePrefix+getClass().getSimpleName());
 
@@ -35,7 +35,7 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
 
       //ground reaction wrench on joints
       yoTorqueInJoints = new ArrayList<>();
-      RigidBody currentBody = sensorLinkBody;
+      RigidBodyBasics currentBody = sensorLinkBody;
       for(int i=0;i<numberOfJointFromSensor;i++)
       {
          FrameVector3D jAxis = ((OneDoFJoint)currentBody.getParentJoint()).getJointAxis();

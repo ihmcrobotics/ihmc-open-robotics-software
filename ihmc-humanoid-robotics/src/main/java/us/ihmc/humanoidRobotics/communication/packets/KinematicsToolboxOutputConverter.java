@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -87,8 +87,8 @@ public class KinematicsToolboxOutputConverter
 
    public void computeArmTrajectoryMessage(RobotSide robotSide)
    {
-      RigidBody hand = fullRobotModelToUseForConversion.getHand(robotSide);
-      RigidBody chest = fullRobotModelToUseForConversion.getChest();
+      RigidBodyBasics hand = fullRobotModelToUseForConversion.getHand(robotSide);
+      RigidBodyBasics chest = fullRobotModelToUseForConversion.getChest();
       OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
       int numberOfArmJoints = armJoints.length;
       double[] desiredJointPositions = new double[numberOfArmJoints];

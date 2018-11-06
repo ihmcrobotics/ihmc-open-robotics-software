@@ -29,7 +29,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -115,7 +115,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
 
       FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
-      RigidBody chest = fullRobotModel.getChest();
+      RigidBodyBasics chest = fullRobotModel.getChest();
       ReferenceFrame chestControlFrame = chest.getBodyFixedFrame();
       FrameQuaternion initialChestOrientation = new FrameQuaternion(chestControlFrame);
       initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
@@ -278,7 +278,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
 
-      RigidBody chest = drcBehaviorTestHelper.getControllerFullRobotModel().getChest();
+      RigidBodyBasics chest = drcBehaviorTestHelper.getControllerFullRobotModel().getChest();
       ReferenceFrame chestControlFrame = chest.getBodyFixedFrame();
       FrameQuaternion initialChestOrientation = new FrameQuaternion(chestControlFrame);
       initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());

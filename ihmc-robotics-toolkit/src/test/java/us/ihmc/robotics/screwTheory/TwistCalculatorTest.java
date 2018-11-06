@@ -24,9 +24,9 @@ import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
@@ -62,7 +62,7 @@ public class TwistCalculatorTest
 
          for (PrismaticJoint joint : prismaticJoints)
          {
-            RigidBody body = joint.getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
             Twist actualTwist = new Twist();
             twistCalculator.getTwistOfBody(body, actualTwist);
 
@@ -99,7 +99,7 @@ public class TwistCalculatorTest
 
          for (RevoluteJoint joint : revoluteJoints)
          {
-            RigidBody body = joint.getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
             Twist actualTwist = new Twist();
             twistCalculator.getTwistOfBody(body, actualTwist);
 
@@ -136,14 +136,14 @@ public class TwistCalculatorTest
 
          for (PrismaticJoint joint : prismaticJoints)
          {
-            RigidBody body = joint.getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
             Twist actualTwist = new Twist();
             twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
 
-            RigidBody currentBody = body;
+            RigidBodyBasics currentBody = body;
             FrameVector3D cumulatedLinearVelocity = new FrameVector3D(worldFrame);
 
             while (currentBody.getParentJoint() != null)
@@ -180,14 +180,14 @@ public class TwistCalculatorTest
 
          for (RevoluteJoint joint : revoluteJoints)
          {
-            RigidBody body = joint.getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
             Twist actualTwist = new Twist();
             twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
 
-            RigidBody currentBody = body;
+            RigidBodyBasics currentBody = body;
             FrameVector3D cumulatedAngularVelocity = new FrameVector3D(worldFrame);
 
             while (currentBody.getParentJoint() != null)
@@ -242,7 +242,7 @@ public class TwistCalculatorTest
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {
             OneDoFJoint joint = joints.get(jointIndex);
-            RigidBody body = joint.getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
             Twist actualTwist = new Twist();
             twistCalculator.getTwistOfBody(body, actualTwist);
 
@@ -288,7 +288,7 @@ public class TwistCalculatorTest
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {
             OneDoFJoint joint = joints.get(jointIndex);
-            RigidBody body = joint.getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
             Twist actualTwist = new Twist();
             twistCalculator.getTwistOfBody(body, actualTwist);
 
@@ -349,7 +349,7 @@ public class TwistCalculatorTest
          for (int jointIndex = 0; jointIndex < numberOfRevoluteJoints + 1; jointIndex++)
          {
             JointBasics joint = joints.get(jointIndex);
-            RigidBody body = joint.getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
             Twist actualTwist = new Twist();
             twistCalculator.getTwistOfBody(body, actualTwist);
 
@@ -426,7 +426,7 @@ public class TwistCalculatorTest
          for (int jointIndex = 0; jointIndex < numberOfRevoluteJoints + 1; jointIndex++)
          {
             JointBasics joint = joints.get(jointIndex);
-            RigidBody body = joint.getSuccessor();
+            RigidBodyBasics body = joint.getSuccessor();
             Twist actualTwist = new Twist();
             twistCalculator.getTwistOfBody(body, actualTwist);
 
@@ -439,7 +439,7 @@ public class TwistCalculatorTest
             // Assert relative twist
             for (int baseJointIndex = 0; baseJointIndex < numberOfRevoluteJoints + 1; baseJointIndex++)
             {
-               RigidBody base = joints.get(baseJointIndex).getSuccessor();
+               RigidBodyBasics base = joints.get(baseJointIndex).getSuccessor();
                Twist actualRelativeTwist = new Twist();
                twistCalculator.getRelativeTwist(base, body, actualRelativeTwist);
 

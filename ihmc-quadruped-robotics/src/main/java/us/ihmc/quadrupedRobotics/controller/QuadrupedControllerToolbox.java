@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
 import us.ihmc.quadrupedRobotics.controller.toolbox.*;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
@@ -118,7 +118,7 @@ public class QuadrupedControllerToolbox
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          ContactablePlaneBody contactableFoot = contactableFeet.get(robotQuadrant);
-         RigidBody rigidBody = contactableFoot.getRigidBody();
+         RigidBodyBasics rigidBody = contactableFoot.getRigidBody();
          YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getSoleFrame().getName(), rigidBody, contactableFoot.getSoleFrame(),
                                                                     contactableFoot.getContactPoints2d(), coefficientOfFriction, registry);
 

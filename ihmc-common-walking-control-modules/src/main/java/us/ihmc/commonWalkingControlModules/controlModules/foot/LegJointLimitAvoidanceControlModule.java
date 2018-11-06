@@ -16,7 +16,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -47,7 +47,7 @@ public class LegJointLimitAvoidanceControlModule
 
    private final YoDouble percentJointRangeForThreshold;
    private FullHumanoidRobotModel robotModel;
-   private RigidBody base;
+   private RigidBodyBasics base;
    private OneDoFJoint[] robotJoints;
    private OneDoFJoint[] ikJoints;
    private NumericalInverseKinematicsCalculator inverseKinematicsCalculator;
@@ -88,7 +88,7 @@ public class LegJointLimitAvoidanceControlModule
    {
       robotModel = controllerToolbox.getFullRobotModel();
       base = robotModel.getPelvis();
-      RigidBody foot = robotModel.getFoot(robotSide);
+      RigidBodyBasics foot = robotModel.getFoot(robotSide);
       robotJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(base, foot), OneDoFJoint.class);
       ikJoints = ScrewTools.filterJoints(ScrewTools.cloneJointPath(robotJoints), OneDoFJoint.class);
       jacobian = new GeometricJacobian(ikJoints, ikJoints[ikJoints.length - 1].getSuccessor().getBodyFixedFrame());

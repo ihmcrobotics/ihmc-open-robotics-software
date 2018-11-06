@@ -21,8 +21,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -40,7 +40,7 @@ public class WholeBodyControlCoreToolbox
    private final double controlDT;
    private final double gravityZ;
    private final FloatingInverseDynamicsJoint rootJoint;
-   private final RigidBody rootBody;
+   private final RigidBodyBasics rootBody;
    private final ReferenceFrame centerOfMassFrame;
    private final ControllerCoreOptimizationSettings optimizationSettings;
    private FeedbackControllerSettings feedbackControllerSettings = FeedbackControllerSettings.getDefault();
@@ -52,7 +52,7 @@ public class WholeBodyControlCoreToolbox
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
-   private RigidBody vmcMainBody;
+   private RigidBodyBasics vmcMainBody;
 
    private List<? extends ContactablePlaneBody> contactablePlaneBodies;
 
@@ -96,7 +96,7 @@ public class WholeBodyControlCoreToolbox
     * sufficient to run the inverse kinematics module. Not that at the moment this method is empty,
     * it should be called wherever the inverse kinematics module is called in case in the future new
     * parameters are added.
-    * <li>{@link #setupForVirtualModelControlSolver(RigidBody)} to complete the
+    * <li>{@link #setupForVirtualModelControlSolver(RigidBodyBasics)} to complete the
     * parameters necessary and sufficient to run the virtual model control module.
     * </ul>
     * Calling these methods will also notice the {@link WholeBodyControllerCore} at construction
@@ -214,7 +214,7 @@ public class WholeBodyControlCoreToolbox
     * @param contactablePlaneBodies the list of rigid-body which can be used to bear the robot
     *           weight.
     */
-   public void setupForVirtualModelControlSolver(RigidBody vmcMainBody, List<? extends ContactablePlaneBody> contactablePlaneBodies)
+   public void setupForVirtualModelControlSolver(RigidBodyBasics vmcMainBody, List<? extends ContactablePlaneBody> contactablePlaneBodies)
    {
       enableVirtualModelControlModule = true;
       // TODO add tools specific to the virtual model control module here.
@@ -336,12 +336,12 @@ public class WholeBodyControlCoreToolbox
       return rootJoint;
    }
 
-   public RigidBody getRootBody()
+   public RigidBodyBasics getRootBody()
    {
       return rootBody;
    }
 
-   public RigidBody getVirtualModelControlMainBody()
+   public RigidBodyBasics getVirtualModelControlMainBody()
    {
       return vmcMainBody;
    }

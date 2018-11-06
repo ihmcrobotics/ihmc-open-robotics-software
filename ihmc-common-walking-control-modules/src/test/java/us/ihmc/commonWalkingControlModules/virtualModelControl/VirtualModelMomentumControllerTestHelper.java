@@ -17,8 +17,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
@@ -36,7 +36,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class VirtualModelMomentumControllerTestHelper
 {
    static void createVirtualModelMomentumControlTest(SCSRobotFromInverseDynamicsRobotModel robotModel, FullRobotModel controllerModel, ReferenceFrame centerOfMassFrame,
-         List<RigidBody> endEffectors, List<Vector3D> desiredForces, List<Vector3D> desiredTorques, List<ExternalForcePoint> externalForcePoints, SelectionMatrix6D selectionMatrix, SimulationTestingParameters simulationTestingParameters) throws Exception
+         List<RigidBodyBasics> endEffectors, List<Vector3D> desiredForces, List<Vector3D> desiredTorques, List<ExternalForcePoint> externalForcePoints, SelectionMatrix6D selectionMatrix, SimulationTestingParameters simulationTestingParameters) throws Exception
    {
       double simulationDuration = 20.0;
 
@@ -50,7 +50,7 @@ public class VirtualModelMomentumControllerTestHelper
 
       for (int i = 0; i < endEffectors.size(); i++)
       {
-         RigidBody endEffector = endEffectors.get(i);
+         RigidBodyBasics endEffector = endEffectors.get(i);
          ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
 
          FramePose3D desiredEndEffectorPose = new FramePose3D(endEffectorFrame);
@@ -187,12 +187,12 @@ public class VirtualModelMomentumControllerTestHelper
 
       private List<VirtualModelControllerTestHelper.ForcePointController> forcePointControllers = new ArrayList<>();
       private List<YoFixedFrameWrench> yoDesiredWrenches = new ArrayList<>();
-      private List<RigidBody> endEffectors = new ArrayList<>();
+      private List<RigidBodyBasics> endEffectors = new ArrayList<>();
       private final SelectionMatrix6D selectionMatrix;
 
       DummyArmMomentumController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJoint[] controlledJoints,
                                         List<VirtualModelControllerTestHelper.ForcePointController> forcePointControllers,
-                                        VirtualModelMomentumController virtualModelController, List<RigidBody> endEffectors,
+                                        VirtualModelMomentumController virtualModelController, List<RigidBodyBasics> endEffectors,
                                         List<YoFixedFrameWrench> yoDesiredWrenches, SelectionMatrix6D selectionMatrix)
       {
          this.scsRobot = scsRobot;

@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.valkyrieRosControl.XMLJoints.XMLJointWithTorqueOffset;
@@ -171,7 +172,7 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
       ValkyrieTorqueOffsetPrinter printer = new ValkyrieTorqueOffsetPrinter();
       
       List<RevoluteJoint> revoluteJoints = new ArrayList<>();
-      RigidBody rootBody = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      RigidBodyBasics rootBody = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       final Random random = new Random();
       Vector3D[] jointAxes = new Vector3D[random.nextInt(10)];
       for (int i = 0; i < jointAxes.length; i++)

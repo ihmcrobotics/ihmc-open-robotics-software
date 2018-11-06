@@ -17,7 +17,7 @@ import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.GeometryTools;
@@ -49,7 +49,7 @@ public class FootStepPlanner
    private final YoFrameVector3D footScalarFromNominalToBody;
    private final YoFrameVector3D feetOffsetFromBody;
 
-   private final RigidBody pelvis;
+   private final RigidBodyBasics pelvis;
    private final Twist twistToPack = new Twist();
    private FrameVector3D angularVelocity = new FrameVector3D();
    private Vector3D perpindicularToCenterOfMassVelocity = new Vector3D();

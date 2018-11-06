@@ -6,8 +6,8 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 
 public class PassiveRevoluteJoint extends RevoluteJoint
@@ -24,7 +24,7 @@ public class PassiveRevoluteJoint extends RevoluteJoint
     *    2) getTau() should always return a zero because, since the joint is NOT actuated,
     *    there is no torque.
     */
-   public PassiveRevoluteJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis, boolean isPartOfClosedKinematicLoop)
+   public PassiveRevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis, boolean isPartOfClosedKinematicLoop)
    {
       super(name, predecessor, transformToParent, jointAxis);
       this.isPartOfClosedKinematicLoop = isPartOfClosedKinematicLoop;

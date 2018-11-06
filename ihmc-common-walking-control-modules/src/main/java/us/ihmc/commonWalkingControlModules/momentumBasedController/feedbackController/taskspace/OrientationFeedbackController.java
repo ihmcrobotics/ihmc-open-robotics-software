@@ -27,7 +27,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
@@ -109,19 +109,19 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
-   private RigidBody base;
+   private RigidBodyBasics base;
    private ReferenceFrame controlBaseFrame;
    private ReferenceFrame angularGainsFrame;
 
-   private final RigidBody rootBody;
-   private final RigidBody endEffector;
+   private final RigidBodyBasics rootBody;
+   private final RigidBodyBasics endEffector;
    private final MovingReferenceFrame endEffectorFrame;
 
    private final double dt;
    private final boolean isRootBody;
    private final boolean computeIntegralTerm;
 
-   public OrientationFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
+   public OrientationFeedbackController(RigidBodyBasics endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
                                         YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;

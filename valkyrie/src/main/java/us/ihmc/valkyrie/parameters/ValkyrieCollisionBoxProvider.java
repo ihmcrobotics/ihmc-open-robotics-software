@@ -14,7 +14,7 @@ import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionCylinder;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionSphere;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -81,7 +81,7 @@ public class ValkyrieCollisionBoxProvider implements CollisionBoxProvider
          }
 
          { // Wrist
-            RigidBody hand = robotModel.getHand(robotSide);
+            RigidBodyBasics hand = robotModel.getHand(robotSide);
             if (hand != null)
             {
                String jointName = hand.getParentJoint().getName();

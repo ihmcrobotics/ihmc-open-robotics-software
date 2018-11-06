@@ -24,6 +24,7 @@ import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -45,11 +46,11 @@ public class MomentumCalculatorTest
    {
       Random random = new Random(1766L);
 
-      RigidBody elevator = new RigidBody("elevator", world);
+      RigidBodyBasics elevator = new RigidBody("elevator", world);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random);
       jointAxis.normalize();
       PrismaticJoint joint = ScrewTools.addPrismaticJoint("joint", elevator, new Vector3D(), jointAxis);
-      RigidBody body = ScrewTools.addRigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
+      RigidBodyBasics body = ScrewTools.addRigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
 
       joint.setQ(random.nextDouble());
       joint.setQd(random.nextDouble());
@@ -76,13 +77,13 @@ public class MomentumCalculatorTest
    {
       Random random = new Random(1766L);
 
-      RigidBody elevator = new RigidBody("elevator", world);
+      RigidBodyBasics elevator = new RigidBody("elevator", world);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random);
       jointAxis.normalize();
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setIdentity();
       RevoluteJoint joint = ScrewTools.addRevoluteJoint("joint", elevator, transformToParent, jointAxis);
-      RigidBody body = ScrewTools.addRigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
+      RigidBodyBasics body = ScrewTools.addRigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
 
       joint.setQ(random.nextDouble());
       joint.setQd(random.nextDouble());
@@ -114,7 +115,7 @@ public class MomentumCalculatorTest
       Random random = new Random(17679L);
 
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>();
-      RigidBody elevator = new RigidBody("elevator", world);
+      RigidBodyBasics elevator = new RigidBody("elevator", world);
       int nJoints = 10;
       Vector3D[] jointAxes = new Vector3D[nJoints];
       for (int i = 0; i < nJoints; i++)
@@ -154,7 +155,7 @@ public class MomentumCalculatorTest
       assertTrue(norm > epsilon);
    }
 
-   private Momentum computeMomentum(RigidBody elevator, ReferenceFrame frame)
+   private Momentum computeMomentum(RigidBodyBasics elevator, ReferenceFrame frame)
    {
       elevator.updateFramesRecursively();
       MomentumCalculator momentumCalculator = new MomentumCalculator(elevator);

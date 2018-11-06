@@ -9,7 +9,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -46,8 +46,8 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       
       zForceThreshold.set(40.0);
       
-      RigidBody body = robotModel.getRootBody();
-      RigidBody foot = robotModel.getFoot(robotQuadrant);
+      RigidBodyBasics body = robotModel.getRootBody();
+      RigidBodyBasics foot = robotModel.getFoot(robotQuadrant);
       footJacobian = new GeometricJacobian(body, foot, soleFrame);
       
       legOneDoFJoints = robotModel.getLegJointsList(robotQuadrant);

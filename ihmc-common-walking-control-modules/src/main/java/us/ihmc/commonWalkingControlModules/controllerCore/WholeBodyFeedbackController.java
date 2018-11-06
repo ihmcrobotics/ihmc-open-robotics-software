@@ -23,7 +23,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.PointFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -37,9 +37,9 @@ public class WholeBodyFeedbackController
    private final List<FeedbackControllerInterface> allControllers = new ArrayList<>();
 
    private CenterOfMassFeedbackController centerOfMassFeedbackController;
-   private final Map<RigidBody, SpatialFeedbackController> spatialFeedbackControllerMap = new HashMap<>();
-   private final Map<RigidBody, PointFeedbackController> pointFeedbackControllerMap = new HashMap<>();
-   private final Map<RigidBody, OrientationFeedbackController> orientationFeedbackControllerMap = new HashMap<>();
+   private final Map<RigidBodyBasics, SpatialFeedbackController> spatialFeedbackControllerMap = new HashMap<>();
+   private final Map<RigidBodyBasics, PointFeedbackController> pointFeedbackControllerMap = new HashMap<>();
+   private final Map<RigidBodyBasics, OrientationFeedbackController> orientationFeedbackControllerMap = new HashMap<>();
    private final Map<OneDoFJoint, OneDoFJointFeedbackController> oneDoFJointFeedbackControllerMap = new HashMap<>();
 
    private final WholeBodyControlCoreToolbox coreToolbox;
@@ -96,7 +96,7 @@ public class WholeBodyFeedbackController
 
    private void registerSpatialControllers(SpatialFeedbackControlCommand commandExample)
    {
-      RigidBody endEffector = commandExample.getEndEffector();
+      RigidBodyBasics endEffector = commandExample.getEndEffector();
 
       if (spatialFeedbackControllerMap.containsKey(endEffector))
          return;
@@ -108,7 +108,7 @@ public class WholeBodyFeedbackController
 
    private void registerPointControllers(PointFeedbackControlCommand commandExample)
    {
-      RigidBody endEffector = commandExample.getEndEffector();
+      RigidBodyBasics endEffector = commandExample.getEndEffector();
 
       if (pointFeedbackControllerMap.containsKey(endEffector))
          return;
@@ -120,7 +120,7 @@ public class WholeBodyFeedbackController
 
    private void registerOrientationControllers(OrientationFeedbackControlCommand commandExample)
    {
-      RigidBody endEffector = commandExample.getEndEffector();
+      RigidBodyBasics endEffector = commandExample.getEndEffector();
 
       if (orientationFeedbackControllerMap.containsKey(endEffector))
          return;
@@ -283,7 +283,7 @@ public class WholeBodyFeedbackController
 
    private void submitSpatialFeedbackControlCommand(SpatialFeedbackControlCommand feedbackControlCommand)
    {
-      RigidBody endEffector = feedbackControlCommand.getEndEffector();
+      RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       SpatialFeedbackController controller = spatialFeedbackControllerMap.get(endEffector);
       if (controller.isEnabled())
          throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller end-effector: " + endEffector);
@@ -293,7 +293,7 @@ public class WholeBodyFeedbackController
 
    private void submitPointFeedbackControlCommand(PointFeedbackControlCommand feedbackControlCommand)
    {
-      RigidBody endEffector = feedbackControlCommand.getEndEffector();
+      RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       PointFeedbackController controller = pointFeedbackControllerMap.get(endEffector);
       if (controller.isEnabled())
          throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller end-effector: " + endEffector);
@@ -303,7 +303,7 @@ public class WholeBodyFeedbackController
 
    private void submitOrientationFeedbackControlCommand(OrientationFeedbackControlCommand feedbackControlCommand)
    {
-      RigidBody endEffector = feedbackControlCommand.getEndEffector();
+      RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       OrientationFeedbackController controller = orientationFeedbackControllerMap.get(endEffector);
       if (controller.isEnabled())
          throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller end-effector: " + endEffector);

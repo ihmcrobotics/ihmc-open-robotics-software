@@ -22,7 +22,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -221,8 +221,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          }
       });
       
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody chest = fullRobotModel.getChest();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics chest = fullRobotModel.getChest();
       
       double lambdaLeastSquares = 0.0009;
       double tolerance = 1e-8;
@@ -233,8 +233,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          
          GeometricJacobian legJacobian = new GeometricJacobian(pelvis, foot, foot.getBodyFixedFrame());
          GeometricJacobian armJacobian = new GeometricJacobian(chest, hand, hand.getBodyFixedFrame());

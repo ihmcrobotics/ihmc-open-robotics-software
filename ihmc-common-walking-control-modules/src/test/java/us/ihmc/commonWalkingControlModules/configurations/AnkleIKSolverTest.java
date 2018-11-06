@@ -20,6 +20,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -53,13 +54,13 @@ public class AnkleIKSolverTest
       for (int i = 0; i < 1000; i++)
       {
          // Create a random ankle robot with one pitch and one roll joint:
-         RigidBody shin = new RigidBody("Shin", ReferenceFrame.getWorldFrame());
+         RigidBodyBasics shin = new RigidBody("Shin", ReferenceFrame.getWorldFrame());
          Vector3D offset1 = EuclidCoreRandomTools.nextVector3D(random);
          OneDoFJoint anklePitch = ScrewTools.addRevoluteJoint("anklePitch", shin, offset1, new Vector3D(0.0, 1.0, 0.0));
-         RigidBody ankle = ScrewTools.addRigidBody("Ankle", anklePitch, inertia, 1.0, new RigidBodyTransform());
+         RigidBodyBasics ankle = ScrewTools.addRigidBody("Ankle", anklePitch, inertia, 1.0, new RigidBodyTransform());
          Vector3D offset2 = EuclidCoreRandomTools.nextVector3D(random);
          OneDoFJoint ankleRoll = ScrewTools.addRevoluteJoint("ankleRoll", ankle, offset2, new Vector3D(1.0, 0.0, 0.0));
-         RigidBody foot = ScrewTools.addRigidBody("Foot", ankleRoll, inertia, 1.0, new RigidBodyTransform());
+         RigidBodyBasics foot = ScrewTools.addRigidBody("Foot", ankleRoll, inertia, 1.0, new RigidBodyTransform());
 
          // Solve for some random desired values:
          Quaternion desiredOrientation = EuclidCoreRandomTools.nextQuaternion(random, Math.PI / 4.0);

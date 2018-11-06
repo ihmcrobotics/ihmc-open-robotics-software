@@ -2,7 +2,7 @@ package us.ihmc.wholeBodyController.concurrent;
 
 import java.util.Arrays;
 
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
@@ -45,14 +45,14 @@ public class IntermediateEstimatorStateHolder
    private final RawJointSensorDataHolderMapCopier rawDataEstimatorToIntermadiateCopier;
    private final RawJointSensorDataHolderMapCopier rawDataIntermediateToControllerCopier;
 
-   public IntermediateEstimatorStateHolder(FullHumanoidRobotModelFactory fullRobotModelFactory, RigidBody estimatorRootBody, RigidBody controllerRootBody,
+   public IntermediateEstimatorStateHolder(FullHumanoidRobotModelFactory fullRobotModelFactory, RigidBodyBasics estimatorRootBody, RigidBodyBasics controllerRootBody,
          ForceSensorDataHolder estimatorForceSensorDataHolder, ForceSensorDataHolder controllerForceSensorDataHolder,
          CenterOfMassDataHolder estimatorCenterOfMassDataHolder, CenterOfMassDataHolder controllerCenterOfMassDataHolder,
          ContactSensorHolder estimatorContactSensorHolder, ContactSensorHolder controllerContactSensorHolder,
          RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap, RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap)
    {
       FullHumanoidRobotModel intermediateModel = fullRobotModelFactory.createFullRobotModel();
-      RigidBody intermediateRootBody = intermediateModel.getElevator();
+      RigidBodyBasics intermediateRootBody = intermediateModel.getElevator();
 
       estimatorChecksum = new InverseDynamicsJointStateChecksum(estimatorRootBody, estimatorChecksumCalculator);
       controllerChecksum = new InverseDynamicsJointStateChecksum(controllerRootBody, controllerChecksumCalculator);
@@ -145,8 +145,8 @@ public class IntermediateEstimatorStateHolder
    {
 
       private final FullHumanoidRobotModelFactory fullRobotModelFactory;
-      private final RigidBody estimatorRootJoint;
-      private final RigidBody controllerRootJoint;
+      private final RigidBodyBasics estimatorRootJoint;
+      private final RigidBodyBasics controllerRootJoint;
 
       private final ForceSensorDataHolder estimatorForceSensorDataHolder;
       private final ForceSensorDataHolder controllerForceSensorDataHolder;
@@ -161,7 +161,7 @@ public class IntermediateEstimatorStateHolder
       private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
 
 
-      public Builder(FullHumanoidRobotModelFactory fullRobotModelFactory, RigidBody estimatorRootJoint, RigidBody controllerRootJoint,
+      public Builder(FullHumanoidRobotModelFactory fullRobotModelFactory, RigidBodyBasics estimatorRootJoint, RigidBodyBasics controllerRootJoint,
             ForceSensorDataHolder estimatorForceSensorDataHolder, ForceSensorDataHolder controllerForceSensorDataHolder,
             CenterOfMassDataHolder estimatorCenterOfMassDataHolder, CenterOfMassDataHolder controllerCenterOfMassDataHolder,
             ContactSensorHolder estimatorContactSensorHolder, ContactSensorHolder controllerContactSensorHolder,

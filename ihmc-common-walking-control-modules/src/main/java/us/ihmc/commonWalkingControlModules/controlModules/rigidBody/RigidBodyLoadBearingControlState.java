@@ -23,7 +23,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
@@ -90,7 +90,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private Vector3DReadOnly taskspaceAngularWeight;
    private Vector3DReadOnly taskspaceLinearWeight;
 
-   public RigidBodyLoadBearingControlState(RigidBody bodyToControl, ContactablePlaneBody contactableBody, RigidBody elevator, YoDouble yoTime,
+   public RigidBodyLoadBearingControlState(RigidBodyBasics bodyToControl, ContactablePlaneBody contactableBody, RigidBodyBasics elevator, YoDouble yoTime,
          RigidBodyJointControlHelper jointControlHelper, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.LOADBEARING, bodyToControl.getName(), yoTime, parentRegistry);

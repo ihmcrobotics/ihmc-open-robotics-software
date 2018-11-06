@@ -35,7 +35,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -225,7 +225,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          for (RobotSide robotSide : RobotSide.values)
          {
             randomizeArmJointPositions(random, robotSide, randomizedFullRobotModel, 0.6);
-            RigidBody hand = randomizedFullRobotModel.getHand(robotSide);
+            RigidBodyBasics hand = randomizedFullRobotModel.getHand(robotSide);
             FramePoint3D desiredPosition = new FramePoint3D(hand.getBodyFixedFrame());
             desiredPosition.changeFrame(worldFrame);
             KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(hand, desiredPosition);
@@ -338,7 +338,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
 
       int numberOfTests = 30;
 
-      RigidBody[] bodiesToControl = {
+      RigidBodyBasics[] bodiesToControl = {
             randomizedFullRobotModel.getChest(),
             randomizedFullRobotModel.getHand(RobotSide.LEFT),
             randomizedFullRobotModel.getHand(RobotSide.RIGHT),
@@ -357,7 +357,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          randomizedFullRobotModel.getRootJoint().setPositionAndRotation(transformFromRootJointToWorldFrame);
          randomizedFullRobotModel.updateFrames();
 
-         for (RigidBody rigidBody : bodiesToControl)
+         for (RigidBodyBasics rigidBody : bodiesToControl)
          {
             FramePoint3D desiredPosition = new FramePoint3D(rigidBody.getBodyFixedFrame());
             desiredPosition.changeFrame(worldFrame);
@@ -437,17 +437,17 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
 
    private void randomizeArmJointPositions(Random random, RobotSide robotSide, FullHumanoidRobotModel robotModelToModify, double percentOfMotionRangeAllowed)
    {
-      RigidBody chest = robotModelToModify.getChest();
-      RigidBody hand = robotModelToModify.getHand(robotSide);
+      RigidBodyBasics chest = robotModelToModify.getChest();
+      RigidBodyBasics hand = robotModelToModify.getHand(robotSide);
       randomizeKinematicsChainPositions(random, chest, hand, percentOfMotionRangeAllowed);
    }
 
-   private void randomizeKinematicsChainPositions(Random random, RigidBody base, RigidBody body)
+   private void randomizeKinematicsChainPositions(Random random, RigidBodyBasics base, RigidBodyBasics body)
    {
       randomizeKinematicsChainPositions(random, base, body, 1.0);
    }
 
-   private void randomizeKinematicsChainPositions(Random random, RigidBody base, RigidBody body, double percentOfMotionRangeAllowed)
+   private void randomizeKinematicsChainPositions(Random random, RigidBodyBasics base, RigidBodyBasics body, double percentOfMotionRangeAllowed)
    {
       percentOfMotionRangeAllowed = MathTools.clamp(percentOfMotionRangeAllowed, 0.0, 1.0);
 

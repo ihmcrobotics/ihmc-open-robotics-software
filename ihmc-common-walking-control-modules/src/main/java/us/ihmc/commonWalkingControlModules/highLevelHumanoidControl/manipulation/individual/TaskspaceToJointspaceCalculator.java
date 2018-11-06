@@ -17,7 +17,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
@@ -133,7 +133,7 @@ public class TaskspaceToJointspaceCalculator
 
    private final double controlDT;
 
-   public TaskspaceToJointspaceCalculator(String namePrefix, RigidBody base, RigidBody endEffector, double controlDT, YoVariableRegistry parentRegistry)
+   public TaskspaceToJointspaceCalculator(String namePrefix, RigidBodyBasics base, RigidBodyBasics endEffector, double controlDT, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.controlDT = controlDT;
@@ -240,9 +240,9 @@ public class TaskspaceToJointspaceCalculator
       for (int i = 0; i < numberOfDoF; i++)
       {
          OneDoFJoint originalJoint = originalJoints[i];
-         RigidBody originalBody = originalJoint.getSuccessor();
+         RigidBodyBasics originalBody = originalJoint.getSuccessor();
          OneDoFJoint localJoint = localJoints[i];
-         RigidBody localBody = localJoint.getSuccessor();
+         RigidBodyBasics localBody = localJoint.getSuccessor();
 
          originalToLocalFramesMap.put(originalJoint.getFrameAfterJoint(), localJoint.getFrameAfterJoint());
          originalToLocalFramesMap.put(originalJoint.getFrameBeforeJoint(), localJoint.getFrameBeforeJoint());

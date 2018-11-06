@@ -28,7 +28,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
@@ -76,8 +76,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       for (RobotSide robotSide : RobotSide.values)
       {
          double trajectoryTime = 0.5;
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
          int numberOfJoints = ScrewTools.computeDegreesOfFreedom(armJoints);
          double[] desiredJointPositions = generateRandomJointPositions(random, armJoints);
@@ -134,8 +134,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
          armsJoints.put(robotSide, armJoints);
 
@@ -206,8 +206,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       RobotSide robotSide = RobotSide.LEFT;
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      RigidBody chest = fullRobotModel.getChest();
-      RigidBody hand = fullRobotModel.getHand(robotSide);
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
       OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
       int numberOfJoints = ScrewTools.computeDegreesOfFreedom(ScrewTools.createOneDoFJointPath(chest, hand));
 
@@ -288,8 +288,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       long id = 1264L;
       RobotSide robotSide = RobotSide.LEFT;
 
-      RigidBody chest = fullRobotModel.getChest();
-      RigidBody hand = fullRobotModel.getHand(robotSide);
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
       armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
       int numberOfJoints = ScrewTools.computeDegreesOfFreedom(armJoints);
 
@@ -414,8 +414,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
          armsJoints.put(robotSide, armJoints);
          int numberOfJoints = ScrewTools.computeDegreesOfFreedom(armJoints);
@@ -528,8 +528,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
          armsJoints.put(robotSide, armJoints);
          int numberOfJoints = ScrewTools.computeDegreesOfFreedom(armJoints);
@@ -651,8 +651,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       for (RobotSide robotSide : RobotSide.values)
       {
          double trajectoryTime = 1.0;
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
          int numberOfJoints = armJoints.length;
          double[] desiredJointPositions = new double[numberOfJoints];

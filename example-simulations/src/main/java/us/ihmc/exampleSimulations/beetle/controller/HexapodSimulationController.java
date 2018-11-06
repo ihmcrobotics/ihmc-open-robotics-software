@@ -24,8 +24,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
@@ -55,7 +55,7 @@ public class HexapodSimulationController implements RobotController
 
    private final SDFPerfectSimulatedSensorReader sensorReader;
    private final PerfectSimulatedOutputWriter outputWriter;
-   private final SegmentDependentList<RobotSextant, RigidBody> footRigidBodies = new SegmentDependentList<>(RobotSextant.class);
+   private final SegmentDependentList<RobotSextant, RigidBodyBasics> footRigidBodies = new SegmentDependentList<>(RobotSextant.class);
    private final SegmentDependentList<RobotSextant, SimulatedPlaneContactStateUpdater> contactStateUpdaters = new SegmentDependentList<>(RobotSextant.class);
 
    private final FullRobotModel fullRobotModel;
@@ -102,7 +102,7 @@ public class HexapodSimulationController implements RobotController
       RhinoBeetleJointNameMapAndContactDefinition jointMap = new RhinoBeetleJointNameMapAndContactDefinition();
       for (RobotSextant robotSextant : RobotSextant.values)
       {
-         RigidBody endEffector = fullRobotModel.getEndEffector(robotSextant);
+         RigidBodyBasics endEffector = fullRobotModel.getEndEffector(robotSextant);
          footRigidBodies.set(robotSextant, endEffector);
 
          String jointNameBeforeFoot = jointMap.getJointNameBeforeFoot(robotSextant);
@@ -137,12 +137,12 @@ public class HexapodSimulationController implements RobotController
 
       //Rigid Bodies
       List<ContactablePlaneBody> footContactableBodies = new ArrayList<>();
-      RigidBody[] controlledBodies = new RigidBody[7];
+      RigidBodyBasics[] controlledBodies = new RigidBodyBasics[7];
 
       int i = 0;
       for (RobotSextant robotSextant : RobotSextant.values)
       {
-         RigidBody endEffector = fullRobotModel.getEndEffector(robotSextant);
+         RigidBodyBasics endEffector = fullRobotModel.getEndEffector(robotSextant);
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSextant);
          ;
          ListOfPointsContactablePlaneBody footContactableBody = new ListOfPointsContactablePlaneBody(endEffector, footFrame, contactPointsInSoleFrame);

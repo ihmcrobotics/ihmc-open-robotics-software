@@ -67,7 +67,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
@@ -441,8 +441,8 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
 
          if (hand == null)
             continue;
@@ -455,8 +455,8 @@ public class DiagnosticBehavior extends AbstractBehavior
          double jointSign = -Math.signum(elbowJoint.getJointLimitLower() + elbowJoint.getJointLimitUpper());
          elbowJointSign.put(robotSide, jointSign);
 
-         RigidBody upperArmBody = elbowJoint.getPredecessor();
-         RigidBody lowerArmBody = elbowJoint.getSuccessor();
+         RigidBodyBasics upperArmBody = elbowJoint.getPredecessor();
+         RigidBodyBasics lowerArmBody = elbowJoint.getSuccessor();
 
          upperArmsFrames.put(robotSide, upperArmBody.getBodyFixedFrame());
          lowerArmsFrames.put(robotSide, lowerArmBody.getBodyFixedFrame());

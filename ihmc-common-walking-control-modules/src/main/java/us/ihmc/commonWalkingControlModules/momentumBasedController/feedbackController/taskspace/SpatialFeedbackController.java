@@ -28,7 +28,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
@@ -127,20 +127,20 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
-   private final RigidBody rootBody;
-   private RigidBody base;
+   private final RigidBodyBasics rootBody;
+   private RigidBodyBasics base;
    private ReferenceFrame controlBaseFrame;
    private ReferenceFrame angularGainsFrame;
    private ReferenceFrame linearGainsFrame;
 
-   private final RigidBody endEffector;
+   private final RigidBodyBasics endEffector;
    private final YoSE3OffsetFrame controlFrame;
 
    private final double dt;
    private final boolean isRootBody;
    private final boolean computeIntegralTerm;
 
-   public SpatialFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
+   public SpatialFeedbackController(RigidBodyBasics endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
                                     YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;

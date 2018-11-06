@@ -10,7 +10,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
@@ -20,7 +20,7 @@ public class WaypointBasedTrajectoryCommand
    /** This is the unique hash code of the end-effector to be solved for. */
    private int endEffectorHashCode;
    /** This is the end-effector to be solved for. */
-   private RigidBody endEffector;
+   private RigidBodyBasics endEffector;
 
    private final TDoubleArrayList waypointTimes = new TDoubleArrayList();
    private final RecyclingArrayList<Pose3D> waypoints = new RecyclingArrayList<>(Pose3D.class);
@@ -70,7 +70,7 @@ public class WaypointBasedTrajectoryCommand
    }
 
    @Override
-   public void set(WaypointBasedTrajectoryMessage message, Map<Integer, RigidBody> rigidBodyNamedBasedHashMap,
+   public void set(WaypointBasedTrajectoryMessage message, Map<Integer, RigidBodyBasics> rigidBodyNamedBasedHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       clear();
@@ -98,7 +98,7 @@ public class WaypointBasedTrajectoryCommand
       weight = message.getWeight();
    }
 
-   public RigidBody getEndEffector()
+   public RigidBodyBasics getEndEffector()
    {
       return endEffector;
    }

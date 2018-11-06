@@ -37,8 +37,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -221,7 +221,7 @@ public class HighLevelHumanoidControllerToolbox
       this.feet = feet;
       this.contactableBodies = contactableBodies;
 
-      RigidBody elevator = fullRobotModel.getElevator();
+      RigidBodyBasics elevator = fullRobotModel.getElevator();
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
       desiredCoPAlpha = new YoDouble("desiredCoPAlpha", registry);
@@ -248,7 +248,7 @@ public class HighLevelHumanoidControllerToolbox
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactableFoot contactableFoot = feet.get(robotSide);
-         RigidBody rigidBody = contactableFoot.getRigidBody();
+         RigidBodyBasics rigidBody = contactableFoot.getRigidBody();
          YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getSoleFrame().getName(), rigidBody, contactableFoot.getSoleFrame(),
                                                                     contactableFoot.getContactPoints2d(), coefficientOfFriction, registry);
 
@@ -315,7 +315,7 @@ public class HighLevelHumanoidControllerToolbox
          yoCoPError.put(robotSide,
                         new YoFrameVector2D(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getSoleFrame(), registry));
 
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          if (hand != null)
          {
             handWrenches.put(robotSide, new Wrench());
@@ -346,7 +346,7 @@ public class HighLevelHumanoidControllerToolbox
          {
             ForceSensorDataReadOnly wristForceSensor = wristForceSensors.get(robotSide);
             ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
-            RigidBody measurementLink = wristForceSensor.getMeasurementLink();
+            RigidBodyBasics measurementLink = wristForceSensor.getMeasurementLink();
             wristForceSensorMeasurementFrames.put(robotSide, measurementFrame);
 
             String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
@@ -356,7 +356,7 @@ public class HighLevelHumanoidControllerToolbox
             wristForcesHandWeightCancelled.put(robotSide, new YoFrameVector3D(namePrefix + "ForceHandWeightCancelled", measurementFrame, registry));
             wristTorquesHandWeightCancelled.put(robotSide, new YoFrameVector3D(namePrefix + "TorqueHandWeightCancelled", measurementFrame, registry));
 
-            RigidBody[] handBodies = ScrewTools.computeRigidBodiesAfterThisJoint(measurementLink.getParentJoint());
+            RigidBodyBasics[] handBodies = ScrewTools.computeRigidBodiesAfterThisJoint(measurementLink.getParentJoint());
             CenterOfMassReferenceFrame handCoMFrame = new CenterOfMassReferenceFrame(sidePrefix + "HandCoMFrame", measurementFrame, handBodies);
             handCenterOfMassFrames.put(robotSide, handCoMFrame);
             YoDouble handMass = new YoDouble(sidePrefix + "HandTotalMass", registry);
@@ -414,7 +414,7 @@ public class HighLevelHumanoidControllerToolbox
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          if (hand != null)
          {
             List<JointBasics> fingerJoints = Arrays.asList(ScrewTools.computeSubtreeJoints(hand));
@@ -877,7 +877,7 @@ public class HighLevelHumanoidControllerToolbox
       return contactableBodies;
    }
 
-   public ContactablePlaneBody getContactableBody(RigidBody body)
+   public ContactablePlaneBody getContactableBody(RigidBodyBasics body)
    {
       for (ContactablePlaneBody contactableBody : contactableBodies)
          if (contactableBody.getRigidBody().getName().equals(body.getName()))

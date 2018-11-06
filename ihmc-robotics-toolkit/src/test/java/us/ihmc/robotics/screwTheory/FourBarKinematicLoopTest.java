@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -29,9 +30,9 @@ public class FourBarKinematicLoopTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final RigidBody elevator = new RigidBody("elevator", worldFrame);
+   private final RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
 
-   private RigidBody rigidBodyAB, rigidBodyBC, rigidBodyCD, rigidBodyDA;
+   private RigidBodyBasics rigidBodyAB, rigidBodyBC, rigidBodyCD, rigidBodyDA;
    private RevoluteJoint masterJointA;
    private PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD;
    private FourBarKinematicLoop fourBarKinematicLoop;
@@ -880,7 +881,7 @@ public class FourBarKinematicLoopTest
       passiveJointD = ScrewTools.addPassiveRevoluteJoint("jointD", rigidBodyCD, jointCtoD, jointAxisD, true);
       rigidBodyDA = createAndAttachCylinderRB("rigidBodyCD", passiveJointD);
 
-      RigidBody outputBody;
+      RigidBodyBasics outputBody;
       switch(outputJointIndex)
       {
       case 1:
@@ -954,7 +955,7 @@ public class FourBarKinematicLoopTest
    }
 
    // the RigidBodies are independent of the calculations done by FourBarKinematicLoop, so this suffices to make all the RigidBodies
-   private static RigidBody createAndAttachCylinderRB(String name, RevoluteJoint parentJoint)
+   private static RigidBodyBasics createAndAttachCylinderRB(String name, RevoluteJoint parentJoint)
    {
       Matrix3D inertiaCylinder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(1.0, 1.0, 1.0, Axis.Z);
       return ScrewTools.addRigidBody(name, parentJoint, inertiaCylinder, 1.0, new Vector3D());

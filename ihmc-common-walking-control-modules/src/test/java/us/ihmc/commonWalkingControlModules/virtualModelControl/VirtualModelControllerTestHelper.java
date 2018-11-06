@@ -32,6 +32,7 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
@@ -110,7 +111,7 @@ public class VirtualModelControllerTestHelper
    private static final Random random = new Random(100L);
 
    static void createVirtualModelControlTest(SCSRobotFromInverseDynamicsRobotModel robotModel, FullRobotModel controllerModel, ReferenceFrame centerOfMassFrame,
-         List<RigidBody> endEffectors, List<Vector3D> desiredForces, List<Vector3D> desiredTorques, List<ExternalForcePoint> externalForcePoints, DenseMatrix64F selectionMatrix, SimulationTestingParameters simulationTestingParameters) throws Exception
+         List<RigidBodyBasics> endEffectors, List<Vector3D> desiredForces, List<Vector3D> desiredTorques, List<ExternalForcePoint> externalForcePoints, DenseMatrix64F selectionMatrix, SimulationTestingParameters simulationTestingParameters) throws Exception
    {
       double simulationDuration = 20.0;
 
@@ -125,7 +126,7 @@ public class VirtualModelControllerTestHelper
 
       for (int i = 0; i < endEffectors.size(); i++)
       {
-         RigidBody endEffector = endEffectors.get(i);
+         RigidBodyBasics endEffector = endEffectors.get(i);
          ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
 
          FramePose3D desiredEndEffectorPose = new FramePose3D(endEffectorFrame);
@@ -217,7 +218,7 @@ public class VirtualModelControllerTestHelper
       RobotLegs robotLeg = new RobotLegs("robotLegs");
       robotLeg.setGravity(gravity);
 
-      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      RigidBodyBasics elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
 
       FloatingJoint floatingJoint = new FloatingJoint("pelvis", new Vector3D(), robotLeg);
       robotLeg.addRootJoint(floatingJoint);
@@ -225,7 +226,7 @@ public class VirtualModelControllerTestHelper
 
       Link pelvisLink = pelvis();
       floatingJoint.setLink(pelvisLink);
-      RigidBody pelvisBody = copyLinkAsRigidBody(pelvisLink, rootJoint, "pelvis");
+      RigidBodyBasics pelvisBody = copyLinkAsRigidBody(pelvisLink, rootJoint, "pelvis");
 
       Vector3D leftHipYawOffset = new Vector3D(0.0, HIP_WIDTH, 0.0);
       Vector3D rightHipYawOffset = new Vector3D(0.0, -HIP_WIDTH, 0.0);
@@ -245,8 +246,8 @@ public class VirtualModelControllerTestHelper
       RevoluteJoint r_leg_hpz = ScrewTools.addRevoluteJoint("r_leg_hpz", pelvisBody, rightHipYawOffset, Z);
       l_leg_hpz.setQ(l_hip_yaw.getQYoVariable().getDoubleValue());
       r_leg_hpz.setQ(r_hip_yaw.getQYoVariable().getDoubleValue());
-      RigidBody leftHipDifferentialBody = copyLinkAsRigidBody(l_hip_differential, l_leg_hpz, "l_hip_differential");
-      RigidBody rightHipDifferentialBody = copyLinkAsRigidBody(r_hip_differential, r_leg_hpz, "r_hip_differential");
+      RigidBodyBasics leftHipDifferentialBody = copyLinkAsRigidBody(l_hip_differential, l_leg_hpz, "l_hip_differential");
+      RigidBodyBasics rightHipDifferentialBody = copyLinkAsRigidBody(r_hip_differential, r_leg_hpz, "r_hip_differential");
 
       Vector3D leftHipRollOffset = new Vector3D();
       Vector3D rightHipRollOffset = new Vector3D();
@@ -266,8 +267,8 @@ public class VirtualModelControllerTestHelper
       RevoluteJoint r_leg_hpx = ScrewTools.addRevoluteJoint("r_leg_hpx", rightHipDifferentialBody, rightHipRollOffset, X);
       l_leg_hpx.setQ(l_hip_roll.getQYoVariable().getDoubleValue());
       r_leg_hpx.setQ(r_hip_roll.getQYoVariable().getDoubleValue());
-      RigidBody leftHipDifferentialBody2 = copyLinkAsRigidBody(l_hip_differential2, l_leg_hpx, "l_hip_differential");
-      RigidBody rightHipDifferentialBody2 = copyLinkAsRigidBody(r_hip_differential2, r_leg_hpx, "r_hip_differential");
+      RigidBodyBasics leftHipDifferentialBody2 = copyLinkAsRigidBody(l_hip_differential2, l_leg_hpx, "l_hip_differential");
+      RigidBodyBasics rightHipDifferentialBody2 = copyLinkAsRigidBody(r_hip_differential2, r_leg_hpx, "r_hip_differential");
 
       Vector3D leftHipPitchOffset = new Vector3D();
       Vector3D rightHipPitchOffset = new Vector3D();
@@ -287,8 +288,8 @@ public class VirtualModelControllerTestHelper
       RevoluteJoint r_leg_hpy = ScrewTools.addRevoluteJoint("r_leg_hpy", rightHipDifferentialBody2, rightHipPitchOffset, Y);
       l_leg_hpy.setQ(l_hip_pitch.getQYoVariable().getDoubleValue());
       r_leg_hpy.setQ(r_hip_pitch.getQYoVariable().getDoubleValue());
-      RigidBody leftThighBody = copyLinkAsRigidBody(leftThigh, l_leg_hpy, "l_thigh");
-      RigidBody rightThighBody = copyLinkAsRigidBody(rightThigh, r_leg_hpy, "r_thigh");
+      RigidBodyBasics leftThighBody = copyLinkAsRigidBody(leftThigh, l_leg_hpy, "l_thigh");
+      RigidBodyBasics rightThighBody = copyLinkAsRigidBody(rightThigh, r_leg_hpy, "r_thigh");
 
       Vector3D leftKneePitchOffset = new Vector3D(0.0, 0.0, -THIGH_LENGTH);
       Vector3D rightKneePitchOffset = new Vector3D(0.0, 0.0, -THIGH_LENGTH);
@@ -308,8 +309,8 @@ public class VirtualModelControllerTestHelper
       RevoluteJoint r_leg_kny = ScrewTools.addRevoluteJoint("r_leg_kny", rightThighBody, rightKneePitchOffset, Y);
       l_leg_kny.setQ(l_knee_pitch.getQYoVariable().getDoubleValue());
       r_leg_kny.setQ(r_knee_pitch.getQYoVariable().getDoubleValue());
-      RigidBody leftShinBody = copyLinkAsRigidBody(l_shin, l_leg_kny, "l_shin");
-      RigidBody rightShinBody = copyLinkAsRigidBody(r_shin, r_leg_kny, "r_shin");
+      RigidBodyBasics leftShinBody = copyLinkAsRigidBody(l_shin, l_leg_kny, "l_shin");
+      RigidBodyBasics rightShinBody = copyLinkAsRigidBody(r_shin, r_leg_kny, "r_shin");
 
       Vector3D leftAnklePitchOffset = new Vector3D(0.0, 0.0, -SHIN_LENGTH);
       Vector3D rightAnklePitchOffset = new Vector3D(0.0, 0.0, -SHIN_LENGTH);
@@ -329,8 +330,8 @@ public class VirtualModelControllerTestHelper
       RevoluteJoint r_leg_aky = ScrewTools.addRevoluteJoint("r_leg_aky", rightShinBody, rightAnklePitchOffset, Y);
       l_leg_aky.setQ(l_ankle_pitch.getQYoVariable().getDoubleValue());
       r_leg_aky.setQ(r_ankle_pitch.getQYoVariable().getDoubleValue());
-      RigidBody leftAnkleDifferentialBody = copyLinkAsRigidBody(l_ankle_differential, l_leg_aky, "l_ankle_differential");
-      RigidBody rightAnkleDifferentialBody = copyLinkAsRigidBody(r_ankle_differential, r_leg_aky, "r_ankle_differential");
+      RigidBodyBasics leftAnkleDifferentialBody = copyLinkAsRigidBody(l_ankle_differential, l_leg_aky, "l_ankle_differential");
+      RigidBodyBasics rightAnkleDifferentialBody = copyLinkAsRigidBody(r_ankle_differential, r_leg_aky, "r_ankle_differential");
 
       Vector3D leftAnkleRollOffset = new Vector3D();
       Vector3D rightAnkleRollOffset = new Vector3D();
@@ -350,8 +351,8 @@ public class VirtualModelControllerTestHelper
       RevoluteJoint r_leg_akx = ScrewTools.addRevoluteJoint("r_leg_akx", rightAnkleDifferentialBody, rightAnkleRollOffset, X);
       l_leg_akx.setQ(l_ankle_roll.getQYoVariable().getDoubleValue());
       r_leg_akx.setQ(r_ankle_roll.getQYoVariable().getDoubleValue());
-      RigidBody leftFootBody = copyLinkAsRigidBody(l_foot, l_leg_akx, "l_foot");
-      RigidBody rightFootBody = copyLinkAsRigidBody(r_foot, r_leg_akx, "r_foot");
+      RigidBodyBasics leftFootBody = copyLinkAsRigidBody(l_foot, l_leg_akx, "l_foot");
+      RigidBodyBasics rightFootBody = copyLinkAsRigidBody(r_foot, r_leg_akx, "r_foot");
 
       RigidBodyTransform leftSoleToAnkleFrame = TransformTools.createTranslationTransform(footLength / 2.0 - footBack + toFootCenterX,
             toFootCenterY, -ankleHeight);
@@ -362,7 +363,7 @@ public class VirtualModelControllerTestHelper
       MovingReferenceFrame rightSoleFrame = MovingReferenceFrame.constructFrameFixedInParent("Right_Sole",
             rightFootBody.getBodyFixedFrame(), rightSoleToAnkleFrame);
 
-      SideDependentList<RigidBody> feet = new SideDependentList<>();
+      SideDependentList<RigidBodyBasics> feet = new SideDependentList<>();
       feet.put(RobotSide.LEFT, leftFootBody);
       feet.put(RobotSide.RIGHT, rightFootBody);
       SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
@@ -495,7 +496,7 @@ public class VirtualModelControllerTestHelper
 
       return ret;
    }
-   private static RigidBody copyLinkAsRigidBody(Link link, JointBasics currentInverseDynamicsJoint, String bodyName)
+   private static RigidBodyBasics copyLinkAsRigidBody(Link link, JointBasics currentInverseDynamicsJoint, String bodyName)
    {
       Vector3D comOffset = new Vector3D();
       link.getComOffset(comOffset);
@@ -602,10 +603,10 @@ public class VirtualModelControllerTestHelper
       private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
-      private final RigidBody elevator;
-      private final RigidBody upperArm;
-      private final RigidBody lowerArm;
-      private final RigidBody hand;
+      private final RigidBodyBasics elevator;
+      private final RigidBodyBasics upperArm;
+      private final RigidBodyBasics lowerArm;
+      private final RigidBodyBasics hand;
 
       private ExternalForcePoint externalForcePoint;
 
@@ -703,12 +704,12 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getElevator()
+      public RigidBodyBasics getElevator()
       {
          return elevator;
       }
 
-      public RigidBody getHand()
+      public RigidBodyBasics getHand()
       {
          return hand;
       }
@@ -732,13 +733,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getRootBody()
+      public RigidBodyBasics getRootBody()
       {
          return getElevator();
       }
 
       @Override
-      public RigidBody getHead()
+      public RigidBodyBasics getHead()
       {
          return null;
       }
@@ -776,7 +777,7 @@ public class VirtualModelControllerTestHelper
          return null;
       }
 
-      private RigidBody createUpperArm(RigidBody parentBody)
+      private RigidBodyBasics createUpperArm(RigidBodyBasics parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(Math.toRadians(20));
@@ -785,7 +786,7 @@ public class VirtualModelControllerTestHelper
          return ScrewTools.addRigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
       }
 
-      private RigidBody createLowerArm(RigidBody parentBody)
+      private RigidBodyBasics createLowerArm(RigidBodyBasics parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("elbow_y", parentBody, new Vector3D(0.0, 0.0, THIGH_LENGTH), Y);
          joint.setQ(Math.toRadians(40));
@@ -795,7 +796,7 @@ public class VirtualModelControllerTestHelper
          return ScrewTools.addRigidBody("lowerArm", joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
       }
 
-      private RigidBody createHand(RigidBody parentBody)
+      private RigidBodyBasics createHand(RigidBodyBasics parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("wristPitch_y", parentBody, new Vector3D(0.0, 0.0, SHIN_LENGTH), Y);
          joint.setQ(Math.toRadians(30));
@@ -823,7 +824,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
       {
          return null;
       }
@@ -878,9 +879,9 @@ public class VirtualModelControllerTestHelper
       private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
-      private final RigidBody elevator;
-      private final RigidBody hand;
-      private final RigidBody shoulderDifferentialYaw;
+      private final RigidBodyBasics elevator;
+      private final RigidBodyBasics hand;
+      private final RigidBodyBasics shoulderDifferentialYaw;
 
       private ExternalForcePoint externalForcePoint;
 
@@ -893,13 +894,13 @@ public class VirtualModelControllerTestHelper
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), elevator);
 
          shoulderDifferentialYaw = createDifferential("shoulderDifferential", elevator, new Vector3D(), Z);
-         RigidBody shoulderDifferentialRoll = createDifferential("shoulderDifferential", shoulderDifferentialYaw, new Vector3D(), X);
+         RigidBodyBasics shoulderDifferentialRoll = createDifferential("shoulderDifferential", shoulderDifferentialYaw, new Vector3D(), X);
 
-         RigidBody upperArm = createUpperArm(shoulderDifferentialRoll);
+         RigidBodyBasics upperArm = createUpperArm(shoulderDifferentialRoll);
 
-         RigidBody lowerArm = createLowerArm(upperArm);
+         RigidBodyBasics lowerArm = createLowerArm(upperArm);
 
-         RigidBody wristDifferentialRoll = createDifferential("wristDifferential", lowerArm, new Vector3D(0.0, 0.0, SHIN_LENGTH), X);
+         RigidBodyBasics wristDifferentialRoll = createDifferential("wristDifferential", lowerArm, new Vector3D(0.0, 0.0, SHIN_LENGTH), X);
          //RigidBody wristDifferentialYaw = createDifferential("wristDifferential", wristDifferentialRoll, new Vector3d(), Z);
 
          hand = createHand(wristDifferentialRoll);
@@ -986,12 +987,12 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getElevator()
+      public RigidBodyBasics getElevator()
       {
          return elevator;
       }
 
-      public RigidBody getHand()
+      public RigidBodyBasics getHand()
       {
          return hand;
       }
@@ -1015,13 +1016,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getRootBody()
+      public RigidBodyBasics getRootBody()
       {
          return getElevator();
       }
 
       @Override
-      public RigidBody getHead()
+      public RigidBodyBasics getHead()
       {
          return null;
       }
@@ -1059,7 +1060,7 @@ public class VirtualModelControllerTestHelper
          return null;
       }
 
-      private RigidBody createDifferential(String name, RigidBody parentBody, Vector3D jointOffset, Vector3D jointAxis)
+      private RigidBodyBasics createDifferential(String name, RigidBodyBasics parentBody, Vector3D jointOffset, Vector3D jointAxis)
       {
          String jointName;
          if (jointAxis == X)
@@ -1076,7 +1077,7 @@ public class VirtualModelControllerTestHelper
          return ScrewTools.addRigidBody(name, joint, 0.005, 0.005, 0.005, 0.1, comOffset);
       }
 
-      private RigidBody createUpperArm(RigidBody parentBody)
+      private RigidBodyBasics createUpperArm(RigidBodyBasics parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(random.nextDouble());
@@ -1085,7 +1086,7 @@ public class VirtualModelControllerTestHelper
          return ScrewTools.addRigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
       }
 
-      private RigidBody createLowerArm(RigidBody parentBody)
+      private RigidBodyBasics createLowerArm(RigidBodyBasics parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("elbow_y", parentBody, new Vector3D(0.0, 0.0, THIGH_LENGTH), Y);
          joint.setQ(random.nextDouble());
@@ -1095,7 +1096,7 @@ public class VirtualModelControllerTestHelper
          return ScrewTools.addRigidBody("lowerArm", joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
       }
 
-      private RigidBody createHand(RigidBody parentBody)
+      private RigidBodyBasics createHand(RigidBodyBasics parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("wristPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(random.nextDouble());
@@ -1123,7 +1124,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
       {
          return null;
       }
@@ -1178,11 +1179,11 @@ public class VirtualModelControllerTestHelper
       private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
-      private final RigidBody elevator;
-      private final RigidBody hand1;
-      private final RigidBody hand2;
-      private final RigidBody shoulderDifferentialYaw;
-      private final SideDependentList<RigidBody> hands = new SideDependentList<>();
+      private final RigidBodyBasics elevator;
+      private final RigidBodyBasics hand1;
+      private final RigidBodyBasics hand2;
+      private final RigidBodyBasics shoulderDifferentialYaw;
+      private final SideDependentList<RigidBodyBasics> hands = new SideDependentList<>();
       private final List<JointBasics> joints = new ArrayList<>();
 
       private ExternalForcePoint externalForcePoint1;
@@ -1198,11 +1199,11 @@ public class VirtualModelControllerTestHelper
 
          shoulderDifferentialYaw = createDifferential("shoulderDifferential", elevator, new Vector3D(), Z);
 
-         RigidBody upperArm = createUpperArm(shoulderDifferentialYaw);
+         RigidBodyBasics upperArm = createUpperArm(shoulderDifferentialYaw);
          joints.add(upperArm.getParentJoint());
 
-         RigidBody elbowDifferentialYaw1 = createDifferential("elbowDifferentialYaw1", upperArm, new Vector3D(0.0, 0.0, THIGH_LENGTH), Z);
-         RigidBody elbowDifferentialYaw2 = createDifferential("elbowDifferentialYaw2", upperArm, new Vector3D(0.0, 0.0, THIGH_LENGTH), Z);
+         RigidBodyBasics elbowDifferentialYaw1 = createDifferential("elbowDifferentialYaw1", upperArm, new Vector3D(0.0, 0.0, THIGH_LENGTH), Z);
+         RigidBodyBasics elbowDifferentialYaw2 = createDifferential("elbowDifferentialYaw2", upperArm, new Vector3D(0.0, 0.0, THIGH_LENGTH), Z);
          RevoluteJoint differential1 = (RevoluteJoint) elbowDifferentialYaw1.getParentJoint();
          RevoluteJoint differential2 = (RevoluteJoint) elbowDifferentialYaw2.getParentJoint();
          differential1.setQ(2.5 * random.nextDouble());
@@ -1210,13 +1211,13 @@ public class VirtualModelControllerTestHelper
          joints.add(differential1);
          joints.add(differential2);
 
-         RigidBody lowerArm1 = createLowerArm("1", elbowDifferentialYaw1);
-         RigidBody lowerArm2 = createLowerArm("2", elbowDifferentialYaw2);
+         RigidBodyBasics lowerArm1 = createLowerArm("1", elbowDifferentialYaw1);
+         RigidBodyBasics lowerArm2 = createLowerArm("2", elbowDifferentialYaw2);
          joints.add(lowerArm1.getParentJoint());
          joints.add(lowerArm2.getParentJoint());
 
-         RigidBody wristDifferentialRoll1 = createDifferential("wristDifferential1", lowerArm1, new Vector3D(0.0, 0.0, SHIN_LENGTH), X);
-         RigidBody wristDifferentialRoll2 = createDifferential("wristDifferential2", lowerArm2, new Vector3D(0.0, 0.0, SHIN_LENGTH), X);
+         RigidBodyBasics wristDifferentialRoll1 = createDifferential("wristDifferential1", lowerArm1, new Vector3D(0.0, 0.0, SHIN_LENGTH), X);
+         RigidBodyBasics wristDifferentialRoll2 = createDifferential("wristDifferential2", lowerArm2, new Vector3D(0.0, 0.0, SHIN_LENGTH), X);
          joints.add(wristDifferentialRoll1.getParentJoint());
          joints.add(wristDifferentialRoll2.getParentJoint());
 
@@ -1321,12 +1322,12 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getElevator()
+      public RigidBodyBasics getElevator()
       {
          return elevator;
       }
 
-      public RigidBody getHand(RobotSide robotSide)
+      public RigidBodyBasics getHand(RobotSide robotSide)
       {
          return hands.get(robotSide);
       }
@@ -1350,13 +1351,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getRootBody()
+      public RigidBodyBasics getRootBody()
       {
          return getElevator();
       }
 
       @Override
-      public RigidBody getHead()
+      public RigidBodyBasics getHead()
       {
          return null;
       }
@@ -1394,7 +1395,7 @@ public class VirtualModelControllerTestHelper
          return null;
       }
 
-      private RigidBody createDifferential(String name, RigidBody parentBody, Vector3D jointOffset, Vector3D jointAxis)
+      private RigidBodyBasics createDifferential(String name, RigidBodyBasics parentBody, Vector3D jointOffset, Vector3D jointAxis)
       {
          String jointName;
          if (jointAxis == X)
@@ -1410,7 +1411,7 @@ public class VirtualModelControllerTestHelper
          return ScrewTools.addRigidBody(jointName, joint, 0.005, 0.005, 0.005, 0.1, comOffset);
       }
 
-      private RigidBody createUpperArm(RigidBody parentBody)
+      private RigidBodyBasics createUpperArm(RigidBodyBasics parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(random.nextDouble());
@@ -1420,7 +1421,7 @@ public class VirtualModelControllerTestHelper
          return ScrewTools.addRigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
       }
 
-      private RigidBody createLowerArm(String suffix, RigidBody parentBody)
+      private RigidBodyBasics createLowerArm(String suffix, RigidBodyBasics parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("elbow_y_" + suffix, parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(random.nextDouble());
@@ -1430,7 +1431,7 @@ public class VirtualModelControllerTestHelper
          return ScrewTools.addRigidBody("lowerArm" + suffix, joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
       }
 
-      private RigidBody createHand(String suffix, RigidBody parentBody)
+      private RigidBodyBasics createHand(String suffix, RigidBodyBasics parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("wristPitch_y_" + suffix, parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(random.nextDouble());
@@ -1458,7 +1459,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
       {
          return null;
       }
@@ -1513,11 +1514,11 @@ public class VirtualModelControllerTestHelper
       private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
-      private final RigidBody elevator;
-      private final RigidBody upperArm;
-      private final RigidBody hand1;
-      private final RigidBody hand2;
-      private final SideDependentList<RigidBody> hands = new SideDependentList<>();
+      private final RigidBodyBasics elevator;
+      private final RigidBodyBasics upperArm;
+      private final RigidBodyBasics hand1;
+      private final RigidBodyBasics hand2;
+      private final SideDependentList<RigidBodyBasics> hands = new SideDependentList<>();
 
       private ExternalForcePoint externalForcePoint1;
       private ExternalForcePoint externalForcePoint2;
@@ -1535,8 +1536,8 @@ public class VirtualModelControllerTestHelper
          upperArm = createUpperArm(elevator);
          joints.add(upperArm.getParentJoint());
 
-         RigidBody lowerArm1 = createLowerArm("1", upperArm);
-         RigidBody lowerArm2 = createLowerArm("2", upperArm);
+         RigidBodyBasics lowerArm1 = createLowerArm("1", upperArm);
+         RigidBodyBasics lowerArm2 = createLowerArm("2", upperArm);
          RevoluteJoint elbow1 = (RevoluteJoint) lowerArm1.getParentJoint();
          RevoluteJoint elbow2 = (RevoluteJoint) lowerArm2.getParentJoint();
          elbow1.setQ(1.5 * random.nextDouble());
@@ -1645,12 +1646,12 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getElevator()
+      public RigidBodyBasics getElevator()
       {
          return elevator;
       }
 
-      public RigidBody getHand(RobotSide robotSide)
+      public RigidBodyBasics getHand(RobotSide robotSide)
       {
          return hands.get(robotSide);
       }
@@ -1674,13 +1675,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getRootBody()
+      public RigidBodyBasics getRootBody()
       {
          return getElevator();
       }
 
       @Override
-      public RigidBody getHead()
+      public RigidBodyBasics getHead()
       {
          return null;
       }
@@ -1718,7 +1719,7 @@ public class VirtualModelControllerTestHelper
          return null;
       }
 
-      private RigidBody createUpperArm(RigidBody parentBody)
+      private RigidBodyBasics createUpperArm(RigidBodyBasics parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(random.nextDouble());
@@ -1727,7 +1728,7 @@ public class VirtualModelControllerTestHelper
          return ScrewTools.addRigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
       }
 
-      private RigidBody createLowerArm(String suffix, RigidBody parentBody)
+      private RigidBodyBasics createLowerArm(String suffix, RigidBodyBasics parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("elbow_y_" + suffix, parentBody, new Vector3D(0.0, 0.0, THIGH_LENGTH), Y);
          joint.setQ(random.nextDouble());
@@ -1737,7 +1738,7 @@ public class VirtualModelControllerTestHelper
          return ScrewTools.addRigidBody("lowerArm" + suffix, joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
       }
 
-      private RigidBody createHand(String suffix, RigidBody parentBody)
+      private RigidBodyBasics createHand(String suffix, RigidBodyBasics parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("wristPitch_y_" + suffix, parentBody, new Vector3D(0.0, 0.0, SHIN_LENGTH), Y);
          joint.setQ(random.nextDouble());
@@ -1765,7 +1766,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
       {
          return null;
       }
@@ -1814,10 +1815,10 @@ public class VirtualModelControllerTestHelper
 
    public static class RobotLegs extends Robot implements FullRobotModel
    {
-      private RigidBody elevator;
-      private RigidBody pelvis;
+      private RigidBodyBasics elevator;
+      private RigidBodyBasics pelvis;
 
-      private SideDependentList<RigidBody> feet = new SideDependentList<>();
+      private SideDependentList<RigidBodyBasics> feet = new SideDependentList<>();
       private SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
       private SixDoFJoint rootJoint;
       private OneDoFJoint[] joints;
@@ -1842,17 +1843,17 @@ public class VirtualModelControllerTestHelper
          this.rootJoint = rootJoint;
       }
 
-      void setElevator(RigidBody elevator)
+      void setElevator(RigidBodyBasics elevator)
       {
          this.elevator = elevator;
       }
 
-      void setPelvis(RigidBody pelvis)
+      void setPelvis(RigidBodyBasics pelvis)
       {
          this.pelvis = pelvis;
       }
 
-      public void setFeet(SideDependentList<RigidBody> feet)
+      public void setFeet(SideDependentList<RigidBodyBasics> feet)
       {
          this.feet.set(feet);
       }
@@ -1891,7 +1892,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getElevator()
+      public RigidBodyBasics getElevator()
       {
          return elevator;
       }
@@ -1915,13 +1916,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getRootBody()
+      public RigidBodyBasics getRootBody()
       {
          return pelvis;
       }
 
       @Override
-      public RigidBody getHead()
+      public RigidBodyBasics getHead()
       {
          return null;
       }
@@ -1958,7 +1959,7 @@ public class VirtualModelControllerTestHelper
          return null;
       }
 
-      public RigidBody getFoot(RobotSide robotSide)
+      public RigidBodyBasics getFoot(RobotSide robotSide)
       {
          return feet.get(robotSide);
       }
@@ -1991,7 +1992,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
       {
          return null;
       }
@@ -2046,7 +2047,7 @@ public class VirtualModelControllerTestHelper
       private final SideDependentList<MovingReferenceFrame> footReferenceFrames = new SideDependentList<>();
       private final SideDependentList<MovingReferenceFrame> soleReferenceFrames = new SideDependentList<>();
 
-      LegReferenceFrames(RigidBody pelvis, RigidBody elevator, SideDependentList<RigidBody> feet, SideDependentList<MovingReferenceFrame> soleFrames)
+      LegReferenceFrames(RigidBodyBasics pelvis, RigidBodyBasics elevator, SideDependentList<RigidBodyBasics> feet, SideDependentList<MovingReferenceFrame> soleFrames)
       {
          pelvisFrame = pelvis.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), elevator);
@@ -2468,11 +2469,11 @@ public class VirtualModelControllerTestHelper
 
       private List<ForcePointController> forcePointControllers = new ArrayList<>();
       private List<YoFixedFrameWrench> yoDesiredWrenches = new ArrayList<>();
-      private List<RigidBody> endEffectors = new ArrayList<>();
+      private List<RigidBodyBasics> endEffectors = new ArrayList<>();
       private final DenseMatrix64F selectionMatrix;
 
       DummyArmController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJoint[] controlledJoints,
-            List<ForcePointController> forcePointControllers, VirtualModelController virtualModelController, List<RigidBody> endEffectors,
+            List<ForcePointController> forcePointControllers, VirtualModelController virtualModelController, List<RigidBodyBasics> endEffectors,
             List<YoFixedFrameWrench> yoDesiredWrenches, DenseMatrix64F selectionMatrix)
       {
          this.scsRobot = scsRobot;

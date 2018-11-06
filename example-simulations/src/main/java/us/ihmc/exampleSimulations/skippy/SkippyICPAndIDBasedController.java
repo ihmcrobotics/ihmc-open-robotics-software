@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -62,8 +62,8 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
 
    private void setupGraphics(YoGraphicsListRegistry graphicsListRegistry)
    {
-      RigidBody[] bodies = ScrewTools.computeRigidBodiesAfterThisJoint(skippy.getTorso().getParentJoint());
-      for (RigidBody body : bodies)
+      RigidBodyBasics[] bodies = ScrewTools.computeRigidBodiesAfterThisJoint(skippy.getTorso().getParentJoint());
+      for (RigidBodyBasics body : bodies)
       {
          YoGraphicReferenceFrame referenceFrameBody = new YoGraphicReferenceFrame(body.getBodyFixedFrame(), registry, true, 0.4);
          graphicsListRegistry.registerYoGraphic(body.getName() + "BodyFrame", referenceFrameBody);
@@ -90,12 +90,12 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
 
       //End effector on the right shoulder
       ReferenceFrame rightShoulderFrame = skippy.getRightShoulderFrame();
-      RigidBody shoulderBody = skippy.getShoulderBody();
+      RigidBodyBasics shoulderBody = skippy.getShoulderBody();
       ReferenceFrame rightShoulderBodyFrame = shoulderBody.getBodyFixedFrame();
 
       // --- compute force to pull the end effector towards the target position
       ReferenceFrame endEffectorFrame = skippy.getRightShoulderFrame();
-      RigidBody endEffectorBody = skippy.getShoulderBody();
+      RigidBodyBasics endEffectorBody = skippy.getShoulderBody();
       ReferenceFrame endEffectorBodyFrame = endEffectorBody.getBodyFixedFrame();
 
       endEffectorPosition.setToZero(endEffectorFrame); //set(targetPosition.getFrameTuple());  //

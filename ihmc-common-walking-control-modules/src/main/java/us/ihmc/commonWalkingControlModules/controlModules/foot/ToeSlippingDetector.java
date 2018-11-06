@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeSlippingDetectorPar
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
@@ -35,10 +35,10 @@ public class ToeSlippingDetector
    private final YoBoolean isToeSlipping;
 
    private final double dt;
-   private final RigidBody foot;
+   private final RigidBodyBasics foot;
    private final FootSwitchInterface footSwitch;
 
-   public ToeSlippingDetector(String namePrefix, double controlDT, RigidBody foot, FootSwitchInterface footSwitch,
+   public ToeSlippingDetector(String namePrefix, double controlDT, RigidBodyBasics foot, FootSwitchInterface footSwitch,
                               YoVariableRegistry parentRegistry)
    {
       dt = controlDT;

@@ -13,6 +13,7 @@ import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -29,7 +30,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 {
    private final SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = new SCSToInverseDynamicsJointMap();
 
-   private final RigidBody elevator;
+   private final RigidBodyBasics elevator;
 
    /**
     * Using the given SCS robot, generates an equivalent robot model using the
@@ -60,7 +61,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          Vector3D comOffset = new Vector3D();
          link.getComOffset(comOffset);
 
-         RigidBody parentIDBody = getParentIDBody(polledJoint, elevator);
+         RigidBodyBasics parentIDBody = getParentIDBody(polledJoint, elevator);
 
          if (polledJoint instanceof FloatingJoint)
          {
@@ -133,12 +134,12 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
     * 
     * @return the elevator.
     */
-   public RigidBody getElevator()
+   public RigidBodyBasics getElevator()
    {
       return elevator;
    }
 
-   private RigidBody getParentIDBody(Joint polledJoint, RigidBody elevator)
+   private RigidBodyBasics getParentIDBody(Joint polledJoint, RigidBodyBasics elevator)
    {
       Joint parentJoint = polledJoint.getParentJoint();
 

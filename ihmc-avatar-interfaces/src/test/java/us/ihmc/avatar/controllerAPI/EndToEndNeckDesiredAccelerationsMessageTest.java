@@ -22,7 +22,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -54,8 +54,8 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
-      RigidBody chest = fullRobotModel.getChest();
-      RigidBody head = fullRobotModel.getHead();
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      RigidBodyBasics head = fullRobotModel.getHead();
       String headName = head.getName();
       OneDoFJoint[] neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
 

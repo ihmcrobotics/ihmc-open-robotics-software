@@ -12,6 +12,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -20,7 +21,7 @@ public class PassiveRevoluteJointTest
    // Variables
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
    private FrameVector3D frameVec = new FrameVector3D();
-   private RigidBody rigidBody = new RigidBody("rigidBody", referenceFrame);
+   private RigidBodyBasics rigidBody = new RigidBody("rigidBody", referenceFrame);
    private PassiveRevoluteJoint joint = null; // new PassiveRevoluteJoint("testJoint",rigidBody, referenceFrame, frameVec);
    private DenseMatrix64F matrix = new DenseMatrix64F();
    private int rowStart = 1;

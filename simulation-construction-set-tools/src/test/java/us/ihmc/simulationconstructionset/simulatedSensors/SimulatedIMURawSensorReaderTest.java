@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -26,7 +27,7 @@ public class SimulatedIMURawSensorReaderTest
 {
    private final RawSensors rawSensors = new RawSensors();
    private final TestingRobotModel fullRobotModel = new TestingRobotModel();
-   private final RigidBody rigidBody = fullRobotModel.getBodyLink();
+   private final RigidBodyBasics rigidBody = fullRobotModel.getBodyLink();
    private final ReferenceFrame bodyFrame = fullRobotModel.getBodyFrame();
 
    private final RotationMatrix actualIMUOrientation = new RotationMatrix();
@@ -296,8 +297,8 @@ public class SimulatedIMURawSensorReaderTest
 
    private static class TestingRobotModel
    {
-      private final RigidBody elevator;
-      private final RigidBody body;
+      private final RigidBodyBasics elevator;
+      private final RigidBodyBasics body;
 
       private final SixDoFJoint rootJoint;
       private final ReferenceFrame worldFrame;
@@ -351,7 +352,7 @@ public class SimulatedIMURawSensorReaderTest
          elevator.updateFramesRecursively();
       }
 
-      public RigidBody getBodyLink()
+      public RigidBodyBasics getBodyLink()
       {
          return body;
       }
@@ -371,7 +372,7 @@ public class SimulatedIMURawSensorReaderTest
          return elevator.getBodyFixedFrame();
       }
 
-      public RigidBody getElevator()
+      public RigidBodyBasics getElevator()
       {
          return elevator;
       }

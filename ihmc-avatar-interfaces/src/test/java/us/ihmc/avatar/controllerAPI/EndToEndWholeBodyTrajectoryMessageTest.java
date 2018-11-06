@@ -32,7 +32,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -70,7 +70,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       RobotSide footSide = RobotSide.LEFT;
       // First need to pick up the foot:
-      RigidBody foot = fullRobotModel.getFoot(footSide);
+      RigidBodyBasics foot = fullRobotModel.getFoot(footSide);
       FramePose3D footPoseCloseToActual = new FramePose3D(foot.getBodyFixedFrame());
       footPoseCloseToActual.setPosition(0.0, 0.0, 0.10);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -105,8 +105,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] arm = ScrewTools.createOneDoFJointPath(chest, hand);
          OneDoFJoint[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
          for (int i = 0; i < armClone.length; i++)
@@ -114,7 +114,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
             OneDoFJoint joint = armClone[i];
             joint.setQ(arm[i].getQ() + RandomNumbers.nextDouble(random, -0.2, 0.2));
          }
-         RigidBody handClone = armClone[armClone.length - 1].getSuccessor();
+         RigidBodyBasics handClone = armClone[armClone.length - 1].getSuccessor();
          FramePose3D desiredRandomHandPose = new FramePose3D(handClone.getBodyFixedFrame());
          desiredRandomHandPose.changeFrame(worldFrame);
          desiredHandPoses.put(robotSide, desiredRandomHandPose);
@@ -132,7 +132,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       }
 
       HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
       FramePose3D desiredPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
       desiredPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
@@ -166,7 +166,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       assertTrue(success);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      RigidBody chest = fullRobotModel.getChest();
+      RigidBodyBasics chest = fullRobotModel.getChest();
       String footName = fullRobotModel.getFoot(footSide).getName();
       humanoidReferenceFrames.updateFrames();
       desiredChestOrientation.changeFrame(worldFrame);
@@ -205,7 +205,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       RobotSide footSide = RobotSide.LEFT;
       // First need to pick up the foot:
-      RigidBody foot = fullRobotModel.getFoot(footSide);
+      RigidBodyBasics foot = fullRobotModel.getFoot(footSide);
       FramePose3D footPoseCloseToActual = new FramePose3D(foot.getBodyFixedFrame());
       footPoseCloseToActual.setPosition(0.0, 0.0, 0.10);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -235,8 +235,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] arm = ScrewTools.createOneDoFJointPath(chest, hand);
          OneDoFJoint[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
          for (int i = 0; i < armClone.length; i++)
@@ -244,7 +244,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
             OneDoFJoint joint = armClone[i];
             joint.setQ(arm[i].getQ() + RandomNumbers.nextDouble(random, -0.2, 0.2));
          }
-         RigidBody handClone = armClone[armClone.length - 1].getSuccessor();
+         RigidBodyBasics handClone = armClone[armClone.length - 1].getSuccessor();
          FramePose3D desiredRandomHandPose = new FramePose3D(handClone.getBodyFixedFrame());
          desiredRandomHandPose.changeFrame(worldFrame);
          desiredHandPoses.put(robotSide, desiredRandomHandPose);
@@ -256,7 +256,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       }
 
       HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
       FramePose3D desiredPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
       desiredPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
@@ -290,7 +290,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       assertTrue(success);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      RigidBody chest = fullRobotModel.getChest();
+      RigidBodyBasics chest = fullRobotModel.getChest();
       String footName = fullRobotModel.getFoot(footSide).getName();
       humanoidReferenceFrames.updateFrames();
       desiredChestOrientation.changeFrame(worldFrame);
@@ -329,7 +329,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       RobotSide footSide = RobotSide.LEFT;
       // First need to pick up the foot:
-      RigidBody foot = fullRobotModel.getFoot(footSide);
+      RigidBodyBasics foot = fullRobotModel.getFoot(footSide);
       FramePose3D footPoseCloseToActual = new FramePose3D(foot.getBodyFixedFrame());
       footPoseCloseToActual.setPosition(0.0, 0.0, 0.10);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -358,8 +358,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] arm = ScrewTools.createOneDoFJointPath(chest, hand);
          OneDoFJoint[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
          for (int i = 0; i < armClone.length; i++)
@@ -367,7 +367,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
             OneDoFJoint joint = armClone[i];
             joint.setQ(arm[i].getQ() + RandomNumbers.nextDouble(random, -0.2, 0.2));
          }
-         RigidBody handClone = armClone[armClone.length - 1].getSuccessor();
+         RigidBodyBasics handClone = armClone[armClone.length - 1].getSuccessor();
          FramePose3D desiredRandomHandPose = new FramePose3D(handClone.getBodyFixedFrame());
          desiredRandomHandPose.changeFrame(worldFrame);
          desiredHandPoses.put(robotSide, desiredRandomHandPose);
@@ -381,7 +381,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       }
 
       HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
       FramePose3D desiredPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
       desiredPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
@@ -415,7 +415,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       assertTrue(success);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      RigidBody chest = fullRobotModel.getChest();
+      RigidBodyBasics chest = fullRobotModel.getChest();
       String footName = fullRobotModel.getFoot(footSide).getName();
       humanoidReferenceFrames.updateFrames();
       desiredChestOrientation.changeFrame(worldFrame);

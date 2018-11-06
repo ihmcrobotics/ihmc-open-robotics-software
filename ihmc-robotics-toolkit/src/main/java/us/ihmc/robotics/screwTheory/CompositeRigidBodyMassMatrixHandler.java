@@ -7,8 +7,8 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class CompositeRigidBodyMassMatrixHandler
@@ -21,7 +21,7 @@ public class CompositeRigidBodyMassMatrixHandler
    private final Map<JointBasics, int[]> indicesForJoints = new LinkedHashMap<>();
    private final CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
 
-   public CompositeRigidBodyMassMatrixHandler(RigidBody rootBody, ArrayList<JointBasics> jointsToIgnore)
+   public CompositeRigidBodyMassMatrixHandler(RigidBodyBasics rootBody, ArrayList<JointBasics> jointsToIgnore)
    {
       this.massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootBody, jointsToIgnore);
 

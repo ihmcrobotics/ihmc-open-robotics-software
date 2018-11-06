@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -100,7 +100,7 @@ public class SCSToInverseDynamicsJointMap
     * @param joint the simulated joint.
     * @return the child/successor rigid-body.
     */
-   public RigidBody getRigidBody(Joint joint)
+   public RigidBodyBasics getRigidBody(Joint joint)
    {
       if (joint instanceof FloatingJoint)
       {

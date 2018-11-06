@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullLeggedRobotModel;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
@@ -64,8 +64,8 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
       this.contactThresholdForce = contactThresholdForce;
       this.isInContact = new GlitchFilteredYoBoolean(prefix + "IsInContact", registry, pastThreshold, filterWindowSize);
       
-      RigidBody body = robotModel.getRootBody();
-      RigidBody foot = robotModel.getFoot(robotSegment);
+      RigidBodyBasics body = robotModel.getRootBody();
+      RigidBodyBasics foot = robotModel.getFoot(robotSegment);
       soleFrame = robotModel.getSoleFrame(robotSegment);
       jacobian = new GeometricJacobian(body, foot, soleFrame);
       

@@ -6,8 +6,8 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
@@ -28,7 +28,7 @@ public class CentroidalMomentumHandler
    private final ReferenceFrame centerOfMassFrame;
    private final CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator;
 
-   public CentroidalMomentumHandler(RigidBody rootBody, ReferenceFrame centerOfMassFrame)
+   public CentroidalMomentumHandler(RigidBodyBasics rootBody, ReferenceFrame centerOfMassFrame)
    {
       this(ScrewTools.computeSubtreeJoints(rootBody), centerOfMassFrame);
    }

@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 
 /**
@@ -24,12 +24,12 @@ public class MovingCenterOfMassReferenceFrame extends MovingReferenceFrame
    private final FrameVector3D centerOfMassVelocity;
 
    
-   public MovingCenterOfMassReferenceFrame(String frameName, RigidBody rootBody)
+   public MovingCenterOfMassReferenceFrame(String frameName, RigidBodyBasics rootBody)
    {
       this(frameName, rootBody.getBodyFixedFrame(), rootBody);
    }
 
-   public MovingCenterOfMassReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBody rootBody)
+   public MovingCenterOfMassReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyBasics rootBody)
    {
       super(frameName, rootBody.getBodyFixedFrame());
 

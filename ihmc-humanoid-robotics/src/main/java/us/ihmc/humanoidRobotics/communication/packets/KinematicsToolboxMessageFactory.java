@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -36,7 +36,7 @@ public class KinematicsToolboxMessageFactory
     * @param rigidBody the rigid-body to hold the current pose of.
     * @return the message ready to send to the {@code KinematicsToolbosModule}.
     */
-   public static KinematicsToolboxRigidBodyMessage holdRigidBodyCurrentPose(RigidBody rigidBody)
+   public static KinematicsToolboxRigidBodyMessage holdRigidBodyCurrentPose(RigidBodyBasics rigidBody)
    {
       KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(rigidBody);
       FramePose3D currentPose = new FramePose3D(rigidBody.getBodyFixedFrame());
@@ -69,7 +69,7 @@ public class KinematicsToolboxMessageFactory
     * @param rigidBody the rigid-body to hold the current orientation of.
     * @return the message ready to send to the {@code KinematicsToolbosModule}.
     */
-   public static KinematicsToolboxRigidBodyMessage holdRigidBodyCurrentOrientation(RigidBody rigidBody)
+   public static KinematicsToolboxRigidBodyMessage holdRigidBodyCurrentOrientation(RigidBodyBasics rigidBody)
    {
       KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(rigidBody);
       FrameQuaternion currentOrientation = new FrameQuaternion(rigidBody.getBodyFixedFrame());
@@ -105,7 +105,7 @@ public class KinematicsToolboxMessageFactory
     * @param holdZ whether the z-coordinate should be maintained.
     * @return the message ready to send to the {@code KinematicsToolbosModule}.
     */
-   public static KinematicsToolboxCenterOfMassMessage holdCenterOfMassCurrentPosition(RigidBody rootBody, boolean holdX, boolean holdY, boolean holdZ)
+   public static KinematicsToolboxCenterOfMassMessage holdCenterOfMassCurrentPosition(RigidBodyBasics rootBody, boolean holdX, boolean holdY, boolean holdZ)
    {
       KinematicsToolboxCenterOfMassMessage message = new KinematicsToolboxCenterOfMassMessage();
       CenterOfMassCalculator calculator = new CenterOfMassCalculator(rootBody, worldFrame);

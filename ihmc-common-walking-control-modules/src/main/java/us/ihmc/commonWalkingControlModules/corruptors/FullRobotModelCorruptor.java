@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -37,11 +37,11 @@ public class FullRobotModelCorruptor
       SpineJointName[] spineJointNames = robotSpecificJointNames.getSpineJointNames();
 
       String chestName = "chest";
-      final RigidBody chest = fullRobotModel.getChest();
+      final RigidBodyBasics chest = fullRobotModel.getChest();
       createMassAndCoMOffsetCorruptors(namePrefix, chestName, chest);
 
       String pelvisName = "pelvis";
-      final RigidBody pelvis = fullRobotModel.getPelvis();
+      final RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       createMassAndCoMOffsetCorruptors(namePrefix, pelvisName, pelvis);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -49,15 +49,15 @@ public class FullRobotModelCorruptor
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
          String thighName = sidePrefix + "Thigh";
-         final RigidBody thigh = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getPredecessor();
+         final RigidBodyBasics thigh = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getPredecessor();
          createMassAndCoMOffsetCorruptors(namePrefix, thighName, thigh);
 
          String shinName = sidePrefix + "Shin";
-         final RigidBody shin = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getSuccessor();
+         final RigidBodyBasics shin = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getSuccessor();
          createMassAndCoMOffsetCorruptors(namePrefix, shinName, shin);
 
          String footName = sidePrefix + "Foot";
-         final RigidBody foot = fullRobotModel.getFoot(robotSide);
+         final RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
          createMassAndCoMOffsetCorruptors(namePrefix, footName, foot);
       }
 
@@ -69,7 +69,7 @@ public class FullRobotModelCorruptor
             if (armJoint == null)
                continue;
 
-            RigidBody rigidBody = armJoint.getSuccessor();
+            RigidBodyBasics rigidBody = armJoint.getSuccessor();
             createMassAndCoMOffsetCorruptors(namePrefix, rigidBody.getName(), rigidBody);
          }
       }
@@ -145,7 +145,7 @@ public class FullRobotModelCorruptor
 //      variableChangedListeners.add(jointOffsetChangedListener);
    }
 
-   private void createMassAndCoMOffsetCorruptors(String namePrefix, String name, final RigidBody rigidBody)
+   private void createMassAndCoMOffsetCorruptors(String namePrefix, String name, final RigidBodyBasics rigidBody)
    {
       if(rigidBody == null)
       {

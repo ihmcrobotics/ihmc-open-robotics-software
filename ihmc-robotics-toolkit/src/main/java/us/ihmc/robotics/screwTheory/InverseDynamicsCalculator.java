@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
@@ -23,14 +23,14 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
  */
 public class InverseDynamicsCalculator
 {
-   private final RigidBody rootBody;
-   private final List<RigidBody> listOfBodiesWithExternalWrenches = new ArrayList<>();
-   private final Map<RigidBody, Wrench> externalWrenches = new LinkedHashMap<>();
+   private final RigidBodyBasics rootBody;
+   private final List<RigidBodyBasics> listOfBodiesWithExternalWrenches = new ArrayList<>();
+   private final Map<RigidBodyBasics, Wrench> externalWrenches = new LinkedHashMap<>();
    private final List<JointBasics> jointsToIgnore;
 
-   private final List<RigidBody> allBodiesExceptRoot = new ArrayList<RigidBody>();
+   private final List<RigidBodyBasics> allBodiesExceptRoot = new ArrayList<RigidBodyBasics>();
    private final List<JointBasics> allJoints = new ArrayList<JointBasics>();
-   private final Map<RigidBody, Wrench> netWrenches = new LinkedHashMap<RigidBody, Wrench>();
+   private final Map<RigidBodyBasics, Wrench> netWrenches = new LinkedHashMap<RigidBodyBasics, Wrench>();
    private final Map<JointBasics, Wrench> jointWrenches = new LinkedHashMap<JointBasics, Wrench>();
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
@@ -41,19 +41,19 @@ public class InverseDynamicsCalculator
 
    private InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener;
    
-   public InverseDynamicsCalculator(RigidBody body, double gravity)
+   public InverseDynamicsCalculator(RigidBodyBasics body, double gravity)
    {
       this(body, gravity, new ArrayList<JointBasics>());
    }
 
-   public InverseDynamicsCalculator(RigidBody body, double gravity, List<JointBasics> jointsToIgnore)
+   public InverseDynamicsCalculator(RigidBodyBasics body, double gravity, List<JointBasics> jointsToIgnore)
    {
       this(body, ScrewTools.createGravitationalSpatialAcceleration(ScrewTools.getRootBody(body), gravity),
             jointsToIgnore, true, true);
    }
 
    // FIXME: doVelocityTerms = false does not seem to work
-   public InverseDynamicsCalculator(RigidBody body, SpatialAccelerationReadOnly rootAcceleration, List<JointBasics> jointsToIgnore,
+   public InverseDynamicsCalculator(RigidBodyBasics body, SpatialAccelerationReadOnly rootAcceleration, List<JointBasics> jointsToIgnore,
          boolean doVelocityTerms, boolean doAccelerationTerms)
    {
       this(jointsToIgnore, new SpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms,
@@ -96,12 +96,12 @@ public class InverseDynamicsCalculator
       if (inverseDynamicsCalculatorListener != null) inverseDynamicsCalculatorListener.inverseDynamicsCalculatorIsDone(this);
    }
 
-   public void setExternalWrench(RigidBody rigidBody, WrenchReadOnly externalWrench)
+   public void setExternalWrench(RigidBodyBasics rigidBody, WrenchReadOnly externalWrench)
    {
       externalWrenches.get(rigidBody).setIncludingFrame(externalWrench);
    }
    
-   public void getExternalWrench(RigidBody rigidBody, Wrench externalWrenchToPack)
+   public void getExternalWrench(RigidBodyBasics rigidBody, Wrench externalWrenchToPack)
    {
       externalWrenchToPack.setIncludingFrame(externalWrenches.get(rigidBody));
    }
@@ -120,7 +120,7 @@ public class InverseDynamicsCalculator
    {
       for (int bodyIndex = 0; bodyIndex < allBodiesExceptRoot.size(); bodyIndex++)
       {
-         RigidBody body = allBodiesExceptRoot.get(bodyIndex);
+         RigidBodyBasics body = allBodiesExceptRoot.get(bodyIndex);
          Wrench netWrench = netWrenches.get(body);
          body.getBodyFixedFrame().getTwistOfFrame(tempTwist);
          if (!doVelocityTerms)
@@ -138,7 +138,7 @@ public class InverseDynamicsCalculator
       {
          JointBasics joint = allJoints.get(jointIndex);
 
-         RigidBody successor = joint.getSuccessor();
+         RigidBodyBasics successor = joint.getSuccessor();
 
          Wrench jointWrench = jointWrenches.get(joint);
          jointWrench.setIncludingFrame(netWrenches.get(successor));
@@ -170,12 +170,12 @@ public class InverseDynamicsCalculator
 
    private void populateMapsAndLists()
    {
-      ArrayList<RigidBody> morgue = new ArrayList<RigidBody>();
+      ArrayList<RigidBodyBasics> morgue = new ArrayList<RigidBodyBasics>();
       morgue.add(rootBody);
 
       while (!morgue.isEmpty())
       {
-         RigidBody currentBody = morgue.get(0);
+         RigidBodyBasics currentBody = morgue.get(0);
 
          ReferenceFrame bodyFixedFrame = currentBody.getBodyFixedFrame();
 
@@ -197,7 +197,7 @@ public class InverseDynamicsCalculator
             {
                if (!jointsToIgnore.contains(joint))
                {
-                  RigidBody successor = joint.getSuccessor();
+                  RigidBodyBasics successor = joint.getSuccessor();
                   if (successor != null)
                   {
                      if (allBodiesExceptRoot.contains(successor))

@@ -19,7 +19,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -55,8 +55,8 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody chest = fullRobotModel.getChest();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics chest = fullRobotModel.getChest();
       OneDoFJoint[] spineJoints = ScrewTools.createOneDoFJointPath(pelvis, chest);
       double[] chestDesiredJointAccelerations = RandomNumbers.nextDoubleArray(random, spineJoints.length, 0.1);
       SpineDesiredAccelerationsMessage desiredAccelerationsMessage = HumanoidMessageTools.createSpineDesiredAccelerationsMessage(chestDesiredJointAccelerations);

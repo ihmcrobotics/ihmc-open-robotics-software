@@ -8,8 +8,8 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
@@ -18,15 +18,15 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 public class GravityCoriolisExternalWrenchMatrixCalculator
 {
-   private final RigidBody rootBody;
+   private final RigidBodyBasics rootBody;
 
    private final ArrayList<JointBasics> jointsToIgnore;
    private final ArrayList<JointBasics> allJoints = new ArrayList<>();
-   private final ArrayList<RigidBody> allBodiesExceptRoot = new ArrayList<>();
-   private final ArrayList<RigidBody> listOfBodiesWithExternalWrenches = new ArrayList<>();
+   private final ArrayList<RigidBodyBasics> allBodiesExceptRoot = new ArrayList<>();
+   private final ArrayList<RigidBodyBasics> listOfBodiesWithExternalWrenches = new ArrayList<>();
 
-   private final LinkedHashMap<RigidBody, Wrench> externalWrenches;
-   private final LinkedHashMap<RigidBody, Wrench> netWrenches = new LinkedHashMap<>();
+   private final LinkedHashMap<RigidBodyBasics, Wrench> externalWrenches;
+   private final LinkedHashMap<RigidBodyBasics, Wrench> netWrenches = new LinkedHashMap<>();
    private final LinkedHashMap<JointBasics, Wrench> jointWrenches = new LinkedHashMap<>();
    private final LinkedHashMap<JointBasics, DenseMatrix64F> coriolisWrenches = new LinkedHashMap<>();
 
@@ -41,13 +41,13 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
    private static final boolean DO_ACCELERATION_TERMS = false;
    private static final boolean USE_DESIRED_ACCELERATIONS = true;
 
-   public GravityCoriolisExternalWrenchMatrixCalculator(RigidBody body, ArrayList<JointBasics> jointsToIgnore, double gravity)
+   public GravityCoriolisExternalWrenchMatrixCalculator(RigidBodyBasics body, ArrayList<JointBasics> jointsToIgnore, double gravity)
    {
       this(body,ScrewTools.createGravitationalSpatialAcceleration(ScrewTools.getRootBody(body), gravity), new LinkedHashMap<>(), jointsToIgnore,
            DEFAULT_DO_VELOCITY_TERMS, DO_ACCELERATION_TERMS);
    }
 
-   public GravityCoriolisExternalWrenchMatrixCalculator(RigidBody body, SpatialAccelerationReadOnly rootAcceleration, HashMap<RigidBody, Wrench> externalWrenches,
+   public GravityCoriolisExternalWrenchMatrixCalculator(RigidBodyBasics body, SpatialAccelerationReadOnly rootAcceleration, HashMap<RigidBodyBasics, Wrench> externalWrenches,
                                                         ArrayList<JointBasics> jointsToIgnore, boolean doVelocityTerms, boolean doAccelerationTerms)
    {
       this(externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms, doAccelerationTerms,
@@ -55,7 +55,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
    }
 
    //// TODO: 12/31/16  remove explicit dependency on the spatial acceleration calculator
-   public GravityCoriolisExternalWrenchMatrixCalculator(HashMap<RigidBody, Wrench> externalWrenches, List<JointBasics> jointsToIgnore,
+   public GravityCoriolisExternalWrenchMatrixCalculator(HashMap<RigidBodyBasics, Wrench> externalWrenches, List<JointBasics> jointsToIgnore,
                                                         SpatialAccelerationCalculator spatialAccelerationCalculator)
    {
       this.rootBody = spatialAccelerationCalculator.getRootBody();
@@ -80,7 +80,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
       computeJointWrenchesAndTorques();
    }
 
-   public void setExternalWrench(RigidBody rigidBody, WrenchReadOnly externalWrench)
+   public void setExternalWrench(RigidBodyBasics rigidBody, WrenchReadOnly externalWrench)
    {
       externalWrenches.get(rigidBody).setIncludingFrame(externalWrench);
    }
@@ -99,7 +99,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
    {
       for (int bodyIndex = 0; bodyIndex < allBodiesExceptRoot.size(); bodyIndex++)
       {
-         RigidBody body = allBodiesExceptRoot.get(bodyIndex);
+         RigidBodyBasics body = allBodiesExceptRoot.get(bodyIndex);
          Wrench netWrench = netWrenches.get(body);
          body.getBodyFixedFrame().getTwistOfFrame(tempTwist);
          if (!doVelocityTerms)
@@ -116,7 +116,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
       {
          JointBasics joint = allJoints.get(jointIndex);
 
-         RigidBody successor = joint.getSuccessor();
+         RigidBodyBasics successor = joint.getSuccessor();
 
          Wrench jointWrench = jointWrenches.get(joint);
          jointWrench.setIncludingFrame(netWrenches.get(successor));
@@ -152,12 +152,12 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
 
    private void populateMapsAndLists()
    {
-      ArrayList<RigidBody> morgue = new ArrayList<RigidBody>();
+      ArrayList<RigidBodyBasics> morgue = new ArrayList<RigidBodyBasics>();
       morgue.add(rootBody);
 
       while (!morgue.isEmpty())
       {
-         RigidBody currentBody = morgue.get(0);
+         RigidBodyBasics currentBody = morgue.get(0);
 
          ReferenceFrame bodyFixedFrame = currentBody.getBodyFixedFrame();
 
@@ -179,7 +179,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
             {
                if (!jointsToIgnore.contains(joint))
                {
-                  RigidBody successor = joint.getSuccessor();
+                  RigidBodyBasics successor = joint.getSuccessor();
                   if (successor != null)
                   {
                      if (allBodiesExceptRoot.contains(successor))

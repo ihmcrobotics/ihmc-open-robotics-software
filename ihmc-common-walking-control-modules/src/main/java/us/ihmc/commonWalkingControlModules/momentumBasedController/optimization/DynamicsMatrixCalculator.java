@@ -8,8 +8,8 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.screwTheory.CompositeRigidBodyMassMatrixHandler;
@@ -53,7 +53,7 @@ public class DynamicsMatrixCalculator
    public DynamicsMatrixCalculator(ArrayList<JointBasics> jointsToIgnore, WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
    {
       FloatingInverseDynamicsJoint rootJoint = toolbox.getRootJoint();
-      RigidBody rootBody = toolbox.getRootBody();
+      RigidBodyBasics rootBody = toolbox.getRootBody();
       int rhoSize = wrenchMatrixCalculator.getRhoSize();
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
@@ -109,7 +109,7 @@ public class DynamicsMatrixCalculator
     * @param rigidBody body to which the wrench is applied.
     * @param externalWrench external wrench acting on body.
     */
-   public void setExternalWrench(RigidBody rigidBody, WrenchReadOnly externalWrench)
+   public void setExternalWrench(RigidBodyBasics rigidBody, WrenchReadOnly externalWrench)
    {
       coriolisMatrixCalculator.setExternalWrench(rigidBody, externalWrench);
    }

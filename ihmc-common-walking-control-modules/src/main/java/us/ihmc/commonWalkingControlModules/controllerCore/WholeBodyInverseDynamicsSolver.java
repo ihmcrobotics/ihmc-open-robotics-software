@@ -36,8 +36,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -183,8 +183,8 @@ public class WholeBodyInverseDynamicsSolver
 
       DenseMatrix64F jointAccelerations = momentumModuleSolution.getJointAccelerations();
       DenseMatrix64F rhoSolution = momentumModuleSolution.getRhoSolution();
-      Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
-      List<RigidBody> rigidBodiesWithExternalWrench = momentumModuleSolution.getRigidBodiesWithExternalWrench();
+      Map<RigidBodyBasics, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
+      List<RigidBodyBasics> rigidBodiesWithExternalWrench = momentumModuleSolution.getRigidBodiesWithExternalWrench();
       SpatialForceReadOnly centroidalMomentumRateSolution = momentumModuleSolution.getCentroidalMomentumRateSolution();
 
       yoAchievedMomentumRateLinear.setMatchingFrame(centroidalMomentumRateSolution.getLinearPart());
@@ -208,7 +208,7 @@ public class WholeBodyInverseDynamicsSolver
       {
          for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
          {
-            RigidBody rigidBody = rigidBodiesWithExternalWrench.get(i);
+            RigidBodyBasics rigidBody = rigidBodiesWithExternalWrench.get(i);
             inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenchSolution.get(rigidBody));
          }
 

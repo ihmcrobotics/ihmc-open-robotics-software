@@ -17,6 +17,7 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -38,7 +39,7 @@ public class SkippyRobotV2 extends Robot
    private final ReferenceFrame leftShoulderFrame;
    private final ReferenceFrame rightShoulderFrame;
 
-   private final RigidBody elevator;
+   private final RigidBodyBasics elevator;
    private final SixDoFJoint rootJoint;
 
    private static final boolean SHOW_MASS_ELIPSOIDS = false;
@@ -80,7 +81,7 @@ public class SkippyRobotV2 extends Robot
 
    private final EnumMap<SkippyJoint, OneDoFJoint> jointMap = new EnumMap<>(SkippyJoint.class);
    private final EnumMap<SkippyJoint, PinJoint> scsJointMap = new EnumMap<>(SkippyJoint.class);
-   private final EnumMap<SkippyBody, RigidBody> bodyMap = new EnumMap<>(SkippyBody.class);
+   private final EnumMap<SkippyBody, RigidBodyBasics> bodyMap = new EnumMap<>(SkippyBody.class);
    private final FloatingJoint scsRootJoint;
 
    public SkippyRobotV2()
@@ -94,12 +95,12 @@ public class SkippyRobotV2 extends Robot
 
       rootJoint = new SixDoFJoint("rootJoint", elevator);
       Matrix3D inertiaTorso = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(TORSO_MASS, TORSO_RADIUS, TORSO_LENGTH, Axis.Z);
-      RigidBody torso = ScrewTools.addRigidBody("torso", rootJoint, inertiaTorso, TORSO_MASS, new Vector3D(0.0, 0.0, 0.0));
+      RigidBodyBasics torso = ScrewTools.addRigidBody("torso", rootJoint, inertiaTorso, TORSO_MASS, new Vector3D(0.0, 0.0, 0.0));
       bodyMap.put(SkippyBody.TORSO, torso);
 
       RevoluteJoint idHipJoint = ScrewTools.addRevoluteJoint("idHipJoint", torso, new Vector3D(0.0, 0.0, -TORSO_LENGTH / 2.0), new Vector3D(1.0, 0.0, 0.0));
       Matrix3D inertiaLeg = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(LEG_MASS, LEG_RADIUS, LEG_LENGTH, Axis.Z);
-      RigidBody leg = ScrewTools.addRigidBody("leg", idHipJoint, inertiaLeg, LEG_MASS, new Vector3D(0.0, 0.0, -LEG_LENGTH / 2.0));
+      RigidBodyBasics leg = ScrewTools.addRigidBody("leg", idHipJoint, inertiaLeg, LEG_MASS, new Vector3D(0.0, 0.0, -LEG_LENGTH / 2.0));
       bodyMap.put(SkippyBody.LEG, leg);
       jointMap.put(SkippyJoint.HIP_PITCH, idHipJoint);
 
@@ -110,7 +111,7 @@ public class SkippyRobotV2 extends Robot
       RevoluteJoint idShoulderJoint = ScrewTools.addRevoluteJoint("idShoulderJoint", torso, new Vector3D(0.0, 0.0, TORSO_LENGTH / 2.0),
                                                                   new Vector3D(0.0, 1.0, 0.0));
       Matrix3D inertiaShoulder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(SHOULDER_MASS, SHOULDER_RADIUS, SHOULDER_LENGTH, Axis.X);
-      RigidBody shoulder = ScrewTools.addRigidBody("shoulder", idShoulderJoint, inertiaShoulder, SHOULDER_MASS, new Vector3D(0.0, 0.0, 0.0));
+      RigidBodyBasics shoulder = ScrewTools.addRigidBody("shoulder", idShoulderJoint, inertiaShoulder, SHOULDER_MASS, new Vector3D(0.0, 0.0, 0.0));
       jointMap.put(SkippyJoint.SHOULDER_ROLL, idShoulderJoint);
       bodyMap.put(SkippyBody.SHOULDER, shoulder);
 
@@ -285,7 +286,7 @@ public class SkippyRobotV2 extends Robot
       return footContactPoint.getPositionPoint();
    }
 
-   public RigidBody getSkippyFoot()
+   public RigidBodyBasics getSkippyFoot()
    {
       return bodyMap.get(SkippyBody.LEG);
    }
@@ -315,22 +316,22 @@ public class SkippyRobotV2 extends Robot
       return footReferenceFrame;
    }
 
-   public RigidBody getLegBody()
+   public RigidBodyBasics getLegBody()
    {
       return bodyMap.get(SkippyBody.LEG);
    }
 
-   public RigidBody getShoulderBody()
+   public RigidBodyBasics getShoulderBody()
    {
       return bodyMap.get(SkippyBody.SHOULDER);
    }
 
-   public RigidBody getElevator()
+   public RigidBodyBasics getElevator()
    {
       return elevator;
    }
 
-   public RigidBody getTorso()
+   public RigidBodyBasics getTorso()
    {
       return bodyMap.get(SkippyBody.TORSO);
    }

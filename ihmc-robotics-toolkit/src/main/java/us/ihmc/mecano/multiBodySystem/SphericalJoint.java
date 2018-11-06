@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
@@ -32,7 +33,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
 
    private List<Twist> unitTwists;
 
-   public SphericalJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
+   public SphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
    {
       super(name, predecessor, transformToParent);
       this.jointAngularVelocity = new FrameVector3D(afterJointFrame);
@@ -98,7 +99,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void setSuccessor(RigidBody successor)
+   public void setSuccessor(RigidBodyBasics successor)
    {
       this.successor = successor;
       setMotionSubspace();

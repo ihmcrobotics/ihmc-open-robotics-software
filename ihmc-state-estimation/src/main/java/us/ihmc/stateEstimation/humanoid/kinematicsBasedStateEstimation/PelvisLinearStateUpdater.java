@@ -18,7 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -69,7 +69,7 @@ public class PelvisLinearStateUpdater
    private final CenterOfMassCalculator centerOfMassCalculator;
    private final CenterOfMassJacobian centerOfMassJacobianWorld;
 
-   private final List<RigidBody> feet = new ArrayList<RigidBody>();
+   private final List<RigidBodyBasics> feet = new ArrayList<RigidBodyBasics>();
 
    private final YoFramePoint3D yoRootJointPosition = new YoFramePoint3D("estimatedRootJointPosition", worldFrame, registry);
    private final YoFrameVector3D yoRootJointVelocity = new YoFrameVector3D("estimatedRootJointVelocity", worldFrame, registry);
@@ -94,23 +94,23 @@ public class PelvisLinearStateUpdater
    private final BooleanProvider useGroundReactionForcesToComputeCenterOfMassVelocity;
    private final YoInteger numberOfEndEffectorsTrusted = new YoInteger("numberOfEndEffectorsTrusted", registry);
 
-   private final Map<RigidBody, YoDouble> footForcesZInPercentOfTotalForce = new LinkedHashMap<RigidBody, YoDouble>();
+   private final Map<RigidBodyBasics, YoDouble> footForcesZInPercentOfTotalForce = new LinkedHashMap<RigidBodyBasics, YoDouble>();
    private final DoubleProvider forceZInPercentThresholdToFilterFoot;
 
-   private final Map<RigidBody, FootSwitchInterface> footSwitches;
-   private final Map<RigidBody, Wrench> footWrenches = new LinkedHashMap<RigidBody, Wrench>();
+   private final Map<RigidBodyBasics, FootSwitchInterface> footSwitches;
+   private final Map<RigidBodyBasics, Wrench> footWrenches = new LinkedHashMap<RigidBodyBasics, Wrench>();
    private final DoubleProvider delayTimeBeforeTrustingFoot;
-   private final Map<RigidBody, GlitchFilteredYoBoolean> haveFeetHitGroundFiltered = new LinkedHashMap<>();
-   private final Map<RigidBody, YoBoolean> areFeetTrusted = new LinkedHashMap<>();
-   private final List<RigidBody> listOfTrustedFeet = new ArrayList<RigidBody>();
-   private final List<RigidBody> listOfUnTrustedFeet = new ArrayList<RigidBody>();
+   private final Map<RigidBodyBasics, GlitchFilteredYoBoolean> haveFeetHitGroundFiltered = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoBoolean> areFeetTrusted = new LinkedHashMap<>();
+   private final List<RigidBodyBasics> listOfTrustedFeet = new ArrayList<RigidBodyBasics>();
+   private final List<RigidBodyBasics> listOfUnTrustedFeet = new ArrayList<RigidBodyBasics>();
 
    private final ReferenceFrame rootJointFrame;
-   private final Map<RigidBody, ReferenceFrame> footFrames;
+   private final Map<RigidBodyBasics, ReferenceFrame> footFrames;
 
    private final double estimatorDT;
 
-   private final Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies;
+   private final Map<RigidBodyBasics, ? extends ContactablePlaneBody> feetContactablePlaneBodies;
 
    private final YoBoolean reinitialize = new YoBoolean("reinitialize", registry);
    private final BooleanProvider trustImuWhenNoFeetAreInContact;
@@ -149,9 +149,9 @@ public class PelvisLinearStateUpdater
    private final GlitchFilteredYoInteger lowestFootInContactIndex = new GlitchFilteredYoInteger("LowestFootInContact", lowestFootWindowSize, registry);
 
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
-         IMUBiasProvider imuBiasProvider, BooleanProvider cancelGravityFromAccelerationMeasurement, Map<RigidBody, FootSwitchInterface> footSwitches,
+         IMUBiasProvider imuBiasProvider, BooleanProvider cancelGravityFromAccelerationMeasurement, Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
          CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate, CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
-         Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies, double gravitationalAcceleration, StateEstimatorParameters stateEstimatorParameters,
+         Map<RigidBodyBasics, ? extends ContactablePlaneBody> feetContactablePlaneBodies, double gravitationalAcceleration, StateEstimatorParameters stateEstimatorParameters,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
@@ -164,9 +164,9 @@ public class PelvisLinearStateUpdater
       rootJoint = inverseDynamicsStructure.getRootJoint();
       rootJointFrame = rootJoint.getFrameAfterJoint();
 
-      footFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
+      footFrames = new LinkedHashMap<RigidBodyBasics, ReferenceFrame>();
 
-      RigidBody elevator = inverseDynamicsStructure.getElevator();
+      RigidBodyBasics elevator = inverseDynamicsStructure.getElevator();
       this.centerOfMassCalculator = new CenterOfMassCalculator(elevator, rootJointFrame);
       this.centerOfMassJacobianWorld = new CenterOfMassJacobian(elevator);
 
@@ -220,7 +220,7 @@ public class PelvisLinearStateUpdater
    {
       for (int i = 0; i < feet.size(); i++)
       {
-         RigidBody foot = feet.get(i);
+         RigidBodyBasics foot = feet.get(i);
          ReferenceFrame footFrame = feetContactablePlaneBodies.get(foot).getSoleFrame();
          footFrames.put(foot, footFrame);
 
@@ -257,7 +257,7 @@ public class PelvisLinearStateUpdater
 
       if (!initializeToActual && DRCKinematicsBasedStateEstimator.INITIALIZE_HEIGHT_WITH_FOOT)
       {
-         RigidBody foot = feet.get(0);
+         RigidBodyBasics foot = feet.get(0);
          footPositionInWorld.setToZero(footFrames.get(foot));
          footPositionInWorld.changeFrame(worldFrame);
          yoInitialFootPosition.set(footPositionInWorld);
@@ -394,7 +394,7 @@ public class PelvisLinearStateUpdater
 
       for (int i = 0; i < feet.size(); i++)
       {
-         RigidBody foot = feet.get(i);
+         RigidBodyBasics foot = feet.get(i);
          haveFeetHitGroundFiltered.get(foot).setWindowSize(windowSize);
 
          if (footSwitches.get(foot).hasFootHitGround())
@@ -417,7 +417,7 @@ public class PelvisLinearStateUpdater
          {
             for (int i = 0; i < feet.size(); i++)
             {
-               RigidBody foot = feet.get(i);
+               RigidBodyBasics foot = feet.get(i);
                boolean isFootOnGround = haveFeetHitGroundFiltered.get(foot).getBooleanValue();
                areFeetTrusted.get(foot).set(isFootOnGround);
             }
@@ -427,11 +427,11 @@ public class PelvisLinearStateUpdater
       // Else if there is a foot with a force past the threshold trust the force and not the CoP
       else
       {
-         RigidBody trustedFoot = null;
+         RigidBodyBasics trustedFoot = null;
 
          for (int i = 0; i < feet.size(); i++)
          {
-            RigidBody foot = feet.get(i);
+            RigidBodyBasics foot = feet.get(i);
             if (footSwitches.get(foot).getForceMagnitudePastThreshhold())
             {
                trustedFoot = foot;
@@ -444,7 +444,7 @@ public class PelvisLinearStateUpdater
          {
             for (int i = 0; i < feet.size(); i++)
             {
-               RigidBody foot = feet.get(i);
+               RigidBodyBasics foot = feet.get(i);
                areFeetTrusted.get(foot).set(foot == trustedFoot);
             }
          }
@@ -456,7 +456,7 @@ public class PelvisLinearStateUpdater
          {
             for (int i = 0; i < feet.size(); i++)
             {
-               RigidBody foot = feet.get(i);
+               RigidBodyBasics foot = feet.get(i);
                areFeetTrusted.get(foot).set(false);
             }
          }
@@ -464,7 +464,7 @@ public class PelvisLinearStateUpdater
          {
             for (int i = 0; i < feet.size(); i++)
             {
-               RigidBody foot = feet.get(i);
+               RigidBodyBasics foot = feet.get(i);
                if (areFeetTrusted.get(foot).getBooleanValue())
                   numberOfEndEffectorsTrusted++;
             }
@@ -508,7 +508,7 @@ public class PelvisLinearStateUpdater
       double lowestFootZ = Double.MAX_VALUE;
       for (int footIdx = 0; footIdx < feet.size(); footIdx++)
       {
-         RigidBody foot = feet.get(footIdx);
+         RigidBodyBasics foot = feet.get(footIdx);
          tmpFramePoint.setToZero(foot.getBodyFixedFrame());
          tmpFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
          double footZ = tmpFramePoint.getZ();
@@ -530,7 +530,7 @@ public class PelvisLinearStateUpdater
       double totalForceZ = 0.0;
       for (int i = 0; i < feet.size(); i++)
       {
-         RigidBody foot = feet.get(i);
+         RigidBodyBasics foot = feet.get(i);
          Wrench footWrench = footWrenches.get(foot);
          footSwitches.get(foot).computeAndPackFootWrench(footWrench);
          totalForceZ += footWrench.getLinearPartZ();
@@ -538,7 +538,7 @@ public class PelvisLinearStateUpdater
 
       for (int i = 0; i < feet.size(); i++)
       {
-         RigidBody foot = feet.get(i);
+         RigidBodyBasics foot = feet.get(i);
          Wrench footWrench = footWrenches.get(foot);
          footForcesZInPercentOfTotalForce.get(foot).set(footWrench.getLinearPartZ() / totalForceZ);
 
@@ -661,7 +661,7 @@ public class PelvisLinearStateUpdater
 
       for (int i = 0; i < feet.size(); i++)
       {
-         RigidBody foot = feet.get(i);
+         RigidBodyBasics foot = feet.get(i);
          Wrench footWrench = footWrenches.get(foot);
          footSwitches.get(foot).computeAndPackFootWrench(footWrench);
          tempFootForce.setIncludingFrame(footWrench.getLinearPart());
@@ -682,7 +682,7 @@ public class PelvisLinearStateUpdater
 
       for (int i = 0; i < feet.size(); i++)
       {
-         RigidBody foot = feet.get(i);
+         RigidBodyBasics foot = feet.get(i);
          if (areFeetTrusted.get(foot).getBooleanValue())
             listOfTrustedFeet.add(foot);
          else
@@ -710,7 +710,7 @@ public class PelvisLinearStateUpdater
       comVelocityToPack.setIncludingFrame(yoCenterOfMassVelocity);
    }
 
-   public List<RigidBody> getCurrentListOfTrustedFeet()
+   public List<RigidBodyBasics> getCurrentListOfTrustedFeet()
    {
       return listOfTrustedFeet;
    }

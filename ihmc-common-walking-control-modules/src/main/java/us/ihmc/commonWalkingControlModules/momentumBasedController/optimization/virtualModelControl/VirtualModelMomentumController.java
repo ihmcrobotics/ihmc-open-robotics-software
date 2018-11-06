@@ -12,8 +12,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -150,7 +150,7 @@ public class VirtualModelMomentumController
     *
     * @return true if the wrench was successfully added.
     */
-   public boolean addExternalWrench(RigidBody base, RigidBody endEffector, WrenchReadOnly wrench, SelectionMatrix6D selectionMatrix)
+   public boolean addExternalWrench(RigidBodyBasics base, RigidBodyBasics endEffector, WrenchReadOnly wrench, SelectionMatrix6D selectionMatrix)
    {
       if (wrench.getLinearPart().length() < 1e-5 && wrench.getAngularPart().length() < 1e-5)
          return false;
@@ -207,7 +207,7 @@ public class VirtualModelMomentumController
     *
     * @return true if the wrench was successfully added.
     */
-   public boolean addExternalWrench(RigidBody base, RigidBody endEffector, Wrench wrench)
+   public boolean addExternalWrench(RigidBodyBasics base, RigidBodyBasics endEffector, Wrench wrench)
    {
       return addExternalWrench(base, endEffector, wrench, defaultSelectionMatrix);
    }

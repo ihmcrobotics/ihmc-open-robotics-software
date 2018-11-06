@@ -35,6 +35,7 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -46,11 +47,11 @@ public class ScrewToolsTest
    private static final Vector3D Y = new Vector3D(0.0, 1.0, 0.0);
    private static final Vector3D Z = new Vector3D(0.0, 0.0, 1.0);
 
-   private RigidBody elevator;
+   private RigidBodyBasics elevator;
    private Random random;
-   private List<RigidBody> firstLevelSubTrees;
-   private List<RigidBody> secondLevelSubTrees;
-   private Set<RigidBody> exclusions;
+   private List<RigidBodyBasics> firstLevelSubTrees;
+   private List<RigidBodyBasics> secondLevelSubTrees;
+   private Set<RigidBodyBasics> exclusions;
    private Set<JointBasics> exclusionsJoints;
    private ArrayList<RevoluteJoint> joints;
 
@@ -66,14 +67,14 @@ public class ScrewToolsTest
 
       setUpRandomTree(elevator);
 
-      firstLevelSubTrees = new ArrayList<RigidBody>();
+      firstLevelSubTrees = new ArrayList<RigidBodyBasics>();
 
       for (JointBasics childJoint : elevator.getChildrenJoints())
       {
          firstLevelSubTrees.add(childJoint.getSuccessor());
       }
 
-      secondLevelSubTrees = new ArrayList<RigidBody>();
+      secondLevelSubTrees = new ArrayList<RigidBodyBasics>();
       for(int i = 0; i < 3; i++)
       {
          for (JointBasics childJoint : firstLevelSubTrees.get(i).getChildrenJoints())
@@ -82,7 +83,7 @@ public class ScrewToolsTest
          }
       }
 
-      exclusions = new LinkedHashSet<RigidBody>();
+      exclusions = new LinkedHashSet<RigidBodyBasics>();
       exclusionsJoints = new LinkedHashSet<JointBasics>();
       exclusions.add(firstLevelSubTrees.get(1));
 
@@ -92,8 +93,8 @@ public class ScrewToolsTest
       }
 
       JointBasics[] subtreeJoints = ScrewTools.computeSubtreeJoints(firstLevelSubTrees.get(2));
-      RigidBody[] lastSubTree = ScrewTools.computeSuccessors(subtreeJoints);
-      RigidBody halfwayDownLastSubTree = lastSubTree[3];
+      RigidBodyBasics[] lastSubTree = ScrewTools.computeSuccessors(subtreeJoints);
+      RigidBodyBasics halfwayDownLastSubTree = lastSubTree[3];
       exclusions.add(halfwayDownLastSubTree);
 
       for (JointBasics excludedJoint : halfwayDownLastSubTree.getChildrenJoints())
@@ -102,7 +103,7 @@ public class ScrewToolsTest
       }
    }
 
-   private void setUpRandomTree(RigidBody elevator)
+   private void setUpRandomTree(RigidBodyBasics elevator)
    {
       joints = new ArrayList<RevoluteJoint>();
 
@@ -116,13 +117,13 @@ public class ScrewToolsTest
       ScrewTestTools.createRandomChainRobot("chainC", joints, elevator, jointAxes3, random);
    }
 
-   private Set<RigidBody> getExcludedRigidBodies()
+   private Set<RigidBodyBasics> getExcludedRigidBodies()
    {
-      Set<RigidBody> excludedBodies = new LinkedHashSet<RigidBody>();
-      for (RigidBody rigidBody : exclusions)
+      Set<RigidBodyBasics> excludedBodies = new LinkedHashSet<RigidBodyBasics>();
+      for (RigidBodyBasics rigidBody : exclusions)
       {
          excludedBodies.add(rigidBody);
-         RigidBody[] subTree = ScrewTools.computeSuccessors(ScrewTools.computeSubtreeJoints(rigidBody));
+         RigidBodyBasics[] subTree = ScrewTools.computeSuccessors(ScrewTools.computeSubtreeJoints(rigidBody));
          excludedBodies.addAll(Arrays.asList(subTree));
       }
 
@@ -131,9 +132,9 @@ public class ScrewToolsTest
 
    private Set<JointBasics> getExcludedJoints()
    {
-      Set<RigidBody> excludedBodies = getExcludedRigidBodies();
+      Set<RigidBodyBasics> excludedBodies = getExcludedRigidBodies();
       Set<JointBasics> excludedJoints = new LinkedHashSet<JointBasics>();
-      for (RigidBody rigidBody : excludedBodies)
+      for (RigidBodyBasics rigidBody : excludedBodies)
       {
          excludedJoints.addAll(rigidBody.getChildrenJoints());
       }
@@ -150,8 +151,8 @@ public class ScrewToolsTest
       chain.setRandomPositionsAndVelocities(random);
 
       JointBasics[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
-      RigidBody[] partialBodiesArray = ScrewTools.computeSubtreeSuccessors(chain.getElevator());
-      RigidBody[] bodiesArray = new RigidBody[partialBodiesArray.length + 1];
+      RigidBodyBasics[] partialBodiesArray = ScrewTools.computeSubtreeSuccessors(chain.getElevator());
+      RigidBodyBasics[] bodiesArray = new RigidBodyBasics[partialBodiesArray.length + 1];
       bodiesArray[0] = chain.getElevator();
       for(int i = 0; i < partialBodiesArray.length; i++)
       {
@@ -159,7 +160,7 @@ public class ScrewToolsTest
       }
 
       String jointName = "joint";
-      RigidBody parentBody = bodiesArray[bodiesArray.length - 1];
+      RigidBodyBasics parentBody = bodiesArray[bodiesArray.length - 1];
       Vector3D jointOffset = RandomGeometry.nextVector3D(random, 5.0);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
@@ -175,7 +176,7 @@ public class ScrewToolsTest
    public void testAddRevoluteJoint_String_RigidBody_Transform3D_Vector3d()
    {
       String jointName = "joint";
-      RigidBody parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
+      RigidBodyBasics parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
       RigidBodyTransform transformToParent = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
@@ -191,7 +192,7 @@ public class ScrewToolsTest
    public void testAddPrismaticJoint_String_RigidBody_Vector3d_Vector3d()
    {
       String jointName = "joint";
-      RigidBody parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
+      RigidBodyBasics parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
       Vector3D jointOffset = RandomGeometry.nextVector3D(random, 5.0);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
@@ -206,7 +207,7 @@ public class ScrewToolsTest
    public void testAddPrismaticJoint_String_RigidBody_Transform3D_Vector3d()
    {
       String jointName = "joint";
-      RigidBody parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
+      RigidBodyBasics parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
       RigidBodyTransform transformToParent = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
@@ -221,12 +222,12 @@ public class ScrewToolsTest
    public void testAddRigidBody_String_InverseDynamicsJoint_Matrix3d_double_Vector3d()
    {
       String name = "body";
-      RigidBody predecessor = new RigidBody("Predecessor", theFrame);
+      RigidBodyBasics predecessor = new RigidBody("Predecessor", theFrame);
       PlanarJoint parentJoint = new PlanarJoint(name, predecessor);
       Matrix3D momentOfInertia = new Matrix3D();
       double mass = random.nextDouble();
 
-      RigidBody body = ScrewTools.addRigidBody(name, parentJoint, momentOfInertia, mass, X);
+      RigidBodyBasics body = ScrewTools.addRigidBody(name, parentJoint, momentOfInertia, mass, X);
 
       assertEquals("Should be equal", name, body.getName());
       assertTrue(parentJoint.equals(body.getParentJoint()));
@@ -237,13 +238,13 @@ public class ScrewToolsTest
    public void testAddRigidBody_String_InverseDynamicsJoint_Matrix3d_double_Transform3D()
    {
       String name = "body";
-      RigidBody predecessor = new RigidBody("Predecessor", theFrame);
+      RigidBodyBasics predecessor = new RigidBody("Predecessor", theFrame);
       PlanarJoint parentJoint = new PlanarJoint(name, predecessor);
       Matrix3D momentOfInertia = new Matrix3D();
       double mass = random.nextDouble();
       RigidBodyTransform inertiaPose = new RigidBodyTransform();
 
-      RigidBody body = ScrewTools.addRigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
+      RigidBodyBasics body = ScrewTools.addRigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
 
       assertEquals("Should be equal", name, body.getName());
       assertTrue(parentJoint.equals(body.getParentJoint()));
@@ -254,14 +255,14 @@ public class ScrewToolsTest
    public void testComputeSuccessors()
    {  
       int numJoints = 3;
-      RigidBody[] bodyArray = new RigidBody[numJoints];
+      RigidBodyBasics[] bodyArray = new RigidBodyBasics[numJoints];
       for (int i = 0; i < numJoints; i++)
       {
          JointBasics joint = joints.get(i);
          bodyArray[i] = joint.getSuccessor();
       }
 
-      RigidBody[] bodies = ScrewTools.computeSuccessors(joints.get(0), joints.get(1), joints.get(2));
+      RigidBodyBasics[] bodies = ScrewTools.computeSuccessors(joints.get(0), joints.get(1), joints.get(2));
 
       assertEquals("Should be equal", bodyArray.length, bodies.length);
       for(int i = 0; i < bodies.length; i++)
@@ -274,10 +275,10 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testComputeSubtreeSuccessors_InverseDynamicsJoint_RigidBody()
    {
-      RigidBody[] bodies = ScrewTools.computeSubtreeSuccessors(elevator);
+      RigidBodyBasics[] bodies = ScrewTools.computeSubtreeSuccessors(elevator);
 
       Set<JointBasics> jointsToExclude = new HashSet<JointBasics>();
-      RigidBody[] subtreeSuccessors = ScrewTools.computeSubtreeSuccessors(jointsToExclude, elevator);
+      RigidBodyBasics[] subtreeSuccessors = ScrewTools.computeSubtreeSuccessors(jointsToExclude, elevator);
       assertEquals("Should be equal", bodies.length, subtreeSuccessors.length);
       for(int i = 0; i < bodies.length; i++)
       {
@@ -293,10 +294,10 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testComputeSubtreeSuccessors_RigidBody()
    {
-      RigidBody[] successors = ScrewTools.computeSubtreeSuccessors(elevator);
+      RigidBodyBasics[] successors = ScrewTools.computeSubtreeSuccessors(elevator);
 
       Set<JointBasics> jointsToExclude = new HashSet<JointBasics>();
-      RigidBody[] otherSuccessors = ScrewTools.computeSubtreeSuccessors(jointsToExclude, elevator);
+      RigidBodyBasics[] otherSuccessors = ScrewTools.computeSubtreeSuccessors(jointsToExclude, elevator);
 
       assertEquals("Should be equal", successors.length, otherSuccessors.length);
       for(int i = 0; i < successors.length; i++)
@@ -312,11 +313,11 @@ public class ScrewToolsTest
       List<JointBasics> jointsList = new ArrayList<JointBasics>();
       jointsList.addAll(elevator.getChildrenJoints());
 
-      RigidBody[] successors = ScrewTools.computeSubtreeSuccessors(jointsList.get(0), jointsList.get(1));
+      RigidBodyBasics[] successors = ScrewTools.computeSubtreeSuccessors(jointsList.get(0), jointsList.get(1));
 
 
       Set<JointBasics> jointsToExclude = new HashSet<JointBasics>();
-      RigidBody[] otherSuccessors = ScrewTools.computeSubtreeSuccessors(jointsToExclude, elevator, elevator);
+      RigidBodyBasics[] otherSuccessors = ScrewTools.computeSubtreeSuccessors(jointsToExclude, elevator, elevator);
 
       assertEquals("Should be equal", successors.length, otherSuccessors.length);
       for(int i = 0; i < successors.length; i++)
@@ -331,7 +332,7 @@ public class ScrewToolsTest
    {
       int numberOfBodiesOnChain = 6;
       int numberOfBodies = 16;
-      RigidBody[] successors = ScrewTools.computeSupportAndSubtreeSuccessors(secondLevelSubTrees.get(0));
+      RigidBodyBasics[] successors = ScrewTools.computeSupportAndSubtreeSuccessors(secondLevelSubTrees.get(0));
       assertEquals(numberOfBodiesOnChain - 1, successors.length);
 
       successors = ScrewTools.computeSupportAndSubtreeSuccessors(elevator);
@@ -370,7 +371,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testComputeSubtreeJoints_RigidBody()
    {
-      List<RigidBody> bodies = new ArrayList<RigidBody>();
+      List<RigidBodyBasics> bodies = new ArrayList<RigidBodyBasics>();
       bodies.add(elevator);
       bodies.add(elevator);
 
@@ -388,21 +389,21 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testComputeSubtreeJoints_RigidBodyLIST()
    {
-      ArrayList<RigidBody> rootBodies = new ArrayList<RigidBody>();
+      ArrayList<RigidBodyBasics> rootBodies = new ArrayList<RigidBodyBasics>();
       rootBodies.add(elevator);
       JointBasics[] subtreeJoints = ScrewTools.computeSubtreeJoints(rootBodies);
 
       ArrayList<JointBasics> subtree = new ArrayList<JointBasics>();
-      ArrayList<RigidBody> rigidBodyStack = new ArrayList<RigidBody>();
+      ArrayList<RigidBodyBasics> rigidBodyStack = new ArrayList<RigidBodyBasics>();
       rigidBodyStack.addAll(rootBodies);
 
       while (!rigidBodyStack.isEmpty())
       {
-         RigidBody currentBody = rigidBodyStack.remove(0);
+         RigidBodyBasics currentBody = rigidBodyStack.remove(0);
          List<JointBasics> childrenJoints = currentBody.getChildrenJoints();
          for (JointBasics joint : childrenJoints)
          {
-            RigidBody successor = joint.getSuccessor();
+            RigidBodyBasics successor = joint.getSuccessor();
             rigidBodyStack.add(successor);
             subtree.add(joint);
          }
@@ -419,7 +420,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testGetRootBody()
    {
-      RigidBody randomBody = ScrewTools.getRootBody(joints.get(joints.size() - 1).getPredecessor());
+      RigidBodyBasics randomBody = ScrewTools.getRootBody(joints.get(joints.size() - 1).getPredecessor());
       assertTrue(randomBody.isRootBody());
    }
 
@@ -428,8 +429,8 @@ public class ScrewToolsTest
    public void testCreateParentMap()
    {
       int numberOfBodies = ScrewTools.computeSubtreeSuccessors(elevator).length + 1;
-      RigidBody[] mostBodies = ScrewTools.computeSubtreeSuccessors(elevator);
-      RigidBody[] allRigidBodiesInOrder = new RigidBody[numberOfBodies];
+      RigidBodyBasics[] mostBodies = ScrewTools.computeSubtreeSuccessors(elevator);
+      RigidBodyBasics[] allRigidBodiesInOrder = new RigidBodyBasics[numberOfBodies];
       allRigidBodiesInOrder[0] = elevator;
       for(int i = 0; i < numberOfBodies -1; i++)
       {
@@ -469,14 +470,14 @@ public class ScrewToolsTest
    public void testCreateJointPath()
    {
       int numberOfJoints = joints.size(), numberOfBodies = numberOfJoints + 1;
-      RigidBody[] allBodies = new RigidBody[numberOfBodies];
+      RigidBodyBasics[] allBodies = new RigidBodyBasics[numberOfBodies];
       allBodies[0] = elevator;
       for(int i = 0; i < numberOfJoints; i++)
       {
          allBodies[i+1] = joints.get(i).getSuccessor();
       }
 
-      RigidBody start = allBodies[0] , end = allBodies[allBodies.length - 1];
+      RigidBodyBasics start = allBodies[0] , end = allBodies[allBodies.length - 1];
       JointBasics[] jointPath = ScrewTools.createJointPath(start, end);
       for(int i = 0; i < jointPath.length; i++)
       {
@@ -489,17 +490,17 @@ public class ScrewToolsTest
    public void testIsAncestor()
    {
       int numberOfJoints = joints.size(), numberOfBodies = numberOfJoints + 1;
-      RigidBody[] allBodies = new RigidBody[numberOfBodies];
+      RigidBodyBasics[] allBodies = new RigidBodyBasics[numberOfBodies];
       allBodies[0] = elevator;
       for(int i = 0; i < numberOfJoints; i++)
       {
          allBodies[i+1] = joints.get(i).getSuccessor();
       }
 
-      RigidBody d0 = allBodies[0]; //elevator
-      RigidBody d1 = allBodies[1]; //chainAbody0
-      RigidBody d2 = allBodies[2]; //chainAbody1
-      RigidBody d3 = allBodies[3]; //chainAbody2
+      RigidBodyBasics d0 = allBodies[0]; //elevator
+      RigidBodyBasics d1 = allBodies[1]; //chainAbody0
+      RigidBodyBasics d2 = allBodies[2]; //chainAbody1
+      RigidBodyBasics d3 = allBodies[3]; //chainAbody2
 
       assertTrue(ScrewTools.isAncestor(d0, d0)); //self
       assertTrue(ScrewTools.isAncestor(d3, d0)); //ancestor
@@ -511,17 +512,17 @@ public class ScrewToolsTest
    public void testComputeDistanceToAncestor()
    {
       int numberOfJoints = joints.size(), numberOfBodies = numberOfJoints + 1;
-      RigidBody[] allBodies = new RigidBody[numberOfBodies];
+      RigidBodyBasics[] allBodies = new RigidBodyBasics[numberOfBodies];
       allBodies[0] = elevator;
       for(int i = 0; i < numberOfJoints; i++)
       {
          allBodies[i+1] = joints.get(i).getSuccessor();
       }
 
-      RigidBody d0 = allBodies[0]; //elevator
-      RigidBody d1 = allBodies[1]; //chainAbody0
-      RigidBody d2 = allBodies[2]; //chainAbody1
-      RigidBody d3 = allBodies[3]; //chainAbody2
+      RigidBodyBasics d0 = allBodies[0]; //elevator
+      RigidBodyBasics d1 = allBodies[1]; //chainAbody0
+      RigidBodyBasics d2 = allBodies[2]; //chainAbody1
+      RigidBodyBasics d3 = allBodies[3]; //chainAbody2
 
       assertEquals(0, ScrewTools.computeDistanceToAncestor(d0, d0)); //self
       assertEquals(3, ScrewTools.computeDistanceToAncestor(d3, d0)); //ancestor
@@ -611,8 +612,8 @@ public class ScrewToolsTest
       chain.setRandomPositionsAndVelocities(random);
 
       JointBasics[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
-      RigidBody[] partialBodiesArray = ScrewTools.computeSubtreeSuccessors(chain.getElevator());
-      RigidBody[] bodiesArray = new RigidBody[partialBodiesArray.length + 1];
+      RigidBodyBasics[] partialBodiesArray = ScrewTools.computeSubtreeSuccessors(chain.getElevator());
+      RigidBodyBasics[] bodiesArray = new RigidBodyBasics[partialBodiesArray.length + 1];
       bodiesArray[0] = chain.getElevator();
       for(int i = 0; i < partialBodiesArray.length; i++)
       {
@@ -634,8 +635,8 @@ public class ScrewToolsTest
       JointBasics[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
       ArrayList<JointBasics> jointsList = new ArrayList<JointBasics>(jointsArray.length);
 
-      RigidBody[] partialBodiesArray = ScrewTools.computeSubtreeSuccessors(chain.getElevator());
-      RigidBody[] bodiesArray = new RigidBody[partialBodiesArray.length + 1];
+      RigidBodyBasics[] partialBodiesArray = ScrewTools.computeSubtreeSuccessors(chain.getElevator());
+      RigidBodyBasics[] bodiesArray = new RigidBodyBasics[partialBodiesArray.length + 1];
       bodiesArray[0] = chain.getElevator();
       for(int i = 0; i < partialBodiesArray.length; i++)
       {
@@ -876,14 +877,14 @@ public class ScrewToolsTest
    public void testFindRigidBodiesWithNames_RigidBody_String()
    {
       int numberOfJoints = joints.size();
-      RigidBody[] allBodies = new RigidBody[joints.size() + 1];
+      RigidBodyBasics[] allBodies = new RigidBodyBasics[joints.size() + 1];
       allBodies[0] = elevator;
       for(int i = 0; i < numberOfJoints; i++)
       {
          allBodies[i+1] = joints.get(i).getSuccessor();
       }
 
-      RigidBody[] matches;
+      RigidBodyBasics[] matches;
       try
       {
          matches = ScrewTools.findRigidBodiesWithNames(allBodies, "elevatorOOPS");
@@ -906,12 +907,12 @@ public class ScrewToolsTest
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       JointBasics[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
 
-      LinkedHashMap<RigidBody, Wrench> external = new LinkedHashMap<RigidBody, Wrench>();
-      LinkedHashMap<RigidBody, Wrench> toAdd = new LinkedHashMap<RigidBody, Wrench>();
+      LinkedHashMap<RigidBodyBasics, Wrench> external = new LinkedHashMap<RigidBodyBasics, Wrench>();
+      LinkedHashMap<RigidBodyBasics, Wrench> toAdd = new LinkedHashMap<RigidBodyBasics, Wrench>();
 
-      RigidBody rigidBody1 = jointsArray[2].getSuccessor(); //testBody1
-      RigidBody rigidBody2 = jointsArray[0].getSuccessor(); //rootBody
-      RigidBody rigidBody3 = jointsArray[4].getSuccessor(); //testBody3
+      RigidBodyBasics rigidBody1 = jointsArray[2].getSuccessor(); //testBody1
+      RigidBodyBasics rigidBody2 = jointsArray[0].getSuccessor(); //rootBody
+      RigidBodyBasics rigidBody3 = jointsArray[4].getSuccessor(); //testBody3
 
       ReferenceFrame frame1 = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame1", theFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
 

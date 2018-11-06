@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 
@@ -13,7 +14,7 @@ public class PrismaticJoint extends OneDoFJoint
    private final FrameVector3D jointAxis;
    private final Vector3D translation = new Vector3D();
 
-   public PrismaticJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
+   public PrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
    {
       super(name, predecessor, transformToParent);
       this.jointAxis = new FrameVector3D(beforeJointFrame, jointAxis);
@@ -29,7 +30,7 @@ public class PrismaticJoint extends OneDoFJoint
    }
 
    @Override
-   public void setSuccessor(RigidBody successor)
+   public void setSuccessor(RigidBodyBasics successor)
    {
       this.successor = successor;
 

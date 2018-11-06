@@ -21,7 +21,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
@@ -158,12 +158,12 @@ public class VirtualModelControlOptimizationControlModule
 
       DenseMatrix64F rhoSolution = qpSolver.getRhos();
 
-      Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
+      Map<RigidBodyBasics, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
       SpatialForceReadOnly centroidalMomentumRateSolution = computeCentroidalMomentumRateSolution(rhoSolution);
-      Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
-      List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
+      Map<RigidBodyBasics, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
+      List<RigidBodyBasics> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
 
       virtualModelControlSolution.setExternalWrenchSolution(rigidBodiesWithExternalWrench, externalWrenchSolution);
       virtualModelControlSolution.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
@@ -189,7 +189,7 @@ public class VirtualModelControlOptimizationControlModule
       wrenchMatrixCalculator.submitPlaneContactStateCommand(command);
    }
 
-   public void submitExternalWrench(RigidBody rigidBody, WrenchReadOnly wrench)
+   public void submitExternalWrench(RigidBodyBasics rigidBody, WrenchReadOnly wrench)
    {
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }

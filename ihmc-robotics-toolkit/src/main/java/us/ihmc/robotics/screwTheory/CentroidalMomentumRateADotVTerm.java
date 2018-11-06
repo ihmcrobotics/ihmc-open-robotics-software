@@ -5,8 +5,8 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
@@ -21,7 +21,7 @@ public class CentroidalMomentumRateADotVTerm
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final SpatialAcceleration tempSpatialAcceleration;
    private final CentroidalMomentumMatrix centroidalMomentumMatrix;
-   private final RigidBody rootBody;
+   private final RigidBodyBasics rootBody;
    private final DenseMatrix64F v;
    private final double robotMass;
    private final DenseMatrix64F aDotV;
@@ -34,7 +34,7 @@ public class CentroidalMomentumRateADotVTerm
    private final Vector3D tempVector;
    private final Momentum leftSide;
 
-   public CentroidalMomentumRateADotVTerm(RigidBody rootBody, ReferenceFrame centerOfMassFrame, CentroidalMomentumMatrix centroidalMomentumMatrix,
+   public CentroidalMomentumRateADotVTerm(RigidBodyBasics rootBody, ReferenceFrame centerOfMassFrame, CentroidalMomentumMatrix centroidalMomentumMatrix,
          double robotMass, DenseMatrix64F v)
    {
       this.jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(rootBody);
@@ -75,7 +75,7 @@ public class CentroidalMomentumRateADotVTerm
 
       for (int i = 0; i < jointsInOrder.length; i++)
       {
-         RigidBody rigidBody = jointsInOrder[i].getSuccessor();
+         RigidBodyBasics rigidBody = jointsInOrder[i].getSuccessor();
 
          SpatialInertiaBasics inertia = rigidBody.getInertia(); // I
 

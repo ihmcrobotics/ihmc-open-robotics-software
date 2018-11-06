@@ -16,8 +16,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
@@ -41,7 +41,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
    private final ReferenceFrame matrixFrame;
    private final JointBasics[] joints;
    private final RecursionStep initialRecursionStep;
-   private final Map<RigidBody, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
 
    private final DenseMatrix64F centroidalMomentumMatrix;
    private final SpatialForce biasSpatialForce = new SpatialForce();
@@ -67,7 +67,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
    private boolean isCenterOfMassVelocityUpToDate = false;
    private boolean isCenterOfMassAccelerationUpToDate = false;
 
-   public CentroidalMomentumRateTermCalculator(RigidBody rootBody, ReferenceFrame matrixFrame)
+   public CentroidalMomentumRateTermCalculator(RigidBodyBasics rootBody, ReferenceFrame matrixFrame)
    {
       this(ScrewTools.computeSubtreeJoints(rootBody), matrixFrame);
    }
@@ -81,7 +81,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
    {
       this.matrixFrame = matrixFrame;
 
-      RigidBody rootBody = ScrewTools.getRootBody(jointsToConsider[0].getPredecessor());
+      RigidBodyBasics rootBody = ScrewTools.getRootBody(jointsToConsider[0].getPredecessor());
       initialRecursionStep = new RecursionStep(rootBody, null, matrixFrame);
       rigidBodyToRecursionStepMap.put(rootBody, initialRecursionStep);
       joints = jointsToConsider;
@@ -105,7 +105,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
          if (!jointsToConsider.contains(childJoint))
             continue;
 
-         RigidBody childBody = childJoint.getSuccessor();
+         RigidBodyBasics childBody = childJoint.getSuccessor();
          if (childBody != null)
          {
             RecursionStep child = new RecursionStep(childBody, parent, matrixFrame);
@@ -236,7 +236,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
 
       for (JointBasics joint : joints)
       {
-         RigidBody successor = joint.getSuccessor();
+         RigidBodyBasics successor = joint.getSuccessor();
          RecursionStep recursionStep = rigidBodyToRecursionStepMap.get(successor);
 
          CommonOps.insert(recursionStep.centroidalMomentumMatrixBlock, centroidalMomentumMatrixToPack, 0, columnIndex);
@@ -263,7 +263,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
 
       for (JointBasics joint : joints)
       {
-         RigidBody successor = joint.getSuccessor();
+         RigidBodyBasics successor = joint.getSuccessor();
          RecursionStep recursionStep = rigidBodyToRecursionStepMap.get(successor);
 
          CommonOps.insert(recursionStep.centroidalMomentumMatrixBlock, centroidalMomentumMatrixToPack, 0, columnIndex);
@@ -379,7 +379,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       /**
        * The rigid-body for which this recursion is.
        */
-      private final RigidBody rigidBody;
+      private final RigidBodyBasics rigidBody;
       /**
        * The reference frame in which the internal including the jacobian matrix is to be expressed
        * in.
@@ -405,7 +405,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       private final List<RecursionStep> children = new ArrayList<>();
       private final RecursionStep parent;
 
-      public RecursionStep(RigidBody rigidBody, RecursionStep parent, ReferenceFrame matrixFrame)
+      public RecursionStep(RigidBodyBasics rigidBody, RecursionStep parent, ReferenceFrame matrixFrame)
       {
          this.rigidBody = rigidBody;
          this.parent = parent;

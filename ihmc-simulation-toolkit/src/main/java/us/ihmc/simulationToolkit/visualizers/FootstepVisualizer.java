@@ -25,7 +25,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnapper
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
@@ -300,7 +300,7 @@ public class FootstepVisualizer
          contactableFeet.set(RobotSide.RIGHT, rightContactableFoot);
       }
 
-      SideDependentList<RigidBody> feetRigidBodies = new SideDependentList<RigidBody>();
+      SideDependentList<RigidBodyBasics> feetRigidBodies = new SideDependentList<RigidBodyBasics>();
       SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
       {
          for (RobotSide robotSide : RobotSide.values)

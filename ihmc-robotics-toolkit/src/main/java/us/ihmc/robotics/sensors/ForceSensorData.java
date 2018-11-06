@@ -5,7 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
@@ -15,7 +15,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly
    private final DenseMatrix64F wrench = new DenseMatrix64F(Wrench.SIZE, 1);
 
    private final ReferenceFrame measurementFrame;
-   private final RigidBody measurementLink;
+   private final RigidBodyBasics measurementLink;
 
    public ForceSensorData(ForceSensorDefinition forceSensorDefinition)
    {
@@ -56,7 +56,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly
    }
 
    @Override
-   public RigidBody getMeasurementLink()
+   public RigidBodyBasics getMeasurementLink()
    {
       return measurementLink;
    }

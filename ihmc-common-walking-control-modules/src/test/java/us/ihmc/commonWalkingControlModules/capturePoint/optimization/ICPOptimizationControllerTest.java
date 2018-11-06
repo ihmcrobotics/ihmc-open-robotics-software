@@ -27,7 +27,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
@@ -402,7 +402,7 @@ public class ICPOptimizationControllerTest
          ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         RigidBody foot = contactableFoot.getRigidBody();
+         RigidBodyBasics foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
          List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();

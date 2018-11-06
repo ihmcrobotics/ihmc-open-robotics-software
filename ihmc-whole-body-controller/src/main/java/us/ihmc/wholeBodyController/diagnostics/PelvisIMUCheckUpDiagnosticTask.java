@@ -17,7 +17,7 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -99,7 +99,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    public PelvisIMUCheckUpDiagnosticTask(IMUDefinition imuToCheck, DiagnosticControllerToolbox toolbox)
    {
       FullHumanoidRobotModel fullRobotModel = toolbox.getFullRobotModel();
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       if (imuToCheck.getRigidBody() != pelvis)
          throw new RuntimeException("The IMU: " + imuToCheck.getName() + " is not attached to the pelvis, cannot create check up diagnostic for it.");
 

@@ -20,8 +20,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -50,9 +50,9 @@ public class VirtualModelControllerTest
       double gravity = -9.81;
 
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
 
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
@@ -101,9 +101,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame and no selection matrix
@@ -125,9 +125,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
 
@@ -150,9 +150,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
 
@@ -181,9 +181,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
 
@@ -212,9 +212,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
@@ -240,9 +240,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
@@ -268,9 +268,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
@@ -296,9 +296,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
@@ -324,9 +324,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
@@ -352,9 +352,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
@@ -380,9 +380,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
@@ -409,9 +409,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
@@ -439,9 +439,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
@@ -469,9 +469,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
@@ -499,9 +499,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
@@ -526,9 +526,9 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
@@ -556,9 +556,9 @@ public class VirtualModelControllerTest
 
       
       VirtualModelControllerTestHelper.RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
@@ -614,8 +614,8 @@ public class VirtualModelControllerTest
       VirtualModelControllerTestHelper.RobotArm robotArm = VirtualModelControllerTestHelper.createRobotArm();
       SCSRobotFromInverseDynamicsRobotModel scsRobotArm = robotArm.getSCSRobotArm();
 
-      List<RigidBody> endEffectors = new ArrayList<>();
-      RigidBody hand = robotArm.getHand();
+      List<RigidBodyBasics> endEffectors = new ArrayList<>();
+      RigidBodyBasics hand = robotArm.getHand();
       endEffectors.add(hand);
 
       double forceX = random.nextDouble() * 10.0;
@@ -653,8 +653,8 @@ public class VirtualModelControllerTest
       VirtualModelControllerTestHelper.PlanarRobotArm robotArm = VirtualModelControllerTestHelper.createPlanarArm();
       SCSRobotFromInverseDynamicsRobotModel scsRobotArm = robotArm.getSCSRobotArm();
 
-      List<RigidBody> endEffectors = new ArrayList<>();
-      RigidBody hand = robotArm.getHand();
+      List<RigidBodyBasics> endEffectors = new ArrayList<>();
+      RigidBodyBasics hand = robotArm.getHand();
       endEffectors.add(hand);
 
       double forceX = random.nextDouble() * 10.0;
@@ -778,7 +778,7 @@ public class VirtualModelControllerTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   private void submitAndCheckVMC(RigidBody base, RigidBody endEffector, ReferenceFrame centerOfMassFrame, Wrench desiredWrench, DenseMatrix64F selectionMatrix)
+   private void submitAndCheckVMC(RigidBodyBasics base, RigidBodyBasics endEffector, ReferenceFrame centerOfMassFrame, Wrench desiredWrench, DenseMatrix64F selectionMatrix)
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
 

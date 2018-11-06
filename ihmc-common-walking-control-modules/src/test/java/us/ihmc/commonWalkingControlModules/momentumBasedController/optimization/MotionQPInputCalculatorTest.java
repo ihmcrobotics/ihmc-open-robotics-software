@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -45,9 +45,9 @@ public class MotionQPInputCalculatorTest
       int numberOfJoints = 20;
 
       List<RevoluteJoint> joints = ScrewTestTools.createRandomChainRobot(numberOfJoints, random);
-      RigidBody rootBody = joints.get(0).getPredecessor();
+      RigidBodyBasics rootBody = joints.get(0).getPredecessor();
       ReferenceFrame rootFrame = rootBody.getBodyFixedFrame();
-      RigidBody endEffector = joints.get(numberOfJoints - 1).getSuccessor();
+      RigidBodyBasics endEffector = joints.get(numberOfJoints - 1).getSuccessor();
       ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
       int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(joints);
 

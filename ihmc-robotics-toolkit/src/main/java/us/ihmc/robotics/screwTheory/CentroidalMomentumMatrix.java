@@ -4,8 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
@@ -24,7 +24,7 @@ public class CentroidalMomentumMatrix
    private final Vector3D zero = new Vector3D();
    private final boolean[][] isAncestorMapping;
 
-   public CentroidalMomentumMatrix(RigidBody rootBody, ReferenceFrame centerOfMassFrame)
+   public CentroidalMomentumMatrix(RigidBodyBasics rootBody, ReferenceFrame centerOfMassFrame)
    {
       this.jointList = ScrewTools.computeSupportAndSubtreeJoints(rootBody);
       this.centerOfMassFrame = centerOfMassFrame;
@@ -38,10 +38,10 @@ public class CentroidalMomentumMatrix
 
       for (int j = 0; j < jointList.length; j++)
       {
-         RigidBody columnRigidBody = jointList[j].getSuccessor();
+         RigidBodyBasics columnRigidBody = jointList[j].getSuccessor();
          for (int i = 0; i < jointList.length; i++)
          {
-            RigidBody rowRigidBody = jointList[i].getSuccessor();
+            RigidBodyBasics rowRigidBody = jointList[i].getSuccessor();
             isAncestorMapping[i][j] = ScrewTools.isAncestor(rowRigidBody, columnRigidBody);
          }
       }
@@ -67,7 +67,7 @@ public class CentroidalMomentumMatrix
             {
                if (isAncestorMapping[i][j])
                {
-                  RigidBody rowRigidBody = jointList[i].getSuccessor();
+                  RigidBodyBasics rowRigidBody = jointList[i].getSuccessor();
                   SpatialInertiaBasics inertia = rowRigidBody.getInertia();
                   tempTwist.setIncludingFrame(columnJoint.getUnitTwists().get(k));
                   tempTwist.changeFrame(inertia.getReferenceFrame());
