@@ -16,7 +16,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.math.frames.YoWrench;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -56,7 +56,7 @@ public class SimpleWalkerRobot extends Robot
    private GroundContactPoint gcToeL;
    private GroundContactPoint gcToeR;
    private SideDependentList<GroundContactPointBasedWrenchCalculator> gcPointBasedWrenchCalculators = new SideDependentList<>();
-   private SideDependentList<YoWrench> yoWrenchs = new SideDependentList<>();
+   private SideDependentList<YoFixedFrameWrench> yoWrenchs = new SideDependentList<>();
 
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame bodyZUpFrame;
@@ -245,10 +245,10 @@ public class SimpleWalkerRobot extends Robot
 
             GroundContactPointBasedWrenchCalculator gcPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(robotSide.getSideNameFirstLetter()+"gcWrench", gCpoints.get(robotSide), ankleRollJoint, new RigidBodyTransform(), getRobotsYoVariableRegistry());
             gcPointBasedWrenchCalculators.put(robotSide,gcPointBasedWrenchCalculator);
-            YoWrench yoWrench = new YoWrench(robotSide.getSideNameFirstLetter()+ "wrench",ReferenceFrame.getWorldFrame(),ReferenceFrame.getWorldFrame(),getRobotsYoVariableRegistry());
+            YoFixedFrameWrench yoWrench = new YoFixedFrameWrench(robotSide.getSideNameFirstLetter()+ "wrench",ReferenceFrame.getWorldFrame(),ReferenceFrame.getWorldFrame(),getRobotsYoVariableRegistry());
             yoWrenchs.put(robotSide,yoWrench);
 
-            YoGraphicVector reactionForceViz = new YoGraphicVector(robotSide.getSideNameFirstLetter()+"ReactionForceViz",  gCpoints.get(robotSide).get(0).getYoPosition(), yoWrenchs.get(robotSide).getYoLinearPart(),
+            YoGraphicVector reactionForceViz = new YoGraphicVector(robotSide.getSideNameFirstLetter()+"ReactionForceViz",  gCpoints.get(robotSide).get(0).getYoPosition(), yoWrenchs.get(robotSide).getLinearPart(),
                                                                    YoAppearance.Red());
             reactionForceVizs.put(robotSide,reactionForceViz);
 
@@ -687,7 +687,7 @@ public class SimpleWalkerRobot extends Robot
             Wrench wrench = new Wrench(worldFrame, worldFrame, wrenchMatrix);
             this.yoWrenchs.get(robotSide).set(wrench);
             this.yoWrenchs.get(robotSide).scale(0.01);
-            reactionForceVizs.get(robotSide).set(gCpoints.get(robotSide).get(0).getYoPosition(), yoWrenchs.get(robotSide).getYoLinearPart());
+            reactionForceVizs.get(robotSide).set(gCpoints.get(robotSide).get(0).getYoPosition(), yoWrenchs.get(robotSide).getLinearPart());
          }
       }
 

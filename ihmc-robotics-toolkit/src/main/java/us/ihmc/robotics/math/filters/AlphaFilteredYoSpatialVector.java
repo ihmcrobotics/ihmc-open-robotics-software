@@ -2,67 +2,67 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.frames.YoSpatialVector;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class AlphaFilteredYoSpatialVector extends YoSpatialVector
+public class AlphaFilteredYoSpatialVector extends YoFixedFrameSpatialVector
 {
-   private final AlphaFilteredYoFrameVector alphaFilteredLinearPart;
    private final AlphaFilteredYoFrameVector alphaFilteredAngularPart;
+   private final AlphaFilteredYoFrameVector alphaFilteredLinearPart;
 
-   public AlphaFilteredYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alphaLinearPart,
-                                       DoubleProvider alphaAngularPart, FrameVector3DReadOnly rawLinearPart, FrameVector3DReadOnly rawAngularPart)
+   public AlphaFilteredYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alphaAngularPart,
+                                       DoubleProvider alphaLinearPart, FrameVector3DReadOnly rawAngularPart, FrameVector3DReadOnly rawLinearPart)
    {
-      super(new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alphaLinearPart, rawLinearPart),
-            new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alphaAngularPart, rawAngularPart));
-      this.alphaFilteredLinearPart = (AlphaFilteredYoFrameVector) linearPart;
-      this.alphaFilteredAngularPart = (AlphaFilteredYoFrameVector) angularPart;
+      super(new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alphaAngularPart, rawAngularPart),
+            new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alphaLinearPart, rawLinearPart));
+      this.alphaFilteredAngularPart = (AlphaFilteredYoFrameVector) getAngularPart();
+      this.alphaFilteredLinearPart = (AlphaFilteredYoFrameVector) getLinearPart();
    }
 
-   public AlphaFilteredYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alphaLinearPart,
-                                       DoubleProvider alphaAngularPart, YoSpatialVector rawSpatialVector)
+   public AlphaFilteredYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alphaAngularPart,
+                                       DoubleProvider alphaLinearPart, YoFixedFrameSpatialVector rawSpatialVector)
    {
-      super(new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alphaLinearPart, rawSpatialVector.getYoLinearPart()),
-            new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alphaAngularPart, rawSpatialVector.getYoAngularPart()));
-      this.alphaFilteredLinearPart = (AlphaFilteredYoFrameVector) linearPart;
-      this.alphaFilteredAngularPart = (AlphaFilteredYoFrameVector) angularPart;
+      super(new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alphaAngularPart, rawSpatialVector.getAngularPart()),
+            new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alphaLinearPart, rawSpatialVector.getLinearPart()));
+      this.alphaFilteredAngularPart = (AlphaFilteredYoFrameVector) getAngularPart();
+      this.alphaFilteredLinearPart = (AlphaFilteredYoFrameVector) getLinearPart();
    }
 
-   public AlphaFilteredYoSpatialVector(AlphaFilteredYoFrameVector yoLinearPart, AlphaFilteredYoFrameVector yoAngularPart)
+   public AlphaFilteredYoSpatialVector(AlphaFilteredYoFrameVector yoAngularPart, AlphaFilteredYoFrameVector yoLinearPart)
    {
-      super(yoLinearPart, yoAngularPart);
-      this.alphaFilteredLinearPart = yoLinearPart;
+      super(yoAngularPart, yoLinearPart);
       this.alphaFilteredAngularPart = yoAngularPart;
+      this.alphaFilteredLinearPart = yoLinearPart;
    }
 
    public void reset()
    {
-      alphaFilteredLinearPart.reset();
       alphaFilteredAngularPart.reset();
+      alphaFilteredLinearPart.reset();
    }
 
    public void update()
    {
-      alphaFilteredLinearPart.update();
       alphaFilteredAngularPart.update();
+      alphaFilteredLinearPart.update();
    }
 
-   public void update(FrameVector3DReadOnly rawLinearPart, FrameVector3DReadOnly rawAngularPart)
+   public void update(FrameVector3DReadOnly rawAngularPart, FrameVector3DReadOnly rawLinearPart)
    {
-      alphaFilteredLinearPart.update(rawLinearPart);
       alphaFilteredAngularPart.update(rawAngularPart);
-   }
-
-   public void update(Vector3DReadOnly rawLinearPart, Vector3DReadOnly rawAngularPart)
-   {
       alphaFilteredLinearPart.update(rawLinearPart);
-      alphaFilteredAngularPart.update(rawAngularPart);
    }
 
-   public void update(double rawLinearX, double rawLinearY, double rawLinearZ, double rawAngularX, double rawAngularY, double rawAngularZ)
+   public void update(Vector3DReadOnly rawAngularPart, Vector3DReadOnly rawLinearPart)
    {
-      alphaFilteredLinearPart.update(rawLinearX, rawLinearY, rawLinearZ);
+      alphaFilteredAngularPart.update(rawAngularPart);
+      alphaFilteredLinearPart.update(rawLinearPart);
+   }
+
+   public void update(double rawAngularX, double rawAngularY, double rawAngularZ, double rawLinearX, double rawLinearY, double rawLinearZ)
+   {
       alphaFilteredAngularPart.update(rawAngularX, rawAngularY, rawAngularZ);
+      alphaFilteredLinearPart.update(rawLinearX, rawLinearY, rawLinearZ);
    }
 }
