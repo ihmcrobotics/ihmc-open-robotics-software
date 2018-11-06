@@ -65,8 +65,8 @@ public class JointLimitData
       velocityLimitUpper = joint.getVelocityLimitUpper();
       velocityLimitLower = joint.getVelocityLimitLower();
 
-      torqueLimitUpper = joint.getMaxEffortLimit();
-      torqueLimitLower = joint.getMinEffortLimit();
+      torqueLimitUpper = joint.getEffortLimitUpper();
+      torqueLimitLower = joint.getEffortLimitLower();
    }
 
    public void completeWith(JointLimitData other)
