@@ -297,7 +297,7 @@ public class ScrewTools
          size += joint.getDegreesOfFreedom();
       }
 
-      DenseMatrix64F tempMatrix = new DenseMatrix64F(JointBasics.maxDoF, 1);
+      DenseMatrix64F tempMatrix = new DenseMatrix64F(JointBasics.MAX_NUMBER_OF_DOFS, 1);
       DenseMatrix64F ret = new DenseMatrix64F(size, 1);
       int startIndex = 0;
       for (JointBasics joint : jointsInOrder)

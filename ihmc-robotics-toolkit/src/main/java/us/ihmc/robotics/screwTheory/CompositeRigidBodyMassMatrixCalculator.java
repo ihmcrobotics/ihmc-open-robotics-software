@@ -209,7 +209,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
 
    private static Momentum[] createMomenta()
    {
-      Momentum[] ret = new Momentum[JointBasics.maxDoF];
+      Momentum[] ret = new Momentum[JointBasics.MAX_NUMBER_OF_DOFS];
       for (int i = 0; i < ret.length; i++)
       {
          ret[i] = new Momentum();
