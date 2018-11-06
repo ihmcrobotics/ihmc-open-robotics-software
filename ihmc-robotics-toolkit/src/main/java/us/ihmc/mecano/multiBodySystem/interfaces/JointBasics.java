@@ -38,7 +38,7 @@ import us.ihmc.simulationconstructionset.util.CommonJoint;
  */
 public abstract interface JointBasics extends CommonJoint
 {
-   public static int maxDoF = 6;
+   public static int MAX_NUMBER_OF_DOFS = 6;
 
    /**
     * Returns the the {@code MovingReferenceFrame} that is attached to the predecessor of this
