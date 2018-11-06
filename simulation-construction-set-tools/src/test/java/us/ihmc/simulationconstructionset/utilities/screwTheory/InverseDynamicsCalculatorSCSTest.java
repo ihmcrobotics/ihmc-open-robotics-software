@@ -368,7 +368,7 @@ public class InverseDynamicsCalculatorSCSTest
 
          YoDouble qddVariable = revoluteJoint.getQDDYoVariable();
          double qdd = qddVariable.getDoubleValue();
-         double qddInverse = idJoint.getQddDesired();
+         double qddInverse = idJoint.getQdd();
 
 //         YoDouble tauVariable = revoluteJoint.getTau();
 //         System.out.println("qddInverse: " + qddInverse + ", qdd: " + qdd);
@@ -428,7 +428,7 @@ public class InverseDynamicsCalculatorSCSTest
          RevoluteJoint currentIDJoint = ScrewTools.addRevoluteJoint("jointID" + i, currentIDBody, jointOffset, jointAxis);
          currentIDJoint.setQ(jointPosition);
          currentIDJoint.setQd(jointVelocity);
-         currentIDJoint.setQddDesired(jointAcceleration);
+         currentIDJoint.setQdd(jointAcceleration);
          
          currentIDBody = ScrewTools.addRigidBody("bodyID" + i, currentIDJoint, momentOfInertia, mass, comOffset);
          
@@ -492,7 +492,7 @@ public class InverseDynamicsCalculatorSCSTest
          RevoluteJoint currentIDJoint = ScrewTools.addRevoluteJoint("jointID" + i, inverseDynamicsParentBody, jointOffset, jointAxis);
          currentIDJoint.setQ(jointPosition);
          currentIDJoint.setQd(jointVelocity);
-         currentIDJoint.setQddDesired(jointAcceleration);
+         currentIDJoint.setQdd(jointAcceleration);
          ScrewTools.addRigidBody("bodyID" + i, currentIDJoint, momentOfInertia, mass, comOffset);
 
          Link currentBody = new Link("body" + i);

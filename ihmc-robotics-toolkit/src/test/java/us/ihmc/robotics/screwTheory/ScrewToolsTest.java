@@ -697,7 +697,7 @@ public class ScrewToolsTest
       for(int i = 6; i < jointAccelerations.getNumRows() * jointAccelerations.getNumCols(); i++)
       {
          joint = (OneDoFJoint)jointsArray[i - 5]; //1 - 6
-         assertEquals("Should be equal accelerations", jointAccelerations.get(i), joint.getQddDesired(), epsilon);
+         assertEquals("Should be equal accelerations", jointAccelerations.get(i), joint.getQdd(), epsilon);
       }
    }
 

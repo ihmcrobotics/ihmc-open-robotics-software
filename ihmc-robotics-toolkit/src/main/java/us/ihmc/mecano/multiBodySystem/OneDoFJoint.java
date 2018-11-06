@@ -25,7 +25,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    private double q;
    private double qd;
    private double qdd;
-   private double qddDesired;
 
    private double tau;
 
@@ -69,13 +68,13 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    {
       MathTools.checkIntervalContains(matrix.getNumRows(), 1, Integer.MAX_VALUE);
       MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);
-      matrix.set(rowStart, 0, qddDesired);
+      matrix.set(rowStart, 0, qdd);
    }
 
    @Override
    public void setJointAccelerationToZero()
    {
-      qddDesired = 0.0;
+      qdd= 0.0;
    }
 
    @Override
@@ -105,7 +104,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    @Override
    public void setJointAcceleration(int rowStart, DenseMatrix64F matrix)
    {
-      setQddDesired(matrix.get(rowStart + 0, 0));
+      setQdd(matrix.get(rowStart + 0, 0));
    }
 
    public double getQ()
@@ -139,16 +138,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    public void setQdd(double qdd)
    {
       this.qdd = qdd;
-   }
-
-   public double getQddDesired()
-   {
-      return qddDesired;
-   }
-
-   public void setQddDesired(double qddDesired)
-   {
-      this.qddDesired = qddDesired;
    }
 
    public double getTau()

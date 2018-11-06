@@ -253,7 +253,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
 
-         double inverseDynamicsAcceleration = oneDoFJoint.getQddDesired();
+         double inverseDynamicsAcceleration = oneDoFJoint.getQdd();
          double simulatedRobotAcceleration = oneDegreeOfFreedomJoint.getQDDYoVariable().getDoubleValue();
 
          YoDouble computedJointAcceleration = computedJointAccelerations.get(oneDoFJoint);
@@ -443,7 +443,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
-         oneDoFJoint.setQddDesired(RandomNumbers.nextDouble(random, maxJointAcceleration));
+         oneDoFJoint.setQdd(RandomNumbers.nextDouble(random, maxJointAcceleration));
       }
    }
 
@@ -466,7 +466,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
 
          double robotJointAcceleration = oneDegreeOfFreedomJoint.getQDDYoVariable().getDoubleValue();
-         oneDoFJoint.setQddDesired(robotJointAcceleration);
+         oneDoFJoint.setQdd(robotJointAcceleration);
 
          YoDouble computedJointAcceleration = computedJointAccelerations.get(oneDoFJoint);
          computedJointAcceleration.set(robotJointAcceleration);

@@ -64,14 +64,12 @@ public class SpatialAccelerationCalculatorTest
          SpatialAcceleration rootAcceleration = new SpatialAcceleration(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          rootAcceleration.getLinearPart().set(rootLinearAcceleration);
          rootAcceleration.getAngularPart().set(rootAngularAcceleration);
-         boolean useDesireds = random.nextBoolean();
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, rootAcceleration, doVelocityTerms,
                                                                                                          doAccelerationTerms);
 
          ScrewTestTools.setRandomPositions(prismaticJoints, random, -10.0, 10.0);
          ScrewTestTools.setRandomVelocities(prismaticJoints, random, -10.0, 10.0);
          ScrewTestTools.setRandomAccelerations(prismaticJoints, random, -10.0, 10.0);
-         ScrewTestTools.setRandomDesiredAccelerations(prismaticJoints, random, -10.0, 10.0);
          spatialAccelerationCalculator.getRootBody().updateFramesRecursively();
 
          spatialAccelerationCalculator.compute();
@@ -89,8 +87,7 @@ public class SpatialAccelerationCalculatorTest
 
             FrameVector3D jointAxis = joint.getJointAxis();
             cumulatedLinearAcceleration.changeFrame(jointAxis.getReferenceFrame());
-            double qdd = useDesireds ? joint.getQddDesired() : joint.getQdd();
-            cumulatedLinearAcceleration.scaleAdd(qdd, jointAxis, cumulatedLinearAcceleration);
+            cumulatedLinearAcceleration.scaleAdd(joint.getQdd(), jointAxis, cumulatedLinearAcceleration);
             cumulatedLinearAcceleration.changeFrame(bodyFrame);
             expectedAcceleration.getLinearPart().set(cumulatedLinearAcceleration);
 
@@ -130,14 +127,12 @@ public class SpatialAccelerationCalculatorTest
          SpatialAcceleration rootAcceleration = new SpatialAcceleration(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          rootAcceleration.getLinearPart().set(rootLinearAcceleration);
          rootAcceleration.getAngularPart().set(rootAngularAcceleration);
-         boolean useDesireds = random.nextBoolean();
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, rootAcceleration, doVelocityTerms,
                                                                                                          doAccelerationTerms);
 
          ScrewTestTools.setRandomPositions(revoluteJoints, random, -10.0, 10.0);
          ScrewTestTools.setRandomVelocities(revoluteJoints, random, 0.0, 0.0);
          ScrewTestTools.setRandomAccelerations(revoluteJoints, random, -10.0, 10.0);
-         ScrewTestTools.setRandomDesiredAccelerations(revoluteJoints, random, -10.0, 10.0);
 
          spatialAccelerationCalculator.compute();
 
@@ -154,8 +149,7 @@ public class SpatialAccelerationCalculatorTest
 
             FrameVector3D jointAxis = joint.getJointAxis();
             cumulatedAngularAcceleration.changeFrame(jointAxis.getReferenceFrame());
-            double qdd = useDesireds ? joint.getQddDesired() : joint.getQdd();
-            cumulatedAngularAcceleration.scaleAdd(qdd, jointAxis, cumulatedAngularAcceleration);
+            cumulatedAngularAcceleration.scaleAdd(joint.getQdd(), jointAxis, cumulatedAngularAcceleration);
             cumulatedAngularAcceleration.changeFrame(bodyFrame);
             expectedAcceleration.getAngularPart().set(cumulatedAngularAcceleration);
 
@@ -175,14 +169,12 @@ public class SpatialAccelerationCalculatorTest
          SpatialAcceleration rootAcceleration = new SpatialAcceleration(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          rootAcceleration.getLinearPart().set(rootLinearAcceleration);
          rootAcceleration.getAngularPart().set(rootAngularAcceleration);
-         boolean useDesireds = random.nextBoolean();
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, rootAcceleration, doVelocityTerms,
                                                                                                          doAccelerationTerms);
 
          ScrewTestTools.setRandomPositions(revoluteJoints, random, -10.0, 10.0);
          ScrewTestTools.setRandomVelocities(revoluteJoints, random, -10.0, 10.0);
          ScrewTestTools.setRandomAccelerations(revoluteJoints, random, -10.0, 10.0);
-         ScrewTestTools.setRandomDesiredAccelerations(revoluteJoints, random, -10.0, 10.0);
          spatialAccelerationCalculator.getRootBody().updateFramesRecursively();
 
          spatialAccelerationCalculator.compute();
@@ -201,8 +193,7 @@ public class SpatialAccelerationCalculatorTest
 
             FrameVector3D jointAxis = new FrameVector3D(joint.getJointAxis());
             cumulatedAngularAcceleration.changeFrame(jointAxis.getReferenceFrame());
-            double qdd = useDesireds ? joint.getQddDesired() : joint.getQdd();
-            cumulatedAngularAcceleration.scaleAdd(qdd, jointAxis, cumulatedAngularAcceleration);
+            cumulatedAngularAcceleration.scaleAdd(joint.getQdd(), jointAxis, cumulatedAngularAcceleration);
             cumulatedAngularAcceleration.changeFrame(bodyFrame);
 
             if (doVelocityTerms)
