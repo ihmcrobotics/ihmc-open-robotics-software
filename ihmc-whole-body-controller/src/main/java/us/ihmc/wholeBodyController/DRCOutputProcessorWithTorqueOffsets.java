@@ -6,6 +6,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.tools.lists.PairList;
@@ -23,7 +24,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
 
    private final YoBoolean resetTorqueOffsets = new YoBoolean("resetTorqueOffsets", registry);
 
-   private PairList<JointDesiredOutput, YoDouble> torqueOffsetList;
+   private PairList<JointDesiredOutputBasics, YoDouble> torqueOffsetList;
    private HashMap<OneDoFJoint, YoDouble> torqueOffsetMap;
 
    private final double updateDT;
@@ -52,7 +53,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
    {
       for (int i = 0; i < torqueOffsetList.size(); i++)
       {
-         JointDesiredOutput jointData = torqueOffsetList.first(i);
+         JointDesiredOutputBasics jointData = torqueOffsetList.first(i);
          YoDouble torqueOffsetVariable = torqueOffsetList.second(i);
 
          double desiredAcceleration = jointData.hasDesiredAcceleration() ? jointData.getDesiredAcceleration() : 0.0;
@@ -91,7 +92,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
 
       for (int i = 0; i < lowLevelControllerCoreOutput.getNumberOfJointsWithDesiredOutput(); i++)
       {
-         JointDesiredOutput jointData = lowLevelControllerCoreOutput.getJointDesiredOutput(i);
+         JointDesiredOutputBasics jointData = lowLevelControllerCoreOutput.getJointDesiredOutput(i);
          final YoDouble torqueOffset = new YoDouble("tauOffset_" + lowLevelControllerCoreOutput.getJointName(i), registry);
 
          torqueOffsetList.add(jointData, torqueOffset);

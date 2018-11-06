@@ -49,6 +49,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.fingers.ValkyrieHandStateCommunicator;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
@@ -63,7 +64,7 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
-   public static final boolean HAS_FOREARMS_ON = true;
+   public static final boolean HAS_FOREARMS_ON = true && ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS;
    public static final boolean ENABLE_FINGER_JOINTS = true && HAS_FOREARMS_ON;
    public static final boolean HAS_LIGHTER_BACKPACK = true;
 
@@ -74,8 +75,12 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       jointList.addAll(Arrays.asList("leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll"));
       jointList.addAll(Arrays.asList("rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll"));
       jointList.addAll(Arrays.asList("torsoYaw", "torsoPitch", "torsoRoll"));
-      jointList.addAll(Arrays.asList("leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch"));
-      jointList.addAll(Arrays.asList("rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"));
+
+      if (ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
+      {
+         jointList.addAll(Arrays.asList("leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch"));
+         jointList.addAll(Arrays.asList("rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"));
+      }
 
       if (HAS_FOREARMS_ON)
       {

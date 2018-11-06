@@ -10,6 +10,8 @@ int8 CONFIGURATION_SPACE_NAME_PITCH=4
 
 int8 CONFIGURATION_SPACE_NAME_YAW=5
 
+int8 CONFIGURATION_SPACE_NAME_SO3=6
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

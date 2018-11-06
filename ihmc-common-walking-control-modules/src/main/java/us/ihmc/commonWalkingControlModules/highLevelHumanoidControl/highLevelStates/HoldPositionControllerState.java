@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.tools.lists.PairList;
@@ -61,7 +62,7 @@ public class HoldPositionControllerState extends HighLevelControllerState
          OneDoFJoint joint = jointSetpoints.get(jointIndex).getLeft();
          YoDouble desiredPosition = jointSetpoints.get(jointIndex).getRight();
 
-         JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+         JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          lowLevelJointData.clear();
          lowLevelJointData.setDesiredPosition(desiredPosition.getDoubleValue());
          lowLevelJointData.setDesiredVelocity(0.0);

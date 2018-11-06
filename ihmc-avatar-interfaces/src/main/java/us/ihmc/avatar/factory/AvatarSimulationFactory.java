@@ -29,6 +29,7 @@ import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
@@ -332,15 +333,17 @@ public class AvatarSimulationFactory
             OneDegreeOfFreedomJoint simulatedJoint = humanoidFloatingRootJointRobot.getOneDegreeOfFreedomJoint(positionControlledJointName);
             FullRobotModel controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
             OneDoFJoint controllerJoint = controllerFullRobotModel.getOneDoFJointByName(positionControlledJointName);
+
+            if (simulatedJoint == null || controllerJoint == null)
+               continue;
+
             JointDesiredOutputList controllerLowLevelDataList = threadDataSynchronizer.getControllerDesiredJointDataHolder();
-            JointDesiredOutput controllerDesiredOutput = controllerLowLevelDataList.getJointDesiredOutput(controllerJoint);
+            JointDesiredOutputBasics controllerDesiredOutput = controllerLowLevelDataList.getJointDesiredOutput(controllerJoint);
 
             JointRole jointRole = robotModel.get().getJointMap().getJointRole(positionControlledJointName);
             boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
             boolean isBackJoint = jointRole == JointRole.SPINE;
 
-            if (simulatedJoint == null || controllerJoint == null)
-               continue;
 
             JointLowLevelJointControlSimulator positionControlSimulator = new JointLowLevelJointControlSimulator(simulatedJoint, controllerJoint,
                                                                                                                  controllerDesiredOutput, isUpperBodyJoint,

@@ -115,7 +115,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       momentumWeight.set(1.0);
 
       for (RobotSide robotSide : RobotSide.values)
-         setupVisualization(desiredFullRobotModel.getHand(robotSide), desiredFullRobotModel.getFoot(robotSide));
+      {
+         if (desiredFullRobotModel.getHand(robotSide) != null)
+            setupVisualization(desiredFullRobotModel.getHand(robotSide));
+         setupVisualization(desiredFullRobotModel.getFoot(robotSide));
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -157,7 +161,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         listOfControllableRigidBodies.add(desiredFullRobotModel.getHand(robotSide));
+         if (desiredFullRobotModel.getHand(robotSide) != null)
+            listOfControllableRigidBodies.add(desiredFullRobotModel.getHand(robotSide));
          listOfControllableRigidBodies.add(desiredFullRobotModel.getFoot(robotSide));
       }
       

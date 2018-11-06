@@ -16,6 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -115,7 +116,7 @@ public class JointSettingsHelper
          {
             jointsLoaded[jointIdx] = null;
          }
-         else if (integrationParametersLoaded == null && desiredBehaviorLoaded == null)
+         else
          {
             jointsLoaded[jointIdx] = new YoBoolean(jointName + "_isUnderLoad", registry);
          }
@@ -138,7 +139,7 @@ public class JointSettingsHelper
    {
       for (int jointIdx = 0; jointIdx < jointNames.length; jointIdx++)
       {
-         JointDesiredOutput jointDesiredOutput = stateSpecificJointSettings.getJointDesiredOutput(jointIdx);
+         JointDesiredOutputBasics jointDesiredOutput = stateSpecificJointSettings.getJointDesiredOutput(jointIdx);
          boolean isLoaded = jointLoadStatusProvider.isJointLoadBearing(jointNames[jointIdx]);
          if (jointsLoaded[jointIdx] != null)
          {

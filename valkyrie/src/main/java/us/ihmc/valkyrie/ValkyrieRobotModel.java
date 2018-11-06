@@ -402,7 +402,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public double getControllerDT()
    {
-      return 0.004;
+      return 0.006;
    }
 
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
@@ -429,9 +429,12 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
                                                                          RealtimeRos2Node realtimeRos2Node,
                                                                          CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
-      return new SimulatedValkyrieFingerController(simulatedRobot, threadDataSynchronizer, realtimeRos2Node, closeableAndDisposableRegistry, this,
-                                                   ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
-                                                   ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
+      if (!ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
+         return null;
+      else
+         return new SimulatedValkyrieFingerController(simulatedRobot, threadDataSynchronizer, realtimeRos2Node, closeableAndDisposableRegistry, this,
+                                                      ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
+                                                      ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
    }
 
    @Override
@@ -618,7 +621,16 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public InputStream getWholeBodyControllerParametersFile()
    {
-      return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller.xml");
+      switch (target)
+      {
+      case SCS:
+         return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_simulation.xml");
+      case GAZEBO:
+      case REAL_ROBOT:
+         return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_hardware.xml");
+      default:
+         throw new UnsupportedOperationException("Unsupported target: " + target);
+      }
    }
 
    public ValkyrieCalibrationParameters getCalibrationParameters()

@@ -291,15 +291,17 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
                   double desiredHandJoint = ValkyrieFingerControlParameters.getDesiredHandJoint(robotSide, handJointName, 1.0);
                   if (handJointName.getFingerName() == FingerName.THUMB)
                      handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, extendedTrajectoryTime, desiredHandJoint);
-                  handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, trajectoryTime, desiredHandJoint);
+                  else
+                     handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, trajectoryTime, desiredHandJoint);
                }
 
                for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
                {
-                  double desiredFingerMotor = ValkyrieFingerControlParameters.getDesiredFingerMotor(robotSide, fingerMotorName, 1.0);
+                  double desiredFingerMotor = ValkyrieFingerControlParameters.getDesiredFingerMotorPosition(robotSide, fingerMotorName, 1.0);
                   if (fingerMotorName.getFingerName() == FingerName.THUMB)
                      fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, extendedTrajectoryTime, desiredFingerMotor);
-                  fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, trajectoryTime, desiredFingerMotor);
+                  else
+                     fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, trajectoryTime, desiredFingerMotor);
                }
 
                break;
@@ -310,14 +312,16 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
                   double desiredHandJoint = ValkyrieFingerControlParameters.getDesiredHandJoint(robotSide, handJointName, 0.0);
                   if (handJointName.getFingerName() == FingerName.THUMB)
                      handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, extendedTrajectoryTime, desiredHandJoint);
-                  handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, trajectoryTime, desiredHandJoint);
+                  else
+                     handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, trajectoryTime, desiredHandJoint);
                }
                for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
                {
-                  double desiredFingerMotor = ValkyrieFingerControlParameters.getDesiredFingerMotor(robotSide, fingerMotorName, 0.0);
+                  double desiredFingerMotor = ValkyrieFingerControlParameters.getDesiredFingerMotorPosition(robotSide, fingerMotorName, 0.0);
                   if (fingerMotorName.getFingerName() == FingerName.THUMB)
                      fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, extendedTrajectoryTime, desiredFingerMotor);
-                  fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, trajectoryTime, desiredFingerMotor);
+                  else
+                     fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, trajectoryTime, desiredFingerMotor);
                }
                break;
 
@@ -376,7 +380,7 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
                   {
                      TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPoints.get(i);
                      double wayPointTime = trajectoryPoint1DMessage.getTime();
-                     double wayPointPosition = ValkyrieFingerControlParameters.getDesiredFingerMotor(robotSide, fingerMotorName,
+                     double wayPointPosition = ValkyrieFingerControlParameters.getDesiredFingerMotorPosition(robotSide, fingerMotorName,
                                                                                                      trajectoryPoint1DMessage.getPosition());
                      fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, wayPointTime, wayPointPosition);
                   }

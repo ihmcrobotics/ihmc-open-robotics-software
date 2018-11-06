@@ -10,6 +10,7 @@ byte CONFIGURATION_SPACE_NAME_Z = 2
 byte CONFIGURATION_SPACE_NAME_ROLL = 3
 byte CONFIGURATION_SPACE_NAME_PITCH = 4
 byte CONFIGURATION_SPACE_NAME_YAW = 5
+byte CONFIGURATION_SPACE_NAME_SO3 = 6
 
 int64 end_effector_name_based_hash_code
 geometry_msgs/Point manifold_origin_position
