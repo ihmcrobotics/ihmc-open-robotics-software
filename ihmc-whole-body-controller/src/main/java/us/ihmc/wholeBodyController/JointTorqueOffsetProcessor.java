@@ -1,6 +1,6 @@
 package us.ihmc.wholeBodyController;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 
 public interface JointTorqueOffsetProcessor
 {

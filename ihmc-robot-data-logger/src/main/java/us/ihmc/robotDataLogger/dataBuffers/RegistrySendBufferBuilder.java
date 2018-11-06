@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointHolderFactory;
 import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
-import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;

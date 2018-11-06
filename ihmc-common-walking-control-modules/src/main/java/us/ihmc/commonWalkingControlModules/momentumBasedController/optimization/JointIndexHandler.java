@@ -7,8 +7,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.robotics.screwTheory.JointBasics;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class JointIndexHandler

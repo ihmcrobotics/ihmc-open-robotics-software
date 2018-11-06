@@ -1,4 +1,4 @@
-package us.ihmc.robotics.screwTheory;
+package us.ihmc.mecano.multiBodySystem;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,10 +14,14 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.screwTheory.GenericCRC32;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class SphericalJoint extends AbstractInverseDynamicsJoint
 {

@@ -1,7 +1,7 @@
 package us.ihmc.valkyrieRosControl.dataHolders;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoJointDesiredOutput;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;

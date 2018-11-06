@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelC
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 
 import java.util.ArrayList;
 import java.util.List;

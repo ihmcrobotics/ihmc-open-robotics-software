@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class ControlledBodiesCommand implements VirtualModelControlCommand<ControlledBodiesCommand>

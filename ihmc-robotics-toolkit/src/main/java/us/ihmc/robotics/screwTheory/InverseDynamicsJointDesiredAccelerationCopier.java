@@ -1,5 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 
 public class InverseDynamicsJointDesiredAccelerationCopier extends AbstractInverseDynamicsCopier
 {

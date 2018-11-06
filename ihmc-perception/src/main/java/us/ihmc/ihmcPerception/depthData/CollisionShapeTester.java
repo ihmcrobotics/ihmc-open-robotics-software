@@ -5,9 +5,9 @@ import java.util.List;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.JointBasics;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class CollisionShapeTester
 {

@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpPreserveYReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;

@@ -9,11 +9,11 @@ import us.ihmc.avatar.posePlayback.PlaybackPose;
 import us.ihmc.avatar.posePlayback.PlaybackPoseSequence;
 import us.ihmc.avatar.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.avatar.posePlayback.PosePlaybackPacket;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.valkyrie.configuration.YamlWithIncludesLoader;
 
 public class ValkyrieWarmupPoseSequencePacket implements PosePlaybackPacket

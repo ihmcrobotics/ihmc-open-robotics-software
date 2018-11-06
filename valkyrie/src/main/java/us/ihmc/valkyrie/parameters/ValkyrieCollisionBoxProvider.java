@@ -13,11 +13,11 @@ import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBox;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionCylinder;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionSphere;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**

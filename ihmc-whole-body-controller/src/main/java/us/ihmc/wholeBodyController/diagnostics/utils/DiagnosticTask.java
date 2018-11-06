@@ -4,7 +4,7 @@ import java.util.ArrayDeque;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticDataReporter;
 
 public abstract class DiagnosticTask

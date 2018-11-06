@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controller.states;
 
 import java.util.ArrayList;
 
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -9,7 +10,6 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;

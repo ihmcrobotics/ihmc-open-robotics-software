@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccele
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 
 /**
  * {@link SpatialFeedbackControlCommand} is a command meant to be submitted to the

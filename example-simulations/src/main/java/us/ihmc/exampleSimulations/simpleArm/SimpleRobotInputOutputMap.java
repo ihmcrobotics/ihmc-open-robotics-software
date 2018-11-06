@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.simpleArm;
 
 import us.ihmc.exampleSimulations.simpleArm.SimpleArmRobot.ArmJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 
 public class SimpleRobotInputOutputMap
 {

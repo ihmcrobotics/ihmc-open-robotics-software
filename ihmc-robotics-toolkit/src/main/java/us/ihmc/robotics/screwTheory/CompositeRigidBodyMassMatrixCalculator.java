@@ -8,6 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Twist;

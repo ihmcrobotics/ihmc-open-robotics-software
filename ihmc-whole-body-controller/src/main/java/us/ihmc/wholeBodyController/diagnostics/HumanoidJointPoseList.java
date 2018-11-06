@@ -2,6 +2,7 @@ package us.ihmc.wholeBodyController.diagnostics;
 
 import java.util.ArrayList;
 
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -12,7 +13,6 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class HumanoidJointPoseList
 {

@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.outputData;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 
 public class JointDesiredOutputList implements JointDesiredOutputListBasics
 {

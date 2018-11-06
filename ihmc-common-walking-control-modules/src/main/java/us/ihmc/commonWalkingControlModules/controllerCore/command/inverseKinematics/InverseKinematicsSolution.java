@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinema
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
-import us.ihmc.robotics.screwTheory.JointBasics;
 
 public class InverseKinematicsSolution
 {

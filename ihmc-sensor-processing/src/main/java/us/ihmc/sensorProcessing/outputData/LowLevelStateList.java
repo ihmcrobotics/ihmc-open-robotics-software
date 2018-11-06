@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.tools.lists.PairList;
 
 import java.util.HashMap;

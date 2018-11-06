@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
@@ -21,7 +22,6 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 

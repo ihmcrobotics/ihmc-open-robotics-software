@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;

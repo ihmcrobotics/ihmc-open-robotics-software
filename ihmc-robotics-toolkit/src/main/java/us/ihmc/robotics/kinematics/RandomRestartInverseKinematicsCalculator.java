@@ -5,8 +5,8 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 

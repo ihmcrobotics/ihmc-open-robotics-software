@@ -10,10 +10,10 @@ import java.util.logging.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;

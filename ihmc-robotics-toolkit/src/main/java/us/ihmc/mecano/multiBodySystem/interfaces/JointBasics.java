@@ -1,11 +1,20 @@
-package us.ihmc.robotics.screwTheory;
+package us.ihmc.mecano.multiBodySystem.interfaces;
 
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
+import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
+import us.ihmc.robotics.screwTheory.GenericCRC32;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.simulationconstructionset.util.CommonJoint;
 
 /**

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 
 import us.ihmc.avatar.handControl.FingerJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 
 public class SandiaHandModel

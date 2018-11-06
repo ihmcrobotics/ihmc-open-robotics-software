@@ -10,9 +10,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.JointBasics;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class PlaybackPoseSequenceReader

@@ -1,8 +1,8 @@
 package us.ihmc.quadrupedRobotics.output;
 
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.*;
 import us.ihmc.simulationToolkit.controllers.LowLevelActuatorSimulator;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;

@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 

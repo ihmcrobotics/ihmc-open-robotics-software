@@ -1,7 +1,7 @@
 package us.ihmc.robotDataLogger.jointState;
 
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotDataLogger.JointType;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class OneDoFJointHolder implements JointHolder
 {

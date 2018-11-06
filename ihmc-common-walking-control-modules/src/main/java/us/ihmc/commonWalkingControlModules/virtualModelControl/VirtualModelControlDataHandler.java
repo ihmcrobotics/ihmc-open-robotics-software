@@ -9,8 +9,8 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 

@@ -1,10 +1,10 @@
 package us.ihmc.valkyrieRosControl.sliderBoardControl;
 
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>

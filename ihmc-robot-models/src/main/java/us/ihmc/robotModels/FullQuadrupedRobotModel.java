@@ -2,9 +2,9 @@ package us.ihmc.robotModels;
 
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.robotics.kinematics.JointLimit;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 import java.util.List;
