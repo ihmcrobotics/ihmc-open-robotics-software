@@ -511,7 +511,7 @@ public class GeometricJacobianCalculatorTest
       SpatialAcceleration actualAcceleration = new SpatialAcceleration();
 
       DenseMatrix64F jointDesiredAccelerationsMatrix = new DenseMatrix64F(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
-      ScrewTools.getDesiredJointAccelerationsMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointDesiredAccelerationsMatrix);
+      ScrewTools.getJointAccelerationsMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointDesiredAccelerationsMatrix);
 
       spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector, expectedAcceleration);
       jacobianCalculator.getEndEffectorAcceleration(jointDesiredAccelerationsMatrix, actualAcceleration);

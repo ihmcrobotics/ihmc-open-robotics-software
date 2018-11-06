@@ -202,7 +202,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
    {
       if (!isJointAccelerationMatrixUpToDate)
       {
-         ScrewTools.getDesiredJointAccelerationsMatrix(joints, jointAccelerationMatrix);
+         ScrewTools.getJointAccelerationsMatrix(joints, jointAccelerationMatrix);
          isJointAccelerationMatrixUpToDate = true;
       }
 

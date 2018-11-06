@@ -162,23 +162,7 @@ public abstract interface JointBasics extends CommonJoint
     */
    public abstract void getJointVelocity(int rowStart, DenseMatrix64F matrixToPack);
 
-   /**
-    * Packs this joint desired acceleration into a column vector {@code DenseMatrix64F}. Here are a
-    * few examples:
-    * <ul>
-    * <li>For a {@code OneDoFJoint}, the scalar acceleration {@code qddDesired} is stored at the
-    * {@code rowStart}<sup>th</sup> row.
-    * <li>For a {@code SixDoFJoint}, the joint desired spatial acceleration is stored from the
-    * {@code rowStart}<sup>th</sup> row to the ({@code rowStart + 6})<sup>th</sup> row, starting
-    * with the three components of the angular acceleration.
-    * </ul>
-    * 
-    * @param matrixToPack the column vector in which the acceleration of this joint is stored.
-    *           Modified.
-    * @param rowStart row index for the first component of the acceleration.
-    */
-   @Deprecated // TODO
-   public abstract void getDesiredAccelerationMatrix(DenseMatrix64F matrixToPack, int rowStart);
+   public abstract void getJointAcceleration(int rowStart, DenseMatrix64F matrixToPack);
 
    public abstract void setJointAccelerationToZero();
 

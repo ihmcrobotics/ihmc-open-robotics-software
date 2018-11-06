@@ -65,7 +65,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getJointAcceleration(int rowStart, DenseMatrix64F matrix)
    {
       MathTools.checkIntervalContains(matrix.getNumRows(), 1, Integer.MAX_VALUE);
       MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);

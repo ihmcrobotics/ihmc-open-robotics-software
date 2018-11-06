@@ -88,7 +88,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
 
    private void storeJointState()
    {
-      ScrewTools.getDesiredJointAccelerationsMatrix(jointsInOrder, storedJointDesiredAccelerations);
+      ScrewTools.getJointAccelerationsMatrix(jointsInOrder, storedJointDesiredAccelerations);
       ScrewTools.getJointVelocitiesMatrix(jointsInOrder, storedJointVelocities);
       for (JointBasics joint : jointsInOrder)
       {
