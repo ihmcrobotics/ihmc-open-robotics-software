@@ -9,7 +9,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.spatial.SpatialInertia;
@@ -44,7 +43,7 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
  * </ul>
  * </p>
  */
-public class RigidBody implements NameBasedHashCodeHolder
+public class RigidBody
 {
    /** This is where the physical properties of this rigid-body are stored. */
    private final SpatialInertia inertia;
@@ -152,7 +151,7 @@ public class RigidBody implements NameBasedHashCodeHolder
       name = bodyName;
       this.parentJoint = parentJoint;
 
-      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(name, parentJoint);
+      nameBasedHashCode = 1L;
       ReferenceFrame frameAfterJoint = parentJoint.getFrameAfterJoint();
       bodyFixedFrame = MovingReferenceFrame.constructFrameFixedInParent(bodyName + "CoM", frameAfterJoint, inertiaPose);
       inertia = new SpatialInertia(bodyFixedFrame, bodyFixedFrame, momentOfInertia, mass);
@@ -356,9 +355,8 @@ public class RigidBody implements NameBasedHashCodeHolder
     * same robot, such that it can be used to serialize and deserialize robot information.
     * </p>
     */
-   @Override
-   public long getNameBasedHashCode()
+   public int hashCode()
    {
-      return nameBasedHashCode;
+      return (int) nameBasedHashCode;
    }
 }

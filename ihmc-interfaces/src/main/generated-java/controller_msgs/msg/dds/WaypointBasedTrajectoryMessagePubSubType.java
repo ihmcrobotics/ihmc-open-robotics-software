@@ -42,7 +42,7 @@ public class WaypointBasedTrajectoryMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -75,7 +75,7 @@ public class WaypointBasedTrajectoryMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -106,7 +106,7 @@ public class WaypointBasedTrajectoryMessagePubSubType implements us.ihmc.pubsub.
    {
       cdr.write_type_4(data.getSequenceId());
 
-      cdr.write_type_11(data.getEndEffectorNameBasedHashCode());
+      cdr.write_type_2(data.getEndEffectorHashCode());
 
       if(data.getWaypointTimes().size() <= 100)
       cdr.write_type_e(data.getWaypointTimes());else
@@ -128,7 +128,7 @@ public class WaypointBasedTrajectoryMessagePubSubType implements us.ihmc.pubsub.
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      data.setEndEffectorNameBasedHashCode(cdr.read_type_11());
+      data.setEndEffectorHashCode(cdr.read_type_2());
       	
       cdr.read_type_e(data.getWaypointTimes());	
       cdr.read_type_e(data.getWaypoints());	
@@ -145,7 +145,7 @@ public class WaypointBasedTrajectoryMessagePubSubType implements us.ihmc.pubsub.
    public final void serialize(controller_msgs.msg.dds.WaypointBasedTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_11("end_effector_name_based_hash_code", data.getEndEffectorNameBasedHashCode());
+      ser.write_type_2("end_effector_hash_code", data.getEndEffectorHashCode());
       ser.write_type_e("waypoint_times", data.getWaypointTimes());
       ser.write_type_e("waypoints", data.getWaypoints());
       ser.write_type_a("angular_selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getAngularSelectionMatrix());
@@ -163,7 +163,7 @@ public class WaypointBasedTrajectoryMessagePubSubType implements us.ihmc.pubsub.
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WaypointBasedTrajectoryMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      data.setEndEffectorNameBasedHashCode(ser.read_type_11("end_effector_name_based_hash_code"));
+      data.setEndEffectorHashCode(ser.read_type_2("end_effector_hash_code"));
       ser.read_type_e("waypoint_times", data.getWaypointTimes());
       ser.read_type_e("waypoints", data.getWaypoints());
       ser.read_type_a("angular_selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getAngularSelectionMatrix());

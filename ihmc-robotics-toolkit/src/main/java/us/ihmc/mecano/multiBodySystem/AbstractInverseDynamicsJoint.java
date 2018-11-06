@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
@@ -80,7 +79,7 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
     */
    public AbstractInverseDynamicsJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
    {
-      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(name, predecessor);
+      nameBasedHashCode = 1L;
 
       this.name = name;
       this.predecessor = predecessor;
@@ -328,9 +327,8 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
       return getClass().getSimpleName() + " " + getName();
    }
 
-   @Override
-   public long getNameBasedHashCode()
+   public int hashCode()
    {
-      return nameBasedHashCode;
+      return (int) nameBasedHashCode;
    }
 }

@@ -31,11 +31,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class ReferenceFrameHashCodeResolver
 {
 
-   private final TLongObjectHashMap<ReferenceFrame> nameBasedHashCodeToReferenceFrameMap = new TLongObjectHashMap<ReferenceFrame>();
+   private final TLongObjectHashMap<ReferenceFrame> hashCodeToReferenceFrameMap = new TLongObjectHashMap<ReferenceFrame>();
 
    public ReferenceFrameHashCodeResolver(FullRobotModel fullRobotModel, ReferenceFrames referenceFrames)
    {
-      nameBasedHashCodeToReferenceFrameMap.put(NameBasedHashCodeTools.NULL_HASHCODE, null);
+      hashCodeToReferenceFrameMap.put(NameBasedHashCodeTools.NULL_HASHCODE, null);
       checkAndAddReferenceFrame(ReferenceFrame.getWorldFrame());
 
       try
@@ -84,12 +84,12 @@ public class ReferenceFrameHashCodeResolver
     */
    public ReferenceFrameHashCodeResolver(List<ReferenceFrame> referenceFrames)
    {
-      nameBasedHashCodeToReferenceFrameMap.put(NameBasedHashCodeTools.NULL_HASHCODE, null);
+      hashCodeToReferenceFrameMap.put(NameBasedHashCodeTools.NULL_HASHCODE, null);
       for (ReferenceFrame referenceFrame : referenceFrames)
       {
          if (referenceFrame != null)
          {
-            nameBasedHashCodeToReferenceFrameMap.put(referenceFrame.hashCode(), referenceFrame);
+            hashCodeToReferenceFrameMap.put(referenceFrame.hashCode(), referenceFrame);
          }
       }
    }
@@ -168,28 +168,28 @@ public class ReferenceFrameHashCodeResolver
 
    private void checkAndAddReferenceFrame(ReferenceFrame referenceFrame, long nameBasedHashCode)
    {
-      if (nameBasedHashCodeToReferenceFrameMap.containsKey(nameBasedHashCode))
+      if (hashCodeToReferenceFrameMap.containsKey(nameBasedHashCode))
       {
-         ReferenceFrame existingFrame = nameBasedHashCodeToReferenceFrameMap.get(nameBasedHashCode);
+         ReferenceFrame existingFrame = hashCodeToReferenceFrameMap.get(nameBasedHashCode);
          if (referenceFrame != existingFrame)
          {
             throw new IllegalArgumentException("ReferenceFrameHashCodeResolver: Tried to put in a reference frame with the same name");
          }
          return;
       }
-      nameBasedHashCodeToReferenceFrameMap.put(nameBasedHashCode, referenceFrame);
+      hashCodeToReferenceFrameMap.put(nameBasedHashCode, referenceFrame);
    }
 
-   public ReferenceFrame getReferenceFrameFromNameBaseHashCode(long nameBasedHashCode)
+   public ReferenceFrame getReferenceFrameFromHashCode(long nameBasedHashCode)
    {
-      if (!nameBasedHashCodeToReferenceFrameMap.containsKey(nameBasedHashCode))
+      if (!hashCodeToReferenceFrameMap.containsKey(nameBasedHashCode))
          throw new RuntimeException("Recieved reference frame id that is unknown in the controller.");
 
-      return nameBasedHashCodeToReferenceFrameMap.get(nameBasedHashCode);
+      return hashCodeToReferenceFrameMap.get(nameBasedHashCode);
    }
 
    public Collection<ReferenceFrame> getAllReferenceFrames()
    {
-      return nameBasedHashCodeToReferenceFrameMap.valueCollection();
+      return hashCodeToReferenceFrameMap.valueCollection();
    }
 }

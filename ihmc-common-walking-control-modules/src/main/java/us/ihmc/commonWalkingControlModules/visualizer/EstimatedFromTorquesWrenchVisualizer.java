@@ -1,13 +1,17 @@
 package us.ihmc.commonWalkingControlModules.visualizer;
 
-import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -18,18 +22,11 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 public class EstimatedFromTorquesWrenchVisualizer
 {
@@ -85,7 +82,7 @@ public class EstimatedFromTorquesWrenchVisualizer
          jointLists.put(rigidBody, joints);
          if (jacobianHolder != null)
          {
-            long jacobianId = jacobianHolder.getOrCreateGeometricJacobian(joints, rigidBody.getBodyFixedFrame());
+            int jacobianId = jacobianHolder.getOrCreateGeometricJacobian(joints, rigidBody.getBodyFixedFrame());
             jacobians.put(rigidBody, jacobianHolder.getJacobian(jacobianId));
          }
          else
@@ -98,7 +95,7 @@ public class EstimatedFromTorquesWrenchVisualizer
       {
          for (RigidBody rigidBody : rigidBodies)
          {
-            long jacobianId = jacobianHolder.getOrCreateGeometricJacobian(rootBody, rigidBody, ReferenceFrame.getWorldFrame());
+            int jacobianId = jacobianHolder.getOrCreateGeometricJacobian(rootBody, rigidBody, ReferenceFrame.getWorldFrame());
             jacobians.put(rigidBody, jacobianHolder.getJacobian(jacobianId));
          }
       }

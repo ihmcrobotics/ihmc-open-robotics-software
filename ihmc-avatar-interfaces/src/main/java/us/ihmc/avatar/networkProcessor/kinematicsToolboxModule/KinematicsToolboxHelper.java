@@ -8,7 +8,7 @@ import org.ejml.ops.NormOps;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
@@ -32,7 +32,6 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 
@@ -169,18 +168,18 @@ public class KinematicsToolboxHelper
     * @param oneDoFJoints the one degree-of-freedom joints to update. Modified.
     */
    static void setRobotStateFromPrivilegedConfigurationData(KinematicsToolboxConfigurationCommand commandWithPrivilegedConfiguration,
-                                                            FloatingInverseDynamicsJoint desiredRootJoint, Map<Long, OneDoFJoint> jointNameBasedHashCodeMap)
+                                                            FloatingInverseDynamicsJoint desiredRootJoint, Map<Integer, OneDoFJoint> jointHashCodeMap)
    {
       boolean hasPrivilegedJointAngles = commandWithPrivilegedConfiguration.hasPrivilegedJointAngles();
 
       if (hasPrivilegedJointAngles)
       {
-         TLongArrayList jointNameBasedHashCode = commandWithPrivilegedConfiguration.getJointNameBasedHashCodes();
+         TIntArrayList jointHashCodes = commandWithPrivilegedConfiguration.getJointHashCodes();
          TFloatArrayList privilegedJointAngles = commandWithPrivilegedConfiguration.getPrivilegedJointAngles();
 
          for (int i = 0; i < privilegedJointAngles.size(); i++)
          {
-            OneDoFJoint joint = jointNameBasedHashCodeMap.get(jointNameBasedHashCode.get(i));
+            OneDoFJoint joint = jointHashCodeMap.get(jointHashCodes.get(i));
             joint.setQ(privilegedJointAngles.get(i));
             joint.setQd(0.0);
          }

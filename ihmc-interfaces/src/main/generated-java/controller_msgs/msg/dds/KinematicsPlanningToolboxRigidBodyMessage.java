@@ -13,7 +13,7 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-   public long end_effector_name_based_hash_code_;
+   public int end_effector_hash_code_;
    /**
             * This is the list of desired times for each key frames.
             */
@@ -102,7 +102,7 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
    {
       sequence_id_ = other.sequence_id_;
 
-      end_effector_name_based_hash_code_ = other.end_effector_name_based_hash_code_;
+      end_effector_hash_code_ = other.end_effector_hash_code_;
 
       key_frame_times_.set(other.key_frame_times_);
       key_frame_poses_.set(other.key_frame_poses_);
@@ -133,13 +133,13 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
       return sequence_id_;
    }
 
-   public void setEndEffectorNameBasedHashCode(long end_effector_name_based_hash_code)
+   public void setEndEffectorHashCode(int end_effector_hash_code)
    {
-      end_effector_name_based_hash_code_ = end_effector_name_based_hash_code;
+      end_effector_hash_code_ = end_effector_hash_code;
    }
-   public long getEndEffectorNameBasedHashCode()
+   public int getEndEffectorHashCode()
    {
-      return end_effector_name_based_hash_code_;
+      return end_effector_hash_code_;
    }
 
 
@@ -271,7 +271,7 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_effector_name_based_hash_code_, other.end_effector_name_based_hash_code_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_effector_hash_code_, other.end_effector_hash_code_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.key_frame_times_, other.key_frame_times_, epsilon)) return false;
 
@@ -307,7 +307,7 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.end_effector_name_based_hash_code_ != otherMyClass.end_effector_name_based_hash_code_) return false;
+      if(this.end_effector_hash_code_ != otherMyClass.end_effector_hash_code_) return false;
 
       if (!this.key_frame_times_.equals(otherMyClass.key_frame_times_)) return false;
       if (!this.key_frame_poses_.equals(otherMyClass.key_frame_poses_)) return false;
@@ -331,8 +331,8 @@ public class KinematicsPlanningToolboxRigidBodyMessage extends Packet<Kinematics
       builder.append("KinematicsPlanningToolboxRigidBodyMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("end_effector_name_based_hash_code=");
-      builder.append(this.end_effector_name_based_hash_code_);      builder.append(", ");
+      builder.append("end_effector_hash_code=");
+      builder.append(this.end_effector_hash_code_);      builder.append(", ");
       builder.append("key_frame_times=");
       builder.append(this.key_frame_times_);      builder.append(", ");
       builder.append("key_frame_poses=");

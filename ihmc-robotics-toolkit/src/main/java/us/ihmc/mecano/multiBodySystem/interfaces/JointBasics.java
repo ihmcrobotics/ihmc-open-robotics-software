@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -37,7 +36,7 @@ import us.ihmc.simulationconstructionset.util.CommonJoint;
  * </ul>
  * 
  */
-public abstract interface JointBasics extends CommonJoint, NameBasedHashCodeHolder
+public abstract interface JointBasics extends CommonJoint
 {
    public static int maxDoF = 6;
 
@@ -470,4 +469,5 @@ public abstract interface JointBasics extends CommonJoint, NameBasedHashCodeHold
 
    public abstract void calculateJointStateChecksum(GenericCRC32 checksum);
 
+   public int hashCode();
 }

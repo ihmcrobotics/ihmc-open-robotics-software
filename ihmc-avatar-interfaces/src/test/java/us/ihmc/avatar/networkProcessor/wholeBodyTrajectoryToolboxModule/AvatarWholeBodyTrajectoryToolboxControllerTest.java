@@ -525,7 +525,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             WaypointBasedTrajectoryMessage trajectory = wayPointBasedTrajectoryMessages.get(i);
             RigidBodyExplorationConfigurationMessage explorationMessage = getRigidBodyExplorationConfigurationMessageHasSameHashCode(message.getExplorationConfigurations(),
                                                                                                                                      trajectory);
-            RigidBody rigidBodyOftrajectory = commandConversionHelper.getRigidBody(trajectory.getEndEffectorNameBasedHashCode());
+            RigidBody rigidBodyOftrajectory = commandConversionHelper.getRigidBody(trajectory.getEndEffectorHashCode());
 
             RigidBody rigidBodyOfOutputFullRobotModel = getRigidBodyHasSameName(outputFullRobotModel, rigidBodyOftrajectory);
 
@@ -583,7 +583,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       for (int i = 0; i < rigidBodyExplorationConfigurationMessages.size(); i++)
       {
          RigidBodyExplorationConfigurationMessage message = rigidBodyExplorationConfigurationMessages.get(i);
-         if (trajectory.getEndEffectorNameBasedHashCode() == message.getRigidBodyNameBasedHashCode())
+         if (trajectory.getEndEffectorHashCode() == message.getRigidBodyHashCode())
             return message;
       }
       return null;

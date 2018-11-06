@@ -28,7 +28,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
  */
 public class WholeBodyTrajectoryToolboxCommandConverter implements CommandConversionInterface
 {
-   private final Map<Long, RigidBody> rigidBodyNamedBasedHashMap = new HashMap<>();
+   private final Map<Integer, RigidBody> rigidBodyHashMap = new HashMap<>();
    private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
 
    public WholeBodyTrajectoryToolboxCommandConverter(FullHumanoidRobotModel fullRobotModel)
@@ -38,7 +38,7 @@ public class WholeBodyTrajectoryToolboxCommandConverter implements CommandConver
       RigidBody rootBody = ScrewTools.getRootBody(fullRobotModel.getElevator());
       RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
       for (RigidBody rigidBody : allRigidBodies)
-         rigidBodyNamedBasedHashMap.put(rigidBody.getNameBasedHashCode(), rigidBody);
+         rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody);
    }
 
    public WholeBodyTrajectoryToolboxCommandConverter(RigidBody rootBody)
@@ -59,12 +59,12 @@ public class WholeBodyTrajectoryToolboxCommandConverter implements CommandConver
 
       RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
       for (RigidBody rigidBody : allRigidBodies)
-         rigidBodyNamedBasedHashMap.put(rigidBody.getNameBasedHashCode(), rigidBody);
+         rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody);
    }
 
-   public RigidBody getRigidBody(long hashMap)
+   public RigidBody getRigidBody(int hashCode)
    {
-      return rigidBodyNamedBasedHashMap.get(hashMap);
+      return rigidBodyHashMap.get(hashCode);
    }
 
    /**
@@ -86,6 +86,6 @@ public class WholeBodyTrajectoryToolboxCommandConverter implements CommandConver
    public <C extends Command<?, M>, M extends Settable<M>> void process(C command, M message)
    {
       WholeBodyTrajectoryToolboxAPI<M> wholeBodyTrajectoryCommand = (WholeBodyTrajectoryToolboxAPI<M>) command;
-      wholeBodyTrajectoryCommand.set(message, rigidBodyNamedBasedHashMap, referenceFrameHashCodeResolver);
+      wholeBodyTrajectoryCommand.set(message, rigidBodyHashMap, referenceFrameHashCodeResolver);
    }
 }

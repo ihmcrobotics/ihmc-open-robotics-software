@@ -22,14 +22,14 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
       {
          JointDesiredOutput data = new JointDesiredOutput();
          jointsData[i] = data;
-         jointMap.put(joints[i].getNameBasedHashCode(), data);
+         jointMap.put(joints[i].hashCode(), data);
       }
    }
 
    @Override
    public boolean hasDataForJoint(OneDoFJoint joint)
    {
-      return jointMap.containsKey(joint.getNameBasedHashCode());
+      return jointMap.containsKey(joint.hashCode());
    }
 
    @Override
@@ -53,7 +53,7 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
    @Override
    public JointDesiredOutput getJointDesiredOutput(OneDoFJoint joint)
    {
-      return jointMap.get(joint.getNameBasedHashCode());
+      return jointMap.get(joint.hashCode());
    }
 
    @Override

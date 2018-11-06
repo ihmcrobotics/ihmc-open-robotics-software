@@ -5,7 +5,6 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -36,7 +35,7 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
  * </ul>
  * </p>
  */
-public class GeometricJacobian implements NameBasedHashCodeHolder
+public class GeometricJacobian
 {
    /** Array of the joints to be considered by this Jacobian. */
    private final JointBasics[] joints;
@@ -52,7 +51,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Twist.SIZE, 1);
 
    private final boolean allowChangeFrame;
-   private final long nameBasedHashCode;
+   private final int hashCode;
 
    /**
     * Creates the Jacobian for the kinematic chain described by the given joints. These joints have
@@ -91,7 +90,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
       this.jointPathFromBaseToEndEffector = ScrewTools.createJointPath(getBase(), getEndEffector());
       this.allowChangeFrame = allowChangeFrame;
 
-      nameBasedHashCode = ScrewTools.computeGeometricJacobianNameBasedHashCode(joints, jacobianFrame, allowChangeFrame);
+      hashCode = ScrewTools.computeGeometricJacobianHashCode(joints, jacobianFrame, allowChangeFrame);
    }
 
    /**
@@ -374,9 +373,8 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
       return "Jacobian, end effector = " + getEndEffector() + ", base = " + getBase() + ", expressed in " + getJacobianFrame();
    }
 
-   @Override
-   public long getNameBasedHashCode()
+   public int hashCode()
    {
-      return nameBasedHashCode;
+      return hashCode;
    }
 }
