@@ -230,16 +230,13 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
     *           not.
     * @param updateAccelerations whether the joint accelerations should be copied over to the SCS
     *           robot or not.
-    * @param useDesiredAcceleration whether to extract the desired or measured joint accelerations.
-    *           Unused when {@code updateAccelerations == false}.
     * @param updateTorques whether the joint forces/torques should be copied over to the SCS robot
     *           or not.
     * @param useDesiredTorque whether to extract the desired or measured joint forces/torques.
     *           Unused when {@code updateTorques == false}.
     */
    public void updateRobotFromInverseDynamicsRobotModel(boolean updateRootJoints, boolean updatePositions, boolean updateVelocities,
-                                                        boolean updateAccelerations, boolean useDesiredAcceleration, boolean updateTorques,
-                                                        boolean useDesiredTorque)
+                                                        boolean updateAccelerations, boolean updateTorques, boolean useDesiredTorque)
    {
 
       Collection<OneDegreeOfFreedomJoint> pinJoints = scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints();
@@ -262,10 +259,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 
             if (updateAccelerations)
             {
-               if (useDesiredAcceleration)
-                  jointAcceleration = revoluteJoint.getQddDesired();
-               else
-                  jointAcceleration = revoluteJoint.getQdd();
+               jointAcceleration = revoluteJoint.getQdd();
                pinJoint.setQdd(jointAcceleration);
             }
 
@@ -312,10 +306,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 
             if (updateAccelerations)
             {
-               if (useDesiredAcceleration)
-                  spatialAccelerationVector.setIncludingFrame(sixDoFJoint.getJointAcceleration());
-               else
-                  spatialAccelerationVector.setIncludingFrame(sixDoFJoint.getJointAcceleration());
+               spatialAccelerationVector.setIncludingFrame(sixDoFJoint.getJointAcceleration());
                originAcceleration.setIncludingFrame(spatialAccelerationVector.getLinearPart());
                originAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
                floatingJoint.setAcceleration(originAcceleration);
