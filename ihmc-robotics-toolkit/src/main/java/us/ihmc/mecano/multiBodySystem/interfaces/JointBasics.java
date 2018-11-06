@@ -113,40 +113,6 @@ public abstract interface JointBasics extends CommonJoint
    public abstract void getSuccessorAcceleration(SpatialAcceleration jointAccelerationToPack);
 
    /**
-    * Packs the {@code SpatialAccelerationVector} (the 3D angular and linear accelerations) of this
-    * joint's {@code successor} with respect to this joint's {@code predecessor} resulting from the
-    * desired acceleration of this joint. The reference frames of the resulting
-    * {@code SpatialAccelerationVector} are as follows:
-    * <ul>
-    * <li>{@code bodyFrame} is {@code successorFrame == successor.getBodyFixedFrame()}.
-    * <li>{@code baseFrame} is {@code predecessorFrame == predecessor.getBodyFixedFrame()}.
-    * <li>{@code expressedInFrame} is {@code successorFrame}.
-    * </ul>
-    * 
-    * @param jointAccelerationToPack the {@code SpatialAccelerationVector} in which the acceleration
-    *           of this joint's {@code successor} resulting from this joint desired acceleration is
-    *           stored. Modified.
-    */
-   public abstract void getDesiredSuccessorAcceleration(SpatialAcceleration jointAccelerationToPack);
-
-   /**
-    * Packs the {@code SpatialAccelerationVector} (the 3D angular and linear accelerations) of this
-    * joint's {@code predecessor} with respect to this joint's {@code successor} resulting from the
-    * desired acceleration of this joint. The reference frames of the resulting
-    * {@code SpatialAccelerationVector} are as follows:
-    * <ul>
-    * <li>{@code bodyFrame} is {@code predecessorFrame == predecessor.getBodyFixedFrame()}.
-    * <li>{@code baseFrame} is {@code successorFrame == successor.getBodyFixedFrame()}.
-    * <li>{@code expressedInFrame} is {@code predecessorFrame}.
-    * </ul>
-    * 
-    * @param jointAccelerationToPack the {@code SpatialAccelerationVector} in which the acceleration
-    *           of this joint's {@code predecessor} resulting from this joint desired acceleration
-    *           is stored. Modified.
-    */
-   public abstract void getDesiredPredecessorAcceleration(SpatialAcceleration jointAccelerationToPack);
-
-   /**
     * Packs this joint's configuration into a column vector {@code DenseMatrix64F}. Here are a few
     * examples:
     * <ul>
