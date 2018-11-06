@@ -93,7 +93,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
       this.rigidBody = rigidBody;
       this.imuFrame = imuFrame;
       this.twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootBody);
-      this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, rootAcceleration, true, false);
+      this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, rootAcceleration, true);
 
       name = getClass().getSimpleName() + imuIndex;
       registry = new YoVariableRegistry(name);

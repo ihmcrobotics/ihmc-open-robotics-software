@@ -50,8 +50,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
    public GravityCoriolisExternalWrenchMatrixCalculator(RigidBodyBasics body, SpatialAccelerationReadOnly rootAcceleration, HashMap<RigidBodyBasics, Wrench> externalWrenches,
                                                         ArrayList<JointBasics> jointsToIgnore, boolean doVelocityTerms, boolean doAccelerationTerms)
    {
-      this(externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms, doAccelerationTerms,
-                                                                               USE_DESIRED_ACCELERATIONS));
+      this(externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms, doAccelerationTerms));
    }
 
    //// TODO: 12/31/16  remove explicit dependency on the spatial acceleration calculator

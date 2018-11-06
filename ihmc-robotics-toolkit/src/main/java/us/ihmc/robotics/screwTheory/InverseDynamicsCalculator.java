@@ -57,7 +57,7 @@ public class InverseDynamicsCalculator
          boolean doVelocityTerms, boolean doAccelerationTerms)
    {
       this(jointsToIgnore, new SpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms,
-            doAccelerationTerms, true));
+            doAccelerationTerms));
    }
 
    public InverseDynamicsCalculator(List<JointBasics> jointsToIgnore, SpatialAccelerationCalculator spatialAccelerationCalculator)

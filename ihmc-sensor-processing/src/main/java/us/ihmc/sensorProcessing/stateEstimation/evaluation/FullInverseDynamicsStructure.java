@@ -19,7 +19,7 @@ public class FullInverseDynamicsStructure
       this.elevator = elevator;
       this.rootJoint = rootInverseDynamicsJoint;
 
-      spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, 0.0, false);
+      spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, 0.0);
 
       this.estimationLink = estimationLink;
    }
