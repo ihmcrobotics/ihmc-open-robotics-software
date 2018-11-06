@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.controllerCore.robotArmWithMovingBase;
 
-import static us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector.*;
+import static us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,19 +21,20 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.KinematicPoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SliderJoint;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class MovingBaseRobotArm extends Robot
 {
@@ -44,7 +45,7 @@ public class MovingBaseRobotArm extends Robot
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double gravity = 9.81;
 
-   private final RigidBody elevator;
+   private final RigidBodyBasics elevator;
 
    private final Vector3D baseXOffset = new Vector3D(0.0, 0.0, 0.3);
 
@@ -80,25 +81,25 @@ public class MovingBaseRobotArm extends Robot
    private final Vector3D handCoM = new Vector3D(0.0, 0.0, 0.05);
 
    private final PrismaticJoint baseX;
-   private final RigidBody baseXLink;
+   private final RigidBodyBasics baseXLink;
    private final PrismaticJoint baseY;
-   private final RigidBody baseYLink;
+   private final RigidBodyBasics baseYLink;
    private final PrismaticJoint baseZ;
-   private final RigidBody base;
+   private final RigidBodyBasics base;
    private final RevoluteJoint shoulderYaw;
-   private final RigidBody shoulderYawLink;
+   private final RigidBodyBasics shoulderYawLink;
    private final RevoluteJoint shoulderRoll;
-   private final RigidBody shoulderRollLink;
+   private final RigidBodyBasics shoulderRollLink;
    private final RevoluteJoint shoulderPitch;
-   private final RigidBody upperArm;
+   private final RigidBodyBasics upperArm;
    private final RevoluteJoint elbowPitch;
-   private final RigidBody lowerArm;
+   private final RigidBodyBasics lowerArm;
    private final RevoluteJoint wristPitch;
-   private final RigidBody wristPitchLink;
+   private final RigidBodyBasics wristPitchLink;
    private final RevoluteJoint wristRoll;
-   private final RigidBody wristRollLink;
+   private final RigidBodyBasics wristRollLink;
    private final RevoluteJoint wristYaw;
-   private final RigidBody hand;
+   private final RigidBodyBasics hand;
 
    private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform(new AxisAngle(), new Vector3D(0.0, 0.0, 0.4));
    private final ReferenceFrame handControlFrame;
@@ -388,17 +389,17 @@ public class MovingBaseRobotArm extends Robot
       }
    }
 
-   public RigidBody getElevator()
+   public RigidBodyBasics getElevator()
    {
       return elevator;
    }
 
-   public RigidBody getBase()
+   public RigidBodyBasics getBase()
    {
       return base;
    }
 
-   public RigidBody getHand()
+   public RigidBodyBasics getHand()
    {
       return hand;
    }

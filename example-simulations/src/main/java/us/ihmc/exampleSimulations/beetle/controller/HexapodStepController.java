@@ -18,7 +18,7 @@ import us.ihmc.exampleSimulations.beetle.planning.FootStepPlanner;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSextant;
@@ -44,14 +44,14 @@ public class HexapodStepController
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
 
-   private RigidBody[] rigidBodiesToControl = new RigidBody[6];
+   private RigidBodyBasics[] rigidBodiesToControl = new RigidBodyBasics[6];
 
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
    private final VirtualModelControlCommandList contactStateVMCCommands = new VirtualModelControlCommandList();
    private final InverseDynamicsCommandList contactStateIDCommands = new InverseDynamicsCommandList();
    private final SegmentDependentList<RobotSextant, SimulatedPlaneContactStateUpdater> contactStateUpdaters;
 
-   private final SegmentDependentList<RobotSextant, RigidBody> shinRigidBodies = new SegmentDependentList<>(RobotSextant.class);
+   private final SegmentDependentList<RobotSextant, RigidBodyBasics> shinRigidBodies = new SegmentDependentList<>(RobotSextant.class);
    private final SegmentDependentList<RobotSextant, TwoWaypointSwingGenerator> swingTrajectoryGenerators = new SegmentDependentList<>(RobotSextant.class);
    private final SegmentDependentList<RobotSextant, SpatialFeedbackControlCommand> spatialFeedbackControlCommands = new SegmentDependentList<>(
          RobotSextant.class);
@@ -104,7 +104,7 @@ public class HexapodStepController
          String name = prefix + robotSextant.toString();
          String jointName = jointMap.getJointNameBeforeFoot(robotSextant);
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
-         RigidBody shinRigidBody = oneDoFJoint.getSuccessor();
+         RigidBodyBasics shinRigidBody = oneDoFJoint.getSuccessor();
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSextant);
          FramePose3D footInShinFrame = new FramePose3D(footFrame);
          footInShinFrame.changeFrame(shinRigidBody.getBodyFixedFrame());
@@ -323,7 +323,7 @@ public class HexapodStepController
       return contactStateIDCommands;
    }
 
-   public RigidBody[] getRigidBodiesToControl()
+   public RigidBodyBasics[] getRigidBodiesToControl()
    {
       return rigidBodiesToControl;
    }

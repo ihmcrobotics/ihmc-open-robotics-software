@@ -11,14 +11,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class ReachingManifoldCommand
       implements Command<ReachingManifoldCommand, ReachingManifoldMessage>, WholeBodyTrajectoryToolboxAPI<ReachingManifoldMessage>
 {
    private int rigidBodyHashCode;
-   private RigidBody rigidBody;
+   private RigidBodyBasics rigidBody;
 
    private Point3D manifoldOriginPosition;
    private Quaternion manifoldOriginOrientation;
@@ -32,7 +32,7 @@ public class ReachingManifoldCommand
 
    }
 
-   public ReachingManifoldCommand(RigidBody rigidBody, Point3D manifoldOriginPosition, Quaternion manifoldOriginOrientation,
+   public ReachingManifoldCommand(RigidBodyBasics rigidBody, Point3D manifoldOriginPosition, Quaternion manifoldOriginOrientation,
                                   ConfigurationSpaceName... configurationSpaces)
    {
       clear();
@@ -72,7 +72,7 @@ public class ReachingManifoldCommand
    }
 
    @Override
-   public void set(ReachingManifoldMessage message, Map<Integer, RigidBody> rigidBodyHashMap, ReferenceFrameHashCodeResolver referenceFrameResolver)
+   public void set(ReachingManifoldMessage message, Map<Integer, RigidBodyBasics> rigidBodyHashMap, ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       clear();
 
@@ -117,7 +117,7 @@ public class ReachingManifoldCommand
       return !manifoldOriginPosition.containsNaN() && !manifoldOriginOrientation.containsNaN();
    }
 
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }

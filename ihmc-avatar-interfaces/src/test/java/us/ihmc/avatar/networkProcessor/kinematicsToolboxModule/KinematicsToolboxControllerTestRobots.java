@@ -12,6 +12,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
@@ -113,9 +114,9 @@ public class KinematicsToolboxControllerTestRobots
 
    public static Pair<FloatingInverseDynamicsJoint, OneDoFJoint[]> createInverseDynamicsRobot(RobotDescription robotDescription)
    {
-      RigidBody predecessor;
+      RigidBodyBasics predecessor;
 
-      RigidBody rootBody = new RigidBody("rootBody", ReferenceFrame.getWorldFrame());
+      RigidBodyBasics rootBody = new RigidBody("rootBody", ReferenceFrame.getWorldFrame());
       FloatingInverseDynamicsJoint rootJoint;
 
       if (robotDescription.getRootJoints().get(0) instanceof FloatingInverseDynamicsJoint)
@@ -144,7 +145,7 @@ public class KinematicsToolboxControllerTestRobots
 
    
 
-   protected static void addJointsRecursively(OneDoFJointDescription joint, RigidBody parentBody)
+   protected static void addJointsRecursively(OneDoFJointDescription joint, RigidBodyBasics parentBody)
    {
       Vector3D jointAxis = new Vector3D();
       joint.getJointAxis(jointAxis);
@@ -180,7 +181,7 @@ public class KinematicsToolboxControllerTestRobots
       Vector3D comOffset = new Vector3D(childLink.getCenterOfMassOffset());
       Matrix3D inertia = childLink.getMomentOfInertiaCopy();
 
-      RigidBody rigidBody = ScrewTools.addRigidBody(childLink.getName(), inverseDynamicsJoint, inertia, mass, comOffset);
+      RigidBodyBasics rigidBody = ScrewTools.addRigidBody(childLink.getName(), inverseDynamicsJoint, inertia, mass, comOffset);
 
       for (JointDescription sdfJoint : joint.getChildrenJoints())
       {

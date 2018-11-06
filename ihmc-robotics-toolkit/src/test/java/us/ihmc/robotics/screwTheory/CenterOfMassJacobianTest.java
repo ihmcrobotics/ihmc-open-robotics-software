@@ -25,6 +25,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -35,7 +36,7 @@ public class CenterOfMassJacobianTest
    private static final Vector3D Z = new Vector3D(0.0, 0.0, 1.0);
 
    private ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private RigidBody elevator;
+   private RigidBodyBasics elevator;
    private Random random;
 
    @Before
@@ -88,11 +89,11 @@ public class CenterOfMassJacobianTest
    public void testRigidBodyListSortInvariant()
    {
       ArrayList<RevoluteJoint> joints = setUpRandomTree(elevator);
-      RigidBody[] rigidBodiesInOrder = ScrewTools.computeSupportAndSubtreeSuccessors(elevator);
-      List<RigidBody> rigidBodiesInOrderArrayList = Arrays.asList(rigidBodiesInOrder);
+      RigidBodyBasics[] rigidBodiesInOrder = ScrewTools.computeSupportAndSubtreeSuccessors(elevator);
+      List<RigidBodyBasics> rigidBodiesInOrderArrayList = Arrays.asList(rigidBodiesInOrder);
 
       Collections.shuffle(rigidBodiesInOrderArrayList, random);
-      RigidBody[] rigidBodiesOutOrder = rigidBodiesInOrderArrayList.toArray(new RigidBody[rigidBodiesInOrder.length]);
+      RigidBodyBasics[] rigidBodiesOutOrder = rigidBodiesInOrderArrayList.toArray(new RigidBodyBasics[rigidBodiesInOrder.length]);
 
       ScrewTestTools.setRandomPositions(joints, random);
       elevator.updateFramesRecursively();
@@ -116,7 +117,7 @@ public class CenterOfMassJacobianTest
    public void testComputeJacobianSixDoFPlusRandomChain()
    {
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator);
-      RigidBody floatingBody = ScrewTools.addRigidBody("floating", sixDoFJoint, new Matrix3D(), random.nextDouble(), RandomGeometry.nextVector3D(random));
+      RigidBodyBasics floatingBody = ScrewTools.addRigidBody("floating", sixDoFJoint, new Matrix3D(), random.nextDouble(), RandomGeometry.nextVector3D(random));
       ArrayList<RevoluteJoint> revoluteJoints = setUpRandomChain(floatingBody);
 
       CenterOfMassJacobian jacobian = new CenterOfMassJacobian(elevator);
@@ -136,7 +137,7 @@ public class CenterOfMassJacobianTest
       FrameVector3D velocityFromJacobian = new FrameVector3D(ReferenceFrame.getWorldFrame());
       jacobian.getCenterOfMassVelocity(velocityFromJacobian);
 
-      RigidBody rootBody = elevator;
+      RigidBodyBasics rootBody = elevator;
       FrameVector3D velocityNumerical = computeCenterOfMassVelocityNumerically(sixDoFJoint, revoluteJoints, rootBody,
                                          ScrewTools.computeSupportAndSubtreeSuccessors(rootBody), elevator.getBodyFixedFrame());
 
@@ -151,7 +152,7 @@ public class CenterOfMassJacobianTest
    public void testComputeJacobianSkipLeafBody()
    {
       ArrayList<RevoluteJoint> joints = setUpTwoJointsSimple();
-      RigidBody[] rigidBodies = new RigidBody[] {joints.get(0).getSuccessor()};
+      RigidBodyBasics[] rigidBodies = new RigidBodyBasics[] {joints.get(0).getSuccessor()};
       testComputeJacobianRevoluteJoints(joints, rigidBodies, elevator.getBodyFixedFrame());
    }
 
@@ -160,7 +161,7 @@ public class CenterOfMassJacobianTest
    public void testComputeJacobianSkipIntermediateBody()
    {
       ArrayList<RevoluteJoint> joints = setUpTwoJointsSimple();
-      RigidBody[] rigidBodies = new RigidBody[] {joints.get(joints.size() - 1).getSuccessor()};
+      RigidBodyBasics[] rigidBodies = new RigidBodyBasics[] {joints.get(joints.size() - 1).getSuccessor()};
       testComputeJacobianRevoluteJoints(joints, rigidBodies, elevator.getBodyFixedFrame());
    }
 
@@ -170,10 +171,10 @@ public class CenterOfMassJacobianTest
    {
       Random random = new Random(44345L);
 
-      RigidBody elevator = new RigidBody("elevator", worldFrame);
+      RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
 
       SixDoFJoint rootJoint = new SixDoFJoint("rootJoint", elevator);
-      RigidBody body0 = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
+      RigidBodyBasics body0 = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
 
       ArrayList<RevoluteJoint> revoluteJoints = new ArrayList<RevoluteJoint>();
       ScrewTestTools.createRandomTreeRobot(revoluteJoints, body0, 25, random);
@@ -219,8 +220,8 @@ public class CenterOfMassJacobianTest
       assertTrue(rootJointLinearVelocity.epsilonEquals(rootJointLinearVelocityBack, 1e-12));
    }
    
-   public static FrameVector3D computeCenterOfMassVelocityNumerically(SixDoFJoint sixDoFJoint, ArrayList<RevoluteJoint> revoluteJoints, RigidBody rootBody,
-           RigidBody[] rigidBodiesToUse, ReferenceFrame referenceFrame)
+   public static FrameVector3D computeCenterOfMassVelocityNumerically(SixDoFJoint sixDoFJoint, ArrayList<RevoluteJoint> revoluteJoints, RigidBodyBasics rootBody,
+           RigidBodyBasics[] rigidBodiesToUse, ReferenceFrame referenceFrame)
    {
       CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rigidBodiesToUse, referenceFrame);
 
@@ -243,7 +244,7 @@ public class CenterOfMassJacobianTest
       return velocityNumerical;
    }
 
-   private void testComputeJacobianRevoluteJoints(ArrayList<RevoluteJoint> joints, RigidBody[] rigidBodies, ReferenceFrame referenceFrame)
+   private void testComputeJacobianRevoluteJoints(ArrayList<RevoluteJoint> joints, RigidBodyBasics[] rigidBodies, ReferenceFrame referenceFrame)
    {
       CenterOfMassJacobian jacobian = new CenterOfMassJacobian(rigidBodies, referenceFrame);
 
@@ -255,7 +256,7 @@ public class CenterOfMassJacobianTest
       FrameVector3D velocityFromJacobian = new FrameVector3D(ReferenceFrame.getWorldFrame());
       jacobian.getCenterOfMassVelocity(velocityFromJacobian);
 
-      RigidBody rootBody = elevator;
+      RigidBodyBasics rootBody = elevator;
       FrameVector3D velocityNumerical = computeCenterOfMassVelocityNumerically(null, joints, rootBody, rigidBodies, referenceFrame);
 
       EuclidCoreTestTools.assertTuple3DEquals(velocityNumerical, velocityFromJacobian, 1e-5);
@@ -277,7 +278,7 @@ public class CenterOfMassJacobianTest
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>();
       RevoluteJoint joint1 = ScrewTools.addRevoluteJoint("joint1", elevator, new Vector3D(0.0, 1.0, 0.0), X);
       joints.add(joint1);
-      RigidBody body1 = ScrewTools.addRigidBody("body1", joint1, new Matrix3D(), 2.0, new Vector3D(0.0, 1.0, 0.0));
+      RigidBodyBasics body1 = ScrewTools.addRigidBody("body1", joint1, new Matrix3D(), 2.0, new Vector3D(0.0, 1.0, 0.0));
       RevoluteJoint joint2 = ScrewTools.addRevoluteJoint("joint2", body1, new Vector3D(0.0, 1.0, 0.0), X);
       joints.add(joint2);
       ScrewTools.addRigidBody("body2", joint2, new Matrix3D(), 3.0, new Vector3D(0.0, 1.0, 0.0));
@@ -285,7 +286,7 @@ public class CenterOfMassJacobianTest
       return joints;
    }
 
-   private ArrayList<RevoluteJoint> setUpRandomChain(RigidBody rootBody)
+   private ArrayList<RevoluteJoint> setUpRandomChain(RigidBodyBasics rootBody)
    {
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>();
       Vector3D[] jointAxes =
@@ -297,7 +298,7 @@ public class CenterOfMassJacobianTest
       return joints;
    }
 
-   private ArrayList<RevoluteJoint> setUpRandomTree(RigidBody elevator)
+   private ArrayList<RevoluteJoint> setUpRandomTree(RigidBodyBasics elevator)
    {
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>();
 

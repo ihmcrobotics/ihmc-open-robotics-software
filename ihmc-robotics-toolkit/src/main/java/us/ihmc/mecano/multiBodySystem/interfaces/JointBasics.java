@@ -5,7 +5,6 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
@@ -334,7 +333,7 @@ public abstract interface JointBasics extends CommonJoint
     * 
     * @param successor the {@code RigidBody} located after this joint.
     */
-   public abstract void setSuccessor(RigidBody successor);
+   public abstract void setSuccessor(RigidBodyBasics successor);
 
    /**
     * Returns the motion subspace of this joint in the form of {@code GeometricJacobian}. Its number
@@ -386,7 +385,7 @@ public abstract interface JointBasics extends CommonJoint
     * 
     * @return the {@code predecessor} of this joint.
     */
-   public abstract RigidBody getPredecessor();
+   public abstract RigidBodyBasics getPredecessor();
 
    /**
     * Returns the {@code RigidBody} that succeeds this joint. In other words, the {@code RigidBody}
@@ -395,7 +394,7 @@ public abstract interface JointBasics extends CommonJoint
     * 
     * @return the {@code successor} of this joint.
     */
-   public abstract RigidBody getSuccessor();
+   public abstract RigidBodyBasics getSuccessor();
 
    /**
     * Sets the desired force/torque of this joint from the given {@code Wrench} using this joint
@@ -425,7 +424,7 @@ public abstract interface JointBasics extends CommonJoint
 
    /**
     * Updates {@code afterJointFrame} of this joint to take into consideration the new joint
-    * configuration. Then calls {@link RigidBody#updateFramesRecursively()} which in its turn
+    * configuration. Then calls {@link RigidBodyBasics#updateFramesRecursively()} which in its turn
     * updates its {@code bodyFixedFrame} and then {@link #updateFramesRecursively()} for all of its
     * {@link JointBasics} child.
     * <p>

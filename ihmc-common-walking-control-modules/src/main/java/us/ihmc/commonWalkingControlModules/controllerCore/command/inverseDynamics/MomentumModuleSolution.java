@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 
@@ -16,8 +16,8 @@ public class MomentumModuleSolution
    private DenseMatrix64F jointAccelerations;
    private DenseMatrix64F rhoSolution;
    private SpatialForceReadOnly centroidalMomentumRateSolution;
-   private Map<RigidBody, Wrench> externalWrenchSolution;
-   private List<RigidBody> rigidBodiesWithExternalWrench;
+   private Map<RigidBodyBasics, Wrench> externalWrenchSolution;
+   private List<RigidBodyBasics> rigidBodiesWithExternalWrench;
 
    public void setJointsToOptimizeFor(JointBasics[] jointsToOptimizeFor)
    {
@@ -38,12 +38,12 @@ public class MomentumModuleSolution
       this.centroidalMomentumRateSolution = centroidalMomentumRateSolution;
    }
 
-   public void setExternalWrenchSolution(Map<RigidBody, Wrench> externalWrenchSolution)
+   public void setExternalWrenchSolution(Map<RigidBodyBasics, Wrench> externalWrenchSolution)
    {
       this.externalWrenchSolution = externalWrenchSolution;
    }
 
-   public void setRigidBodiesWithExternalWrench(List<RigidBody> rigidBodiesWithExternalWrench)
+   public void setRigidBodiesWithExternalWrench(List<RigidBodyBasics> rigidBodiesWithExternalWrench)
    {
       this.rigidBodiesWithExternalWrench = rigidBodiesWithExternalWrench;
    }
@@ -53,12 +53,12 @@ public class MomentumModuleSolution
       return centroidalMomentumRateSolution;
    }
 
-   public Map<RigidBody, Wrench> getExternalWrenchSolution()
+   public Map<RigidBodyBasics, Wrench> getExternalWrenchSolution()
    {
       return externalWrenchSolution;
    }
 
-   public List<RigidBody> getRigidBodiesWithExternalWrench()
+   public List<RigidBodyBasics> getRigidBodiesWithExternalWrench()
    {
       return rigidBodiesWithExternalWrench;
    }

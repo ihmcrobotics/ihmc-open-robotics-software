@@ -35,8 +35,8 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -71,8 +71,8 @@ public final class PointFeedbackControllerTest
       YoVariableRegistry registry = new YoVariableRegistry("Dummy");
       ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
-      RigidBody elevator = randomFloatingChain.getElevator();
-      RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
+      RigidBodyBasics elevator = randomFloatingChain.getElevator();
+      RigidBodyBasics endEffector = joints.get(joints.size() - 1).getSuccessor();
       FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.nextFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       ScrewTestTools.setRandomPositions(joints, random);
@@ -161,8 +161,8 @@ public final class PointFeedbackControllerTest
       YoVariableRegistry registry = new YoVariableRegistry("Dummy");
       ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
-      RigidBody elevator = randomFloatingChain.getElevator();
-      RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
+      RigidBodyBasics elevator = randomFloatingChain.getElevator();
+      RigidBodyBasics endEffector = joints.get(joints.size() - 1).getSuccessor();
       FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.nextFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       ScrewTestTools.setRandomPositions(joints, random);
@@ -282,8 +282,8 @@ public final class PointFeedbackControllerTest
       int numberOfRevoluteJoints = 10;
       RandomFloatingChain randomFloatingChain = new RandomFloatingChain(random, numberOfRevoluteJoints);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
-      RigidBody elevator = randomFloatingChain.getElevator();
-      RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
+      RigidBodyBasics elevator = randomFloatingChain.getElevator();
+      RigidBodyBasics endEffector = joints.get(joints.size() - 1).getSuccessor();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
       JointBasics[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);

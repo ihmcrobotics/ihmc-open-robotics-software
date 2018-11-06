@@ -23,6 +23,7 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
@@ -65,7 +66,7 @@ public class GeometricJacobianTest
       int numberOfJoints = random.nextInt(100);
 
       List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
-      RigidBody rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
+      RigidBodyBasics rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
 
       Twist expectedTwist = new Twist();
       Twist actualTwist = new Twist();
@@ -76,7 +77,7 @@ public class GeometricJacobianTest
          ScrewTestTools.setRandomVelocities(joints, random, -10.0, 10.0);
 
          int randomEndEffectorIndex = random.nextInt(numberOfJoints);
-         RigidBody randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
+         RigidBodyBasics randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
          GeometricJacobian rootJacobian = new GeometricJacobian(rootBody, randomEndEffector, randomEndEffector.getBodyFixedFrame());
          rootJacobian.compute();
 
@@ -88,7 +89,7 @@ public class GeometricJacobianTest
 
          TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
 
-         RigidBody randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
+         RigidBodyBasics randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
          GeometricJacobian jacobian = new GeometricJacobian(randomBase, randomEndEffector, randomEndEffector.getBodyFixedFrame());
          jacobian.compute();
 
@@ -115,7 +116,7 @@ public class GeometricJacobianTest
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
       List<JointBasics> joints = floatingChain.getInverseDynamicsJoints();
 
-      RigidBody rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
+      RigidBodyBasics rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
 
       Twist expectedTwist = new Twist();
       Twist actualTwist = new Twist();
@@ -129,7 +130,7 @@ public class GeometricJacobianTest
          floatingChain.getElevator().updateFramesRecursively();
 
          int randomEndEffectorIndex = random.nextInt(numberOfJoints);
-         RigidBody randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
+         RigidBodyBasics randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
          GeometricJacobian rootJacobian = new GeometricJacobian(rootBody, randomEndEffector, randomEndEffector.getBodyFixedFrame());
          rootJacobian.compute();
 
@@ -141,7 +142,7 @@ public class GeometricJacobianTest
 
          TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
 
-         RigidBody randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
+         RigidBodyBasics randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
          GeometricJacobian jacobian = new GeometricJacobian(randomBase, randomEndEffector, randomEndEffector.getBodyFixedFrame());
          jacobian.compute();
 
@@ -243,13 +244,13 @@ public class GeometricJacobianTest
 
    private void buildMechanismAndJacobians()
    {
-      RigidBody base = new RigidBody("base", ReferenceFrame.getWorldFrame());
+      RigidBodyBasics base = new RigidBody("base", ReferenceFrame.getWorldFrame());
       joint1 = ScrewTools.addPrismaticJoint("joint1", base, new Vector3D(), new Vector3D(0.0, -1.0, 0.0));
-      RigidBody body1 = ScrewTools.addRigidBody("body1", joint1, new Matrix3D(), 0.0, new Vector3D());
+      RigidBodyBasics body1 = ScrewTools.addRigidBody("body1", joint1, new Matrix3D(), 0.0, new Vector3D());
       joint2 = ScrewTools.addRevoluteJoint("joint2", body1, new Vector3D(0.0, 0.0, 3.0), new Vector3D(-1.0, 0.0, 0.0));
-      RigidBody body2 = ScrewTools.addRigidBody("body2", joint2, new Matrix3D(), 0.0, new Vector3D());
+      RigidBodyBasics body2 = ScrewTools.addRigidBody("body2", joint2, new Matrix3D(), 0.0, new Vector3D());
       joint3 = ScrewTools.addPrismaticJoint("joint4", body2, new Vector3D(), new Vector3D(0.0, 0.0, 1.0));
-      RigidBody body3 = ScrewTools.addRigidBody("body3", joint3, new Matrix3D(), 0.0, new Vector3D());
+      RigidBodyBasics body3 = ScrewTools.addRigidBody("body3", joint3, new Matrix3D(), 0.0, new Vector3D());
 
       // create Jacobians
       bodyManipulatorJacobian = new GeometricJacobian(base, body3, joint3.getFrameAfterJoint());

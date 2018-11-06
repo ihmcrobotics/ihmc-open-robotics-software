@@ -6,8 +6,8 @@ import java.util.List;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.GraphicsObjectsHolder;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
@@ -15,12 +15,12 @@ import us.ihmc.simulationconstructionset.graphics.joints.GraphicsJoint;
 
 public class GraphicsIDRobot extends GraphicsRobot
 {
-   public GraphicsIDRobot(String name, RigidBody rootBody, GraphicsObjectsHolder graphicsObjectsHolder)
+   public GraphicsIDRobot(String name, RigidBodyBasics rootBody, GraphicsObjectsHolder graphicsObjectsHolder)
    {
       this(name, rootBody, graphicsObjectsHolder, false);
    }
 
-   public GraphicsIDRobot(String name, RigidBody rootBody, GraphicsObjectsHolder graphicsObjectsHolder, boolean useCollisionMeshes)
+   public GraphicsIDRobot(String name, RigidBodyBasics rootBody, GraphicsObjectsHolder graphicsObjectsHolder, boolean useCollisionMeshes)
    {
       super(new Graphics3DNode(name, Graphics3DNodeType.TRANSFORM));
 

@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -28,8 +29,8 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 public class FootSpoof implements ContactablePlaneBody
 {
    private final JointBasics ankle;
-   private final RigidBody shin;
-   private final RigidBody foot;
+   private final RigidBodyBasics shin;
+   private final RigidBodyBasics foot;
    private final PoseReferenceFrame shinFrame;
    private final ReferenceFrame soleFrame;
    private final List<FramePoint3D> contactPoints = new ArrayList<FramePoint3D>();
@@ -137,7 +138,7 @@ public class FootSpoof implements ContactablePlaneBody
       return foot.getName();
    }
 
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return foot;
    }

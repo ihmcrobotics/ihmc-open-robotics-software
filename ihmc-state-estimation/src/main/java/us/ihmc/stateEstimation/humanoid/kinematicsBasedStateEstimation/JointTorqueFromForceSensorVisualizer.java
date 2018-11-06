@@ -8,8 +8,8 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -21,12 +21,12 @@ public class JointTorqueFromForceSensorVisualizer
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final List<RigidBody> allRigidBodies;
-   private final Map<RigidBody, FootSwitchInterface> footSwitches;
-   private final Map<RigidBody, GeometricJacobian> jacobians;
+   private final List<RigidBodyBasics> allRigidBodies;
+   private final Map<RigidBodyBasics, FootSwitchInterface> footSwitches;
+   private final Map<RigidBodyBasics, GeometricJacobian> jacobians;
    private final Map<OneDoFJoint, YoDouble> jointTorques;
 
-   public JointTorqueFromForceSensorVisualizer(Map<RigidBody, FootSwitchInterface> footSwitches, YoVariableRegistry parentRegistry)
+   public JointTorqueFromForceSensorVisualizer(Map<RigidBodyBasics, FootSwitchInterface> footSwitches, YoVariableRegistry parentRegistry)
    {
       this.footSwitches = footSwitches;
 
@@ -34,9 +34,9 @@ public class JointTorqueFromForceSensorVisualizer
       jacobians = new HashMap<>();
       jointTorques = new HashMap<>();
 
-      for (RigidBody rigidBody : allRigidBodies)
+      for (RigidBodyBasics rigidBody : allRigidBodies)
       {
-         RigidBody rootBody = ScrewTools.getRootBody(rigidBody);
+         RigidBodyBasics rootBody = ScrewTools.getRootBody(rigidBody);
          OneDoFJoint[] oneDoFJoints = ScrewTools.createOneDoFJointPath(rootBody, rigidBody);
 
          GeometricJacobian jacobian = new GeometricJacobian(oneDoFJoints, rigidBody.getBodyFixedFrame());
@@ -62,7 +62,7 @@ public class JointTorqueFromForceSensorVisualizer
    {
       for (int i = 0; i < allRigidBodies.size(); i++)
       {
-         RigidBody rigidBody = allRigidBodies.get(i);
+         RigidBodyBasics rigidBody = allRigidBodies.get(i);
          FootSwitchInterface footSwitch = footSwitches.get(rigidBody);
          GeometricJacobian jacobian = jacobians.get(rigidBody);
 

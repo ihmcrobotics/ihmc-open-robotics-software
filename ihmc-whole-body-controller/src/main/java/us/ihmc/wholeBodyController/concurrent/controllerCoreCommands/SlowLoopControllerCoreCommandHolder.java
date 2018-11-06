@@ -6,13 +6,13 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandInterface;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SlowLoopControllerCoreCommandHolder
 {
-   private final Map<String, RigidBody> fastLoopRigidBodyMap = new HashMap<>();
+   private final Map<String, RigidBodyBasics> fastLoopRigidBodyMap = new HashMap<>();
    private final Map<String, OneDoFJoint> fastLoopJointMap = new HashMap<>();
 
    private final ControllerCoreCommandDataCopier intermediateCommandDataCopier = new ControllerCoreCommandDataCopier();
@@ -43,7 +43,7 @@ public class SlowLoopControllerCoreCommandHolder
    }
 
    // No need to put all of the rigid bodies (there is a lot especially when having hands).
-   private static void setupRigidBodyMap(FullHumanoidRobotModel fullRobotModel, Map<String, RigidBody> rigidBodyMapToPack)
+   private static void setupRigidBodyMap(FullHumanoidRobotModel fullRobotModel, Map<String, RigidBodyBasics> rigidBodyMapToPack)
    {
       addRigidBodyToMap(fullRobotModel.getElevator(), rigidBodyMapToPack);
       addRigidBodyToMap(fullRobotModel.getHead(), rigidBodyMapToPack);
@@ -57,7 +57,7 @@ public class SlowLoopControllerCoreCommandHolder
       }
    }
 
-   public static void addRigidBodyToMap(RigidBody foot, Map<String, RigidBody> rigidBodyMapToPack)
+   public static void addRigidBodyToMap(RigidBodyBasics foot, Map<String, RigidBodyBasics> rigidBodyMapToPack)
    {
       rigidBodyMapToPack.put(foot.getName(), foot);
    }

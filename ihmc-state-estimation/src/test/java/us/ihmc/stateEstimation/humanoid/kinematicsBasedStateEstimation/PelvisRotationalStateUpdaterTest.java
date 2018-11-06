@@ -21,8 +21,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -202,7 +202,7 @@ public class PelvisRotationalStateUpdaterTest
       for (int i = 0; i < stateEstimatorSensorDefinitions.getIMUSensorDefinitions().size(); i++)
       {
          IMUDefinition imuDefinition = stateEstimatorSensorDefinitions.getIMUSensorDefinitions().get(i);
-         RigidBody measurementLink = imuDefinition.getRigidBody();
+         RigidBodyBasics measurementLink = imuDefinition.getRigidBody();
          Twist twistIMU = new Twist();
          measurementLink.getBodyFixedFrame().getTwistOfFrame(twistIMU);
          twistIMU.changeFrame(imuSensors.get(i).getMeasurementFrame());
@@ -254,7 +254,7 @@ public class PelvisRotationalStateUpdaterTest
    private IMUDefinition createRandomIMUDefinition(String suffix, ArrayList<RevoluteJoint> joints)
    {
       int indexOfIMUParentJoint = RandomNumbers.nextInt(random, 0, joints.size() - 1);
-      RigidBody rigidBody = joints.get(indexOfIMUParentJoint).getSuccessor();
+      RigidBodyBasics rigidBody = joints.get(indexOfIMUParentJoint).getSuccessor();
       RigidBodyTransform transformFromIMUToJoint = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       IMUDefinition imuDefinition = new IMUDefinition("IMU" + suffix, rigidBody, transformFromIMUToJoint);
       return imuDefinition;
@@ -264,9 +264,9 @@ public class PelvisRotationalStateUpdaterTest
          ArrayList<RevoluteJoint> joints)
    {
       int indexOfEstimationParentJoint = RandomNumbers.nextInt(random, 0, joints.size() - 1);
-      RigidBody estimationLink = joints.get(indexOfEstimationParentJoint).getSuccessor();
+      RigidBodyBasics estimationLink = joints.get(indexOfEstimationParentJoint).getSuccessor();
       SixDoFJoint rootInverseDynamicsJoint = randomFloatingChain.getRootJoint();
-      RigidBody elevator = randomFloatingChain.getElevator();
+      RigidBodyBasics elevator = randomFloatingChain.getElevator();
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
       return inverseDynamicsStructure;
    }

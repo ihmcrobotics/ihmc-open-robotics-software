@@ -7,8 +7,8 @@ import java.util.Map;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -36,13 +36,13 @@ public interface FullRobotModel
 
    /**
     * Returns the elevator of this robot.
-    * The elevator is a virtual {@link RigidBody} that has no size nor mass, and is fixed in world (it does not move at all).
+    * The elevator is a virtual {@link RigidBodyBasics} that has no size nor mass, and is fixed in world (it does not move at all).
     * It is the only predecessor of the root joint.
     * It only has an acceleration that is equal to the opposite of the gravity.
     * It is mainly to easily propagates the effect of gravity to all the robot's joints.
     * @return
     */
-   RigidBody getElevator();
+   RigidBodyBasics getElevator();
 
    /**
     * Return the {@link OneDoFJoint} describing the the corresponding spine joint.
@@ -50,7 +50,7 @@ public interface FullRobotModel
     */
    OneDoFJoint getSpineJoint(SpineJointName spineJointName);
 
-   RigidBody getEndEffector(Enum<?> segmentEnum);
+   RigidBodyBasics getEndEffector(Enum<?> segmentEnum);
 
    /**
     * Return the {@link OneDoFJoint} describing the the corresponding leg joint.
@@ -92,16 +92,16 @@ public interface FullRobotModel
    ReferenceFrame getCameraFrame(String name);
 
    /**
-    * Returns the {@link RigidBody} describing the root link of this robot.
+    * Returns the {@link RigidBodyBasics} describing the root link of this robot.
     * In the current framework (on the day: 2/28/2018), the root link is the the first successor of the root joint.
     */
-   RigidBody getRootBody();
+   RigidBodyBasics getRootBody();
 
    /**
-    * Returns the {@link RigidBody} describing the head of this robot.
+    * Returns the {@link RigidBodyBasics} describing the head of this robot.
     * It is located right after the neck joints.
     */
-   RigidBody getHead();
+   RigidBodyBasics getHead();
 
    ReferenceFrame getHeadBaseFrame();
 

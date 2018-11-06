@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -37,9 +38,9 @@ public class CenterOfMassReferenceFrameTest
       Random random = new Random(124L);
       int nJoints = 10;
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(nJoints);
-      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      RigidBodyBasics elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoF", elevator);
-      RigidBody floatingBody = ScrewTools.addRigidBody("floatingBody", sixDoFJoint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(),
+      RigidBodyBasics floatingBody = ScrewTools.addRigidBody("floatingBody", sixDoFJoint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(),
                                   RandomGeometry.nextVector3D(random));
 
       Vector3D[] jointAxes = new Vector3D[nJoints];

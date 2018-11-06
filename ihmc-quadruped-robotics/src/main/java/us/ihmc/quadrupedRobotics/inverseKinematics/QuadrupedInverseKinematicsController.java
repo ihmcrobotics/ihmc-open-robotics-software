@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.robotModels.FullLeggedRobotModel;
@@ -74,9 +74,9 @@ public class QuadrupedInverseKinematicsController implements RobotController
 
       for (RobotQuadrant robotQuadrant : quadrants)
       {
-         RigidBody foot = fullRobotModel.getFoot(robotQuadrant);
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotQuadrant);
          ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotQuadrant);
-         RigidBody body = fullRobotModel.getBody();
+         RigidBodyBasics body = fullRobotModel.getBody();
 
          FramePoint3D currentPosition = new FramePoint3D(soleFrame);
          currentPosition.changeFrame(foot.getBodyFixedFrame());
@@ -86,7 +86,7 @@ public class QuadrupedInverseKinematicsController implements RobotController
          feedbackControlCommand.setBodyFixedPointToControl(currentPosition);
          feedbackControlCommands.put(robotQuadrant, feedbackControlCommand);
 
-         RigidBody rigidBody = foot;
+         RigidBodyBasics rigidBody = foot;
          while (rigidBody.getParentJoint().getPredecessor() != body)
             rigidBody = rigidBody.getParentJoint().getPredecessor();
          ReferenceFrame shoulderBaseFrame = rigidBody.getParentJoint().getFrameBeforeJoint();

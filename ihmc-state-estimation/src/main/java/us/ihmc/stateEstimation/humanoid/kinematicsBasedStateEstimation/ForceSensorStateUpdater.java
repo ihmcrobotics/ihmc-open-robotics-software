@@ -13,7 +13,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -73,7 +73,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
    private final double gravity;
 
    // For the viz
-   private final Map<RigidBody, Wrench> wrenches;
+   private final Map<RigidBodyBasics, Wrench> wrenches;
    private final WrenchVisualizer wrenchVisualizer;
 
    private final boolean hasWristForceSensors;
@@ -168,7 +168,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          {
             ForceSensorDefinition forceSensorDefinition = wristForceSensorDefinitions.get(robotSide);
             ReferenceFrame measurementFrame = forceSensorDefinition.getSensorFrame();
-            RigidBody measurementLink = forceSensorDefinition.getRigidBody();
+            RigidBodyBasics measurementLink = forceSensorDefinition.getRigidBody();
 
             String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
             String namePrefix = sidePrefix + "WristSensor";
@@ -179,7 +179,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
             wristForceCalibrationOffsets.put(robotSide, new YoFrameVector3D(namePrefix + "ForceCalibrationOffset", measurementFrame, registry));
             wristTorqueCalibrationOffsets.put(robotSide, new YoFrameVector3D(namePrefix + "TorqueCalibrationOffset", measurementFrame, registry));
 
-            RigidBody[] handBodies = ScrewTools.computeRigidBodiesAfterThisJoint(measurementLink.getParentJoint());
+            RigidBodyBasics[] handBodies = ScrewTools.computeRigidBodiesAfterThisJoint(measurementLink.getParentJoint());
             CenterOfMassReferenceFrame subtreeCoMFrame = new CenterOfMassReferenceFrame(namePrefix + "SubtreeCoMFrame", measurementFrame, handBodies);
             wristsubtreeCenterOfMassFrames.put(robotSide, subtreeCoMFrame);
             YoDouble handMass = new YoDouble(namePrefix + "SubtreeMass", registry);
@@ -194,16 +194,16 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          }
          else
          {
-            wrenches = new LinkedHashMap<RigidBody, Wrench>();
+            wrenches = new LinkedHashMap<RigidBodyBasics, Wrench>();
 
             for (RobotSide robotSide : RobotSide.values)
             {
                ForceSensorDefinition forceSensorDefinition = inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(robotSide));
-               RigidBody measurementLink = forceSensorDefinition.getRigidBody();
+               RigidBodyBasics measurementLink = forceSensorDefinition.getRigidBody();
                wrenches.put(measurementLink, new Wrench());
             }
 
-            List<RigidBody> bodies = new ArrayList<>(wrenches.keySet());
+            List<RigidBodyBasics> bodies = new ArrayList<>(wrenches.keySet());
             double forceVizScaling = 10.0;
             AppearanceDefinition forceAppearance = YoAppearance.DarkRed();
             AppearanceDefinition torqueAppearance = YoAppearance.DarkBlue();
@@ -325,7 +325,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          ForceSensorDefinition wristForceSensorDefinition = wristForceSensorDefinitions.get(robotSide);
          ForceSensorDataReadOnly wristForceSensor = inputForceSensorDataHolder.get(wristForceSensorDefinition);
          ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
-         RigidBody measurementLink = wristForceSensorDefinition.getRigidBody();
+         RigidBodyBasics measurementLink = wristForceSensorDefinition.getRigidBody();
          wristForceSensor.getWrench(tempWrench);
 
          tempForce.setIncludingFrame(wristForceCalibrationOffsets.get(robotSide));

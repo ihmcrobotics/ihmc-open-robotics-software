@@ -5,7 +5,7 @@ import java.util.Random;
 
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
@@ -28,7 +28,7 @@ public class SimpleArmController extends SimpleRobotController
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
-   public SimpleArmController(SimpleRobotInputOutputMap robot, RigidBody endEffectorBody, YoDouble time)
+   public SimpleArmController(SimpleRobotInputOutputMap robot, RigidBodyBasics endEffectorBody, YoDouble time)
    {
       this.time = time;
       this.robot = robot;

@@ -40,8 +40,8 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -83,7 +83,7 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    /** Reference to the desired robot's root body. */
-   protected final RigidBody rootBody;
+   protected final RigidBodyBasics rootBody;
    /** Reference to the desired robot's floating joint. */
    protected final FloatingInverseDynamicsJoint rootJoint;
    /**
@@ -178,13 +178,13 @@ public class KinematicsToolboxController extends ToolboxController
     * {@code SCSVisualizer}. They are only visible when the end-effector is being actively
     * controlled.
     */
-   private final Map<RigidBody, YoGraphicCoordinateSystem> desiredCoodinateSystems = new HashMap<>();
+   private final Map<RigidBodyBasics, YoGraphicCoordinateSystem> desiredCoodinateSystems = new HashMap<>();
    /**
     * Visualization of the current end-effector poses seen as coordinate systems in the
     * {@code SCSVisualizer}. They are only visible when the end-effector is being actively
     * controlled.
     */
-   private final Map<RigidBody, YoGraphicCoordinateSystem> currentCoodinateSystems = new HashMap<>();
+   private final Map<RigidBodyBasics, YoGraphicCoordinateSystem> currentCoodinateSystems = new HashMap<>();
 
    /**
     * Reference to the most recent robot configuration received from the controller. It is used for
@@ -213,7 +213,7 @@ public class KinematicsToolboxController extends ToolboxController
    }
 
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                      FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] oneDoFJoints, Collection<RigidBody> controllableRigidBodies,
+                                      FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] oneDoFJoints, Collection<RigidBodyBasics> controllableRigidBodies,
                                       YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -250,12 +250,12 @@ public class KinematicsToolboxController extends ToolboxController
     * @param rigidBodies all the rigid bodies for which the desired and actual pose will be
     *           displayed using graphical coordinate systems.
     */
-   public void setupVisualization(RigidBody... rigidBodies)
+   public void setupVisualization(RigidBodyBasics... rigidBodies)
    {
       AppearanceDefinition desiredAppearance = YoAppearance.Red();
       AppearanceDefinition currentAppearance = YoAppearance.Blue();
 
-      for (RigidBody rigidBody : rigidBodies)
+      for (RigidBodyBasics rigidBody : rigidBodies)
       {
          YoGraphicCoordinateSystem desiredCoodinateSystem = createCoodinateSystem(rigidBody, Type.DESIRED, desiredAppearance);
          YoGraphicCoordinateSystem currentCoodinateSystem = createCoodinateSystem(rigidBody, Type.CURRENT, currentAppearance);
@@ -281,7 +281,7 @@ public class KinematicsToolboxController extends ToolboxController
     * @param appearanceDefinition the appearance of the coordinate system's arrows.
     * @return the graphic with a good name for the given end-effector.
     */
-   private YoGraphicCoordinateSystem createCoodinateSystem(RigidBody endEffector, Type type, AppearanceDefinition appearanceDefinition)
+   private YoGraphicCoordinateSystem createCoodinateSystem(RigidBodyBasics endEffector, Type type, AppearanceDefinition appearanceDefinition)
    {
       String namePrefix = endEffector.getName() + type.getName();
       return new YoGraphicCoordinateSystem(namePrefix, "", registry, false, 0.2, appearanceDefinition);
@@ -295,7 +295,7 @@ public class KinematicsToolboxController extends ToolboxController
     * @return the controller core that will run for the desired robot
     *         {@link #desiredFullRobotModel}.
     */
-   private WholeBodyControllerCore createControllerCore(Collection<RigidBody> controllableRigidBodies)
+   private WholeBodyControllerCore createControllerCore(Collection<RigidBodyBasics> controllableRigidBodies)
    {
       KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
       JointBasics[] controlledJoints;
@@ -328,10 +328,10 @@ public class KinematicsToolboxController extends ToolboxController
     *           robot will be controllable.
     * @return the template for the controller core.
     */
-   private FeedbackControlCommandList createControllerCoreTemplate(Collection<RigidBody> controllableRigidBodies)
+   private FeedbackControlCommandList createControllerCoreTemplate(Collection<RigidBodyBasics> controllableRigidBodies)
    {
       FeedbackControlCommandList template = new FeedbackControlCommandList();
-      Collection<RigidBody> rigidBodies;
+      Collection<RigidBodyBasics> rigidBodies;
 
       if (controllableRigidBodies != null)
          rigidBodies = controllableRigidBodies;
@@ -346,7 +346,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Convenience method for pure laziness. Should only be used for
     * {@link #createControllerCoreTemplate()}.
     */
-   private SpatialFeedbackControlCommand createFeedbackControlCommand(RigidBody endEffector)
+   private SpatialFeedbackControlCommand createFeedbackControlCommand(RigidBodyBasics endEffector)
    {
       SpatialFeedbackControlCommand command = new SpatialFeedbackControlCommand();
       command.set(rootBody, endEffector);
@@ -517,7 +517,7 @@ public class KinematicsToolboxController extends ToolboxController
       FramePoint3D position = new FramePoint3D();
       FrameQuaternion orientation = new FrameQuaternion();
 
-      for (RigidBody endEffector : desiredCoodinateSystems.keySet())
+      for (RigidBodyBasics endEffector : desiredCoodinateSystems.keySet())
       {
          YoGraphicCoordinateSystem coordinateSystem = desiredCoodinateSystems.get(endEffector);
          hasData = feedbackControllerDataHolder.getPositionData(endEffector, position, Type.DESIRED);
@@ -533,7 +533,7 @@ public class KinematicsToolboxController extends ToolboxController
             coordinateSystem.setOrientation(orientation);
       }
 
-      for (RigidBody endEffector : currentCoodinateSystems.keySet())
+      for (RigidBodyBasics endEffector : currentCoodinateSystems.keySet())
       {
          YoGraphicCoordinateSystem coordinateSystem = currentCoodinateSystems.get(endEffector);
          hasData = feedbackControllerDataHolder.getPositionData(endEffector, position, Type.CURRENT);
@@ -569,7 +569,7 @@ public class KinematicsToolboxController extends ToolboxController
       latestRobotConfigurationDataReference.set(newConfigurationData);
    }
 
-   public boolean isUserControllingRigidBody(RigidBody rigidBody)
+   public boolean isUserControllingRigidBody(RigidBodyBasics rigidBody)
    {
       return isUserControllingRigidBody(rigidBody.getName());
    }

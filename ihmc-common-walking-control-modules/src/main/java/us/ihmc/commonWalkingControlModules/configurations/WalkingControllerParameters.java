@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
@@ -250,7 +250,7 @@ public abstract class WalkingControllerParameters
     * If the particular body does not support full pose control but only orientation control the position part of the
     * pose will be disregarded.
     * <p>
-    * The key of the map is the name of the rigid body that can be obtained with {@link RigidBody#getName()}. If a
+    * The key of the map is the name of the rigid body that can be obtained with {@link RigidBodyBasics#getName()}. If a
     * body is not contained in this map but a default control mode of {@link RigidBodyControlMode#TASKSPACE} is not
     * supported for that body.
     *

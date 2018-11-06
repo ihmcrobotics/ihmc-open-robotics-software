@@ -9,8 +9,8 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
@@ -19,17 +19,17 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
  * rigid-body system.
  * <p>
  * A new twist calculator can be constructed via the constructor
- * {@link #TwistCalculator(ReferenceFrame, RigidBody)}. Every time the system's state is changing,
+ * {@link #TwistCalculator(ReferenceFrame, RigidBodyBasics)}. Every time the system's state is changing,
  * the twist calculator can be notified via {@link #compute()}. Finally, the twist of any rigid-body
  * can be obtained as follows:
  * <ul>
- * <li>{@link #getTwistOfBody(RigidBody, Twist)} provides the twist of any rigid-body with respect
+ * <li>{@link #getTwistOfBody(RigidBodyBasics, Twist)} provides the twist of any rigid-body with respect
  * to the {@code inertialFrame}.
- * <li>{@link #getRelativeTwist(RigidBody, RigidBody, Twist)} provides the twist of any rigid-body
+ * <li>{@link #getRelativeTwist(RigidBodyBasics, RigidBodyBasics, Twist)} provides the twist of any rigid-body
  * with respect to another rigid-body of the same system.
- * <li>{@link #getLinearVelocityOfBodyFixedPoint(RigidBody, FramePoint3D, FrameVector3D)} provides the
+ * <li>{@link #getLinearVelocityOfBodyFixedPoint(RigidBodyBasics, FramePoint3D, FrameVector3D)} provides the
  * linear velocity of a point of a rigid-body with respect to the {@code inertialFrame}.
- * <li>{@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)}
+ * <li>{@link #getLinearVelocityOfBodyFixedPoint(RigidBodyBasics, RigidBodyBasics, FramePoint3D, FrameVector3D)}
  * provides the linear velocity of a point of a rigid-body with respect to another rigid-body of the
  * same system.
  * </ul>
@@ -43,7 +43,7 @@ public class TwistCalculator
     */
    private final ReferenceFrame inertialFrame;
    /** The root body of the system for which this {@code TwistCalculator} is available. */
-   private final RigidBody rootBody;
+   private final RigidBodyBasics rootBody;
    /** Twist of the root body. */
    private final Twist rootTwist;
 
@@ -53,12 +53,12 @@ public class TwistCalculator
     * retrieving their twist if already computed. If no twist has been computed yet, the index is
     * equal to {@code -1}.
     */
-   private final HashMap<RigidBody, MutableInt> rigidBodyToAssignedTwistIndex = new HashMap<>();
+   private final HashMap<RigidBodyBasics, MutableInt> rigidBodyToAssignedTwistIndex = new HashMap<>();
    /**
     * List of the rigid-bodies with an up-to-date twist. This list allows a garbage free clearance
     * of the {@code rigidBodyToAssignedTwistIndex} map.
     */
-   private final List<RigidBody> rigidBodiesWithAssignedTwist;
+   private final List<RigidBodyBasics> rigidBodiesWithAssignedTwist;
    /**
     * The list of up-to-date twists assigned to rigid-bodies. The association twist <-> rigid-body
     * can be retrieved using the map {@code rigidBodyToAssignedTwistIndex}.
@@ -77,7 +77,7 @@ public class TwistCalculator
     *           {@link ReferenceFrame#getWorldFrame()} is used here.
     * @param body a body that belongs to the system this twist calculator will be available for.
     */
-   public TwistCalculator(ReferenceFrame inertialFrame, RigidBody body)
+   public TwistCalculator(ReferenceFrame inertialFrame, RigidBodyBasics body)
    {
       this.inertialFrame = inertialFrame;
       this.rootBody = ScrewTools.getRootBody(body);
@@ -98,8 +98,8 @@ public class TwistCalculator
     * Notifies the system has changed state (configuration and velocity).
     * <p>
     * This method has to be called once every time the system state has changed, and before calling
-    * the methods {@link #getTwistOfBody(RigidBody, Twist)} and
-    * {@link #getRelativeTwist(RigidBody, RigidBody, Twist)}.
+    * the methods {@link #getTwistOfBody(RigidBodyBasics, Twist)} and
+    * {@link #getRelativeTwist(RigidBodyBasics, RigidBodyBasics, Twist)}.
     * </p>
     */
    // TODO rename to reset
@@ -141,14 +141,14 @@ public class TwistCalculator
     * @param body the rigid-body to get the twist of.
     * @param twistToPack the twist of the {@code body} to pack. Modified.
     */
-   public void getTwistOfBody(RigidBody body, Twist twistToPack)
+   public void getTwistOfBody(RigidBodyBasics body, Twist twistToPack)
    {
       twistToPack.setIncludingFrame(computeOrGetTwistOfBody(body));
    }
 
    /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
-    * {@link #getRelativeTwist(RigidBody, RigidBody, Twist)}.
+    * {@link #getRelativeTwist(RigidBodyBasics, RigidBodyBasics, Twist)}.
     */
    private final Twist twistForGetRelativeTwist = new Twist();
 
@@ -165,7 +165,7 @@ public class TwistCalculator
     * </p>
     * <p>
     * The relative twist between the two rigid-bodies is calculated knowing their twists with
-    * respect to the inertial frame using the method {@link #getTwistOfBody(RigidBody, Twist)}: <br>
+    * respect to the inertial frame using the method {@link #getTwistOfBody(RigidBodyBasics, Twist)}: <br>
     * T<sup>b2, b2</sup><sub>b1</sub> = T<sup>b2, b2</sup><sub>i</sub> - T<sup>b1,
     * b2</sup><sub>i</sub> </br>
     * with 'b1' being the {@code base}, 'b2' the {@code body}, and 'i' the {@code inertialFrame}.
@@ -175,7 +175,7 @@ public class TwistCalculator
     * @param body the rigid-body to compute the twist of.
     * @param twistToPack the twist of the {@code body} relative to the {@code base}. Modified.
     */
-   public void getRelativeTwist(RigidBody base, RigidBody body, Twist twistToPack)
+   public void getRelativeTwist(RigidBodyBasics base, RigidBodyBasics body, Twist twistToPack)
    {
       twistToPack.setIncludingFrame(computeOrGetTwistOfBody(body));
       twistForGetRelativeTwist.setIncludingFrame(computeOrGetTwistOfBody(base));
@@ -185,7 +185,7 @@ public class TwistCalculator
 
    /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
-    * {@link #getAngularVelocityOfBody(RigidBody, FrameVector3D)}.
+    * {@link #getAngularVelocityOfBody(RigidBodyBasics, FrameVector3D)}.
     */
    private final Twist twistForGetAngularVelocityOfBody = new Twist();
 
@@ -200,7 +200,7 @@ public class TwistCalculator
     * @param body the rigid-body to compute the angular velocity of.
     * @param angularVelocityToPack the angular velocity of the given {@code body}. Modified.
     */
-   public void getAngularVelocityOfBody(RigidBody body, FrameVector3D angularVelocityToPack)
+   public void getAngularVelocityOfBody(RigidBodyBasics body, FrameVector3D angularVelocityToPack)
    {
       getTwistOfBody(body, twistForGetAngularVelocityOfBody);
       angularVelocityToPack.setIncludingFrame(twistForGetAngularVelocityOfBody.getAngularPart());
@@ -219,7 +219,7 @@ public class TwistCalculator
     * @param angularVelocityToPack the angular velocity of {@code body} relative to the
     *           {@code base}. Modified.
     */
-   public void getRelativeAngularVelocity(RigidBody base, RigidBody body, FrameVector3D angularVelocityToPack)
+   public void getRelativeAngularVelocity(RigidBodyBasics base, RigidBodyBasics body, FrameVector3D angularVelocityToPack)
    {
       getRelativeTwist(base, body, twistForGetAngularVelocityOfBody);
       angularVelocityToPack.setIncludingFrame(twistForGetAngularVelocityOfBody.getAngularPart());
@@ -227,12 +227,12 @@ public class TwistCalculator
 
    /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
-    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)}.
+    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBodyBasics, RigidBodyBasics, FramePoint3D, FrameVector3D)}.
     */
    private final Twist twistForGetLinearVelocityOfBodyFixedPoint = new Twist();
    /**
     * Temporary point used for intermediate garbage free operations. To use only in the method
-    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)}.
+    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBodyBasics, RigidBodyBasics, FramePoint3D, FrameVector3D)}.
     */
    private final FramePoint3D pointForGetLinearVelocityOfBodyFixedPoint = new FramePoint3D();
 
@@ -250,7 +250,7 @@ public class TwistCalculator
     * @param linearVelocityToPack the linear velocity of the body fixed point with respect to the
     *           inertial frame. Modified.
     */
-   public void getLinearVelocityOfBodyFixedPoint(RigidBody body, FramePoint3D bodyFixedPoint, FrameVector3D linearVelocityToPack)
+   public void getLinearVelocityOfBodyFixedPoint(RigidBodyBasics body, FramePoint3D bodyFixedPoint, FrameVector3D linearVelocityToPack)
    {
       FramePoint3D localPoint = pointForGetLinearVelocityOfBodyFixedPoint;
       Twist localTwist = twistForGetLinearVelocityOfBodyFixedPoint;
@@ -280,7 +280,7 @@ public class TwistCalculator
     * @param linearVelocityToPack the linear velocity of the body fixed point with respect to the
     *           inertial frame. Modified.
     */
-   public void getLinearVelocityOfBodyFixedPoint(RigidBody base, RigidBody body, FramePoint3D bodyFixedPoint, FrameVector3D linearVelocityToPack)
+   public void getLinearVelocityOfBodyFixedPoint(RigidBodyBasics base, RigidBodyBasics body, FramePoint3D bodyFixedPoint, FrameVector3D linearVelocityToPack)
    {
       FramePoint3D localPoint = pointForGetLinearVelocityOfBodyFixedPoint;
       Twist localTwist = twistForGetLinearVelocityOfBodyFixedPoint;
@@ -301,7 +301,7 @@ public class TwistCalculator
     * 
     * @return the root body.
     */
-   public RigidBody getRootBody()
+   public RigidBodyBasics getRootBody()
    {
       return rootBody;
    }
@@ -319,7 +319,7 @@ public class TwistCalculator
 
    /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
-    * {@link #computeOrGetTwistOfBody(RigidBody)}.
+    * {@link #computeOrGetTwistOfBody(RigidBodyBasics)}.
     */
    private final Twist twistForComputeOrGetTwistOfBody = new Twist();
 
@@ -345,7 +345,7 @@ public class TwistCalculator
     * @param body the rigid-body to get the twist of.
     * @return the twist of the rigid-body with respect to the inertial frame.
     */
-   private TwistReadOnly computeOrGetTwistOfBody(RigidBody body)
+   private TwistReadOnly computeOrGetTwistOfBody(RigidBodyBasics body)
    {
       Twist twist = retrieveAssignedTwist(body);
 
@@ -358,7 +358,7 @@ public class TwistCalculator
           */
          ReferenceFrame bodyFrame = body.getBodyFixedFrame();
          JointBasics parentJoint = body.getParentJoint();
-         RigidBody predecessor = parentJoint.getPredecessor();
+         RigidBodyBasics predecessor = parentJoint.getPredecessor();
          TwistReadOnly twistOfPredecessor = computeOrGetTwistOfBody(predecessor);
          twist = assignAndGetEmptyTwist(body);
 
@@ -379,7 +379,7 @@ public class TwistCalculator
     * @return the up-to-date twist of the given {@code body}, returns {@code null} if no twist could
     *         be found.
     */
-   private Twist retrieveAssignedTwist(RigidBody body)
+   private Twist retrieveAssignedTwist(RigidBodyBasics body)
    {
       MutableInt mutableIndex = rigidBodyToAssignedTwistIndex.get(body);
 
@@ -402,7 +402,7 @@ public class TwistCalculator
     * @param body the rigid-body to assign a twist to.
     * @return the twist newly assigned to the rigid-body.
     */
-   private Twist assignAndGetEmptyTwist(RigidBody body)
+   private Twist assignAndGetEmptyTwist(RigidBodyBasics body)
    {
       Twist newAssignedTwist;
 

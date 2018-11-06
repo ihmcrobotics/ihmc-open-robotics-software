@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 
@@ -14,26 +14,26 @@ public class VirtualModelControlSolution
    private DenseMatrix64F jointTorques;
 
    private SpatialForceReadOnly centroidalMomentumRateSolution;
-   private Map<RigidBody, Wrench> externalWrenchSolution;
-   private List<RigidBody> rigidBodiesWithExternalWrench;
+   private Map<RigidBodyBasics, Wrench> externalWrenchSolution;
+   private List<RigidBodyBasics> rigidBodiesWithExternalWrench;
 
    public void setCentroidalMomentumRateSolution(SpatialForceReadOnly centroidalMomentumRateSolution)
    {
       this.centroidalMomentumRateSolution = centroidalMomentumRateSolution;
    }
 
-   public void setExternalWrenchSolution(List<RigidBody> rigidBodiesWithExternalWrench, Map<RigidBody, Wrench> externalWrenchSolution)
+   public void setExternalWrenchSolution(List<RigidBodyBasics> rigidBodiesWithExternalWrench, Map<RigidBodyBasics, Wrench> externalWrenchSolution)
    {
       this.rigidBodiesWithExternalWrench = rigidBodiesWithExternalWrench;
       this.externalWrenchSolution = externalWrenchSolution;
    }
 
-   public List<RigidBody> getRigidBodiesWithExternalWrench()
+   public List<RigidBodyBasics> getRigidBodiesWithExternalWrench()
    {
       return rigidBodiesWithExternalWrench;
    }
 
-   public Map<RigidBody, Wrench> getExternalWrenchSolution()
+   public Map<RigidBodyBasics, Wrench> getExternalWrenchSolution()
    {
       return externalWrenchSolution;
    }

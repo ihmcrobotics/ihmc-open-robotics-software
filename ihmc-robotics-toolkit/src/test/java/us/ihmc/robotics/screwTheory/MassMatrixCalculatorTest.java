@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Twist;
 
@@ -29,7 +30,7 @@ public abstract class MassMatrixCalculatorTest
 
    protected final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    protected ArrayList<RevoluteJoint> joints;
-   protected RigidBody elevator;
+   protected RigidBodyBasics elevator;
    
    private final Random random = new Random(1776L);
 

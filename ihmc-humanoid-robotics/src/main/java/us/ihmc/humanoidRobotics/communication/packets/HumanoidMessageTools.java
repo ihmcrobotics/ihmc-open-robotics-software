@@ -148,7 +148,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -461,7 +461,7 @@ public class HumanoidMessageTools
    /**
     * To set disable exploration on this rigid body.
     */
-   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBody rigidBody)
+   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBodyBasics rigidBody)
    {
       ConfigurationSpaceName[] configurations = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, ConfigurationSpaceName.YAW,
             ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
@@ -473,14 +473,14 @@ public class HumanoidMessageTools
    /**
     * To set enable exploration on this rigid body with following order of ConfigurationSpaceName.
     */
-   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBody rigidBody,
+   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBodyBasics rigidBody,
                                                                                                          ConfigurationSpaceName[] degreesOfFreedomToExplore)
    {
       return createRigidBodyExplorationConfigurationMessage(rigidBody, degreesOfFreedomToExplore,
                                                             WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationAmplitudeArray(degreesOfFreedomToExplore));
    }
 
-   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBody rigidBody,
+   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBodyBasics rigidBody,
                                                                                                          ConfigurationSpaceName[] degreesOfFreedomToExplore,
                                                                                                          double[] explorationRangeAmplitudes)
    {
@@ -509,7 +509,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBody rigidBody,
+   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBodyBasics rigidBody,
                                                                                                          ConfigurationSpaceName[] degreesOfFreedomToExplore,
                                                                                                          double[] explorationRangeUpperLimits,
                                                                                                          double[] explorationRangeLowerLimits)
@@ -565,12 +565,12 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static WaypointBasedTrajectoryMessage createWaypointBasedTrajectoryMessage(RigidBody endEffector, double[] waypointTimes, Pose3D[] waypoints)
+   public static WaypointBasedTrajectoryMessage createWaypointBasedTrajectoryMessage(RigidBodyBasics endEffector, double[] waypointTimes, Pose3D[] waypoints)
    {
       return createWaypointBasedTrajectoryMessage(endEffector, waypointTimes, waypoints);
    }
 
-   public static WaypointBasedTrajectoryMessage createWaypointBasedTrajectoryMessage(RigidBody endEffector, double[] waypointTimes, Pose3D[] waypoints,
+   public static WaypointBasedTrajectoryMessage createWaypointBasedTrajectoryMessage(RigidBodyBasics endEffector, double[] waypointTimes, Pose3D[] waypoints,
                                                                                      SelectionMatrix6D selectionMatrix)
    {
       WaypointBasedTrajectoryMessage message = new WaypointBasedTrajectoryMessage();
@@ -1325,7 +1325,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static ReachingManifoldMessage createReachingManifoldMessage(RigidBody rigidBody)
+   public static ReachingManifoldMessage createReachingManifoldMessage(RigidBodyBasics rigidBody)
    {
       ReachingManifoldMessage message = new ReachingManifoldMessage();
       message.setEndEffectorHashCode(rigidBody.hashCode());

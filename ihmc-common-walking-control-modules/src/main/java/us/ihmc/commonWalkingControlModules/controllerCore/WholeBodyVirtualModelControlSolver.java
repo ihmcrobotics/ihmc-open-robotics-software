@@ -34,7 +34,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
@@ -64,7 +64,7 @@ public class WholeBodyVirtualModelControlSolver
 
    private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", worldFrame);
 
-   private final RigidBody controlRootBody;
+   private final RigidBodyBasics controlRootBody;
 
    private final Wrench tempWrench = new Wrench();
    private final FrameVector3D tempForce = new FrameVector3D();
@@ -156,8 +156,8 @@ public class WholeBodyVirtualModelControlSolver
       }
 
       // get output for contact forces
-      Map<RigidBody, Wrench> externalWrenchSolution = virtualModelControlSolution.getExternalWrenchSolution();
-      List<RigidBody> rigidBodiesWithExternalWrench = virtualModelControlSolution.getRigidBodiesWithExternalWrench();
+      Map<RigidBodyBasics, Wrench> externalWrenchSolution = virtualModelControlSolution.getExternalWrenchSolution();
+      List<RigidBodyBasics> rigidBodiesWithExternalWrench = virtualModelControlSolution.getRigidBodiesWithExternalWrench();
       SpatialForceReadOnly centroidalMomentumRateSolution = virtualModelControlSolution.getCentroidalMomentumRateSolution();
 
       yoAchievedMomentumRateLinear.setMatchingFrame(centroidalMomentumRateSolution.getLinearPart());
@@ -167,7 +167,7 @@ public class WholeBodyVirtualModelControlSolver
       // submit forces for contact forces
       for (int bodyIndex = 0; bodyIndex < rigidBodiesWithExternalWrench.size(); bodyIndex++)
       {
-         RigidBody rigidBody = rigidBodiesWithExternalWrench.get(bodyIndex);
+         RigidBodyBasics rigidBody = rigidBodiesWithExternalWrench.get(bodyIndex);
          externalWrenchSolution.get(rigidBody).negate();
          virtualModelController.addExternalWrench(controlRootBody, rigidBody, externalWrenchSolution.get(rigidBody));
       }
@@ -177,7 +177,7 @@ public class WholeBodyVirtualModelControlSolver
 
       for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
       {
-         RigidBody rigidBody = rigidBodiesWithExternalWrench.get(i);
+         RigidBodyBasics rigidBody = rigidBodiesWithExternalWrench.get(i);
          externalWrenchSolution.get(rigidBody).setBodyFrame(rigidBody.getBodyFixedFrame());
          externalWrenchSolution.get(rigidBody).negate();
       }

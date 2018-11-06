@@ -27,8 +27,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -57,8 +57,8 @@ public class OrientationFeedbackControllerTest
       int numberOfRevoluteJoints = 10;
       RandomFloatingChain randomFloatingChain = new RandomFloatingChain(random, numberOfRevoluteJoints);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
-      RigidBody elevator = randomFloatingChain.getElevator();
-      RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
+      RigidBodyBasics elevator = randomFloatingChain.getElevator();
+      RigidBodyBasics endEffector = joints.get(joints.size() - 1).getSuccessor();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
       JointBasics[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);

@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -62,9 +62,9 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     * The base is the rigid-body located right before the first joint to be used for controlling the
     * end-effector.
     */
-   private RigidBody base;
+   private RigidBodyBasics base;
    /** The end-effector is the rigid-body to be controlled. */
-   private RigidBody endEffector;
+   private RigidBodyBasics endEffector;
 
    private String baseName;
    private String endEffectorName;
@@ -123,7 +123,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     *           end-effector.
     * @param endEffector the rigid-body to be controlled.
     */
-   public void set(RigidBody base, RigidBody endEffector)
+   public void set(RigidBodyBasics base, RigidBodyBasics endEffector)
    {
       this.base = base;
       this.endEffector = endEffector;
@@ -398,7 +398,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody getBase()
+   public RigidBodyBasics getBase()
    {
       return base;
    }
@@ -412,7 +412,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody getEndEffector()
+   public RigidBodyBasics getEndEffector()
    {
       return endEffector;
    }

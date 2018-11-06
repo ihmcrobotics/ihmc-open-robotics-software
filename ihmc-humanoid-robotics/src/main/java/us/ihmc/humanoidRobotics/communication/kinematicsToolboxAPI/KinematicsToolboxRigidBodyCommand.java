@@ -8,7 +8,7 @@ import controller_msgs.msg.dds.WeightMatrix3DMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -18,7 +18,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    /** This is the unique hash code of the end-effector to be solved for. */
    private int endEffectorHashCode;
    /** This is the end-effector to be solved for. */
-   private RigidBody endEffector;
+   private RigidBodyBasics endEffector;
 
    private final FramePose3D desiredPose = new FramePose3D();
    private final FramePose3D controlFramePose = new FramePose3D();
@@ -53,7 +53,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       set(message, null, null);
    }
 
-   public void set(KinematicsToolboxRigidBodyMessage message, Map<Integer, RigidBody> rigidBodyHashMap,
+   public void set(KinematicsToolboxRigidBodyMessage message, Map<Integer, RigidBodyBasics> rigidBodyHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       endEffectorHashCode = message.getEndEffectorHashCode();
@@ -87,7 +87,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       }
    }
 
-   public RigidBody getEndEffector()
+   public RigidBodyBasics getEndEffector()
    {
       return endEffector;
    }

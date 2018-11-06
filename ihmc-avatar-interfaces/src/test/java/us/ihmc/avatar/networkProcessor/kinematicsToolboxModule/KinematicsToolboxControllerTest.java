@@ -33,7 +33,7 @@ import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
@@ -172,7 +172,7 @@ public class KinematicsToolboxControllerTest
       Pair<FloatingInverseDynamicsJoint, OneDoFJoint[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       snapGhostToFullRobotModel(initialFullRobotModel);
 
-      RigidBody hand = ScrewTools.findRigidBodiesWithNames(ScrewTools.computeRigidBodiesAfterThisJoint(initialFullRobotModel.getRight()), "handLink")[0];
+      RigidBodyBasics hand = ScrewTools.findRigidBodiesWithNames(ScrewTools.computeRigidBodiesAfterThisJoint(initialFullRobotModel.getRight()), "handLink")[0];
       commandInputManager.submitMessage(holdRigidBodyCurrentPose(hand));
 
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
@@ -202,7 +202,7 @@ public class KinematicsToolboxControllerTest
       for (int i = 0; i < 10; i++)
       {
          randomizeJointPositions(random, randomizedFullRobotModel, 0.6);
-         RigidBody hand = ScrewTools.findRigidBodiesWithNames(ScrewTools.computeRigidBodiesAfterThisJoint(randomizedFullRobotModel.getRight()), "handLink")[0];
+         RigidBodyBasics hand = ScrewTools.findRigidBodiesWithNames(ScrewTools.computeRigidBodiesAfterThisJoint(randomizedFullRobotModel.getRight()), "handLink")[0];
          FramePoint3D desiredPosition = new FramePoint3D(hand.getBodyFixedFrame());
          desiredPosition.changeFrame(worldFrame);
          KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(hand, desiredPosition);
@@ -245,7 +245,7 @@ public class KinematicsToolboxControllerTest
       for (int i = 0; i < numberOfTests; i++)
       {
          randomizeJointPositions(random, randomizedFullRobotModel, 0.3);
-         RigidBody hand = ScrewTools.findRigidBodiesWithNames(ScrewTools.computeRigidBodiesAfterThisJoint(randomizedFullRobotModel.getRight()), "handLink")[0];
+         RigidBodyBasics hand = ScrewTools.findRigidBodiesWithNames(ScrewTools.computeRigidBodiesAfterThisJoint(randomizedFullRobotModel.getRight()), "handLink")[0];
          KinematicsToolboxRigidBodyMessage message = holdRigidBodyCurrentPose(hand);
          message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
          message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));

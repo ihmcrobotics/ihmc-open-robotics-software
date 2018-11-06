@@ -4,14 +4,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class AfterJointReferenceFrameNameMap
 {
    private final LinkedHashMap<String, ReferenceFrame> afterJointReferenceFrames = new LinkedHashMap<String, ReferenceFrame>();
    
-   public AfterJointReferenceFrameNameMap(RigidBody base)
+   public AfterJointReferenceFrameNameMap(RigidBodyBasics base)
    {
       JointBasics[] joints = ScrewTools.computeSubtreeJoints(base);
       

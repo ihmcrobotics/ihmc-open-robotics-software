@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -58,7 +59,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       Random random = new Random(12651L);
 
       ArrayList<RevoluteJoint> joints = new ArrayList<>();
-      RigidBody elevator = new RigidBody("elevator", worldFrame);
+      RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
       int numberOfJoints = 10;
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
@@ -77,9 +78,9 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       Random random = new Random(12651L);
 
       ArrayList<RevoluteJoint> joints = new ArrayList<>();
-      RigidBody elevator = new RigidBody("elevator", worldFrame);
+      RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
       RevoluteJoint rootJoint = ScrewTestTools.addRandomRevoluteJoint("rootJoint", random, elevator); // Just to make sure there is only one root joint for the SCS robot
-      RigidBody rootBody = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
+      RigidBodyBasics rootBody = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
 
       int numberOfJoints = 10; 
       ScrewTestTools.createRandomTreeRobot(joints, rootBody, numberOfJoints - 1, random);
@@ -102,7 +103,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
       ScrewTestTools.RandomFloatingChain idRobot = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
-      RigidBody elevator = idRobot.getElevator();
+      RigidBodyBasics elevator = idRobot.getElevator();
       joints.addAll(idRobot.getRevoluteJoints());
 
       SCSRobotFromInverseDynamicsRobotModel robot = new SCSRobotFromInverseDynamicsRobotModel("robot", idRobot.getRootJoint());
@@ -110,7 +111,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       assertAAndADotV(random, joints, elevator, robot, numberOfJoints + 1);
    }
 
-   private void assertAAndADotV(Random random, ArrayList<RevoluteJoint> joints, RigidBody elevator, SCSRobotFromInverseDynamicsRobotModel robot,int numJoints)
+   private void assertAAndADotV(Random random, ArrayList<RevoluteJoint> joints, RigidBodyBasics elevator, SCSRobotFromInverseDynamicsRobotModel robot,int numJoints)
          throws UnreasonableAccelerationException
    {
       int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(ScrewTools.computeSubtreeJoints(elevator));

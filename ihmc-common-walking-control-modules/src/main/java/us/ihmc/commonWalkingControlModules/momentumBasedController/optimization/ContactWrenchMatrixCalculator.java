@@ -7,7 +7,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
 
 public class ContactWrenchMatrixCalculator
@@ -18,7 +18,7 @@ public class ContactWrenchMatrixCalculator
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
    private final DenseMatrix64F contactableBodyJacobianMatrix = new DenseMatrix64F(6, 12);
 
-   private final RigidBody rootBody;
+   private final RigidBodyBasics rootBody;
 
    private final int numberOfDoFs;
 
@@ -26,7 +26,7 @@ public class ContactWrenchMatrixCalculator
    private final DenseMatrix64F tmpContactJacobianMatrixTranspose;
    private final DenseMatrix64F tmpContactJacobianMatrix;
 
-   public ContactWrenchMatrixCalculator(RigidBody rootBody, List<? extends ContactablePlaneBody> contactablePlaneBodies, WrenchMatrixCalculator wrenchMatrixCalculator,
+   public ContactWrenchMatrixCalculator(RigidBodyBasics rootBody, List<? extends ContactablePlaneBody> contactablePlaneBodies, WrenchMatrixCalculator wrenchMatrixCalculator,
          JointIndexHandler jointIndexHandler)
    {
       this.rootBody = rootBody;
@@ -47,7 +47,7 @@ public class ContactWrenchMatrixCalculator
       int contactForceStartIndex = 0;
       for (int bodyIndex = 0; bodyIndex < contactablePlaneBodies.size(); bodyIndex++)
       {
-         RigidBody rigidBody = contactablePlaneBodies.get(bodyIndex).getRigidBody();
+         RigidBodyBasics rigidBody = contactablePlaneBodies.get(bodyIndex).getRigidBody();
          jacobianCalculator.clear();
          jacobianCalculator.setKinematicChain(rootBody, rigidBody);
          jacobianCalculator.setJacobianFrame(wrenchMatrixCalculator.getJacobianFrame());

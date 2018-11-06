@@ -45,6 +45,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3Trajector
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
@@ -70,7 +71,7 @@ public class RigidBodyControlManagerTest
 
    private YoVariableRegistry testRegistry;
    private YoDouble yoTime;
-   private RigidBody bodyToControl;
+   private RigidBodyBasics bodyToControl;
 
    private OneDoFJoint joint1;
    private OneDoFJoint joint2;
@@ -493,11 +494,11 @@ public class RigidBodyControlManagerTest
       yoTime = new YoDouble("yoTime", testRegistry);
 
       // create a dummy robot with elevator, two joints, and two rigid bodies
-      RigidBody elevator = new RigidBody("elevator", worldFrame);
+      RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
       joint1 = ScrewTools.addRevoluteJoint("Joint1", elevator, new Vector3D(), new Vector3D(1.0, 0.0, 0.0));
-      RigidBody link1 = ScrewTools.addRigidBody("Link1", joint1, new Matrix3D(), 0.0, new Vector3D());
+      RigidBodyBasics link1 = ScrewTools.addRigidBody("Link1", joint1, new Matrix3D(), 0.0, new Vector3D());
       joint2 = ScrewTools.addRevoluteJoint("Joint2", link1, new Vector3D(), new Vector3D(1.0, 0.0, 0.0));
-      RigidBody link2 = ScrewTools.addRigidBody("Link2", joint2, new Matrix3D(), 0.0, new Vector3D());
+      RigidBodyBasics link2 = ScrewTools.addRigidBody("Link2", joint2, new Matrix3D(), 0.0, new Vector3D());
 
       joint1.setQ(q1_init);
       joint2.setQ(q2_init);
@@ -517,7 +518,7 @@ public class RigidBodyControlManagerTest
 
       // use default control and base frames
       bodyToControl = link2;
-      RigidBody baseBody = link1;
+      RigidBodyBasics baseBody = link1;
       ReferenceFrame controlFrame = bodyToControl.getBodyFixedFrame();
       ReferenceFrame baseFrame = baseBody.getBodyFixedFrame();
 

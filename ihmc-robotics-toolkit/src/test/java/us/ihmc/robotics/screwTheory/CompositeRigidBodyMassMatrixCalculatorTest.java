@@ -15,8 +15,8 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -61,7 +61,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
       sixDoFJointTwist.getAngularPart().set(RandomGeometry.nextVector3D(random));
       sixDoFJoint.setJointTwist(sixDoFJointTwist);
 
-      RigidBody floating = ScrewTools.addRigidBody("floating", sixDoFJoint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(),
+      RigidBodyBasics floating = ScrewTools.addRigidBody("floating", sixDoFJoint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(),
             RandomGeometry.nextVector3D(random));
 
       MassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(elevator);
@@ -90,7 +90,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
       sixDoFJointTwist.getAngularPart().set(EuclidCoreRandomTools.nextVector3D(random));
       sixDoFJoint.setJointTwist(sixDoFJointTwist);
 
-      RigidBody floating = ScrewTools.addRigidBody("floating", sixDoFJoint, EuclidCoreRandomTools.nextDiagonalMatrix3D(random), random.nextDouble(),
+      RigidBodyBasics floating = ScrewTools.addRigidBody("floating", sixDoFJoint, EuclidCoreRandomTools.nextDiagonalMatrix3D(random), random.nextDouble(),
                                                    EuclidCoreRandomTools.nextVector3D(random));
 
       random = new Random(1986L);
@@ -100,7 +100,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
       massMatrixCalculator.compute();
    }
 
-   private void setUpRandomTree(RigidBody elevator)
+   private void setUpRandomTree(RigidBodyBasics elevator)
    {
       joints = new ArrayList<RevoluteJoint>();
 

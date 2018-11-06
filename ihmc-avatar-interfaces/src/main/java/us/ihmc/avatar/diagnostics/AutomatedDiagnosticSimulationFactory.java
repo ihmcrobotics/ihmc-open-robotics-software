@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -174,8 +174,8 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       SideDependentList<ContactableFoot> bipedFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
       contactableBodiesFactory.disposeFactory();
 
-      Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
-      Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
+      Map<RigidBodyBasics, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBodyBasics, FootSwitchInterface>();
+      Map<RigidBodyBasics, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBodyBasics, ContactablePlaneBody>();
 
       DoubleProvider contactThresholdForce = new DoubleParameter("ContactThresholdForce", simulationRegistry, stateEstimatorParameters.getContactThresholdForce());
       DoubleProvider copThresholdFraction = new DoubleParameter("CoPThresholdFraction", simulationRegistry, stateEstimatorParameters.getFootSwitchCoPThresholdFraction());
@@ -183,7 +183,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody contactablePlaneBody = bipedFeet.get(robotSide);
-         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+         RigidBodyBasics rigidBody = contactablePlaneBody.getRigidBody();
          bipedFeetMap.put(rigidBody, contactablePlaneBody);
 
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);

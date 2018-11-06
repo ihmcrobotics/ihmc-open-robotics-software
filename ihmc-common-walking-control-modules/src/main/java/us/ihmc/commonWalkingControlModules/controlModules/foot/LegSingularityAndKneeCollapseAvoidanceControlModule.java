@@ -21,7 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -94,7 +94,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final YoDouble currentLegLength;
    private final YoDouble correctedDesiredLegLength;
 
-   private final RigidBody pelvis;
+   private final RigidBodyBasics pelvis;
 
    private final FrameVector3D unachievedSwingTranslationTemp = new FrameVector3D();
    private final FrameVector3D unachievedSwingVelocityTemp = new FrameVector3D();

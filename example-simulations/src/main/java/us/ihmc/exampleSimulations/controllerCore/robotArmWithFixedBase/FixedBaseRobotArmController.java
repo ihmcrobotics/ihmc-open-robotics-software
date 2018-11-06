@@ -29,8 +29,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -111,8 +111,8 @@ public class FixedBaseRobotArmController implements RobotController
 
       yoTime = robotArm.getYoTime();
       double gravityZ = robotArm.getGravity();
-      RigidBody hand = robotArm.getHand();
-      RigidBody elevator = robotArm.getElevator();
+      RigidBodyBasics hand = robotArm.getHand();
+      RigidBodyBasics elevator = robotArm.getElevator();
       JointBasics[] controlledJoints = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
 

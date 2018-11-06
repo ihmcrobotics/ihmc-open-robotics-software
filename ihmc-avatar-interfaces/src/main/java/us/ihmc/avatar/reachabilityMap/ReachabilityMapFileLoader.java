@@ -20,8 +20,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -32,22 +32,22 @@ public class ReachabilityMapFileLoader
    private HSSFWorkbook workBookToLoad;
    private final Voxel3DGrid loadedGrid;
 
-   public ReachabilityMapFileLoader(String robotName, RigidBody rootBody)
+   public ReachabilityMapFileLoader(String robotName, RigidBodyBasics rootBody)
    {
       this(robotName, rootBody, null);
    }
 
-   public ReachabilityMapFileLoader(String robotName, RigidBody rootBody, HumanoidReferenceFrames referenceFrames)
+   public ReachabilityMapFileLoader(String robotName, RigidBodyBasics rootBody, HumanoidReferenceFrames referenceFrames)
    {
       this(selectionFileDialog(), robotName, rootBody, referenceFrames);
    }
 
-   public ReachabilityMapFileLoader(File fileToLoad, String robotName, RigidBody rootBody)
+   public ReachabilityMapFileLoader(File fileToLoad, String robotName, RigidBodyBasics rootBody)
    {
       this(selectionFileDialog(), robotName, rootBody, null);
    }
 
-   public ReachabilityMapFileLoader(File fileToLoad, String robotName, RigidBody rootBody, HumanoidReferenceFrames referenceFrames)
+   public ReachabilityMapFileLoader(File fileToLoad, String robotName, RigidBodyBasics rootBody, HumanoidReferenceFrames referenceFrames)
    {
       try
       {
@@ -92,7 +92,7 @@ public class ReachabilityMapFileLoader
       }
    }
 
-   private void checkRobotMatchesData(String robotName, RigidBody rootBody, HSSFSheet descriptionSheet)
+   private void checkRobotMatchesData(String robotName, RigidBodyBasics rootBody, HSSFSheet descriptionSheet)
    {
       String robotNameInWorkbook = descriptionSheet.getRow(0).getCell(1).getStringCellValue();
 
@@ -122,7 +122,7 @@ public class ReachabilityMapFileLoader
       }
    }
 
-   private ReferenceFrame createGridReferenceFrame(RigidBody rootBody, HumanoidReferenceFrames referenceFrames, HSSFSheet descriptionSheet)
+   private ReferenceFrame createGridReferenceFrame(RigidBodyBasics rootBody, HumanoidReferenceFrames referenceFrames, HSSFSheet descriptionSheet)
    {
       String gridFrameName = descriptionSheet.getRow(6).getCell(2).getStringCellValue();
       String parentFrameName = descriptionSheet.getRow(7).getCell(2).getStringCellValue();
@@ -192,7 +192,7 @@ public class ReachabilityMapFileLoader
       return loadedGrid;
    }
 
-   private ReferenceFrame searchParentFrameInCommonRobotFrames(String parentFrameName, HumanoidReferenceFrames referenceFrames, RigidBody rootBody)
+   private ReferenceFrame searchParentFrameInCommonRobotFrames(String parentFrameName, HumanoidReferenceFrames referenceFrames, RigidBodyBasics rootBody)
    {
       if (parentFrameName.equals(worldFrame.getName()))
          return worldFrame;
@@ -206,7 +206,7 @@ public class ReachabilityMapFileLoader
       {
          ReferenceFrame frameAfterJoint = joint.getFrameAfterJoint();
          ReferenceFrame frameBeforeJoint = joint.getFrameBeforeJoint();
-         RigidBody successor = joint.getSuccessor();
+         RigidBodyBasics successor = joint.getSuccessor();
 
          if (parentFrameName.equals(frameAfterJoint.getName()))
             return frameAfterJoint;

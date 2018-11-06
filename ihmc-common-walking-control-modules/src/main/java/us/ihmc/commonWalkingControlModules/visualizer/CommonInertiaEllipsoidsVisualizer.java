@@ -17,8 +17,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.robotics.robotDescription.InertiaTools;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -44,11 +44,11 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
    private class RigidBodyVisualizationData
    {
-      public RigidBody rigidBody;
+      public RigidBodyBasics rigidBody;
       public YoFramePoint3D position;
       public YoFrameYawPitchRoll orientation;
 
-      public RigidBodyVisualizationData(RigidBody rigidBody, YoFramePoint3D position, YoFrameYawPitchRoll orientation)
+      public RigidBodyVisualizationData(RigidBodyBasics rigidBody, YoFramePoint3D position, YoFrameYawPitchRoll orientation)
       {
          this.rigidBody = rigidBody;
          this.position = position;
@@ -59,13 +59,13 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
    private final ArrayList<RigidBodyVisualizationData> centerOfMassData = new ArrayList<RigidBodyVisualizationData>();
 
-   public CommonInertiaEllipsoidsVisualizer(RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public CommonInertiaEllipsoidsVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this(rootBody, yoGraphicsListRegistry);
       parentRegistry.addChild(registry);
    }
 
-   public CommonInertiaEllipsoidsVisualizer(RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CommonInertiaEllipsoidsVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       inertiaEllipsoidGhostOffset.set(0, 0.0, 0.0);
 
@@ -76,7 +76,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
    }
 
-   private void findMinimumAndMaximumMassOfRigidBodies(RigidBody body)
+   private void findMinimumAndMaximumMassOfRigidBodies(RigidBodyBasics body)
    {
       SpatialInertiaBasics inertia = body.getInertia();
       if (inertia != null)
@@ -97,7 +97,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
          for (JointBasics joint : childJoints)
          {
-            RigidBody nextBody = joint.getSuccessor();
+            RigidBodyBasics nextBody = joint.getSuccessor();
             if (nextBody != null)
                findMinimumAndMaximumMassOfRigidBodies(nextBody);
          }
@@ -123,7 +123,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
       return Color.getHSBColor(H, S, B);
    }
 
-   private void addRigidBodyAndChilderenToVisualization(RigidBody currentRigidBody)
+   private void addRigidBodyAndChilderenToVisualization(RigidBodyBasics currentRigidBody)
    {
 
       SpatialInertiaBasics inertia = currentRigidBody.getInertia();
@@ -159,7 +159,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
          for (JointBasics joint : childJoints)
          {
-            RigidBody nextRigidBody = joint.getSuccessor();
+            RigidBodyBasics nextRigidBody = joint.getSuccessor();
             if (nextRigidBody != null)
                addRigidBodyAndChilderenToVisualization(nextRigidBody);
          }

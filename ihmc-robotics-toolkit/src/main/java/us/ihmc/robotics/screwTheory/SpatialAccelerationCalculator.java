@@ -12,8 +12,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
@@ -28,14 +28,14 @@ import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
  * {@link #compute()}. Finally, the spatial acceleration of any rigid-body can be obtained as
  * follows:
  * <ul>
- * <li>{@link #getAccelerationOfBody(RigidBody, SpatialAcceleration)} provides the spatial
+ * <li>{@link #getAccelerationOfBody(RigidBodyBasics, SpatialAcceleration)} provides the spatial
  * acceleration of any rigid-body with respect to the {@code inertialFrame}.
- * <li>{@link #getRelativeAcceleration(RigidBody, RigidBody, SpatialAcceleration)} provides
+ * <li>{@link #getRelativeAcceleration(RigidBodyBasics, RigidBodyBasics, SpatialAcceleration)} provides
  * the spatial acceleration of any rigid-body with respect to another rigid-body of the same system.
- * <li>{@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint3D, FrameVector3D)}
+ * <li>{@link #getLinearAccelerationOfBodyFixedPoint(RigidBodyBasics, FramePoint3D, FrameVector3D)}
  * provides the linear acceleration of a point of a rigid-body with respect to the
  * {@code inertialFrame}.
- * <li>{@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)}
+ * <li>{@link #getLinearAccelerationOfBodyFixedPoint(RigidBodyBasics, RigidBodyBasics, FramePoint3D, FrameVector3D)}
  * provides the linear acceleration of a point of a rigid-body with respect to another rigid-body of
  * the same system.
  * </ul>
@@ -46,7 +46,7 @@ public class SpatialAccelerationCalculator
    /**
     * The root body of the system for which this {@code SpatialAccelerationCalculator} is available.
     */
-   private final RigidBody rootBody;
+   private final RigidBodyBasics rootBody;
    /**
     * Whether rigid-body accelerations resulting from centrifugal and Coriolis effects are
     * considered or ignored.
@@ -68,12 +68,12 @@ public class SpatialAccelerationCalculator
     * {@code assignedAccelerations} for retrieving their acceleration if already computed. If no
     * acceleration has been computed yet, the index is equal to {@code -1}.
     */
-   private final HashMap<RigidBody, MutableInt> rigidBodyToAssignedAccelerationIndex = new HashMap<>();
+   private final HashMap<RigidBodyBasics, MutableInt> rigidBodyToAssignedAccelerationIndex = new HashMap<>();
    /**
     * List of the rigid-bodies with an up-to-date acceleration. This list allows a garbage free
     * clearance of the {@code rigidBodyToAssignedAccelerationIndex} map.
     */
-   private final List<RigidBody> rigidBodiesWithAssignedAcceleration;
+   private final List<RigidBodyBasics> rigidBodiesWithAssignedAcceleration;
    /**
     * The list of up-to-date accelerations assigned to rigid-bodies. The association acceleration
     * <-> rigid-body can be retrieved using the map {@code rigidBodyToAssignedAccelerationIndex}.
@@ -103,7 +103,7 @@ public class SpatialAccelerationCalculator
     * @param useDesiredAccelerations whether the desired or actual joint accelerations are used to
     *           compute the rigid-body accelerations.
     */
-   public SpatialAccelerationCalculator(RigidBody body, double gravity, boolean useDesiredAccelerations)
+   public SpatialAccelerationCalculator(RigidBodyBasics body, double gravity, boolean useDesiredAccelerations)
    {
       this(body, createGravitationalSpatialAcceleration(ScrewTools.getRootBody(body), gravity), true, useDesiredAccelerations);
    }
@@ -123,7 +123,7 @@ public class SpatialAccelerationCalculator
     * @param useDesiredAccelerations whether the desired or actual joint accelerations are used to
     *           compute the rigid-body accelerations.
     */
-   public SpatialAccelerationCalculator(RigidBody body, SpatialAccelerationReadOnly rootAcceleration, boolean doVelocityTerms, boolean useDesiredAccelerations)
+   public SpatialAccelerationCalculator(RigidBodyBasics body, SpatialAccelerationReadOnly rootAcceleration, boolean doVelocityTerms, boolean useDesiredAccelerations)
    {
       this(body, rootAcceleration, doVelocityTerms, true, useDesiredAccelerations);
    }
@@ -145,7 +145,7 @@ public class SpatialAccelerationCalculator
     * @param useDesiredAccelerations whether the desired or actual joint accelerations are used to
     *           compute the rigid-body accelerations.
     */
-   public SpatialAccelerationCalculator(RigidBody body, SpatialAccelerationReadOnly rootAcceleration, boolean doVelocityTerms, boolean doAccelerationTerms,
+   public SpatialAccelerationCalculator(RigidBodyBasics body, SpatialAccelerationReadOnly rootAcceleration, boolean doVelocityTerms, boolean doAccelerationTerms,
                                         boolean useDesiredAccelerations)
    {
       this.inertialFrame = rootAcceleration.getBaseFrame();
@@ -187,8 +187,8 @@ public class SpatialAccelerationCalculator
     * Notifies the system has changed state (configuration, velocity, and acceleration).
     * <p>
     * This method has to be called once every time the system state has changed, and before calling
-    * the methods {@link #getAccelerationOfBody(RigidBody, SpatialAcceleration)} and
-    * {@link #getRelativeAcceleration(RigidBody, RigidBody, SpatialAcceleration)}.
+    * the methods {@link #getAccelerationOfBody(RigidBodyBasics, SpatialAcceleration)} and
+    * {@link #getRelativeAcceleration(RigidBodyBasics, RigidBodyBasics, SpatialAcceleration)}.
     * </p>
     */
    // TODO rename to reset
@@ -231,24 +231,24 @@ public class SpatialAccelerationCalculator
     * @param body the rigid-body to get the acceleration of.
     * @param accelerationToPack the acceleration of the {@code body} to pack. Modified.
     */
-   public void getAccelerationOfBody(RigidBody body, SpatialAcceleration accelerationToPack)
+   public void getAccelerationOfBody(RigidBodyBasics body, SpatialAcceleration accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(computeOrGetAccelerationOfBody(body));
    }
 
    /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
-    * {@link #getRelativeAcceleration(RigidBody, RigidBody, SpatialAcceleration)}.
+    * {@link #getRelativeAcceleration(RigidBodyBasics, RigidBodyBasics, SpatialAcceleration)}.
     */
    private final Twist twistOfCurrentWithRespectToNew = new Twist();
    /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
-    * {@link #getRelativeAcceleration(RigidBody, RigidBody, SpatialAcceleration)}.
+    * {@link #getRelativeAcceleration(RigidBodyBasics, RigidBodyBasics, SpatialAcceleration)}.
     */
    private final Twist twistOfBodyWithRespectToBase = new Twist();
    /**
     * Temporary acceleration used for intermediate garbage free operations. To use only in the
-    * method {@link #getRelativeAcceleration(RigidBody, RigidBody, SpatialAcceleration)}.
+    * method {@link #getRelativeAcceleration(RigidBodyBasics, RigidBodyBasics, SpatialAcceleration)}.
     */
    private final SpatialAcceleration baseAcceleration = new SpatialAcceleration();
 
@@ -266,7 +266,7 @@ public class SpatialAccelerationCalculator
     * <p>
     * The relative acceleration between the two rigid-bodies is calculated knowing their
     * accelerations with respect to the inertial frame using the method
-    * {@link #getAccelerationOfBody(RigidBody, SpatialAcceleration)}: <br>
+    * {@link #getAccelerationOfBody(RigidBodyBasics, SpatialAcceleration)}: <br>
     * A<sup>b2, b2</sup><sub>b1</sub> = A<sup>b2, b2</sup><sub>i</sub> - A<sup>b1,
     * b2</sup><sub>i</sub> </br>
     * with 'b1' being the {@code base}, 'b2' the {@code body}, and 'i' the {@code inertialFrame}.
@@ -277,7 +277,7 @@ public class SpatialAccelerationCalculator
     * @param accelerationToPack the acceleration of {@code body} with respect to {@code base}.
     *           Modified.
     */
-   public void getRelativeAcceleration(RigidBody base, RigidBody body, SpatialAcceleration accelerationToPack)
+   public void getRelativeAcceleration(RigidBodyBasics base, RigidBodyBasics body, SpatialAcceleration accelerationToPack)
    {
       MovingReferenceFrame baseFrame = base.getBodyFixedFrame();
       MovingReferenceFrame bodyFrame = body.getBodyFixedFrame();
@@ -304,20 +304,20 @@ public class SpatialAccelerationCalculator
    /**
     * Temporary acceleration used for intermediate garbage free operations. To use only in the
     * method
-    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)}
-    * and {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint3D, FrameVector3D)}.
+    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBodyBasics, RigidBodyBasics, FramePoint3D, FrameVector3D)}
+    * and {@link #getLinearAccelerationOfBodyFixedPoint(RigidBodyBasics, FramePoint3D, FrameVector3D)}.
     */
    private final SpatialAcceleration accelerationForGetLinearAccelerationOfBodyFixedPoint = new SpatialAcceleration();
    /**
     * Temporary point used for intermediate garbage free operations. To use only in the method
-    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)}
-    * and {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint3D, FrameVector3D)}.
+    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBodyBasics, RigidBodyBasics, FramePoint3D, FrameVector3D)}
+    * and {@link #getLinearAccelerationOfBodyFixedPoint(RigidBodyBasics, FramePoint3D, FrameVector3D)}.
     */
    private final FramePoint3D pointForGetLinearAccelerationOfBodyFixedPoint = new FramePoint3D();
    /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
-    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)}
-    * and {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint3D, FrameVector3D)}.
+    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBodyBasics, RigidBodyBasics, FramePoint3D, FrameVector3D)}
+    * and {@link #getLinearAccelerationOfBodyFixedPoint(RigidBodyBasics, FramePoint3D, FrameVector3D)}.
     */
    private final Twist twistForGetLinearAccelerationOfBodyFixedPoint = new Twist();
 
@@ -330,7 +330,7 @@ public class SpatialAccelerationCalculator
     * </p>
     * <p>
     * The approach used is the same as for
-    * {@link #getRelativeAcceleration(RigidBody, RigidBody, SpatialAcceleration)}.
+    * {@link #getRelativeAcceleration(RigidBodyBasics, RigidBodyBasics, SpatialAcceleration)}.
     * </p>
     * 
     * @param base the rigid-body with respect to which the acceleration is to be computed.
@@ -338,7 +338,7 @@ public class SpatialAccelerationCalculator
     * @param bodyFixedPoint the point to compute the linear acceleration of. Not modified.
     * @param linearAccelerationToPack the linear acceleration of the body fixed point. Modified.
     */
-   public void getLinearAccelerationOfBodyFixedPoint(RigidBody base, RigidBody body, FramePoint3D bodyFixedPoint, FrameVector3D linearAccelerationToPack)
+   public void getLinearAccelerationOfBodyFixedPoint(RigidBodyBasics base, RigidBodyBasics body, FramePoint3D bodyFixedPoint, FrameVector3D linearAccelerationToPack)
    {
       FramePoint3D localPoint = pointForGetLinearAccelerationOfBodyFixedPoint;
       Twist localTwist = twistForGetLinearAccelerationOfBodyFixedPoint;
@@ -376,7 +376,7 @@ public class SpatialAccelerationCalculator
     * <p>
     * Note that the root acceleration is considered in this calculation. To get the linear
     * acceleration without considering the root acceleration use
-    * {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)}
+    * {@link #getLinearAccelerationOfBodyFixedPoint(RigidBodyBasics, RigidBodyBasics, FramePoint3D, FrameVector3D)}
     * providing {@link #getRootBody()} as the {@code base}.
     * </p>
     * <p>
@@ -388,7 +388,7 @@ public class SpatialAccelerationCalculator
     * @param bodyFixedPoint the point to compute the linear acceleration of. Not modified.
     * @param linearAccelerationToPack the linear acceleration of the body fixed point. Modified.
     */
-   public void getLinearAccelerationOfBodyFixedPoint(RigidBody body, FramePoint3D bodyFixedPoint, FrameVector3D linearAccelerationToPack)
+   public void getLinearAccelerationOfBodyFixedPoint(RigidBodyBasics body, FramePoint3D bodyFixedPoint, FrameVector3D linearAccelerationToPack)
    {
       FramePoint3D localPoint = pointForGetLinearAccelerationOfBodyFixedPoint;
       Twist localTwist = twistForGetLinearAccelerationOfBodyFixedPoint;
@@ -426,7 +426,7 @@ public class SpatialAccelerationCalculator
     * 
     * @return the root body.
     */
-   public RigidBody getRootBody()
+   public RigidBodyBasics getRootBody()
    {
       return rootBody;
    }
@@ -469,17 +469,17 @@ public class SpatialAccelerationCalculator
 
    /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
-    * {@link #computeOrGetAccelerationOfBody(RigidBody)}.
+    * {@link #computeOrGetAccelerationOfBody(RigidBodyBasics)}.
     */
    private final Twist twistForComputeOrGetTwistOfBody1 = new Twist();
    /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
-    * {@link #computeOrGetAccelerationOfBody(RigidBody)}.
+    * {@link #computeOrGetAccelerationOfBody(RigidBodyBasics)}.
     */
    private final Twist twistForComputeOrGetTwistOfBody2 = new Twist();
    /**
     * Temporary acceleration used for intermediate garbage free operations. To use only in the
-    * method {@link #computeOrGetAccelerationOfBody(RigidBody)}.
+    * method {@link #computeOrGetAccelerationOfBody(RigidBodyBasics)}.
     */
    private final SpatialAcceleration accelerationForComputeOrGetAccelerationOfBody = new SpatialAcceleration();
 
@@ -507,7 +507,7 @@ public class SpatialAccelerationCalculator
     * @param body the rigid-body to get the twist of.
     * @return the acceleration of the rigid-body with respect to the inertial frame.
     */
-   private SpatialAccelerationReadOnly computeOrGetAccelerationOfBody(RigidBody body)
+   private SpatialAccelerationReadOnly computeOrGetAccelerationOfBody(RigidBodyBasics body)
    {
       SpatialAcceleration acceleration = retrieveAssignedAcceleration(body);
 
@@ -520,7 +520,7 @@ public class SpatialAccelerationCalculator
           */
          ReferenceFrame bodyFrame = body.getBodyFixedFrame();
          JointBasics parentJoint = body.getParentJoint();
-         RigidBody predecessor = parentJoint.getPredecessor();
+         RigidBodyBasics predecessor = parentJoint.getPredecessor();
          SpatialAccelerationReadOnly accelerationOfPredecessor = computeOrGetAccelerationOfBody(predecessor);
          acceleration = assignAndGetEmptyAcceleration(body);
 
@@ -569,7 +569,7 @@ public class SpatialAccelerationCalculator
     * @return the up-to-date acceleration of the given {@code body}, returns {@code null} if no
     *         acceleration could be found.
     */
-   private SpatialAcceleration retrieveAssignedAcceleration(RigidBody body)
+   private SpatialAcceleration retrieveAssignedAcceleration(RigidBodyBasics body)
    {
       MutableInt mutableIndex = rigidBodyToAssignedAccelerationIndex.get(body);
 
@@ -592,7 +592,7 @@ public class SpatialAccelerationCalculator
     * @param body the rigid-body to assign a twist to.
     * @return the twist newly assigned to the rigid-body.
     */
-   private SpatialAcceleration assignAndGetEmptyAcceleration(RigidBody body)
+   private SpatialAcceleration assignAndGetEmptyAcceleration(RigidBodyBasics body)
    {
       SpatialAcceleration newAssignedAcceleration;
 

@@ -20,7 +20,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -50,7 +50,7 @@ public class ReachabilityMapSolver
    private final KinematicsToolboxController kinematicsToolboxController;
    private final CommandInputManager commandInputManager = new CommandInputManager(KinematicsToolboxModule.supportedCommands());
    private final StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
-   private final RigidBody endEffector;
+   private final RigidBodyBasics endEffector;
    private final OneDoFJoint[] robotArmJoints;
    private final RigidBodyTransform controlFramePoseInEndEffector = new RigidBodyTransform();
    private final SelectionMatrix3D angularSelection = new SelectionMatrix3D(null, true, true, true);

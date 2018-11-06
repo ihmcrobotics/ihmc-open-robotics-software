@@ -19,14 +19,14 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class WholeBodyTrajectoryToolboxHelper
 {
-   public static double kinematicsChainLimitScore(RigidBody start, RigidBody end)
+   public static double kinematicsChainLimitScore(RigidBodyBasics start, RigidBodyBasics end)
    {
       return jointsLimitScore(ScrewTools.createOneDoFJointPath(start, end));
    }

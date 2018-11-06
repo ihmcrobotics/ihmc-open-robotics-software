@@ -1,12 +1,12 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class InverseDynamicsJointStateChecksum extends AbstractInverseDynamicsChecksum
 {
 
-   public InverseDynamicsJointStateChecksum(RigidBody rootJoint, GenericCRC32 checksum)
+   public InverseDynamicsJointStateChecksum(RigidBodyBasics rootJoint, GenericCRC32 checksum)
    {
       super(rootJoint, checksum);
    }

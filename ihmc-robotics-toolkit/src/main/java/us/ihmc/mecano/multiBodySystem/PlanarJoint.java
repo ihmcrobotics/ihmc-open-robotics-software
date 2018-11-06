@@ -19,6 +19,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
@@ -39,12 +40,12 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
 
    private Wrench successorWrench;
 
-   public PlanarJoint(String name, RigidBody predecessor)
+   public PlanarJoint(String name, RigidBodyBasics predecessor)
    {
       this(name, predecessor, null);
    }
 
-   public PlanarJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
+   public PlanarJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
    {
       super(name, predecessor, transformToParent);
 
@@ -93,7 +94,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setSuccessor(RigidBody successor)
+   public void setSuccessor(RigidBodyBasics successor)
    {
       this.successor = successor;
       setMotionSubspace();

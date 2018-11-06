@@ -9,14 +9,14 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class RigidBodyExplorationConfigurationCommand implements Command<RigidBodyExplorationConfigurationCommand, RigidBodyExplorationConfigurationMessage>,
       WholeBodyTrajectoryToolboxAPI<RigidBodyExplorationConfigurationMessage>
 {
    private int rigidBodyHashCode;
-   private RigidBody rigidBody;
+   private RigidBodyBasics rigidBody;
    private final List<ConfigurationSpaceName> degreesOfFreedomToExplore = new ArrayList<>();
 
    private final TDoubleArrayList explorationRangeUpperLimits = new TDoubleArrayList();
@@ -26,7 +26,7 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    {
    }
 
-   public RigidBodyExplorationConfigurationCommand(RigidBody rigidBody, ConfigurationSpaceName... configurationSpaces)
+   public RigidBodyExplorationConfigurationCommand(RigidBodyBasics rigidBody, ConfigurationSpaceName... configurationSpaces)
    {
       clear();
       this.rigidBody = rigidBody;
@@ -70,7 +70,7 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    }
 
    @Override
-   public void set(RigidBodyExplorationConfigurationMessage message, Map<Integer, RigidBody> rigidBodyHashMap,
+   public void set(RigidBodyExplorationConfigurationMessage message, Map<Integer, RigidBodyBasics> rigidBodyHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       clear();
@@ -89,7 +89,7 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
       }
    }
 
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }

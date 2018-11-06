@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class InverseKinematicsCommandDataCopier
 {
@@ -26,13 +26,13 @@ public class InverseKinematicsCommandDataCopier
       clear();
    }
 
-   public void retrieveRigidBodiesFromName(Map<String, RigidBody> nameToRigidBodyMap)
+   public void retrieveRigidBodiesFromName(Map<String, RigidBodyBasics> nameToRigidBodyMap)
    {
       for (int i = 0; i < spatialVelocityCommands.size(); i++)
       {
          SpatialVelocityCommand command = spatialVelocityCommands.get(i);
-         RigidBody base = nameToRigidBodyMap.get(command.getBaseName());
-         RigidBody endEffector = nameToRigidBodyMap.get(command.getEndEffectorName());
+         RigidBodyBasics base = nameToRigidBodyMap.get(command.getBaseName());
+         RigidBodyBasics endEffector = nameToRigidBodyMap.get(command.getEndEffectorName());
          command.set(base, endEffector);
       }
    }

@@ -18,16 +18,16 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
 public class CenterOfMassJacobian
 {
    private final ReferenceFrame rootFrame;
-   private final List<RigidBody> rigidBodyList = new ArrayList<>();
-   private final Set<RigidBody> rigidBodySet = new HashSet<>();
+   private final List<RigidBodyBasics> rigidBodyList = new ArrayList<>();
+   private final Set<RigidBodyBasics> rigidBodySet = new HashSet<>();
    private final JointBasics[] joints;
 
    private final DenseMatrix64F jacobianMatrix;
@@ -38,23 +38,23 @@ public class CenterOfMassJacobian
    private final DenseMatrix64F tempJointVelocitiesMatrix;
    private final DenseMatrix64F centerOfMassVelocityMatrix;
 
-   private final Map<RigidBody, MutableDouble> subTreeMassMap = new LinkedHashMap<>();
-   private final Map<RigidBody, FramePoint3D> comScaledByMassMap = new LinkedHashMap<>();
-   private final Map<RigidBody, MutableBoolean> comScaledByMassMapIsUpdated = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, MutableDouble> subTreeMassMap = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, FramePoint3D> comScaledByMassMap = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, MutableBoolean> comScaledByMassMapIsUpdated = new LinkedHashMap<>();
 
    private double inverseTotalMass;
 
-   public CenterOfMassJacobian(RigidBody rootBody)
+   public CenterOfMassJacobian(RigidBodyBasics rootBody)
    {
       this(ScrewTools.computeSupportAndSubtreeSuccessors(rootBody), rootBody.getBodyFixedFrame());
    }
 
-   public CenterOfMassJacobian(RigidBody[] rigidBodies, ReferenceFrame rootFrame)
+   public CenterOfMassJacobian(RigidBodyBasics[] rigidBodies, ReferenceFrame rootFrame)
    {
       this(rigidBodies, ScrewTools.computeSupportJoints(rigidBodies), rootFrame);
    }
 
-   public CenterOfMassJacobian(RigidBody[] rigidBodies, JointBasics[] joints, ReferenceFrame rootFrame)
+   public CenterOfMassJacobian(RigidBodyBasics[] rigidBodies, JointBasics[] joints, ReferenceFrame rootFrame)
    {
       this.rigidBodyList.addAll(Arrays.asList(rigidBodies));
       rigidBodySet.addAll(rigidBodyList);
@@ -69,7 +69,7 @@ public class CenterOfMassJacobian
 
       for (int i = 0; i < rigidBodyList.size(); i++)
       {
-         RigidBody rigidBody = rigidBodyList.get(i);
+         RigidBodyBasics rigidBody = rigidBodyList.get(i);
          comScaledByMassMap.put(rigidBody, new FramePoint3D(rootFrame));
          comScaledByMassMapIsUpdated.put(rigidBody, new MutableBoolean(false));
          subTreeMassMap.put(rigidBody, new MutableDouble(-1.0));
@@ -96,7 +96,7 @@ public class CenterOfMassJacobian
 
       for (JointBasics joint : joints)
       {
-         RigidBody childBody = joint.getSuccessor();
+         RigidBodyBasics childBody = joint.getSuccessor();
 
          FramePoint3D comPositionScaledByMass = getCoMScaledByMass(childBody);
          double subTreeMass = getSubTreeMass(childBody);
@@ -114,7 +114,7 @@ public class CenterOfMassJacobian
       CommonOps.scale(inverseTotalMass, jacobianMatrix);
    }
 
-   private double getSubTreeMass(RigidBody rigidBody)
+   private double getSubTreeMass(RigidBodyBasics rigidBody)
    {
 
       if (!subTreeMassMap.containsKey(rigidBody))
@@ -142,7 +142,7 @@ public class CenterOfMassJacobian
       }
    }
 
-   private FramePoint3D getCoMScaledByMass(RigidBody rigidBody)
+   private FramePoint3D getCoMScaledByMass(RigidBodyBasics rigidBody)
    {
       MutableBoolean comIsUpdated = comScaledByMassMapIsUpdated.get(rigidBody);
 

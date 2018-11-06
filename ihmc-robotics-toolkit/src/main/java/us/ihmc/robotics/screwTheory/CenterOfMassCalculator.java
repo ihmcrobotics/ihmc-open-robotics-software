@@ -4,33 +4,33 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class CenterOfMassCalculator
 {
    private final ReferenceFrame desiredFrame;
 
-   private final RigidBody[] rigidBodies;
+   private final RigidBodyBasics[] rigidBodies;
    private double totalMass;
    private final FramePoint3D centerOfMass = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final FramePoint3D tempPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
-   public CenterOfMassCalculator(RigidBody rootBody, ReferenceFrame desiredFrame)
+   public CenterOfMassCalculator(RigidBodyBasics rootBody, ReferenceFrame desiredFrame)
    {
       this(ScrewTools.computeSupportAndSubtreeSuccessors(rootBody), desiredFrame); //TODO: This gets too much stuff. Shouldn't it just get the rootBody and everything posterior to it?
 
 //    this(ScrewTools.computeSubtreeSuccessors(rootBody.getParentJoint()), desiredFrame); //TODO: Should it be something like this instead?
    }
 
-   public CenterOfMassCalculator(RigidBody[] rigidBodies, ReferenceFrame desiredFrame)
+   public CenterOfMassCalculator(RigidBodyBasics[] rigidBodies, ReferenceFrame desiredFrame)
    {
       this.rigidBodies = rigidBodies;
       this.desiredFrame = desiredFrame;
    }
    
-   public CenterOfMassCalculator(ArrayList<RigidBody> rigidBodies, ReferenceFrame desiredFrame)
+   public CenterOfMassCalculator(ArrayList<RigidBodyBasics> rigidBodies, ReferenceFrame desiredFrame)
    {
-      this.rigidBodies = new RigidBody[rigidBodies.size()];
+      this.rigidBodies = new RigidBodyBasics[rigidBodies.size()];
       rigidBodies.toArray(this.rigidBodies);
       this.desiredFrame = desiredFrame;
    }
@@ -41,7 +41,7 @@ public class CenterOfMassCalculator
       centerOfMass.setToZero(desiredFrame);
       totalMass = 0.0;
 
-      for (RigidBody rigidBody : rigidBodies)
+      for (RigidBodyBasics rigidBody : rigidBodies)
       {
          rigidBody.getCenterOfMass(tempPoint);
          double mass = rigidBody.getInertia().getMass();

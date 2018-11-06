@@ -18,7 +18,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
@@ -97,7 +97,7 @@ public class SupportState extends AbstractFootControlState
    private final YoDouble timeBeforeExploring;
 
    // For straight legs with privileged configuration
-   private final RigidBody pelvis;
+   private final RigidBodyBasics pelvis;
 
    // Toe contact point loading time
    private final boolean rampUpAllowableToeLoadAfterContact;

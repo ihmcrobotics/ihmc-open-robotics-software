@@ -7,7 +7,7 @@ import java.util.Set;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.simulationconstructionset.IMUMount;
@@ -85,7 +85,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
 
       for (IMUMount imuMount : imuMounts)
       {
-         RigidBody rigidBody = scsToInverseDynamicsJointMap.getRigidBody(imuMount.getParentJoint());
+         RigidBodyBasics rigidBody = scsToInverseDynamicsJointMap.getRigidBody(imuMount.getParentJoint());
          RigidBodyTransform transformFromMountToJoint = new RigidBodyTransform();
          imuMount.getTransformFromMountToJoint(transformFromMountToJoint);
          IMUDefinition imuDefinition = new IMUDefinition(imuMount.getName(), rigidBody, transformFromMountToJoint);

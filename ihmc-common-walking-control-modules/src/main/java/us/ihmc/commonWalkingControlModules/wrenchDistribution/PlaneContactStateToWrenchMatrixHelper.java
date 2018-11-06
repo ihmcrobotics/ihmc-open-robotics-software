@@ -19,7 +19,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -138,7 +138,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       String namePrefix = bodyName + "WrenchMatrixHelper";
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
 
-      RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+      RigidBodyBasics rigidBody = contactablePlaneBody.getRigidBody();
       planeFrame = new PoseReferenceFrame(namePrefix + "ContactFrame", rigidBody.getBodyFixedFrame());
       planeFrame.setPoseAndUpdate(contactablePlaneBody.getSoleFrame().getTransformToDesiredFrame(rigidBody.getBodyFixedFrame()));
       yoPlaneContactState = new YoPlaneContactState(namePrefix, rigidBody, planeFrame, contactPoints2d, 0.0, registry);
@@ -492,7 +492,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       basisVectorToPack.normalize();
    }
 
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return yoPlaneContactState.getRigidBody();
    }

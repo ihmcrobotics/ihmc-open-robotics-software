@@ -13,8 +13,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -180,9 +180,9 @@ public class JointStateUpdaterTest
          ArrayList<RevoluteJoint> joints)
    {
       int indexOfEstimationParentJoint = RandomNumbers.nextInt(random, 0, joints.size() - 1);
-      RigidBody estimationLink = joints.get(indexOfEstimationParentJoint).getSuccessor();
+      RigidBodyBasics estimationLink = joints.get(indexOfEstimationParentJoint).getSuccessor();
       SixDoFJoint rootInverseDynamicsJoint = randomFloatingChain.getRootJoint();
-      RigidBody elevator = randomFloatingChain.getElevator();
+      RigidBodyBasics elevator = randomFloatingChain.getElevator();
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
       return inverseDynamicsStructure;
    }

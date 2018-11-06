@@ -9,17 +9,17 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 
 public class InverseDynamicsMechanismExplorer
 {
-   private final RigidBody rootbody;
+   private final RigidBodyBasics rootbody;
 
-   public InverseDynamicsMechanismExplorer(RigidBody rootbody)
+   public InverseDynamicsMechanismExplorer(RigidBodyBasics rootbody)
    {
       super();
       this.rootbody = rootbody;
@@ -72,7 +72,7 @@ public class InverseDynamicsMechanismExplorer
          throw new RuntimeException("Only Pin and Slider implemented right now");
       }
 
-      RigidBody linkRigidBody = joint.getSuccessor();
+      RigidBodyBasics linkRigidBody = joint.getSuccessor();
       printLinkInformation(linkRigidBody, buffer);
 
    }
@@ -101,7 +101,7 @@ public class InverseDynamicsMechanismExplorer
       buffer.append("Joint is a Floating Joint.\n");
    }
 
-   private void printLinkInformation(RigidBody link, StringBuffer buffer)
+   private void printLinkInformation(RigidBodyBasics link, StringBuffer buffer)
    {
       SpatialInertiaBasics inertia = link.getInertia();
       JointBasics parentJoint = link.getParentJoint();

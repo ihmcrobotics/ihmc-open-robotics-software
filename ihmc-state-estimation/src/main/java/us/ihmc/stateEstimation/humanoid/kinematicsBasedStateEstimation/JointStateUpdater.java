@@ -2,8 +2,8 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -24,7 +24,7 @@ public class JointStateUpdater
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
-   private final RigidBody rootBody;
+   private final RigidBodyBasics rootBody;
 
    private OneDoFJoint[] oneDoFJoints;
    private final SensorOutputMapReadOnly sensorMap;

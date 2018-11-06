@@ -12,8 +12,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MecanoTestTools;
@@ -44,7 +44,7 @@ public class MomentumControlTestTools
       MecanoTestTools.assertSpatialForceEquals(desiredCentroidalMomentumRate, totalWrench, epsilon);
    }
 
-   public static void assertWrenchesInFrictionCones(Map<RigidBody, Wrench> externalWrenches,
+   public static void assertWrenchesInFrictionCones(Map<RigidBodyBasics, Wrench> externalWrenches,
          Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, double coefficientOfFriction)
    {
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
@@ -71,10 +71,10 @@ public class MomentumControlTestTools
       }
    }
 
-   public static void assertRootJointWrenchZero(Map<RigidBody, Wrench> externalWrenches, SixDoFJoint rootJoint, double gravityZ, double epsilon)
+   public static void assertRootJointWrenchZero(Map<RigidBodyBasics, Wrench> externalWrenches, SixDoFJoint rootJoint, double gravityZ, double epsilon)
    {
       InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(rootJoint.getPredecessor(), gravityZ);
-      for (RigidBody rigidBody : externalWrenches.keySet())
+      for (RigidBodyBasics rigidBody : externalWrenches.keySet())
       {
          Wrench externalWrench = externalWrenches.get(rigidBody);
          externalWrench.changeFrame(rigidBody.getBodyFixedFrame());

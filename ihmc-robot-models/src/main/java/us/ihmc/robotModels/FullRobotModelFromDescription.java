@@ -18,6 +18,7 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -49,12 +50,12 @@ public class FullRobotModelFromDescription implements FullRobotModel
    protected final EnumMap<SpineJointName, OneDoFJoint> spineJoints = new EnumMap<>(SpineJointName.class);
    protected final String[] sensorLinksToTrack;
 //   protected final SDFLinkHolder rootLink;
-   protected RigidBody head;
+   protected RigidBodyBasics head;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final RigidBody elevator;
+   private final RigidBodyBasics elevator;
    protected final SixDoFJoint rootJoint;
-   private final RigidBody rootLink;
+   private final RigidBodyBasics rootLink;
    private final LinkedHashMap<String, OneDoFJoint> oneDoFJoints = new LinkedHashMap<String, OneDoFJoint>();
    private final ArrayList<IMUDefinition> imuDefinitions = new ArrayList<IMUDefinition>();
    private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
@@ -67,7 +68,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
    private double totalMass = 0.0;
    private final boolean alignReferenceFramesWithJoints;
 
-   private final Map<Enum<?>, RigidBody> endEffectors = new HashMap<>();
+   private final Map<Enum<?>, RigidBodyBasics> endEffectors = new HashMap<>();
 
    public FullRobotModelFromDescription(FullRobotModelFromDescription modelToCopy)
    {
@@ -122,7 +123,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
    }
 
    @Override
-   public RigidBody getEndEffector(Enum<?> segmentEnum)
+   public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
    {
       return endEffectors.get(segmentEnum);
    }
@@ -194,7 +195,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody getElevator()
+   public RigidBodyBasics getElevator()
    {
       return elevator;
    }
@@ -222,14 +223,14 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody getRootBody()
+   public RigidBodyBasics getRootBody()
    {
       return rootLink;
    }
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody getHead()
+   public RigidBodyBasics getHead()
    {
       return head;
    }
@@ -373,7 +374,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
       return sensorFrames.get(linkName);
    }
 
-   protected void addJointsRecursively(OneDoFJointDescription joint, RigidBody parentBody)
+   protected void addJointsRecursively(OneDoFJointDescription joint, RigidBodyBasics parentBody)
    {
       Vector3D jointAxis = new Vector3D();
       joint.getJointAxis(jointAxis);
@@ -417,7 +418,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
       Vector3D comOffset = new Vector3D(childLink.getCenterOfMassOffset());
       Matrix3D inertia = childLink.getMomentOfInertiaCopy();
 
-      RigidBody rigidBody = ScrewTools.addRigidBody(childLink.getName(), inverseDynamicsJoint, inertia, mass,
+      RigidBodyBasics rigidBody = ScrewTools.addRigidBody(childLink.getName(), inverseDynamicsJoint, inertia, mass,
             comOffset);
       //      System.out.println("Adding rigid body " + childLink.getName() + "; Mass: " + childLink.getMass() + "; ixx: " + childLink.getInertia().m00 + "; iyy: " + childLink.getInertia().m11
       //            + "; izz: " + childLink.getInertia().m22 + "; COM Offset: " + childLink.getCoMOffset());
@@ -445,7 +446,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
       }
    }
 
-   protected void mapRigidBody(JointDescription joint, OneDoFJoint inverseDynamicsJoint, RigidBody rigidBody)
+   protected void mapRigidBody(JointDescription joint, OneDoFJoint inverseDynamicsJoint, RigidBodyBasics rigidBody)
    {
       if (rigidBody.getName().equals(sdfJointNameMap.getHeadName()))
       {

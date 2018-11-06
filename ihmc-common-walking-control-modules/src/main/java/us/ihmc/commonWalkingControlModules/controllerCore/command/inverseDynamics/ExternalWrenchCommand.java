@@ -2,13 +2,13 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWrenchCommand>, VirtualModelControlCommand<ExternalWrenchCommand>
 {
-   private RigidBody rigidBody;
+   private RigidBodyBasics rigidBody;
    private String rigidBodyName;
    private final Wrench externalWrenchAppliedOnRigidBody = new Wrench();
 
@@ -16,20 +16,20 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
    {
    }
 
-   public void setRigidBody(RigidBody rigidBody)
+   public void setRigidBody(RigidBodyBasics rigidBody)
    {
       this.rigidBody = rigidBody;
       rigidBodyName = rigidBody.getName();
    }
 
-   public void set(RigidBody rigidBody, WrenchReadOnly externalWrench)
+   public void set(RigidBodyBasics rigidBody, WrenchReadOnly externalWrench)
    {
       setRigidBody(rigidBody);
       externalWrenchAppliedOnRigidBody.setIncludingFrame(externalWrench);
       externalWrenchAppliedOnRigidBody.changeFrame(rigidBody.getBodyFixedFrame());
    }
 
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }

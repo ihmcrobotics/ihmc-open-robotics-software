@@ -19,6 +19,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
@@ -39,12 +40,12 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
 
    private Wrench successorWrench;
 
-   public SixDoFJoint(String name, RigidBody predecessor)
+   public SixDoFJoint(String name, RigidBodyBasics predecessor)
    {
       this(name, predecessor, null);
    }
 
-   public SixDoFJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
+   public SixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
    {
       super(name, predecessor, transformToParent);
       jointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame);
@@ -125,7 +126,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setSuccessor(RigidBody successor)
+   public void setSuccessor(RigidBodyBasics successor)
    {
       this.successor = successor;
       setMotionSubspace();

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -283,7 +283,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       ArrayList<OneDoFJoint> armOneDoFJoints = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody hand = controllerRobotModel.getHand(robotSide);
+         RigidBodyBasics hand = controllerRobotModel.getHand(robotSide);
          if (hand != null)
          {
             JointBasics[] armJoints = ScrewTools.createJointPath(controllerRobotModel.getChest(), hand);

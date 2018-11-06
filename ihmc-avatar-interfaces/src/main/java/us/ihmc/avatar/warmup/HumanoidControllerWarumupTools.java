@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -121,8 +121,8 @@ public class HumanoidControllerWarumupTools
 
    public static ArmTrajectoryMessage createArmMessage(FullHumanoidRobotModel fullRobotModel, RobotSide side)
    {
-      RigidBody chest = fullRobotModel.getChest();
-      RigidBody hand = fullRobotModel.getHand(side);
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      RigidBodyBasics hand = fullRobotModel.getHand(side);
       OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(chest, hand);
       ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(side);
 

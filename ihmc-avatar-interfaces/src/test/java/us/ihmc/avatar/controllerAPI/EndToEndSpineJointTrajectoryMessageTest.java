@@ -32,7 +32,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -60,8 +60,8 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private final Random random = new Random(1991L);
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private RigidBody pelvis;
-   private RigidBody chest;
+   private RigidBodyBasics pelvis;
+   private RigidBodyBasics chest;
    private OneDoFJoint[] spineJoints;
    private int numberOfJoints;
    private ControllerSpy controllerSpy;
@@ -422,7 +422,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    {
       OneDoFJoint[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
       ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
-      RigidBody chestClone = spineClone[spineClone.length - 1].getSuccessor();
+      RigidBodyBasics chestClone = spineClone[spineClone.length - 1].getSuccessor();
       FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
@@ -469,7 +469,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       }
    }
 
-   private void executeMessage(ChestTrajectoryMessage message, RigidBody chest) throws SimulationExceededMaximumTimeException
+   private void executeMessage(ChestTrajectoryMessage message, RigidBodyBasics chest) throws SimulationExceededMaximumTimeException
    {
       double controllerDT = getRobotModel().getControllerDT();
       drcSimulationTestHelper.publishToController(message);
@@ -481,7 +481,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       assertChestDesired(drcSimulationTestHelper.getSimulationConstructionSet(), desired, chest);
    }
 
-   private static void assertChestDesired(SimulationConstructionSet scs, Quaternion desired, RigidBody chest)
+   private static void assertChestDesired(SimulationConstructionSet scs, Quaternion desired, RigidBodyBasics chest)
    {
       Quaternion controllerDesired = EndToEndChestTrajectoryMessageTest.findControllerDesiredOrientation(scs, chest);
       EuclidCoreTestTools.assertQuaternionEquals(desired, controllerDesired, DESIRED_QUAT_EPSILON);
@@ -501,7 +501,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       return getDoubleYoVariable(scs, variable, namespace);
    }
 
-   private static YoBoolean findOrientationControlEnabled(SimulationConstructionSet scs, RigidBody body)
+   private static YoBoolean findOrientationControlEnabled(SimulationConstructionSet scs, RigidBodyBasics body)
    {
       String bodyName = body.getName();
       String namespace = bodyName + "OrientationFBController";
@@ -517,7 +517,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       return getBooleanYoVariable(scs, variable, namespace);
    }
 
-   private static YoFrameQuaternion findOrientationDesired(SimulationConstructionSet scs, RigidBody body)
+   private static YoFrameQuaternion findOrientationDesired(SimulationConstructionSet scs, RigidBodyBasics body)
    {
       String bodyName = body.getName();
       String namespace = "FeedbackControllerToolbox";
@@ -600,7 +600,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       private final double controllerDT;
       private final OneDoFJoint[] spineJoints;
       private final OneDoFJoint[] spineJointClones;
-      private final RigidBody chestClone;
+      private final RigidBodyBasics chestClone;
 
       private final Map<OneDoFJoint, YoBoolean> jointControlEnabled = new HashMap<>();
       private final Map<OneDoFJoint, YoDouble> jointDesiredsMap = new HashMap<>();

@@ -34,7 +34,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -391,7 +391,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       return ret;
    }
 
-   private Footstep generateFootstep(FramePose2D footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide, double height, Vector3D planeNormal)
+   private Footstep generateFootstep(FramePose2D footPose2d, RigidBodyBasics foot, ReferenceFrame soleFrame, RobotSide robotSide, double height, Vector3D planeNormal)
    {
       double yaw = footPose2d.getYaw();
       Point3D position = new Point3D(footPose2d.getX(), footPose2d.getY(), height);

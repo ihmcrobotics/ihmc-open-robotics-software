@@ -20,8 +20,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelTestTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -140,7 +140,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
       ArrayList<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody footBody = fullHumanoidRobotModel.getFoot(robotSide);
+         RigidBodyBasics footBody = fullHumanoidRobotModel.getFoot(robotSide);
          ReferenceFrame soleFrame = fullHumanoidRobotModel.getSoleFrame(robotSide);
          contactablePlaneBodies.add(ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(footBody, soleFrame));
       }

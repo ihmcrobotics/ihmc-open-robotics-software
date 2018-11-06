@@ -3,8 +3,8 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 /**
  * @author twan
@@ -38,7 +38,7 @@ public class ConstrainedCenterOfMassJacobianCalculator
       dynamicallyConsistentNullspaceCalculator.reset();
    }
 
-   public void addConstraint(RigidBody body, DenseMatrix64F selectionMatrix)
+   public void addConstraint(RigidBodyBasics body, DenseMatrix64F selectionMatrix)
    {
       dynamicallyConsistentNullspaceCalculator.addConstraint(body, selectionMatrix);
    }

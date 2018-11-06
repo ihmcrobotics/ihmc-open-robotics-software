@@ -27,7 +27,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -66,7 +66,7 @@ public class KinematicsToolboxHelper
     * @param gains the gains to use in the feedback controller. Not modified.
     * @return the feedback control command ready to be submitted to the controller core.
     */
-   static SpatialFeedbackControlCommand consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBody base, PIDSE3Gains gains)
+   static SpatialFeedbackControlCommand consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBodyBasics base, PIDSE3Gains gains)
    {
       SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
       feedbackControlCommand.set(base, command.getEndEffector());
@@ -289,7 +289,7 @@ public class KinematicsToolboxHelper
    private static double calculateCommandQuality(SpatialFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
    {
       SpatialAccelerationCommand accelerationCommand = command.getSpatialAccelerationCommand();
-      RigidBody endEffector = accelerationCommand.getEndEffector();
+      RigidBodyBasics endEffector = accelerationCommand.getEndEffector();
 
       PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", worldFrame);
 

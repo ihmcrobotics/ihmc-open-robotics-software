@@ -8,7 +8,7 @@ import com.google.common.collect.HashBiMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.kinematics.JointLimit;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.partNames.*;
@@ -30,7 +30,7 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    private QuadrantDependentList<EnumMap<LegJointName, OneDoFJoint>> legJointMaps;
    private QuadrantDependentList<ArrayList<OneDoFJoint>> legJointLists;
 
-   private QuadrantDependentList<RigidBody> feet;
+   private QuadrantDependentList<RigidBodyBasics> feet;
    private boolean initialized = false;
 
    private final RobotQuadrant[] robotQuadrants;
@@ -88,7 +88,7 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    }
 
    @Override
-   protected void mapRigidBody(JointDescription joint, OneDoFJoint inverseDynamicsJoint, RigidBody rigidBody)
+   protected void mapRigidBody(JointDescription joint, OneDoFJoint inverseDynamicsJoint, RigidBodyBasics rigidBody)
    {
       initializeLists();
 
@@ -153,13 +153,13 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
        * @see us.ihmc.modelFileLoaders.SdfLoader.FullQuadrupedRobotModel#getFoot(us.ihmc.robotics.robotSide.RobotQuadrant)
        */
    @Override
-   public RigidBody getFoot(RobotQuadrant robotQuadrant)
+   public RigidBodyBasics getFoot(RobotQuadrant robotQuadrant)
    {
       return feet.get(robotQuadrant);
    }
 
    @Override
-   public RigidBody getEndEffector(RobotQuadrant robotQuadrant, LimbName limbName)
+   public RigidBodyBasics getEndEffector(RobotQuadrant robotQuadrant, LimbName limbName)
    {
       switch (limbName)
       {
@@ -171,7 +171,7 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    }
 
    @Override
-   public RigidBody getBody()
+   public RigidBodyBasics getBody()
    {
       return getRootBody();
    }

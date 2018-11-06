@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
@@ -168,7 +168,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
                                                           QuadrupedFootControlModuleParameters.getDefaultTouchdownTriggerWindow());
 
-      RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotQuadrant);
+      RigidBodyBasics foot = controllerToolbox.getFullRobotModel().getFoot(robotQuadrant);
       FramePoint3D currentPosition = new FramePoint3D(soleFrame);
       currentPosition.changeFrame(foot.getBodyFixedFrame());
 

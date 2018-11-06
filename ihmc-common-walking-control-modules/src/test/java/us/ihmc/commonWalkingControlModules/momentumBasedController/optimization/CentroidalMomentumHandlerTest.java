@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -38,7 +38,7 @@ public class CentroidalMomentumHandlerTest
       int numberOfJoints = 20;
       List<RevoluteJoint> joints = ScrewTestTools.createRandomChainRobot(numberOfJoints, random);
 
-      RigidBody rootBody = ScrewTools.getRootBody(joints.get(0).getPredecessor());
+      RigidBodyBasics rootBody = ScrewTools.getRootBody(joints.get(0).getPredecessor());
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, rootBody);
       CentroidalMomentumHandler centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody);
@@ -72,7 +72,7 @@ public class CentroidalMomentumHandlerTest
       int numberOfJoints = 20;
       RandomFloatingChain randomFloatingChain = new RandomFloatingChain(random, numberOfJoints);
 
-      RigidBody rootBody = randomFloatingChain.getElevator();
+      RigidBodyBasics rootBody = randomFloatingChain.getElevator();
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, rootBody);
       CentroidalMomentumHandler centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody);

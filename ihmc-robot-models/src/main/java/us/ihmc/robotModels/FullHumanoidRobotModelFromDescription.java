@@ -8,7 +8,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
@@ -33,11 +33,11 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
    private SideDependentList<ArrayList<OneDoFJoint>> armJointIDsList;
    private SideDependentList<ArrayList<OneDoFJoint>> legJointIDsList;
 
-   private RigidBody[] endEffectors = new RigidBody[4];
-   private SideDependentList<RigidBody> feet;
-   private SideDependentList<RigidBody> hands;
+   private RigidBodyBasics[] endEffectors = new RigidBodyBasics[4];
+   private SideDependentList<RigidBodyBasics> feet;
+   private SideDependentList<RigidBodyBasics> hands;
 
-   private RigidBody chest;
+   private RigidBodyBasics chest;
 
    private boolean initialized = false;
 
@@ -201,14 +201,14 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody getPelvis()
+   public RigidBodyBasics getPelvis()
    {
       return getRootBody();
    }
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody getChest()
+   public RigidBodyBasics getChest()
    {
       return chest;
    }
@@ -223,21 +223,21 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody getFoot(RobotSide robotSide)
+   public RigidBodyBasics getFoot(RobotSide robotSide)
    {
       return getEndEffector(robotSide, LimbName.LEG);
    }
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody getHand(RobotSide robotSide)
+   public RigidBodyBasics getHand(RobotSide robotSide)
    {
       return getEndEffector(robotSide, LimbName.ARM);
    }
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody getEndEffector(RobotSide robotSide, LimbName limbName)
+   public RigidBodyBasics getEndEffector(RobotSide robotSide, LimbName limbName)
    {
       switch (limbName)
       {
@@ -340,7 +340,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
    //   }
 
    @Override
-   protected void mapRigidBody(JointDescription joint, OneDoFJoint inverseDynamicsJoint, RigidBody rigidBody)
+   protected void mapRigidBody(JointDescription joint, OneDoFJoint inverseDynamicsJoint, RigidBodyBasics rigidBody)
    {
       initializeLists();
 
@@ -410,8 +410,8 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
          armJointIDsList = SideDependentList.createListOfArrayLists();
          legJointIDsList = SideDependentList.createListOfArrayLists();
 
-         feet = new SideDependentList<RigidBody>();
-         hands = new SideDependentList<RigidBody>();
+         feet = new SideDependentList<RigidBodyBasics>();
+         hands = new SideDependentList<RigidBodyBasics>();
          initialized = true;
       }
    }
@@ -421,7 +421,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       getOneDoFJoints(jointsToPack);
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody hand = getHand(robotSide);
+         RigidBodyBasics hand = getHand(robotSide);
          if (hand != null)
          {
             OneDoFJoint[] fingerJoints = ScrewTools.filterJoints(ScrewTools.computeSubtreeJoints(hand), OneDoFJoint.class);

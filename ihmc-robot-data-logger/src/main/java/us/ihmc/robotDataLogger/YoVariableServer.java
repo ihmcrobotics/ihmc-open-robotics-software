@@ -11,7 +11,7 @@ import gnu.trove.list.array.TByteArrayList;
 import us.ihmc.commons.Conversions;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.handshake.SummaryProvider;
@@ -280,7 +280,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    }
 
    @Override
-   public void setMainRegistry(YoVariableRegistry registry, RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void setMainRegistry(YoVariableRegistry registry, RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       if (this.mainRegistry != null)
       {

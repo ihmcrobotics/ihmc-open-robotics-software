@@ -23,7 +23,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.PDControllerWithGainSetter;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
@@ -68,7 +68,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final LookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator;
 
    private final double gravity;
-   private final RigidBody pelvis;
+   private final RigidBodyBasics pelvis;
 
 
    public CenterOfMassHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
@@ -100,7 +100,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
+         RigidBodyBasics foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
          ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
          RigidBodyTransform ankleToSole = new RigidBodyTransform();

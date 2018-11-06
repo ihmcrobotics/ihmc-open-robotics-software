@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
@@ -25,7 +25,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
 
    private final RawIMUSensorsInterface rawSensors;
    protected final int imuIndex;
-   protected final RigidBody rigidBody;
+   protected final RigidBodyBasics rigidBody;
    protected final ReferenceFrame imuFrame;
 
    private final FramePoint3D imuFramePoint;
@@ -86,7 +86,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    protected final NoisyYoDouble[] gyroList;
    protected final NoisyYoDouble[] compassList;
 
-   public SimulatedIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBody rigidBody, ReferenceFrame imuFrame, RigidBody rootBody, SpatialAccelerationReadOnly rootAcceleration)
+   public SimulatedIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBodyBasics rigidBody, ReferenceFrame imuFrame, RigidBodyBasics rootBody, SpatialAccelerationReadOnly rootAcceleration)
    {
       this.rawSensors = rawSensors;
       this.imuIndex = imuIndex;

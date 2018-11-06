@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
@@ -43,7 +44,7 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
  * </ul>
  * </p>
  */
-public class RigidBody
+public class RigidBody implements RigidBodyBasics
 {
    /** This is where the physical properties of this rigid-body are stored. */
    private final SpatialInertia inertia;
@@ -165,6 +166,7 @@ public class RigidBody
     *
     * @return the reference to this rigid-body's inertia.
     */
+   @Override
    public SpatialInertiaBasics getInertia()
    {
       return inertia;
@@ -190,6 +192,7 @@ public class RigidBody
     *
     * @return the reference frame attached to this rigid-body.
     */
+   @Override
    public MovingReferenceFrame getBodyFixedFrame()
    {
       return bodyFixedFrame;
@@ -204,6 +207,7 @@ public class RigidBody
     *
     * @return the reference to the parent joint.
     */
+   @Override
    public JointBasics getParentJoint()
    {
       return parentJoint;
@@ -221,6 +225,7 @@ public class RigidBody
     *
     * @param joint the new child joint to register to this rigid-body.
     */
+   @Override
    public void addChildJoint(JointBasics joint)
    {
       childrenJoints.add(joint);
@@ -236,6 +241,7 @@ public class RigidBody
     *
     * @return all the children joints of this rigid-body.
     */
+   @Override
    public List<JointBasics> getChildrenJoints()
    {
       return childrenJointsReadOnly;
@@ -249,6 +255,7 @@ public class RigidBody
     *
     * @return {@code true} if this rigid-body has at least one child joint, {@code false} otherwise.
     */
+   @Override
    public boolean hasChildrenJoints()
    {
       return !childrenJoints.isEmpty();
@@ -263,6 +270,7 @@ public class RigidBody
     *
     * @return {@code true} if this is the root body, {@code false} otherwise.
     */
+   @Override
    public boolean isRootBody()
    {
       return parentJoint == null;
@@ -276,6 +284,7 @@ public class RigidBody
     *
     * @return this rigid-body's name.
     */
+   @Override
    public String getName()
    {
       return name;
@@ -292,6 +301,7 @@ public class RigidBody
     * @param comOffsetToPack the {@code FramePoint} in which the center of mass position is stored.
     *           Modified.
     */
+   @Override
    public void getCenterOfMass(FramePoint3D comOffsetToPack)
    {
       comOffsetToPack.setIncludingFrame(inertia.getCenterOfMassOffset());
@@ -311,6 +321,7 @@ public class RigidBody
     * @throws ReferenceFrameMismatchException if the argument is not expressed in the
     *            {@code bodyFixedFrame}.
     */
+   @Override
    public void setCenterOfMass(FramePoint3D comOffset)
    {
       inertia.getCenterOfMassOffset().set(comOffset);
@@ -324,6 +335,7 @@ public class RigidBody
     * the robot's joints.
     * </p>
     */
+   @Override
    public void updateFramesRecursively()
    {
       bodyFixedFrame.update();
@@ -355,6 +367,7 @@ public class RigidBody
     * same robot, such that it can be used to serialize and deserialize robot information.
     * </p>
     */
+   @Override
    public int hashCode()
    {
       return (int) nameBasedHashCode;

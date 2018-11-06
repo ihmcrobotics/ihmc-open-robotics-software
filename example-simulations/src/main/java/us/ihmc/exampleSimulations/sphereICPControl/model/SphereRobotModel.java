@@ -12,6 +12,7 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
@@ -33,8 +34,8 @@ public class SphereRobotModel implements FullRobotModel
    private static final double
          Ixx1 = 0.1, Iyy1 = 0.1, Izz1 = 0.1;
 
-   private final RigidBody elevator;
-   private final RigidBody body;
+   private final RigidBodyBasics elevator;
+   private final RigidBodyBasics body;
 
    private final SixDoFJoint floatingJoint;
    private final OneDoFJoint[] oneDoFJoints;
@@ -72,7 +73,7 @@ public class SphereRobotModel implements FullRobotModel
       return worldFrame;
    }
 
-   public RigidBody getElevator()
+   public RigidBodyBasics getElevator()
    {
       return elevator;
    }
@@ -138,7 +139,7 @@ public class SphereRobotModel implements FullRobotModel
       return null;
    }
 
-   @Override public RigidBody getEndEffector(Enum<?> segmentEnum)
+   @Override public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
    {
       return null;
    }
@@ -168,12 +169,12 @@ public class SphereRobotModel implements FullRobotModel
       return null;
    }
 
-   public RigidBody getRootBody()
+   public RigidBodyBasics getRootBody()
    {
       return null;
    }
 
-   public RigidBody getHead()
+   public RigidBodyBasics getHead()
    {
       return null;
    }

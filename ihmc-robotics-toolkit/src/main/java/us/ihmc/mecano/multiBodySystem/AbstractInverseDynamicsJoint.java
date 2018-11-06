@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -26,13 +27,13 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
     * The {@code RigidBody} directly connected to this joint and located between this joint and the
     * root body of the robot. The predecessor cannot be {@code null}.
     */
-   protected final RigidBody predecessor;
+   protected final RigidBodyBasics predecessor;
    /**
     * The {@code RigidBody} directly connected to this joint and located between this joint and an
     * end-effector of the robot. The successor should not be {@code null}, but it is not enforced
     * here.
     */
-   protected RigidBody successor;
+   protected RigidBodyBasics successor;
    /**
     * Reference frame fixed to the predecessor and which origin is located at this joint's origin.
     */
@@ -65,7 +66,7 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
     * @param name the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     */
-   public AbstractInverseDynamicsJoint(String name, RigidBody predecessor)
+   public AbstractInverseDynamicsJoint(String name, RigidBodyBasics predecessor)
    {
       this(name, predecessor, null);
    }
@@ -77,7 +78,7 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
     * @param predecessor the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     */
-   public AbstractInverseDynamicsJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
+   public AbstractInverseDynamicsJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
    {
       nameBasedHashCode = 1L;
 
@@ -88,7 +89,7 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
       predecessor.addChildJoint(this);
    }
 
-   private static MovingReferenceFrame createBeforeJointFrame(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent)
+   private static MovingReferenceFrame createBeforeJointFrame(String jointName, RigidBodyBasics parentBody, RigidBodyTransform transformToParent)
    {
       String beforeJointName = "before" + StringUtils.capitalize(jointName);
 
@@ -167,14 +168,14 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
 
    /** {@inheritDoc} */
    @Override
-   public final RigidBody getPredecessor()
+   public final RigidBodyBasics getPredecessor()
    {
       return predecessor;
    }
 
    /** {@inheritDoc} */
    @Override
-   public final RigidBody getSuccessor()
+   public final RigidBodyBasics getSuccessor()
    {
       return successor;
    }

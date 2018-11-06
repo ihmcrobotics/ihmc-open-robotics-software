@@ -16,7 +16,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -123,8 +123,8 @@ public class QuadrupedVirtualModelController
       legEffortVector = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         RigidBody foot = fullRobotModel.getFoot(robotQuadrant);
-         RigidBody body = fullRobotModel.getRootJoint().getSuccessor();
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotQuadrant);
+         RigidBodyBasics body = fullRobotModel.getRootJoint().getSuccessor();
          legJoints.set(robotQuadrant, ScrewTools.filterJoints(ScrewTools.createJointPath(body, foot), OneDoFJoint.class));
          footJacobian.set(robotQuadrant, new GeometricJacobian(legJoints.get(robotQuadrant), body.getBodyFixedFrame()));
          soleJacobian.set(robotQuadrant, new PointJacobian());

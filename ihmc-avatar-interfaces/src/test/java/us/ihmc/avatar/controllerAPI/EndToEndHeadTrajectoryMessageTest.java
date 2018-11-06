@@ -23,7 +23,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -45,8 +45,8 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private RigidBody head;
-   private RigidBody chest;
+   private RigidBodyBasics head;
+   private RigidBodyBasics chest;
    private OneDoFJoint[] neckJoints;
    private int numberOfJoints;
 
@@ -60,7 +60,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       double trajectoryTime = 1.0;
 
       ScrewTestTools.setRandomPositionsWithinJointLimits(neckJoints, random);
-      RigidBody headClone = neckJoints[numberOfJoints - 1].getSuccessor();
+      RigidBodyBasics headClone = neckJoints[numberOfJoints - 1].getSuccessor();
       FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(headClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 

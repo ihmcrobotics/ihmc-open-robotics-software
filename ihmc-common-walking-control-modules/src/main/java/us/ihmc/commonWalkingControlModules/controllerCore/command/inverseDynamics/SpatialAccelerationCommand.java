@@ -17,7 +17,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -80,13 +80,13 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * The base is the rigid-body located right before the first joint to be used for controlling the
     * end-effector.
     */
-   private RigidBody base;
+   private RigidBodyBasics base;
    /** The end-effector is the rigid-body to be controlled. */
-   private RigidBody endEffector;
+   private RigidBodyBasics endEffector;
    /**
     * Intermediate base located between the {@code base} and {@code endEffector}. It can be null.
     */
-   private RigidBody optionalPrimaryBase;
+   private RigidBodyBasics optionalPrimaryBase;
 
    private String baseName;
    private String endEffectorName;
@@ -150,7 +150,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     *           end-effector.
     * @param endEffector the rigid-body to be controlled.
     */
-   public void set(RigidBody base, RigidBody endEffector)
+   public void set(RigidBodyBasics base, RigidBodyBasics endEffector)
    {
       this.base = base;
       this.endEffector = endEffector;
@@ -178,7 +178,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * 
     * @param primaryBase the rigid-body to use as the primary base. Optional.
     */
-   public void setPrimaryBase(RigidBody primaryBase)
+   public void setPrimaryBase(RigidBodyBasics primaryBase)
    {
       optionalPrimaryBase = primaryBase;
       optionalPrimaryBaseName = primaryBase.getName();
@@ -840,7 +840,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @return the rigid-body located right before the first joint to be used for controlling the
     *         end-effector.
     */
-   public RigidBody getBase()
+   public RigidBodyBasics getBase()
    {
       return base;
    }
@@ -864,7 +864,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * 
     * @return the rigid-body to be controlled.
     */
-   public RigidBody getEndEffector()
+   public RigidBodyBasics getEndEffector()
    {
       return endEffector;
    }
@@ -889,7 +889,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * 
     * @return the rigid-body to use as the primary base. Optional.
     */
-   public RigidBody getPrimaryBase()
+   public RigidBodyBasics getPrimaryBase()
    {
       return optionalPrimaryBase;
    }

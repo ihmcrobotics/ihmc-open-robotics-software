@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Rigi
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.manipulation.planning.exploringSpatial.SpatialData;
 import us.ihmc.manipulation.planning.exploringSpatial.SpatialNode;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -50,9 +50,9 @@ public class WholeBodyTrajectoryToolboxData
    private double trajectoryTime;
    private int dimensionOfExploration = 0;
 
-   private final List<RigidBody> allRigidBodies = new ArrayList<>();
-   private final Map<String, RigidBody> nameToRigidBodyMap = new HashMap<>();
-   private final Map<RigidBody, ConstrainedRigidBodyTrajectory> rigidBodyDataMap = new HashMap<>();
+   private final List<RigidBodyBasics> allRigidBodies = new ArrayList<>();
+   private final Map<String, RigidBodyBasics> nameToRigidBodyMap = new HashMap<>();
+   private final Map<RigidBodyBasics, ConstrainedRigidBodyTrajectory> rigidBodyDataMap = new HashMap<>();
 
    private final List<ReachingManifoldCommand> reachingManifolds;
 
@@ -63,15 +63,15 @@ public class WholeBodyTrajectoryToolboxData
       this.fullRobotModel = fullRobotModel;
       this.reachingManifolds = reachingManifolds;
 
-      Map<RigidBody, RigidBodyExplorationConfigurationCommand> explorationMap = new HashMap<>();
-      Map<RigidBody, WaypointBasedTrajectoryCommand> trajectoryMap = new HashMap<>();
+      Map<RigidBodyBasics, RigidBodyExplorationConfigurationCommand> explorationMap = new HashMap<>();
+      Map<RigidBodyBasics, WaypointBasedTrajectoryCommand> trajectoryMap = new HashMap<>();
 
       for (int i = 0; i < explorationConfigurations.size(); i++)
       {
          RigidBodyExplorationConfigurationCommand exp = explorationConfigurations.get(i);
          explorationMap.put(exp.getRigidBody(), exp);
       }
-      Set<RigidBody> rigidBodySet = new HashSet<>(explorationMap.keySet());
+      Set<RigidBodyBasics> rigidBodySet = new HashSet<>(explorationMap.keySet());
 
       // classify
       if (endEffectorTrajectories != null)
@@ -105,7 +105,7 @@ public class WholeBodyTrajectoryToolboxData
       allRigidBodies.forEach(body -> nameToRigidBodyMap.put(body.getName(), body));
 
       // construct ConstrainedRigidBodyTrajectory
-      for (RigidBody rigidBody : allRigidBodies)
+      for (RigidBodyBasics rigidBody : allRigidBodies)
       {
          WaypointBasedTrajectoryCommand trajectory;
          if (trajectoryMap.isEmpty())
@@ -127,7 +127,7 @@ public class WholeBodyTrajectoryToolboxData
          }
 
          ConstrainedRigidBodyTrajectory constrainedRigidBodyTrajectory = null;
-         for (RigidBody candidateRigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(ScrewTools.getRootBody(fullRobotModel.getElevator())))
+         for (RigidBodyBasics candidateRigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(ScrewTools.getRootBody(fullRobotModel.getElevator())))
          {
             if (candidateRigidBody.getName() == rigidBody.getName())
             {
@@ -157,7 +157,7 @@ public class WholeBodyTrajectoryToolboxData
 
       for (int i = 0; i < allRigidBodies.size(); i++)
       {
-         RigidBody rigidBody = allRigidBodies.get(i);
+         RigidBodyBasics rigidBody = allRigidBodies.get(i);
 
          if (rigidBodyDataMap.get(rigidBody).hasTrajectoryCommand())
          {
@@ -174,7 +174,7 @@ public class WholeBodyTrajectoryToolboxData
 
       for (int i = 0; i < allRigidBodies.size(); i++)
       {
-         RigidBody rigidBody = allRigidBodies.get(i);
+         RigidBodyBasics rigidBody = allRigidBodies.get(i);
 
          rigidBodyDataMap.get(rigidBody).appendRandomSpatial(spatialData);
       }
@@ -188,7 +188,7 @@ public class WholeBodyTrajectoryToolboxData
       double timeInTrajectory = node.getTime();
       for (int i = 0; i < node.getSize(); i++)
       {
-         RigidBody rigidBody = nameToRigidBodyMap.get(node.getName(i));
+         RigidBodyBasics rigidBody = nameToRigidBodyMap.get(node.getName(i));
 
          Pose3D poseToAppend = node.getSpatialData(i);
 
@@ -210,7 +210,7 @@ public class WholeBodyTrajectoryToolboxData
             {
                ReachingManifoldCommand manifold = reachingManifolds.get(j);
 
-               RigidBody rigidBody = nameToRigidBodyMap.get(node.getName(i));
+               RigidBodyBasics rigidBody = nameToRigidBodyMap.get(node.getName(i));
 
                Pose3D currentSpatial = rigidBodyDataMap.get(rigidBody).getPoseToWorldFrame(node.getSpatialData(i));
 
@@ -233,7 +233,7 @@ public class WholeBodyTrajectoryToolboxData
             {
                ReachingManifoldCommand manifold = reachingManifolds.get(j);
 
-               RigidBody rigidBody = nameToRigidBodyMap.get(node.getName(i));
+               RigidBodyBasics rigidBody = nameToRigidBodyMap.get(node.getName(i));
 
                Pose3D currentSpatial = rigidBodyDataMap.get(rigidBody).getPoseToWorldFrame(node.getSpatialData(i));
 
@@ -255,9 +255,9 @@ public class WholeBodyTrajectoryToolboxData
    {
       for (int i = 0; i < allRigidBodies.size(); i++)
       {
-         RigidBody rigidBody = allRigidBodies.get(i);
+         RigidBodyBasics rigidBody = allRigidBodies.get(i);
 
-         for (RigidBody candidateRigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(ScrewTools.getRootBody(fullRobotModel.getElevator())))
+         for (RigidBodyBasics candidateRigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(ScrewTools.getRootBody(fullRobotModel.getElevator())))
          {
             if (candidateRigidBody.getName() == rigidBody.getName())
             {
@@ -274,7 +274,7 @@ public class WholeBodyTrajectoryToolboxData
    {
       for (int i = 0; i < allRigidBodies.size(); i++)
       {
-         RigidBody rigidBody = allRigidBodies.get(i);
+         RigidBodyBasics rigidBody = allRigidBodies.get(i);
          rigidBodyDataMap.get(rigidBody).updateInitialResult();
       }
    }

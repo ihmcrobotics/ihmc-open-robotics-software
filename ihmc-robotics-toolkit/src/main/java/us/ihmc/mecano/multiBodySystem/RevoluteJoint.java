@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 
@@ -16,12 +17,12 @@ public class RevoluteJoint extends OneDoFJoint
    private final FrameVector3D jointAxis;
    private final JointTransformCalculator jointTransformCalculator;
 
-   public RevoluteJoint(String name, RigidBody predecessor, Vector3DReadOnly jointAxis)
+   public RevoluteJoint(String name, RigidBodyBasics predecessor, Vector3DReadOnly jointAxis)
    {
       this(name, predecessor, null, jointAxis);
    }
 
-   public RevoluteJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
+   public RevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
    {
       super(name, predecessor, transformToParent);
       this.jointAxis = new FrameVector3D(beforeJointFrame, jointAxis);
@@ -56,7 +57,7 @@ public class RevoluteJoint extends OneDoFJoint
    }
 
    @Override
-   public void setSuccessor(RigidBody successor)
+   public void setSuccessor(RigidBodyBasics successor)
    {
       this.successor = successor;
 

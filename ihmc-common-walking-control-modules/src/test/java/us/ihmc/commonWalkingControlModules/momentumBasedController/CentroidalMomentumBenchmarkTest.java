@@ -14,8 +14,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -62,7 +62,7 @@ public class CentroidalMomentumBenchmarkTest
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
       ScrewTestTools.RandomFloatingChain idRobot = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
-      RigidBody elevator = idRobot.getElevator();
+      RigidBodyBasics elevator = idRobot.getElevator();
       joints.addAll(idRobot.getRevoluteJoints());
 
       SCSRobotFromInverseDynamicsRobotModel robot = new SCSRobotFromInverseDynamicsRobotModel("robot", idRobot.getRootJoint());
@@ -70,7 +70,7 @@ public class CentroidalMomentumBenchmarkTest
       assertADotV(random, joints, elevator, robot, numberOfJoints + 1);
    }
 
-   private void assertADotV(Random random, ArrayList<RevoluteJoint> joints, RigidBody elevator, SCSRobotFromInverseDynamicsRobotModel robot, int numJoints)
+   private void assertADotV(Random random, ArrayList<RevoluteJoint> joints, RigidBodyBasics elevator, SCSRobotFromInverseDynamicsRobotModel robot, int numJoints)
          throws UnreasonableAccelerationException
    {
       int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(ScrewTools.computeSubtreeJoints(elevator));

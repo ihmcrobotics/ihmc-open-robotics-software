@@ -13,8 +13,8 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SpecializedOps;
 
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 
 /**
@@ -28,9 +28,9 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
 {
    private final FloatingInverseDynamicsJoint rootJoint;
    private final JointBasics[] jointsInOrder;
-   private final Map<RigidBody, DenseMatrix64F> constrainedBodiesAndSelectionMatrices = new LinkedHashMap<RigidBody, DenseMatrix64F>();
+   private final Map<RigidBodyBasics, DenseMatrix64F> constrainedBodiesAndSelectionMatrices = new LinkedHashMap<RigidBodyBasics, DenseMatrix64F>();
    private final List<JointBasics> actuatedJoints = new ArrayList<JointBasics>();
-   private final Map<RigidBody, List<JointBasics>> supportingBodyToJointPathMap = new LinkedHashMap<RigidBody, List<JointBasics>>();
+   private final Map<RigidBodyBasics, List<JointBasics>> supportingBodyToJointPathMap = new LinkedHashMap<RigidBodyBasics, List<JointBasics>>();
    private final MassMatrixCalculator massMatrixCalculator;
 
    private final boolean computeSNsBar;
@@ -81,7 +81,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
    }
 
    @Override
-   public void addConstraint(RigidBody body, DenseMatrix64F selectionMatrix)
+   public void addConstraint(RigidBodyBasics body, DenseMatrix64F selectionMatrix)
    {
       constrainedBodiesAndSelectionMatrices.put(body, selectionMatrix);
       nConstraints += selectionMatrix.getNumRows();
@@ -191,13 +191,13 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
       return SNsBar;
    }
 
-   private void computeJs(DenseMatrix64F Js, Map<RigidBody, List<JointBasics>> supportJacobians,
-                          Map<RigidBody, DenseMatrix64F> constrainedBodiesAndSelectionMatrices)
+   private void computeJs(DenseMatrix64F Js, Map<RigidBodyBasics, List<JointBasics>> supportJacobians,
+                          Map<RigidBodyBasics, DenseMatrix64F> constrainedBodiesAndSelectionMatrices)
    {
       Js.zero();
 
       int rowStartNumber = 0;
-      for (RigidBody rigidBody : supportJacobians.keySet())
+      for (RigidBodyBasics rigidBody : supportJacobians.keySet())
       {
          List<JointBasics> supportingJoints = supportJacobians.get(rigidBody);
          DenseMatrix64F selectionMatrix = constrainedBodiesAndSelectionMatrices.get(rigidBody);

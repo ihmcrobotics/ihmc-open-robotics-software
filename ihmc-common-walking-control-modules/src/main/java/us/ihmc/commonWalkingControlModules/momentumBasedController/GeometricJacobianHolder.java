@@ -5,8 +5,8 @@ import java.util.List;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -40,7 +40,7 @@ public class GeometricJacobianHolder
     * @param jacobianFrame
     * @return
     */
-   public int getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
+   public int getOrCreateGeometricJacobian(RigidBodyBasics ancestor, RigidBodyBasics descendant, ReferenceFrame jacobianFrame)
    {
       int numberOfJoints = ScrewTools.createJointPath(temporaryToStoreJointPath, ancestor, descendant);
       return getOrCreateGeometricJacobian(temporaryToStoreJointPath, numberOfJoints, jacobianFrame);

@@ -6,8 +6,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -57,23 +57,23 @@ public class CenterOfMassCalibrationTool implements Updatable
       
       
       
-      RigidBody spinePitchBody = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH).getSuccessor();
+      RigidBodyBasics spinePitchBody = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH).getSuccessor();
       spinePitchCenterOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(spinePitchBody, true);
       spinePitchCoMInZUpFrame = new YoFramePoint3D("spinePitchCoMInZUpFrame", spinePitchCenterOfMassCalculator.getDesiredFrame(), registry);
 
-      RigidBody leftHipPitchBody = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH).getSuccessor();
+      RigidBodyBasics leftHipPitchBody = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH).getSuccessor();
       leftHipPitchCenterOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(leftHipPitchBody, true);
       leftHipPitchCoMInZUpFrame = new YoFramePoint3D("leftHipPitchCoMInZUpFrame", leftHipPitchCenterOfMassCalculator.getDesiredFrame(), registry);
 
-      RigidBody rightHipPitchBody = fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.HIP_PITCH).getSuccessor();
+      RigidBodyBasics rightHipPitchBody = fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.HIP_PITCH).getSuccessor();
       rightHipPitchCenterOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(rightHipPitchBody, true);
       rightHipPitchCoMInZUpFrame = new YoFramePoint3D("rightHipPitchCoMInZUpFrame", rightHipPitchCenterOfMassCalculator.getDesiredFrame(), registry);
 
-      RigidBody leftKneeBody = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH).getSuccessor();
+      RigidBodyBasics leftKneeBody = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH).getSuccessor();
       leftKneeCenterOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(leftKneeBody, true);
       leftKneeCoMInZUpFrame = new YoFramePoint3D("leftKneeCoMInZUpFrame", leftKneeCenterOfMassCalculator.getDesiredFrame(), registry);
 
-      RigidBody rightKneeBody = fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.KNEE_PITCH).getSuccessor();
+      RigidBodyBasics rightKneeBody = fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.KNEE_PITCH).getSuccessor();
       rightKneeCenterOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(rightKneeBody, true);
       rightKneeCoMInZUpFrame = new YoFramePoint3D("rightKneeCoMInZUpFrame", rightKneeCenterOfMassCalculator.getDesiredFrame(), registry);
 
@@ -182,7 +182,7 @@ public class CenterOfMassCalibrationTool implements Updatable
 //
 //   }
 
-   private static CenterOfMassCalculator createCenterOfMassCalculatorInJointZUpFrame(RigidBody rootBody, boolean preserveY)
+   private static CenterOfMassCalculator createCenterOfMassCalculatorInJointZUpFrame(RigidBodyBasics rootBody, boolean preserveY)
    {
       if (DEBUG) System.out.println("\nCenterOfMassCalibrationTool: rootBody = " + rootBody);
 
@@ -206,7 +206,7 @@ public class CenterOfMassCalibrationTool implements Updatable
          jointZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), jointFrame, jointName + "ZUp");
       }
       
-      RigidBody[] rigidBodies = ScrewTools.computeSubtreeSuccessors(rootBody.getParentJoint());
+      RigidBodyBasics[] rigidBodies = ScrewTools.computeSubtreeSuccessors(rootBody.getParentJoint());
       CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rigidBodies, jointZUpFrame);
 
       return centerOfMassCalculator;

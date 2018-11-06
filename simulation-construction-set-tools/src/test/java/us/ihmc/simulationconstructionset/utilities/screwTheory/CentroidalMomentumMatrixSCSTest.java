@@ -17,6 +17,7 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -40,7 +41,7 @@ public class CentroidalMomentumMatrixSCSTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      RigidBody elevator = new RigidBody("elevator", worldFrame);
+      RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
       double gravity = 0.0;
 
       int numberOfJoints = 3;
@@ -84,7 +85,7 @@ public class CentroidalMomentumMatrixSCSTest
       robot.addRootJoint(rootJoint);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      RigidBody elevator = new RigidBody("elevator", worldFrame);
+      RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator);
       ScrewTools.addRigidBody("rigidBody", sixDoFJoint, momentOfInertia, mass, comOffset);
 
@@ -131,7 +132,7 @@ public class CentroidalMomentumMatrixSCSTest
       }
    }
 
-   public static Momentum computeCoMMomentum(RigidBody elevator, ReferenceFrame centerOfMassFrame, CentroidalMomentumMatrix centroidalMomentumMatrix)
+   public static Momentum computeCoMMomentum(RigidBodyBasics elevator, ReferenceFrame centerOfMassFrame, CentroidalMomentumMatrix centroidalMomentumMatrix)
    {
       DenseMatrix64F mat = centroidalMomentumMatrix.getMatrix();
 //      InverseDynamicsJoint[] jointList = ScrewTools.computeJointsInOrder(elevator); //deprecated method

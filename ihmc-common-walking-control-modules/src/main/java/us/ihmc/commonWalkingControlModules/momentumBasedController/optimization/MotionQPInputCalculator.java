@@ -19,8 +19,8 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
@@ -236,8 +236,8 @@ public class MotionQPInputCalculator
          CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
       }
 
-      RigidBody base = commandToConvert.getBase();
-      RigidBody endEffector = commandToConvert.getEndEffector();
+      RigidBodyBasics base = commandToConvert.getBase();
+      RigidBodyBasics endEffector = commandToConvert.getEndEffector();
 
       jacobianCalculator.clear();
       jacobianCalculator.setKinematicChain(base, endEffector);
@@ -264,7 +264,7 @@ public class MotionQPInputCalculator
       jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
 
       // Dealing with the primary base:
-      RigidBody primaryBase = commandToConvert.getPrimaryBase();
+      RigidBodyBasics primaryBase = commandToConvert.getPrimaryBase();
       List<JointBasics> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
@@ -355,8 +355,8 @@ public class MotionQPInputCalculator
          CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
       }
 
-      RigidBody base = commandToConvert.getBase();
-      RigidBody endEffector = commandToConvert.getEndEffector();
+      RigidBodyBasics base = commandToConvert.getBase();
+      RigidBodyBasics endEffector = commandToConvert.getEndEffector();
 
       jacobianCalculator.clear();
       jacobianCalculator.setKinematicChain(base, endEffector);
@@ -379,7 +379,7 @@ public class MotionQPInputCalculator
       jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
 
       // Dealing with the primary base:
-      RigidBody primaryBase = commandToConvert.getPrimaryBase();
+      RigidBodyBasics primaryBase = commandToConvert.getPrimaryBase();
       List<JointBasics> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.

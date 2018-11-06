@@ -8,15 +8,15 @@ import org.ejml.data.DenseMatrix64F;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Twist;
 
 public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalculator
 {
-   private final RigidBody[] allBodiesExceptRoot;
+   private final RigidBodyBasics[] allBodiesExceptRoot;
    private final JointBasics[] jointsInOrder;
    private final SpatialInertia[] crbInertiasInOrder;
    private final int[] parentMap;
@@ -28,7 +28,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
 
    private final LinkedHashMap<JointBasics, int[]> srcJointIndices = new LinkedHashMap<>();
 
-   public CompositeRigidBodyMassMatrixCalculator(RigidBody rootBody, ArrayList<JointBasics> jointsToIgnore)
+   public CompositeRigidBodyMassMatrixCalculator(RigidBodyBasics rootBody, ArrayList<JointBasics> jointsToIgnore)
    {
       allBodiesExceptRoot = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
       jointsInOrder = computeJointsInOrder(rootBody, jointsToIgnore);
@@ -54,7 +54,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
    }
 
 
-   public CompositeRigidBodyMassMatrixCalculator(RigidBody rootBody)
+   public CompositeRigidBodyMassMatrixCalculator(RigidBodyBasics rootBody)
    {
       this(rootBody, new ArrayList<JointBasics>());
    }
@@ -72,7 +72,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
 
       for (int bodyIndex = allBodiesExceptRoot.length - 1; bodyIndex >= 0; bodyIndex--)
       {
-         RigidBody currentBody = allBodiesExceptRoot[bodyIndex];
+         RigidBodyBasics currentBody = allBodiesExceptRoot[bodyIndex];
          JointBasics parentJoint = currentBody.getParentJoint();
          SpatialInertia currentBodyInertia = crbInertiasInOrder[bodyIndex];
 
@@ -193,13 +193,13 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       return ret;
    }
 
-   private static int[] createMassMatrixIndices(RigidBody[] rigidBodiesInOrder)
+   private static int[] createMassMatrixIndices(RigidBodyBasics[] rigidBodiesInOrder)
    {
       int[] ret = new int[rigidBodiesInOrder.length];
       int currentIndex = 0;
       for (int i = 0; i < rigidBodiesInOrder.length; i++)
       {
-         RigidBody rigidBody = rigidBodiesInOrder[i];
+         RigidBodyBasics rigidBody = rigidBodiesInOrder[i];
          ret[i] = currentIndex;
          currentIndex += rigidBody.getParentJoint().getDegreesOfFreedom();
       }
@@ -223,7 +223,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       return parentIndex >= 0;
    }
 
-   private static JointBasics[] computeJointsInOrder(RigidBody rootBody, ArrayList<JointBasics> jointsToIgnore)
+   private static JointBasics[] computeJointsInOrder(RigidBodyBasics rootBody, ArrayList<JointBasics> jointsToIgnore)
    {
       JointBasics[] jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(rootBody);
       ArrayList<JointBasics> joints = new ArrayList<>();

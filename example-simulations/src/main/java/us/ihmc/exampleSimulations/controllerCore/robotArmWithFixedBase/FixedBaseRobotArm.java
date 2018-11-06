@@ -20,11 +20,12 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.KinematicPoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -42,7 +43,7 @@ public class FixedBaseRobotArm extends Robot
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double gravity = 9.81;
 
-   private final RigidBody elevator;
+   private final RigidBodyBasics elevator;
    private final Vector3D shoulderYawOffset = new Vector3D(0.0, 0.0, 0.3);
    private final Vector3D shoulderRollOffset = new Vector3D(0.0, 0.0, 0.0);
    private final Vector3D shoulderPitchOffset = new Vector3D(0.0, 0.0, 0.0);
@@ -72,19 +73,19 @@ public class FixedBaseRobotArm extends Robot
    private final Vector3D handCoM = new Vector3D(0.0, 0.0, 0.05);
 
    private final RevoluteJoint shoulderYaw;
-   private final RigidBody shoulderYawLink;
+   private final RigidBodyBasics shoulderYawLink;
    private final RevoluteJoint shoulderRoll;
-   private final RigidBody shoulderRollLink;
+   private final RigidBodyBasics shoulderRollLink;
    private final RevoluteJoint shoulderPitch;
-   private final RigidBody upperArm;
+   private final RigidBodyBasics upperArm;
    private final RevoluteJoint elbowPitch;
-   private final RigidBody lowerArm;
+   private final RigidBodyBasics lowerArm;
    private final RevoluteJoint wristPitch;
-   private final RigidBody wristPitchLink;
+   private final RigidBodyBasics wristPitchLink;
    private final RevoluteJoint wristRoll;
-   private final RigidBody wristRollLink;
+   private final RigidBodyBasics wristRollLink;
    private final RevoluteJoint wristYaw;
-   private final RigidBody hand;
+   private final RigidBodyBasics hand;
 
    private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform(new AxisAngle(), new Vector3D(0.0, 0.0, 0.4));
    private final ReferenceFrame handControlFrame;
@@ -324,12 +325,12 @@ public class FixedBaseRobotArm extends Robot
       }
    }
 
-   public RigidBody getElevator()
+   public RigidBodyBasics getElevator()
    {
       return elevator;
    }
 
-   public RigidBody getHand()
+   public RigidBodyBasics getHand()
    {
       return hand;
    }

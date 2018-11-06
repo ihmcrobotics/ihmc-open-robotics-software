@@ -15,7 +15,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.frames.YoMatrix;
@@ -99,8 +99,8 @@ public class GroundContactForceOptimizationControlModule
       qpSolver.reset();
    }
 
-   private Map<RigidBody, Wrench> solutionWrenches;
-   public void compute(Map<RigidBody, Wrench> groundReactionWrenchesToPack) throws NoConvergenceException
+   private Map<RigidBodyBasics, Wrench> solutionWrenches;
+   public void compute(Map<RigidBodyBasics, Wrench> groundReactionWrenchesToPack) throws NoConvergenceException
    {
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
       qpSolver.addRegularization();
@@ -144,7 +144,7 @@ public class GroundContactForceOptimizationControlModule
       solutionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
-         RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
+         RigidBodyBasics rigidBody = contactablePlaneBodies.get(i).getRigidBody();
          Wrench solutionWrench = solutionWrenches.get(rigidBody);
 
          if (groundReactionWrenchesToPack.containsKey(rigidBody))

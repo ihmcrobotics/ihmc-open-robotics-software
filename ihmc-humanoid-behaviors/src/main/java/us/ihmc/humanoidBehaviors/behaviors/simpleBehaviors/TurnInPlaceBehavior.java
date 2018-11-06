@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnInPlaceFootstepGenerator;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -35,7 +35,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    private ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
    private FootstepListBehavior footstepListBehavior;
 
-   private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
+   private final SideDependentList<RigidBodyBasics> feet = new SideDependentList<RigidBodyBasics>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
    private FrameOrientation2D targetOrientationInWorldFrame;
 
