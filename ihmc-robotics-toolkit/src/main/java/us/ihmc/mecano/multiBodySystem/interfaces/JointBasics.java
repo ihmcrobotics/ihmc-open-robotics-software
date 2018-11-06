@@ -40,9 +40,9 @@ public abstract interface JointBasics extends CommonJoint
    public static int MAX_NUMBER_OF_DOFS = 6;
 
    /**
-    * Returns the the {@code MovingReferenceFrame} that is attached to the predecessor of this
-    * joint, namely the {@code RigidBody} before this joint, and has its origin centered at the
-    * joint origin. The pose of the {@code frameBeforeJoint} is independent from this joint motion.
+    * Returns the the {@code MovingReferenceFrame} that is attached to the predecessor of this joint,
+    * namely the {@code RigidBody} before this joint, and has its origin centered at the joint origin.
+    * The pose of the {@code frameBeforeJoint} is independent from this joint motion.
     * 
     * @return the {@code MovingReferenceFrame} located right before this joint.
     */
@@ -50,8 +50,8 @@ public abstract interface JointBasics extends CommonJoint
 
    /**
     * Returns the the {@code MovingReferenceFrame} that is attached to the successor of this joint,
-    * namely the {@code RigidBody} after this joint, and has its origin centered at the joint
-    * origin. The pose of the {@code frameAfterJoint} will change as this joint moves.
+    * namely the {@code RigidBody} after this joint, and has its origin centered at the joint origin.
+    * The pose of the {@code frameAfterJoint} will change as this joint moves.
     * 
     * @return the {@code MovingReferenceFrame} located right after this joint.
     */
@@ -63,32 +63,32 @@ public abstract interface JointBasics extends CommonJoint
    }
 
    /**
-    * Packs the {@code Twist} (the 3D angular and linear velocities) of this joint's
-    * {@code successor} with respect to this joint's {@code predecessor}. The reference frames of
-    * the resulting {@code Twist} are as follows:
+    * Packs the {@code Twist} (the 3D angular and linear velocities) of this joint's {@code successor}
+    * with respect to this joint's {@code predecessor}. The reference frames of the resulting
+    * {@code Twist} are as follows:
     * <ul>
     * <li>{@code bodyFrame} is {@code successorFrame == successor.getBodyFixedFrame()}.
     * <li>{@code baseFrame} is {@code predecessorFrame == predecessor.getBodyFixedFrame()}.
     * <li>{@code expressedInFrame} is {@code successorFrame}.
     * </ul>
     * 
-    * @param twistToPack the {@code Twist} in which the velocity of this joint's {@code successor}
-    *           is stored. Modified.
+    * @param twistToPack the {@code Twist} in which the velocity of this joint's {@code successor} is
+    *           stored. Modified.
     */
    public abstract void getSuccessorTwist(Twist twistToPack);
 
    /**
     * Packs the {@code Twist} (the 3D angular and linear velocities) of this joint's
-    * {@code predecessor} with respect to this joint's {@code successor}. The reference frames of
-    * the resulting {@code Twist} are as follows:
+    * {@code predecessor} with respect to this joint's {@code successor}. The reference frames of the
+    * resulting {@code Twist} are as follows:
     * <ul>
     * <li>{@code bodyFrame} is {@code predecessorFrame == predecessor.getBodyFixedFrame()}.
     * <li>{@code baseFrame} is {@code successorFrame == successor.getBodyFixedFrame()}.
     * <li>{@code expressedInFrame} is {@code predecessorFrame}.
     * </ul>
     * 
-    * @param twistToPack the {@code Twist} in which the velocity of this joint's {@code predecessor}
-    *           is stored. Modified.
+    * @param twistToPack the {@code Twist} in which the velocity of this joint's {@code predecessor} is
+    *           stored. Modified.
     */
    public abstract void getPredecessorTwist(Twist twistToPack);
 
@@ -99,16 +99,16 @@ public abstract interface JointBasics extends CommonJoint
 
    /**
     * Packs the {@code SpatialAccelerationVector} (the 3D angular and linear accelerations) of this
-    * joint's {@code successor} with respect to this joint's {@code predecessor}. The reference
-    * frames of the resulting {@code SpatialAccelerationVector} are as follows:
+    * joint's {@code successor} with respect to this joint's {@code predecessor}. The reference frames
+    * of the resulting {@code SpatialAccelerationVector} are as follows:
     * <ul>
     * <li>{@code bodyFrame} is {@code successorFrame == successor.getBodyFixedFrame()}.
     * <li>{@code baseFrame} is {@code predecessorFrame == predecessor.getBodyFixedFrame()}.
     * <li>{@code expressedInFrame} is {@code successorFrame}.
     * </ul>
     * 
-    * @param jointAccelerationToPack the {@code SpatialAccelerationVector} in which the acceleration
-    *           of this joint's {@code successor} is stored. Modified.
+    * @param jointAccelerationToPack the {@code SpatialAccelerationVector} in which the acceleration of
+    *           this joint's {@code successor} is stored. Modified.
     */
    public abstract void getSuccessorAcceleration(SpatialAcceleration jointAccelerationToPack);
 
@@ -121,6 +121,7 @@ public abstract interface JointBasics extends CommonJoint
     * <li>For a {@code SphericalJoint}, the actual joint configuration is a quaternion and is stored
     * from the {@code rowStart}<sup>th</sup> row to the ({@code rowStart + 4})<sup>th</sup> row.
     * </ul>
+    * 
     * @param rowStart row index for the first component of the configuration.
     * @param matrixToPack the column vector in which this joint actual configuration is stored.
     *           Modified.
@@ -128,20 +129,20 @@ public abstract interface JointBasics extends CommonJoint
    public abstract void getJointConfiguration(int rowStart, DenseMatrix64F matrixToPack);
 
    /**
-    * Packs this joint desired force/torque into a column vector {@code DenseMatrix64F}. Here are a
-    * few examples:
+    * Packs this joint desired force/torque into a column vector {@code DenseMatrix64F}. Here are a few
+    * examples:
     * <ul>
     * <li>For a {@code RevoluteJoint}, the desired joint torque is stored at the 1<sup>st</sup> row.
     * <li>For a {@code PrismaticJoint}, the desired joint force is stored at the 1<sup>st</sup> row.
-    * <li>For a {@code SixDoFJoint}, the desired wrench (the 3D torque and 3D force) of this joint
-    * is stored from the {@code rowStart}<sup>th</sup> row to the
-    * ({@code rowStart + 6})<sup>th</sup> row, starting with the three components of the torque.
-    * Note: the joint wrench is the wrench of {@code successorFrame} expressed in
-    * {@code successorFrame}.
+    * <li>For a {@code SixDoFJoint}, the desired wrench (the 3D torque and 3D force) of this joint is
+    * stored from the {@code rowStart}<sup>th</sup> row to the ({@code rowStart + 6})<sup>th</sup> row,
+    * starting with the three components of the torque. Note: the joint wrench is the wrench of
+    * {@code successorFrame} expressed in {@code successorFrame}.
     * </ul>
+    * 
     * @param rowStart TODO
-    * @param matrixToPack the column vector in which the desired force/torque of this joint is
-    *           stored. Modified.
+    * @param matrixToPack the column vector in which the desired force/torque of this joint is stored.
+    *           Modified.
     */
    public abstract void getJointTau(int rowStart, DenseMatrix64F matrixToPack);
 
@@ -151,12 +152,12 @@ public abstract interface JointBasics extends CommonJoint
     * <ul>
     * <li>For a {@code OneDoFJoint}, the scalar velocity {@code qd} is stored at the
     * {@code rowStart}<sup>th</sup> row.
-    * <li>For a {@code SixDoFJoint}, the joint twist is stored from the
-    * {@code rowStart}<sup>th</sup> row to the ({@code rowStart + 6})<sup>th</sup> row, starting
-    * with the three components of the angular velocity. Note: the joint twist is the twist of the
-    * {@code afterJointFrame} with respect to the {@code beforeJointFrame} expressed in the
-    * {@code afterJointFrame}.
+    * <li>For a {@code SixDoFJoint}, the joint twist is stored from the {@code rowStart}<sup>th</sup>
+    * row to the ({@code rowStart + 6})<sup>th</sup> row, starting with the three components of the
+    * angular velocity. Note: the joint twist is the twist of the {@code afterJointFrame} with respect
+    * to the {@code beforeJointFrame} expressed in the {@code afterJointFrame}.
     * </ul>
+    * 
     * @param rowStart row index for the first component of the velocity.
     * @param matrixToPack the column vector in which the velocity of this joint is stored. Modified.
     */
@@ -170,12 +171,13 @@ public abstract interface JointBasics extends CommonJoint
     * Sets the joint current configuration from the given column vector {@code DenseMatrix64F}. Here
     * are a few examples:
     * <ul>
-    * <li>For a {@code RevoluteJoint}, the {@code rowStart}<sup>th</sup> row of the given column
-    * vector is used to set the current joint angle {@code q}.
+    * <li>For a {@code RevoluteJoint}, the {@code rowStart}<sup>th</sup> row of the given column vector
+    * is used to set the current joint angle {@code q}.
     * <li>For a {@code SixDoFJoint}, the 4 rows starting from {@code rowStart} are used to set the
-    * current 3D orientation as a quaternion, and the 3 rows starting from ({@code rowStart + 4})
-    * are used to set the 3D position.
+    * current 3D orientation as a quaternion, and the 3 rows starting from ({@code rowStart + 4}) are
+    * used to set the 3D position.
     * </ul>
+    * 
     * @param rowStart row index of the first component of this joint configuration.
     * @param matrix the column vector from which the configuration of this joint is to be extracted.
     *           Not modified.
@@ -183,16 +185,17 @@ public abstract interface JointBasics extends CommonJoint
    public abstract void setJointConfiguration(int rowStart, DenseMatrix64F matrix);
 
    /**
-    * Sets the joint current wrench from the given column vector {@code DenseMatrix64F}. Here are a
-    * few examples:
+    * Sets the joint current wrench from the given column vector {@code DenseMatrix64F}. Here are a few
+    * examples:
     * <ul>
-    * <li>For a {@code RevoluteJoint}, the {@code rowStart}<sup>th</sup> row of the given column
-    * vector is used to set the joint torque {@code tau}.
+    * <li>For a {@code RevoluteJoint}, the {@code rowStart}<sup>th</sup> row of the given column vector
+    * is used to set the joint torque {@code tau}.
     * <li>For a {@code SixDoFJoint}, the 6 rows starting from {@code rowStart} are use to set the
     * current spatial wrench of this joint starting with the torque. Note: the joint wrench is the
-    * wrench of the {@code afterJointFrame} with respect to the {@code beforeJointFrame} expressed
-    * in the {@code afterJointFrame}.
+    * wrench of the {@code afterJointFrame} with respect to the {@code beforeJointFrame} expressed in
+    * the {@code afterJointFrame}.
     * </ul>
+    * 
     * @param rowStart row index of the first component of this joint configuration.
     * @param matrixToPack the column vector from which the configuration of this joint is to be
     *           extracted. Not modified.
@@ -200,16 +203,17 @@ public abstract interface JointBasics extends CommonJoint
    public abstract void setJointTau(int rowStart, DenseMatrix64F matrixToPack);
 
    /**
-    * Sets this joint current velocity from the given column vector {@code DenseMAtrix64F}. Here are
-    * a few examples:
+    * Sets this joint current velocity from the given column vector {@code DenseMAtrix64F}. Here are a
+    * few examples:
     * <ul>
-    * <li>For a {@code RevoluteJoint}, the {@code rowStart}<sup>th</sup> row of the given column
-    * vector is used to set the joint current angular velocity {@code qd}.
+    * <li>For a {@code RevoluteJoint}, the {@code rowStart}<sup>th</sup> row of the given column vector
+    * is used to set the joint current angular velocity {@code qd}.
     * <li>For a {@code SixDoFJoint}, the 6 rows starting from {@code rowStart} are use to set the
     * current twist of this joint starting with the angular velocity. Note: the joint twist is the
     * twist of the {@code afterJointFrame} with respect to the {@code beforeJointFrame} expressed in
     * the {@code afterJointFrame}.
     * </ul>
+    * 
     * @param rowStart row index of the first component of this joint velocity.
     * @param jointVelocity the column vector from which the current velocity of this joint is to be
     *           extracted. Not modified.
@@ -219,11 +223,11 @@ public abstract interface JointBasics extends CommonJoint
    public abstract void setJointAcceleration(int rowStart, DenseMatrix64F jointDesiredAcceleration);
 
    /**
-    * Attach the {@code RigidBody} located after this joint, i.e. the {@code successor}. "After"
-    * means that the {@code RigidBody} sits between the joint and the end-effector of the kinematics
-    * chain, or that its is the end-effector. This method is to be called <b>only once</b>, at
-    * creation of a kinematics chain. It is also in this method, that the final steps of
-    * initialization of this joint are made.
+    * Attach the {@code RigidBody} located after this joint, i.e. the {@code successor}. "After" means
+    * that the {@code RigidBody} sits between the joint and the end-effector of the kinematics chain,
+    * or that its is the end-effector. This method is to be called <b>only once</b>, at creation of a
+    * kinematics chain. It is also in this method, that the final steps of initialization of this joint
+    * are made.
     * 
     * @param successor the {@code RigidBody} located after this joint.
     */
@@ -234,14 +238,14 @@ public abstract interface JointBasics extends CommonJoint
    }
 
    /**
-    * Retrieves the unit-twist corresponding to the {@code dofIndex}<sup>th</sup> degree of freedom
-    * of this joint.
+    * Retrieves the unit-twist corresponding to the {@code dofIndex}<sup>th</sup> degree of freedom of
+    * this joint.
     * <p>
     * Unit-twist are mostly used to compute a Jacobian.
     * </p>
     * <p>
-    * For instance, the unit-twist for a {@link RevoluteJoint} about the the y-axis is equal to [0,
-    * 1, 0, 0, 0, 0]<sup>T</sup> with {@code body = joint.getSuccessor()},
+    * For instance, the unit-twist for a {@link RevoluteJoint} about the the y-axis is equal to [0, 1,
+    * 0, 0, 0, 0]<sup>T</sup> with {@code body = joint.getSuccessor()},
     * {@code base = joint.getSuccessor()}, and expressed in the predecessor body-fixed frame.
     * </p>
     * 
@@ -258,15 +262,15 @@ public abstract interface JointBasics extends CommonJoint
 
    /**
     * Update the motion subspace of this joint. It is only necessary for when the motion subspace
-    * depends on this joint configuration. A good example is a four bar linkage, for which the
-    * motion subspace depends on the linkage configuration.
+    * depends on this joint configuration. A good example is a four bar linkage, for which the motion
+    * subspace depends on the linkage configuration.
     */
    public abstract void updateMotionSubspace();
 
    /**
     * Returns the {@code RigidBody} that precedes this joint. In other words, the {@code RigidBody}
-    * directly connected to this joint that sits between this joint and the root or that is the root
-    * of this kinematics chain.
+    * directly connected to this joint that sits between this joint and the root or that is the root of
+    * this kinematics chain.
     * 
     * @return the {@code predecessor} of this joint.
     */
@@ -274,20 +278,19 @@ public abstract interface JointBasics extends CommonJoint
 
    /**
     * Returns the {@code RigidBody} that succeeds this joint. In other words, the {@code RigidBody}
-    * directly connected to this joint that sits between this joint and the end-effector or that is
-    * the end-effector of this kinematics chain.
+    * directly connected to this joint that sits between this joint and the end-effector or that is the
+    * end-effector of this kinematics chain.
     * 
     * @return the {@code successor} of this joint.
     */
    public abstract RigidBodyBasics getSuccessor();
 
    /**
-    * Sets the desired force/torque of this joint from the given {@code Wrench} using this joint
-    * motion subspace. The given {@code Wrench} is expected to have the following frames:
+    * Sets the desired force/torque of this joint from the given {@code Wrench} using this joint motion
+    * subspace. The given {@code Wrench} is expected to have the following frames:
     * <ul>
     * <li>{@code bodyFrame} should be {@code successorFrame == successor.getBodyFixedFrame()}.
-    * <li>{@code expressedInFrame} should be
-    * {@code successorFrame == successor.getBodyFixedFrame()}.
+    * <li>{@code expressedInFrame} should be {@code successorFrame == successor.getBodyFixedFrame()}.
     * </ul>
     * <p>
     * For instance, for a {@code RevoluteJoint} that can rotate around the y-axis, this method will
@@ -295,8 +298,8 @@ public abstract interface JointBasics extends CommonJoint
     * {@code RevolueJoint}'s desired torque.
     * </p>
     * 
-    * @param jointWrench the {@code Wrench} from which the desired force/torque of this joint is to
-    *           be extracted. Not modified.
+    * @param jointWrench the {@code Wrench} from which the desired force/torque of this joint is to be
+    *           extracted. Not modified.
     */
    public abstract void setJointWrench(Wrench jointWrench);
 
@@ -313,8 +316,8 @@ public abstract interface JointBasics extends CommonJoint
     * updates its {@code bodyFixedFrame} and then {@link #updateFramesRecursively()} for all of its
     * {@link JointBasics} child.
     * <p>
-    * As a result, this method will update all the reference frames of the subtree starting from
-    * this joint.
+    * As a result, this method will update all the reference frames of the subtree starting from this
+    * joint.
     * </p>
     */
    public abstract void updateFramesRecursively();
@@ -339,20 +342,14 @@ public abstract interface JointBasics extends CommonJoint
    default void setJointConfiguration(JointBasics other)
    {
    }
+
    default void setJointTwist(JointBasics other)
    {
    }
+
    default void setJointAcceleration(JointBasics other)
    {
    }
-   
-   /**
-    * Copies the desired acceleration of {@code originalJoint} into this joint
-    * 
-    * @param originalJoint the joint to copy the desired acceleration of. Not modified.
-    */
-   @Deprecated // TODO
-   public abstract void setQddDesired(JointBasics originalJoint);
 
    public int hashCode();
 }

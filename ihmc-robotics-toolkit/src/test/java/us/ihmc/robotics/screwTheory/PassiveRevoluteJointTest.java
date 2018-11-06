@@ -205,19 +205,4 @@ public class PassiveRevoluteJointTest
       }     
       Assert.fail();
    }
-    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testSetQddDesiredFromJoint()
-   {
-      try
-      {
-         joint.setQddDesired(joint);
-      }
-      catch(RuntimeException e)
-      {
-         return; 
-      }     
-      Assert.fail();
-   }
 }

@@ -225,13 +225,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       }
    }
 
-   @Override
-   public void setQddDesired(JointBasics originalJoint)
-   {
-      OneDoFJoint oneDoFOriginalJoint = checkAndGetAsOneDoFJoint(originalJoint);
-      setQddDesired(oneDoFOriginalJoint.getQddDesired());
-   }
-
    public double getJointLimitLower()
    {
       return jointLimitLower;
