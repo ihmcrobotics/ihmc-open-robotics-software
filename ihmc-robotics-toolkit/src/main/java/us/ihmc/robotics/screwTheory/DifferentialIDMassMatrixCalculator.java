@@ -95,7 +95,9 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
          DenseMatrix64F tauMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
          joint.getJointTau(0, tauMatrix);
          DenseMatrix64F spatialForce = new DenseMatrix64F(SpatialForce.SIZE, 1);
-         CommonOps.mult(joint.getMotionSubspace().getJacobianMatrix(), tauMatrix, spatialForce);
+         DenseMatrix64F motionSubspace = new DenseMatrix64F(6, joint.getDegreesOfFreedom());
+         joint.getMotionSubspace(motionSubspace);
+         CommonOps.mult(motionSubspace, tauMatrix, spatialForce);
          Wrench jointWrench = storedJointWrenches.get(joint);
          jointWrench.setIncludingFrame(joint.getFrameAfterJoint(), spatialForce);
          jointWrench.changeFrame(joint.getSuccessor().getBodyFixedFrame());
