@@ -36,7 +36,7 @@ public class OneDoFJointForceTrackingDelayEstimator implements DiagnosticUpdatab
    @Override
    public void update()
    {
-      delayEstimator.update(output.getDesiredTorque(), joint.getTauMeasured());
+      delayEstimator.update(output.getDesiredTorque(), joint.getTau());
    }
 
    public void setAlphaFilterBreakFrequency(double delayEstimatorFilterBreakFrequency)

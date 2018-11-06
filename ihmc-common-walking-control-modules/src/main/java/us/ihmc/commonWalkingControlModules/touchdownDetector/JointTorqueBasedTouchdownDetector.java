@@ -69,9 +69,9 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    public void update()
    {
       double threshold = torqueThreshold.getDoubleValue() * signum;
-      double torque = joint.getTauMeasured() * signum;
+      double torque = joint.getTau() * signum;
 
-      jointTorque.set(joint.getTauMeasured());
+      jointTorque.set(joint.getTau());
 
       if (dontDetectTouchdownIfAtJointLimit && isAtJointLimit())
       {

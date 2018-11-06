@@ -26,11 +26,11 @@ class EffortJointHolder extends ValkyrieSliderBoardJointHolder
       joint.setQ(handle.getPosition());
       joint.setQd(handle.getVelocity());
       bl_qd.update();
-      joint.setTauMeasured(handle.getEffort());
+      joint.setTau(handle.getEffort());
 
       q.set(joint.getQ());
       qd.set(joint.getQd());
-      tau.set(joint.getTauMeasured());
+      tau.set(joint.getTau());
 
       double pdOutput = pdController.compute(q.getDoubleValue(), q_d.getDoubleValue(), qd.getDoubleValue(), qd_d.getDoubleValue());
       jointCommand_pd.set(pdOutput);

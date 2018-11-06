@@ -26,7 +26,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    private double q;
    private double qd;
    private double qdd;
-   private double tauMeasured;
    private double qddDesired;
 
    private double tau;
@@ -290,7 +289,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       setQ(oneDoFOriginalJoint.getQ());
       setQd(oneDoFOriginalJoint.getQd());
       setQdd(oneDoFOriginalJoint.getQdd());
-      setTauMeasured(oneDoFOriginalJoint.getTauMeasured());
    }
 
    @Override
@@ -373,14 +371,4 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    public abstract FrameVector3D getJointAxis();
 
    public abstract void getJointAxis(FrameVector3D axisToPack);
-
-   public double getTauMeasured()
-   {
-      return tauMeasured;
-   }
-
-   public void setTauMeasured(double tauMeasured)
-   {
-      this.tauMeasured = tauMeasured;
-   }
 }

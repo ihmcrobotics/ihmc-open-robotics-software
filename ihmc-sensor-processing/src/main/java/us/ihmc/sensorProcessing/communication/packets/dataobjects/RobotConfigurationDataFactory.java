@@ -48,7 +48,7 @@ public class RobotConfigurationDataFactory
       {
          robotConfigurationData.getJointAngles().add((float) newJointData[i].getQ());
          robotConfigurationData.getJointVelocities().add((float) newJointData[i].getQd());
-         robotConfigurationData.getJointTorques().add((float) newJointData[i].getTauMeasured());
+         robotConfigurationData.getJointTorques().add((float) newJointData[i].getTau());
       }
    }
 
@@ -62,7 +62,7 @@ public class RobotConfigurationDataFactory
       {
          robotConfigurationData.getJointAngles().add((float) newJointData.get(i).getQ());
          robotConfigurationData.getJointVelocities().add((float) newJointData.get(i).getQd());
-         robotConfigurationData.getJointTorques().add((float) newJointData.get(i).getTauMeasured());
+         robotConfigurationData.getJointTorques().add((float) newJointData.get(i).getTau());
       }
    }
 }

@@ -195,7 +195,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
          revoluteJoint.setQ(pinJoint.getQYoVariable().getDoubleValue());
          revoluteJoint.setQd(pinJoint.getQDYoVariable().getDoubleValue());
          revoluteJoint.setQdd(pinJoint.getQDDYoVariable().getDoubleValue());
-         revoluteJoint.setTauMeasured(pinJoint.getTau());
+         revoluteJoint.setTau(pinJoint.getTau());
       }
    }
 
