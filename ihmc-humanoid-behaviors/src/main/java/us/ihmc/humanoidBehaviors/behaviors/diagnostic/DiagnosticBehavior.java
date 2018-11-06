@@ -482,7 +482,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
          Vector3D expectedElbowAxis = new Vector3D(0.0, 0.0, 1.0);
          RigidBodyTransform zRotationDueToAccountForElbowAxis = new RigidBodyTransform();
-         FrameVector3D elbowJointAxis = elbowJoint.getJointAxis();
+         FrameVector3D elbowJointAxis = new FrameVector3D(elbowJoint.getJointAxis());
          zRotationDueToAccountForElbowAxis.setRotationPitchAndZeroTranslation(-elbowJointAxis.angle(expectedElbowAxis));
          armZeroJointAngleConfigurationOffset.multiply(zRotationDueToAccountForElbowAxis);
 

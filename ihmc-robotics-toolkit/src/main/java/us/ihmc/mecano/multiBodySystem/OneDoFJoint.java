@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -276,7 +277,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       return effortLimitUpper;
    }
 
-   public abstract FrameVector3D getJointAxis();
+   public abstract FrameVector3DReadOnly getJointAxis();
 
    public abstract void getJointAxis(FrameVector3D axisToPack);
 }

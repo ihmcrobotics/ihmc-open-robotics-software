@@ -27,6 +27,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -281,8 +282,8 @@ public class HighLevelHumanoidControllerToolbox
          OneDoFJoint anklePitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
          OneDoFJoint ankleRollJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
 
-         FrameVector3D pitchJointAxis;
-         FrameVector3D rollJointAxis;
+         FrameVector3DReadOnly pitchJointAxis;
+         FrameVector3DReadOnly rollJointAxis;
          if (anklePitchJoint != null)
          {
             pitchJointAxis = anklePitchJoint.getJointAxis();

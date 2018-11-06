@@ -38,7 +38,7 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
       RigidBodyBasics currentBody = sensorLinkBody;
       for(int i=0;i<numberOfJointFromSensor;i++)
       {
-         FrameVector3D jAxis = ((OneDoFJoint)currentBody.getParentJoint()).getJointAxis();
+         FrameVector3D jAxis = new FrameVector3D(((OneDoFJoint)currentBody.getParentJoint()).getJointAxis());
          yoTorqueInJoints.add(new ImmutablePair<>(jAxis,new YoDouble("NegGRFWrenchIn"+ currentBody.getParentJoint().getName(), registry)));
          currentBody=currentBody.getParentJoint().getPredecessor();
       }
