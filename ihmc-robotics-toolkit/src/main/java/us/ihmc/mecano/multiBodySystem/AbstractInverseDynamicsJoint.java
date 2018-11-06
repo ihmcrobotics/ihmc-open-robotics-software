@@ -236,35 +236,6 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
       accelerationToPack.changeFrame(successorFrame);
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public void getDesiredSuccessorAcceleration(SpatialAcceleration accelerationToPack)
-   {
-      accelerationToPack.setIncludingFrame(getJointAcceleration());
-
-      ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
-      ReferenceFrame successorFrame = successor.getBodyFixedFrame();
-
-      accelerationToPack.setBaseFrame(predecessorFrame);
-      accelerationToPack.setBodyFrame(successorFrame);
-      accelerationToPack.changeFrame(successorFrame);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void getDesiredPredecessorAcceleration(SpatialAcceleration accelerationToPack)
-   {
-      accelerationToPack.setIncludingFrame(getJointAcceleration());
-
-      ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
-      ReferenceFrame successorFrame = successor.getBodyFixedFrame();
-
-      accelerationToPack.setBaseFrame(predecessorFrame);
-      accelerationToPack.setBodyFrame(successorFrame);
-      accelerationToPack.invert();
-      accelerationToPack.changeFrame(predecessorFrame);
-   }
-
    /**
     * Returns the offset from the frame before this joint to the frame after this parent joint.
     * <p>
