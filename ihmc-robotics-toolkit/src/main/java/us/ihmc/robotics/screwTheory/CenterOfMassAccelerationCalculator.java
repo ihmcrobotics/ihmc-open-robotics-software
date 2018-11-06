@@ -33,7 +33,7 @@ public class CenterOfMassAccelerationCalculator
       for (RigidBody rigidBody : rigidBodies)
       {
          double mass = rigidBody.getInertia().getMass();
-         rigidBody.getCoMOffset(comLocation);
+         rigidBody.getCenterOfMass(comLocation);
 
          spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(base, rigidBody, comLocation, linkLinearMomentumDot);
          linkLinearMomentumDot.scale(mass);
