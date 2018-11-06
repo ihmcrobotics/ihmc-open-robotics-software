@@ -329,7 +329,9 @@ public class TwistCalculatorTest
                                                                 floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
 
-         floatingJointInFuture.setJointPositionVelocityAndAcceleration(floatingJoint);
+         floatingJointInFuture.setJointConfiguration(floatingJoint);
+         floatingJointInFuture.setJointTwist(floatingJoint);
+         floatingJointInFuture.setJointAcceleration(floatingJoint);
          ScrewTestTools.integrateVelocities(floatingJointInFuture, dt);
 
          ScrewTestTools.setRandomPositions(revoluteJoints, random, -1.0, 1.0);
@@ -406,7 +408,9 @@ public class TwistCalculatorTest
                                                                 floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
 
-         floatingJointInFuture.setJointPositionVelocityAndAcceleration(floatingJoint);
+         floatingJointInFuture.setJointConfiguration(floatingJoint);
+         floatingJointInFuture.setJointTwist(floatingJoint);
+         floatingJointInFuture.setJointAcceleration(floatingJoint);
          ScrewTestTools.integrateVelocities(floatingJointInFuture, dt);
 
          ScrewTestTools.setRandomPositions(revoluteJoints, random, -1.0, 1.0);

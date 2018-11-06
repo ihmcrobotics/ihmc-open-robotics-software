@@ -233,15 +233,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void setJointPositionVelocityAndAcceleration(JointBasics originalJoint)
-   {
-      OneDoFJoint oneDoFOriginalJoint = checkAndGetAsOneDoFJoint(originalJoint);
-      setQ(oneDoFOriginalJoint.getQ());
-      setQd(oneDoFOriginalJoint.getQd());
-      setQdd(oneDoFOriginalJoint.getQdd());
-   }
-
-   @Override
    public void setQddDesired(JointBasics originalJoint)
    {
       OneDoFJoint oneDoFOriginalJoint = checkAndGetAsOneDoFJoint(originalJoint);

@@ -292,15 +292,6 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void setJointPositionVelocityAndAcceleration(JointBasics originalJoint)
-   {
-      SphericalJoint originalSphericalJoint = checkAndGetAsSphericalJoint(originalJoint);
-      setRotation(originalSphericalJoint.jointRotation);
-      jointAngularVelocity.set(originalSphericalJoint.jointAngularVelocity);
-      jointAngularAcceleration.set(originalSphericalJoint.jointAngularAcceleration);
-   }
-
-   @Override
    public void setQddDesired(JointBasics originalJoint)
    {
       SphericalJoint originalSphericalJoint = checkAndGetAsSphericalJoint(originalJoint);

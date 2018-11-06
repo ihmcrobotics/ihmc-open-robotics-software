@@ -67,18 +67,6 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setJointPositionVelocityAndAcceleration(JointBasics originalJoint)
-   {
-      PlanarJoint floatingJoint = checkAndGetAsPlanarJoint(originalJoint);
-
-      setJointPosition(floatingJoint.jointTranslation);
-      setJointOrientation(floatingJoint.jointRotation);
-
-      setJointTwist(floatingJoint.jointTwist);
-      setJointAcceleration(floatingJoint.jointAcceleration);
-   }
-
-   @Override
    public void setQddDesired(JointBasics originalJoint)
    {
       PlanarJoint floatingJoint = checkAndGetAsPlanarJoint(originalJoint);
