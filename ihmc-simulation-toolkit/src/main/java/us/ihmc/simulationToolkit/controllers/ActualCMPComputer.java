@@ -33,7 +33,7 @@ public class ActualCMPComputer extends SimpleRobotController
    private final Vector3D linearMomentumRate = new Vector3D();
    private final Point3D comPosition = new Point3D();
    private final Point2D comPosition2d = new Point2D();
-   private final Vector2D comAcceleration = new Vector2D();
+   private final Vector3D comAcceleration = new Vector3D();
    private final Point2D cmp = new Point2D();
 
    private final YoDouble alpha = new YoDouble("momentumRateAlpha", registry);
@@ -79,13 +79,14 @@ public class ActualCMPComputer extends SimpleRobotController
       comPosition2d.set(comPosition.getX(), comPosition.getY());
 
       // now compute the COM acceleration
-      comAcceleration.set(linearMomentumRate.getX(), linearMomentumRate.getY());
+      comAcceleration.set(linearMomentumRate);
       comAcceleration.scale(1.0 / totalMass);
 
-      // CMP = COM - 1/omega^2 * COMAcc
-      double omega0 = Math.sqrt(-gravity / comPosition.getZ());
+      // CMP = COMxy - (z/Fz)*Fxy
       cmp.set(comAcceleration);
-      cmp.scale(- 1.0 / (omega0 * omega0));
+      double z = comPosition.getZ();
+      double normalizedFz= -gravity +  comAcceleration.getZ();
+      cmp.scale(- z/normalizedFz);
       cmp.add(comPosition2d);
 
       yoCmp.set(cmp);
