@@ -468,14 +468,14 @@ public class ScrewTestTools
       sixDoFJoint.getJointTwist(twist);
 
       RotationMatrix rotation = new RotationMatrix();
-      sixDoFJoint.getRotation(rotation);
+      rotation.set(sixDoFJoint.getJointPose().getOrientation());
       Vector3D position = new Vector3D();
-      sixDoFJoint.getTranslation(position);
+      position.set(sixDoFJoint.getJointPose().getPosition());
 
       integrate(rotation, position, dt, twist);
 
-      sixDoFJoint.setRotation(rotation);
-      sixDoFJoint.setPosition(position);
+      sixDoFJoint.setJointOrientation(rotation);
+      sixDoFJoint.setJointPosition(position);
    }
 
    public static void integrate(RotationMatrix rotationToPack, Tuple3DBasics positionToPack, double dt, Twist twist)
@@ -511,7 +511,7 @@ public class ScrewTestTools
 
    public static void setRandomPositionAndOrientation(FloatingInverseDynamicsJoint rootJoint, Random random)
    {
-      rootJoint.setPositionAndRotation(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+      rootJoint.setJointConfiguration(EuclidCoreRandomTools.nextRigidBodyTransform(random));
    }
 
    public static void setRandomVelocity(FloatingInverseDynamicsJoint rootJoint, Random random)
@@ -529,14 +529,14 @@ public class ScrewTestTools
       rootJoint.getJointAcceleration(jointAcceleration);
       jointAcceleration.getAngularPart().set(RandomGeometry.nextVector3D(random));
       jointAcceleration.getLinearPart().set(RandomGeometry.nextVector3D(random));
-      rootJoint.setAcceleration(jointAcceleration);
+      rootJoint.setJointAcceleration(jointAcceleration);
    }
 
    public static void copyDesiredAccelerationToActual(SixDoFJoint rootJoint)
    {
       SpatialAcceleration rootJointAcceleration = new SpatialAcceleration();
       rootJoint.getDesiredJointAcceleration(rootJointAcceleration);
-      rootJoint.setAcceleration(rootJointAcceleration);
+      rootJoint.setJointAcceleration(rootJointAcceleration);
    }
 
    public static void copyDesiredAccelerationsToActual(Iterable<? extends OneDoFJoint> joints)
@@ -577,9 +577,9 @@ public class ScrewTestTools
       sixDoFJoint.getJointTwist(deltaConfiguration);
 
       RotationMatrix rotation = new RotationMatrix();
-      sixDoFJoint.getRotation(rotation);
+      rotation.set(sixDoFJoint.getJointPose().getOrientation());
       Vector3D position = new Vector3D();
-      sixDoFJoint.getTranslation(position);
+      position.set(sixDoFJoint.getJointPose().getPosition());
 
       deltaTwist.scale(0.5 * dt);
       deltaConfiguration.getAngularPart().add(deltaTwist.getAngularPart());
@@ -587,8 +587,8 @@ public class ScrewTestTools
 
       integrate(rotation, position, dt, deltaConfiguration);
 
-      sixDoFJoint.setRotation(rotation);
-      sixDoFJoint.setPosition(position);
+      sixDoFJoint.setJointOrientation(rotation);
+      sixDoFJoint.setJointPosition(position);
    }
 
    public static void integrateAccelerations(Iterable<? extends OneDoFJoint> joints, double dt)

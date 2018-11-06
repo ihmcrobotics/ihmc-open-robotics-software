@@ -52,8 +52,8 @@ public class CenterOfMassReferenceFrameTest
       ScrewTestTools.createRandomChainRobot("test", joints, floatingBody, jointAxes, random);
       ReferenceFrame centerOfMassReferenceFrame = new CenterOfMassReferenceFrame("com", elevator.getBodyFixedFrame(), elevator);
 
-      sixDoFJoint.setPosition(RandomGeometry.nextVector3D(random));
-      sixDoFJoint.setRotation(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      sixDoFJoint.setJointPosition(RandomGeometry.nextVector3D(random));
+      sixDoFJoint.getJointPose().setOrientationYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
 
       for (RevoluteJoint joint : joints)
       {

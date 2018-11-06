@@ -802,7 +802,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       FloatingInverseDynamicsJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
 
       actualRobotRootJoint.getJointTransform3D(rootJointPose);
-      feedForwardRootJoint.setPositionAndRotation(rootJointPose);
+      feedForwardRootJoint.setJointConfiguration(rootJointPose);
 
       feedForwardReferenceFrames.updateFrames();
 
@@ -863,8 +863,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       FloatingInverseDynamicsJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
 
-      feedForwardRootJoint.setRotation(filteredDesiredCoMOrientation.getYaw().getDoubleValue(), filteredDesiredCoMOrientation.getPitch().getDoubleValue(),
-                                       filteredDesiredCoMOrientation.getRoll().getDoubleValue());
+      feedForwardRootJoint.getJointPose().setOrientationYawPitchRoll(filteredDesiredCoMOrientation.getYaw().getDoubleValue(), filteredDesiredCoMOrientation.getPitch().getDoubleValue(), filteredDesiredCoMOrientation.getRoll().getDoubleValue());
       feedForwardFullRobotModel.updateFrames();
 
       //	   Vector3d rootJointPosition = new Vector3d();
@@ -882,8 +881,8 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       desiredRootJointPosition.setIncludingFrame(desiredCoM);
       desiredRootJointPosition.sub(vectorToSubtractHolder);
-      feedForwardRootJoint.getTranslation(linearVelocityHolder);
-      feedForwardRootJoint.setPosition(desiredRootJointPosition);
+      linearVelocityHolder.set(feedForwardRootJoint.getJointPose().getPosition());
+      feedForwardRootJoint.setJointPosition(desiredRootJointPosition);
       linearVelocityHolder.sub(desiredRootJointPosition, linearVelocityHolder);
       //	   feedForwardRootJoint.setLinearVelocityInWorld(linearVelocityHolder);
 
@@ -934,7 +933,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    {
       actualFullRobotModel.getBody().getBodyFixedFrame().getTwistOfFrame(bodyTwist);
 
-      actualRobotRootJoint.getRotation(yawPitchRollArray);
+      actualRobotRootJoint.getJointPose().getOrientationYawPitchRoll(yawPitchRollArray);
       actualYaw.set(yawPitchRollArray[0]);
       actualPitch.set(yawPitchRollArray[1]);
       actualRoll.set(yawPitchRollArray[2]);

@@ -354,7 +354,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          RigidBodyTransform initialSupportFootTransform = initialFullRobotModel.getFoot(supportFootSide).getBodyFixedFrame().getTransformToWorldFrame();
          transformFromRootJointToWorldFrame.preMultiply(initialSupportFootTransform);
          
-         randomizedFullRobotModel.getRootJoint().setPositionAndRotation(transformFromRootJointToWorldFrame);
+         randomizedFullRobotModel.getRootJoint().setJointConfiguration(transformFromRootJointToWorldFrame);
          randomizedFullRobotModel.updateFrames();
 
          for (RigidBodyBasics rigidBody : bodiesToControl)
@@ -526,8 +526,8 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       OneDoFJoint[] joints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, new ForceSensorDefinition[0], new IMUDefinition[0]);
       RobotConfigurationDataFactory.packJointState(robotConfigurationData, Arrays.stream(joints).collect(Collectors.toList()));
-      robotConfigurationData.getRootTranslation().set(fullRobotModel.getRootJoint().getTranslationForReading());
-      robotConfigurationData.getRootOrientation().set(fullRobotModel.getRootJoint().getRotationForReading());
+      robotConfigurationData.getRootTranslation().set(fullRobotModel.getRootJoint().getJointPose().getPosition());
+      robotConfigurationData.getRootOrientation().set(fullRobotModel.getRootJoint().getJointPose().getOrientation());
       return robotConfigurationData;
    }
 

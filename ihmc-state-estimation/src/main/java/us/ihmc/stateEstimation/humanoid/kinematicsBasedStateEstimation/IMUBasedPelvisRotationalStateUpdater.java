@@ -134,7 +134,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       yoRootJointFrameQuaternion.setToZero();
       yoRootJointFrameOrientation.setToZero();
 
-      rootJoint.setRotation(yoRootJointFrameQuaternion);
+      rootJoint.setJointOrientation(yoRootJointFrameQuaternion);
 
       // Set the rootJoint twist to zero.
       rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
@@ -168,7 +168,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       rotationFrozenOffset.setToYawMatrix(yawDifference);
 
       // Keep setting the orientation so that the localization updater works properly.
-      rootJoint.setRotation(yoRootJointFrameQuaternion);
+      rootJoint.setJointOrientation(yoRootJointFrameQuaternion);
 
       // Set the rootJoint twist to zero.
       rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
@@ -212,7 +212,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
 
       rotationFromRootJointFrameToWorld.preMultiply(rotationFrozenOffset);
 
-      rootJoint.setRotation(rotationFromRootJointFrameToWorld);
+      rootJoint.setJointOrientation(rotationFromRootJointFrameToWorld);
       rootJointFrame.update();
 
       if (imuYawDriftEstimator != null)
@@ -223,7 +223,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
          rotationFromRootJointFrameToWorld.preMultiply(yawBiasMatrix);
       }
 
-      rootJoint.setRotation(rotationFromRootJointFrameToWorld);
+      rootJoint.setJointOrientation(rotationFromRootJointFrameToWorld);
       rootJointFrame.update();
    }
 

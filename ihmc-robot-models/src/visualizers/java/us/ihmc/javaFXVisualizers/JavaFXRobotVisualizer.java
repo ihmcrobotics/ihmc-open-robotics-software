@@ -58,7 +58,7 @@ public class JavaFXRobotVisualizer
 
             RigidBodyTransform newRootJointPose = newRootJointPoseReference.getAndSet(null);
             if (newRootJointPose != null)
-               fullRobotModel.getRootJoint().setPositionAndRotation(newRootJointPose);
+               fullRobotModel.getRootJoint().setJointConfiguration(newRootJointPose);
 
             float[] newJointConfiguration = newJointConfigurationReference.getAndSet(null);
             if (newJointConfiguration != null)

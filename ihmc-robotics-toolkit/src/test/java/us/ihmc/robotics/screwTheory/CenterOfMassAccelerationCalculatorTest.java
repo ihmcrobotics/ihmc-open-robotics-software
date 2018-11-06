@@ -55,13 +55,13 @@ public class CenterOfMassAccelerationCalculatorTest
       ReferenceFrame frameBeforeJoint = sixDoFJoint.getFrameBeforeJoint();
       SpatialAcceleration jointAcceleration = new SpatialAcceleration(frameAfterJoint, frameBeforeJoint, frameAfterJoint, new Vector3D(),
                                                        getRandomVector(random));
-      sixDoFJoint.setPosition(getRandomVector(random));
-      sixDoFJoint.setRotation(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      sixDoFJoint.setAcceleration(jointAcceleration);
+      sixDoFJoint.setJointPosition(getRandomVector(random));
+      sixDoFJoint.getJointPose().setOrientationYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      sixDoFJoint.setJointAcceleration(jointAcceleration);
       elevator.updateFramesRecursively();
 
       RotationMatrix rotationMatrix = new RotationMatrix();
-      sixDoFJoint.getRotation(rotationMatrix);
+      rotationMatrix.set(sixDoFJoint.getJointPose().getOrientation());
 
       spatialAccelerationCalculator.compute();
       FrameVector3D comAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());

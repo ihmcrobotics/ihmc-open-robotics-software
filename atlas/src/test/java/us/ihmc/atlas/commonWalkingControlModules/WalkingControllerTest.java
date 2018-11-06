@@ -198,7 +198,7 @@ public class WalkingControllerTest
          }
          else
          {
-            Tuple3DReadOnly rootPosition = fullRobotModel.getRootJoint().getTranslationForReading();
+            Tuple3DReadOnly rootPosition = fullRobotModel.getRootJoint().getJointPose().getPosition();
             Point3D min = new Point3D(-0.1, -0.1, 0.5);
             Point3D max = new Point3D(0.1, 0.1, 1.0);
             Vector3D drift = new Vector3D(maxDriftRate, maxDriftRate, maxDriftRate);
@@ -350,8 +350,8 @@ public class WalkingControllerTest
       desiredLinearAcceleration.set(desiredAcceleration.get(3), desiredAcceleration.get(4), desiredAcceleration.get(5));
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
-      rootJoint.getTranslation(position);
-      rootJoint.getLinearVelocity(linearVelocity);
+      position.set(rootJoint.getJointPose().getPosition());
+      linearVelocity.set(rootJoint.getJointTwist().getLinearPart());
 
       newPosition.set(desiredLinearAcceleration);
       newPosition.scale(0.5 * controlDT);
@@ -370,8 +370,8 @@ public class WalkingControllerTest
 
       newPosition.addZ(-zCorrection);
 
-      rootJoint.setRotation(newOrientation);
-      rootJoint.setPosition(newPosition);
+      rootJoint.setJointOrientation(newOrientation);
+      rootJoint.setJointPosition(newPosition);
       rootJoint.updateFramesRecursively();
       frameLinearVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), newLinearVelocity);
       frameAngularVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), newAngularVelocity);
@@ -563,7 +563,7 @@ public class WalkingControllerTest
       FloatingInverseDynamicsJoint sixDoFJoint = fullRobotModel.getRootJoint();
       RigidBodyTransform transform = new RigidBodyTransform();
       floatingJoint.getTransformToWorld(transform);
-      sixDoFJoint.setPositionAndRotation(transform);
+      sixDoFJoint.setJointConfiguration(transform);
 
       fullRobotModel.updateFrames();
       referenceFrames.updateFrames();

@@ -254,7 +254,7 @@ public class SkippyRobotV2 extends Robot
       RigidBodyTransform rootJointTransform = new RigidBodyTransform();
       scsRootJoint.getTransformToWorld(rootJointTransform);
       rootJointTransform.normalizeRotationPart();
-      rootJoint.setPositionAndRotation(rootJointTransform);
+      rootJoint.setJointConfiguration(rootJointTransform);
 
       // update root joint velocity
       FrameVector3D linearVelocity = new FrameVector3D();

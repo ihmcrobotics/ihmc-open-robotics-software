@@ -113,8 +113,8 @@ public class CentroidalMomentumMatrixSCSTest
          Vector3D angularMomentum = new Vector3D();
          robot.computeCOMMomentum(comPoint, linearMomentum, angularMomentum);
 
-         sixDoFJoint.setPosition(position);
-         sixDoFJoint.setRotation(rotation);
+         sixDoFJoint.setJointPosition(position);
+         sixDoFJoint.setJointOrientation(rotation);
          Twist jointTwist = new Twist();
          sixDoFJoint.getJointTwist(jointTwist);
          jointTwist.getAngularPart().set(angularVelocity);

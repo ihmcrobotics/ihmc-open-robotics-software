@@ -277,7 +277,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          pelvisTransformInWorldFrame.set(pelvisTimeStampedTransform3D.getTransform3D());
          pelvisReferenceFrame.update();
 
-         sixDofPelvisJoint.setPositionAndRotation(pelvisTimeStampedTransform3D.getTransform3D());
+         sixDofPelvisJoint.setJointConfiguration(pelvisTimeStampedTransform3D.getTransform3D());
          sixDofPelvisJoint.updateFramesRecursively();
          pelvisBeforeCorrection_Translation.set(pelvisTimeStampedTransform3D.getTransform3D());
          pelvisBeforeCorrection_Translation.setRotationToZero();
@@ -345,7 +345,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          pelvisTransformInWorldFrame.set(pelvisTimeStampedTransform3D.getTransform3D());
          pelvisReferenceFrame.update();
 
-         sixDofPelvisJoint.setPositionAndRotation(pelvisTimeStampedTransform3D.getTransform3D());
+         sixDofPelvisJoint.setJointConfiguration(pelvisTimeStampedTransform3D.getTransform3D());
          sixDofPelvisJoint.updateFramesRecursively();
          pelvisBeforeCorrection.set(pelvisTimeStampedTransform3D.getTransform3D());
 
