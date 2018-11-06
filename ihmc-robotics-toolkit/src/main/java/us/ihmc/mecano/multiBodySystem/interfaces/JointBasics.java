@@ -315,19 +315,9 @@ public abstract interface JointBasics extends CommonJoint
     */
    public abstract void setSuccessor(RigidBodyBasics successor);
 
-   /**
-    * Returns the motion subspace of this joint in the form of {@code GeometricJacobian}. Its number
-    * of columns is equal to the number of degrees of freedom of this joint. It is expressed in:
-    * <ul>
-    * <li>{@code afterJointFrame} for: {@code SixDoFJoint}, {@code SphericalJoint},
-    * {@code PlanarJoint}.
-    * <li>{@code successorFrame} for: {@code RevoluteJoint} and {@code PrismaticJoint}.
-    * </ul>
-    * 
-    * @return the motion subspace of this joint.
-    */
-   @Deprecated // TODO
-   public abstract GeometricJacobian getMotionSubspace();
+   default void getMotionSubspace(DenseMatrix64F matrixToPack)
+   {
+   }
 
    /**
     * Retrieves the unit-twist corresponding to the {@code dofIndex}<sup>th</sup> degree of freedom

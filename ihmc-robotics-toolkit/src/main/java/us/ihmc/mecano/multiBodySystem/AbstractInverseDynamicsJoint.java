@@ -161,13 +161,6 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
 
    /** {@inheritDoc} */
    @Override
-   public final GeometricJacobian getMotionSubspace()
-   {
-      return motionSubspace;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public final RigidBodyBasics getPredecessor()
    {
       return predecessor;
