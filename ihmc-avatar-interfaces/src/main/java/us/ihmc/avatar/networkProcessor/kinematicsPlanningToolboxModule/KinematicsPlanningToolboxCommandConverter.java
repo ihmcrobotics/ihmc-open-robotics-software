@@ -21,7 +21,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class KinematicsPlanningToolboxCommandConverter implements CommandConversionInterface
 {
-   private final Map<Long, RigidBody> rigidBodyNamedBasedHashMap = new HashMap<>();
+   private final Map<Integer, RigidBody> rigidBodyHashMap = new HashMap<>();
    private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
 
    public KinematicsPlanningToolboxCommandConverter(FullHumanoidRobotModel fullRobotModel)
@@ -31,7 +31,7 @@ public class KinematicsPlanningToolboxCommandConverter implements CommandConvers
       RigidBody rootBody = ScrewTools.getRootBody(fullRobotModel.getElevator());
       RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
       for (RigidBody rigidBody : allRigidBodies)
-         rigidBodyNamedBasedHashMap.put(rigidBody.getNameBasedHashCode(), rigidBody);
+         rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody);
    }
 
    public KinematicsPlanningToolboxCommandConverter(RigidBody rootBody)
@@ -52,7 +52,7 @@ public class KinematicsPlanningToolboxCommandConverter implements CommandConvers
 
       RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
       for (RigidBody rigidBody : allRigidBodies)
-         rigidBodyNamedBasedHashMap.put(rigidBody.getNameBasedHashCode(), rigidBody);
+         rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody);
    }
 
    @Override
@@ -66,7 +66,7 @@ public class KinematicsPlanningToolboxCommandConverter implements CommandConvers
    {
       KinematicsPlanningToolboxRigidBodyMessage rigiBodyMessage = (KinematicsPlanningToolboxRigidBodyMessage) message;
       KinematicsPlanningToolboxRigidBodyCommand rigiBodyCommand = (KinematicsPlanningToolboxRigidBodyCommand) command;
-      rigiBodyCommand.set(rigiBodyMessage, rigidBodyNamedBasedHashMap, referenceFrameHashCodeResolver);
+      rigiBodyCommand.set(rigiBodyMessage, rigidBodyHashMap, referenceFrameHashCodeResolver);
    }
 
 }

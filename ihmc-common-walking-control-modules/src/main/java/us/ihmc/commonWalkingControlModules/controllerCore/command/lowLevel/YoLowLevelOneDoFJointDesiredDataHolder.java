@@ -39,14 +39,14 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
          OneDoFJoint joint = controlledJoints[i];
          YoJointDesiredOutput jointData = new YoJointDesiredOutput(joint.getName(), registry, StringTools.getEveryUppercaseLetter(parentRegistry.getName()));
          lowLevelJointDataList[i] = jointData;
-         lowLevelJointDataMap.put(joint.getNameBasedHashCode(), jointData);
+         lowLevelJointDataMap.put(joint.hashCode(), jointData);
       }
    }
 
    @Override
    public boolean hasDataForJoint(OneDoFJoint joint)
    {
-      return lowLevelJointDataMap.containsKey(joint.getNameBasedHashCode());
+      return lowLevelJointDataMap.containsKey(joint.hashCode());
    }
 
    @Override
@@ -64,7 +64,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    @Override
    public JointDesiredOutputBasics getJointDesiredOutput(OneDoFJoint joint)
    {
-      return getJointDesiredOutput(joint.getNameBasedHashCode());
+      return getJointDesiredOutput(joint.hashCode());
    }
 
    @Override

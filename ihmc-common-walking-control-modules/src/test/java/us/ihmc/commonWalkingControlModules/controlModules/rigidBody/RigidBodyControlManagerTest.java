@@ -199,7 +199,7 @@ public class RigidBodyControlManagerTest
          assertEquals(ControllerCoreCommandType.TASKSPACE, feedbackControlCommand.getCommandType());
          SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
 
-         assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
+         assertEquals(taskspaceCommand.getEndEffector().hashCode(), bodyToControl.hashCode());
          taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
          taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
          taskspaceCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
@@ -218,7 +218,7 @@ public class RigidBodyControlManagerTest
          assertEquals(ControllerCoreCommandType.TASKSPACE, feedbackControlCommand.getCommandType());
          SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
 
-         assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
+         assertEquals(taskspaceCommand.getEndEffector().hashCode(), bodyToControl.hashCode());
          taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
          taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
          taskspaceCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
@@ -444,7 +444,7 @@ public class RigidBodyControlManagerTest
          assertEquals(ControllerCoreCommandType.TASKSPACE, feedbackControlCommand.getCommandType());
          SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
 
-         assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
+         assertEquals(taskspaceCommand.getEndEffector().hashCode(), bodyToControl.hashCode());
          taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
          taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
          taskspaceCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
@@ -469,7 +469,7 @@ public class RigidBodyControlManagerTest
          assertEquals(ControllerCoreCommandType.TASKSPACE, feedbackControlCommand.getCommandType());
          SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
 
-         assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
+         assertEquals(taskspaceCommand.getEndEffector().hashCode(), bodyToControl.hashCode());
          taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
          taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
          taskspaceCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);

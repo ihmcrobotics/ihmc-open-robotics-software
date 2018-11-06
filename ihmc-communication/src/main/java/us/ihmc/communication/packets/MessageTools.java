@@ -2,6 +2,7 @@ package us.ihmc.communication.packets;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import controller_msgs.msg.dds.BoundingBox3DMessage;
@@ -133,13 +134,13 @@ public class MessageTools
    /**
     * Creates a new center of mass message.
     * <p>
-    * The new message is ready to be sent, but it can be further adjusted to provide more details.
-    * For example, the priority of the task can be changed by changing the weight of this message, a
-    * custom control frame can be specified.
+    * The new message is ready to be sent, but it can be further adjusted to provide more details. For
+    * example, the priority of the task can be changed by changing the weight of this message, a custom
+    * control frame can be specified.
     * </p>
     * 
-    * @param desiredPosition the position that center of mass should reach. The data is assumed to
-    *           be expressed in world frame. Not modified.
+    * @param desiredPosition the position that center of mass should reach. The data is assumed to be
+    *           expressed in world frame. Not modified.
     */
    public static KinematicsToolboxCenterOfMassMessage createKinematicsToolboxCenterOfMassMessage(Point3DReadOnly desiredPosition)
    {
@@ -168,29 +169,29 @@ public class MessageTools
    public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBody endEffector)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
+      message.setEndEffectorHashCode(endEffector.hashCode());
       return message;
    }
 
    /**
     * Creates a new rigid-body message for the given end-effector.
     * <p>
-    * The new message is ready to be sent, but it can be further adjusted to provide more details.
-    * For example, the priority of the task can be changed by changing the weight of this message, a
-    * custom control frame can be specified.
+    * The new message is ready to be sent, but it can be further adjusted to provide more details. For
+    * example, the priority of the task can be changed by changing the weight of this message, a custom
+    * control frame can be specified.
     * </p>
     * <p>
     * Note that this constructor also sets up the selection matrix for linear control only.
     * </p>
     * 
     * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
-    * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin
-    *           should reach. The data is assumed to be expressed in world frame. Not modified.
+    * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin should
+    *           reach. The data is assumed to be expressed in world frame. Not modified.
     */
    public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBody endEffector, Point3DReadOnly desiredPosition)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
+      message.setEndEffectorHashCode(endEffector.hashCode());
       message.getDesiredPositionInWorld().set(desiredPosition);
       message.getAngularSelectionMatrix().setXSelected(false);
       message.getAngularSelectionMatrix().setYSelected(false);
@@ -204,9 +205,9 @@ public class MessageTools
    /**
     * Creates a new rigid-body message for the given end-effector.
     * <p>
-    * The new message is ready to be sent, but it can be further adjusted to provide more details.
-    * For example, the priority of the task can be changed by changing the weight of this message, a
-    * custom control frame can be specified.
+    * The new message is ready to be sent, but it can be further adjusted to provide more details. For
+    * example, the priority of the task can be changed by changing the weight of this message, a custom
+    * control frame can be specified.
     * </p>
     * <p>
     * Note that this constructor also sets up the selection matrix for angular control only.
@@ -219,7 +220,7 @@ public class MessageTools
    public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBody endEffector, QuaternionReadOnly desiredOrientation)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
+      message.setEndEffectorHashCode(endEffector.hashCode());
       message.getDesiredOrientationInWorld().set(desiredOrientation);
       message.getAngularSelectionMatrix().setXSelected(true);
       message.getAngularSelectionMatrix().setYSelected(true);
@@ -233,14 +234,14 @@ public class MessageTools
    /**
     * Creates a new rigid-body message for the given end-effector.
     * <p>
-    * The new message is ready to be sent, but it can be further adjusted to provide more details.
-    * For example, the priority of the task can be changed by changing the weight of this message, a
-    * custom control frame can be specified.
+    * The new message is ready to be sent, but it can be further adjusted to provide more details. For
+    * example, the priority of the task can be changed by changing the weight of this message, a custom
+    * control frame can be specified.
     * </p>
     * 
     * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
-    * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin
-    *           should reach. The data is assumed to be expressed in world frame. Not modified.
+    * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin should
+    *           reach. The data is assumed to be expressed in world frame. Not modified.
     * @param desiredOrientation the orientation that {@code endEffector.getBodyFixedFrame()} should
     *           reach. The data is assumed to be expressed in world frame. Not modified.
     */
@@ -248,7 +249,7 @@ public class MessageTools
                                                                                            QuaternionReadOnly desiredOrientation)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
+      message.setEndEffectorHashCode(endEffector.hashCode());
       message.getDesiredPositionInWorld().set(desiredPosition);
       message.getDesiredOrientationInWorld().set(desiredOrientation);
       return message;
@@ -257,16 +258,16 @@ public class MessageTools
    /**
     * Creates a new rigid-body message for the given end-effector.
     * <p>
-    * The new message is ready to be sent, but it can be further adjusted to provide more details.
-    * For example, the priority of the task can be changed by changing the weight of this message, a
-    * custom control frame can be specified.
+    * The new message is ready to be sent, but it can be further adjusted to provide more details. For
+    * example, the priority of the task can be changed by changing the weight of this message, a custom
+    * control frame can be specified.
     * </p>
     * 
     * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
     * @param controlFrame specifies the location and orientation of interest for controlling the
     *           end-effector.
-    * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin
-    *           should reach. The data is assumed to be expressed in world frame. Not modified.
+    * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin should
+    *           reach. The data is assumed to be expressed in world frame. Not modified.
     * @param desiredOrientation the orientation that {@code endEffector.getBodyFixedFrame()} should
     *           reach. The data is assumed to be expressed in world frame. Not modified.
     */
@@ -275,7 +276,7 @@ public class MessageTools
                                                                                            QuaternionReadOnly desiredOrientation)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
+      message.setEndEffectorHashCode(endEffector.hashCode());
       message.getDesiredPositionInWorld().set(desiredPosition);
       message.getDesiredOrientationInWorld().set(desiredOrientation);
       RigidBodyTransform transformToBodyFixedFrame = new RigidBodyTransform();
@@ -323,7 +324,7 @@ public class MessageTools
    public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(OneDoFJoint[] joints)
    {
       KinematicsToolboxOutputStatus message = new KinematicsToolboxOutputStatus();
-      message.setJointNameHash((int) NameBasedHashCodeTools.computeArrayHashCode(joints));
+      message.setJointNameHash(Arrays.hashCode(joints));
       return message;
    }
 
@@ -331,7 +332,7 @@ public class MessageTools
                                                                                    boolean useQDesired)
    {
       KinematicsToolboxOutputStatus message = new KinematicsToolboxOutputStatus();
-      message.setJointNameHash((int) NameBasedHashCodeTools.computeArrayHashCode(newJointData));
+      message.setJointNameHash(Arrays.hashCode(newJointData));
       MessageTools.packDesiredJointState(message, rootJoint, newJointData, useQDesired);
       return message;
    }
@@ -416,8 +417,9 @@ public class MessageTools
 
    public static LidarScanParameters toLidarScanParameters(LidarScanParametersMessage message)
    {
-      return new LidarScanParameters(message.getPointsPerSweep(), message.getScanHeight(), message.getSweepYawMin(), message.getSweepYawMax(), message.getHeightPitchMin(),
-                                     message.getHeightPitchMax(), message.getTimeIncrement(), message.getMinRange(), message.getMaxRange(), message.getScanTime(), message.getTimestamp());
+      return new LidarScanParameters(message.getPointsPerSweep(), message.getScanHeight(), message.getSweepYawMin(), message.getSweepYawMax(),
+                                     message.getHeightPitchMin(), message.getHeightPitchMax(), message.getTimeIncrement(), message.getMinRange(),
+                                     message.getMaxRange(), message.getScanTime(), message.getTimestamp());
    }
 
    /**
@@ -721,7 +723,7 @@ public class MessageTools
    public static void unpackDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingInverseDynamicsJoint rootJointToUpdate,
                                               OneDoFJoint[] jointsToUpdate)
    {
-      int jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(jointsToUpdate);
+      int jointNameHash = Arrays.hashCode(jointsToUpdate);
 
       if (jointNameHash != kinematicsToolboxOutputStatus.getJointNameHash())
          throw new RuntimeException("The robots are different.");
@@ -736,13 +738,13 @@ public class MessageTools
    public static void packDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingInverseDynamicsJoint rootJoint,
                                             OneDoFJoint[] newJointData, boolean useQDesired)
    {
-      int jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(newJointData);
-      
+      int jointNameHash = Arrays.hashCode(newJointData);
+
       if (jointNameHash != kinematicsToolboxOutputStatus.getJointNameHash())
          throw new RuntimeException("The robots are different.");
-      
+
       kinematicsToolboxOutputStatus.getDesiredJointAngles().reset();
-      
+
       if (useQDesired)
       {
          for (int i = 0; i < newJointData.length; i++)
@@ -757,7 +759,7 @@ public class MessageTools
             kinematicsToolboxOutputStatus.getDesiredJointAngles().add((float) newJointData[i].getQ());
          }
       }
-      
+
       if (rootJoint != null)
       {
          rootJoint.getTranslation(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
@@ -770,27 +772,27 @@ public class MessageTools
    {
       if (outputStatusOne.getJointNameHash() != outputStatusTwo.getJointNameHash())
          throw new RuntimeException("Output status are not compatible.");
-      
+
       KinematicsToolboxOutputStatus interplateOutputStatus = new KinematicsToolboxOutputStatus();
-      
+
       TFloatArrayList jointAngles1 = outputStatusOne.getDesiredJointAngles();
       TFloatArrayList jointAngles2 = outputStatusTwo.getDesiredJointAngles();
-      
+
       for (int i = 0; i < jointAngles1.size(); i++)
       {
          interplateOutputStatus.getDesiredJointAngles().add((float) EuclidCoreTools.interpolate(jointAngles1.get(i), jointAngles2.get(i), alpha));
       }
-      
+
       Vector3D rootTranslation1 = outputStatusOne.getDesiredRootTranslation();
       Vector3D rootTranslation2 = outputStatusTwo.getDesiredRootTranslation();
       Quaternion rootOrientation1 = outputStatusOne.getDesiredRootOrientation();
       Quaternion rootOrientation2 = outputStatusTwo.getDesiredRootOrientation();
-      
+
       interplateOutputStatus.getDesiredRootTranslation().interpolate(rootTranslation1, rootTranslation2, alpha);
       interplateOutputStatus.getDesiredRootOrientation().interpolate(rootOrientation1, rootOrientation2, alpha);
-      
+
       interplateOutputStatus.setJointNameHash(outputStatusOne.getJointNameHash());
-      
+
       return interplateOutputStatus;
    }
 
@@ -802,55 +804,55 @@ public class MessageTools
     * </p>
     * <p>
     * Note that by sending a privileged configuration the solver will get reinitialized to start off
-    * that configuration and thus may delay the convergence to the solution. It is therefore
-    * preferable to send the privileged configuration as soon as possible.
+    * that configuration and thus may delay the convergence to the solution. It is therefore preferable
+    * to send the privileged configuration as soon as possible.
     * </p>
     * 
     * @param rootJointPosition the privileged root joint position. Not modified.
     * @param rootJointOrientation the privileged root joint orientation. Not modified.
-    * @param jointNameBasedHashCodes allows to safely identify to which joint each angle in
-    *           {@link #privilegedJointAngles} belongs to. The name-based hash code can be obtained
-    *           from {@link OneDoFJoint#getNameBasedHashCode()}. Not modified.
+    * @param jointHashCodes allows to safely identify to which joint each angle in
+    *           {@link #privilegedJointAngles} belongs to. The hash code can be obtained from
+    *           {@link OneDoFJoint#hashCode()}. Not modified.
     * @param jointAngles the privileged joint angles. Not modified.
     * @throws IllegalArgumentException if the lengths of {@code jointAngles} and
-    *            {@code jointNameBasedHashCodes} are different.
+    *            {@code jointHashCodes} are different.
     */
    public static void packPrivilegedRobotConfiguration(KinematicsToolboxConfigurationMessage kinematicsToolboxConfigurationMessage,
-                                                       Tuple3DReadOnly rootJointPosition, QuaternionReadOnly rootJointOrientation,
-                                                       long[] jointNameBasedHashCodes, float[] jointAngles)
+                                                       Tuple3DReadOnly rootJointPosition, QuaternionReadOnly rootJointOrientation, int[] jointHashCodes,
+                                                       float[] jointAngles)
    {
       kinematicsToolboxConfigurationMessage.getPrivilegedRootJointPosition().set(rootJointPosition);
       kinematicsToolboxConfigurationMessage.getPrivilegedRootJointOrientation().set(rootJointOrientation);
-      MessageTools.packPrivilegedJointAngles(kinematicsToolboxConfigurationMessage, jointNameBasedHashCodes, jointAngles);
+      MessageTools.packPrivilegedJointAngles(kinematicsToolboxConfigurationMessage, jointHashCodes, jointAngles);
    }
 
    /**
-    * When provided, the {@code KinematicsToolboxController} will attempt to find the closest
-    * solution to the privileged configuration.
+    * When provided, the {@code KinematicsToolboxController} will attempt to find the closest solution
+    * to the privileged configuration.
     * <p>
     * Avoid calling this method directly, use instead the {@code KinematicsToolboxInputHelper}.
     * </p>
     * <p>
     * Note that by sending a privileged configuration the solver will get reinitialized to start off
-    * that configuration and thus may delay the convergence to the solution. It is therefore
-    * preferable to send the privileged configuration as soon as possible.
+    * that configuration and thus may delay the convergence to the solution. It is therefore preferable
+    * to send the privileged configuration as soon as possible.
     * </p>
     * 
-    * @param jointNameBasedHashCodes allows to safely identify to which joint each angle in
-    *           {@link #privilegedJointAngles} belongs to. The name-based hash code can be obtained
-    *           from {@link OneDoFJoint#getNameBasedHashCode()}. Not modified.
+    * @param jointHashCodes allows to safely identify to which joint each angle in
+    *           {@link #privilegedJointAngles} belongs to. The hash code can be obtained from
+    *           {@link OneDoFJoint#hashCode()}. Not modified.
     * @param jointAngles the privileged joint angles. Not modified.
-    * @throws IllegalArgumentException if the lengths of {@code jointAngles} and
-    *            {@code jointNameBasedHashCodes} are different.
+    * @throws IllegalArgumentException if the lengths of {@code jointAngles} and {@code jointHashCodes}
+    *            are different.
     */
-   public static void packPrivilegedJointAngles(KinematicsToolboxConfigurationMessage kinematicsToolboxConfigurationMessage, long[] jointNameBasedHashCodes,
+   public static void packPrivilegedJointAngles(KinematicsToolboxConfigurationMessage kinematicsToolboxConfigurationMessage, int[] jointHashCodes,
                                                 float[] jointAngles)
    {
-      if (jointNameBasedHashCodes.length != jointAngles.length)
-         throw new IllegalArgumentException("The two arrays jointAngles and jointNameBasedHashCodes have to be of same length.");
-      
-      kinematicsToolboxConfigurationMessage.getPrivilegedJointNameBasedHashCodes().reset();
-      kinematicsToolboxConfigurationMessage.getPrivilegedJointNameBasedHashCodes().add(jointNameBasedHashCodes);
+      if (jointHashCodes.length != jointAngles.length)
+         throw new IllegalArgumentException("The two arrays jointAngles and jointHashCodes have to be of same length.");
+
+      kinematicsToolboxConfigurationMessage.getPrivilegedJointHashCodes().reset();
+      kinematicsToolboxConfigurationMessage.getPrivilegedJointHashCodes().add(jointHashCodes);
       kinematicsToolboxConfigurationMessage.getPrivilegedJointAngles().reset();
       kinematicsToolboxConfigurationMessage.getPrivilegedJointAngles().add(jointAngles);
    }
@@ -858,7 +860,7 @@ public class MessageTools
    public static void packScan(LidarScanMessage lidarScanMessage, Point3DReadOnly[] scan)
    {
       lidarScanMessage.getScan().reset();
-      
+
       for (Point3DReadOnly scanPoint : scan)
       {
          lidarScanMessage.getScan().add((float) scanPoint.getX());

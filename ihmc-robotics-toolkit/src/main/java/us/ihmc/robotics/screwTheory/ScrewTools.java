@@ -78,7 +78,8 @@ public class ScrewTools
       return addRigidBody(name, parentJoint, momentOfInertia, mass, centerOfMassOffset);
    }
 
-   public static RigidBody addRigidBody(String name, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, Vector3DReadOnly centerOfMassOffset)
+   public static RigidBody addRigidBody(String name, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass,
+                                        Vector3DReadOnly centerOfMassOffset)
    {
       RigidBodyTransform inertiaPose = new RigidBodyTransform();
       inertiaPose.setTranslation(centerOfMassOffset);
@@ -348,14 +349,12 @@ public class ScrewTools
 
    /**
     * Compute and pack the joint path between two RigidBody in the jointPathToPack. Use the method
-    * {@link #computeDistanceToAncestor(RigidBody, RigidBody)} to get the size of the Array to
-    * provide.
+    * {@link #computeDistanceToAncestor(RigidBody, RigidBody)} to get the size of the Array to provide.
     * 
     * @param jointPathToPack
     * @param start
     * @param end
-    * @return the length of the joint path, returns -1 if the the given jointPathToPack is too
-    *         small.
+    * @return the length of the joint path, returns -1 if the the given jointPathToPack is too small.
     */
    public static int createJointPath(JointBasics[] jointPathToPack, RigidBody start, RigidBody end)
    {
@@ -490,13 +489,12 @@ public class ScrewTools
    }
 
    public static <T extends JointBasics> T[] cloneJointPathDisconnectedFromOriginalRobot(T[] joints, Class<T> clazz, String suffix,
-                                                                                                  ReferenceFrame rootBodyFrame)
+                                                                                         ReferenceFrame rootBodyFrame)
    {
       return filterJoints(cloneJointPathDisconnectedFromOriginalRobot(joints, suffix, rootBodyFrame), clazz);
    }
 
-   public static JointBasics[] cloneJointPathDisconnectedFromOriginalRobot(JointBasics[] inverseDynamicsJoints, String suffix,
-                                                                                    ReferenceFrame rootBodyFrame)
+   public static JointBasics[] cloneJointPathDisconnectedFromOriginalRobot(JointBasics[] inverseDynamicsJoints, String suffix, ReferenceFrame rootBodyFrame)
    {
       JointBasics[] cloned = new JointBasics[inverseDynamicsJoints.length];
 
@@ -566,8 +564,8 @@ public class ScrewTools
    }
 
    /**
-    * Traverses up the kinematic chain from the candidate descendant towards the root body, checking
-    * to see if each parent body is the ancestor in question.
+    * Traverses up the kinematic chain from the candidate descendant towards the root body, checking to
+    * see if each parent body is the ancestor in question.
     * 
     * @param candidateDescendant
     * @param ancestor
@@ -657,8 +655,8 @@ public class ScrewTools
     * @return the number of degrees of freedom.
     * @throws RuntimeException if the given ancestor and descendant are swapped, or if the do not
     *            belong to the same system.
-    * @throws RuntimeException this method does not support in kinematic trees to go through
-    *            different branches.
+    * @throws RuntimeException this method does not support in kinematic trees to go through different
+    *            branches.
     */
    public static int computeDegreesOfFreedom(RigidBody ancestor, RigidBody descendant)
    {
@@ -716,8 +714,8 @@ public class ScrewTools
    {
       Vector3D gravitationalAcceleration = new Vector3D(0.0, 0.0, gravity);
       Vector3D zero = new Vector3D();
-      SpatialAcceleration rootAcceleration = new SpatialAcceleration(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(),
-                                                                                 rootBody.getBodyFixedFrame(), zero, gravitationalAcceleration);
+      SpatialAcceleration rootAcceleration = new SpatialAcceleration(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame(),
+                                                                     zero, gravitationalAcceleration);
 
       return rootAcceleration;
    }
@@ -826,8 +824,7 @@ public class ScrewTools
       }
    }
 
-   public static void computeIndicesForJoint(JointBasics[] jointsInOrder, TIntArrayList listToPackIndices,
-                                             JointBasics... jointsToComputeIndicesFor)
+   public static void computeIndicesForJoint(JointBasics[] jointsInOrder, TIntArrayList listToPackIndices, JointBasics... jointsToComputeIndicesFor)
    {
       int startIndex = 0;
       for (int i = 0; i < jointsInOrder.length; i++)
@@ -1021,28 +1018,29 @@ public class ScrewTools
       }
    }
 
-   public static long computeGeometricJacobianNameBasedHashCode(JointBasics joints[], ReferenceFrame jacobianFrame, boolean allowChangeFrame)
+   public static int computeGeometricJacobianHashCode(JointBasics joints[], ReferenceFrame jacobianFrame, boolean allowChangeFrame)
    {
-      long jointsHashCode = 1L;
+      int jointsHashCode = 1;
       for (JointBasics joint : joints)
-         jointsHashCode = 31L * jointsHashCode + joint.getNameBasedHashCode();
+      {
+         jointsHashCode = 31 * jointsHashCode + joint.hashCode();
+      }
       if (!allowChangeFrame)
-         return 31L * jointsHashCode + jacobianFrame.hashCode();
+         return 31 * jointsHashCode + jacobianFrame.hashCode();
       else
          return jointsHashCode;
    }
 
-   public static long computeGeometricJacobianNameBasedHashCode(JointBasics joints[], int firstIndex, int lastIndex, ReferenceFrame jacobianFrame,
-                                                                boolean allowChangeFrame)
+   public static int computeGeometricJacobianHashCode(JointBasics joints[], int firstIndex, int lastIndex, ReferenceFrame jacobianFrame,
+                                                               boolean allowChangeFrame)
    {
-      long jointsHashCode = 1L;
+      int jointsHashCode = 1;
       for (int i = firstIndex; i <= lastIndex; i++)
       {
-         JointBasics joint = joints[i];
-         jointsHashCode = 31L * jointsHashCode + joint.getNameBasedHashCode();
+         jointsHashCode = 31 * jointsHashCode + joints[i].hashCode();
       }
       if (!allowChangeFrame)
-         return 31L * jointsHashCode + jacobianFrame.hashCode();
+         return 31 * jointsHashCode + jacobianFrame.hashCode();
       else
          return jointsHashCode;
    }
@@ -1050,11 +1048,12 @@ public class ScrewTools
    /**
     * Will return the {@code numberOfBodies}'eth parent of the provided {@code startBody}. E.g. if
     * {@code numberOfBodies == 1} this will return the parent of the {@code startBody} and so on.
+    * 
     * @throws RuntimeException if the body chain is not long enough to reach the desired parent.
     * @param startBody the body to start at.
     * @param numberOfBodies the amount of steps to go up the body chain.
-    * @return the {@link RigidBody} that is {@code numberOfBodies} higher up the rigid body chain
-    * then the {@code startBody}.
+    * @return the {@link RigidBody} that is {@code numberOfBodies} higher up the rigid body chain then
+    *         the {@code startBody}.
     */
    public static RigidBody goUpBodyChain(RigidBody startBody, int numberOfBodies)
    {

@@ -91,7 +91,7 @@ public class KinematicsToolboxController extends ToolboxController
     * finger joints that are not handled by this solver.
     */
    private final OneDoFJoint[] oneDoFJoints;
-   private final Map<Long, OneDoFJoint> jointNameBasedHashCodeMap = new HashMap<>();
+   private final Map<Integer, OneDoFJoint> jointHashCodeMap = new HashMap<>();
 
    /**
     * Reference frame centered at the robot's center of mass. It is used to hold the initial center
@@ -227,7 +227,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, rootBody);
 
-      Arrays.stream(oneDoFJoints).forEach(joint -> jointNameBasedHashCodeMap.put(joint.getNameBasedHashCode(), joint));
+      Arrays.stream(oneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
 
       controllerCore = createControllerCore(controllableRigidBodies);
       feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
@@ -465,7 +465,7 @@ public class KinematicsToolboxController extends ToolboxController
           * with the privileged configuration and the initial center of mass position and foot
           * poses.
           */
-         KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint, jointNameBasedHashCodeMap);
+         KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint, jointHashCodeMap);
          if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRootJointPosition() || command.hasPrivilegedRootJointOrientation())
             robotConfigurationReinitialized();
          if (command.hasPrivilegedJointAngles())

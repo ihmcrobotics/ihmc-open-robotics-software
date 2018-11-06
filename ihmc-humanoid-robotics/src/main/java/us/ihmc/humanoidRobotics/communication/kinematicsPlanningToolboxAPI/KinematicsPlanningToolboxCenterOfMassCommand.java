@@ -55,9 +55,9 @@ public class KinematicsPlanningToolboxCenterOfMassCommand
 
       if (referenceFrameResolver != null)
       {
-         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrameFromNameBaseHashCode(linearSelection.getSelectionFrameId());
+         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrameFromHashCode(linearSelection.getSelectionFrameId());
          selectionMatrix.setSelectionFrame(linearSelectionFrame);
-         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrameFromNameBaseHashCode(linearWeight.getWeightFrameId());
+         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrameFromHashCode(linearWeight.getWeightFrameId());
          weightMatrix.setWeightFrame(linearWeightFrame);
       }
    }

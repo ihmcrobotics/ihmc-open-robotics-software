@@ -74,7 +74,7 @@ public class UnloadedAnkleControlModule
       }
 
       SpatialFeedbackControlCommand feedbackControlCommand = currentState.getFeedbackControlCommand();
-      if (feedbackControlCommand.getEndEffector().getNameBasedHashCode() != foot.getNameBasedHashCode())
+      if (feedbackControlCommand.getEndEffector().hashCode() != foot.hashCode())
       {
          throw new RuntimeException("Something got messed up. Expecting a command for " + foot.getName());
       }

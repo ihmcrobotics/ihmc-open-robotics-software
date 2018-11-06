@@ -152,12 +152,12 @@ public class KinematicsToolboxMessageFactory
 
       OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
-      long[] jointNameBasedHashCodes = new long[oneDoFJoints.length];
+      int[] jointHashCodes = new int[oneDoFJoints.length];
       float[] privilegedJointAngles = new float[oneDoFJoints.length];
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         jointNameBasedHashCodes[i] = oneDoFJoints[i].getNameBasedHashCode();
+         jointHashCodes[i] = oneDoFJoints[i].hashCode();
 
          if (useDesiredJointAngles)
             privilegedJointAngles[i] = (float) oneDoFJoints[i].getqDesired();
@@ -171,7 +171,7 @@ public class KinematicsToolboxMessageFactory
       Quaternion privilegedRootJointOrientation = new Quaternion();
       rootJoint.getRotation(privilegedRootJointOrientation);
 
-      MessageTools.packPrivilegedRobotConfiguration(message, privilegedRootJointPosition, privilegedRootJointOrientation, jointNameBasedHashCodes, privilegedJointAngles);
+      MessageTools.packPrivilegedRobotConfiguration(message, privilegedRootJointPosition, privilegedRootJointOrientation, jointHashCodes, privilegedJointAngles);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
 
       return message;

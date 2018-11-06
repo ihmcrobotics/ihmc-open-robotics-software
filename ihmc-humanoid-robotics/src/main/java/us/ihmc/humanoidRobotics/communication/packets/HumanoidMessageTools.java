@@ -488,7 +488,7 @@ public class HumanoidMessageTools
       if (degreesOfFreedomToExplore.length != explorationRangeAmplitudes.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length);
 
-      message.setRigidBodyNameBasedHashCode(rigidBody.getNameBasedHashCode());
+      message.setRigidBodyHashCode(rigidBody.hashCode());
       byte[] degreesOfFreedomToExplore1 = ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore);
       if (degreesOfFreedomToExplore1.length != explorationRangeAmplitudes.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
@@ -518,7 +518,7 @@ public class HumanoidMessageTools
       if (degreesOfFreedomToExplore.length != explorationRangeUpperLimits.length || degreesOfFreedomToExplore.length != explorationRangeLowerLimits.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length);
 
-      message.setRigidBodyNameBasedHashCode(rigidBody.getNameBasedHashCode());
+      message.setRigidBodyHashCode(rigidBody.hashCode());
       byte[] degreesOfFreedomToExplore1 = ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore);
       if (degreesOfFreedomToExplore1.length != explorationRangeUpperLimits.length || degreesOfFreedomToExplore1.length != explorationRangeLowerLimits.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
@@ -574,7 +574,7 @@ public class HumanoidMessageTools
                                                                                      SelectionMatrix6D selectionMatrix)
    {
       WaypointBasedTrajectoryMessage message = new WaypointBasedTrajectoryMessage();
-      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
+      message.setEndEffectorHashCode(endEffector.hashCode());
       if (waypointTimes.length != waypoints.length)
          throw new RuntimeException("Inconsistent array lengths.");
 
@@ -1328,7 +1328,7 @@ public class HumanoidMessageTools
    public static ReachingManifoldMessage createReachingManifoldMessage(RigidBody rigidBody)
    {
       ReachingManifoldMessage message = new ReachingManifoldMessage();
-      message.setEndEffectorNameBasedHashCode(rigidBody.getNameBasedHashCode());
+      message.setEndEffectorHashCode(rigidBody.hashCode());
       return message;
    }
 

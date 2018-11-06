@@ -27,7 +27,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
  */
 public class KinematicsToolboxCommandConverter implements CommandConversionInterface
 {
-   private final Map<Long, RigidBody> rigidBodyNamedBasedHashMap = new HashMap<>();
+   private final Map<Integer, RigidBody> rigidBodyHashMap = new HashMap<>();
    private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
 
    public KinematicsToolboxCommandConverter(FullHumanoidRobotModel fullRobotModel)
@@ -37,7 +37,7 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
       RigidBody rootBody = ScrewTools.getRootBody(fullRobotModel.getElevator());
       RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
       for (RigidBody rigidBody : allRigidBodies)
-         rigidBodyNamedBasedHashMap.put(rigidBody.getNameBasedHashCode(), rigidBody);
+         rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody);
    }
 
    public KinematicsToolboxCommandConverter(RigidBody rootBody)
@@ -58,7 +58,7 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
 
       RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
       for (RigidBody rigidBody : allRigidBodies)
-         rigidBodyNamedBasedHashMap.put(rigidBody.getNameBasedHashCode(), rigidBody);
+         rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody);
    }
 
    /**
@@ -78,6 +78,6 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
    {
       KinematicsToolboxRigidBodyMessage rigiBodyMessage = (KinematicsToolboxRigidBodyMessage) message;
       KinematicsToolboxRigidBodyCommand rigiBodyCommand = (KinematicsToolboxRigidBodyCommand) command;
-      rigiBodyCommand.set(rigiBodyMessage, rigidBodyNamedBasedHashMap, referenceFrameHashCodeResolver);
+      rigiBodyCommand.set(rigiBodyMessage, rigidBodyHashMap, referenceFrameHashCodeResolver);
    }
 }

@@ -55,7 +55,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
 
    public JointDesiredOutput registerJointWithEmptyData(OneDoFJoint joint)
    {
-      if (lowLevelJointDataMap.containsKey(joint.getNameBasedHashCode()))
+      if (lowLevelJointDataMap.containsKey(joint.hashCode()))
          throwJointAlreadyRegisteredException(joint);
 
       return registerJointWithEmptyDataUnsafe(joint);
@@ -83,7 +83,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
       {
          OneDoFJoint joint = other.getOneDoFJoint(i);
 
-         JointDesiredOutputBasics lowLevelJointData = getJointDesiredOutput(joint.getNameBasedHashCode());
+         JointDesiredOutputBasics lowLevelJointData = getJointDesiredOutput(joint.hashCode());
          JointDesiredOutputReadOnly otherLowLevelJointData = other.getJointDesiredOutput(i);
 
          if (lowLevelJointData != null)
@@ -118,7 +118,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
    @Override
    public boolean hasDataForJoint(OneDoFJoint joint)
    {
-      return lowLevelJointDataMap.containsKey(joint.getNameBasedHashCode());
+      return lowLevelJointDataMap.containsKey(joint.hashCode());
    }
 
    @Override
@@ -136,7 +136,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
    @Override
    public JointDesiredOutputBasics getJointDesiredOutput(OneDoFJoint joint)
    {
-      return lowLevelJointDataMap.get(joint.getNameBasedHashCode());
+      return lowLevelJointDataMap.get(joint.hashCode());
    }
 
    @Override
@@ -160,7 +160,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
    private JointDesiredOutput registerJointWithEmptyDataUnsafe(OneDoFJoint joint)
    {
       JointDesiredOutput jointData = lowLevelJointData.add();
-      lowLevelJointDataMap.put(joint.getNameBasedHashCode(), jointData);
+      lowLevelJointDataMap.put(joint.hashCode(), jointData);
       jointsWithDesiredData.add(joint);
       return jointData;
    }
