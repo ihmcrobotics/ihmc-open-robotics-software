@@ -39,13 +39,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    private double velocityLimitLower = Double.NEGATIVE_INFINITY;
    private double velocityLimitUpper = Double.POSITIVE_INFINITY;
 
-   //   private double tauDamping;
-
-   /**
-    * Describes if a joint is online
-    */
-   private boolean isOnline = true;
-
    public OneDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
    {
       super(name, predecessor, transformToParent);
@@ -389,15 +382,5 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    public void setTauMeasured(double tauMeasured)
    {
       this.tauMeasured = tauMeasured;
-   }
-
-   public boolean isOnline()
-   {
-      return isOnline;
-   }
-
-   public void setOnline(boolean isOnline)
-   {
-      this.isOnline = isOnline;
    }
 }
