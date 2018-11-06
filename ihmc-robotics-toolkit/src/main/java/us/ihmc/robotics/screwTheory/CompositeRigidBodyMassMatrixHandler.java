@@ -16,15 +16,15 @@ public class CompositeRigidBodyMassMatrixHandler
 
    private final int degreesOfFreedom;
 
-   private final Map<InverseDynamicsJoint, int[]> indicesForJoints = new LinkedHashMap<>();
+   private final Map<JointBasics, int[]> indicesForJoints = new LinkedHashMap<>();
    private final CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
 
-   public CompositeRigidBodyMassMatrixHandler(RigidBody rootBody, ArrayList<InverseDynamicsJoint> jointsToIgnore)
+   public CompositeRigidBodyMassMatrixHandler(RigidBody rootBody, ArrayList<JointBasics> jointsToIgnore)
    {
       this.massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootBody, jointsToIgnore);
 
-      InverseDynamicsJoint[] jointsInOrder = massMatrixCalculator.getJointsInOrder();
-      for (InverseDynamicsJoint joint : jointsInOrder)
+      JointBasics[] jointsInOrder = massMatrixCalculator.getJointsInOrder();
+      for (JointBasics joint : jointsInOrder)
       {
          TIntArrayList listToPackIndices = new TIntArrayList();
          ScrewTools.computeIndexForJoint(jointsInOrder, listToPackIndices, joint);
@@ -42,7 +42,7 @@ public class CompositeRigidBodyMassMatrixHandler
       massMatrixCalculator.compute();
    }
 
-   public DenseMatrix64F getMassMatrix(InverseDynamicsJoint[] jointsToConsider)
+   public DenseMatrix64F getMassMatrix(JointBasics[] jointsToConsider)
    {
       int reducedDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsToConsider);
       massMatrix.reshape(reducedDegreesOfFreedom, reducedDegreesOfFreedom);
@@ -53,7 +53,7 @@ public class CompositeRigidBodyMassMatrixHandler
       return massMatrix;
    }
 
-   public void getMassMatrix(InverseDynamicsJoint[] jointsToConsider, DenseMatrix64F massMatrixToPack)
+   public void getMassMatrix(JointBasics[] jointsToConsider, DenseMatrix64F massMatrixToPack)
    {
       int reducedDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsToConsider);
       columnReducedMassMatrix.reshape(degreesOfFreedom, reducedDegreesOfFreedom);
@@ -61,7 +61,7 @@ public class CompositeRigidBodyMassMatrixHandler
       massMatrixToPack.zero();
 
       int startColumn = 0;
-      for (InverseDynamicsJoint joint : jointsToConsider)
+      for (JointBasics joint : jointsToConsider)
       {
          int[] columnsForJoint = indicesForJoints.get(joint);
          MatrixTools.extractColumns(massMatrixCalculator.getMassMatrix(), columnsForJoint, columnReducedMassMatrix, startColumn);
@@ -69,7 +69,7 @@ public class CompositeRigidBodyMassMatrixHandler
       }
 
       int startRow = 0;
-      for (InverseDynamicsJoint joint : jointsToConsider)
+      for (JointBasics joint : jointsToConsider)
       {
          int[] rowsForJoint = indicesForJoints.get(joint);
          MatrixTools.extractRows(columnReducedMassMatrix, rowsForJoint, massMatrixToPack, startRow);

@@ -9,11 +9,11 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 
 /**
- * Base implementation for any {@link InverseDynamicsJoint} that gathers all the basic setup for a
+ * Base implementation for any {@link JointBasics} that gathers all the basic setup for a
  * joint.
  * 
  */
-public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoint
+public abstract class AbstractInverseDynamicsJoint implements JointBasics
 {
    /**
     * The name of this joint. Each joint of a robot should have a unique name, but it is not

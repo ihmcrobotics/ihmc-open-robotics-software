@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -52,7 +52,7 @@ public class ForceSensorDistalMassCompensator
    {
       String sensorName = forceSensorDefinition.getSensorName();
 
-      InverseDynamicsJoint parentJointOfSensorBody = forceSensorDefinition.getRigidBody().getParentJoint();
+      JointBasics parentJointOfSensorBody = forceSensorDefinition.getRigidBody().getParentJoint();
       sensorFrame = forceSensorDefinition.getSensorFrame();
 
       sensorPose = new FramePose3D(world);

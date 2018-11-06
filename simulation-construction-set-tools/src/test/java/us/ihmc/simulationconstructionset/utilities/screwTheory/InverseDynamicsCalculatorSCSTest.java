@@ -26,7 +26,7 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.InverseDynamicsMechanismExplorer;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -329,7 +329,7 @@ public class InverseDynamicsCalculatorSCSTest
    private InverseDynamicsCalculator createInverseDynamicsCalculatorAndCompute(RigidBody elevator, double gravity, ReferenceFrame worldFrame, boolean doVelocityTerms, boolean doAcceleration)
    {
       SpatialAcceleration rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(elevator, -gravity);
-      ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
+      ArrayList<JointBasics> jointsToIgnore = new ArrayList<JointBasics>();
       InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, rootAcceleration, jointsToIgnore, doVelocityTerms, doAcceleration);
 //      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -gravity);
       inverseDynamicsCalculator.compute();
@@ -530,7 +530,7 @@ public class InverseDynamicsCalculatorSCSTest
       return link;
    }
 
-   private RigidBody copyLinkAsRigidBody(Link link, InverseDynamicsJoint currentInverseDynamicsJoint, String bodyName)
+   private RigidBody copyLinkAsRigidBody(Link link, JointBasics currentInverseDynamicsJoint, String bodyName)
    {
       Vector3D comOffset = new Vector3D();
       link.getComOffset(comOffset);

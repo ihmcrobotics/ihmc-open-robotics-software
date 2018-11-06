@@ -82,7 +82,7 @@ public class GeometricJacobianCalculatorTest
       verifyThatHasBeenCleared(jacobianCalculator);
 
       // Do the same thing but now using setKinematicChain(OneDoFJoint[])
-      jacobianCalculator.setKinematicChain(joints.toArray(new InverseDynamicsJoint[0]));
+      jacobianCalculator.setKinematicChain(joints.toArray(new JointBasics[0]));
 
       jacobianCalculator.computeJacobianMatrix();
       jacobianCalculator.computeConvectiveTerm();
@@ -249,7 +249,7 @@ public class GeometricJacobianCalculatorTest
       RandomFloatingChain floatingChain = new RandomFloatingChain(random, numberOfRevoluteJoints);
       SixDoFJoint floatingJoint = floatingChain.getRootJoint();
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
-      List<InverseDynamicsJoint> joints = floatingChain.getInverseDynamicsJoints();
+      List<JointBasics> joints = floatingChain.getInverseDynamicsJoints();
       GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
       for (int i = 0; i < 1000; i++)
@@ -398,7 +398,7 @@ public class GeometricJacobianCalculatorTest
       RandomFloatingChain floatingChain = new RandomFloatingChain(random, numberOfJoints);
       SixDoFJoint floatingJoint = floatingChain.getRootJoint();
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
-      List<InverseDynamicsJoint> joints = floatingChain.getInverseDynamicsJoints();
+      List<JointBasics> joints = floatingChain.getInverseDynamicsJoints();
 
       RigidBody rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
 
@@ -442,7 +442,7 @@ public class GeometricJacobianCalculatorTest
       RandomFloatingChain floatingChain = new RandomFloatingChain(random, numberOfJoints);
       SixDoFJoint floatingJoint = floatingChain.getRootJoint();
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
-      List<InverseDynamicsJoint> joints = floatingChain.getInverseDynamicsJoints();
+      List<JointBasics> joints = floatingChain.getInverseDynamicsJoints();
 
       RigidBody rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
 

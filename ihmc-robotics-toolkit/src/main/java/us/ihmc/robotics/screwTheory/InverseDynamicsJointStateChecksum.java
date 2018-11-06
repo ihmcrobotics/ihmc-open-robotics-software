@@ -9,7 +9,7 @@ public class InverseDynamicsJointStateChecksum extends AbstractInverseDynamicsCh
    }
 
    @Override
-   public void calculateJointChecksum(InverseDynamicsJoint joint)
+   public void calculateJointChecksum(JointBasics joint)
    {
       joint.calculateJointStateChecksum(checksum);
    }

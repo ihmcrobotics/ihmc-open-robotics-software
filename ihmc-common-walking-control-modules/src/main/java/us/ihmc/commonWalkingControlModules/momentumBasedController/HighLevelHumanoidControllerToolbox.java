@@ -52,7 +52,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.MomentumCalculator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -134,7 +134,7 @@ public class HighLevelHumanoidControllerToolbox
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   private final InverseDynamicsJoint[] controlledJoints;
+   private final JointBasics[] controlledJoints;
    private final OneDoFJoint[] controlledOneDoFJoints;
 
    private final SideDependentList<Wrench> handWrenches = new SideDependentList<>();
@@ -174,7 +174,7 @@ public class HighLevelHumanoidControllerToolbox
                                              SideDependentList<ForceSensorDataReadOnly> wristForceSensors, YoDouble yoTime, double gravityZ,
                                              double omega0, SideDependentList<ContactableFoot> feet, double controlDT,
                                              ArrayList<Updatable> updatables, List<ContactablePlaneBody> contactableBodies,
-                                             YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
+                                             YoGraphicsListRegistry yoGraphicsListRegistry, JointBasics... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
@@ -406,10 +406,10 @@ public class HighLevelHumanoidControllerToolbox
       return controllerFailed;
    }
    
-   public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
+   public static JointBasics[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, JointBasics... jointsToRemove)
    {
-      List<InverseDynamicsJoint> joints = new ArrayList<InverseDynamicsJoint>();
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
+      List<JointBasics> joints = new ArrayList<JointBasics>();
+      JointBasics[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       joints.addAll(Arrays.asList(allJoints));
 
       for (RobotSide robotSide : RobotSide.values)
@@ -417,20 +417,20 @@ public class HighLevelHumanoidControllerToolbox
          RigidBody hand = fullRobotModel.getHand(robotSide);
          if (hand != null)
          {
-            List<InverseDynamicsJoint> fingerJoints = Arrays.asList(ScrewTools.computeSubtreeJoints(hand));
+            List<JointBasics> fingerJoints = Arrays.asList(ScrewTools.computeSubtreeJoints(hand));
             joints.removeAll(fingerJoints);
          }
       }
 
       if (jointsToRemove != null)
       {
-         for (InverseDynamicsJoint joint : jointsToRemove)
+         for (JointBasics joint : jointsToRemove)
          {
             joints.remove(joint);
          }
       }
 
-      return joints.toArray(new InverseDynamicsJoint[joints.size()]);
+      return joints.toArray(new JointBasics[joints.size()]);
    }
 
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
@@ -931,7 +931,7 @@ public class HighLevelHumanoidControllerToolbox
       return yoGraphicsListRegistry;
    }
 
-   public InverseDynamicsJoint[] getControlledJoints()
+   public JointBasics[] getControlledJoints()
    {
       return controlledJoints;
    }

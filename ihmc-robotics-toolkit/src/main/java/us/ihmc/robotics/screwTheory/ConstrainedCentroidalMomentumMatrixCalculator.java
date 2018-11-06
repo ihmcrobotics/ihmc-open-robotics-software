@@ -36,7 +36,7 @@ public class ConstrainedCentroidalMomentumMatrixCalculator
       dynamicallyConsistentNullspaceCalculator.addConstraint(body, selectionMatrix);
    }
 
-   public void addActuatedJoint(InverseDynamicsJoint joint)
+   public void addActuatedJoint(JointBasics joint)
    {
       dynamicallyConsistentNullspaceCalculator.addActuatedJoint(joint);
    }

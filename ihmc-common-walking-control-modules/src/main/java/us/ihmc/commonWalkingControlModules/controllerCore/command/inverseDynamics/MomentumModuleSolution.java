@@ -7,19 +7,19 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class MomentumModuleSolution
 {
-   private InverseDynamicsJoint[] jointsToOptimizeFor;
+   private JointBasics[] jointsToOptimizeFor;
    private DenseMatrix64F jointAccelerations;
    private DenseMatrix64F rhoSolution;
    private SpatialForceReadOnly centroidalMomentumRateSolution;
    private Map<RigidBody, Wrench> externalWrenchSolution;
    private List<RigidBody> rigidBodiesWithExternalWrench;
 
-   public void setJointsToOptimizeFor(InverseDynamicsJoint[] jointsToOptimizeFor)
+   public void setJointsToOptimizeFor(JointBasics[] jointsToOptimizeFor)
    {
       this.jointsToOptimizeFor = jointsToOptimizeFor;
    }
@@ -63,7 +63,7 @@ public class MomentumModuleSolution
       return rigidBodiesWithExternalWrench;
    }
 
-   public InverseDynamicsJoint[] getJointsToOptimizeFor()
+   public JointBasics[] getJointsToOptimizeFor()
    {
       return jointsToOptimizeFor;
    }

@@ -42,7 +42,7 @@ public class DiagnosticsWhenHangingHelper
    }
 
    public DiagnosticsWhenHangingHelper(OneDoFJoint parentJoint, boolean preserveY, boolean isSpineJoint,
-         SideDependentList<InverseDynamicsJoint> topLegJointsIfSpine, YoVariableRegistry registry)
+         SideDependentList<JointBasics> topLegJointsIfSpine, YoVariableRegistry registry)
    {
       this.parentJoint = parentJoint;
       this.isSpineJoint = isSpineJoint;
@@ -65,8 +65,8 @@ public class DiagnosticsWhenHangingHelper
       torqueCorrectionAlpha.set(0.001);
    }
 
-   private static CenterOfMassCalculator createCenterOfMassCalculatorInJointZUpFrame(InverseDynamicsJoint parentJoint, boolean preserveY, boolean spineJoint,
-         SideDependentList<InverseDynamicsJoint> topLegJointsIfSpine)
+   private static CenterOfMassCalculator createCenterOfMassCalculatorInJointZUpFrame(JointBasics parentJoint, boolean preserveY, boolean spineJoint,
+         SideDependentList<JointBasics> topLegJointsIfSpine)
    {
       if (DEBUG)
          System.out.println("parentJoint = " + parentJoint);
@@ -95,7 +95,7 @@ public class DiagnosticsWhenHangingHelper
       if (spineJoint)
       {
          ScrewTools.computeRigidBodiesFromRootToThisJoint(rigidBodies, parentJoint);
-         for (InverseDynamicsJoint legJoint : topLegJointsIfSpine)
+         for (JointBasics legJoint : topLegJointsIfSpine)
          {
             ScrewTools.computeRigidBodiesAfterThisJoint(rigidBodies, legJoint);
          }

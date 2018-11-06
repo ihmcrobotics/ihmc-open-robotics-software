@@ -29,7 +29,7 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -650,7 +650,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
          makeArmJointHelper(RobotSide.RIGHT, -1.0, true, ArmJointName.ELBOW_PITCH);
       }
 
-      SideDependentList<InverseDynamicsJoint> topLegJoints = new SideDependentList<>();
+      SideDependentList<JointBasics> topLegJoints = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
          topLegJoints.set(robotSide, fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW));

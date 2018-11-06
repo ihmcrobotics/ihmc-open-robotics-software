@@ -19,7 +19,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -135,7 +135,7 @@ public class CentroidalMomentumMatrixSCSTest
    {
       DenseMatrix64F mat = centroidalMomentumMatrix.getMatrix();
 //      InverseDynamicsJoint[] jointList = ScrewTools.computeJointsInOrder(elevator); //deprecated method
-      InverseDynamicsJoint[] jointList = ScrewTools.computeSubtreeJoints(elevator);
+      JointBasics[] jointList = ScrewTools.computeSubtreeJoints(elevator);
 
       DenseMatrix64F jointVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointList), 1);
       ScrewTools.getJointVelocitiesMatrix(jointList, jointVelocities);

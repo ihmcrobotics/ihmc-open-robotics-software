@@ -20,7 +20,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -36,7 +36,7 @@ public class VirtualModelController
    private final GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
    private final RigidBody defaultRootBody;
 
-   private final Map<InverseDynamicsJoint, MutableDouble> jointTorques = new HashMap<>();
+   private final Map<JointBasics, MutableDouble> jointTorques = new HashMap<>();
 
    private final VirtualModelControlDataHandler vmcDataHandler = new VirtualModelControlDataHandler();
 
@@ -60,7 +60,7 @@ public class VirtualModelController
       this.defaultRootBody = defaultRootBody;
       this.centerOfMassFrame = centerOfMassFrame;
 
-      for (InverseDynamicsJoint joint : ScrewTools.computeSubtreeJoints(defaultRootBody))
+      for (JointBasics joint : ScrewTools.computeSubtreeJoints(defaultRootBody))
          jointTorques.put(joint, new MutableDouble());
 
       if (DISPLAY_GRAVITY_WRENCHES)
@@ -281,7 +281,7 @@ public class VirtualModelController
 
       // Write torques to map
       int index = 0;
-      for (InverseDynamicsJoint joint : vmcDataHandler.getControlledJoints())
+      for (JointBasics joint : vmcDataHandler.getControlledJoints())
       {
          jointTorques.get(joint).setValue(fullEffortMatrix.get(index));
          index++;

@@ -16,7 +16,7 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class DiagnosticLogProcessorFunction implements LogDataProcessorFunction
@@ -50,7 +50,7 @@ public class DiagnosticLogProcessorFunction implements LogDataProcessorFunction
          makeArmJointHelper(robotSide, true, ArmJointName.ELBOW_PITCH);
       }
 
-      SideDependentList<InverseDynamicsJoint> topLegJoints = new SideDependentList<InverseDynamicsJoint>();
+      SideDependentList<JointBasics> topLegJoints = new SideDependentList<JointBasics>();
       for (RobotSide robotSide : RobotSide.values())
       {
          topLegJoints.set(robotSide, fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW));

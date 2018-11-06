@@ -10,7 +10,7 @@ public class InverseDynamicsJointDesiredAccelerationCopier extends AbstractInver
    }
 
    @Override
-   protected void copyJoint(InverseDynamicsJoint originalJoint, InverseDynamicsJoint targetJoint)
+   protected void copyJoint(JointBasics originalJoint, JointBasics targetJoint)
    {
       targetJoint.setQddDesired(originalJoint);
 

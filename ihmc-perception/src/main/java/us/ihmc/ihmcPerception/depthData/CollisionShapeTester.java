@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class CollisionShapeTester
@@ -24,7 +24,7 @@ public class CollisionShapeTester
       }
    }
 
-   private void addJoint(CollisionBoxProvider collissionBoxProvider, InverseDynamicsJoint joint)
+   private void addJoint(CollisionBoxProvider collissionBoxProvider, JointBasics joint)
    {
       List<CollisionShape> collisionMesh = collissionBoxProvider.getCollisionMesh(joint.getName());
       if (collisionMesh != null)

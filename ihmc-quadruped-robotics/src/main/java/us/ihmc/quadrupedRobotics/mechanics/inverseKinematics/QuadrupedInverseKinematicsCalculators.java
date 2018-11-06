@@ -11,7 +11,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -118,7 +118,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
          this.referenceFrames = referenceFrames;
 
          this.fullRobotModel = fullRobotModel;
-         InverseDynamicsJoint[] joints = ScrewTools.createJointPath(fullRobotModel.getRootJoint().getSuccessor(), fullRobotModel.getFoot(robotQuadrant));
+         JointBasics[] joints = ScrewTools.createJointPath(fullRobotModel.getRootJoint().getSuccessor(), fullRobotModel.getFoot(robotQuadrant));
          jointsToControl = ScrewTools.filterJoints(joints, OneDoFJoint.class);
 
          closedFormInverseKinematicsCalculator = QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator.createFromLegAttachmentFrame(robotQuadrant,

@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
@@ -63,7 +63,7 @@ public class RobotJointVelocityAccelerationIntegrator
    private final Vector3D translationIntegrated = new Vector3D();
    private final Vector3D translation = new Vector3D();
 
-   public void integrateJointVelocities(InverseDynamicsJoint[] joints, DenseMatrix64F jointVelocitiesToIntegrate)
+   public void integrateJointVelocities(JointBasics[] joints, DenseMatrix64F jointVelocitiesToIntegrate)
    {
       int jointConfigurationStartIndex = 0;
       int jointStartIndex = 0;
@@ -132,7 +132,7 @@ public class RobotJointVelocityAccelerationIntegrator
    private final Vector3D angularAccelerationIntegrated = new Vector3D();
    private final Vector3D linearAccelerationIntegrated = new Vector3D();
 
-   public void integrateJointAccelerations(InverseDynamicsJoint[] joints, DenseMatrix64F jointAccelerationsToIntegrate)
+   public void integrateJointAccelerations(JointBasics[] joints, DenseMatrix64F jointAccelerationsToIntegrate)
    {
       int jointStartIndex = 0;
 

@@ -108,13 +108,13 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    }
 
    @Override
-   public void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint)
+   public void setJointPositionVelocityAndAcceleration(JointBasics originalJoint)
    {
       throw new RuntimeException("Cannot set position, velocity, or acceleration of a passive joint");
    }
 
    @Override
-   public void setQddDesired(InverseDynamicsJoint originalJoint)
+   public void setQddDesired(JointBasics originalJoint)
    {
       throw new RuntimeException("Cannot set acceleration of a passive joint");
    }

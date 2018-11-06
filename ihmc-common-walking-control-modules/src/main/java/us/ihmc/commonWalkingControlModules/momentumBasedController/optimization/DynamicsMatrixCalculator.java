@@ -13,7 +13,7 @@ import us.ihmc.robotics.screwTheory.CompositeRigidBodyMassMatrixHandler;
 import us.ihmc.robotics.screwTheory.FloatingBaseRigidBodyDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -42,7 +42,7 @@ public class DynamicsMatrixCalculator
 
    private final DenseMatrix64F torqueMinimizationObjective;
 
-   private final InverseDynamicsJoint[] jointsToOptimizeFor;
+   private final JointBasics[] jointsToOptimizeFor;
    private final int bodyDoFs;
 
    public DynamicsMatrixCalculator(WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
@@ -50,7 +50,7 @@ public class DynamicsMatrixCalculator
       this(new ArrayList<>(), toolbox, wrenchMatrixCalculator);
    }
 
-   public DynamicsMatrixCalculator(ArrayList<InverseDynamicsJoint> jointsToIgnore, WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
+   public DynamicsMatrixCalculator(ArrayList<JointBasics> jointsToIgnore, WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
    {
       FloatingInverseDynamicsJoint rootJoint = toolbox.getRootJoint();
       RigidBody rootBody = toolbox.getRootBody();
@@ -362,7 +362,7 @@ public class DynamicsMatrixCalculator
             localBodyMassMatrix, localBodyCoriolisMatrix, localBodyContactJacobian, qddot, tau, rho);
    }
 
-   public void extractTorqueMatrix(InverseDynamicsJoint[] joints, DenseMatrix64F torqueMatrixToPack)
+   public void extractTorqueMatrix(JointBasics[] joints, DenseMatrix64F torqueMatrixToPack)
    {
       OneDoFJoint[] filteredJoints = ScrewTools.extractRevoluteJoints(joints);
       int bodyDoFs = ScrewTools.computeDegreesOfFreedom(filteredJoints);
@@ -370,7 +370,7 @@ public class DynamicsMatrixCalculator
       int startIndex = 0;
       for (int i = 0; i < bodyDoFs; i++)
       {
-         InverseDynamicsJoint joint = filteredJoints[i];
+         JointBasics joint = filteredJoints[i];
          int jointDoF = joint.getDegreesOfFreedom();
          tmpMatrix.reshape(jointDoF, 1);
          joint.getTauMatrix(tmpMatrix);

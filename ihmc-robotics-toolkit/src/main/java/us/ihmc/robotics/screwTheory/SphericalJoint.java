@@ -273,7 +273,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
       return RotationTools.QUATERNION_SIZE;
    }
 
-   private SphericalJoint checkAndGetAsSphericalJoint(InverseDynamicsJoint originalJoint)
+   private SphericalJoint checkAndGetAsSphericalJoint(JointBasics originalJoint)
    {
       if (originalJoint instanceof SphericalJoint)
       {
@@ -286,7 +286,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint)
+   public void setJointPositionVelocityAndAcceleration(JointBasics originalJoint)
    {
       SphericalJoint originalSphericalJoint = checkAndGetAsSphericalJoint(originalJoint);
       setRotation(originalSphericalJoint.jointRotation);
@@ -295,7 +295,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void setQddDesired(InverseDynamicsJoint originalJoint)
+   public void setQddDesired(JointBasics originalJoint)
    {
       SphericalJoint originalSphericalJoint = checkAndGetAsSphericalJoint(originalJoint);
       jointAngularAccelerationDesired.set(originalSphericalJoint.jointAngularAccelerationDesired);

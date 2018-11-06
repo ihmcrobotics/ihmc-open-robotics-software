@@ -305,7 +305,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       return getDegreesOfFreedom();
    }
 
-   public OneDoFJoint checkAndGetAsOneDoFJoint(InverseDynamicsJoint originalJoint)
+   public OneDoFJoint checkAndGetAsOneDoFJoint(JointBasics originalJoint)
    {
       if (originalJoint instanceof OneDoFJoint)
       {
@@ -318,7 +318,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint)
+   public void setJointPositionVelocityAndAcceleration(JointBasics originalJoint)
    {
       OneDoFJoint oneDoFOriginalJoint = checkAndGetAsOneDoFJoint(originalJoint);
       setQ(oneDoFOriginalJoint.getQ());
@@ -329,7 +329,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void setQddDesired(InverseDynamicsJoint originalJoint)
+   public void setQddDesired(JointBasics originalJoint)
    {
       OneDoFJoint oneDoFOriginalJoint = checkAndGetAsOneDoFJoint(originalJoint);
       setQddDesired(oneDoFOriginalJoint.getQddDesired());

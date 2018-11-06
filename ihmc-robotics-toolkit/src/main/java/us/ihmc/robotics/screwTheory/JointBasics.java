@@ -25,7 +25,7 @@ import us.ihmc.simulationconstructionset.util.CommonJoint;
  * </ul>
  * 
  */
-public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHashCodeHolder
+public abstract interface JointBasics extends CommonJoint, NameBasedHashCodeHolder
 {
    public static int maxDoF = 6;
 
@@ -411,7 +411,7 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
     * Updates {@code afterJointFrame} of this joint to take into consideration the new joint
     * configuration. Then calls {@link RigidBody#updateFramesRecursively()} which in its turn
     * updates its {@code bodyFixedFrame} and then {@link #updateFramesRecursively()} for all of its
-    * {@link InverseDynamicsJoint} child.
+    * {@link JointBasics} child.
     * <p>
     * As a result, this method will update all the reference frames of the subtree starting from
     * this joint.
@@ -442,14 +442,14 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
     * 
     * @param originalJoint the joint to copy the actual (not desired) state of. Not modified.
     */
-   public abstract void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint);
+   public abstract void setJointPositionVelocityAndAcceleration(JointBasics originalJoint);
 
    /**
     * Copies the desired acceleration of {@code originalJoint} into this joint
     * 
     * @param originalJoint the joint to copy the desired acceleration of. Not modified.
     */
-   public abstract void setQddDesired(InverseDynamicsJoint originalJoint);
+   public abstract void setQddDesired(JointBasics originalJoint);
 
    public abstract void calculateJointStateChecksum(GenericCRC32 checksum);
 

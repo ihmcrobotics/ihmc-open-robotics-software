@@ -8,7 +8,7 @@ import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointHolderFactory;
 import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -53,8 +53,8 @@ public class RegistrySendBufferBuilder implements us.ihmc.concurrent.Builder<Reg
 
       if (rootBody != null)
       {
-         InverseDynamicsJoint[] joints = ScrewTools.computeSubtreeJoints(rootBody);
-         for (InverseDynamicsJoint joint : joints)
+         JointBasics[] joints = ScrewTools.computeSubtreeJoints(rootBody);
+         for (JointBasics joint : joints)
          {
             JointHolder jointHolder = JointHolderFactory.getJointHolder(joint);
             jointHolders.add(jointHolder);

@@ -58,7 +58,7 @@ public class PointJacobianTest
       pointJacobian.set(geometricJacobian, point);
       pointJacobian.compute();
 
-      InverseDynamicsJoint[] joints = geometricJacobian.getJointsInOrder();
+      JointBasics[] joints = geometricJacobian.getJointsInOrder();
 
       DenseMatrix64F jointVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(joints), 1);
       ScrewTools.getJointVelocitiesMatrix(joints, jointVelocities);

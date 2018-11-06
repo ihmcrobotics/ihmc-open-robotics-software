@@ -42,7 +42,7 @@ public class GeometricJacobianCalculator
    private RigidBody base;
    /** The end-effector is the successor of the last joint that the Jacobian considers. */
    private RigidBody endEffector;
-   private final List<InverseDynamicsJoint> jointsFromBaseToEndEffector = new ArrayList<>();
+   private final List<JointBasics> jointsFromBaseToEndEffector = new ArrayList<>();
    private ReferenceFrame jacobianFrame;
 
    private int numberOfDegreesOfFreedom;
@@ -131,7 +131,7 @@ public class GeometricJacobianCalculator
 
       while (currentBody != base)
       {
-         InverseDynamicsJoint joint = currentBody.getParentJoint();
+         JointBasics joint = currentBody.getParentJoint();
          jointsFromBaseToEndEffector.set(index--, joint);
          currentBody = joint.getPredecessor();
       }
@@ -155,7 +155,7 @@ public class GeometricJacobianCalculator
     *            {@code joints[joints.length - 1].getPredecessor()} is not the ancestor of
     *            {@code joints[0].getSuccessor()}.
     */
-   public void setKinematicChain(InverseDynamicsJoint[] joints)
+   public void setKinematicChain(JointBasics[] joints)
    {
       base = joints[0].getPredecessor();
       endEffector = joints[joints.length - 1].getSuccessor();
@@ -224,7 +224,7 @@ public class GeometricJacobianCalculator
 
       for (int jointIndex = 0; jointIndex < jointsFromBaseToEndEffector.size(); jointIndex++)
       {
-         InverseDynamicsJoint joint = jointsFromBaseToEndEffector.get(jointIndex);
+         JointBasics joint = jointsFromBaseToEndEffector.get(jointIndex);
 
          for (int dofIndex = 0; dofIndex < joint.getDegreesOfFreedom(); dofIndex++)
          {
@@ -284,7 +284,7 @@ public class GeometricJacobianCalculator
 
       while (currentBody != base)
       {
-         InverseDynamicsJoint joint = currentBody.getParentJoint();
+         JointBasics joint = currentBody.getParentJoint();
          ReferenceFrame currentBodyFrame = currentBody.getBodyFixedFrame();
          RigidBody predecessor = joint.getPredecessor();
          ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
@@ -453,7 +453,7 @@ public class GeometricJacobianCalculator
     * 
     * @return the list of joints.
     */
-   public List<InverseDynamicsJoint> getJointsFromBaseToEndEffector()
+   public List<JointBasics> getJointsFromBaseToEndEffector()
    {
       return jointsFromBaseToEndEffector;
    }
@@ -567,7 +567,7 @@ public class GeometricJacobianCalculator
 
       while (currentBody != base)
       {
-         InverseDynamicsJoint joint = currentBody.getParentJoint();
+         JointBasics joint = currentBody.getParentJoint();
          builder.append(joint.getClass().getSimpleName() + " " + joint.getName() + "\n");
          currentBody = joint.getPredecessor();
       }

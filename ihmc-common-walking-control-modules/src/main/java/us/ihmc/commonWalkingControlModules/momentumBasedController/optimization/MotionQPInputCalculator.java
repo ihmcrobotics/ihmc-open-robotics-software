@@ -26,7 +26,7 @@ import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -265,7 +265,7 @@ public class MotionQPInputCalculator
 
       // Dealing with the primary base:
       RigidBody primaryBase = commandToConvert.getPrimaryBase();
-      List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+      List<JointBasics> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
@@ -285,7 +285,7 @@ public class MotionQPInputCalculator
          boolean isJointUpstreamOfPrimaryBase = false;
          for (int i = jointsUsedInTask.size() - 1; i >= 0; i--)
          {
-            InverseDynamicsJoint joint = jointsUsedInTask.get(i);
+            JointBasics joint = jointsUsedInTask.get(i);
 
             if (joint.getSuccessor() == primaryBase)
                isJointUpstreamOfPrimaryBase = true;
@@ -380,7 +380,7 @@ public class MotionQPInputCalculator
 
       // Dealing with the primary base:
       RigidBody primaryBase = commandToConvert.getPrimaryBase();
-      List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+      List<JointBasics> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
@@ -400,7 +400,7 @@ public class MotionQPInputCalculator
          boolean isJointUpstreamOfPrimaryBase = false;
          for (int i = jointsUsedInTask.size() - 1; i >= 0; i--)
          {
-            InverseDynamicsJoint joint = jointsUsedInTask.get(i);
+            JointBasics joint = jointsUsedInTask.get(i);
 
             if (joint.getSuccessor() == primaryBase)
                isJointUpstreamOfPrimaryBase = true;
@@ -539,7 +539,7 @@ public class MotionQPInputCalculator
       int row = 0;
       for (int jointIndex = 0; jointIndex < commandToConvert.getNumberOfJoints(); jointIndex++)
       {
-         InverseDynamicsJoint joint = commandToConvert.getJoint(jointIndex);
+         JointBasics joint = commandToConvert.getJoint(jointIndex);
          double weight = commandToConvert.getWeight(jointIndex);
          int[] columns = jointIndexHandler.getJointIndices(joint);
          if (columns == null)
@@ -579,7 +579,7 @@ public class MotionQPInputCalculator
       int row = 0;
       for (int jointIndex = 0; jointIndex < commandToConvert.getNumberOfJoints(); jointIndex++)
       {
-         InverseDynamicsJoint joint = commandToConvert.getJoint(jointIndex);
+         JointBasics joint = commandToConvert.getJoint(jointIndex);
          double weight = commandToConvert.getWeight(jointIndex);
          int[] columns = jointIndexHandler.getJointIndices(joint);
          if (columns == null)

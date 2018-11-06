@@ -13,7 +13,7 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 
-public interface FloatingInverseDynamicsJoint extends InverseDynamicsJoint
+public interface FloatingInverseDynamicsJoint extends JointBasics
 {
    public abstract void setRotation(double yaw, double pitch, double roll);
 

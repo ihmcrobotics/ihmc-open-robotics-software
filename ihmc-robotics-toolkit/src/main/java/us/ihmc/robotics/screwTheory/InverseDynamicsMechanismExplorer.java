@@ -25,12 +25,12 @@ public class InverseDynamicsMechanismExplorer
       printLinkInformation(rootbody, buffer);
    }
 
-   private void printJointInformation(InverseDynamicsJoint joint, StringBuffer buffer)
+   private void printJointInformation(JointBasics joint, StringBuffer buffer)
    {
       String jointName = joint.getName();
 
       buffer.append("Joint name = " + jointName + "\n");
-      InverseDynamicsJoint parentJoint = joint.getPredecessor().getParentJoint();
+      JointBasics parentJoint = joint.getPredecessor().getParentJoint();
       if (parentJoint == null)
       {
          buffer.append("Root joint\n");
@@ -99,7 +99,7 @@ public class InverseDynamicsMechanismExplorer
    private void printLinkInformation(RigidBody link, StringBuffer buffer)
    {
       SpatialInertiaBasics inertia = link.getInertia();
-      InverseDynamicsJoint parentJoint = link.getParentJoint();
+      JointBasics parentJoint = link.getParentJoint();
       if (inertia != null)
       {
          double mass = inertia.getMass();
@@ -115,9 +115,9 @@ public class InverseDynamicsMechanismExplorer
          buffer.append("momentOfInertia = \n" + momentOfInertia + "\n");
       }
 
-      List<InverseDynamicsJoint> childrenJoints = link.getChildrenJoints();
+      List<JointBasics> childrenJoints = link.getChildrenJoints();
 
-      for (InverseDynamicsJoint childJoint : childrenJoints)
+      for (JointBasics childJoint : childrenJoints)
       {
          String parentJointName;
          if (parentJoint != null)

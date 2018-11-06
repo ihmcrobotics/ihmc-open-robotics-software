@@ -15,7 +15,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -62,9 +62,9 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
    private final GeometricJacobian jacobian;
    private final double lambdaLeastSquares;
    
-   public static NumericalInverseKinematicsCalculator createIKCalculator(InverseDynamicsJoint[] jointsToControl, int maxIterations)
+   public static NumericalInverseKinematicsCalculator createIKCalculator(JointBasics[] jointsToControl, int maxIterations)
    {
-      InverseDynamicsJoint[] cloneOfControlledJoints = ScrewTools.cloneJointPath(jointsToControl);
+      JointBasics[] cloneOfControlledJoints = ScrewTools.cloneJointPath(jointsToControl);
 
       int numberOfDoFs = cloneOfControlledJoints.length;
       RigidBody cloneOfEndEffector = cloneOfControlledJoints[numberOfDoFs - 1].getSuccessor();

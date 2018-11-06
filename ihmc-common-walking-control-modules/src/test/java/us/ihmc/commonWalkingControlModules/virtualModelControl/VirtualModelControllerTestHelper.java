@@ -41,7 +41,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -495,7 +495,7 @@ public class VirtualModelControllerTestHelper
 
       return ret;
    }
-   private static RigidBody copyLinkAsRigidBody(Link link, InverseDynamicsJoint currentInverseDynamicsJoint, String bodyName)
+   private static RigidBody copyLinkAsRigidBody(Link link, JointBasics currentInverseDynamicsJoint, String bodyName)
    {
       Vector3D comOffset = new Vector3D();
       link.getComOffset(comOffset);
@@ -726,7 +726,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public InverseDynamicsJoint getLidarJoint(String lidarName)
+      public JointBasics getLidarJoint(String lidarName)
       {
          return null;
       }
@@ -1009,7 +1009,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public InverseDynamicsJoint getLidarJoint(String lidarName)
+      public JointBasics getLidarJoint(String lidarName)
       {
          return null;
       }
@@ -1183,7 +1183,7 @@ public class VirtualModelControllerTestHelper
       private final RigidBody hand2;
       private final RigidBody shoulderDifferentialYaw;
       private final SideDependentList<RigidBody> hands = new SideDependentList<>();
-      private final List<InverseDynamicsJoint> joints = new ArrayList<>();
+      private final List<JointBasics> joints = new ArrayList<>();
 
       private ExternalForcePoint externalForcePoint1;
       private ExternalForcePoint externalForcePoint2;
@@ -1227,7 +1227,7 @@ public class VirtualModelControllerTestHelper
          joints.add(hand1.getParentJoint());
          joints.add(hand2.getParentJoint());
 
-         InverseDynamicsJoint[] jointArray = new InverseDynamicsJoint[joints.size()];
+         JointBasics[] jointArray = new JointBasics[joints.size()];
          joints.toArray(jointArray);
          oneDoFJoints = ScrewTools.filterJoints(jointArray, OneDoFJoint.class);
 
@@ -1344,7 +1344,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public InverseDynamicsJoint getLidarJoint(String lidarName)
+      public JointBasics getLidarJoint(String lidarName)
       {
          return null;
       }
@@ -1530,7 +1530,7 @@ public class VirtualModelControllerTestHelper
          elevatorFrame = elevator.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), elevator);
 
-         List<InverseDynamicsJoint> joints = new ArrayList<>();
+         List<JointBasics> joints = new ArrayList<>();
 
          upperArm = createUpperArm(elevator);
          joints.add(upperArm.getParentJoint());
@@ -1551,7 +1551,7 @@ public class VirtualModelControllerTestHelper
          joints.add(hand1.getParentJoint());
          joints.add(hand2.getParentJoint());
 
-         InverseDynamicsJoint[] jointArray = new InverseDynamicsJoint[joints.size()];
+         JointBasics[] jointArray = new JointBasics[joints.size()];
          joints.toArray(jointArray);
          oneDoFJoints = ScrewTools.filterJoints(jointArray, OneDoFJoint.class);
 
@@ -1668,7 +1668,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public InverseDynamicsJoint getLidarJoint(String lidarName)
+      public JointBasics getLidarJoint(String lidarName)
       {
          return null;
       }
@@ -1909,7 +1909,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public InverseDynamicsJoint getLidarJoint(String lidarName)
+      public JointBasics getLidarJoint(String lidarName)
       {
          return null;
       }
@@ -2456,7 +2456,7 @@ public class VirtualModelControllerTestHelper
    {
       private final YoVariableRegistry registry = new YoVariableRegistry("controller");
 
-      private final Map<InverseDynamicsJoint, YoDouble> yoJointTorques = new HashMap<>();
+      private final Map<JointBasics, YoDouble> yoJointTorques = new HashMap<>();
 
       private final SCSRobotFromInverseDynamicsRobotModel scsRobot;
       private final FullRobotModel controllerModel;
@@ -2484,7 +2484,7 @@ public class VirtualModelControllerTestHelper
          this.selectionMatrix = selectionMatrix;
          this.yoDesiredWrenches = yoDesiredWrenches;
 
-         for (InverseDynamicsJoint joint : controlledJoints)
+         for (JointBasics joint : controlledJoints)
             yoJointTorques.put(joint, new YoDouble(joint.getName() + "solutionTorque", registry));
 
          for (ForcePointController forcePointController : forcePointControllers)

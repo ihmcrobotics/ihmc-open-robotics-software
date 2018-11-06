@@ -37,7 +37,7 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolder
 {
    private final ReferenceFrame matrixFrame;
-   private final InverseDynamicsJoint[] joints;
+   private final JointBasics[] joints;
    private final RecursionStep initialRecursionStep;
    private final Map<RigidBody, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
 
@@ -70,12 +70,12 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       this(ScrewTools.computeSubtreeJoints(rootBody), matrixFrame);
    }
 
-   public CentroidalMomentumRateTermCalculator(List<? extends InverseDynamicsJoint> jointsToConsider, ReferenceFrame matrixFrame)
+   public CentroidalMomentumRateTermCalculator(List<? extends JointBasics> jointsToConsider, ReferenceFrame matrixFrame)
    {
-      this(jointsToConsider.toArray(new InverseDynamicsJoint[jointsToConsider.size()]), matrixFrame);
+      this(jointsToConsider.toArray(new JointBasics[jointsToConsider.size()]), matrixFrame);
    }
 
-   public CentroidalMomentumRateTermCalculator(InverseDynamicsJoint[] jointsToConsider, ReferenceFrame matrixFrame)
+   public CentroidalMomentumRateTermCalculator(JointBasics[] jointsToConsider, ReferenceFrame matrixFrame)
    {
       this.matrixFrame = matrixFrame;
 
@@ -96,9 +96,9 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       centerOfMassAcceleration = new FrameVector3D(matrixFrame);
    }
 
-   private void buildMultiBodyTree(RecursionStep parent, Collection<? extends InverseDynamicsJoint> jointsToConsider)
+   private void buildMultiBodyTree(RecursionStep parent, Collection<? extends JointBasics> jointsToConsider)
    {
-      for (InverseDynamicsJoint childJoint : parent.rigidBody.getChildrenJoints())
+      for (JointBasics childJoint : parent.rigidBody.getChildrenJoints())
       {
          if (!jointsToConsider.contains(childJoint))
             continue;
@@ -169,7 +169,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
 
       biasSpatialForce.setToZero(matrixFrame);
 
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          RecursionStep recursionStep = rigidBodyToRecursionStepMap.get(joint.getSuccessor());
 
@@ -213,14 +213,14 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       return centroidalMomentumMatrix;
    }
 
-   public DenseMatrix64F getCentroidalMomentumMatrix(InverseDynamicsJoint[] joints)
+   public DenseMatrix64F getCentroidalMomentumMatrix(JointBasics[] joints)
    {
       DenseMatrix64F centroidalMomentumMatrix = new DenseMatrix64F(6, ScrewTools.computeDegreesOfFreedom(joints));
       getCentroidalMomentumMatrix(joints, centroidalMomentumMatrix);
       return centroidalMomentumMatrix;
    }
 
-   public void getCentroidalMomentumMatrix(InverseDynamicsJoint[] joints, DenseMatrix64F centroidalMomentumMatrixToPack)
+   public void getCentroidalMomentumMatrix(JointBasics[] joints, DenseMatrix64F centroidalMomentumMatrixToPack)
    {
       if (joints.length != this.joints.length)
          throw new IllegalArgumentException("Incompatible array of joints.");
@@ -232,7 +232,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
 
       int columnIndex = 0;
 
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          RigidBody successor = joint.getSuccessor();
          RecursionStep recursionStep = rigidBodyToRecursionStepMap.get(successor);
@@ -243,14 +243,14 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       }
    }
 
-   public DenseMatrix64F getCentroidalMomentumMatrix(List<? extends InverseDynamicsJoint> joints)
+   public DenseMatrix64F getCentroidalMomentumMatrix(List<? extends JointBasics> joints)
    {
       DenseMatrix64F centroidalMomentumMatrix = new DenseMatrix64F(6, ScrewTools.computeDegreesOfFreedom(joints));
       getCentroidalMomentumMatrix(joints, centroidalMomentumMatrix);
       return centroidalMomentumMatrix;
    }
 
-   public void getCentroidalMomentumMatrix(List<? extends InverseDynamicsJoint> joints, DenseMatrix64F centroidalMomentumMatrixToPack)
+   public void getCentroidalMomentumMatrix(List<? extends JointBasics> joints, DenseMatrix64F centroidalMomentumMatrixToPack)
    {
       updateCentroidalMomentum();
 
@@ -259,7 +259,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
 
       int columnIndex = 0;
 
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          RigidBody successor = joint.getSuccessor();
          RecursionStep recursionStep = rigidBodyToRecursionStepMap.get(successor);
@@ -324,7 +324,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       momentumRateToPack.add(getBiasSpatialForce());
    }
 
-   public void getMomentumRate(InverseDynamicsJoint[] joints, DenseMatrix64F jointAccelerationMatrix, SpatialForce momentumRateToPack)
+   public void getMomentumRate(JointBasics[] joints, DenseMatrix64F jointAccelerationMatrix, SpatialForce momentumRateToPack)
    {
       CommonOps.mult(getCentroidalMomentumMatrix(joints), jointAccelerationMatrix, momentumMatrix);
       momentumRateToPack.setToZero(matrixFrame);
@@ -338,7 +338,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
       if (!isTotalMassUpToDate)
       {
          totalMass = 0.0;
-         for (InverseDynamicsJoint joint : joints)
+         for (JointBasics joint : joints)
             totalMass += joint.getSuccessor().getInertia().getMass();
          isTotalMassUpToDate = true;
       }
@@ -488,7 +488,7 @@ public class CentroidalMomentumRateTermCalculator implements ReferenceFrameHolde
          return rigidBody.isRootBody();
       }
 
-      public InverseDynamicsJoint getJoint()
+      public JointBasics getJoint()
       {
          return rigidBody.getParentJoint();
       }

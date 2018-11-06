@@ -121,7 +121,7 @@ public class MomentumCalculatorTest
       }
 
       ScrewTestTools.createRandomChainRobot("randomChain", joints, elevator, jointAxes, random);
-      InverseDynamicsJoint[] jointsArray = new RevoluteJoint[joints.size()];
+      JointBasics[] jointsArray = new RevoluteJoint[joints.size()];
       joints.toArray(jointsArray);
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("comFrame", world, elevator);
 

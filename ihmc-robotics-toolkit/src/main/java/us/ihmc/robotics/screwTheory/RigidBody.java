@@ -54,7 +54,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     * robot.
     * </p>
     */
-   private final InverseDynamicsJoint parentJoint;
+   private final JointBasics parentJoint;
    /**
     * The children joints are all the joints that are directly connected to a rigid-body and located
     * between the rigid-body and any end-effector of the robot.
@@ -62,8 +62,8 @@ public class RigidBody implements NameBasedHashCodeHolder
     * There is no children joint when this rigid-body is an end-effector.
     * </p>
     */
-   private final List<InverseDynamicsJoint> childrenJoints = new ArrayList<>();
-   private final List<InverseDynamicsJoint> childrenJointsReadOnly = Collections.unmodifiableList(childrenJoints);
+   private final List<JointBasics> childrenJoints = new ArrayList<>();
+   private final List<JointBasics> childrenJointsReadOnly = Collections.unmodifiableList(childrenJoints);
    /**
     * The name of this rigid-body. It is important that this name is unique among all the
     * rigid-bodies of a robot.
@@ -137,7 +137,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     *           part corresponds to the position of this rigid-body center of mass position
     *           expressed in {@code parentJoint.getFrameAfterJointFrame()}. Not modified.
     */
-   public RigidBody(String bodyName, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
+   public RigidBody(String bodyName, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
    {
       if (bodyName == null)
          throw new IllegalArgumentException("Name can not be null");
@@ -198,7 +198,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     *
     * @return the reference to the parent joint.
     */
-   public InverseDynamicsJoint getParentJoint()
+   public JointBasics getParentJoint()
    {
       return parentJoint;
    }
@@ -215,7 +215,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     *
     * @param joint the new child joint to register to this rigid-body.
     */
-   public void addChildJoint(InverseDynamicsJoint joint)
+   public void addChildJoint(JointBasics joint)
    {
       childrenJoints.add(joint);
    }
@@ -230,7 +230,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     *
     * @return all the children joints of this rigid-body.
     */
-   public List<InverseDynamicsJoint> getChildrenJoints()
+   public List<JointBasics> getChildrenJoints()
    {
       return childrenJointsReadOnly;
    }

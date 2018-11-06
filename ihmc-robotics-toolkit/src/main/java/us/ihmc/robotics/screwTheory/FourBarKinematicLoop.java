@@ -512,7 +512,7 @@ public class FourBarKinematicLoop
    private class FourBarKinematicLoopJacobianSolver
    {
       private final GeometricJacobian geometricJacobian;
-      private final InverseDynamicsJoint[] jointsForJacobianCalculation;
+      private final JointBasics[] jointsForJacobianCalculation;
       private final ReferenceFrame geometricJacobianFrame;
       private final DenseMatrix64F geometricJacobianToColumnJacobian;
 
@@ -524,26 +524,26 @@ public class FourBarKinematicLoop
          this.geometricJacobian = new GeometricJacobian(jointsForJacobianCalculation, geometricJacobianFrame);
       }
 
-      private InverseDynamicsJoint[] getJointsForJacobianCalculation()
+      private JointBasics[] getJointsForJacobianCalculation()
       {
-         InverseDynamicsJoint[] joints;
+         JointBasics[] joints;
 
          if (fourBarOutputJoint == passiveJointD)
          {
-            joints = new InverseDynamicsJoint[3];
+            joints = new JointBasics[3];
             joints[0] = masterJointA;
             joints[1] = passiveJointB;
             joints[2] = passiveJointC;
          }
          else if (fourBarOutputJoint == passiveJointC)
          {
-            joints = new InverseDynamicsJoint[2];
+            joints = new JointBasics[2];
             joints[0] = masterJointA;
             joints[1] = passiveJointB;
          }
          else
          {
-            joints = new InverseDynamicsJoint[1];
+            joints = new JointBasics[1];
             joints[0] = masterJointA;
          }
 
@@ -586,7 +586,7 @@ public class FourBarKinematicLoop
          }
       }
 
-      private DenseMatrix64F createGeometricJacobianToColumnJacobianMatrix(InverseDynamicsJoint[] jointsForJacobianCalculation)
+      private DenseMatrix64F createGeometricJacobianToColumnJacobianMatrix(JointBasics[] jointsForJacobianCalculation)
       {
          int numberOfJointsForJacobianCalculation = jointsForJacobianCalculation.length;
 

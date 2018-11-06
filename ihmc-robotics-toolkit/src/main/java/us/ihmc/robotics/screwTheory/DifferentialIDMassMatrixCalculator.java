@@ -18,19 +18,19 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
 {
    private final InverseDynamicsCalculator idCalculator;
-   private final InverseDynamicsJoint[] jointsInOrder;
+   private final JointBasics[] jointsInOrder;
    private final DenseMatrix64F massMatrix;
    private final DenseMatrix64F storedJointDesiredAccelerations;
    private final DenseMatrix64F tmpDesiredJointAccelerationsMatrix;
    private final DenseMatrix64F tmpTauMatrix;
-   private final LinkedHashMap<InverseDynamicsJoint, Wrench> storedJointWrenches = new LinkedHashMap<InverseDynamicsJoint, Wrench>();
+   private final LinkedHashMap<JointBasics, Wrench> storedJointWrenches = new LinkedHashMap<JointBasics, Wrench>();
    private final DenseMatrix64F storedJointVelocities;
    
    private final int totalNumberOfDoFs;
 
    public DifferentialIDMassMatrixCalculator(ReferenceFrame inertialFrame, RigidBody rootBody)
    {
-      ArrayList<InverseDynamicsJoint> zeroJointToIgnore = new ArrayList<InverseDynamicsJoint>();
+      ArrayList<JointBasics> zeroJointToIgnore = new ArrayList<JointBasics>();
       SpatialAcceleration zeroRootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(rootBody, 0.0);
       
       idCalculator = new InverseDynamicsCalculator(rootBody, zeroRootAcceleration, zeroJointToIgnore, false, true);
@@ -43,7 +43,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
       tmpDesiredJointAccelerationsMatrix = new DenseMatrix64F(totalNumberOfDoFs, 1);
       tmpTauMatrix = new DenseMatrix64F(totalNumberOfDoFs, 1);
       
-      for (InverseDynamicsJoint joint : jointsInOrder)
+      for (JointBasics joint : jointsInOrder)
       {
          ReferenceFrame bodyFixedFrame = joint.getSuccessor().getBodyFixedFrame();
          Wrench jointWrench = new Wrench(bodyFixedFrame, bodyFixedFrame);
@@ -77,7 +77,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
 
    private void setDesiredAccelerationsToZero()
    {
-      for (InverseDynamicsJoint joint : jointsInOrder)
+      for (JointBasics joint : jointsInOrder)
       {
          joint.setDesiredAccelerationToZero();
          joint.setVelocity(new DenseMatrix64F(joint.getDegreesOfFreedom(), 1), 0);
@@ -88,7 +88,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
    {
       ScrewTools.getDesiredJointAccelerationsMatrix(jointsInOrder, storedJointDesiredAccelerations);
       ScrewTools.getJointVelocitiesMatrix(jointsInOrder, storedJointVelocities);
-      for (InverseDynamicsJoint joint : jointsInOrder)
+      for (JointBasics joint : jointsInOrder)
       {
          DenseMatrix64F tauMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
          joint.getTauMatrix(tauMatrix);
@@ -105,7 +105,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
       ScrewTools.setDesiredAccelerations(jointsInOrder, storedJointDesiredAccelerations);
       ScrewTools.setVelocities(jointsInOrder, storedJointVelocities);
       
-      for (InverseDynamicsJoint joint : jointsInOrder)
+      for (JointBasics joint : jointsInOrder)
       {
          joint.setTorqueFromWrench(storedJointWrenches.get(joint));
       }
@@ -124,7 +124,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
    }
 
    @Override
-   public InverseDynamicsJoint[] getJointsInOrder()
+   public JointBasics[] getJointsInOrder()
    {
       return jointsInOrder;
    }

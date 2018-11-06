@@ -355,7 +355,7 @@ public class TwistCalculator
           * while updating twists.
           */
          ReferenceFrame bodyFrame = body.getBodyFixedFrame();
-         InverseDynamicsJoint parentJoint = body.getParentJoint();
+         JointBasics parentJoint = body.getParentJoint();
          RigidBody predecessor = parentJoint.getPredecessor();
          TwistReadOnly twistOfPredecessor = computeOrGetTwistOfBody(predecessor);
          twist = assignAndGetEmptyTwist(body);

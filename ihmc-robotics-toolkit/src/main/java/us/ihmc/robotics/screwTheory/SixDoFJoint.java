@@ -381,7 +381,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
       return RotationTools.QUATERNION_SIZE + positionSize;
    }
 
-   private SixDoFJoint checkAndGetAsSiXDoFJoint(InverseDynamicsJoint originalJoint)
+   private SixDoFJoint checkAndGetAsSiXDoFJoint(JointBasics originalJoint)
    {
       if (originalJoint instanceof SixDoFJoint)
       {
@@ -394,7 +394,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint)
+   public void setJointPositionVelocityAndAcceleration(JointBasics originalJoint)
    {
       SixDoFJoint sixDoFOriginalJoint = checkAndGetAsSiXDoFJoint(originalJoint);
       setPosition(sixDoFOriginalJoint.jointTranslation);
@@ -408,7 +408,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setQddDesired(InverseDynamicsJoint originalJoint)
+   public void setQddDesired(JointBasics originalJoint)
    {
       SixDoFJoint sixDoFOriginalJoint = checkAndGetAsSiXDoFJoint(originalJoint);
       jointAccelerationDesired.getAngularPart().set(sixDoFOriginalJoint.jointAccelerationDesired.getAngularPart());

@@ -21,7 +21,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -329,7 +329,7 @@ public class FullRobotModelTestTools
          return neckJoints.get(neckJointName);
       }
 
-      @Override public InverseDynamicsJoint getLidarJoint(String lidarName)
+      @Override public JointBasics getLidarJoint(String lidarName)
       {
          return null;
       }
@@ -389,7 +389,7 @@ public class FullRobotModelTestTools
       @Override public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
       {
          oneDoFJointsToPack.clear();
-         InverseDynamicsJoint parent = oneDoFJointAtEndOfChain;
+         JointBasics parent = oneDoFJointAtEndOfChain;
 
          while (parent != rootJoint)
          {

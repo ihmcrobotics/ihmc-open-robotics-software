@@ -11,7 +11,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -80,7 +80,7 @@ public class PlaybackPoseSequenceReader
          jointNamesArray = new String[jointNames.size()];
          jointNames.toArray(jointNamesArray);
 
-         InverseDynamicsJoint[] inverseDynamicsJoints = ScrewTools.findJointsWithNames(allJoints, jointNamesArray);
+         JointBasics[] inverseDynamicsJoints = ScrewTools.findJointsWithNames(allJoints, jointNamesArray);
          OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(inverseDynamicsJoints, OneDoFJoint.class);
          double[] jointAngles = new double[oneDoFJoints.length];
 

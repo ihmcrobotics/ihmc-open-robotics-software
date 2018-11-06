@@ -22,7 +22,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -40,7 +40,7 @@ public class InverseKinematicsOptimizationControlModule
    private final WholeBodyControllerBoundCalculator boundCalculator;
 
    private final OneDoFJoint[] oneDoFJoints;
-   private final InverseDynamicsJoint[] jointsToOptimizeFor;
+   private final JointBasics[] jointsToOptimizeFor;
    private final int numberOfDoFs;
 
    private final Map<OneDoFJoint, YoDouble> jointMaximumVelocities = new HashMap<>();

@@ -15,7 +15,7 @@ import us.ihmc.robotics.referenceFrames.ZUpPreserveYReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -186,7 +186,7 @@ public class CenterOfMassCalibrationTool implements Updatable
    {
       if (DEBUG) System.out.println("\nCenterOfMassCalibrationTool: rootBody = " + rootBody);
 
-      InverseDynamicsJoint parentJoint = rootBody.getParentJoint();
+      JointBasics parentJoint = rootBody.getParentJoint();
       if (DEBUG) System.out.println("parentJoint = " + parentJoint);
 
       ReferenceFrame jointFrame = parentJoint.getFrameAfterJoint();

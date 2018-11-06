@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.robotController.RawSensorReader;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
@@ -97,9 +97,9 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
 
    private void createJointRelations(FloatingRootJointRobot robot, FloatingInverseDynamicsJoint rootJoint)
    {
-      InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor());
+      JointBasics[] jointsArray = ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor());
 
-      for (InverseDynamicsJoint joint : jointsArray)
+      for (JointBasics joint : jointsArray)
       {
          if (joint instanceof OneDoFJoint)
          {

@@ -9,7 +9,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
@@ -90,7 +90,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
 
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
-      for (InverseDynamicsJoint joint : ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()))
+      for (JointBasics joint : ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()))
       {
          if (joint instanceof OneDoFJoint)
          {

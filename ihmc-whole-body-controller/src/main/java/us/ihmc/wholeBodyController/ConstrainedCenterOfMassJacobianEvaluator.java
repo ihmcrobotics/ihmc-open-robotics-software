@@ -23,7 +23,7 @@ import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ConstrainedCenterOfMassJacobianCalculator;
 import us.ihmc.robotics.screwTheory.ConstrainedCentroidalMomentumMatrixCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -56,12 +56,12 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
    private final YoDouble constrainedCMMConditionNumber = new YoDouble("constrCMMCondition", registry);
    private final YoDouble constrainedCMMSigmaMin = new YoDouble("constrCMMSigmaMin", registry);
 
-   private final InverseDynamicsJoint[] allJoints;
+   private final JointBasics[] allJoints;
    private final DenseMatrix64F v;
    private final DenseMatrix64F vActuated;
    private final DenseMatrix64F tempCoMVelocityMatrix = new DenseMatrix64F(3, 1);
    private final Vector3D tempCoMVelocity = new Vector3D();
-   private final Collection<InverseDynamicsJoint> actuatedJoints;
+   private final Collection<JointBasics> actuatedJoints;
    private final ColumnSpaceProjector projector;
 
    private final YoFrameVector3D centroidalLinearMomentum;
@@ -106,18 +106,18 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
       constrainedCenterOfMassJacobianCalculator.addConstraint(fullRobotModel.getPelvis(), orientationSelectionMatrix);
       constrainedCentroidalMomentumMatrixCalculator.addConstraint(fullRobotModel.getPelvis(), orientationSelectionMatrix);
 
-      actuatedJoints = new ArrayList<InverseDynamicsJoint>();
+      actuatedJoints = new ArrayList<JointBasics>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         InverseDynamicsJoint[] jointPath = ScrewTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getFoot(robotSide));
+         JointBasics[] jointPath = ScrewTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getFoot(robotSide));
          actuatedJoints.addAll(Arrays.asList(jointPath));
       }
 
 //    actuatedJoints.addAll(Arrays.asList(allJoints));
       actuatedJoints.remove(fullRobotModel.getRootJoint());
 
-      for (InverseDynamicsJoint actuatedJoint : actuatedJoints)
+      for (JointBasics actuatedJoint : actuatedJoints)
       {
          constrainedCenterOfMassJacobianCalculator.addActuatedJoint(actuatedJoint);
          constrainedCentroidalMomentumMatrixCalculator.addActuatedJoint(actuatedJoint);

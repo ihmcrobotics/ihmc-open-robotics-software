@@ -107,7 +107,7 @@ public class GeometricJacobianTest
       RandomFloatingChain floatingChain = new RandomFloatingChain(random, numberOfJoints);
       SixDoFJoint floatingJoint = floatingChain.getRootJoint();
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
-      List<InverseDynamicsJoint> joints = floatingChain.getInverseDynamicsJoints();
+      List<JointBasics> joints = floatingChain.getInverseDynamicsJoints();
 
       RigidBody rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
 

@@ -8,7 +8,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.JointBasics;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.util.RobotController;
 
@@ -22,15 +22,15 @@ public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotCo
          double length)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
-      List<InverseDynamicsJoint> jointStack = new ArrayList<InverseDynamicsJoint>(rootBody.getChildrenJoints());
+      List<JointBasics> jointStack = new ArrayList<JointBasics>(rootBody.getChildrenJoints());
       while (!jointStack.isEmpty())
       {
-         InverseDynamicsJoint joint = jointStack.get(0);
+         JointBasics joint = jointStack.get(0);
          ReferenceFrame referenceFrame = joint.getSuccessor().getBodyFixedFrame();
          YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(referenceFrame, registry, false, length);
          yoGraphicsList.add(yoGraphicReferenceFrame);
          yoGraphicReferenceFrames.add(yoGraphicReferenceFrame);
-         List<InverseDynamicsJoint> childrenJoints = joint.getSuccessor().getChildrenJoints();
+         List<JointBasics> childrenJoints = joint.getSuccessor().getChildrenJoints();
          jointStack.addAll(childrenJoints);
          jointStack.remove(joint);
       }

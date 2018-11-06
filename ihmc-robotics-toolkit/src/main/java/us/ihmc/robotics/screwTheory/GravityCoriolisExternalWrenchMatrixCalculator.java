@@ -18,15 +18,15 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
 {
    private final RigidBody rootBody;
 
-   private final ArrayList<InverseDynamicsJoint> jointsToIgnore;
-   private final ArrayList<InverseDynamicsJoint> allJoints = new ArrayList<>();
+   private final ArrayList<JointBasics> jointsToIgnore;
+   private final ArrayList<JointBasics> allJoints = new ArrayList<>();
    private final ArrayList<RigidBody> allBodiesExceptRoot = new ArrayList<>();
    private final ArrayList<RigidBody> listOfBodiesWithExternalWrenches = new ArrayList<>();
 
    private final LinkedHashMap<RigidBody, Wrench> externalWrenches;
    private final LinkedHashMap<RigidBody, Wrench> netWrenches = new LinkedHashMap<>();
-   private final LinkedHashMap<InverseDynamicsJoint, Wrench> jointWrenches = new LinkedHashMap<>();
-   private final LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F> coriolisWrenches = new LinkedHashMap<>();
+   private final LinkedHashMap<JointBasics, Wrench> jointWrenches = new LinkedHashMap<>();
+   private final LinkedHashMap<JointBasics, DenseMatrix64F> coriolisWrenches = new LinkedHashMap<>();
 
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
@@ -39,21 +39,21 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
    private static final boolean DO_ACCELERATION_TERMS = false;
    private static final boolean USE_DESIRED_ACCELERATIONS = true;
 
-   public GravityCoriolisExternalWrenchMatrixCalculator(RigidBody body, ArrayList<InverseDynamicsJoint> jointsToIgnore, double gravity)
+   public GravityCoriolisExternalWrenchMatrixCalculator(RigidBody body, ArrayList<JointBasics> jointsToIgnore, double gravity)
    {
       this(body,ScrewTools.createGravitationalSpatialAcceleration(ScrewTools.getRootBody(body), gravity), new LinkedHashMap<>(), jointsToIgnore,
            DEFAULT_DO_VELOCITY_TERMS, DO_ACCELERATION_TERMS);
    }
 
    public GravityCoriolisExternalWrenchMatrixCalculator(RigidBody body, SpatialAccelerationReadOnly rootAcceleration, HashMap<RigidBody, Wrench> externalWrenches,
-                                                        ArrayList<InverseDynamicsJoint> jointsToIgnore, boolean doVelocityTerms, boolean doAccelerationTerms)
+                                                        ArrayList<JointBasics> jointsToIgnore, boolean doVelocityTerms, boolean doAccelerationTerms)
    {
       this(externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms, doAccelerationTerms,
                                                                                USE_DESIRED_ACCELERATIONS));
    }
 
    //// TODO: 12/31/16  remove explicit dependency on the spatial acceleration calculator
-   public GravityCoriolisExternalWrenchMatrixCalculator(HashMap<RigidBody, Wrench> externalWrenches, List<InverseDynamicsJoint> jointsToIgnore,
+   public GravityCoriolisExternalWrenchMatrixCalculator(HashMap<RigidBody, Wrench> externalWrenches, List<JointBasics> jointsToIgnore,
                                                         SpatialAccelerationCalculator spatialAccelerationCalculator)
    {
       this.rootBody = spatialAccelerationCalculator.getRootBody();
@@ -112,7 +112,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
    {
       for (int jointIndex = allJoints.size() - 1; jointIndex >= 0; jointIndex--)
       {
-         InverseDynamicsJoint joint = allJoints.get(jointIndex);
+         JointBasics joint = allJoints.get(jointIndex);
 
          RigidBody successor = joint.getSuccessor();
 
@@ -122,11 +122,11 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
          WrenchReadOnly externalWrench = externalWrenches.get(successor);
          jointWrench.sub(externalWrench);
 
-         List<InverseDynamicsJoint> childrenJoints = successor.getChildrenJoints();
+         List<JointBasics> childrenJoints = successor.getChildrenJoints();
 
          for (int childIndex = 0; childIndex < childrenJoints.size(); childIndex++)
          {
-            InverseDynamicsJoint child = childrenJoints.get(childIndex);
+            JointBasics child = childrenJoints.get(childIndex);
             if (!jointsToIgnore.contains(child))
             {
                WrenchReadOnly wrenchExertedOnChild = jointWrenches.get(child);
@@ -172,8 +172,8 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
 
          if (currentBody.hasChildrenJoints())
          {
-            List<InverseDynamicsJoint> childrenJoints = currentBody.getChildrenJoints();
-            for (InverseDynamicsJoint joint : childrenJoints)
+            List<JointBasics> childrenJoints = currentBody.getChildrenJoints();
+            for (JointBasics joint : childrenJoints)
             {
                if (!jointsToIgnore.contains(joint))
                {
@@ -207,7 +207,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
       }
    }
 
-   public void getJointCoriolisMatrix(InverseDynamicsJoint joint, DenseMatrix64F jointCoriolisMatrixToPack)
+   public void getJointCoriolisMatrix(JointBasics joint, DenseMatrix64F jointCoriolisMatrixToPack)
    {
       jointCoriolisMatrixToPack.set(coriolisWrenches.get(joint));
    }
