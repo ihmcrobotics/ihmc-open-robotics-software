@@ -71,7 +71,7 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
          OneDoFJoint joint = joints[i];
 
          // Only set a desired if the actuator has just come online.
-         if (!initialized.get(i) && joint.isOnline())
+         if (!initialized.get(i)) //FIXME && joint.isOnline())
          {
             jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredTorque(0.0);
             jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredPosition(joint.getQ());
