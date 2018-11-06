@@ -1,6 +1,6 @@
 package us.ihmc.robotics.sensors;
 
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 
 public class ContactSensorDefinition
 {

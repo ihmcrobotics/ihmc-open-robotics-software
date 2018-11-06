@@ -2,6 +2,7 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.List;
 
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 

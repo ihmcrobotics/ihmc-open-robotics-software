@@ -15,8 +15,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneContactStateCommand>, VirtualModelControlCommand<PlaneContactStateCommand>
 {

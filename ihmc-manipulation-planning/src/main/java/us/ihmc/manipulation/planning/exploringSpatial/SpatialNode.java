@@ -3,7 +3,7 @@ package us.ihmc.manipulation.planning.exploringSpatial;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 
 public class SpatialNode
 {
