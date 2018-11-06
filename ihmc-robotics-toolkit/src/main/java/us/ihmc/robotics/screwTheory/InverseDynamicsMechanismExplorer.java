@@ -7,7 +7,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.mecano.multiBodySystem.AbstractInverseDynamicsJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -65,7 +64,7 @@ public class InverseDynamicsMechanismExplorer
 
       else if (joint instanceof SixDoFJoint)
       {
-         printFloatingJointInformation((AbstractInverseDynamicsJoint) joint, buffer);
+         printFloatingJointInformation((SixDoFJoint) joint, buffer);
       }
 
       else
@@ -97,7 +96,7 @@ public class InverseDynamicsMechanismExplorer
       buffer.append("Joint is a Slider Joint.\n");
    }
 
-   private void printFloatingJointInformation(AbstractInverseDynamicsJoint floatingJoint, StringBuffer buffer)
+   private void printFloatingJointInformation(SixDoFJoint floatingJoint, StringBuffer buffer)
    {
       buffer.append("Joint is a Floating Joint.\n");
    }
