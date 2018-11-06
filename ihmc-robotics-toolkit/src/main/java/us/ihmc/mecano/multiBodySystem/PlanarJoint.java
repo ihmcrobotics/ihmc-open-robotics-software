@@ -67,15 +67,6 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setQddDesired(JointBasics originalJoint)
-   {
-      PlanarJoint floatingJoint = checkAndGetAsPlanarJoint(originalJoint);
-
-      jointAccelerationDesired.getAngularPart().set(floatingJoint.jointAccelerationDesired.getAngularPart());
-      jointAccelerationDesired.getLinearPart().set(floatingJoint.jointAccelerationDesired.getLinearPart());
-   }
-
-   @Override
    public void setSuccessor(RigidBodyBasics successor)
    {
       this.successor = successor;

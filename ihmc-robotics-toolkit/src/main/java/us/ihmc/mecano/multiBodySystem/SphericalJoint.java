@@ -17,11 +17,9 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
 public class SphericalJoint extends AbstractInverseDynamicsJoint
@@ -282,12 +280,5 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
       {
          throw new RuntimeException("Cannot set " + getClass().getSimpleName() + " to " + originalJoint.getClass().getSimpleName());
       }
-   }
-
-   @Override
-   public void setQddDesired(JointBasics originalJoint)
-   {
-      SphericalJoint originalSphericalJoint = checkAndGetAsSphericalJoint(originalJoint);
-      jointAngularAccelerationDesired.set(originalSphericalJoint.jointAngularAccelerationDesired);
    }
 }

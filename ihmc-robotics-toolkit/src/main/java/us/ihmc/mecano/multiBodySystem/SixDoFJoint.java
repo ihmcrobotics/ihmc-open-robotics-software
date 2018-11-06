@@ -11,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -289,13 +288,5 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
       {
          throw new RuntimeException("Cannot set " + getClass().getSimpleName() + " to " + originalJoint.getClass().getSimpleName());
       }
-   }
-
-   @Override
-   public void setQddDesired(JointBasics originalJoint)
-   {
-      SixDoFJoint sixDoFOriginalJoint = checkAndGetAsSiXDoFJoint(originalJoint);
-      jointAccelerationDesired.getAngularPart().set(sixDoFOriginalJoint.jointAccelerationDesired.getAngularPart());
-      jointAccelerationDesired.getLinearPart().set(sixDoFOriginalJoint.jointAccelerationDesired.getLinearPart());
    }
 }

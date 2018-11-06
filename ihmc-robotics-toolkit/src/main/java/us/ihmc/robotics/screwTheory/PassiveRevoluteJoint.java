@@ -6,7 +6,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 
@@ -108,12 +107,6 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    public void setJointVelocity(int rowStart, DenseMatrix64F matrix)
    {
       throw new RuntimeException("Cannot set velocity of a passive joint");
-   }
-
-   @Override
-   public void setQddDesired(JointBasics originalJoint)
-   {
-      throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
 
    public boolean isPartOfClosedKinematicLoop()
