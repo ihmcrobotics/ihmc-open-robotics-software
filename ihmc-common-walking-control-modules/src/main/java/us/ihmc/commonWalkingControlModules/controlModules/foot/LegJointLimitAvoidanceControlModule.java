@@ -177,7 +177,7 @@ public class LegJointLimitAvoidanceControlModule
       updateJointPositions();
 
       Twist rootJointTist = new Twist();
-      robotModel.getRootJoint().getJointTwist(rootJointTist);
+      rootJointTist.setIncludingFrame(robotModel.getRootJoint().getJointTwist());
       FrameVector3D linearRootJointVelocity = new FrameVector3D();
       linearRootJointVelocity.setIncludingFrame(rootJointTist.getLinearPart());
 

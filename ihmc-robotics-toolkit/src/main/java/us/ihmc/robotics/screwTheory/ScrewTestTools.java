@@ -465,7 +465,7 @@ public class ScrewTestTools
    public static void integrateVelocities(SixDoFJoint sixDoFJoint, double dt)
    {
       Twist twist = new Twist();
-      sixDoFJoint.getJointTwist(twist);
+      twist.setIncludingFrame(sixDoFJoint.getJointTwist());
 
       RotationMatrix rotation = new RotationMatrix();
       rotation.set(sixDoFJoint.getJointPose().getOrientation());
@@ -517,7 +517,7 @@ public class ScrewTestTools
    public static void setRandomVelocity(FloatingInverseDynamicsJoint rootJoint, Random random)
    {
       Twist jointTwist = new Twist();
-      rootJoint.getJointTwist(jointTwist);
+      jointTwist.setIncludingFrame(rootJoint.getJointTwist());
       jointTwist.getAngularPart().set(RandomGeometry.nextVector3D(random));
       jointTwist.getLinearPart().set(RandomGeometry.nextVector3D(random));
       rootJoint.setJointTwist(jointTwist);
@@ -526,7 +526,7 @@ public class ScrewTestTools
    public static void setRandomAcceleration(SixDoFJoint rootJoint, Random random)
    {
       SpatialAcceleration jointAcceleration = new SpatialAcceleration();
-      rootJoint.getJointAcceleration(jointAcceleration);
+      jointAcceleration.setIncludingFrame(rootJoint.getJointAcceleration());
       jointAcceleration.getAngularPart().set(RandomGeometry.nextVector3D(random));
       jointAcceleration.getLinearPart().set(RandomGeometry.nextVector3D(random));
       rootJoint.setJointAcceleration(jointAcceleration);
@@ -550,11 +550,11 @@ public class ScrewTestTools
    public static void integrateAccelerations(SixDoFJoint sixDoFJoint, double dt)
    {
       SpatialAcceleration deltaTwist = new SpatialAcceleration();
-      sixDoFJoint.getJointAcceleration(deltaTwist);
+      deltaTwist.setIncludingFrame(sixDoFJoint.getJointAcceleration());
       deltaTwist.scale(dt);
 
       Twist rootJointTwist = new Twist();
-      sixDoFJoint.getJointTwist(rootJointTwist);
+      rootJointTwist.setIncludingFrame(sixDoFJoint.getJointTwist());
       rootJointTwist.getAngularPart().add(deltaTwist.getAngularPart());
       rootJointTwist.getLinearPart().add(deltaTwist.getLinearPart());
       sixDoFJoint.setJointTwist(rootJointTwist);
@@ -563,18 +563,18 @@ public class ScrewTestTools
    public static void doubleIntegrateFromAcceleration(SixDoFJoint sixDoFJoint, double dt)
    {
       SpatialAcceleration deltaTwist = new SpatialAcceleration();
-      sixDoFJoint.getJointAcceleration(deltaTwist);
+      deltaTwist.setIncludingFrame(sixDoFJoint.getJointAcceleration());
       deltaTwist.scale(dt);
 
       Twist rootJointTwist = new Twist();
-      sixDoFJoint.getJointTwist(rootJointTwist);
+      rootJointTwist.setIncludingFrame(sixDoFJoint.getJointTwist());
       rootJointTwist.getAngularPart().add(deltaTwist.getAngularPart());
       rootJointTwist.getLinearPart().add(deltaTwist.getLinearPart());
       sixDoFJoint.setJointTwist(rootJointTwist);
 
 
       Twist deltaConfiguration = new Twist();
-      sixDoFJoint.getJointTwist(deltaConfiguration);
+      deltaConfiguration.setIncludingFrame(sixDoFJoint.getJointTwist());
 
       RotationMatrix rotation = new RotationMatrix();
       rotation.set(sixDoFJoint.getJointPose().getOrientation());
@@ -605,7 +605,7 @@ public class ScrewTestTools
       {
          DenseMatrix64F jointVelocity = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
          RandomMatrices.setRandom(jointVelocity, random);
-         joint.setVelocity(jointVelocity, 0);
+         joint.setJointVelocity(0, jointVelocity);
       }
    }
 

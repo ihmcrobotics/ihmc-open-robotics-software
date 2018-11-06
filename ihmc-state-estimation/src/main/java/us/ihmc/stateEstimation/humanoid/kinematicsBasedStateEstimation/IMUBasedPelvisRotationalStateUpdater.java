@@ -137,7 +137,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       rootJoint.setJointOrientation(yoRootJointFrameQuaternion);
 
       // Set the rootJoint twist to zero.
-      rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
+      twistRootBodyRelativeToWorld.setIncludingFrame(rootJoint.getJointTwist());
       twistRootBodyRelativeToWorld.setToZero();
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
    }
@@ -171,7 +171,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       rootJoint.setJointOrientation(yoRootJointFrameQuaternion);
 
       // Set the rootJoint twist to zero.
-      rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
+      twistRootBodyRelativeToWorld.setIncludingFrame(rootJoint.getJointTwist());
       twistRootBodyRelativeToWorld.setToZero();
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
 
@@ -271,7 +271,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       // omega_{rootJointFrame}^{rootJointFrame, world} = omega_{rootJointFrame}^{rootJointFrame, measurementLink} + omega_{measurementLink}^{rootJointFrame, world}
       angularVelocityRootJointFrameRelativeToWorld.add(angularVelocityRootJointFrameRelativeToMeasurementLink, angularVelocityMeasurementLinkRelativeToWorld);
 
-      rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
+      twistRootBodyRelativeToWorld.setIncludingFrame(rootJoint.getJointTwist());
       twistRootBodyRelativeToWorld.getAngularPart().set(angularVelocityRootJointFrameRelativeToWorld);
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
       rootJoint.updateFramesRecursively();

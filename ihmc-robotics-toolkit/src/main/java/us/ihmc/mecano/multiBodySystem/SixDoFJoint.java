@@ -56,31 +56,19 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void getJointTwist(Twist twistToPack)
-   {
-      twistToPack.setIncludingFrame(jointTwist);
-   }
-
-   @Override
-   public void getJointAcceleration(SpatialAcceleration accelerationToPack)
-   {
-      accelerationToPack.setIncludingFrame(jointAcceleration);
-   }
-
-   @Override
    public void getDesiredJointAcceleration(SpatialAcceleration accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(jointAccelerationDesired);
    }
 
    @Override
-   public void getTauMatrix(DenseMatrix64F matrix)
+   public void getJointTau(int rowStart, DenseMatrix64F matrix)
    {
       successorWrench.get(matrix);
    }
 
    @Override
-   public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getJointVelocity(int rowStart, DenseMatrix64F matrix)
    {
       jointTwist.get(rowStart, matrix);
    }
@@ -109,7 +97,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setTorqueFromWrench(Wrench jointWrench)
+   public void setJointWrench(Wrench jointWrench)
    {
       successorWrench.set(jointWrench);
    }
@@ -128,7 +116,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setJointTorque(DenseMatrix64F matrix, int rowStart)
+   public void setJointTau(int rowStart, DenseMatrix64F matrix)
    {
       successorWrench.setIncludingFrame(successorWrench.getBodyFrame(), successorWrench.getReferenceFrame(), rowStart, matrix);
    }
@@ -243,21 +231,21 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getJointConfiguration(int rowStart, DenseMatrix64F matrix)
    {
       jointRotation.get(rowStart, matrix);
       jointTranslation.get(rowStart + 4, matrix);
    }
 
    @Override
-   public void setConfiguration(DenseMatrix64F matrix, int rowStart)
+   public void setJointConfiguration(int rowStart, DenseMatrix64F matrix)
    {
       jointRotation.set(rowStart, matrix);
       jointTranslation.set(rowStart + 4, matrix);
    }
 
    @Override
-   public void setVelocity(DenseMatrix64F matrix, int rowStart)
+   public void setJointVelocity(int rowStart, DenseMatrix64F matrix)
    {
       jointTwist.setIncludingFrame(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getReferenceFrame(), rowStart, matrix);
    }

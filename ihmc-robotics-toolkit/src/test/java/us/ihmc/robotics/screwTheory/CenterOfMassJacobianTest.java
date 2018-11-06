@@ -124,7 +124,7 @@ public class CenterOfMassJacobianTest
 
       sixDoFJoint.setJointConfiguration(EuclidCoreRandomTools.nextRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
-      sixDoFJoint.getJointTwist(sixDoFJointTwist);
+      sixDoFJointTwist.setIncludingFrame(sixDoFJoint.getJointTwist());
       sixDoFJointTwist.getLinearPart().set(RandomGeometry.nextVector3D(random));
       sixDoFJointTwist.getAngularPart().set(RandomGeometry.nextVector3D(random));
       sixDoFJoint.setJointTwist(sixDoFJointTwist);
@@ -187,7 +187,7 @@ public class CenterOfMassJacobianTest
 
       ReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
       Twist rootJointTwist = new Twist();
-      rootJoint.getJointTwist(rootJointTwist);
+      rootJointTwist.setIncludingFrame(rootJoint.getJointTwist());
       FrameVector3D rootJointLinearVelocity = new FrameVector3D(rootJointFrame);
       rootJointLinearVelocity.setIncludingFrame(rootJointTwist.getLinearPart());
       

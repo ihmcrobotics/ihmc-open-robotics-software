@@ -8,6 +8,7 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
@@ -57,18 +58,10 @@ public abstract interface JointBasics extends CommonJoint
     */
    public abstract MovingReferenceFrame getFrameAfterJoint();
 
-   /**
-    * Packs the actual, not desired, velocity of this joint in a {@code Twist} (the 3D angular and
-    * linear velocities). The reference frames of the resulting {@code Twist} are as follows:
-    * <ul>
-    * <li>{@code bodyFrame} is {@code afterJointFrame}.
-    * <li>{@code baseFrame} is {@code beforeJointFrame}.
-    * <li>{@code expressedInFrame} is {@code afterJointFrame}.
-    * </ul>
-    * 
-    * @param twistToPack the {@code Twist} in which the velocity of this joint is stored. Modified.
-    */
-   public abstract void getJointTwist(Twist twistToPack);
+   default TwistReadOnly getJointTwist()
+   {
+      return null;
+   }
 
    /**
     * Packs the {@code Twist} (the 3D angular and linear velocities) of this joint's
@@ -100,20 +93,10 @@ public abstract interface JointBasics extends CommonJoint
     */
    public abstract void getPredecessorTwist(Twist twistToPack);
 
-   /**
-    * Packs the actual, not desired, acceleration of this joint in a
-    * {@code SpatialAccelerationVector} (the 3D angular and linear accelerations). The reference
-    * frames of the resulting {@code SpatialAccelerationVector} are as follows:
-    * <ul>
-    * <li>{@code bodyFrame} is {@code afterJointFrame}.
-    * <li>{@code baseFrame} is {@code beforeJointFrame}.
-    * <li>{@code expressedInFrame} is {@code afterJointFrame}.
-    * </ul>
-    * 
-    * @param accelerationToPack the {@code SpatialAccelerationVector} in which the acceleration of
-    *           this joint is stored. Modified.
-    */
-   public abstract void getJointAcceleration(SpatialAcceleration accelerationToPack);
+   default SpatialAccelerationReadOnly getJointAcceleration()
+   {
+      return null;
+   }
 
    /**
     * Packs the {@code SpatialAccelerationVector} (the 3D angular and linear accelerations) of this
@@ -188,12 +171,11 @@ public abstract interface JointBasics extends CommonJoint
     * <li>For a {@code SphericalJoint}, the actual joint configuration is a quaternion and is stored
     * from the {@code rowStart}<sup>th</sup> row to the ({@code rowStart + 4})<sup>th</sup> row.
     * </ul>
-    * 
+    * @param rowStart row index for the first component of the configuration.
     * @param matrixToPack the column vector in which this joint actual configuration is stored.
     *           Modified.
-    * @param rowStart row index for the first component of the configuration.
     */
-   public abstract void getConfigurationMatrix(DenseMatrix64F matrixToPack, int rowStart);
+   public abstract void getJointConfiguration(int rowStart, DenseMatrix64F matrixToPack);
 
    /**
     * Packs this joint desired force/torque into a column vector {@code DenseMatrix64F}. Here are a
@@ -207,11 +189,11 @@ public abstract interface JointBasics extends CommonJoint
     * Note: the joint wrench is the wrench of {@code successorFrame} expressed in
     * {@code successorFrame}.
     * </ul>
-    * 
+    * @param rowStart TODO
     * @param matrixToPack the column vector in which the desired force/torque of this joint is
     *           stored. Modified.
     */
-   public abstract void getTauMatrix(DenseMatrix64F matrixToPack);
+   public abstract void getJointTau(int rowStart, DenseMatrix64F matrixToPack);
 
    /**
     * Packs this joint actual velocity into a column vector {@code DenseMatrix64F}. Here are a few
@@ -225,11 +207,10 @@ public abstract interface JointBasics extends CommonJoint
     * {@code afterJointFrame} with respect to the {@code beforeJointFrame} expressed in the
     * {@code afterJointFrame}.
     * </ul>
-    * 
-    * @param matrixToPack the column vector in which the velocity of this joint is stored. Modified.
     * @param rowStart row index for the first component of the velocity.
+    * @param matrixToPack the column vector in which the velocity of this joint is stored. Modified.
     */
-   public abstract void getVelocityMatrix(DenseMatrix64F matrixToPack, int rowStart);
+   public abstract void getJointVelocity(int rowStart, DenseMatrix64F matrixToPack);
 
    /**
     * Packs this joint desired acceleration into a column vector {@code DenseMatrix64F}. Here are a
@@ -246,11 +227,13 @@ public abstract interface JointBasics extends CommonJoint
     *           Modified.
     * @param rowStart row index for the first component of the acceleration.
     */
+   @Deprecated // TODO
    public abstract void getDesiredAccelerationMatrix(DenseMatrix64F matrixToPack, int rowStart);
 
    /**
     * Sets the desired acceleration stored in this joint to zero.
     */
+   @Deprecated // TODO
    public abstract void setDesiredAccelerationToZero();
 
    /**
@@ -263,12 +246,11 @@ public abstract interface JointBasics extends CommonJoint
     * current 3D orientation as a quaternion, and the 3 rows starting from ({@code rowStart + 4})
     * are used to set the 3D position.
     * </ul>
-    * 
+    * @param rowStart row index of the first component of this joint configuration.
     * @param matrix the column vector from which the configuration of this joint is to be extracted.
     *           Not modified.
-    * @param rowStart row index of the first component of this joint configuration.
     */
-   public abstract void setConfiguration(DenseMatrix64F matrix, int rowStart);
+   public abstract void setJointConfiguration(int rowStart, DenseMatrix64F matrix);
 
    /**
     * Sets the joint current wrench from the given column vector {@code DenseMatrix64F}. Here are a
@@ -281,12 +263,11 @@ public abstract interface JointBasics extends CommonJoint
     * wrench of the {@code afterJointFrame} with respect to the {@code beforeJointFrame} expressed
     * in the {@code afterJointFrame}.
     * </ul>
-    *
+    * @param rowStart row index of the first component of this joint configuration.
     * @param matrixToPack the column vector from which the configuration of this joint is to be
     *           extracted. Not modified.
-    * @param rowStart row index of the first component of this joint configuration.
     */
-   public abstract void setJointTorque(DenseMatrix64F matrixToPack, int rowStart);
+   public abstract void setJointTau(int rowStart, DenseMatrix64F matrixToPack);
 
    /**
     * Sets this joint current velocity from the given column vector {@code DenseMAtrix64F}. Here are
@@ -299,12 +280,11 @@ public abstract interface JointBasics extends CommonJoint
     * twist of the {@code afterJointFrame} with respect to the {@code beforeJointFrame} expressed in
     * the {@code afterJointFrame}.
     * </ul>
-    * 
+    * @param rowStart row index of the first component of this joint velocity.
     * @param jointVelocity the column vector from which the current velocity of this joint is to be
     *           extracted. Not modified.
-    * @param rowStart row index of the first component of this joint velocity.
     */
-   public abstract void setVelocity(DenseMatrix64F jointVelocity, int rowStart);
+   public abstract void setJointVelocity(int rowStart, DenseMatrix64F jointVelocity);
 
    /**
     * Sets this joint desired acceleration from the given column vector {@code DenseMAtrix64F}. Here
@@ -322,6 +302,7 @@ public abstract interface JointBasics extends CommonJoint
     *           joint is to be extracted. Not modified.
     * @param rowStart row index of the first component of this joint acceleration.
     */
+   @Deprecated // TODO
    public abstract void setDesiredAcceleration(DenseMatrix64F jointDesiredAcceleration, int rowStart);
 
    /**
@@ -346,6 +327,7 @@ public abstract interface JointBasics extends CommonJoint
     * 
     * @return the motion subspace of this joint.
     */
+   @Deprecated // TODO
    public abstract GeometricJacobian getMotionSubspace();
 
    /**
@@ -413,7 +395,7 @@ public abstract interface JointBasics extends CommonJoint
     * @param jointWrench the {@code Wrench} from which the desired force/torque of this joint is to
     *           be extracted. Not modified.
     */
-   public abstract void setTorqueFromWrench(Wrench jointWrench);
+   public abstract void setJointWrench(Wrench jointWrench);
 
    /**
     * Returns the reference to the name of this joint.
@@ -457,6 +439,7 @@ public abstract interface JointBasics extends CommonJoint
     * 
     * @param originalJoint the joint to copy the actual (not desired) state of. Not modified.
     */
+   @Deprecated // TODO
    public abstract void setJointPositionVelocityAndAcceleration(JointBasics originalJoint);
 
    /**
@@ -464,8 +447,10 @@ public abstract interface JointBasics extends CommonJoint
     * 
     * @param originalJoint the joint to copy the desired acceleration of. Not modified.
     */
+   @Deprecated // TODO
    public abstract void setQddDesired(JointBasics originalJoint);
 
+   @Deprecated // TODO
    public abstract void calculateJointStateChecksum(GenericCRC32 checksum);
 
    public int hashCode();

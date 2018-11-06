@@ -126,7 +126,7 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
          @Override
          protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
          {
-            getJointTwist(twistRelativeToParentToPack);
+            twistRelativeToParentToPack.setIncludingFrame(getJointTwist());
          }
       };
    }
@@ -204,7 +204,7 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
    @Override
    public void getSuccessorTwist(Twist twistToPack)
    {
-      getJointTwist(twistToPack);
+      twistToPack.setIncludingFrame(getJointTwist());
 
       ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
@@ -218,7 +218,7 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
    @Override
    public void getPredecessorTwist(Twist twistToPack)
    {
-      getJointTwist(twistToPack);
+      twistToPack.setIncludingFrame(getJointTwist());
 
       ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
@@ -233,7 +233,7 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
    @Override
    public void getSuccessorAcceleration(SpatialAcceleration accelerationToPack)
    {
-      getJointAcceleration(accelerationToPack);
+      accelerationToPack.setIncludingFrame(getJointAcceleration());
 
       ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();

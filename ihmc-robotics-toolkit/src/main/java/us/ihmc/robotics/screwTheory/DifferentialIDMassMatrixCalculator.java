@@ -82,7 +82,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
       for (JointBasics joint : jointsInOrder)
       {
          joint.setDesiredAccelerationToZero();
-         joint.setVelocity(new DenseMatrix64F(joint.getDegreesOfFreedom(), 1), 0);
+         joint.setJointVelocity(0, new DenseMatrix64F(joint.getDegreesOfFreedom(), 1));
       }
    }
 
@@ -93,7 +93,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
       for (JointBasics joint : jointsInOrder)
       {
          DenseMatrix64F tauMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
-         joint.getTauMatrix(tauMatrix);
+         joint.getJointTau(0, tauMatrix);
          DenseMatrix64F spatialForce = new DenseMatrix64F(SpatialForce.SIZE, 1);
          CommonOps.mult(joint.getMotionSubspace().getJacobianMatrix(), tauMatrix, spatialForce);
          Wrench jointWrench = storedJointWrenches.get(joint);
@@ -109,7 +109,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
       
       for (JointBasics joint : jointsInOrder)
       {
-         joint.setTorqueFromWrench(storedJointWrenches.get(joint));
+         joint.setJointWrench(storedJointWrenches.get(joint));
       }
    }
 

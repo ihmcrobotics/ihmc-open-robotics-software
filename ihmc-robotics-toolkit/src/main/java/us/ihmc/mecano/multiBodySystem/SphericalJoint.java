@@ -48,20 +48,6 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void getJointTwist(Twist twistToPack)
-   {
-      twistToPack.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
-      twistToPack.getAngularPart().set(jointAngularVelocity);
-   }
-
-   @Override
-   public void getJointAcceleration(SpatialAcceleration accelerationToPack)
-   {
-      accelerationToPack.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
-      accelerationToPack.getAngularPart().set(jointAngularAcceleration);
-   }
-
-   @Override
    public void getDesiredJointAcceleration(SpatialAcceleration jointAcceleration)
    {
       jointAcceleration.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
@@ -69,7 +55,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void getTauMatrix(DenseMatrix64F matrix)
+   public void getJointTau(int rowStart, DenseMatrix64F matrix)
    {
       matrix.set(0, 0, jointTorque.getX());
       matrix.set(1, 0, jointTorque.getY());
@@ -77,7 +63,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getJointVelocity(int rowStart, DenseMatrix64F matrix)
    {
       matrix.set(rowStart + 0, 0, jointAngularVelocity.getX());
       matrix.set(rowStart + 1, 0, jointAngularVelocity.getY());
@@ -115,7 +101,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void setTorqueFromWrench(Wrench jointWrench)
+   public void setJointWrench(Wrench jointWrench)
    {
       jointWrench.getBodyFrame().checkReferenceFrameMatch(successor.getBodyFixedFrame());
       jointWrench.getReferenceFrame().checkReferenceFrameMatch(jointTorque.getReferenceFrame());
@@ -137,7 +123,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void setJointTorque(DenseMatrix64F matrix, int rowStart)
+   public void setJointTau(int rowStart, DenseMatrix64F matrix)
    {
       jointTorque.set(matrix.get(rowStart + 0), matrix.get(rowStart + 1), matrix.get(rowStart + 2));
    }
@@ -252,19 +238,19 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getJointConfiguration(int rowStart, DenseMatrix64F matrix)
    {
       jointRotation.get(rowStart, matrix);
    }
 
    @Override
-   public void setConfiguration(DenseMatrix64F matrix, int rowStart)
+   public void setJointConfiguration(int rowStart, DenseMatrix64F matrix)
    {
       jointRotation.set(rowStart, matrix);
    }
 
    @Override
-   public void setVelocity(DenseMatrix64F matrix, int rowStart)
+   public void setJointVelocity(int rowStart, DenseMatrix64F matrix)
    {
       jointAngularVelocity.setX(matrix.get(rowStart + 0, 0));
       jointAngularVelocity.setY(matrix.get(rowStart + 1, 0));
