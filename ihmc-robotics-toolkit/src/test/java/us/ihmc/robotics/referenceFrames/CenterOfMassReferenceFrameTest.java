@@ -14,13 +14,13 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -65,9 +65,8 @@ public class CenterOfMassReferenceFrameTest
       centerOfMassReferenceFrame.update();
 
       CenterOfMassCalculator comCalculator = new CenterOfMassCalculator(elevator, elevator.getBodyFixedFrame());
-      comCalculator.compute();
-      FramePoint3D centerOfMass = new FramePoint3D(elevator.getBodyFixedFrame());
-      comCalculator.getCenterOfMass(centerOfMass);
+      comCalculator.reset();
+      FramePoint3D centerOfMass = new FramePoint3D(comCalculator.getCenterOfMass());
 
       FramePoint3D centerOfMassFromFrame = new FramePoint3D(centerOfMassReferenceFrame);
       centerOfMassFromFrame.changeFrame(elevator.getBodyFixedFrame());

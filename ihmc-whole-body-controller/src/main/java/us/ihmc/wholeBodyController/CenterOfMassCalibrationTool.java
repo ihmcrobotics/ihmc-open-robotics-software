@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
@@ -16,8 +17,6 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpPreserveYReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -59,23 +58,23 @@ public class CenterOfMassCalibrationTool implements Updatable
       
       RigidBodyBasics spinePitchBody = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH).getSuccessor();
       spinePitchCenterOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(spinePitchBody, true);
-      spinePitchCoMInZUpFrame = new YoFramePoint3D("spinePitchCoMInZUpFrame", spinePitchCenterOfMassCalculator.getDesiredFrame(), registry);
+      spinePitchCoMInZUpFrame = new YoFramePoint3D("spinePitchCoMInZUpFrame", spinePitchCenterOfMassCalculator.getReferenceFrame(), registry);
 
       RigidBodyBasics leftHipPitchBody = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH).getSuccessor();
       leftHipPitchCenterOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(leftHipPitchBody, true);
-      leftHipPitchCoMInZUpFrame = new YoFramePoint3D("leftHipPitchCoMInZUpFrame", leftHipPitchCenterOfMassCalculator.getDesiredFrame(), registry);
+      leftHipPitchCoMInZUpFrame = new YoFramePoint3D("leftHipPitchCoMInZUpFrame", leftHipPitchCenterOfMassCalculator.getReferenceFrame(), registry);
 
       RigidBodyBasics rightHipPitchBody = fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.HIP_PITCH).getSuccessor();
       rightHipPitchCenterOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(rightHipPitchBody, true);
-      rightHipPitchCoMInZUpFrame = new YoFramePoint3D("rightHipPitchCoMInZUpFrame", rightHipPitchCenterOfMassCalculator.getDesiredFrame(), registry);
+      rightHipPitchCoMInZUpFrame = new YoFramePoint3D("rightHipPitchCoMInZUpFrame", rightHipPitchCenterOfMassCalculator.getReferenceFrame(), registry);
 
       RigidBodyBasics leftKneeBody = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH).getSuccessor();
       leftKneeCenterOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(leftKneeBody, true);
-      leftKneeCoMInZUpFrame = new YoFramePoint3D("leftKneeCoMInZUpFrame", leftKneeCenterOfMassCalculator.getDesiredFrame(), registry);
+      leftKneeCoMInZUpFrame = new YoFramePoint3D("leftKneeCoMInZUpFrame", leftKneeCenterOfMassCalculator.getReferenceFrame(), registry);
 
       RigidBodyBasics rightKneeBody = fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.KNEE_PITCH).getSuccessor();
       rightKneeCenterOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(rightKneeBody, true);
-      rightKneeCoMInZUpFrame = new YoFramePoint3D("rightKneeCoMInZUpFrame", rightKneeCenterOfMassCalculator.getDesiredFrame(), registry);
+      rightKneeCoMInZUpFrame = new YoFramePoint3D("rightKneeCoMInZUpFrame", rightKneeCenterOfMassCalculator.getReferenceFrame(), registry);
 
       spinePitchZUpFrameViz = new YoGraphicCoordinateSystem("spinePitchZUpFrameViz", "", registry, true, 0.3);
       yoGraphicsListRegistry.registerYoGraphic("CenterOfMassCalibrationTool", spinePitchZUpFrameViz);
@@ -92,35 +91,35 @@ public class CenterOfMassCalibrationTool implements Updatable
    @Override
    public void update(double time)
    {
-      spinePitchZUpFrameViz.setToReferenceFrame(spinePitchCenterOfMassCalculator.getDesiredFrame());
-      leftHipPitchZUpFrameViz.setToReferenceFrame(leftHipPitchCenterOfMassCalculator.getDesiredFrame());
+      spinePitchZUpFrameViz.setToReferenceFrame(spinePitchCenterOfMassCalculator.getReferenceFrame());
+      leftHipPitchZUpFrameViz.setToReferenceFrame(leftHipPitchCenterOfMassCalculator.getReferenceFrame());
       leftHipPitchFrameViz.setToReferenceFrame(fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH).getFrameAfterJoint());
 
-      spinePitchCenterOfMassCalculator.getDesiredFrame().update();
-      leftHipPitchCenterOfMassCalculator.getDesiredFrame().update();
-      rightHipPitchCenterOfMassCalculator.getDesiredFrame().update();
-      leftKneeCenterOfMassCalculator.getDesiredFrame().update();
-      rightKneeCenterOfMassCalculator.getDesiredFrame().update();
+      spinePitchCenterOfMassCalculator.getReferenceFrame().update();
+      leftHipPitchCenterOfMassCalculator.getReferenceFrame().update();
+      rightHipPitchCenterOfMassCalculator.getReferenceFrame().update();
+      leftKneeCenterOfMassCalculator.getReferenceFrame().update();
+      rightKneeCenterOfMassCalculator.getReferenceFrame().update();
 
 
-      spinePitchCenterOfMassCalculator.compute();
-      spinePitchCenterOfMassCalculator.getCenterOfMass(tempFramePoint);
+      spinePitchCenterOfMassCalculator.reset();
+      tempFramePoint.setIncludingFrame(spinePitchCenterOfMassCalculator.getCenterOfMass());
       spinePitchCoMInZUpFrame.set(tempFramePoint);
 
-      leftHipPitchCenterOfMassCalculator.compute();
-      leftHipPitchCenterOfMassCalculator.getCenterOfMass(tempFramePoint);
+      leftHipPitchCenterOfMassCalculator.reset();
+      tempFramePoint.setIncludingFrame(leftHipPitchCenterOfMassCalculator.getCenterOfMass());
       leftHipPitchCoMInZUpFrame.set(tempFramePoint);
 
-      rightHipPitchCenterOfMassCalculator.compute();
-      rightHipPitchCenterOfMassCalculator.getCenterOfMass(tempFramePoint);
+      rightHipPitchCenterOfMassCalculator.reset();
+      tempFramePoint.setIncludingFrame(rightHipPitchCenterOfMassCalculator.getCenterOfMass());
       rightHipPitchCoMInZUpFrame.set(tempFramePoint);
 
-      leftKneeCenterOfMassCalculator.compute();
-      leftKneeCenterOfMassCalculator.getCenterOfMass(tempFramePoint);
+      leftKneeCenterOfMassCalculator.reset();
+      tempFramePoint.setIncludingFrame(leftKneeCenterOfMassCalculator.getCenterOfMass());
       leftKneeCoMInZUpFrame.set(tempFramePoint);
 
-      rightKneeCenterOfMassCalculator.compute();
-      rightKneeCenterOfMassCalculator.getCenterOfMass(tempFramePoint);
+      rightKneeCenterOfMassCalculator.reset();
+      tempFramePoint.setIncludingFrame(rightKneeCenterOfMassCalculator.getCenterOfMass());
       rightKneeCoMInZUpFrame.set(tempFramePoint);
       
       
@@ -206,8 +205,7 @@ public class CenterOfMassCalibrationTool implements Updatable
          jointZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), jointFrame, jointName + "ZUp");
       }
       
-      RigidBodyBasics[] rigidBodies = ScrewTools.computeSubtreeSuccessors(rootBody.getParentJoint());
-      CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rigidBodies, jointZUpFrame);
+      CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rootBody, jointZUpFrame);
 
       return centerOfMassCalculator;
    }

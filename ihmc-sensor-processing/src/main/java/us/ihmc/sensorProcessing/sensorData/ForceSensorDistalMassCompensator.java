@@ -5,11 +5,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -52,13 +50,12 @@ public class ForceSensorDistalMassCompensator
    {
       String sensorName = forceSensorDefinition.getSensorName();
 
-      JointBasics parentJointOfSensorBody = forceSensorDefinition.getRigidBody().getParentJoint();
       sensorFrame = forceSensorDefinition.getSensorFrame();
 
       sensorPose = new FramePose3D(world);
       yoSensorPositionInWorld = new YoFramePoint3D(sensorName + "Position", world, registry);
 
-      distalMassCalc = new CenterOfMassCalculator(ScrewTools.computeRigidBodiesAfterThisJoint(parentJointOfSensorBody), world);
+      distalMassCalc = new CenterOfMassCalculator(forceSensorDefinition.getRigidBody(), world);
       distalMass = new YoDouble(sensorName + "DistalMass", registry);
       lowPassSensorForceZ = new AlphaFilteredYoVariable(sensorName + "LowPassFz", registry, AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.0001, dtForLowpassFilter));
       distalMassForceInWorld = new YoFrameVector3D(sensorName + "DistalWeight", world, registry);
@@ -173,12 +170,11 @@ public class ForceSensorDistalMassCompensator
 
    private void updateCenterOfMass()
    {
-      distalMassCalc.compute();
+      distalMassCalc.reset();
       distalMass.set(distalMassCalc.getTotalMass());
       distalMassForceInWorld.set(0.0, 0.0, Math.abs(GRAVITY) * distalMass.getDoubleValue());
 
-      FramePoint3D distalCoMinWorld = distalMassCalc.getCenterOfMass();
-      distalCoMInWorld.set(distalCoMinWorld);
+      distalCoMInWorld.set(distalMassCalc.getCenterOfMass());
       
       lowPassSensorForceZ.update(yoSensorForce.getZ());
    }
