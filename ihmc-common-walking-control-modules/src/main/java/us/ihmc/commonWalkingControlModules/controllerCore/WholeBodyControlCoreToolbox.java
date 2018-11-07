@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.CentroidalMomentumHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
@@ -21,8 +20,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -48,7 +49,7 @@ public class WholeBodyControlCoreToolbox
 
    private final JointIndexHandler jointIndexHandler;
    private final double totalRobotMass;
-   private final CentroidalMomentumHandler centroidalMomentumHandler;
+   private final CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
@@ -131,7 +132,7 @@ public class WholeBodyControlCoreToolbox
       rootBody = ScrewTools.getRootBody(controlledJoints[0].getPredecessor());
       jointIndexHandler = new JointIndexHandler(controlledJoints);
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
-      centroidalMomentumHandler = new CentroidalMomentumHandler(controlledJoints, centerOfMassFrame);
+      centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(controlledJoints), centerOfMassFrame);
       inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody, gravityZ);
       spatialAccelerationCalculator = inverseDynamicsCalculator.getSpatialAccelerationCalculator();
 
@@ -259,7 +260,7 @@ public class WholeBodyControlCoreToolbox
    {
       if (motionQPInputCalculator == null)
       {
-         motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, centroidalMomentumHandler, jointIndexHandler,
+         motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, centroidalMomentumRateCalculator, jointIndexHandler,
                                                                jointPrivilegedConfigurationParameters, registry);
       }
       return motionQPInputCalculator;
@@ -308,10 +309,10 @@ public class WholeBodyControlCoreToolbox
    }
 
    /**
-    * <b>Important note</b>: the {@code CentroidalMomentumHandler} is updated every control tick in
+    * <b>Important note</b>: the {@code CentroidalMomentumRateCalculator} is updated every control tick in
     * {@link MotionQPInputCalculator#initialize()}.
     * <p>
-    * Gets the {@code CentroidalMomentumHandler} which allows to calculate:
+    * Gets the {@code CentroidalMomentumRateCalculator} which allows to calculate:
     * <ul>
     * <li>the robot momentum, often denoted 'h', and center of mass velocity.
     * <li>the centroidal momentum matrix, often denoted 'A', which is the N-by-6 Jacobian matrix
@@ -326,9 +327,9 @@ public class WholeBodyControlCoreToolbox
     *
     * @return the centroidalMomentumHandler.
     */
-   public CentroidalMomentumHandler getCentroidalMomentumHandler()
+   public CentroidalMomentumRateCalculator getCentroidalMomentumRateCalculator()
    {
-      return centroidalMomentumHandler;
+      return centroidalMomentumRateCalculator;
    }
 
    public FloatingJointBasics getRootJoint()

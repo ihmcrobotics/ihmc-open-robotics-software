@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -55,7 +56,7 @@ public class MotionQPInputCalculatorTest
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, 0.0);
       JointIndexHandler jointIndexHandler = new JointIndexHandler(joints);
       YoVariableRegistry registry = new YoVariableRegistry("dummyRegistry");
-      CentroidalMomentumHandler centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
+      CentroidalMomentumRateCalculator centroidalMomentumHandler = new CentroidalMomentumRateCalculator(rootBody, centerOfMassFrame);
       MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, centroidalMomentumHandler, jointIndexHandler, null, registry);
 
       QPInput motionQPInput = new QPInput(numberOfDoFs);

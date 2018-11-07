@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -15,7 +16,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 public class ConstrainedCentroidalMomentumMatrixCalculator
 {
    private final DynamicallyConsistentNullspaceCalculator dynamicallyConsistentNullspaceCalculator;
-   private final CentroidalMomentumMatrix centroidalMomentumMatrix;
+   private final CentroidalMomentumCalculator centroidalMomentumCalculator;
    private final DenseMatrix64F selectionMatrix;
    private final DenseMatrix64F temp = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F constrainedCentroidalMomentumMatrix = new DenseMatrix64F(1, 1);
@@ -25,7 +26,7 @@ public class ConstrainedCentroidalMomentumMatrixCalculator
    {
       this.dynamicallyConsistentNullspaceCalculator = new OriginalDynamicallyConsistentNullspaceCalculator(rootJoint,
             true);
-      this.centroidalMomentumMatrix = new CentroidalMomentumMatrix(rootJoint.getSuccessor(), centerOfMassFrame);
+      this.centroidalMomentumCalculator = new CentroidalMomentumCalculator(rootJoint.getSuccessor(), centerOfMassFrame);
       this.selectionMatrix = selectionMatrix;
    }
 
@@ -47,8 +48,8 @@ public class ConstrainedCentroidalMomentumMatrixCalculator
    public void compute()
    {
       dynamicallyConsistentNullspaceCalculator.compute();
-      centroidalMomentumMatrix.compute();
-      DenseMatrix64F centroidalMomentumMatrix = this.centroidalMomentumMatrix.getMatrix();
+      centroidalMomentumCalculator.reset();
+      DenseMatrix64F centroidalMomentumMatrix = this.centroidalMomentumCalculator.getCentroidalMomentumMatrix();
       DenseMatrix64F sNsBar = dynamicallyConsistentNullspaceCalculator.getSNsBar();
 
       temp.reshape(centroidalMomentumMatrix.getNumRows(), sNsBar.getNumCols());
@@ -65,6 +66,6 @@ public class ConstrainedCentroidalMomentumMatrixCalculator
 
    public DenseMatrix64F getCentroidalMomentumMatrix()
    {
-      return centroidalMomentumMatrix.getMatrix();
+      return centroidalMomentumCalculator.getCentroidalMomentumMatrix();
    }
 }

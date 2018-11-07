@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -23,7 +24,6 @@ import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -51,8 +51,8 @@ public class CentroidalMomentumMatrixSCSTest
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
       centerOfMassFrame.update();
-      CentroidalMomentumMatrix centroidalMomentumMatrix = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
-      centroidalMomentumMatrix.compute();
+      CentroidalMomentumCalculator centroidalMomentumMatrix = new CentroidalMomentumCalculator(elevator, centerOfMassFrame);
+      centroidalMomentumMatrix.reset();
 
       Momentum comMomentum = computeCoMMomentum(elevator, centerOfMassFrame, centroidalMomentumMatrix);
 
@@ -90,7 +90,7 @@ public class CentroidalMomentumMatrixSCSTest
       ScrewTools.addRigidBody("rigidBody", sixDoFJoint, momentOfInertia, mass, comOffset);
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
-      CentroidalMomentumMatrix centroidalMomentumMatrix = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
+      CentroidalMomentumCalculator centroidalMomentumMatrix = new CentroidalMomentumCalculator(elevator, centerOfMassFrame);
 
       int nTests = 10;
       for (int i = 0; i < nTests; i++)
@@ -124,7 +124,7 @@ public class CentroidalMomentumMatrixSCSTest
 
          centerOfMassFrame.update();
 
-         centroidalMomentumMatrix.compute();
+         centroidalMomentumMatrix.reset();
          Momentum comMomentum = computeCoMMomentum(elevator, centerOfMassFrame, centroidalMomentumMatrix);
 
          EuclidCoreTestTools.assertTuple3DEquals(linearMomentum, comMomentum.getLinearPart(), 1e-12);
@@ -132,9 +132,9 @@ public class CentroidalMomentumMatrixSCSTest
       }
    }
 
-   public static Momentum computeCoMMomentum(RigidBodyBasics elevator, ReferenceFrame centerOfMassFrame, CentroidalMomentumMatrix centroidalMomentumMatrix)
+   public static Momentum computeCoMMomentum(RigidBodyBasics elevator, ReferenceFrame centerOfMassFrame, CentroidalMomentumCalculator centroidalMomentumMatrix)
    {
-      DenseMatrix64F mat = centroidalMomentumMatrix.getMatrix();
+      DenseMatrix64F mat = centroidalMomentumMatrix.getCentroidalMomentumMatrix();
 //      InverseDynamicsJoint[] jointList = ScrewTools.computeJointsInOrder(elevator); //deprecated method
       JointBasics[] jointList = ScrewTools.computeSubtreeJoints(elevator);
 
