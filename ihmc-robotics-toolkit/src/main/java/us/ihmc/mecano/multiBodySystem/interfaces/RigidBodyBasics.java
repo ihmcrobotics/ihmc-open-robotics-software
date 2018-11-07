@@ -4,8 +4,8 @@ import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 
 public interface RigidBodyBasics
 {

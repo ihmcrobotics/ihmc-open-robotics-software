@@ -7,6 +7,7 @@ import com.google.common.collect.HashBiMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.kinematics.JointLimit;
@@ -17,7 +18,6 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 
 public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDescription implements FullQuadrupedRobotModel
 {

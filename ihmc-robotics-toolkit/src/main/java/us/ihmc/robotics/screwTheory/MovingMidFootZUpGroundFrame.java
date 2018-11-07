@@ -3,6 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 
 public class MovingMidFootZUpGroundFrame extends MovingReferenceFrame
