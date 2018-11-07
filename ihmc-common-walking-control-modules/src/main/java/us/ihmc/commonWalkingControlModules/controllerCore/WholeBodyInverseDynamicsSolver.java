@@ -35,16 +35,18 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalcul
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -71,7 +73,7 @@ public class WholeBodyInverseDynamicsSolver
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final WrenchVisualizer wrenchVisualizer;
    private final JointAccelerationIntegrationCalculator jointAccelerationIntegrationCalculator;
-   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
+   private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
    private final OneDoFJoint[] controlledOneDoFJoints;
    private final JointBasics[] jointsToOptimizeFor;
@@ -102,7 +104,7 @@ public class WholeBodyInverseDynamicsSolver
       WrenchMatrixCalculator wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
       dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, wrenchMatrixCalculator);
       optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, dynamicsMatrixCalculator, registry);
-      spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
+      rigidBodyAccelerationProvider = toolbox.getRigidBodyAccelerationProvider();
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
@@ -140,7 +142,7 @@ public class WholeBodyInverseDynamicsSolver
       if (USE_DYNAMIC_MATRIX_CALCULATOR)
          dynamicsMatrixCalculator.reset();
       else
-         inverseDynamicsCalculator.reset();
+         inverseDynamicsCalculator.setExternalWrenchesToZero();
    }
 
    public void initialize()
@@ -196,7 +198,9 @@ public class WholeBodyInverseDynamicsSolver
 
       if (USE_DYNAMIC_MATRIX_CALCULATOR)
       {
-         spatialAccelerationCalculator.compute();
+         // TODO Since switch to Mecano: need to update the inverse dynamics to update the rigid-body accelerations, kinda dumb.
+//         rigidBodyAccelerationProvider.compute();
+         inverseDynamicsCalculator.compute();
 
          dynamicsMatrixCalculator.compute();
          DenseMatrix64F tauSolution = dynamicsMatrixCalculator.computeJointTorques(jointAccelerations, rhoSolution);
@@ -214,6 +218,7 @@ public class WholeBodyInverseDynamicsSolver
 
          ScrewTools.setJointAccelerations(jointsToOptimizeFor, jointAccelerations);
          inverseDynamicsCalculator.compute();
+         MultiBodySystemTools.insertJointsState(jointsToOptimizeFor, JointStateType.EFFORT, inverseDynamicsCalculator.getJointTauMatrix());
       }
 
       updateLowLevelData();

@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -26,7 +27,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -119,8 +119,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
          computedJointAccelerations.put(oneDoFJoint, computedJointAcceleration);
       }
 
-      double gravity = -robot.getGravityZ();
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(fullRobotModel.getElevator(), gravity);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(fullRobotModel.getElevator());
+      inverseDynamicsCalculator.setGravitionalAcceleration(robot.getGravityZ());
 
       robot.addYoVariableRegistry(registry);
 
@@ -168,7 +168,6 @@ public class DRCInverseDynamicsCalculatorTestHelper
       rootJointPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       rootJointExternalForcePoint.setOffsetWorld(rootJointPosition);
-      Vector3D offsetInJoint = rootJointExternalForcePoint.getOffsetCopy();
 
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
@@ -475,7 +474,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    public void setFullRobotModelWrenchesToMatchRobot()
    {
-      inverseDynamicsCalculator.reset();
+      inverseDynamicsCalculator.setExternalWrenchesToZero();
 
       ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators = new ArrayList<WrenchCalculatorInterface>();
       robot.getForceSensors(groundContactPointBasedWrenchCalculators);
@@ -510,8 +509,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       {
          RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
 
-         Wrench wrench = new Wrench();
-         inverseDynamicsCalculator.getExternalWrench(foot, wrench);
+         Wrench wrench = new Wrench(inverseDynamicsCalculator.getExternalWrench(foot));
 
          ReferenceFrame footFrame = foot.getBodyFixedFrame();
 
@@ -712,8 +710,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       {
          RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
 
-         Wrench wrench = new Wrench();
-         inverseDynamicsCalculator.getExternalWrench(foot, wrench);
+         Wrench wrench = new Wrench(inverseDynamicsCalculator.getExternalWrench(foot));
 
          ReferenceFrame bodyFixedFrame = foot.getBodyFixedFrame();
          FramePoint3D pointOfWrenchApplication = new FramePoint3D(bodyFixedFrame);
@@ -735,7 +732,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    public void setFullRobotModelExternalForcesRandomly(Random random, double maxFeetExternalForce, double maxFeetExternalTorque)
    {
-      inverseDynamicsCalculator.reset();
+      inverseDynamicsCalculator.setExternalWrenchesToZero();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -858,6 +855,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    public void computeTwistCalculatorAndInverseDynamicsCalculator()
    {
       inverseDynamicsCalculator.compute();
+      inverseDynamicsCalculator.writeComputedJointWrenches(fullRobotModel.getRootJoint().subtreeList());
    }
 
    public Robot getRobot()

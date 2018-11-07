@@ -55,7 +55,6 @@ import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.robotics.screwTheory.MomentumCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -431,11 +430,6 @@ public class HighLevelHumanoidControllerToolbox
       }
 
       return joints.toArray(new JointBasics[joints.size()]);
-   }
-
-   public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
-   {
-      throw new RuntimeException("Sylvain was there.");
    }
 
    public SideDependentList<YoPlaneContactState> getFootContactStates()

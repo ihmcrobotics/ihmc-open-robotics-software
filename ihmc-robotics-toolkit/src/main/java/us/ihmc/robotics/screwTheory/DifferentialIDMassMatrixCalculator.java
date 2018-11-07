@@ -1,12 +1,12 @@
 package us.ihmc.robotics.screwTheory;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -32,10 +32,10 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
 
    public DifferentialIDMassMatrixCalculator(ReferenceFrame inertialFrame, RigidBodyBasics rootBody)
    {
-      ArrayList<JointBasics> zeroJointToIgnore = new ArrayList<JointBasics>();
       SpatialAcceleration zeroRootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(rootBody, 0.0);
       
-      idCalculator = new InverseDynamicsCalculator(rootBody, zeroRootAcceleration, zeroJointToIgnore, false, true);
+      idCalculator = new InverseDynamicsCalculator(rootBody, false, true);
+      idCalculator.setRootAcceleration(zeroRootAcceleration);
       jointsInOrder = ScrewTools.computeSubtreeJoints(rootBody);
       totalNumberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
       massMatrix = new DenseMatrix64F(totalNumberOfDoFs, totalNumberOfDoFs);
@@ -67,7 +67,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
          ScrewTools.setJointAccelerations(jointsInOrder, tmpDesiredJointAccelerationsMatrix);
          
          idCalculator.compute();
-         tmpTauMatrix.set(ScrewTools.getTauMatrix(jointsInOrder));
+         tmpTauMatrix.set(idCalculator.getJointTauMatrix());
          MatrixTools.setMatrixBlock(massMatrix, 0, column, tmpTauMatrix, 0, 0, totalNumberOfDoFs, 1, 1.0);
          column++;
          

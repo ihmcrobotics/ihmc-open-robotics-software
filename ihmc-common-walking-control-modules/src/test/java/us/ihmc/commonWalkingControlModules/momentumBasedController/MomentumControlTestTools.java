@@ -12,12 +12,12 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MecanoTestTools;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 
 /**
  * @author twan
@@ -73,7 +73,8 @@ public class MomentumControlTestTools
 
    public static void assertRootJointWrenchZero(Map<RigidBodyBasics, Wrench> externalWrenches, SixDoFJoint rootJoint, double gravityZ, double epsilon)
    {
-      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(rootJoint.getPredecessor(), gravityZ);
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(rootJoint.getPredecessor());
+      inverseDynamicsCalculator.setGravitionalAcceleration(-gravityZ);
       for (RigidBodyBasics rigidBody : externalWrenches.keySet())
       {
          Wrench externalWrench = externalWrenches.get(rigidBody);

@@ -21,13 +21,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -51,7 +51,7 @@ public class WholeBodyControlCoreToolbox
    private final double totalRobotMass;
    private final CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
-   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
+   private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
    private RigidBodyBasics vmcMainBody;
 
@@ -133,8 +133,9 @@ public class WholeBodyControlCoreToolbox
       jointIndexHandler = new JointIndexHandler(controlledJoints);
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
       centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(controlledJoints), centerOfMassFrame);
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody, gravityZ);
-      spatialAccelerationCalculator = inverseDynamicsCalculator.getSpatialAccelerationCalculator();
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(controlledJoints));
+      inverseDynamicsCalculator.setGravitionalAcceleration(-gravityZ); // Watch out for the sign here, it changed with the switch to Mecano.
+      rigidBodyAccelerationProvider = inverseDynamicsCalculator.getAccelerationProvider();
 
       parentRegistry.addChild(registry);
    }
@@ -298,9 +299,9 @@ public class WholeBodyControlCoreToolbox
       return jointPrivilegedConfigurationParameters;
    }
 
-   public SpatialAccelerationCalculator getSpatialAccelerationCalculator()
+   public RigidBodyAccelerationProvider getRigidBodyAccelerationProvider()
    {
-      return spatialAccelerationCalculator;
+      return rigidBodyAccelerationProvider;
    }
 
    public InverseDynamicsCalculator getInverseDynamicsCalculator()

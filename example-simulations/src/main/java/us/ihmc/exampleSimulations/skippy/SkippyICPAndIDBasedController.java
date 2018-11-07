@@ -9,9 +9,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -47,7 +47,8 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
    {
       this.skippy = skippy;
 
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(skippy.getElevator(), -skippy.getGravityZ());
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(skippy.getElevator());
+      inverseDynamicsCalculator.setGravitionalAcceleration(skippy.getGravityZ());
 
       setupGraphics(graphicsListRegistry);
       totalMass.set(skippy.computeCenterOfMass(new Point3D()));
@@ -113,12 +114,14 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
       // ---
 
       inverseDynamicsCalculator.compute();
+      skippy.getElevator().childrenSubtreeIterable().forEach(inverseDynamicsCalculator::writeComputedJointWrench);
 
       skippy.updateSimulationFromInverseDynamicsTorques();
 
       skippy.updateInverseDynamicsStructureFromSimulation();
 
       inverseDynamicsCalculator.compute();
+      skippy.getElevator().childrenSubtreeIterable().forEach(inverseDynamicsCalculator::writeComputedJointWrench);
       skippy.updateSimulationFromInverseDynamicsTorques();
 
       updateGraphics();
