@@ -12,12 +12,13 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
@@ -80,15 +81,16 @@ public class VirtualModelMomentumController
       jacobianCalculator.clear();
       jacobianCalculator.setKinematicChain(commandToAdd.getBase(), commandToAdd.getEndEffector());
       jacobianCalculator.setJacobianFrame(controlFrame);
-      jacobianCalculator.computeJacobianMatrix();
+      jacobianCalculator.reset();
 
       // Compute the M-by-N task Jacobian: J = S * J
       // Step 1, let's get the 'small' Jacobian matrix, j.
       // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain, which is way smaller than the number of robot DoFs.
-      jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
+      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
+      CommonOps.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
-      List<JointBasics> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+      List<JointReadOnly> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, tempFullJacobian);
 
       /*
@@ -166,15 +168,16 @@ public class VirtualModelMomentumController
       jacobianCalculator.clear();
       jacobianCalculator.setKinematicChain(base, endEffector);
       jacobianCalculator.setJacobianFrame(wrench.getReferenceFrame());
-      jacobianCalculator.computeJacobianMatrix();
+      jacobianCalculator.reset();
 
       // Compute the M-by-N task Jacobian: J = S * J
       // Step 1, let's get the 'small' Jacobian matrix, j.
       // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain, which is way smaller than the number of robot DoFs.
-      jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
+      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
+      CommonOps.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
-      List<JointBasics> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+      List<JointReadOnly> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, tempFullJacobian);
 
       /*

@@ -9,12 +9,13 @@ import org.ejml.ops.CommonOps;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class JointIndexHandler
 {
    private final TIntArrayList indicesIntoCompactBlock = new TIntArrayList();
-   private final LinkedHashMap<JointBasics, int[]> columnsForJoints = new LinkedHashMap<JointBasics, int[]>();
+   private final LinkedHashMap<JointReadOnly, int[]> columnsForJoints = new LinkedHashMap<>();
 
    private final int numberOfDoFs;
    private final JointBasics[] indexedJoints;
@@ -51,11 +52,11 @@ public class JointIndexHandler
       }
    }
 
-   public boolean compactBlockToFullBlock(JointBasics[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
+   public boolean compactBlockToFullBlock(JointReadOnly[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
    {
       fullMatrix.zero();
 
-      for (JointBasics joint : joints)
+      for (JointReadOnly joint : joints)
       {
          indicesIntoCompactBlock.reset();
          ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
@@ -75,13 +76,13 @@ public class JointIndexHandler
       return true;
    }
 
-   public boolean compactBlockToFullBlock(List<? extends JointBasics> joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
+   public boolean compactBlockToFullBlock(List<? extends JointReadOnly> joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
    {
       fullMatrix.zero();
 
       for (int index = 0; index < joints.size(); index++)
       {
-         JointBasics joint = joints.get(index);
+         JointReadOnly joint = joints.get(index);
          indicesIntoCompactBlock.reset();
          ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
          int[] indicesIntoFullBlock = columnsForJoints.get(joint);
@@ -100,14 +101,14 @@ public class JointIndexHandler
       return true;
    }
 
-   public void compactBlockToFullBlockIgnoreUnindexedJoints(List<? extends JointBasics> joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
+   public void compactBlockToFullBlockIgnoreUnindexedJoints(List<? extends JointReadOnly> joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
    {
       fullMatrix.reshape(compactMatrix.getNumRows(), fullMatrix.getNumCols());
       fullMatrix.zero();
 
       for (int index = 0; index < joints.size(); index++)
       {
-         JointBasics joint = joints.get(index);
+         JointReadOnly joint = joints.get(index);
          indicesIntoCompactBlock.reset();
          ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
          int[] indicesIntoFullBlock = columnsForJoints.get(joint);
@@ -182,7 +183,7 @@ public class JointIndexHandler
          return jointIndices[0];
    }
 
-   public int[] getJointIndices(JointBasics joint)
+   public int[] getJointIndices(JointReadOnly joint)
    {
       return columnsForJoints.get(joint);
    }

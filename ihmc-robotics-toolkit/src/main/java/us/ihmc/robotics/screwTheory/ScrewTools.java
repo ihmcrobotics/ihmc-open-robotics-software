@@ -26,6 +26,7 @@ import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.SphericalJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
@@ -818,12 +819,12 @@ public class ScrewTools
       }
    }
 
-   public static void computeIndexForJoint(List<? extends JointBasics> jointsInOrder, TIntArrayList listToPackIndices, JointBasics jointToComputeIndicesFor)
+   public static void computeIndexForJoint(List<? extends JointReadOnly> jointsInOrder, TIntArrayList listToPackIndices, JointReadOnly jointToComputeIndicesFor)
    {
       int startIndex = 0;
       for (int i = 0; i < jointsInOrder.size(); i++)
       {
-         JointBasics joint = jointsInOrder.get(i);
+         JointReadOnly joint = jointsInOrder.get(i);
          int nDegreesOfFreedom = joint.getDegreesOfFreedom();
 
          if (joint == jointToComputeIndicesFor)
@@ -838,7 +839,7 @@ public class ScrewTools
       }
    }
 
-   public static void computeIndexForJoint(JointBasics[] jointsInOrder, TIntArrayList listToPackIndices, JointBasics jointToComputeIndicesFor)
+   public static void computeIndexForJoint(JointReadOnly[] jointsInOrder, TIntArrayList listToPackIndices, JointReadOnly jointToComputeIndicesFor)
    {
       int startIndex = 0;
       for (int i = 0; i < jointsInOrder.length; i++)
