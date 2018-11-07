@@ -25,6 +25,7 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
 public class GeometricJacobianTest
@@ -66,7 +67,7 @@ public class GeometricJacobianTest
       int numberOfJoints = random.nextInt(100);
 
       List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
-      RigidBodyBasics rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getSuccessor());
 
       Twist expectedTwist = new Twist();
       Twist actualTwist = new Twist();
@@ -116,7 +117,7 @@ public class GeometricJacobianTest
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
       List<JointBasics> joints = floatingChain.getInverseDynamicsJoints();
 
-      RigidBodyBasics rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getSuccessor());
 
       Twist expectedTwist = new Twist();
       Twist actualTwist = new Twist();

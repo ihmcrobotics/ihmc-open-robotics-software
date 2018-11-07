@@ -21,6 +21,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -62,7 +63,7 @@ public class ReachabilityMapSolver
       endEffector = robotArmJoints[robotArmJoints.length - 1].getSuccessor();
       kinematicsToolboxController = new KinematicsToolboxController(commandInputManager, statusOutputManager, null, robotArmJoints,
                                                                     Collections.singleton(endEffector), yoGraphicsListRegistry, registry);
-      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(ScrewTools.getRootBody(endEffector)));
+      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(MultiBodySystemTools.getRootBody(endEffector)));
 
       defaultArmConfiguration = RobotConfigurationDataFactory.create(robotArmJoints, new ForceSensorDefinition[0], new IMUDefinition[0]);
       RobotConfigurationDataFactory.packJointState(defaultArmConfiguration, robotArmJoints);

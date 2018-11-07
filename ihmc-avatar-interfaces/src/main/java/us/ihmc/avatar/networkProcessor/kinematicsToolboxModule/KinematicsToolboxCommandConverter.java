@@ -14,6 +14,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -34,7 +35,7 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
    {
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, new HumanoidReferenceFrames(fullRobotModel));
 
-      RigidBodyBasics rootBody = ScrewTools.getRootBody(fullRobotModel.getElevator());
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(fullRobotModel.getElevator());
       RigidBodyBasics[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
       for (RigidBodyBasics rigidBody : allRigidBodies)
          rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody);

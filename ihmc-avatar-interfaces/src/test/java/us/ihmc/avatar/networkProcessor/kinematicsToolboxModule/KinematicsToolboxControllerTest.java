@@ -35,6 +35,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
@@ -96,7 +97,7 @@ public class KinematicsToolboxControllerTest
       RobotDescription robotDescription = new KinematicsToolboxControllerTestRobots.SevenDoFArm();
       Pair<FloatingJointBasics, OneDoFJoint[]> desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDescription);
       commandInputManager = new CommandInputManager(KinematicsToolboxModule.supportedCommands());
-      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(ScrewTools.getRootBody(desiredFullRobotModel.getRight()[0].getSuccessor())));
+      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(MultiBodySystemTools.getRootBody(desiredFullRobotModel.getRight()[0].getSuccessor())));
 
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
 
@@ -301,7 +302,7 @@ public class KinematicsToolboxControllerTest
          if (Double.isFinite(joint.getJointLimitLower()) && Double.isFinite(joint.getJointLimitUpper()))
             joint.setQ(0.5 * (joint.getJointLimitLower() + joint.getJointLimitUpper()));
       }
-      ScrewTools.getRootBody(fullRobotModel.getRight()[0].getPredecessor()).updateFramesRecursively();
+      MultiBodySystemTools.getRootBody(fullRobotModel.getRight()[0].getPredecessor()).updateFramesRecursively();
       return fullRobotModel;
    }
 
@@ -321,7 +322,7 @@ public class KinematicsToolboxControllerTest
          jointLimitUpper -= 0.5 * rangeReduction;
          joint.setQ(RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper));
       }
-      ScrewTools.getRootBody(randomizedFullRobotModel.getRight()[0].getPredecessor()).updateFramesRecursively();
+      MultiBodySystemTools.getRootBody(randomizedFullRobotModel.getRight()[0].getPredecessor()).updateFramesRecursively();
    }
 
    private RobotController createToolboxUpdater()

@@ -38,6 +38,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
@@ -420,49 +421,8 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testGetRootBody()
    {
-      RigidBodyBasics randomBody = ScrewTools.getRootBody(joints.get(joints.size() - 1).getPredecessor());
+      RigidBodyBasics randomBody = MultiBodySystemTools.getRootBody(joints.get(joints.size() - 1).getPredecessor());
       assertTrue(randomBody.isRootBody());
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testCreateParentMap()
-   {
-      int numberOfBodies = ScrewTools.computeSubtreeSuccessors(elevator).length + 1;
-      RigidBodyBasics[] mostBodies = ScrewTools.computeSubtreeSuccessors(elevator);
-      RigidBodyBasics[] allRigidBodiesInOrder = new RigidBodyBasics[numberOfBodies];
-      allRigidBodiesInOrder[0] = elevator;
-      for(int i = 0; i < numberOfBodies -1; i++)
-      {
-         allRigidBodiesInOrder[i+1] = mostBodies[i];
-      }
-
-      int[] parentMap = new int[allRigidBodiesInOrder.length];
-      parentMap = ScrewTools.createParentMap(allRigidBodiesInOrder);
-      assertEquals(-1, parentMap[0]); //root
-      assertEquals(0, parentMap[1]); //first subtree of bodies
-      assertEquals(0, parentMap[2]);
-      assertEquals(0, parentMap[3]);
-
-      for(int i = 4; i < 16; i++) //members of chains A, B, and C
-      {
-         assertEquals(i - 3, parentMap[i]);
-      }
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testGetTauMatrix()
-   {
-      JointBasics[] jointsInOrder = ScrewTools.computeSubtreeJoints(elevator);
-
-      DenseMatrix64F tauMatrix = ScrewTools.getTauMatrix(jointsInOrder);
-      assertEquals(jointsInOrder.length, tauMatrix.numRows);
-      assertEquals(1, tauMatrix.numCols);
-      for(int i = 0; i < jointsInOrder.length; i++)
-      {
-         assertEquals("These should be equal", jointsInOrder[i].getDegreesOfFreedom() - 1, tauMatrix.get(i, 0), epsilon);
-      }
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

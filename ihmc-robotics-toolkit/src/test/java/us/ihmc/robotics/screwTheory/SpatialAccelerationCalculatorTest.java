@@ -30,6 +30,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MecanoRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
@@ -52,7 +53,7 @@ public class SpatialAccelerationCalculatorTest
       int numberOfJoints = 20;
       List<PrismaticJoint> prismaticJoints = ScrewTestTools.createRandomChainRobotWithPrismaticJoints(numberOfJoints, random);
       RigidBodyBasics randomBody = prismaticJoints.get(random.nextInt(numberOfJoints)).getPredecessor();
-      RigidBodyBasics rootBody = ScrewTools.getRootBody(randomBody);
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(randomBody);
       boolean doAccelerationTerms = true;
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -114,7 +115,7 @@ public class SpatialAccelerationCalculatorTest
       int numberOfJoints = 20;
       List<RevoluteJoint> revoluteJoints = ScrewTestTools.createRandomChainRobot(numberOfJoints, random);
       RigidBodyBasics randomBody = revoluteJoints.get(random.nextInt(numberOfJoints)).getPredecessor();
-      RigidBodyBasics rootBody = ScrewTools.getRootBody(randomBody);
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(randomBody);
       boolean doAccelerationTerms = true;
 
       // No velocity
@@ -228,7 +229,7 @@ public class SpatialAccelerationCalculatorTest
       List<OneDoFJoint> jointsInFuture = Arrays.asList(ScrewTools.cloneOneDoFJointPath(joints.toArray(new OneDoFJoint[numberOfJoints])));
 
       RigidBodyBasics randomBody = joints.get(random.nextInt(joints.size())).getPredecessor();
-      RigidBodyBasics rootBody = ScrewTools.getRootBody(randomBody);
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(randomBody);
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, randomBody);
       TwistCalculator twistCalculatorInFuture = new TwistCalculator(worldFrame, jointsInFuture.get(random.nextInt(joints.size())).getPredecessor());
 
@@ -298,7 +299,7 @@ public class SpatialAccelerationCalculatorTest
 
       RigidBodyBasics randomBody = joints.get(0).getPredecessor();
       RigidBodyBasics randomBodyInFuture = jointsInFuture.get(0).getPredecessor();
-      RigidBodyBasics rootBody = ScrewTools.getRootBody(randomBody);
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(randomBody);
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, randomBody);
       TwistCalculator twistCalculatorInFuture = new TwistCalculator(worldFrame, randomBodyInFuture);
 
@@ -391,7 +392,7 @@ public class SpatialAccelerationCalculatorTest
 
       RigidBodyBasics randomBody = joints.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor();
       RigidBodyBasics randomBodyInFuture = jointsInFuture.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor();
-      RigidBodyBasics rootBody = ScrewTools.getRootBody(randomBody);
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(randomBody);
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, randomBody);
       TwistCalculator twistCalculatorInFuture = new TwistCalculator(worldFrame, randomBodyInFuture);
 
@@ -500,8 +501,8 @@ public class SpatialAccelerationCalculatorTest
 
       RigidBodyBasics randomBody = joints.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor();
       RigidBodyBasics randomBodyNoVelocity = jointsNoVelocity.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor();
-      RigidBodyBasics rootBody = ScrewTools.getRootBody(randomBody);
-      RigidBodyBasics rootBodyNoVelocity = ScrewTools.getRootBody(randomBodyNoVelocity);
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(randomBody);
+      RigidBodyBasics rootBodyNoVelocity = MultiBodySystemTools.getRootBody(randomBodyNoVelocity);
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, randomBody);
       TwistCalculator twistCalculatorNoVelocity = new TwistCalculator(worldFrame, randomBodyNoVelocity);
 

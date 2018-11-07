@@ -22,6 +22,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -795,7 +796,7 @@ public class FourBarKinematicLoopTest
 
          masterJointA.setQ(qMaster);
          masterJointA.setQd(qdMaster);
-         ScrewTools.getRootBody(masterJointA.getPredecessor()).updateFramesRecursively();
+         MultiBodySystemTools.getRootBody(masterJointA.getPredecessor()).updateFramesRecursively();
          fourBarKinematicLoop.update();
          fourBarKinematicLoop.getJacobian(jacobian);
 

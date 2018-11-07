@@ -44,6 +44,7 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -223,7 +224,7 @@ public class KinematicsToolboxController extends ToolboxController
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       // This will find the root body without using rootJoint so it can be null.
-      rootBody = ScrewTools.getRootBody(oneDoFJoints[0].getPredecessor());
+      rootBody = MultiBodySystemTools.getRootBody(oneDoFJoints[0].getPredecessor());
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, rootBody);
 

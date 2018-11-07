@@ -13,6 +13,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
  * This class is a tool that can be used to compute the twist of each {@code RigidBody} composing a
@@ -80,7 +81,7 @@ public class TwistCalculator
    public TwistCalculator(ReferenceFrame inertialFrame, RigidBodyBasics body)
    {
       this.inertialFrame = inertialFrame;
-      this.rootBody = ScrewTools.getRootBody(body);
+      this.rootBody = MultiBodySystemTools.getRootBody(body);
       this.rootTwist = new Twist(rootBody.getBodyFixedFrame(), inertialFrame, rootBody.getBodyFixedFrame());
 
       int numberOfRigidBodies = ScrewTools.computeSubtreeSuccessors(ScrewTools.computeSubtreeJoints(rootBody)).length;

@@ -11,6 +11,7 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -36,7 +37,7 @@ public class JointTorqueFromForceSensorVisualizer
 
       for (RigidBodyBasics rigidBody : allRigidBodies)
       {
-         RigidBodyBasics rootBody = ScrewTools.getRootBody(rigidBody);
+         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
          OneDoFJoint[] oneDoFJoints = ScrewTools.createOneDoFJointPath(rootBody, rigidBody);
 
          GeometricJacobian jacobian = new GeometricJacobian(oneDoFJoints, rigidBody.getBodyFixedFrame());

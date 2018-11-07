@@ -69,6 +69,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -569,7 +570,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
    private RigidBodyBasics getRigidBodyHasSameName(FullHumanoidRobotModel fullRobotModel, RigidBodyBasics givenRigidBody)
    {
-      RigidBodyBasics rootBody = ScrewTools.getRootBody(fullRobotModel.getElevator());
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(fullRobotModel.getElevator());
       RigidBodyBasics[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
       for (RigidBodyBasics rigidBody : allRigidBodies)
          if (givenRigidBody.getName().equals(rigidBody.getName()))
