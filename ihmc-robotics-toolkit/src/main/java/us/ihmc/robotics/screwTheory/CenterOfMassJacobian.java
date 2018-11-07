@@ -129,7 +129,7 @@ public class CenterOfMassJacobian
       else
       {
          double curSubTreeMass = (rigidBodySet.contains(rigidBody) ? rigidBody.getInertia().getMass() : 0.0);
-         List<JointBasics> childrenJoints = rigidBody.getChildrenJoints();
+         List<? extends JointBasics> childrenJoints = rigidBody.getChildrenJoints();
          for (int i = 0; i < childrenJoints.size(); i++)
          {
             double childSubTreeMass = getSubTreeMass(childrenJoints.get(i).getSuccessor());
@@ -168,7 +168,7 @@ public class CenterOfMassJacobian
          double massToScale = (rigidBodySet.contains(rigidBody) ? rigidBody.getInertia().getMass() : 0.0);
          curChildCoMScaledByMass.scale(massToScale);
 
-         final List<JointBasics> childrenJoints = rigidBody.getChildrenJoints();
+         final List<? extends JointBasics> childrenJoints = rigidBody.getChildrenJoints();
          for (int i = 0; i < childrenJoints.size(); i++)
          {
             curChildCoMScaledByMass.add(getCoMScaledByMass(childrenJoints.get(i).getSuccessor()));

@@ -30,7 +30,7 @@ public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotCo
          YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(referenceFrame, registry, false, length);
          yoGraphicsList.add(yoGraphicReferenceFrame);
          yoGraphicReferenceFrames.add(yoGraphicReferenceFrame);
-         List<JointBasics> childrenJoints = joint.getSuccessor().getChildrenJoints();
+         List<? extends JointBasics> childrenJoints = joint.getSuccessor().getChildrenJoints();
          jointStack.addAll(childrenJoints);
          jointStack.remove(joint);
       }

@@ -400,7 +400,7 @@ public class ScrewToolsTest
       while (!rigidBodyStack.isEmpty())
       {
          RigidBodyBasics currentBody = rigidBodyStack.remove(0);
-         List<JointBasics> childrenJoints = currentBody.getChildrenJoints();
+         List<? extends JointBasics> childrenJoints = currentBody.getChildrenJoints();
          for (JointBasics joint : childrenJoints)
          {
             RigidBodyBasics successor = joint.getSuccessor();

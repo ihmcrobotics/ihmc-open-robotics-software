@@ -75,7 +75,7 @@ public interface RigidBodyBasics
     *
     * @return all the children joints of this rigid-body.
     */
-   List<JointBasics> getChildrenJoints();
+   List<? extends JointBasics> getChildrenJoints();
 
    /**
     * Verifies whether this rigid-body has at least one child joint or not.

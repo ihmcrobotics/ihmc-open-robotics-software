@@ -93,7 +93,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
       if (body.hasChildrenJoints())
       {
-         List<JointBasics> childJoints = body.getChildrenJoints();
+         List<? extends JointBasics> childJoints = body.getChildrenJoints();
 
          for (JointBasics joint : childJoints)
          {
@@ -155,7 +155,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
       if (currentRigidBody.hasChildrenJoints())
       {
-         List<JointBasics> childJoints = currentRigidBody.getChildrenJoints();
+         List<? extends JointBasics> childJoints = currentRigidBody.getChildrenJoints();
 
          for (JointBasics joint : childJoints)
          {

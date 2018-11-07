@@ -123,7 +123,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
          WrenchReadOnly externalWrench = externalWrenches.get(successor);
          jointWrench.sub(externalWrench);
 
-         List<JointBasics> childrenJoints = successor.getChildrenJoints();
+         List<? extends JointBasics> childrenJoints = successor.getChildrenJoints();
 
          for (int childIndex = 0; childIndex < childrenJoints.size(); childIndex++)
          {
@@ -173,7 +173,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
 
          if (currentBody.hasChildrenJoints())
          {
-            List<JointBasics> childrenJoints = currentBody.getChildrenJoints();
+            List<? extends JointBasics> childrenJoints = currentBody.getChildrenJoints();
             for (JointBasics joint : childrenJoints)
             {
                if (!jointsToIgnore.contains(joint))

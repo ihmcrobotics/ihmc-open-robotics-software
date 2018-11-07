@@ -36,7 +36,7 @@ public class GraphicsIDRobot extends GraphicsRobot
       update();
    }
 
-   private void addInverseDynamicsJoints(List<JointBasics> joints, GraphicsJoint parentJoint, GraphicsObjectsHolder graphicsObjectsHolder,
+   private void addInverseDynamicsJoints(List<? extends JointBasics> joints, GraphicsJoint parentJoint, GraphicsObjectsHolder graphicsObjectsHolder,
                                          boolean useCollisionMeshes)
    {
       for (JointBasics joint : joints)
