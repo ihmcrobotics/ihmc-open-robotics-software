@@ -13,6 +13,7 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SpecializedOps;
 
+import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -32,7 +33,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
    private final Map<RigidBodyBasics, DenseMatrix64F> constrainedBodiesAndSelectionMatrices = new LinkedHashMap<RigidBodyBasics, DenseMatrix64F>();
    private final List<JointBasics> actuatedJoints = new ArrayList<JointBasics>();
    private final Map<RigidBodyBasics, List<JointBasics>> supportingBodyToJointPathMap = new LinkedHashMap<RigidBodyBasics, List<JointBasics>>();
-   private final MassMatrixCalculator massMatrixCalculator;
+   private final CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
 
    private final boolean computeSNsBar;
 
@@ -65,7 +66,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
    {
       this.rootJoint = rootJoint;
       this.massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootJoint.getSuccessor());
-      jointsInOrder = massMatrixCalculator.getJointsInOrder();
+      jointsInOrder = massMatrixCalculator.getInput().getJointMatrixIndexProvider().getIndexedJointsInOrder().toArray(new JointBasics[0]);
       this.nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
       massMatrixSolver = LinearSolverFactory.symmPosDef(nDegreesOfFreedom);
       lambdaSolver = LinearSolverFactory.symmPosDef(nDegreesOfFreedom); // size of matrix is only used to choose algorithm. nDegreesOfFreedom is an upper limit
@@ -126,7 +127,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
 
       computeJs(Js, supportingBodyToJointPathMap, constrainedBodiesAndSelectionMatrices);
 
-      massMatrixCalculator.compute();
+      massMatrixCalculator.reset();
       massMatrixSolver.setA(massMatrixCalculator.getMassMatrix());
       massMatrixSolver.invert(AInverse);
       CommonOps.multTransB(AInverse, Js, AInverseJSTranspose);
