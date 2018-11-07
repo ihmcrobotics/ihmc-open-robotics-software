@@ -242,8 +242,8 @@ public class VirtualModelControllerTestHelper
       floatingJoint.addJoint(l_hip_yaw);
       floatingJoint.addJoint(r_hip_yaw);
 
-      RevoluteJoint l_leg_hpz = ScrewTools.addRevoluteJoint("l_leg_hpz", pelvisBody, leftHipYawOffset, Z);
-      RevoluteJoint r_leg_hpz = ScrewTools.addRevoluteJoint("r_leg_hpz", pelvisBody, rightHipYawOffset, Z);
+      RevoluteJoint l_leg_hpz = new RevoluteJoint("l_leg_hpz", pelvisBody, leftHipYawOffset, Z);
+      RevoluteJoint r_leg_hpz = new RevoluteJoint("r_leg_hpz", pelvisBody, rightHipYawOffset, Z);
       l_leg_hpz.setQ(l_hip_yaw.getQYoVariable().getDoubleValue());
       r_leg_hpz.setQ(r_hip_yaw.getQYoVariable().getDoubleValue());
       RigidBodyBasics leftHipDifferentialBody = copyLinkAsRigidBody(l_hip_differential, l_leg_hpz, "l_hip_differential");
@@ -263,8 +263,8 @@ public class VirtualModelControllerTestHelper
       l_hip_yaw.addJoint(l_hip_roll);
       r_hip_yaw.addJoint(r_hip_roll);
 
-      RevoluteJoint l_leg_hpx = ScrewTools.addRevoluteJoint("l_leg_hpx", leftHipDifferentialBody, leftHipRollOffset, X);
-      RevoluteJoint r_leg_hpx = ScrewTools.addRevoluteJoint("r_leg_hpx", rightHipDifferentialBody, rightHipRollOffset, X);
+      RevoluteJoint l_leg_hpx = new RevoluteJoint("l_leg_hpx", leftHipDifferentialBody, leftHipRollOffset, X);
+      RevoluteJoint r_leg_hpx = new RevoluteJoint("r_leg_hpx", rightHipDifferentialBody, rightHipRollOffset, X);
       l_leg_hpx.setQ(l_hip_roll.getQYoVariable().getDoubleValue());
       r_leg_hpx.setQ(r_hip_roll.getQYoVariable().getDoubleValue());
       RigidBodyBasics leftHipDifferentialBody2 = copyLinkAsRigidBody(l_hip_differential2, l_leg_hpx, "l_hip_differential");
@@ -284,8 +284,8 @@ public class VirtualModelControllerTestHelper
       l_hip_roll.addJoint(l_hip_pitch);
       r_hip_roll.addJoint(r_hip_pitch);
 
-      RevoluteJoint l_leg_hpy = ScrewTools.addRevoluteJoint("l_leg_hpy", leftHipDifferentialBody2, leftHipPitchOffset, Y);
-      RevoluteJoint r_leg_hpy = ScrewTools.addRevoluteJoint("r_leg_hpy", rightHipDifferentialBody2, rightHipPitchOffset, Y);
+      RevoluteJoint l_leg_hpy = new RevoluteJoint("l_leg_hpy", leftHipDifferentialBody2, leftHipPitchOffset, Y);
+      RevoluteJoint r_leg_hpy = new RevoluteJoint("r_leg_hpy", rightHipDifferentialBody2, rightHipPitchOffset, Y);
       l_leg_hpy.setQ(l_hip_pitch.getQYoVariable().getDoubleValue());
       r_leg_hpy.setQ(r_hip_pitch.getQYoVariable().getDoubleValue());
       RigidBodyBasics leftThighBody = copyLinkAsRigidBody(leftThigh, l_leg_hpy, "l_thigh");
@@ -305,8 +305,8 @@ public class VirtualModelControllerTestHelper
       l_hip_pitch.addJoint(l_knee_pitch);
       r_hip_pitch.addJoint(r_knee_pitch);
 
-      RevoluteJoint l_leg_kny = ScrewTools.addRevoluteJoint("l_leg_kny", leftThighBody, leftKneePitchOffset, Y);
-      RevoluteJoint r_leg_kny = ScrewTools.addRevoluteJoint("r_leg_kny", rightThighBody, rightKneePitchOffset, Y);
+      RevoluteJoint l_leg_kny = new RevoluteJoint("l_leg_kny", leftThighBody, leftKneePitchOffset, Y);
+      RevoluteJoint r_leg_kny = new RevoluteJoint("r_leg_kny", rightThighBody, rightKneePitchOffset, Y);
       l_leg_kny.setQ(l_knee_pitch.getQYoVariable().getDoubleValue());
       r_leg_kny.setQ(r_knee_pitch.getQYoVariable().getDoubleValue());
       RigidBodyBasics leftShinBody = copyLinkAsRigidBody(l_shin, l_leg_kny, "l_shin");
@@ -326,8 +326,8 @@ public class VirtualModelControllerTestHelper
       l_knee_pitch.addJoint(r_ankle_pitch);
       l_knee_pitch.addJoint(r_ankle_pitch);
 
-      RevoluteJoint l_leg_aky = ScrewTools.addRevoluteJoint("l_leg_aky", leftShinBody, leftAnklePitchOffset, Y);
-      RevoluteJoint r_leg_aky = ScrewTools.addRevoluteJoint("r_leg_aky", rightShinBody, rightAnklePitchOffset, Y);
+      RevoluteJoint l_leg_aky = new RevoluteJoint("l_leg_aky", leftShinBody, leftAnklePitchOffset, Y);
+      RevoluteJoint r_leg_aky = new RevoluteJoint("r_leg_aky", rightShinBody, rightAnklePitchOffset, Y);
       l_leg_aky.setQ(l_ankle_pitch.getQYoVariable().getDoubleValue());
       r_leg_aky.setQ(r_ankle_pitch.getQYoVariable().getDoubleValue());
       RigidBodyBasics leftAnkleDifferentialBody = copyLinkAsRigidBody(l_ankle_differential, l_leg_aky, "l_ankle_differential");
@@ -347,8 +347,8 @@ public class VirtualModelControllerTestHelper
       l_ankle_pitch.addJoint(l_ankle_roll);
       r_ankle_pitch.addJoint(r_ankle_roll);
 
-      RevoluteJoint l_leg_akx = ScrewTools.addRevoluteJoint("l_leg_akx", leftAnkleDifferentialBody, leftAnkleRollOffset, X);
-      RevoluteJoint r_leg_akx = ScrewTools.addRevoluteJoint("r_leg_akx", rightAnkleDifferentialBody, rightAnkleRollOffset, X);
+      RevoluteJoint l_leg_akx = new RevoluteJoint("l_leg_akx", leftAnkleDifferentialBody, leftAnkleRollOffset, X);
+      RevoluteJoint r_leg_akx = new RevoluteJoint("r_leg_akx", rightAnkleDifferentialBody, rightAnkleRollOffset, X);
       l_leg_akx.setQ(l_ankle_roll.getQYoVariable().getDoubleValue());
       r_leg_akx.setQ(r_ankle_roll.getQYoVariable().getDoubleValue());
       RigidBodyBasics leftFootBody = copyLinkAsRigidBody(l_foot, l_leg_akx, "l_foot");
@@ -505,7 +505,7 @@ public class VirtualModelControllerTestHelper
       Matrix3D momentOfInertia = new Matrix3D();
       link.getMomentOfInertia(momentOfInertia);
 
-      return ScrewTools.addRigidBody(bodyName, currentInverseDynamicsJoint, momentOfInertia, link.getMass(), comOffset);
+      return new RigidBody(bodyName, currentInverseDynamicsJoint, momentOfInertia, link.getMass(), comOffset);
    }
 
    static void compareWrenches(WrenchReadOnly inputWrench, Wrench outputWrench, DenseMatrix64F selectionMatrix)
@@ -782,31 +782,31 @@ public class VirtualModelControllerTestHelper
 
       private RigidBodyBasics createUpperArm(RigidBodyBasics parentBody)
       {
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
+         RevoluteJoint joint = new RevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(Math.toRadians(20));
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, THIGH_LENGTH / 2.0);
-         return ScrewTools.addRigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
+         return new RigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
       }
 
       private RigidBodyBasics createLowerArm(RigidBodyBasics parentBody)
       {
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint("elbow_y", parentBody, new Vector3D(0.0, 0.0, THIGH_LENGTH), Y);
+         RevoluteJoint joint = new RevoluteJoint("elbow_y", parentBody, new Vector3D(0.0, 0.0, THIGH_LENGTH), Y);
          joint.setQ(Math.toRadians(40));
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 2.0);
 
-         return ScrewTools.addRigidBody("lowerArm", joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
+         return new RigidBody("lowerArm", joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
       }
 
       private RigidBodyBasics createHand(RigidBodyBasics parentBody)
       {
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint("wristPitch_y", parentBody, new Vector3D(0.0, 0.0, SHIN_LENGTH), Y);
+         RevoluteJoint joint = new RevoluteJoint("wristPitch_y", parentBody, new Vector3D(0.0, 0.0, SHIN_LENGTH), Y);
          joint.setQ(Math.toRadians(30));
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 4.0);
 
-         return ScrewTools.addRigidBody("hand", joint, 0.0437, 0.0437, 0.0054, FOOT_MASS, comOffset);
+         return new RigidBody("hand", joint, 0.0437, 0.0437, 0.0054, FOOT_MASS, comOffset);
       }
 
       @Override
@@ -1073,41 +1073,41 @@ public class VirtualModelControllerTestHelper
             jointName = name + "_y";
          else
             jointName = name + "_z";
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
+         RevoluteJoint joint = new RevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D();
 
-         return ScrewTools.addRigidBody(name, joint, 0.005, 0.005, 0.005, 0.1, comOffset);
+         return new RigidBody(name, joint, 0.005, 0.005, 0.005, 0.1, comOffset);
       }
 
       private RigidBodyBasics createUpperArm(RigidBodyBasics parentBody)
       {
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
+         RevoluteJoint joint = new RevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, THIGH_LENGTH / 2.0);
-         return ScrewTools.addRigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
+         return new RigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
       }
 
       private RigidBodyBasics createLowerArm(RigidBodyBasics parentBody)
       {
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint("elbow_y", parentBody, new Vector3D(0.0, 0.0, THIGH_LENGTH), Y);
+         RevoluteJoint joint = new RevoluteJoint("elbow_y", parentBody, new Vector3D(0.0, 0.0, THIGH_LENGTH), Y);
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 2.0);
 
-         return ScrewTools.addRigidBody("lowerArm", joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
+         return new RigidBody("lowerArm", joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
       }
 
       private RigidBodyBasics createHand(RigidBodyBasics parentBody)
       {
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint("wristPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
+         RevoluteJoint joint = new RevoluteJoint("wristPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 4.0);
 
-         return ScrewTools.addRigidBody("hand", joint, 0.0437, 0.0437, 0.0054, FOOT_MASS, comOffset);
+         return new RigidBody("hand", joint, 0.0437, 0.0437, 0.0054, FOOT_MASS, comOffset);
       }
 
       @Override
@@ -1409,41 +1409,41 @@ public class VirtualModelControllerTestHelper
             jointName = name + "_y";
          else
             jointName = name + "_z";
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
+         RevoluteJoint joint = new RevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D();
-         return ScrewTools.addRigidBody(jointName, joint, 0.005, 0.005, 0.005, 0.1, comOffset);
+         return new RigidBody(jointName, joint, 0.005, 0.005, 0.005, 0.1, comOffset);
       }
 
       private RigidBodyBasics createUpperArm(RigidBodyBasics parentBody)
       {
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
+         RevoluteJoint joint = new RevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, THIGH_LENGTH / 2.0);
 
-         return ScrewTools.addRigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
+         return new RigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
       }
 
       private RigidBodyBasics createLowerArm(String suffix, RigidBodyBasics parentBody)
       {
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint("elbow_y_" + suffix, parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
+         RevoluteJoint joint = new RevoluteJoint("elbow_y_" + suffix, parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 2.0);
 
-         return ScrewTools.addRigidBody("lowerArm" + suffix, joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
+         return new RigidBody("lowerArm" + suffix, joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
       }
 
       private RigidBodyBasics createHand(String suffix, RigidBodyBasics parentBody)
       {
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint("wristPitch_y_" + suffix, parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
+         RevoluteJoint joint = new RevoluteJoint("wristPitch_y_" + suffix, parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 4.0);
 
-         return ScrewTools.addRigidBody("hand" + suffix, joint, 0.0437, 0.0437, 0.0054, FOOT_MASS, comOffset);
+         return new RigidBody("hand" + suffix, joint, 0.0437, 0.0437, 0.0054, FOOT_MASS, comOffset);
       }
 
       @Override
@@ -1727,31 +1727,31 @@ public class VirtualModelControllerTestHelper
 
       private RigidBodyBasics createUpperArm(RigidBodyBasics parentBody)
       {
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
+         RevoluteJoint joint = new RevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, THIGH_LENGTH / 2.0);
-         return ScrewTools.addRigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
+         return new RigidBody("upperArm", joint, 0.0437, 0.0437, 0.0054, THIGH_MASS, comOffset);
       }
 
       private RigidBodyBasics createLowerArm(String suffix, RigidBodyBasics parentBody)
       {
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint("elbow_y_" + suffix, parentBody, new Vector3D(0.0, 0.0, THIGH_LENGTH), Y);
+         RevoluteJoint joint = new RevoluteJoint("elbow_y_" + suffix, parentBody, new Vector3D(0.0, 0.0, THIGH_LENGTH), Y);
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 2.0);
 
-         return ScrewTools.addRigidBody("lowerArm" + suffix, joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
+         return new RigidBody("lowerArm" + suffix, joint, 0.0437, 0.0437, 0.0054, SHIN_MASS, comOffset);
       }
 
       private RigidBodyBasics createHand(String suffix, RigidBodyBasics parentBody)
       {
-         RevoluteJoint joint = ScrewTools.addRevoluteJoint("wristPitch_y_" + suffix, parentBody, new Vector3D(0.0, 0.0, SHIN_LENGTH), Y);
+         RevoluteJoint joint = new RevoluteJoint("wristPitch_y_" + suffix, parentBody, new Vector3D(0.0, 0.0, SHIN_LENGTH), Y);
          joint.setQ(random.nextDouble());
 
          Vector3D comOffset = new Vector3D(0.0, 0.0, SHIN_LENGTH / 4.0);
 
-         return ScrewTools.addRigidBody("hand" + suffix, joint, 0.0437, 0.0437, 0.0054, FOOT_MASS, comOffset);
+         return new RigidBody("hand" + suffix, joint, 0.0437, 0.0437, 0.0054, FOOT_MASS, comOffset);
       }
 
       @Override

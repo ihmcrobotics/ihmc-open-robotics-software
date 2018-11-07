@@ -53,7 +53,7 @@ public class SphereRobotModel implements FullRobotModel
       floatingJoint = new SixDoFJoint("floatingJoint", elevator);
 
       Matrix3D inertia = new Matrix3D(Ixx1, 0.0, 0.0, 0.0, Iyy1, 0.0, 0.0, 0.0, Izz1);
-      body = ScrewTools.addRigidBody("body", floatingJoint, inertia, mass, new Vector3D());
+      body = new RigidBody("body", floatingJoint, inertia, mass, new Vector3D());
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
 

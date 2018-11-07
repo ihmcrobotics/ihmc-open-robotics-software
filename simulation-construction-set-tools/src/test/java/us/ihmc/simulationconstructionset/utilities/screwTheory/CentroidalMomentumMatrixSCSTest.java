@@ -87,7 +87,7 @@ public class CentroidalMomentumMatrixSCSTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator);
-      ScrewTools.addRigidBody("rigidBody", sixDoFJoint, momentOfInertia, mass, comOffset);
+      new RigidBody("rigidBody", sixDoFJoint, momentOfInertia, mass, comOffset);
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
       CentroidalMomentumCalculator centroidalMomentumMatrix = new CentroidalMomentumCalculator(elevator, centerOfMassFrame);

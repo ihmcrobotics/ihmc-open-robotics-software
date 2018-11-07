@@ -10,6 +10,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -125,8 +127,7 @@ public class KinematicsToolboxControllerTestRobots
          rootJoint = new SixDoFJoint(rootJointDescription.getName(), rootBody);
 
          LinkDescription linkDescription = rootJointDescription.getLink();
-         predecessor = ScrewTools.addRigidBody(rootJointDescription.getName(), rootJoint, linkDescription.getMomentOfInertiaCopy(), linkDescription.getMass(),
-                                               linkDescription.getCenterOfMassOffset());
+         predecessor = new RigidBody(rootJointDescription.getName(), rootJoint, linkDescription.getMomentOfInertiaCopy(), linkDescription.getMass(), linkDescription.getCenterOfMassOffset());
 
          for (JointDescription jointDescription : rootJointDescription.getChildrenJoints())
          {
@@ -157,11 +158,11 @@ public class KinematicsToolboxControllerTestRobots
 
       if (joint instanceof PinJointDescription)
       {
-         inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, offset, jointAxis);
+         inverseDynamicsJoint = new RevoluteJoint(joint.getName(), parentBody, offset, jointAxis);
       }
       else if (joint instanceof SliderJointDescription)
       {
-         inverseDynamicsJoint = ScrewTools.addPrismaticJoint(joint.getName(), parentBody, offset, jointAxis);
+         inverseDynamicsJoint = new PrismaticJoint(joint.getName(), parentBody, offset, jointAxis);
       }
       else
       {
@@ -181,7 +182,7 @@ public class KinematicsToolboxControllerTestRobots
       Vector3D comOffset = new Vector3D(childLink.getCenterOfMassOffset());
       Matrix3D inertia = childLink.getMomentOfInertiaCopy();
 
-      RigidBodyBasics rigidBody = ScrewTools.addRigidBody(childLink.getName(), inverseDynamicsJoint, inertia, mass, comOffset);
+      RigidBodyBasics rigidBody = new RigidBody(childLink.getName(), inverseDynamicsJoint, inertia, mass, comOffset);
 
       for (JointDescription sdfJoint : joint.getChildrenJoints())
       {

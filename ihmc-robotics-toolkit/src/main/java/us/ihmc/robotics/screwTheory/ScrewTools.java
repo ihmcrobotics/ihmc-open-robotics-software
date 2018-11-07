@@ -13,12 +13,10 @@ import org.ejml.data.DenseMatrix64F;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -35,19 +33,6 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class ScrewTools
 {
-   public static RevoluteJoint addRevoluteJoint(String jointName, RigidBodyBasics parentBody, Vector3D jointOffset, Vector3D jointAxis)
-   {
-      RigidBodyTransform transformToParent = new RigidBodyTransform();
-      transformToParent.setTranslationAndIdentityRotation(jointOffset);
-
-      return addRevoluteJoint(jointName, parentBody, transformToParent, jointAxis);
-   }
-
-   public static RevoluteJoint addRevoluteJoint(String jointName, RigidBodyBasics parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis)
-   {
-      return new RevoluteJoint(jointName, parentBody, transformToParent, jointAxis);
-   }
-
    public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBodyBasics parentBody, Vector3D jointOffset, Vector3D jointAxis,
                                                               boolean isPartOfClosedKinematicLoop)
    {
@@ -58,39 +43,6 @@ public class ScrewTools
                                                               boolean isPartOfClosedKinematicLoop)
    {
       return new PassiveRevoluteJoint(jointName, parentBody, transformToParent, jointAxis, isPartOfClosedKinematicLoop);
-   }
-
-   public static PrismaticJoint addPrismaticJoint(String jointName, RigidBodyBasics parentBody, Vector3D jointOffset, Vector3D jointAxis)
-   {
-      return addPrismaticJoint(jointName, parentBody, TransformTools.createTranslationTransform(jointOffset), jointAxis);
-   }
-
-   public static PrismaticJoint addPrismaticJoint(String jointName, RigidBodyBasics parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis)
-   {
-      return new PrismaticJoint(jointName, parentBody, transformToParent, jointAxis);
-   }
-
-   public static RigidBodyBasics addRigidBody(String name, JointBasics parentJoint, double Ixx, double Iyy, double Izz, double mass, Vector3D centerOfMassOffset)
-   {
-      Matrix3D momentOfInertia = new Matrix3D();
-      momentOfInertia.setIdentity();
-      momentOfInertia.setM00(Ixx);
-      momentOfInertia.setM11(Iyy);
-      momentOfInertia.setM22(Izz);
-      return addRigidBody(name, parentJoint, momentOfInertia, mass, centerOfMassOffset);
-   }
-
-   public static RigidBodyBasics addRigidBody(String name, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass,
-                                        Vector3DReadOnly centerOfMassOffset)
-   {
-      RigidBodyTransform inertiaPose = new RigidBodyTransform();
-      inertiaPose.setTranslation(centerOfMassOffset);
-      return addRigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
-   }
-
-   public static RigidBodyBasics addRigidBody(String name, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
-   {
-      return new RigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
    }
 
    public static RigidBodyBasics[] computeSuccessors(JointBasics... joints)
@@ -540,9 +492,9 @@ public class ScrewTools
       OneDoFJoint clone;
 
       if (original instanceof RevoluteJoint)
-         clone = ScrewTools.addRevoluteJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform, jointAxisCopy);
+         clone = new RevoluteJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform, jointAxisCopy);
       else if (original instanceof PrismaticJoint)
-         clone = ScrewTools.addPrismaticJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform, jointAxisCopy);
+         clone = new PrismaticJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform, jointAxisCopy);
       else
          throw new RuntimeException("Unhandled type of " + OneDoFJoint.class.getSimpleName() + ": " + original.getClass().getSimpleName());
 
@@ -562,7 +514,7 @@ public class ScrewTools
       Matrix3D massMomentOfInertiaPartCopy = new Matrix3D(original.getInertia().getMomentOfInertia());
       double mass = original.getInertia().getMass();
       Vector3D comOffsetCopy = new Vector3D(comOffset);
-      RigidBodyBasics clone = ScrewTools.addRigidBody(nameOriginal + cloneSuffix, parentJointOfClone, massMomentOfInertiaPartCopy, mass, comOffsetCopy);
+      RigidBodyBasics clone = new RigidBody(nameOriginal + cloneSuffix, parentJointOfClone, massMomentOfInertiaPartCopy, mass, comOffsetCopy);
       return clone;
    }
 

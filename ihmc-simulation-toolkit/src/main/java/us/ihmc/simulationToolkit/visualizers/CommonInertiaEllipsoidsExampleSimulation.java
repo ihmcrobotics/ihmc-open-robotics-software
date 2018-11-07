@@ -50,7 +50,7 @@ public class CommonInertiaEllipsoidsExampleSimulation
       System.out.println(transform);
       momentOfInertia = InertiaTools.rotate(transform, momentOfInertia);
       System.out.println(momentOfInertia);
-      RigidBodyBasics aBody = ScrewTools.addRigidBody("test", rootJoint, momentOfInertia, mass, inertiaPose);
+      RigidBodyBasics aBody = new RigidBody("test", rootJoint, momentOfInertia, mass, inertiaPose);
       rootJoint.updateFramesRecursively();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();

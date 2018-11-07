@@ -873,7 +873,7 @@ public class FourBarKinematicLoopTest
    private void initializeFourBar(Vector3D elevatorToJointA, Vector3D jointAtoB, Vector3D jointBtoC, Vector3D jointCtoD, Vector3D jointAxisA,
          Vector3D jointAxisB, Vector3D jointAxisC, Vector3D jointAxisD, int outputJointIndex)
    {
-      masterJointA = ScrewTools.addRevoluteJoint("jointA", elevator, elevatorToJointA, jointAxisA);
+      masterJointA = new RevoluteJoint("jointA", elevator, elevatorToJointA, jointAxisA);
       rigidBodyAB = createAndAttachCylinderRB("rigidBodyAB", masterJointA);
       passiveJointB = ScrewTools.addPassiveRevoluteJoint("jointB", rigidBodyAB, jointAtoB, jointAxisB, true);
       rigidBodyBC = createAndAttachCylinderRB("rigidBodyBC", passiveJointB);
@@ -898,7 +898,7 @@ public class FourBarKinematicLoopTest
          throw new RuntimeException("Invalid output joint index: " + outputJointIndex);
       }
 
-      RevoluteJoint outputChildJoint = ScrewTools.addRevoluteJoint("outputChildJoint", outputBody, new Vector3D(), jointAxisA);
+      RevoluteJoint outputChildJoint = new RevoluteJoint("outputChildJoint", outputBody, new Vector3D(), jointAxisA);
       createAndAttachCylinderRB("outputChild_RB", outputChildJoint);
 
       masterJointA.setQ(random.nextDouble());
@@ -911,7 +911,7 @@ public class FourBarKinematicLoopTest
    private void initializeFourBar(RigidBodyTransform jointAtoElevator, RigidBodyTransform jointBtoA, RigidBodyTransform jointCtoB, RigidBodyTransform jointDtoC,
          Vector3D jointAxisA, Vector3D jointAxisB, Vector3D jointAxisC, Vector3D jointAxisD)
    {
-      masterJointA = ScrewTools.addRevoluteJoint("jointA", elevator, jointAtoElevator, jointAxisA);
+      masterJointA = new RevoluteJoint("jointA", elevator, jointAtoElevator, jointAxisA);
       rigidBodyAB = createAndAttachCylinderRB("rigidBodyAB", masterJointA);
       passiveJointB = ScrewTools.addPassiveRevoluteJoint("jointB", rigidBodyAB, jointBtoA, jointAxisB, true);
       rigidBodyBC = createAndAttachCylinderRB("rigidBodyBC", passiveJointB);
@@ -961,7 +961,7 @@ public class FourBarKinematicLoopTest
    private static RigidBodyBasics createAndAttachCylinderRB(String name, RevoluteJoint parentJoint)
    {
       Matrix3D inertiaCylinder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(1.0, 1.0, 1.0, Axis.Z);
-      return ScrewTools.addRigidBody(name, parentJoint, inertiaCylinder, 1.0, new Vector3D());
+      return new RigidBody(name, parentJoint, inertiaCylinder, 1.0, new Vector3D());
    }
 
    private void initializeAllJointsToSameLimits(double lowerLimit, double upperLimit)
