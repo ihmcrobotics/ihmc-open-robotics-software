@@ -13,12 +13,11 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -179,8 +178,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
             wristForceCalibrationOffsets.put(robotSide, new YoFrameVector3D(namePrefix + "ForceCalibrationOffset", measurementFrame, registry));
             wristTorqueCalibrationOffsets.put(robotSide, new YoFrameVector3D(namePrefix + "TorqueCalibrationOffset", measurementFrame, registry));
 
-            RigidBodyBasics[] handBodies = ScrewTools.computeRigidBodiesAfterThisJoint(measurementLink.getParentJoint());
-            CenterOfMassReferenceFrame subtreeCoMFrame = new CenterOfMassReferenceFrame(namePrefix + "SubtreeCoMFrame", measurementFrame, handBodies);
+            CenterOfMassReferenceFrame subtreeCoMFrame = new CenterOfMassReferenceFrame(namePrefix + "SubtreeCoMFrame", measurementFrame, measurementLink);
             wristsubtreeCenterOfMassFrames.put(robotSide, subtreeCoMFrame);
             YoDouble handMass = new YoDouble(namePrefix + "SubtreeMass", registry);
             wristSubtreeMass.put(robotSide, handMass);

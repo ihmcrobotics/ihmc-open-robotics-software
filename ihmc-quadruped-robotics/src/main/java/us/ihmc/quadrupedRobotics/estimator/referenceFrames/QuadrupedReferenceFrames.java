@@ -1,10 +1,14 @@
 package us.ihmc.quadrupedRobotics.estimator.referenceFrames;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
@@ -15,12 +19,16 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
-import us.ihmc.robotics.referenceFrames.*;
-import us.ihmc.robotics.robotSide.*;
+import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotEnd;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
-
-import java.util.EnumMap;
-import java.util.Map;
 
 public class QuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
 {
