@@ -758,6 +758,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
     */
    private void subtractCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
    {
+      ReferenceFrame originalFrame = linearAccelerationToModify.getReferenceFrame();
       controlFrame.getTwistOfFrame(currentTwist);
       currentAngularVelocity.setIncludingFrame(currentTwist.getAngularPart());
       currentLinearVelocity.setIncludingFrame(currentTwist.getLinearPart());
@@ -766,7 +767,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       biasLinearAcceleration.cross(currentLinearVelocity, currentAngularVelocity);
       linearAccelerationToModify.changeFrame(controlFrame);
       linearAccelerationToModify.sub(biasLinearAcceleration);
-      linearAccelerationToModify.changeFrame(worldFrame);
+      linearAccelerationToModify.changeFrame(originalFrame);
    }
 
    @Override

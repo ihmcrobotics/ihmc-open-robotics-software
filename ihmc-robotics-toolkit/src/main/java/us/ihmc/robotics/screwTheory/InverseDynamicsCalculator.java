@@ -164,6 +164,7 @@ public class InverseDynamicsCalculator
             }
          }
 
+         jointWrench.changeFrame(joint.getFrameAfterJoint());
          joint.setJointWrench(jointWrench);
       }
    }
