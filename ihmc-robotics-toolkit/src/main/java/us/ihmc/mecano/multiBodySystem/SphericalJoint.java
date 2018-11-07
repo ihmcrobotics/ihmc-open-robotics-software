@@ -237,14 +237,6 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
-   public void getUnitTwist(int dofIndex, Twist unitTwistToPack)
-   {
-      if (dofIndex < 0 || dofIndex >= getDegreesOfFreedom())
-         throw new ArrayIndexOutOfBoundsException("Illegal index: " + dofIndex + ", was expecting dofIndex in [0, " + getDegreesOfFreedom() + "[.");
-      unitTwistToPack.setIncludingFrame(unitTwists.get(dofIndex));
-   }
-
-   @Override
    public void getJointConfiguration(int rowStart, DenseMatrix64F matrix)
    {
       jointRotation.get(rowStart, matrix);

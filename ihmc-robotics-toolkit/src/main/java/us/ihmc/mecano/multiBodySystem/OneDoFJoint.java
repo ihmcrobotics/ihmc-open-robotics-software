@@ -11,6 +11,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
 public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
@@ -151,9 +152,9 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.tau = tau;
    }
 
-   public void getUnitJointTwist(Twist twistToPack)
+   public TwistReadOnly getUnitJointTwist()
    {
-      twistToPack.setIncludingFrame(unitJointTwist);
+      return unitJointTwist;
    }
 
    public void getUnitJointAcceleration(SpatialAcceleration accelerationToPack)
@@ -169,14 +170,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    {
       this.motionSubspace = new GeometricJacobian(this, unitSuccessorTwist.getReferenceFrame());
       this.motionSubspace.compute();
-   }
-
-   @Override
-   public void getUnitTwist(int dofIndex, Twist unitTwistToPack)
-   {
-      if (dofIndex != 0)
-         throw new ArrayIndexOutOfBoundsException("Illegal index: " + dofIndex + ", was expecting dofIndex equal to 0.");
-      unitTwistToPack.setIncludingFrame(unitSuccessorTwist);
    }
 
    @Override
