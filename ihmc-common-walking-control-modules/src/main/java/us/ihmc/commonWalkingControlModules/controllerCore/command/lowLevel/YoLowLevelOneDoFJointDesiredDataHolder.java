@@ -64,13 +64,13 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    @Override
    public JointDesiredOutputBasics getJointDesiredOutput(OneDoFJoint joint)
    {
-      return getJointDesiredOutput(joint.hashCode());
+      return getJointDesiredOutputFromHash(joint.hashCode());
    }
 
    @Override
-   public JointDesiredOutputBasics getJointDesiredOutput(long jointName)
+   public JointDesiredOutputBasics getJointDesiredOutputFromHash(int jointHashCode)
    {
-      return lowLevelJointDataMap.get(jointName);
+      return lowLevelJointDataMap.get(jointHashCode);
    }
 
    @Override
