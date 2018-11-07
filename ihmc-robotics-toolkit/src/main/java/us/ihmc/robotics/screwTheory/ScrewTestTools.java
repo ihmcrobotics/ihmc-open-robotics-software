@@ -273,7 +273,7 @@ public class ScrewTestTools
    {
       Vector3D jointOffset = RandomGeometry.nextVector3D(random);
       jointAxis.normalize();
-      RevoluteJoint ret = ScrewTools.addRevoluteJoint(name, predecessor, jointOffset, jointAxis);
+      RevoluteJoint ret = new RevoluteJoint(name, predecessor, jointOffset, jointAxis);
 
       return ret;
    }
@@ -288,7 +288,7 @@ public class ScrewTestTools
    {
       Vector3D jointOffset = RandomGeometry.nextVector3D(random);
       jointAxis.normalize();
-      PrismaticJoint ret = ScrewTools.addPrismaticJoint(name, predecessor, jointOffset, jointAxis);
+      PrismaticJoint ret = new PrismaticJoint(name, predecessor, jointOffset, jointAxis);
 
       return ret;
    }
@@ -298,7 +298,7 @@ public class ScrewTestTools
       Matrix3D momentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
       double mass = random.nextDouble();
       Vector3D comOffset = RandomGeometry.nextVector3D(random);
-      RigidBodyBasics ret = ScrewTools.addRigidBody(name, parentJoint, momentOfInertia, mass, comOffset);
+      RigidBodyBasics ret = new RigidBody(name, parentJoint, momentOfInertia, mass, comOffset);
 
       return ret;
    }

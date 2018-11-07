@@ -15,7 +15,6 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
@@ -84,20 +83,20 @@ public class SimpleArmRobot extends Robot
       RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
       bodyMap.put(ArmBody.ELEVATOR, elevator);
 
-      RevoluteJoint idYawJoint = ScrewTools.addRevoluteJoint("idYawJoint", elevator, new Vector3D(0.0, 0.0, baseHeight), new Vector3D(0.0, 0.0, 1.0));
+      RevoluteJoint idYawJoint = new RevoluteJoint("idYawJoint", elevator, new Vector3D(0.0, 0.0, baseHeight), new Vector3D(0.0, 0.0, 1.0));
       Matrix3D inertiaArm1 = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(arm1_mass, arm1_radius, arm1_length, Axis.Z);
-      RigidBodyBasics arm1 = ScrewTools.addRigidBody("arm1", idYawJoint, inertiaArm1, arm1_mass, new Vector3D(0.0, 0.0, arm1_length/2.0));
+      RigidBodyBasics arm1 = new RigidBody("arm1", idYawJoint, inertiaArm1, arm1_mass, new Vector3D(0.0, 0.0, arm1_length/2.0));
       jointMap.put(ArmJoint.YAW, idYawJoint);
       bodyMap.put(ArmBody.ARM_1, arm1);
 
-      RevoluteJoint idPitch1Joint = ScrewTools.addRevoluteJoint("idPitch1Joint", arm1, new Vector3D(0.0, 0.0, arm1_length), new Vector3D(1.0, 0.0, 0.0));
+      RevoluteJoint idPitch1Joint = new RevoluteJoint("idPitch1Joint", arm1, new Vector3D(0.0, 0.0, arm1_length), new Vector3D(1.0, 0.0, 0.0));
       Matrix3D inertiaArm2 = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(arm2_mass, arm2_radius, arm2_length, Axis.X);
-      RigidBodyBasics arm2 = ScrewTools.addRigidBody("arm2", idPitch1Joint, inertiaArm2, arm2_mass, new Vector3D(0.0, 0.0, arm2_length/2.0));
+      RigidBodyBasics arm2 = new RigidBody("arm2", idPitch1Joint, inertiaArm2, arm2_mass, new Vector3D(0.0, 0.0, arm2_length/2.0));
       jointMap.put(ArmJoint.PITCH_1, idPitch1Joint);
       bodyMap.put(ArmBody.ARM_2, arm2);
 
-      RevoluteJoint idPitch2Joint = ScrewTools.addRevoluteJoint("idPitch2Joint", arm2, new Vector3D(0.0, 0.0, arm2_length), new Vector3D(1.0, 0.0, 0.0));
-      RigidBodyBasics arm3 = ScrewTools.addRigidBody("arm3", idPitch2Joint, inertiaArm2, arm2_mass, new Vector3D(0.0, 0.0, arm2_length/2.0));
+      RevoluteJoint idPitch2Joint = new RevoluteJoint("idPitch2Joint", arm2, new Vector3D(0.0, 0.0, arm2_length), new Vector3D(1.0, 0.0, 0.0));
+      RigidBodyBasics arm3 = new RigidBody("arm3", idPitch2Joint, inertiaArm2, arm2_mass, new Vector3D(0.0, 0.0, arm2_length/2.0));
       jointMap.put(ArmJoint.PITCH_2, idPitch2Joint);
       bodyMap.put(ArmBody.ARM_3, arm3);
 

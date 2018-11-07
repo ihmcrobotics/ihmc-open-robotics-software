@@ -428,12 +428,12 @@ public class InverseDynamicsCalculatorSCSTest
          double jointVelocity = useRandomVelocity ? random.nextDouble() : 0.0;
          double jointAcceleration = useRandomAcceleration ? random.nextDouble() : 0.0;
          
-         RevoluteJoint currentIDJoint = ScrewTools.addRevoluteJoint("jointID" + i, currentIDBody, jointOffset, jointAxis);
+         RevoluteJoint currentIDJoint = new RevoluteJoint("jointID" + i, currentIDBody, jointOffset, jointAxis);
          currentIDJoint.setQ(jointPosition);
          currentIDJoint.setQd(jointVelocity);
          currentIDJoint.setQdd(jointAcceleration);
          
-         currentIDBody = ScrewTools.addRigidBody("bodyID" + i, currentIDJoint, momentOfInertia, mass, comOffset);
+         currentIDBody = new RigidBody("bodyID" + i, currentIDJoint, momentOfInertia, mass, comOffset);
          
          PinJoint currentJoint = new PinJoint("joint" + i, jointOffset, robot, jointAxis);
          currentJoint.setInitialState(jointPosition, jointVelocity);
@@ -492,11 +492,11 @@ public class InverseDynamicsCalculatorSCSTest
             inverseDynamicsParentBody = inverseDynamicsParentJoint.getSuccessor();
          }
 
-         RevoluteJoint currentIDJoint = ScrewTools.addRevoluteJoint("jointID" + i, inverseDynamicsParentBody, jointOffset, jointAxis);
+         RevoluteJoint currentIDJoint = new RevoluteJoint("jointID" + i, inverseDynamicsParentBody, jointOffset, jointAxis);
          currentIDJoint.setQ(jointPosition);
          currentIDJoint.setQd(jointVelocity);
          currentIDJoint.setQdd(jointAcceleration);
-         ScrewTools.addRigidBody("bodyID" + i, currentIDJoint, momentOfInertia, mass, comOffset);
+         new RigidBody("bodyID" + i, currentIDJoint, momentOfInertia, mass, comOffset);
 
          Link currentBody = new Link("body" + i);
          currentBody.setComOffset(comOffset);
@@ -541,7 +541,7 @@ public class InverseDynamicsCalculatorSCSTest
       Matrix3D momentOfInertia = new Matrix3D();
       link.getMomentOfInertia(momentOfInertia);
 
-      return ScrewTools.addRigidBody(bodyName, currentInverseDynamicsJoint, momentOfInertia, link.getMass(), comOffset);
+      return new RigidBody(bodyName, currentInverseDynamicsJoint, momentOfInertia, link.getMass(), comOffset);
    }
 
    private void setRandomPosition(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint)

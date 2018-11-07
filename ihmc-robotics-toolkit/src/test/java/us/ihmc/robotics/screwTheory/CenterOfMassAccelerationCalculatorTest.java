@@ -46,7 +46,7 @@ public class CenterOfMassAccelerationCalculatorTest
       RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
       ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoF", elevator);
-      ScrewTools.addRigidBody("body", sixDoFJoint, getRandomDiagonalMatrix(random), mass, new Vector3D());
+      new RigidBody("body", sixDoFJoint, getRandomDiagonalMatrix(random), mass, new Vector3D());
       SpatialAcceleration rootAcceleration = new SpatialAcceleration(elevatorFrame, worldFrame, elevatorFrame);
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, rootAcceleration, true);
       CenterOfMassAccelerationCalculator comAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
@@ -82,10 +82,10 @@ public class CenterOfMassAccelerationCalculatorTest
       RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
       ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
       Vector3D jointAxis = new Vector3D(1.0, 0.0, 0.0);
-      PrismaticJoint j1 = ScrewTools.addPrismaticJoint("j1", elevator, new Vector3D(), jointAxis);
-      RigidBodyBasics r1 = ScrewTools.addRigidBody("r1", j1, getRandomDiagonalMatrix(random), random.nextDouble(), getRandomVector(random));
-      PrismaticJoint j2 = ScrewTools.addPrismaticJoint("j2", r1, new Vector3D(), jointAxis);
-      RigidBodyBasics r2 = ScrewTools.addRigidBody("r2", j2, getRandomDiagonalMatrix(random), random.nextDouble(), getRandomVector(random));
+      PrismaticJoint j1 = new PrismaticJoint("j1", elevator, new Vector3D(), jointAxis);
+      RigidBodyBasics r1 = new RigidBody("r1", j1, getRandomDiagonalMatrix(random), random.nextDouble(), getRandomVector(random));
+      PrismaticJoint j2 = new PrismaticJoint("j2", r1, new Vector3D(), jointAxis);
+      RigidBodyBasics r2 = new RigidBody("r2", j2, getRandomDiagonalMatrix(random), random.nextDouble(), getRandomVector(random));
 
       SpatialAcceleration rootAcceleration = new SpatialAcceleration(elevatorFrame, worldFrame, elevatorFrame);
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, rootAcceleration, true);
@@ -126,8 +126,8 @@ public class CenterOfMassAccelerationCalculatorTest
       RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
       ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
       Vector3D jointAxis = new Vector3D(0.0, 1.0, 0.0);
-      RevoluteJoint j1 = ScrewTools.addRevoluteJoint("j1", elevator, new Vector3D(), jointAxis);
-      ScrewTools.addRigidBody("r1", j1, getRandomDiagonalMatrix(random), mass, comOffset);
+      RevoluteJoint j1 = new RevoluteJoint("j1", elevator, new Vector3D(), jointAxis);
+      new RigidBody("r1", j1, getRandomDiagonalMatrix(random), mass, comOffset);
 
       j1.setQ(random.nextDouble());
       j1.setQd(qd);
@@ -157,10 +157,10 @@ public class CenterOfMassAccelerationCalculatorTest
       RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
       ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
       Vector3D jointAxis = new Vector3D(1.0, 0.0, 0.0);
-      PrismaticJoint j1 = ScrewTools.addPrismaticJoint("j1", elevator, new Vector3D(), jointAxis);
-      ScrewTools.addRigidBody("r1", j1, getRandomDiagonalMatrix(random), random.nextDouble(), getRandomVector(random));
-      PrismaticJoint j2 = ScrewTools.addPrismaticJoint("j2", elevator, new Vector3D(), jointAxis);
-      ScrewTools.addRigidBody("r2", j2, getRandomDiagonalMatrix(random), random.nextDouble(), getRandomVector(random));
+      PrismaticJoint j1 = new PrismaticJoint("j1", elevator, new Vector3D(), jointAxis);
+      new RigidBody("r1", j1, getRandomDiagonalMatrix(random), random.nextDouble(), getRandomVector(random));
+      PrismaticJoint j2 = new PrismaticJoint("j2", elevator, new Vector3D(), jointAxis);
+      new RigidBody("r2", j2, getRandomDiagonalMatrix(random), random.nextDouble(), getRandomVector(random));
 
       SpatialAcceleration rootAcceleration = new SpatialAcceleration(elevatorFrame, worldFrame, elevatorFrame);
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, rootAcceleration, true);

@@ -18,7 +18,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
 import us.ihmc.simulationConstructionSetTools.simulatedSensors.PerfectSimulatedIMURawSensorReader;
 import us.ihmc.simulationConstructionSetTools.simulatedSensors.SimulatedIMURawSensorReader;
@@ -321,7 +320,7 @@ public class SimulatedIMURawSensorReaderTest
 
          rootJoint = new SixDoFJoint("rootJoint", elevator);
 
-         body = ScrewTools.addRigidBody("body", rootJoint, Ixx, Iyy, Izz, mass, comOffset);
+         body = new RigidBody("body", rootJoint, Ixx, Iyy, Izz, mass, comOffset);
 
          bodyFrame = rootJoint.getFrameAfterJoint();
       }

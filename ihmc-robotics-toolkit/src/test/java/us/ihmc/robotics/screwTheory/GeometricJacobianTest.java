@@ -245,12 +245,12 @@ public class GeometricJacobianTest
    private void buildMechanismAndJacobians()
    {
       RigidBodyBasics base = new RigidBody("base", ReferenceFrame.getWorldFrame());
-      joint1 = ScrewTools.addPrismaticJoint("joint1", base, new Vector3D(), new Vector3D(0.0, -1.0, 0.0));
-      RigidBodyBasics body1 = ScrewTools.addRigidBody("body1", joint1, new Matrix3D(), 0.0, new Vector3D());
-      joint2 = ScrewTools.addRevoluteJoint("joint2", body1, new Vector3D(0.0, 0.0, 3.0), new Vector3D(-1.0, 0.0, 0.0));
-      RigidBodyBasics body2 = ScrewTools.addRigidBody("body2", joint2, new Matrix3D(), 0.0, new Vector3D());
-      joint3 = ScrewTools.addPrismaticJoint("joint4", body2, new Vector3D(), new Vector3D(0.0, 0.0, 1.0));
-      RigidBodyBasics body3 = ScrewTools.addRigidBody("body3", joint3, new Matrix3D(), 0.0, new Vector3D());
+      joint1 = new PrismaticJoint("joint1", base, new Vector3D(), new Vector3D(0.0, -1.0, 0.0));
+      RigidBodyBasics body1 = new RigidBody("body1", joint1, new Matrix3D(), 0.0, new Vector3D());
+      joint2 = new RevoluteJoint("joint2", body1, new Vector3D(0.0, 0.0, 3.0), new Vector3D(-1.0, 0.0, 0.0));
+      RigidBodyBasics body2 = new RigidBody("body2", joint2, new Matrix3D(), 0.0, new Vector3D());
+      joint3 = new PrismaticJoint("joint4", body2, new Vector3D(), new Vector3D(0.0, 0.0, 1.0));
+      RigidBodyBasics body3 = new RigidBody("body3", joint3, new Matrix3D(), 0.0, new Vector3D());
 
       // create Jacobians
       bodyManipulatorJacobian = new GeometricJacobian(base, body3, joint3.getFrameAfterJoint());

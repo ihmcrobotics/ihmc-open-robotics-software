@@ -20,7 +20,6 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -95,12 +94,12 @@ public class SkippyRobotV2 extends Robot
 
       rootJoint = new SixDoFJoint("rootJoint", elevator);
       Matrix3D inertiaTorso = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(TORSO_MASS, TORSO_RADIUS, TORSO_LENGTH, Axis.Z);
-      RigidBodyBasics torso = ScrewTools.addRigidBody("torso", rootJoint, inertiaTorso, TORSO_MASS, new Vector3D(0.0, 0.0, 0.0));
+      RigidBodyBasics torso = new RigidBody("torso", rootJoint, inertiaTorso, TORSO_MASS, new Vector3D(0.0, 0.0, 0.0));
       bodyMap.put(SkippyBody.TORSO, torso);
 
-      RevoluteJoint idHipJoint = ScrewTools.addRevoluteJoint("idHipJoint", torso, new Vector3D(0.0, 0.0, -TORSO_LENGTH / 2.0), new Vector3D(1.0, 0.0, 0.0));
+      RevoluteJoint idHipJoint = new RevoluteJoint("idHipJoint", torso, new Vector3D(0.0, 0.0, -TORSO_LENGTH / 2.0), new Vector3D(1.0, 0.0, 0.0));
       Matrix3D inertiaLeg = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(LEG_MASS, LEG_RADIUS, LEG_LENGTH, Axis.Z);
-      RigidBodyBasics leg = ScrewTools.addRigidBody("leg", idHipJoint, inertiaLeg, LEG_MASS, new Vector3D(0.0, 0.0, -LEG_LENGTH / 2.0));
+      RigidBodyBasics leg = new RigidBody("leg", idHipJoint, inertiaLeg, LEG_MASS, new Vector3D(0.0, 0.0, -LEG_LENGTH / 2.0));
       bodyMap.put(SkippyBody.LEG, leg);
       jointMap.put(SkippyJoint.HIP_PITCH, idHipJoint);
 
@@ -108,10 +107,9 @@ public class SkippyRobotV2 extends Robot
       legToFoot.setTranslation(0.0, 0.0, -LEG_LENGTH / 2.0);
       footReferenceFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("footFrame", leg.getBodyFixedFrame(), legToFoot);
 
-      RevoluteJoint idShoulderJoint = ScrewTools.addRevoluteJoint("idShoulderJoint", torso, new Vector3D(0.0, 0.0, TORSO_LENGTH / 2.0),
-                                                                  new Vector3D(0.0, 1.0, 0.0));
+      RevoluteJoint idShoulderJoint = new RevoluteJoint("idShoulderJoint", torso, new Vector3D(0.0, 0.0, TORSO_LENGTH / 2.0), new Vector3D(0.0, 1.0, 0.0));
       Matrix3D inertiaShoulder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(SHOULDER_MASS, SHOULDER_RADIUS, SHOULDER_LENGTH, Axis.X);
-      RigidBodyBasics shoulder = ScrewTools.addRigidBody("shoulder", idShoulderJoint, inertiaShoulder, SHOULDER_MASS, new Vector3D(0.0, 0.0, 0.0));
+      RigidBodyBasics shoulder = new RigidBody("shoulder", idShoulderJoint, inertiaShoulder, SHOULDER_MASS, new Vector3D(0.0, 0.0, 0.0));
       jointMap.put(SkippyJoint.SHOULDER_ROLL, idShoulderJoint);
       bodyMap.put(SkippyBody.SHOULDER, shoulder);
 

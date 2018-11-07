@@ -50,8 +50,8 @@ public class MomentumCalculatorTest
       RigidBodyBasics elevator = new RigidBody("elevator", world);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random);
       jointAxis.normalize();
-      PrismaticJoint joint = ScrewTools.addPrismaticJoint("joint", elevator, new Vector3D(), jointAxis);
-      RigidBodyBasics body = ScrewTools.addRigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
+      PrismaticJoint joint = new PrismaticJoint("joint", elevator, new Vector3D(), jointAxis);
+      RigidBodyBasics body = new RigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
 
       joint.setQ(random.nextDouble());
       joint.setQd(random.nextDouble());
@@ -83,8 +83,8 @@ public class MomentumCalculatorTest
       jointAxis.normalize();
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setIdentity();
-      RevoluteJoint joint = ScrewTools.addRevoluteJoint("joint", elevator, transformToParent, jointAxis);
-      RigidBodyBasics body = ScrewTools.addRigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
+      RevoluteJoint joint = new RevoluteJoint("joint", elevator, transformToParent, jointAxis);
+      RigidBodyBasics body = new RigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
 
       joint.setQ(random.nextDouble());
       joint.setQd(random.nextDouble());

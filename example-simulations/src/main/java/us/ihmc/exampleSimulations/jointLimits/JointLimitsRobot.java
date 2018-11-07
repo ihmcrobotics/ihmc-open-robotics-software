@@ -39,9 +39,9 @@ public class JointLimitsRobot extends Robot
 
       // --- id robot ---
       elevator = new RigidBody("elevator", worldFrame);
-      idJoint = ScrewTools.addRevoluteJoint("idJoint", elevator, new Vector3D(0.0, 0.0, 0.0), new Vector3D(0.0, 1.0, 0.0));
+      idJoint = new RevoluteJoint("idJoint", elevator, new Vector3D(0.0, 0.0, 0.0), new Vector3D(0.0, 1.0, 0.0));
       Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, length, Axis.Z);
-      RigidBodyBasics arm = ScrewTools.addRigidBody("arm", idJoint, inertia, mass, new Vector3D(0.0, 0.0, length/2.0));
+      RigidBodyBasics arm = new RigidBody("arm", idJoint, inertia, mass, new Vector3D(0.0, 0.0, length/2.0));
 
       // --- scs robot ---
       joint = new PinJoint("joint", new Vector3D(), this, Axis.Y);

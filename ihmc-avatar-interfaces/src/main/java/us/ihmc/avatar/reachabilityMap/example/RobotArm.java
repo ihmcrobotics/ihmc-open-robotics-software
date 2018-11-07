@@ -15,7 +15,6 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -74,12 +73,12 @@ public class RobotArm extends Robot
       {
          if (robotArmRevoluteJoints.get(armJoint) == null)
          {
-            parentJoint = ScrewTools.addRevoluteJoint(armJoint.getJointName(false), parentBody, armJoint.getJointOffset(), armJoint.getJointAxis());
+            parentJoint = new RevoluteJoint(armJoint.getJointName(false), parentBody, armJoint.getJointOffset(), armJoint.getJointAxis());
             robotArmRevoluteJoints.put(armJoint, parentJoint);
          }
 
          RobotArmLinkParameters attachedLink = armJoint.getAttachedLink();
-         parentBody = ScrewTools.addRigidBody(attachedLink.getLinkName(), parentJoint, new Matrix3D(), 1.0, new Vector3D());
+         parentBody = new RigidBody(attachedLink.getLinkName(), parentJoint, new Matrix3D(), 1.0, new Vector3D());
          robotArmRigidBodies.put(attachedLink, parentBody);
       }
 

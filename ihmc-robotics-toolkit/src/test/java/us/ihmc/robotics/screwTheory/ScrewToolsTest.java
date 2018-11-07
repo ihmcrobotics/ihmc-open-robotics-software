@@ -164,7 +164,7 @@ public class ScrewToolsTest
       Vector3D jointOffset = RandomGeometry.nextVector3D(random, 5.0);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
-      RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
+      RevoluteJoint joint = new RevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
 
       assertEquals("Should be equal", jointName, joint.getName());
       assertTrue(parentBody.equals(joint.getPredecessor()));
@@ -180,7 +180,7 @@ public class ScrewToolsTest
       RigidBodyTransform transformToParent = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
-      RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, transformToParent, jointAxis);
+      RevoluteJoint joint = new RevoluteJoint(jointName, parentBody, transformToParent, jointAxis);
 
       assertEquals("Should be equal", jointName, joint.getName());
       assertTrue(parentBody.equals(joint.getPredecessor()));
@@ -196,7 +196,7 @@ public class ScrewToolsTest
       Vector3D jointOffset = RandomGeometry.nextVector3D(random, 5.0);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
-      PrismaticJoint joint = ScrewTools.addPrismaticJoint(jointName, parentBody, jointOffset, jointAxis);
+      PrismaticJoint joint = new PrismaticJoint(jointName, parentBody, jointOffset, jointAxis);
 
       assertEquals("Should be equal", jointName, joint.getName());
       assertTrue(parentBody.equals(joint.getPredecessor()));
@@ -211,7 +211,7 @@ public class ScrewToolsTest
       RigidBodyTransform transformToParent = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
-      PrismaticJoint joint = ScrewTools.addPrismaticJoint(jointName, parentBody, transformToParent, jointAxis);
+      PrismaticJoint joint = new PrismaticJoint(jointName, parentBody, transformToParent, jointAxis);
 
       assertEquals("Should be equal", jointName, joint.getName());
       assertTrue(parentBody.equals(joint.getPredecessor()));
@@ -227,7 +227,7 @@ public class ScrewToolsTest
       Matrix3D momentOfInertia = new Matrix3D();
       double mass = random.nextDouble();
 
-      RigidBodyBasics body = ScrewTools.addRigidBody(name, parentJoint, momentOfInertia, mass, X);
+      RigidBodyBasics body = new RigidBody(name, parentJoint, momentOfInertia, mass, X);
 
       assertEquals("Should be equal", name, body.getName());
       assertTrue(parentJoint.equals(body.getParentJoint()));
@@ -244,7 +244,7 @@ public class ScrewToolsTest
       double mass = random.nextDouble();
       RigidBodyTransform inertiaPose = new RigidBodyTransform();
 
-      RigidBodyBasics body = ScrewTools.addRigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
+      RigidBodyBasics body = new RigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
 
       assertEquals("Should be equal", name, body.getName());
       assertTrue(parentJoint.equals(body.getParentJoint()));

@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -54,8 +55,8 @@ public class FootSpoof implements ContactablePlaneBody
 
       shinFrame = new PoseReferenceFrame(name + "ShinFrame", ReferenceFrame.getWorldFrame());
       this.shin = new RigidBody(name, shinFrame);
-      this.ankle = ScrewTools.addRevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
-      this.foot = ScrewTools.addRigidBody(name, ankle, new Matrix3D(), 1.0, new RigidBodyTransform());
+      this.ankle = new RevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
+      this.foot = new RigidBody(name, ankle, new Matrix3D(), 1.0, new RigidBodyTransform());
       soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
 
       for (Point2D contactPointInSoleFrame : contactPoints2dInSoleFrame)
@@ -81,8 +82,8 @@ public class FootSpoof implements ContactablePlaneBody
 
       shinFrame = new PoseReferenceFrame(name + "ShinFrame", ReferenceFrame.getWorldFrame());
       this.shin = new RigidBody(name, shinFrame);
-      this.ankle = ScrewTools.addRevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
-      this.foot = ScrewTools.addRigidBody(name, ankle, new Matrix3D(), 1.0, new RigidBodyTransform());
+      this.ankle = new RevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
+      this.foot = new RigidBody(name, ankle, new Matrix3D(), 1.0, new RigidBodyTransform());
       soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
       FramePoint3D point1 = new FramePoint3D(soleFrame, new Point3D(footForward, footHalfWidth, 0.0));
       FramePoint3D point2 = new FramePoint3D(soleFrame, new Point3D(footForward, -footHalfWidth, 0.0));

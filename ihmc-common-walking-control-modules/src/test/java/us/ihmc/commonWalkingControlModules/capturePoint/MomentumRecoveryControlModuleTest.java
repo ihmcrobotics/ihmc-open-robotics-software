@@ -42,7 +42,6 @@ import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
@@ -439,7 +438,7 @@ public class MomentumRecoveryControlModuleTest
       {
          String prefix = robotSide.getLowerCaseName();
          SixDoFJoint footJoint = new SixDoFJoint(prefix + "FootJoint", elevator);
-         RigidBodyBasics foot = ScrewTools.addRigidBody(prefix + "Foot", footJoint, new Matrix3D(), 1.0, new Vector3D());
+         RigidBodyBasics foot = new RigidBody(prefix + "Foot", footJoint, new Matrix3D(), 1.0, new Vector3D());
          ReferenceFrame ankleFrame = foot.getBodyFixedFrame();
          ReferenceFrame soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(prefix + "Sole", ankleFrame, new RigidBodyTransform());
 

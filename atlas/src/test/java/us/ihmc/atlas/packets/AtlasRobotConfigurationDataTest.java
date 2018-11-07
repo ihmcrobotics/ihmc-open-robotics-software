@@ -55,7 +55,7 @@ public class AtlasRobotConfigurationDataTest
          joints[i] = new RevoluteJoint("noot", body, new RigidBodyTransform(), new Vector3D(1, 0, 0));
       }
       
-      RigidBodyBasics body2 = ScrewTools.addRigidBody("mies", joints[0], new Matrix3D(), 0.0, new RigidBodyTransform());
+      RigidBodyBasics body2 = new RigidBody("mies", joints[0], new Matrix3D(), 0.0, new RigidBodyTransform());
       IMUDefinition imuSensorDefinitions[] = new IMUDefinition[3];
       for (int i = 0; i < imuSensorDefinitions.length; i++)
       {

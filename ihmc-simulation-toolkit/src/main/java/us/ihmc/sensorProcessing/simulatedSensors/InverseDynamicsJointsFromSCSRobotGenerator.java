@@ -68,7 +68,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             FloatingJoint currentJoint = (FloatingJoint) polledJoint;
 
             FloatingJointBasics currentIDJoint = new SixDoFJoint(currentJoint.getName(), elevator);
-            ScrewTools.addRigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
+            new RigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
             scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);
          }
@@ -82,11 +82,11 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             Vector3D jointOffset = new Vector3D();
             currentJoint.getOffset(jointOffset);
 
-            RevoluteJoint currentIDJoint = ScrewTools.addRevoluteJoint(currentJoint.getName(), parentIDBody, jointOffset, jointAxis);
+            RevoluteJoint currentIDJoint = new RevoluteJoint(currentJoint.getName(), parentIDBody, jointOffset, jointAxis);
             currentIDJoint.setJointLimitLower(currentJoint.getJointLowerLimit());
             currentIDJoint.setJointLimitUpper(currentJoint.getJointUpperLimit());
 
-            ScrewTools.addRigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
+            new RigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
             scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);
          }
@@ -100,11 +100,11 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             Vector3D jointOffset = new Vector3D();
             currentJoint.getOffset(jointOffset);
 
-            PrismaticJoint currentIDJoint = ScrewTools.addPrismaticJoint(currentJoint.getName(), parentIDBody, jointOffset, jointAxis);
+            PrismaticJoint currentIDJoint = new PrismaticJoint(currentJoint.getName(), parentIDBody, jointOffset, jointAxis);
             currentIDJoint.setJointLimitLower(currentJoint.getJointLowerLimit());
             currentIDJoint.setJointLimitUpper(currentJoint.getJointUpperLimit());
 
-            ScrewTools.addRigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
+            new RigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
             scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);
          }

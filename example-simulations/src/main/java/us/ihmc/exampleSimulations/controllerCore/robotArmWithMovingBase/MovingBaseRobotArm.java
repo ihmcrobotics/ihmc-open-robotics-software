@@ -118,33 +118,33 @@ public class MovingBaseRobotArm extends Robot
       elevator = new RigidBody("elevator", worldFrame);
 
       // Moving (and actuated) base 
-      baseX = ScrewTools.addPrismaticJoint("baseX", elevator, baseXOffset, X_AXIS);
-      baseXLink = ScrewTools.addRigidBody("baseXLink", baseX, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
-      baseY = ScrewTools.addPrismaticJoint("baseY", baseXLink, new Vector3D(), Y_AXIS);
-      baseYLink = ScrewTools.addRigidBody("baseYLink", baseY, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
-      baseZ = ScrewTools.addPrismaticJoint("baseZ", baseYLink, new Vector3D(), Z_AXIS);
-      base = ScrewTools.addRigidBody("base", baseZ, baseInertia, baseMass, new RigidBodyTransform());
+      baseX = new PrismaticJoint("baseX", elevator, baseXOffset, X_AXIS);
+      baseXLink = new RigidBody("baseXLink", baseX, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
+      baseY = new PrismaticJoint("baseY", baseXLink, new Vector3D(), Y_AXIS);
+      baseYLink = new RigidBody("baseYLink", baseY, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
+      baseZ = new PrismaticJoint("baseZ", baseYLink, new Vector3D(), Z_AXIS);
+      base = new RigidBody("base", baseZ, baseInertia, baseMass, new RigidBodyTransform());
       
       // Arm
-      shoulderYaw = ScrewTools.addRevoluteJoint("shoulderYaw", base, shoulderYawOffset, Z_AXIS);
-      shoulderYawLink = ScrewTools.addRigidBody("shoulderYawLink", shoulderYaw, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
-      shoulderRoll = ScrewTools.addRevoluteJoint("shoulderRoll", shoulderYawLink, shoulderRollOffset, X_AXIS);
-      shoulderRollLink = ScrewTools.addRigidBody("shoulderRollLink", shoulderRoll, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
-      shoulderPitch = ScrewTools.addRevoluteJoint("shoulderPitch", shoulderRollLink, shoulderPitchOffset, Y_AXIS);
+      shoulderYaw = new RevoluteJoint("shoulderYaw", base, shoulderYawOffset, Z_AXIS);
+      shoulderYawLink = new RigidBody("shoulderYawLink", shoulderYaw, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
+      shoulderRoll = new RevoluteJoint("shoulderRoll", shoulderYawLink, shoulderRollOffset, X_AXIS);
+      shoulderRollLink = new RigidBody("shoulderRollLink", shoulderRoll, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
+      shoulderPitch = new RevoluteJoint("shoulderPitch", shoulderRollLink, shoulderPitchOffset, Y_AXIS);
 
-      upperArm = ScrewTools.addRigidBody("upperArm", shoulderPitch, upperArmInertia, upperArmMass, upperArmCoM);
+      upperArm = new RigidBody("upperArm", shoulderPitch, upperArmInertia, upperArmMass, upperArmCoM);
 
-      elbowPitch = ScrewTools.addRevoluteJoint("elbowPitch", upperArm, elbowPitchOffset, Y_AXIS);
+      elbowPitch = new RevoluteJoint("elbowPitch", upperArm, elbowPitchOffset, Y_AXIS);
 
-      lowerArm = ScrewTools.addRigidBody("lowerArm", elbowPitch, lowerArmInertia, lowerArmMass, lowerArmCoM);
+      lowerArm = new RigidBody("lowerArm", elbowPitch, lowerArmInertia, lowerArmMass, lowerArmCoM);
 
-      wristPitch = ScrewTools.addRevoluteJoint("wristPitch", lowerArm, wristPitchOffset, Y_AXIS);
-      wristPitchLink = ScrewTools.addRigidBody("wristPitchLink", wristPitch, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
-      wristRoll = ScrewTools.addRevoluteJoint("wristRoll", wristPitchLink, wristRollOffset, X_AXIS);
-      wristRollLink = ScrewTools.addRigidBody("wristRollLink", wristRoll, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
-      wristYaw = ScrewTools.addRevoluteJoint("wristYaw", wristRollLink, wristYawOffset, Z_AXIS);
+      wristPitch = new RevoluteJoint("wristPitch", lowerArm, wristPitchOffset, Y_AXIS);
+      wristPitchLink = new RigidBody("wristPitchLink", wristPitch, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
+      wristRoll = new RevoluteJoint("wristRoll", wristPitchLink, wristRollOffset, X_AXIS);
+      wristRollLink = new RigidBody("wristRollLink", wristRoll, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
+      wristYaw = new RevoluteJoint("wristYaw", wristRollLink, wristYawOffset, Z_AXIS);
 
-      hand = ScrewTools.addRigidBody("hand", wristYaw, handInertia, handMass, handCoM);
+      hand = new RigidBody("hand", wristYaw, handInertia, handMass, handCoM);
 
       handControlFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
 
