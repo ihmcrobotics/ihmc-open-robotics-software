@@ -139,6 +139,7 @@ public class CentroidalMomentumRateADotVTermSCSTest
          robot.updateJointVelocities_ID_to_SCS();
          robot.updateJointTorques_ID_to_SCS();
 
+         elevator.updateFramesRecursively();
          centerOfMassFrame.update();
 
          centroidalMomentumMatrixCalculator.compute();
