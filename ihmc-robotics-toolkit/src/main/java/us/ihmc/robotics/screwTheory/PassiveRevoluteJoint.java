@@ -7,7 +7,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 public class PassiveRevoluteJoint extends RevoluteJoint
 {
@@ -33,11 +33,12 @@ public class PassiveRevoluteJoint extends RevoluteJoint
     * Torque on a passive joint is always zero
     */
    @Override
-   public void getJointTau(int rowStart, DenseMatrix64F matrix)
+   public int getJointTau(int rowStart, DenseMatrix64F matrix)
    {
       MathTools.checkIntervalContains(matrix.getNumRows(), 1, Integer.MAX_VALUE);
       MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);
       matrix.set(0, 0, 0);
+      return rowStart + 1;
    }
 
    @Override
@@ -47,13 +48,13 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    }
 
    @Override
-   public void setJointWrench(Wrench jointWrench)
+   public void setJointWrench(WrenchReadOnly jointWrench)
    {
       throw new RuntimeException("Cannot set torque of a passive joint");
    }
 
    @Override
-   public void setJointAcceleration(int rowStart, DenseMatrix64F matrix)
+   public int setJointAcceleration(int rowStart, DenseMatrix64F matrix)
    {
       throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
@@ -92,13 +93,13 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    }
 
    @Override
-   public void setJointConfiguration(int rowStart, DenseMatrix64F matrix)
+   public int setJointConfiguration(int rowStart, DenseMatrix64F matrix)
    {
       throw new RuntimeException("Cannot set position of a passive joint");
    }
 
    @Override
-   public void setJointVelocity(int rowStart, DenseMatrix64F matrix)
+   public int setJointVelocity(int rowStart, DenseMatrix64F matrix)
    {
       throw new RuntimeException("Cannot set velocity of a passive joint");
    }
