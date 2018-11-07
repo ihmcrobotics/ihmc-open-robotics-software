@@ -780,7 +780,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       jointAcceleration.getLinearPart().set(linearAccelerationInBody);
       jointAcceleration.getAngularPart().set(angularAccelerationInBody);
 
-      sixDoFJoint.setDesiredAcceleration(jointAcceleration);
+      sixDoFJoint.setJointAcceleration(jointAcceleration);
    }
 
    public void setSixDoFJointAccelerationRandomly(FloatingJointBasics sixDoFJoint, Random random, double maxRootJointLinearAcceleration,
@@ -800,7 +800,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       SpatialAcceleration spatialAccelerationVector = new SpatialAcceleration(bodyFrame, elevatorFrame, bodyFrame);
 
       spatialAccelerationVector.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
-      sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
+      sixDoFJoint.setJointAcceleration(spatialAccelerationVector);
    }
 
    public void copyAccelerationFromForwardToInverse(FloatingJoint floatingJoint, FloatingJointBasics sixDoFJoint)
@@ -822,7 +822,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       SpatialAcceleration spatialAccelerationVector = new SpatialAcceleration(bodyFrame, elevatorFrame, bodyFrame);
 
       spatialAccelerationVector.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
-      sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
+      sixDoFJoint.setJointAcceleration(spatialAccelerationVector);
    }
 
    public boolean checkFullRobotModelRootJointAccelerationmatchesRobot(FloatingJoint floatingJoint, FloatingJointBasics sixDoFJoint, double epsilon)

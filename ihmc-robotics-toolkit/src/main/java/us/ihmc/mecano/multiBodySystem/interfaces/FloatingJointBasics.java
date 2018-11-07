@@ -52,8 +52,6 @@ public interface FloatingJointBasics extends JointBasics
 
    public abstract void setJointAcceleration(SpatialAcceleration jointAcceleration);
 
-   public abstract void setDesiredAcceleration(SpatialAcceleration jointAcceleration);
-
    public abstract void setWrench(Wrench jointWrench);
 
    public void getJointConfiguration(RigidBodyTransform rigidBodyTransformToPack);

@@ -598,7 +598,7 @@ public class InverseDynamicsCalculatorSCSTest
       SpatialAcceleration spatialAccelerationVector = new SpatialAcceleration(sixDoFJoint.getFrameAfterJoint(), sixDoFJoint.getFrameBeforeJoint(), sixDoFJoint.getFrameAfterJoint());
       
       spatialAccelerationVector.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
-      sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
+      sixDoFJoint.setJointAcceleration(spatialAccelerationVector);
    }
 
    private static class RobotExplorer
