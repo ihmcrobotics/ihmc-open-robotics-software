@@ -28,6 +28,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
@@ -37,7 +38,6 @@ import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoSpatialVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -125,7 +125,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final YoPID3DGains orientationGains;
    private final Matrix3D tempGainMatrix = new Matrix3D();
 
-   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
+   private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
    private final RigidBodyBasics rootBody;
    private RigidBodyBasics base;
@@ -161,7 +161,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          rootBody = null;
       }
 
-      spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
+      rigidBodyAccelerationProvider = toolbox.getRigidBodyAccelerationProvider();
 
       String endEffectorName = endEffector.getName();
       registry = new YoVariableRegistry(endEffectorName + "SpatialFBController");
@@ -474,7 +474,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    @Override
    public void computeAchievedAcceleration()
    {
-      spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector, endEffectorAchievedAcceleration);
+      endEffectorAchievedAcceleration.setIncludingFrame(rigidBodyAccelerationProvider.getRelativeAcceleration(base, endEffector));
       endEffectorAchievedAcceleration.changeFrame(controlFrame);
       achievedAngularAcceleration.setIncludingFrame(endEffectorAchievedAcceleration.getAngularPart());
       achievedLinearAcceleration.setIncludingFrame(endEffectorAchievedAcceleration.getLinearPart());

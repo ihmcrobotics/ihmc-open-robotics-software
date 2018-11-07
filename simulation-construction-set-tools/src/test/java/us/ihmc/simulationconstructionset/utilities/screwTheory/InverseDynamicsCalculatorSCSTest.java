@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,17 +21,18 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsMechanismExplorer;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -66,8 +68,8 @@ public class InverseDynamicsCalculatorSCSTest
    {
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout=300000)
    public void testOneFreeRigidBody()
    {
       Robot robot = new Robot("robot");
@@ -118,8 +120,10 @@ public class InverseDynamicsCalculatorSCSTest
 
       copyAccelerationFromForwardToInverse(rootJoint, rootInverseDynamicsJoint);
 
-      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, -gravity);
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator);
+      inverseDynamicsCalculator.setGravitionalAcceleration(gravity);
       inverseDynamicsCalculator.compute();
+      inverseDynamicsCalculator.writeComputedJointWrenches(SubtreeStreams.fromChildren(elevator).collect(Collectors.toList()));
 
       Wrench outputWrench = new Wrench(null, null);
       outputWrench.setIncludingFrame(rootInverseDynamicsJoint.getJointWrench());
@@ -130,8 +134,8 @@ public class InverseDynamicsCalculatorSCSTest
       compareWrenches(inputWrench, outputWrench);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout=300000)
    public void testChainNoGravity()
    {
       Robot robot = new Robot("robot");
@@ -149,8 +153,8 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout=300000)
    public void testTreeWithNoGravity()
    {
       Robot robot = new Robot("robot");
@@ -174,8 +178,8 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-	@Test(timeout=300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout=300000)
    public void testTreeWithGravity()
    {
       Robot robot = new Robot("robot");
@@ -199,8 +203,8 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-	@Test(timeout=300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout=300000)
    public void testDoingInverseDynamicsTermPerTerm()
    {
       Robot robot = new Robot("robot");
@@ -242,8 +246,8 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout=300000)
    public void testDoingNothing()
    {
       Robot robot = new Robot("robot");
@@ -271,8 +275,8 @@ public class InverseDynamicsCalculatorSCSTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout=300000)
    public void testGravityCompensationForChain()
    {
       Robot robot = new Robot("robot");
@@ -289,8 +293,8 @@ public class InverseDynamicsCalculatorSCSTest
       assertZeroAccelerations(jointMap);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout=300000)
    public void testChainWithGravity()
    {
       Robot robot = new Robot("robot");
@@ -329,11 +333,10 @@ public class InverseDynamicsCalculatorSCSTest
    
    private InverseDynamicsCalculator createInverseDynamicsCalculatorAndCompute(RigidBodyBasics elevator, double gravity, ReferenceFrame worldFrame, boolean doVelocityTerms, boolean doAcceleration)
    {
-      SpatialAcceleration rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(elevator, -gravity);
-      ArrayList<JointBasics> jointsToIgnore = new ArrayList<JointBasics>();
-      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, rootAcceleration, jointsToIgnore, doVelocityTerms, doAcceleration);
-//      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -gravity);
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, doVelocityTerms, doAcceleration);
+      inverseDynamicsCalculator.setGravitionalAcceleration(gravity);
       inverseDynamicsCalculator.compute();
+      inverseDynamicsCalculator.writeComputedJointWrenches(SubtreeStreams.fromChildren(elevator).collect(Collectors.toList()));
       return inverseDynamicsCalculator;
    }
    

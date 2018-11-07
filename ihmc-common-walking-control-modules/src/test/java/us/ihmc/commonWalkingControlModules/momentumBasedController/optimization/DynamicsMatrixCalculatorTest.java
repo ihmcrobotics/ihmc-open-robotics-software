@@ -23,17 +23,18 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelTestTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
@@ -85,7 +86,7 @@ public class DynamicsMatrixCalculatorTest
 
       for (int i = 0; i < iters; i++)
       {
-         inverseDynamicsCalculator.reset();
+         inverseDynamicsCalculator.setExternalWrenchesToZero();
          dynamicsMatrixCalculator.reset();
 
          ScrewTestTools.setRandomPositions(joints, random);
@@ -114,7 +115,7 @@ public class DynamicsMatrixCalculatorTest
 
       for (int i = 0; i < iters; i++)
       {
-         inverseDynamicsCalculator.reset();
+         inverseDynamicsCalculator.setExternalWrenchesToZero();
          dynamicsMatrixCalculator.reset();
 
          ScrewTestTools.setRandomPositions(joints, random);
@@ -143,7 +144,7 @@ public class DynamicsMatrixCalculatorTest
 
       for (int i = 0; i < iters; i++)
       {
-         inverseDynamicsCalculator.reset();
+         inverseDynamicsCalculator.setExternalWrenchesToZero();
          dynamicsMatrixCalculator.reset();
          ScrewTestTools.setRandomPositions(joints, random);
 
@@ -167,7 +168,7 @@ public class DynamicsMatrixCalculatorTest
 
       for (int i = 0; i < iters; i++)
       {
-         inverseDynamicsCalculator.reset();
+         inverseDynamicsCalculator.setExternalWrenchesToZero();
          dynamicsMatrixCalculator.reset();
          ScrewTestTools.setRandomPositions(joints, random);
 
@@ -191,7 +192,7 @@ public class DynamicsMatrixCalculatorTest
 
       for (int i = 0; i < iters; i++)
       {
-         inverseDynamicsCalculator.reset();
+         inverseDynamicsCalculator.setExternalWrenchesToZero();
          dynamicsMatrixCalculator.reset();
          ScrewTestTools.setRandomPositions(joints, random);
          ScrewTestTools.setRandomVelocities(joints, random);
@@ -216,7 +217,7 @@ public class DynamicsMatrixCalculatorTest
 
       for (int i = 0; i < iters; i++)
       {
-         inverseDynamicsCalculator.reset();
+         inverseDynamicsCalculator.setExternalWrenchesToZero();
          dynamicsMatrixCalculator.reset();
          ScrewTestTools.setRandomPositions(joints, random);
 
@@ -243,7 +244,7 @@ public class DynamicsMatrixCalculatorTest
 
       for (int i = 0; i < iters; i++)
       {
-         inverseDynamicsCalculator.reset();
+         inverseDynamicsCalculator.setExternalWrenchesToZero();
          dynamicsMatrixCalculator.reset();
          ScrewTestTools.setRandomPositions(joints, random);
          ScrewTestTools.setRandomVelocities(joints, random);
@@ -271,7 +272,7 @@ public class DynamicsMatrixCalculatorTest
 
       for (int i = 0; i < iters; i++)
       {
-         inverseDynamicsCalculator.reset();
+         inverseDynamicsCalculator.setExternalWrenchesToZero();
          dynamicsMatrixCalculator.reset();
          ScrewTestTools.setRandomPositions(joints, random);
          ScrewTestTools.setRandomVelocities(joints, random);
@@ -299,7 +300,7 @@ public class DynamicsMatrixCalculatorTest
 
       for (int i = 0; i < iters; i++)
       {
-         inverseDynamicsCalculator.reset();
+         inverseDynamicsCalculator.setExternalWrenchesToZero();
          dynamicsMatrixCalculator.reset();
          ScrewTestTools.setRandomPositions(joints, random);
 
@@ -323,7 +324,7 @@ public class DynamicsMatrixCalculatorTest
 
       for (int i = 0; i < iters; i++)
       {
-         inverseDynamicsCalculator.reset();
+         inverseDynamicsCalculator.setExternalWrenchesToZero();
          dynamicsMatrixCalculator.reset();
          ScrewTestTools.setRandomPositions(joints, random);
          ScrewTestTools.setRandomVelocities(joints, random);
@@ -375,7 +376,8 @@ public class DynamicsMatrixCalculatorTest
       wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
       jointIndexHandler = toolbox.getJointIndexHandler();
 
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(toolbox.getRootBody(), gravityZ);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(toolbox.getRootBody());
+      inverseDynamicsCalculator.setGravitionalAcceleration(-gravityZ); // Watch out for the sign here, it changed with the switch to Mecano.
       dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, wrenchMatrixCalculator);
 
       centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(twistCalculator.getRootBody(), toolbox.getCenterOfMassFrame());
@@ -416,6 +418,7 @@ public class DynamicsMatrixCalculatorTest
       // compute torques using inverse dynamics calculator
       ScrewTools.setJointAccelerations(jointIndexHandler.getIndexedJoints(), qddotSolution);
       inverseDynamicsCalculator.compute();
+      inverseDynamicsCalculator.writeComputedJointWrenches(SubtreeStreams.fromChildren(toolbox.getRootBody()).toArray(JointBasics[]::new));
 
       dynamicsMatrixCalculator.extractTorqueMatrix(jointIndexHandler.getIndexedJoints(), inverseDynamicsTauSolution);
 

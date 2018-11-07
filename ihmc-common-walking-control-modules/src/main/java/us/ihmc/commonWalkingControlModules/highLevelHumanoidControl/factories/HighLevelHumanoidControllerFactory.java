@@ -42,7 +42,6 @@ import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ContactSensor;
@@ -534,11 +533,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          controllerToolbox.attachControllerStateChangedListener(listener);
       else
          controllerStateChangedListenersToAttach.add(listener);
-   }
-
-   public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
-   {
-      controllerToolbox.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
    public void attachRobotMotionStatusChangedListener(RobotMotionStatusChangedListener listener)

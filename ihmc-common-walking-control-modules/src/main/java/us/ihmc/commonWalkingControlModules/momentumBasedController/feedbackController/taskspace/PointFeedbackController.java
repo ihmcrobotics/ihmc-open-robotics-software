@@ -27,6 +27,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
@@ -34,7 +35,6 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -101,7 +101,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final Matrix3D tempGainMatrix = new Matrix3D();
    private final YoSE3OffsetFrame controlFrame;
 
-   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
+   private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
    private RigidBodyBasics base;
    private ReferenceFrame controlBaseFrame;
@@ -135,7 +135,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
          rootBody = null;
       }
 
-      spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
+      rigidBodyAccelerationProvider = toolbox.getRigidBodyAccelerationProvider();
 
       String endEffectorName = endEffector.getName();
       registry = new YoVariableRegistry(endEffectorName + "PointFBController");
@@ -383,7 +383,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    @Override
    public void computeAchievedAcceleration()
    {
-      spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector, achievedSpatialAccelerationVector);
+      achievedSpatialAccelerationVector.setIncludingFrame(rigidBodyAccelerationProvider.getRelativeAcceleration(base, endEffector));
       achievedSpatialAccelerationVector.changeFrame(controlFrame);
       achievedLinearAcceleration.setIncludingFrame(achievedSpatialAccelerationVector.getLinearPart());
       subtractCoriolisAcceleration(achievedLinearAcceleration);

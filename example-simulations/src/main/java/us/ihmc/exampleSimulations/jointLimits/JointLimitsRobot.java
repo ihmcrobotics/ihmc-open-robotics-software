@@ -6,11 +6,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -51,7 +51,8 @@ public class JointLimitsRobot extends Robot
       this.addRootJoint(joint);
 
       // --- setup ID calculator ---
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, -this.getGravityZ());
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator);
+      inverseDynamicsCalculator.setGravitionalAcceleration(getGravityZ());
    }
 
    private Link makeLink()
@@ -95,6 +96,7 @@ public class JointLimitsRobot extends Robot
       updateInverseDynamicsStructureFromSimulation();
       idJoint.setQdd(qdd);
       inverseDynamicsCalculator.compute();
+      inverseDynamicsCalculator.writeComputedJointWrench(idJoint);
       joint.setTau(idJoint.getTau());
    }
 
