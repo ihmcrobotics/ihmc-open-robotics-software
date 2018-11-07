@@ -32,6 +32,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -108,10 +109,10 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          RigidBodyBasics chest = fullRobotModel.getChest();
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] arm = ScrewTools.createOneDoFJointPath(chest, hand);
-         OneDoFJoint[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
+         OneDoFJointBasics[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
          for (int i = 0; i < armClone.length; i++)
          {
-            OneDoFJoint joint = armClone[i];
+            OneDoFJointBasics joint = armClone[i];
             joint.setQ(arm[i].getQ() + RandomNumbers.nextDouble(random, -0.2, 0.2));
          }
          RigidBodyBasics handClone = armClone[armClone.length - 1].getSuccessor();
@@ -238,10 +239,10 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          RigidBodyBasics chest = fullRobotModel.getChest();
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] arm = ScrewTools.createOneDoFJointPath(chest, hand);
-         OneDoFJoint[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
+         OneDoFJointBasics[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
          for (int i = 0; i < armClone.length; i++)
          {
-            OneDoFJoint joint = armClone[i];
+            OneDoFJointBasics joint = armClone[i];
             joint.setQ(arm[i].getQ() + RandomNumbers.nextDouble(random, -0.2, 0.2));
          }
          RigidBodyBasics handClone = armClone[armClone.length - 1].getSuccessor();
@@ -361,10 +362,10 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          RigidBodyBasics chest = fullRobotModel.getChest();
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] arm = ScrewTools.createOneDoFJointPath(chest, hand);
-         OneDoFJoint[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
+         OneDoFJointBasics[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
          for (int i = 0; i < armClone.length; i++)
          {
-            OneDoFJoint joint = armClone[i];
+            OneDoFJointBasics joint = armClone[i];
             joint.setQ(arm[i].getQ() + RandomNumbers.nextDouble(random, -0.2, 0.2));
          }
          RigidBodyBasics handClone = armClone[armClone.length - 1].getSuccessor();
