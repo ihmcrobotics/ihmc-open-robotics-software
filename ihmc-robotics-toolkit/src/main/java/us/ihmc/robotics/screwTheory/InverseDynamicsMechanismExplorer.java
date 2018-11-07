@@ -120,7 +120,7 @@ public class InverseDynamicsMechanismExplorer
          buffer.append("momentOfInertia = \n" + momentOfInertia + "\n");
       }
 
-      List<JointBasics> childrenJoints = link.getChildrenJoints();
+      List<? extends JointBasics> childrenJoints = link.getChildrenJoints();
 
       for (JointBasics childJoint : childrenJoints)
       {

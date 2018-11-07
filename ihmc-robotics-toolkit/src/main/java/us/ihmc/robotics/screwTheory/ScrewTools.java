@@ -114,7 +114,7 @@ public class ScrewTools
       while (!rigidBodyStack.isEmpty())
       {
          RigidBodyBasics currentBody = rigidBodyStack.remove(0);
-         List<JointBasics> childrenJoints = currentBody.getChildrenJoints();
+         List<? extends JointBasics> childrenJoints = currentBody.getChildrenJoints();
          for (JointBasics joint : childrenJoints)
          {
             rigidBodyStack.add(joint.getSuccessor());
@@ -147,7 +147,7 @@ public class ScrewTools
          JointBasics currentJoint = jointStack.remove(0);
          rigidBodySuccessorsToPack.add(currentJoint.getSuccessor());
          RigidBodyBasics currentBody = currentJoint.getSuccessor();
-         List<JointBasics> childrenJoints = currentBody.getChildrenJoints();
+         List<? extends JointBasics> childrenJoints = currentBody.getChildrenJoints();
          for (JointBasics joint : childrenJoints)
          {
             jointStack.add(joint);
@@ -187,7 +187,7 @@ public class ScrewTools
       while (!rigidBodyStack.isEmpty())
       {
          RigidBodyBasics currentBody = rigidBodyStack.remove(0);
-         List<JointBasics> childrenJoints = currentBody.getChildrenJoints();
+         List<? extends JointBasics> childrenJoints = currentBody.getChildrenJoints();
          for (JointBasics joint : childrenJoints)
          {
             if (!jointsToExclude.contains(joint))
@@ -246,7 +246,7 @@ public class ScrewTools
       while (!rigidBodyStack.isEmpty())
       {
          RigidBodyBasics currentBody = rigidBodyStack.remove(0);
-         List<JointBasics> childrenJoints = currentBody.getChildrenJoints();
+         List<? extends JointBasics> childrenJoints = currentBody.getChildrenJoints();
          for (JointBasics joint : childrenJoints)
          {
             RigidBodyBasics successor = joint.getSuccessor();
