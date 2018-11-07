@@ -96,12 +96,6 @@ public class RevoluteJoint extends OneDoFJoint
       return new FrameVector3D(jointAxis);
    }
 
-   @Override
-   public void getJointAxis(FrameVector3D axisToPack)
-   {
-      axisToPack.setIncludingFrame(jointAxis);
-   }
-
    private static interface JointTransformCalculator
    {
       void updateJointTransform(RigidBodyTransform jointTransformToUpdate);

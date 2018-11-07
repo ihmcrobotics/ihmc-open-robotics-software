@@ -278,6 +278,4 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    public abstract FrameVector3DReadOnly getJointAxis();
-
-   public abstract void getJointAxis(FrameVector3D axisToPack);
 }
