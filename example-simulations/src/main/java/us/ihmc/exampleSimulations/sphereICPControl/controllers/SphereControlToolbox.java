@@ -38,6 +38,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
@@ -47,7 +48,6 @@ import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -214,7 +214,7 @@ public class SphereControlToolbox
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
 
       twistCalculator = new TwistCalculator(worldFrame, sphereRobotModel.getRootJoint().getSuccessor());
-      centerOfMassJacobian = new CenterOfMassJacobian(elevator);
+      centerOfMassJacobian = new CenterOfMassJacobian(elevator, worldFrame);
 
       capturePointPlannerParameters = createICPPlannerParameters();
       smoothICPPlannerParameters = createNewICPPlannerParameters();
@@ -424,7 +424,7 @@ public class SphereControlToolbox
       centerOfMassFrame.update();
 
       twistCalculator.compute();
-      centerOfMassJacobian.compute();
+      centerOfMassJacobian.reset();
       bipedSupportPolygons.updateUsingContactStates(contactStates);
       icpControlPolygons.updateUsingContactStates(contactStates);
 
@@ -588,7 +588,7 @@ public class SphereControlToolbox
    public void computeCapturePoint()
    {
       centerOfMass.setToZero(centerOfMassFrame);
-      centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
+      centerOfMassVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
 
       CapturePointCalculator.computeCapturePoint(capturePoint2d, centerOfMass2d, centerOfMassVelocity2d, omega0.getDoubleValue());
 

@@ -23,13 +23,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.PDControllerWithGainSetter;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -199,7 +199,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       solve(coMHeightPartialDerivatives, isInDoubleSupport);
 
       comPosition.setToZero(centerOfMassFrame);
-      centerOfMassJacobian.getCenterOfMassVelocity(comVelocity);
+      comVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
       comPosition.changeFrame(worldFrame);
       comVelocity.changeFrame(worldFrame);
 

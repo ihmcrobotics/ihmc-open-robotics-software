@@ -19,6 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
@@ -26,7 +27,6 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoInteger;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -168,7 +168,7 @@ public class PelvisLinearStateUpdater
 
       RigidBodyBasics elevator = inverseDynamicsStructure.getElevator();
       this.centerOfMassCalculator = new CenterOfMassCalculator(elevator, rootJointFrame);
-      this.centerOfMassJacobianWorld = new CenterOfMassJacobian(elevator);
+      this.centerOfMassJacobianWorld = new CenterOfMassJacobian(elevator, rootJointFrame);
 
       this.gravitationalAcceleration = gravitationalAcceleration;
 
@@ -609,9 +609,9 @@ public class PelvisLinearStateUpdater
       centerOfMassPosition.changeFrame(worldFrame);
       yoCenterOfMassPosition.set(centerOfMassPosition);
 
-      centerOfMassJacobianWorld.compute();
+      centerOfMassJacobianWorld.reset();
       centerOfMassVelocityUsingPelvisIMUAndKinematics.setToZero(ReferenceFrame.getWorldFrame());
-      centerOfMassJacobianWorld.getCenterOfMassVelocity(centerOfMassVelocityUsingPelvisIMUAndKinematics);
+      centerOfMassVelocityUsingPelvisIMUAndKinematics.setIncludingFrame(centerOfMassJacobianWorld.getCenterOfMassVelocity());
       centerOfMassVelocityUsingPelvisIMUAndKinematics.changeFrame(ReferenceFrame.getWorldFrame());
       yoCenterOfMassVelocityUsingPelvisAndKinematics.set(centerOfMassVelocityUsingPelvisIMUAndKinematics);
 

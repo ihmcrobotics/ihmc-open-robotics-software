@@ -8,6 +8,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
@@ -19,7 +20,6 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
@@ -57,7 +57,7 @@ public class SphereRobotModel implements FullRobotModel
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
 
-      centerOfMassJacobian = new CenterOfMassJacobian(elevator);
+      centerOfMassJacobian = new CenterOfMassJacobian(elevator, worldFrame);
 
       oneDoFJoints = ScrewTools.createOneDoFJointPath(elevator, body);
       totalMass = TotalMassCalculator.computeSubTreeMass(body);
