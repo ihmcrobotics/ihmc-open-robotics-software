@@ -56,5 +56,5 @@ public interface FloatingJointBasics extends JointBasics
 
    public abstract void setWrench(Wrench jointWrench);
 
-   public void getJointTransform3D(RigidBodyTransform rigidBodyTransformToPack);
+   public void getJointConfiguration(RigidBodyTransform rigidBodyTransformToPack);
 }

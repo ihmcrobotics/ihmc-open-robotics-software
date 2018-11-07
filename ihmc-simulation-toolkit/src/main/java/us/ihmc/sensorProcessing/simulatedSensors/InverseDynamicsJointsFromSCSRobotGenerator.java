@@ -285,7 +285,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             RigidBodyTransform rotationAndTranslation = new RigidBodyTransform();
             if (updatePositions)
             {
-               sixDoFJoint.getJointTransform3D(rotationAndTranslation);
+               sixDoFJoint.getJointConfiguration(rotationAndTranslation);
                floatingJoint.setRotationAndTranslation(rotationAndTranslation);
             }
 
