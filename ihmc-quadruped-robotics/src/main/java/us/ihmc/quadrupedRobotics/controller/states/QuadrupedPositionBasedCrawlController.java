@@ -28,6 +28,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -62,7 +63,6 @@ import us.ihmc.robotics.robotSide.RecyclingQuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -131,7 +131,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final SwingTargetGenerator swingTargetGenerator;
    private final QuadrantDependentList<FootSwitchInterface> footSwitches;
    private final FullQuadrupedRobotModel actualFullRobotModel;
-   private final FloatingInverseDynamicsJoint actualRobotRootJoint;
+   private final FloatingJointBasics actualRobotRootJoint;
 
    private final QuadrupedReferenceFrames referenceFrames;
    private final CenterOfMassJacobian centerOfMassJacobian;
@@ -799,7 +799,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       feedForwardReferenceFrames.updateFrames();
       actualFullRobotModel.updateFrames();
 
-      FloatingInverseDynamicsJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
+      FloatingJointBasics feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
 
       actualRobotRootJoint.getJointTransform3D(rootJointPose);
       feedForwardRootJoint.setJointConfiguration(rootJointPose);
@@ -861,7 +861,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          oneDoFJointFeedforward.setQ(jointDesiredOutput.getDesiredPosition());
       }
 
-      FloatingInverseDynamicsJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
+      FloatingJointBasics feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
 
       feedForwardRootJoint.getJointPose().setOrientationYawPitchRoll(filteredDesiredCoMOrientation.getYaw().getDoubleValue(), filteredDesiredCoMOrientation.getPitch().getDoubleValue(), filteredDesiredCoMOrientation.getRoll().getDoubleValue());
       feedForwardFullRobotModel.updateFrames();

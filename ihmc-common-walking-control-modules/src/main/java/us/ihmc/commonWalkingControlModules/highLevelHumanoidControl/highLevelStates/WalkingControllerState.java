@@ -15,9 +15,9 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -60,7 +60,7 @@ public class WalkingControllerState extends HighLevelControllerState
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       JointBasics[] jointsToOptimizeFor = controllerToolbox.getControlledJoints();
 
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(), controllerToolbox.getGravityZ(), rootJoint,
                                                                             jointsToOptimizeFor, centerOfMassFrame,

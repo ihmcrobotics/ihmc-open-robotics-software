@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -19,7 +19,7 @@ public class QtoQSimulatedOutputWriter implements OutputWriter, RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final String name;
    protected final FloatingRootJointRobot robot;
-   protected ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint> rootJointPair;
+   protected ImmutablePair<FloatingJoint, FloatingJointBasics> rootJointPair;
    protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
    
    public QtoQSimulatedOutputWriter(FloatingRootJointRobot robot)
@@ -56,7 +56,7 @@ public class QtoQSimulatedOutputWriter implements OutputWriter, RobotController
          this.revoluteJoints.add(jointPair);
       }
       
-      rootJointPair = new ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint>(robot.getRootJoint(), fullRobotModel.getRootJoint());
+      rootJointPair = new ImmutablePair<FloatingJoint, FloatingJointBasics>(robot.getRootJoint(), fullRobotModel.getRootJoint());
    }
 
    public String getName()

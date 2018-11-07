@@ -13,11 +13,11 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotController.RawSensorReader;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -36,7 +36,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 {
    private final String name;
    private final FloatingRootJointRobot robot;
-   private final FloatingInverseDynamicsJoint rootJoint;
+   private final FloatingJointBasics rootJoint;
    private final ReferenceFrames referenceFrames;
 
    private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
@@ -61,7 +61,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       this(robot, fullRobotModel.getRootJoint(), forceSensorDataHolderToUpdate, referenceFrames);
    }
 
-   public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FloatingInverseDynamicsJoint rootJoint, ForceSensorDataHolder forceSensorDataHolderToUpdate,
+   public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FloatingJointBasics rootJoint, ForceSensorDataHolder forceSensorDataHolderToUpdate,
          ReferenceFrames referenceFrames)
    {
       name = robot.getName() + "SimulatedSensorReader";

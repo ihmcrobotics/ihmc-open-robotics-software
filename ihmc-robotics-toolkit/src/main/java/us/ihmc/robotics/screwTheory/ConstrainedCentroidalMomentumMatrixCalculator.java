@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
@@ -19,7 +20,7 @@ public class ConstrainedCentroidalMomentumMatrixCalculator
    private final DenseMatrix64F temp = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F constrainedCentroidalMomentumMatrix = new DenseMatrix64F(1, 1);
 
-   public ConstrainedCentroidalMomentumMatrixCalculator(FloatingInverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame,
+   public ConstrainedCentroidalMomentumMatrixCalculator(FloatingJointBasics rootJoint, ReferenceFrame centerOfMassFrame,
                                                         DenseMatrix64F selectionMatrix)
    {
       this.dynamicallyConsistentNullspaceCalculator = new OriginalDynamicallyConsistentNullspaceCalculator(rootJoint,

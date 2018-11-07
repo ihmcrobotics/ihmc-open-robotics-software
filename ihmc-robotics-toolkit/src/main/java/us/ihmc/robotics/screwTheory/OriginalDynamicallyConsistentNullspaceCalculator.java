@@ -13,6 +13,7 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SpecializedOps;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
@@ -26,7 +27,7 @@ import us.ihmc.mecano.spatial.Twist;
  */
 public class OriginalDynamicallyConsistentNullspaceCalculator implements DynamicallyConsistentNullspaceCalculator
 {
-   private final FloatingInverseDynamicsJoint rootJoint;
+   private final FloatingJointBasics rootJoint;
    private final JointBasics[] jointsInOrder;
    private final Map<RigidBodyBasics, DenseMatrix64F> constrainedBodiesAndSelectionMatrices = new LinkedHashMap<RigidBodyBasics, DenseMatrix64F>();
    private final List<JointBasics> actuatedJoints = new ArrayList<JointBasics>();
@@ -59,7 +60,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
    private final int nDegreesOfFreedom;
    private int nConstraints;
 
-   public OriginalDynamicallyConsistentNullspaceCalculator(FloatingInverseDynamicsJoint rootJoint,
+   public OriginalDynamicallyConsistentNullspaceCalculator(FloatingJointBasics rootJoint,
                                                            boolean computeSNsBar)
    {
       this.rootJoint = rootJoint;

@@ -21,9 +21,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
@@ -39,7 +39,7 @@ public class WholeBodyControlCoreToolbox
 
    private final double controlDT;
    private final double gravityZ;
-   private final FloatingInverseDynamicsJoint rootJoint;
+   private final FloatingJointBasics rootJoint;
    private final RigidBodyBasics rootBody;
    private final ReferenceFrame centerOfMassFrame;
    private final ControllerCoreOptimizationSettings optimizationSettings;
@@ -117,7 +117,7 @@ public class WholeBodyControlCoreToolbox
     *           {@link Artifact}s of the controller core are registered.
     * @param parentRegistry registry to which this toolbox will attach its own registry.
     */
-   public WholeBodyControlCoreToolbox(double controlDT, double gravityZ, FloatingInverseDynamicsJoint rootJoint, JointBasics[] controlledJoints,
+   public WholeBodyControlCoreToolbox(double controlDT, double gravityZ, FloatingJointBasics rootJoint, JointBasics[] controlledJoints,
                                       ReferenceFrame centerOfMassFrame, ControllerCoreOptimizationSettings controllerCoreOptimizationSettings,
                                       YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -331,7 +331,7 @@ public class WholeBodyControlCoreToolbox
       return centroidalMomentumHandler;
    }
 
-   public FloatingInverseDynamicsJoint getRootJoint()
+   public FloatingJointBasics getRootJoint()
    {
       return rootJoint;
    }

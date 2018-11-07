@@ -51,9 +51,9 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
@@ -328,7 +328,7 @@ public class MessageTools
       return message;
    }
 
-   public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] newJointData)
+   public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(FloatingJointBasics rootJoint, OneDoFJoint[] newJointData)
    {
       KinematicsToolboxOutputStatus message = new KinematicsToolboxOutputStatus();
       message.setJointNameHash(Arrays.hashCode(newJointData));
@@ -719,7 +719,7 @@ public class MessageTools
       return colors;
    }
 
-   public static void unpackDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingInverseDynamicsJoint rootJointToUpdate,
+   public static void unpackDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingJointBasics rootJointToUpdate,
                                               OneDoFJoint[] jointsToUpdate)
    {
       int jointNameHash = Arrays.hashCode(jointsToUpdate);
@@ -734,7 +734,7 @@ public class MessageTools
       rootJointToUpdate.setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
    }
 
-   public static void packDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingInverseDynamicsJoint rootJoint,
+   public static void packDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingJointBasics rootJoint,
                                             OneDoFJoint[] newJointData)
    {
       int jointNameHash = Arrays.hashCode(newJointData);
