@@ -141,6 +141,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
             }
          }
 
+         jointWrench.changeFrame(joint.getFrameAfterJoint());
          joint.setJointWrench(jointWrench);
 
          DenseMatrix64F coriolisWrench = coriolisWrenches.get(joint);
