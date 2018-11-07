@@ -69,7 +69,6 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
    private final QuadrupedControllerToolbox controllerToolbox;
    private final QuadrupedControlManagerFactory controlManagerFactory;
-   private final OutputProcessor outputProcessor;
 
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
@@ -129,15 +128,6 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       controlManagerFactory.getOrCreateBalanceManager();
       controlManagerFactory.getOrCreateJointSpaceManager();
 
-      // Initialize output processor
-      StateChangeSmootherComponent stateChangeSmootherComponent = new StateChangeSmootherComponent(runtimeEnvironment, registry);
-      JointIntegratorComponent jointControlComponent = new JointIntegratorComponent(runtimeEnvironment, registry);
-      controlManagerFactory.getOrCreateFeetManager().attachStateChangedListener(stateChangeSmootherComponent.createFiniteStateMachineStateChangedListener());
-      OutputProcessorBuilder outputProcessorBuilder = new OutputProcessorBuilder(runtimeEnvironment.getFullRobotModel());
-      outputProcessorBuilder.addComponent(stateChangeSmootherComponent);
-      outputProcessorBuilder.addComponent(jointControlComponent);
-      outputProcessor = outputProcessorBuilder.build();
-
       requestedControllerState.set(null);
       requestedControllerState.addVariableChangedListener(new VariableChangedListener()
       {
@@ -195,7 +185,6 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    @Override
    public void initialize()
    {
-      outputProcessor.initialize();
    }
 
    @Override
@@ -256,9 +245,6 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          walkingControllerFailureStatusMessage.falling_direction_.set(runtimeEnvironment.getFullRobotModel().getRootJoint().getLinearVelocityForReading());
          statusMessageOutputManager.reportStatusMessage(walkingControllerFailureStatusMessage);
       }
-
-      // update output processor
-      outputProcessor.update();
    }
 
    @Override
