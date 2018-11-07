@@ -18,6 +18,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
  * This class is a tool that can be used to compute the spatial acceleration of each
@@ -100,7 +101,7 @@ public class SpatialAccelerationCalculator
     */
    public SpatialAccelerationCalculator(RigidBodyBasics body, double gravity)
    {
-      this(body, createGravitationalSpatialAcceleration(ScrewTools.getRootBody(body), gravity), true);
+      this(body, createGravitationalSpatialAcceleration(MultiBodySystemTools.getRootBody(body), gravity), true);
    }
 
    /**
@@ -140,7 +141,7 @@ public class SpatialAccelerationCalculator
                                         boolean doAccelerationTerms)
    {
       this.inertialFrame = rootAcceleration.getBaseFrame();
-      this.rootBody = ScrewTools.getRootBody(body);
+      this.rootBody = MultiBodySystemTools.getRootBody(body);
       this.doVelocityTerms = doVelocityTerms;
       this.doAccelerationTerms = doAccelerationTerms;
 

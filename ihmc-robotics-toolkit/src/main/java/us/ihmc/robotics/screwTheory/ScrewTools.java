@@ -28,6 +28,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
@@ -177,7 +178,7 @@ public class ScrewTools
       Set<JointBasics> supportSet = new LinkedHashSet<JointBasics>();
       for (RigidBodyBasics rigidBody : bodies)
       {
-         RigidBodyBasics rootBody = getRootBody(rigidBody);
+         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
          JointBasics[] jointPath = createJointPath(rootBody, rigidBody);
          supportSet.addAll(Arrays.asList(jointPath));
       }
@@ -210,61 +211,6 @@ public class ScrewTools
 
       JointBasics[] ret = new JointBasics[subtree.size()];
       return subtree.toArray(ret);
-   }
-
-   public static RigidBodyBasics getRootBody(RigidBodyBasics body)
-   {
-      RigidBodyBasics ret = body;
-      while (ret.getParentJoint() != null)
-      {
-         ret = ret.getParentJoint().getPredecessor();
-      }
-      return ret;
-   }
-
-   public static int[] createParentMap(RigidBodyBasics[] allRigidBodiesInOrder)
-   {
-      int[] parentMap = new int[allRigidBodiesInOrder.length];
-      List<RigidBodyBasics> rigidBodiesInOrderList = Arrays.asList(allRigidBodiesInOrder); // this doesn't have to be fast
-      for (int i = 0; i < allRigidBodiesInOrder.length; i++)
-      {
-         RigidBodyBasics currentBody = allRigidBodiesInOrder[i];
-         if (currentBody.isRootBody())
-         {
-            parentMap[i] = -1;
-         }
-         else
-         {
-            RigidBodyBasics parentBody = currentBody.getParentJoint().getPredecessor();
-            parentMap[i] = rigidBodiesInOrderList.indexOf(parentBody);
-         }
-      }
-
-      return parentMap;
-   }
-
-   public static DenseMatrix64F getTauMatrix(JointBasics[] jointsInOrder)
-   {
-      int size = 0;
-      for (JointBasics joint : jointsInOrder)
-      {
-         size += joint.getDegreesOfFreedom();
-      }
-
-      DenseMatrix64F tempMatrix = new DenseMatrix64F(JointBasics.MAX_NUMBER_OF_DOFS, 1);
-      DenseMatrix64F ret = new DenseMatrix64F(size, 1);
-      int startIndex = 0;
-      for (JointBasics joint : jointsInOrder)
-      {
-         int endIndex = startIndex + joint.getDegreesOfFreedom() - 1;
-         joint.getJointTau(0, tempMatrix);
-
-         MatrixTools.setMatrixBlock(ret, startIndex, 0, tempMatrix, 0, 0, joint.getDegreesOfFreedom(), 1, 1.0);
-
-         startIndex = endIndex + 1;
-      }
-
-      return ret;
    }
 
    public static OneDoFJoint[] createOneDoFJointPath(RigidBodyBasics start, RigidBodyBasics end)

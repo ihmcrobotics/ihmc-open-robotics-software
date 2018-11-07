@@ -20,6 +20,7 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Wayp
 import us.ihmc.manipulation.planning.exploringSpatial.SpatialData;
 import us.ihmc.manipulation.planning.exploringSpatial.SpatialNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -127,7 +128,7 @@ public class WholeBodyTrajectoryToolboxData
          }
 
          ConstrainedRigidBodyTrajectory constrainedRigidBodyTrajectory = null;
-         for (RigidBodyBasics candidateRigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(ScrewTools.getRootBody(fullRobotModel.getElevator())))
+         for (RigidBodyBasics candidateRigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(MultiBodySystemTools.getRootBody(fullRobotModel.getElevator())))
          {
             if (candidateRigidBody.getName() == rigidBody.getName())
             {
@@ -257,7 +258,7 @@ public class WholeBodyTrajectoryToolboxData
       {
          RigidBodyBasics rigidBody = allRigidBodies.get(i);
 
-         for (RigidBodyBasics candidateRigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(ScrewTools.getRootBody(fullRobotModel.getElevator())))
+         for (RigidBodyBasics candidateRigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(MultiBodySystemTools.getRootBody(fullRobotModel.getElevator())))
          {
             if (candidateRigidBody.getName() == rigidBody.getName())
             {
