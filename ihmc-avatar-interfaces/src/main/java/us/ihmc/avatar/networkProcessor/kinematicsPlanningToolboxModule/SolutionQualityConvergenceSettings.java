@@ -24,6 +24,6 @@ public interface SolutionQualityConvergenceSettings
 
    default int getDefaultTerminalIteration()
    {
-      return 30;
+      return 50;
    }
 }

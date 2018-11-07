@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -148,6 +149,13 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       if (!initialized)
          throw new RuntimeException("Could not initialize the " + KinematicsToolboxController.class.getSimpleName());
 
+      solution.getKeyFrameTimes().clear();
+      solution.getRobotConfigurations().clear();
+      solution.setSolutionQuality(0.0);
+
+      for (int i = 0; i < getNumberOfKeyFrames(); i++)
+         solution.getKeyFrameTimes().add(keyFrameTimes.get(i));
+
       solutionQualityConvergenceDetector.initialize();
       submitKeyFrameMessages();
 
@@ -241,7 +249,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    {
       if (solutionQualityConvergenceDetector.isSolved())
       {
-         if (indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
+         if (!appendRobotConfigurationOnToolboxSolution() || indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
          {
             isDone.set(true);
          }
@@ -265,6 +273,22 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    public boolean isDone()
    {
       return isDone.getBooleanValue();
+   }
+
+   private boolean appendRobotConfigurationOnToolboxSolution()
+   {
+      if (solutionQualityConvergenceDetector.isValid())
+      {
+         solution.setSolutionQuality(solution.getSolutionQuality() + ikController.getSolution().getSolutionQuality());
+         solution.getRobotConfigurations().add().set(new KinematicsToolboxOutputStatus(ikController.getSolution()));
+
+         return true;
+      }
+      else
+      {
+         solution.setSolutionQuality(-1);
+         return false;
+      }
    }
 
    private boolean submitKeyFrameMessages()
