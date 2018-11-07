@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
@@ -16,7 +17,6 @@ import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.simulationconstructionset.util.CommonJoint;
 
 /**
  * Base interface that describes the basic API for the joints composing a kinematic chain/tree
@@ -35,7 +35,7 @@ import us.ihmc.simulationconstructionset.util.CommonJoint;
  * </ul>
  * 
  */
-public abstract interface JointBasics extends CommonJoint
+public abstract interface JointBasics
 {
    public static int MAX_NUMBER_OF_DOFS = 6;
 
@@ -60,6 +60,16 @@ public abstract interface JointBasics extends CommonJoint
    default TwistReadOnly getJointTwist()
    {
       return null;
+   }
+
+   default void getJointOffset(RigidBodyTransform transform)
+   {
+      
+   }
+
+   default void getJointConfiguration(RigidBodyTransform transform)
+   {
+      
    }
 
    /**

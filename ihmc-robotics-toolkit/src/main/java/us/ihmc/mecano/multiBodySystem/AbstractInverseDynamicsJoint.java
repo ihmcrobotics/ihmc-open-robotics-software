@@ -236,33 +236,6 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
       accelerationToPack.changeFrame(successorFrame);
    }
 
-   /**
-    * Returns the offset from the frame before this joint to the frame after this parent joint.
-    * <p>
-    * The returned {@code RigidBodyTransform} should not be modified.
-    * </p>
-    * 
-    * @return this joint offset with respect to its parent joint as a transform.
-    */
-   @Override
-   public RigidBodyTransform getOffsetTransform3D()
-   {
-      return getFrameBeforeJoint().getTransformToParent();
-   }
-
-   /**
-    * Returns the configuration of this joint as a transform.
-    * <p>
-    * The returned {@code RigidBodyTransform} should not be modified.
-    * </p>
-    * 
-    * @return the pose of the frame after joint expressed in the frame before joint.
-    */
-   @Override
-   public RigidBodyTransform getJointTransform3D()
-   {
-      return getFrameAfterJoint().getTransformToParent();
-   }
 
    /**
     * Packs the offset from the frame before this joint to the frame after this parent joint.

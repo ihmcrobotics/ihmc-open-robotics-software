@@ -223,7 +223,8 @@ public class RobotTools
    {
       Joint scsJoint;
       String jointName = idJoint.getName();
-      RigidBodyTransform offsetTransform = idJoint.getOffsetTransform3D();
+      RigidBodyTransform offsetTransform = new RigidBodyTransform();
+      idJoint.getJointOffset(offsetTransform);
       Vector3D offsetVector = new Vector3D();
       offsetTransform.getTranslation(offsetVector);
 

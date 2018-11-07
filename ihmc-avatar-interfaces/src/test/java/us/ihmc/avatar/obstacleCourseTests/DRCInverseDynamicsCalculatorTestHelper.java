@@ -593,7 +593,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    public void setRobotRootJointPositionAndOrientationToMatchFullRobotModel(FloatingInverseDynamicsJoint sixDoFJoint, FloatingJoint floatingJoint)
    {
-      RigidBodyTransform transform = new RigidBodyTransform(sixDoFJoint.getJointTransform3D());
+      RigidBodyTransform transform = new RigidBodyTransform();
+      sixDoFJoint.getJointConfiguration(transform);
       floatingJoint.setRotationAndTranslation(transform);
    }
 

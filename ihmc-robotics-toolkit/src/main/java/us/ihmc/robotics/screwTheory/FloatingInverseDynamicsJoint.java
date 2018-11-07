@@ -1,6 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -42,6 +43,11 @@ public interface FloatingInverseDynamicsJoint extends JointBasics
    public abstract void setJointPosition(Tuple3DReadOnly qTrans);
 
    public abstract void setJointConfiguration(RigidBodyTransform transform);
+
+   default void setJointConfiguration(Pose3DReadOnly pose)
+   {
+
+   }
 
    public abstract void setJointTwist(Twist jointTwist);
 

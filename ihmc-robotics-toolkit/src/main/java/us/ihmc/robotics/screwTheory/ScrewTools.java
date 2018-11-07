@@ -533,7 +533,8 @@ public class ScrewTools
    private static OneDoFJoint cloneOneDoFJoint(OneDoFJoint original, String cloneSuffix, RigidBodyBasics clonePredecessor)
    {
       String jointNameOriginal = original.getName();
-      RigidBodyTransform jointTransform = original.getOffsetTransform3D();
+      RigidBodyTransform jointTransform = new RigidBodyTransform();
+      original.getJointOffset(jointTransform);
       Vector3D jointAxisCopy = new Vector3D(original.getJointAxis());
       OneDoFJoint clone;
 
