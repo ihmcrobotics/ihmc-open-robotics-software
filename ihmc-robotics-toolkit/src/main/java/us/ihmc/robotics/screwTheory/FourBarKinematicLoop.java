@@ -86,16 +86,16 @@ public class FourBarKinematicLoop
       this.jointDInJointABeforeFrame = new Vector3D(jointDInJointABeforeFrame);
 
       // Rotation axis
-      FrameVector3D masterJointAxis = masterJointA.getJointAxis();
+      FrameVector3D masterJointAxis = new FrameVector3D(masterJointA.getJointAxis());
       masterJointAxis.changeFrame(masterJointA.getFrameBeforeJoint());
       frameBeforeFourBarWithZAlongJointAxis = GeometryTools
             .constructReferenceFrameFromPointAndAxis(name + "FrameWithZAlongJointAxis", new FramePoint3D(masterJointA.getFrameBeforeJoint()), Axis.Z,
                   masterJointAxis);
 
-      FrameVector3D masterAxis = masterJointA.getJointAxis();
-      FrameVector3D jointBAxis = passiveJointB.getJointAxis();
-      FrameVector3D jointCAxis = passiveJointC.getJointAxis();
-      FrameVector3D jointDAxis = passiveJointD.getJointAxis();
+      FrameVector3D masterAxis = new FrameVector3D(masterJointA.getJointAxis());
+      FrameVector3D jointBAxis = new FrameVector3D(passiveJointB.getJointAxis());
+      FrameVector3D jointCAxis = new FrameVector3D(passiveJointC.getJointAxis());
+      FrameVector3D jointDAxis = new FrameVector3D(passiveJointD.getJointAxis());
       FourBarKinematicLoopTools.checkJointAxesAreParallel(masterAxis, jointBAxis, jointCAxis, jointDAxis);
 
       // Joint order
@@ -237,9 +237,9 @@ public class FourBarKinematicLoop
    private void initializeInteriorAnglesAtZeroConfigurationAndJointSigns(FrameVector2D vectorDAProjected, FrameVector2D vectorABProjected,
          FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected)
    {
-      FrameVector3D jointBAxis = passiveJointB.getJointAxis();
-      FrameVector3D jointCAxis = passiveJointC.getJointAxis();
-      FrameVector3D jointDAxis = passiveJointD.getJointAxis();
+      FrameVector3D jointBAxis = new FrameVector3D(passiveJointB.getJointAxis());
+      FrameVector3D jointCAxis = new FrameVector3D(passiveJointC.getJointAxis());
+      FrameVector3D jointDAxis = new FrameVector3D(passiveJointD.getJointAxis());
 
       jointBAxis.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
       jointCAxis.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
