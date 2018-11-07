@@ -100,7 +100,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
          CommonOps.mult(motionSubspace, tauMatrix, spatialForce);
          Wrench jointWrench = storedJointWrenches.get(joint);
          jointWrench.setIncludingFrame(joint.getFrameAfterJoint(), spatialForce);
-         jointWrench.changeFrame(joint.getSuccessor().getBodyFixedFrame());
+         jointWrench.changeFrame(joint.getFrameAfterJoint());
       }
    }
    
