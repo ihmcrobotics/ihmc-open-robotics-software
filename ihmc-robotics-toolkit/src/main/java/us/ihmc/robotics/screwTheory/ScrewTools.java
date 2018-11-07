@@ -25,12 +25,13 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.SphericalJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class ScrewTools
 {
@@ -290,9 +291,9 @@ public class ScrewTools
       return pathLength;
    }
 
-   public static OneDoFJoint[] cloneOneDoFJointPath(RigidBodyBasics start, RigidBodyBasics end)
+   public static OneDoFJointBasics[] cloneOneDoFJointPath(RigidBodyBasics start, RigidBodyBasics end)
    {
-      return cloneJointPathAndFilter(createOneDoFJointPath(start, end), OneDoFJoint.class);
+      return MultiBodySystemFactories.cloneOneDoFJointKinematicChain(start, end);
    }
 
    public static OneDoFJoint[] cloneOneDoFJointPath(OneDoFJoint[] oneDoFJoints)

@@ -1,6 +1,8 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +16,6 @@ import org.junit.Test;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.SpineTrajectoryMessage;
-import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
@@ -32,6 +33,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.QuaternionCalculus;
@@ -420,7 +422,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
    private ChestTrajectoryMessage createRandomChestMessage(double trajectoryTime, Random random)
    {
-      OneDoFJoint[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
+      OneDoFJointBasics[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
       ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
       RigidBodyBasics chestClone = spineClone[spineClone.length - 1].getSuccessor();
       FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());

@@ -23,6 +23,7 @@ import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
@@ -311,20 +312,20 @@ public class ScrewTestTools
       }
    }
 
-   public static void setRandomPositionsWithinJointLimits(OneDoFJoint[] joints, Random random)
+   public static void setRandomPositionsWithinJointLimits(OneDoFJointBasics[] joints, Random random)
    {
-      for (OneDoFJoint joint : joints)
+      for (OneDoFJointBasics joint : joints)
       {
          setRandomPositionWithinJointLimits(joint, random);
       }
    }
 
-   public static void setRandomPosition(OneDoFJoint joint, Random random, double boundaryOne, double boundaryTwo)
+   public static void setRandomPosition(OneDoFJointBasics joint, Random random, double boundaryOne, double boundaryTwo)
    {
       joint.setQ(RandomNumbers.nextDouble(random, boundaryOne, boundaryTwo));
    }
 
-   public static void setRandomPositionWithinJointLimits(OneDoFJoint joint, Random random)
+   public static void setRandomPositionWithinJointLimits(OneDoFJointBasics joint, Random random)
    {
       setRandomPosition(joint, random, joint.getJointLimitLower(), joint.getJointLimitUpper());
    }

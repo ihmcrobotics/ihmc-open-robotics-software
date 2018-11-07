@@ -55,6 +55,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -129,11 +130,11 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
 
          OneDoFJoint[] armOriginal = ScrewTools.createOneDoFJointPath(chest, hand);
-         OneDoFJoint[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
+         OneDoFJointBasics[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
          for (int jointIndex = 0; jointIndex < armOriginal.length; jointIndex++)
          {
             OneDoFJoint original = armOriginal[jointIndex];
-            OneDoFJoint clone = armClone[jointIndex];
+            OneDoFJointBasics clone = armClone[jointIndex];
 
             double limitLower = clone.getJointLimitLower();
             double limitUpper = clone.getJointLimitUpper();
