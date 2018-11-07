@@ -152,12 +152,6 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setDesiredAcceleration(SpatialAcceleration jointAcceleration)
-   {
-      jointAccelerationDesired.set(jointAcceleration);
-   }
-
-   @Override
    public void setWrench(Wrench jointWrench)
    {
       successorWrench.set(jointWrench);

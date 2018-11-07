@@ -172,15 +172,6 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
-   public void setDesiredAcceleration(SpatialAcceleration jointAcceleration)
-   {
-      jointAccelerationDesired.checkReferenceFrameMatch(jointAcceleration);
-      jointAccelerationDesired.setAngularPartY(jointAcceleration.getAngularPartY());
-      jointAccelerationDesired.setLinearPartX(jointAcceleration.getLinearPartX());
-      jointAccelerationDesired.setLinearPartZ(jointAcceleration.getLinearPartZ());
-   }
-
-   @Override
    public void setWrench(Wrench jointWrench)
    {
       successorWrench.getBodyFrame().checkReferenceFrameMatch(jointWrench.getBodyFrame());
