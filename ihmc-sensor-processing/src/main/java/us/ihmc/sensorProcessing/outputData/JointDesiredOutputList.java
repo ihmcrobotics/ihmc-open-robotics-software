@@ -1,13 +1,13 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 
 public class JointDesiredOutputList implements JointDesiredOutputListBasics
 {
    private final OneDoFJoint[] joints;
    private final JointDesiredOutput[] jointsData;
-   private final TLongObjectHashMap<JointDesiredOutput> jointMap;
+   private final TIntObjectHashMap<JointDesiredOutput> jointMap;
 
    public JointDesiredOutputList(OneDoFJoint[] joints)
    {
@@ -15,7 +15,7 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
       this.jointsData = new JointDesiredOutput[joints.length];
 
       float disableAutoCompaction = 0;
-      jointMap = new TLongObjectHashMap<>(joints.length);
+      jointMap = new TIntObjectHashMap<>(joints.length);
       jointMap.setAutoCompactionFactor(disableAutoCompaction);
 
       for (int i = 0; i < joints.length; i++)
@@ -57,9 +57,9 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
    }
 
    @Override
-   public JointDesiredOutput getJointDesiredOutput(long jointName)
+   public JointDesiredOutput getJointDesiredOutputFromHash(int jointHashCode)
    {
-      return jointMap.get(jointName);
+      return jointMap.get(jointHashCode);
    }
 
    public String getJointName(int index)

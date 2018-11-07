@@ -83,7 +83,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
       {
          OneDoFJoint joint = other.getOneDoFJoint(i);
 
-         JointDesiredOutputBasics lowLevelJointData = getJointDesiredOutput(joint.hashCode());
+         JointDesiredOutputBasics lowLevelJointData = getJointDesiredOutputFromHash(joint.hashCode());
          JointDesiredOutputReadOnly otherLowLevelJointData = other.getJointDesiredOutput(i);
 
          if (lowLevelJointData != null)
@@ -140,9 +140,9 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
    }
 
    @Override
-   public JointDesiredOutputBasics getJointDesiredOutput(long jointName)
+   public JointDesiredOutputBasics getJointDesiredOutputFromHash(int jointHashCode)
    {
-      return lowLevelJointDataMap.get(jointName);
+      return lowLevelJointDataMap.get(jointHashCode);
    }
 
    @Override
