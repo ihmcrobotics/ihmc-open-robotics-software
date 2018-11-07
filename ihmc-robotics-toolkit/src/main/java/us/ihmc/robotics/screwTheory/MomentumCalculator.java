@@ -20,7 +20,7 @@ public class MomentumCalculator
 
    public MomentumCalculator(RigidBodyBasics rootBody)
    {
-      this(ScrewTools.computeSupportAndSubtreeSuccessors(rootBody));
+      this(ScrewTools.computeSubtreeSuccessors(rootBody));
    }
 
    public void computeAndPack(Momentum momentum)

@@ -10,11 +10,11 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 public class KinematicsToolboxMessageFactory
@@ -109,7 +109,7 @@ public class KinematicsToolboxMessageFactory
    {
       KinematicsToolboxCenterOfMassMessage message = new KinematicsToolboxCenterOfMassMessage();
       CenterOfMassCalculator calculator = new CenterOfMassCalculator(rootBody, worldFrame);
-      calculator.compute();
+      calculator.reset();
       message.getDesiredPositionInWorld().set(calculator.getCenterOfMass());
       message.getWeights().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_CENTER_OF_MASS_WEIGHT));
 

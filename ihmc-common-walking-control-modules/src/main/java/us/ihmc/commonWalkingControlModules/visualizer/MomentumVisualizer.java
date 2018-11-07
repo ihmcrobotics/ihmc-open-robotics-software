@@ -7,12 +7,11 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
-import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.MomentumCalculator;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -30,14 +29,14 @@ public class MomentumVisualizer implements Updatable
    public MomentumVisualizer(String name, OneDoFJoint rootJoint, YoVariableRegistry registry,
          YoGraphicsListRegistry graphicsRegistry)
    {
-      this(name, registry, graphicsRegistry, ScrewTools.computeRigidBodiesAfterThisJoint(rootJoint));
+      this(name, registry, graphicsRegistry, rootJoint.getSuccessor());
    }
 
    public MomentumVisualizer(String name, YoVariableRegistry registry, YoGraphicsListRegistry graphicsRegistry,
-         RigidBodyBasics... rigidBodies)
+         RigidBodyBasics rootBody)
    {
-      comCalculator = new CenterOfMassCalculator(rigidBodies, ReferenceFrame.getWorldFrame());
-      momentumCalculator = new MomentumCalculator(rigidBodies);
+      comCalculator = new CenterOfMassCalculator(rootBody, ReferenceFrame.getWorldFrame());
+      momentumCalculator = new MomentumCalculator(rootBody);
       centerOfMass = new YoFramePoint3D(name + "CoM", ReferenceFrame.getWorldFrame(), registry);
       linearMomentum = new YoFrameVector3D(name + "Momentum", ReferenceFrame.getWorldFrame(), registry);
 
@@ -50,7 +49,7 @@ public class MomentumVisualizer implements Updatable
    @Override
    public void update(double time)
    {
-      comCalculator.compute();
+      comCalculator.reset();
       centerOfMass.set(comCalculator.getCenterOfMass());
 
       momentumCalculator.computeAndPack(momentum);

@@ -1,21 +1,26 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpPreserveYReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.util.ArrayList;
 
 public class DiagnosticsWhenHangingHelper
 {
@@ -51,8 +56,8 @@ public class DiagnosticsWhenHangingHelper
       this.isSpineJoint = isSpineJoint;
       centerOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(parentJoint, preserveY, isSpineJoint, topLegJointsIfSpine);
 
-      belowJointCoMInZUpFrame = new YoFramePoint3D(parentJoint.getName() + "CoMInZUpFrame", centerOfMassCalculator.getDesiredFrame(), registry);
-      centerOfMassPosition = new FramePoint3D(centerOfMassCalculator.getDesiredFrame());
+      belowJointCoMInZUpFrame = new YoFramePoint3D(parentJoint.getName() + "CoMInZUpFrame", centerOfMassCalculator.getReferenceFrame(), registry);
+      centerOfMassPosition = new FramePoint3D(centerOfMassCalculator.getReferenceFrame());
 
       yoJointAxis = new YoFrameVector3D(parentJoint.getName() + "JointAxis", ReferenceFrame.getWorldFrame(), registry);
       yoJointToCenterOfMass = new YoFrameVector3D(parentJoint.getName() + "JointToCoM", ReferenceFrame.getWorldFrame(), registry);
@@ -93,22 +98,22 @@ public class DiagnosticsWhenHangingHelper
          jointZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), jointFrame, jointName + "ZUp");
       }
 
-      ArrayList<RigidBodyBasics> rigidBodies = new ArrayList<RigidBodyBasics>();
+      MultiBodySystemReadOnly subSystem;
 
       if (spineJoint)
       {
-         ScrewTools.computeRigidBodiesFromRootToThisJoint(rigidBodies, parentJoint);
+         Set<JointReadOnly> jointsToConsider = new HashSet<>();
+         jointsToConsider.addAll(Arrays.asList(MultiBodySystemTools.collectSupportJoints(parentJoint.getPredecessor())));
          for (JointBasics legJoint : topLegJointsIfSpine)
-         {
-            ScrewTools.computeRigidBodiesAfterThisJoint(rigidBodies, legJoint);
-         }
+            legJoint.subtreeIterable().forEach(jointsToConsider::add);
+         subSystem = MultiBodySystemReadOnly.toMultiBodySystemInput(new ArrayList<>(jointsToConsider));
       }
       else
       {
-         ScrewTools.computeRigidBodiesAfterThisJoint(rigidBodies, parentJoint);
+         subSystem = MultiBodySystemReadOnly.toMultiBodySystemInput(parentJoint.getSuccessor());
       }
 
-      CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rigidBodies, jointZUpFrame);
+      CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(subSystem, jointZUpFrame);
 
       return centerOfMassCalculator;
    }
@@ -155,10 +160,10 @@ public class DiagnosticsWhenHangingHelper
 
    public void update()
    {
-      centerOfMassCalculator.getDesiredFrame().update();
+      centerOfMassCalculator.getReferenceFrame().update();
 
-      centerOfMassCalculator.compute();
-      centerOfMassCalculator.getCenterOfMass(centerOfMassPosition);
+      centerOfMassCalculator.reset();
+      centerOfMassPosition.setIncludingFrame(centerOfMassCalculator.getCenterOfMass());
       belowJointCoMInZUpFrame.set(centerOfMassPosition);
 
       jointAxis.setIncludingFrame(parentJoint.getJointAxis());
