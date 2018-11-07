@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
 public class MovingMidFootZUpGroundFrame extends MovingReferenceFrame
 {
@@ -47,8 +48,8 @@ public class MovingMidFootZUpGroundFrame extends MovingReferenceFrame
    @Override
    protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
    {
-      Twist twistOfFrameOne = frameOne.getTwistOfFrame();
-      Twist twistOfFrameTwo = frameTwo.getTwistOfFrame();
+      TwistReadOnly twistOfFrameOne = frameOne.getTwistOfFrame();
+      TwistReadOnly twistOfFrameTwo = frameTwo.getTwistOfFrame();
 
       linearVelocityOne.setIncludingFrame(twistOfFrameOne.getLinearPart());
       linearVelocityTwo.setIncludingFrame(twistOfFrameTwo.getLinearPart());
