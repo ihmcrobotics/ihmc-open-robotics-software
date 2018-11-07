@@ -15,6 +15,8 @@ import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 
 public class MovingReferenceFrameTest
 {
@@ -41,8 +43,8 @@ public class MovingReferenceFrameTest
 
       for (int i = 0; i < 100; i++)
       {
-         ScrewTestTools.setRandomPositions(joints, random, -1.0, 1.0);
-         ScrewTestTools.setRandomVelocities(joints, random, -1.0, 1.0);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -1.0, 1.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, -1.0, 1.0, joints);
          joints.get(0).getPredecessor().updateFramesRecursively();
 
          twistCalculator.compute();
@@ -75,8 +77,8 @@ public class MovingReferenceFrameTest
 
       for (int i = 0; i < 100; i++)
       {
-         ScrewTestTools.setRandomPositions(joints, random, -1.0, 1.0);
-         ScrewTestTools.setRandomVelocities(joints, random, -1.0, 1.0);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -1.0, 1.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, -1.0, 1.0, joints);
          joints.get(0).getPredecessor().updateFramesRecursively();
 
          twistCalculator.compute();
@@ -109,8 +111,8 @@ public class MovingReferenceFrameTest
 
       for (int i = 0; i < 100; i++)
       {
-         ScrewTestTools.setRandomPositions(joints, random, -1.0, 1.0);
-         ScrewTestTools.setRandomVelocities(joints, random, -1.0, 1.0);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -1.0, 1.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, -1.0, 1.0, joints);
          joints.get(0).getPredecessor().updateFramesRecursively();
 
          twistCalculator.compute();

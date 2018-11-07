@@ -25,6 +25,8 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -181,10 +183,10 @@ public class PelvisRotationalStateUpdaterTest
    private void setRandomRobotConfigurationAndUpdateSensors(ArrayList<RevoluteJoint> joints, FullInverseDynamicsStructure inverseDynamicsStructure,
          StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessing jointAndIMUSensorDataSource)
    {
-      ScrewTestTools.setRandomPositionAndOrientation(inverseDynamicsStructure.getRootJoint(), random);
-      ScrewTestTools.setRandomVelocity(inverseDynamicsStructure.getRootJoint(), random);
-      ScrewTestTools.setRandomPositions(joints, random);
-      ScrewTestTools.setRandomVelocities(joints, random);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, inverseDynamicsStructure.getRootJoint());
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, inverseDynamicsStructure.getRootJoint());
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
       inverseDynamicsStructure.getElevator().updateFramesRecursively();
       inverseDynamicsStructure.updateInternalState();
       

@@ -25,6 +25,8 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
@@ -74,8 +76,8 @@ public class GeometricJacobianTest
 
       for (int i = 0; i < 1000; i++)
       {
-         ScrewTestTools.setRandomPositions(joints, random);
-         ScrewTestTools.setRandomVelocities(joints, random, -10.0, 10.0);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, -10.0, 10.0, joints);
 
          int randomEndEffectorIndex = random.nextInt(numberOfJoints);
          RigidBodyBasics randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
@@ -124,10 +126,10 @@ public class GeometricJacobianTest
 
       for (int i = 0; i < 1000; i++)
       {
-         ScrewTestTools.setRandomPositionAndOrientation(floatingJoint, random);
-         ScrewTestTools.setRandomVelocity(floatingJoint, random);
-         ScrewTestTools.setRandomPositions(revoluteJoints, random);
-         ScrewTestTools.setRandomVelocities(revoluteJoints, random, -10.0, 10.0);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, floatingJoint);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, floatingJoint);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, revoluteJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, -10.0, 10.0, revoluteJoints);
          floatingChain.getElevator().updateFramesRecursively();
 
          int randomEndEffectorIndex = random.nextInt(numberOfJoints);

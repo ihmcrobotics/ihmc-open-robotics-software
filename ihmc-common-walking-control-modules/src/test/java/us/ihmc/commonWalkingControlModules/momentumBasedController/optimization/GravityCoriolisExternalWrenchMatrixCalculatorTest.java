@@ -23,6 +23,8 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelTestTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -80,8 +82,8 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
 
       for (int i = 0; i < iters; i++)
       {
-         ScrewTestTools.setRandomPositions(joints, random);
-         ScrewTestTools.setRandomVelocities(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
 
          update();
 
@@ -94,7 +96,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
             noAccelCoriolisMatrices.put(joint, noAccelCoriolisMatrix);
          }
 
-         ScrewTestTools.setRandomAccelerations(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, joints);
 
          coriolisMatrixCalculator.reset();
          update();

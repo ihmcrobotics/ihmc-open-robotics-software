@@ -29,7 +29,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
@@ -68,9 +70,9 @@ public class SpatialAccelerationCalculatorTest
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, rootAcceleration, doVelocityTerms,
                                                                                                          doAccelerationTerms);
 
-         ScrewTestTools.setRandomPositions(prismaticJoints, random, -10.0, 10.0);
-         ScrewTestTools.setRandomVelocities(prismaticJoints, random, -10.0, 10.0);
-         ScrewTestTools.setRandomAccelerations(prismaticJoints, random, -10.0, 10.0);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -10.0, 10.0, prismaticJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, -10.0, 10.0, prismaticJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, -10.0, 10.0, prismaticJoints);
          spatialAccelerationCalculator.getRootBody().updateFramesRecursively();
 
          spatialAccelerationCalculator.compute();
@@ -131,9 +133,9 @@ public class SpatialAccelerationCalculatorTest
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, rootAcceleration, doVelocityTerms,
                                                                                                          doAccelerationTerms);
 
-         ScrewTestTools.setRandomPositions(revoluteJoints, random, -10.0, 10.0);
-         ScrewTestTools.setRandomVelocities(revoluteJoints, random, 0.0, 0.0);
-         ScrewTestTools.setRandomAccelerations(revoluteJoints, random, -10.0, 10.0);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -10.0, 10.0, revoluteJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, 0.0, 0.0, revoluteJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, -10.0, 10.0, revoluteJoints);
 
          spatialAccelerationCalculator.compute();
 
@@ -173,9 +175,9 @@ public class SpatialAccelerationCalculatorTest
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, rootAcceleration, doVelocityTerms,
                                                                                                          doAccelerationTerms);
 
-         ScrewTestTools.setRandomPositions(revoluteJoints, random, -10.0, 10.0);
-         ScrewTestTools.setRandomVelocities(revoluteJoints, random, -10.0, 10.0);
-         ScrewTestTools.setRandomAccelerations(revoluteJoints, random, -10.0, 10.0);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -10.0, 10.0, revoluteJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, -10.0, 10.0, revoluteJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, -10.0, 10.0, revoluteJoints);
          spatialAccelerationCalculator.getRootBody().updateFramesRecursively();
 
          spatialAccelerationCalculator.compute();
@@ -242,9 +244,9 @@ public class SpatialAccelerationCalculatorTest
          rootAcceleration.getAngularPart().set(EuclidCoreRandomTools.nextVector3D(random));
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, rootAcceleration, true, true);
 
-         ScrewTestTools.setRandomPositions(joints, random, -1.0, 1.0);
-         ScrewTestTools.setRandomVelocities(joints, random, -1.0, 1.0);
-         ScrewTestTools.setRandomAccelerations(joints, random, -1.0, 1.0);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -1.0, 1.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, -1.0, 1.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, -1.0, 1.0, joints);
 
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {
@@ -317,16 +319,16 @@ public class SpatialAccelerationCalculatorTest
          Twist floatingJointTwist = MecanoRandomTools.nextTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
                                                                 floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
-         ScrewTestTools.setRandomAcceleration(floatingJoint, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, floatingJoint);
 
          floatingJointInFuture.setJointConfiguration(floatingJoint);
          floatingJointInFuture.setJointTwist(floatingJoint);
          floatingJointInFuture.setJointAcceleration(floatingJoint);
          ScrewTestTools.doubleIntegrateFromAcceleration(floatingJointInFuture, dt);
 
-         ScrewTestTools.setRandomPositions(revoluteJoints, random, -1.0, 1.0);
-         ScrewTestTools.setRandomVelocities(revoluteJoints, random, -1.0, 1.0);
-         ScrewTestTools.setRandomAccelerations(revoluteJoints, random, -1.0, 1.0);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -1.0, 1.0, revoluteJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, -1.0, 1.0, revoluteJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, -1.0, 1.0, revoluteJoints);
 
          for (int jointIndex = 0; jointIndex < numberOfRevoluteJoints; jointIndex++)
          {
@@ -410,16 +412,16 @@ public class SpatialAccelerationCalculatorTest
          Twist floatingJointTwist = MecanoRandomTools.nextTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
                                                                 floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
-         ScrewTestTools.setRandomAcceleration(floatingJoint, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, floatingJoint);
 
          floatingJointInFuture.setJointConfiguration(floatingJoint);
          floatingJointInFuture.setJointTwist(floatingJoint);
          floatingJointInFuture.setJointAcceleration(floatingJoint);
          ScrewTestTools.doubleIntegrateFromAcceleration(floatingJointInFuture, dt);
 
-         ScrewTestTools.setRandomPositions(revoluteJoints, random, -1.0, 1.0);
-         ScrewTestTools.setRandomVelocities(revoluteJoints, random, -1.0, 1.0);
-         ScrewTestTools.setRandomAccelerations(revoluteJoints, random, -1.0, 1.0);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -1.0, 1.0, revoluteJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, -1.0, 1.0, revoluteJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, -1.0, 1.0, revoluteJoints);
 
          for (int jointIndex = 0; jointIndex < numberOfRevoluteJoints; jointIndex++)
          {
@@ -544,9 +546,9 @@ public class SpatialAccelerationCalculatorTest
                                                                 floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
 
-         ScrewTestTools.setRandomPositions(revoluteJoints, random, -1.0, 1.0);
-         ScrewTestTools.setRandomVelocities(revoluteJoints, random, -10.0, 10.0);
-         ScrewTestTools.setRandomAccelerations(revoluteJoints, random, -1.0, 1.0);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -1.0, 1.0, revoluteJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, -10.0, 10.0, revoluteJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, -1.0, 1.0, revoluteJoints);
 
          for (int jointIndex = 0; jointIndex < revoluteJointsNoVelocity.size(); jointIndex++)
          {

@@ -8,12 +8,10 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.RandomMatrices;
 
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
@@ -21,12 +19,12 @@ import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class ScrewTestTools
@@ -55,7 +53,8 @@ public class ScrewTestTools
       return revoluteJoints;
    }
 
-   public static void createRandomChainRobot(String prefix, List<RevoluteJoint> revoluteJointsToPack, RigidBodyBasics rootBody, Vector3D[] jointAxes, Random random)
+   public static void createRandomChainRobot(String prefix, List<RevoluteJoint> revoluteJointsToPack, RigidBodyBasics rootBody, Vector3D[] jointAxes,
+                                             Random random)
    {
       RigidBodyBasics currentIDBody = rootBody;
       for (int i = 0; i < jointAxes.length; i++)
@@ -130,7 +129,7 @@ public class ScrewTestTools
    }
 
    public static void createRandomChainRobotWithOneDoFJoints(String prefix, List<OneDoFJoint> oneDoFJointsToPack, RigidBodyBasics rootBody,
-                                                                Vector3D[] jointAxes, Random random)
+                                                             Vector3D[] jointAxes, Random random)
    {
       RigidBodyBasics predecessor = rootBody;
 
@@ -304,129 +303,6 @@ public class ScrewTestTools
       return ret;
    }
 
-   public static void setRandomPositions(OneDoFJoint[] joints, Random random, double boundaryOne, double boundaryTwo)
-   {
-      for (OneDoFJoint joint : joints)
-      {
-         setRandomPosition(joint, random, boundaryOne, boundaryTwo);
-      }
-   }
-
-   public static void setRandomPositionsWithinJointLimits(OneDoFJointBasics[] joints, Random random)
-   {
-      for (OneDoFJointBasics joint : joints)
-      {
-         setRandomPositionWithinJointLimits(joint, random);
-      }
-   }
-
-   public static void setRandomPosition(OneDoFJointBasics joint, Random random, double boundaryOne, double boundaryTwo)
-   {
-      joint.setQ(RandomNumbers.nextDouble(random, boundaryOne, boundaryTwo));
-   }
-
-   public static void setRandomPositionWithinJointLimits(OneDoFJointBasics joint, Random random)
-   {
-      setRandomPosition(joint, random, joint.getJointLimitLower(), joint.getJointLimitUpper());
-   }
-
-   public static void setRandomVelocities(OneDoFJoint[] joints, Random random)
-   {
-      for (OneDoFJoint joint : joints)
-      {
-         setRandomVelocity(joint, random);
-      }
-   }
-
-   public static void setRandomVelocity(OneDoFJoint joint, Random random)
-   {
-      joint.setQd(random.nextDouble());
-      joint.updateFramesRecursively();
-   }
-
-   public static void setRandomVelocity(OneDoFJoint joint, Random random, double min, double max)
-   {
-      joint.setQd(RandomNumbers.nextDouble(random, min, max));
-      joint.updateFramesRecursively();
-   }
-
-   public static void setRandomAcceleration(OneDoFJoint joint, Random random, double min, double max)
-   {
-      joint.setQdd(RandomNumbers.nextDouble(random, min, max));
-   }
-
-   public static void setRandomAccelerations(OneDoFJoint[] joints, Random random)
-   {
-      for (OneDoFJoint joint : joints)
-      {
-         joint.setQdd(random.nextDouble());
-      }
-   }
-
-   public static void setRandomPositions(Iterable<? extends OneDoFJoint> joints, Random random)
-   {
-      for (OneDoFJoint joint : joints)
-      {
-         setRandomPosition(joint, random, -Math.PI / 2.0, Math.PI / 2.0);
-      }
-   }
-
-   public static void setRandomPositions(Iterable<? extends OneDoFJoint> joints, Random random, double min, double max)
-   {
-      for (OneDoFJoint joint : joints)
-      {
-         setRandomPosition(joint, random, min, max);
-      }
-   }
-
-   public static void setRandomVelocities(Iterable<? extends OneDoFJoint> joints, Random random)
-   {
-      for (OneDoFJoint joint : joints)
-      {
-         setRandomVelocity(joint, random);
-      }
-   }
-
-   public static void setRandomVelocities(Iterable<? extends OneDoFJoint> joints, Random random, double min, double max)
-   {
-      for (OneDoFJoint joint : joints)
-      {
-         setRandomVelocity(joint, random, min, max);
-      }
-   }
-
-   public static void setRandomAccelerations(Iterable<? extends OneDoFJoint> joints, Random random)
-   {
-      for (OneDoFJoint joint : joints)
-      {
-         joint.setQdd(random.nextDouble());
-      }
-   }
-
-   public static void setRandomAccelerations(Iterable<? extends OneDoFJoint> joints, Random random, double min, double max)
-   {
-      for (OneDoFJoint joint : joints)
-      {
-         setRandomAcceleration(joint, random, min, max);
-      }
-   }
-
-   public static void setRandomTorques(Iterable<? extends OneDoFJoint> joints, Random random)
-   {
-      for (OneDoFJoint joint : joints)
-      {
-         joint.setTau(random.nextDouble());
-      }
-   }
-
-   public static void setRandomTorques(Iterable<? extends OneDoFJoint> joints, Random random, double magnitude)
-   {
-      for (OneDoFJoint joint : joints)
-      {
-         joint.setTau(RandomNumbers.nextDouble(random, magnitude));
-      }
-   }
-
    public static void integrateVelocity(OneDoFJoint joint, double dt)
    {
       double oldQ = joint.getQ();
@@ -482,29 +358,6 @@ public class ScrewTestTools
       }
    }
 
-   public static void setRandomPositionAndOrientation(FloatingJointBasics rootJoint, Random random)
-   {
-      rootJoint.setJointConfiguration(EuclidCoreRandomTools.nextRigidBodyTransform(random));
-   }
-
-   public static void setRandomVelocity(FloatingJointBasics rootJoint, Random random)
-   {
-      Twist jointTwist = new Twist();
-      jointTwist.setIncludingFrame(rootJoint.getJointTwist());
-      jointTwist.getAngularPart().set(RandomGeometry.nextVector3D(random));
-      jointTwist.getLinearPart().set(RandomGeometry.nextVector3D(random));
-      rootJoint.setJointTwist(jointTwist);
-   }
-
-   public static void setRandomAcceleration(SixDoFJoint rootJoint, Random random)
-   {
-      SpatialAcceleration jointAcceleration = new SpatialAcceleration();
-      jointAcceleration.setIncludingFrame(rootJoint.getJointAcceleration());
-      jointAcceleration.getAngularPart().set(RandomGeometry.nextVector3D(random));
-      jointAcceleration.getLinearPart().set(RandomGeometry.nextVector3D(random));
-      rootJoint.setJointAcceleration(jointAcceleration);
-   }
-
    public static void integrateAccelerations(SixDoFJoint sixDoFJoint, double dt)
    {
       SpatialAcceleration deltaTwist = new SpatialAcceleration();
@@ -529,7 +382,6 @@ public class ScrewTestTools
       rootJointTwist.getAngularPart().add(deltaTwist.getAngularPart());
       rootJointTwist.getLinearPart().add(deltaTwist.getLinearPart());
       sixDoFJoint.setJointTwist(rootJointTwist);
-
 
       Twist deltaConfiguration = new Twist();
       deltaConfiguration.setIncludingFrame(sixDoFJoint.getJointTwist());
@@ -596,17 +448,17 @@ public class ScrewTestTools
 
       public void setRandomPositionsAndVelocities(Random random)
       {
-         ScrewTestTools.setRandomPositionAndOrientation(getRootJoint(), random);
-         ScrewTestTools.setRandomVelocity(getRootJoint(), random);
-         ScrewTestTools.setRandomPositions(getRevoluteJoints(), random);
-         setRandomVelocities(getRevoluteJoints(), random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, getRootJoint());
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, getRootJoint());
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, getRevoluteJoints());
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, getRevoluteJoints());
          getElevator().updateFramesRecursively();
       }
 
       public void setRandomAccelerations(Random random)
       {
-         ScrewTestTools.setRandomAcceleration(getRootJoint(), random);
-         ScrewTestTools.setRandomAccelerations(getRevoluteJoints(), random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, getRootJoint());
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, getRevoluteJoints());
       }
 
       public RigidBodyBasics getElevator()
