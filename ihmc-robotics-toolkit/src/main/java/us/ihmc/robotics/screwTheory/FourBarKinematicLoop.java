@@ -106,6 +106,10 @@ public class FourBarKinematicLoop
       passiveJointB.setQ(0.0);
       passiveJointC.setQ(0.0);
       passiveJointD.setQ(0.0);
+      masterJointA.getFrameAfterJoint().update();
+      passiveJointB.getFrameAfterJoint().update();
+      passiveJointC.getFrameAfterJoint().update();
+      passiveJointD.getFrameAfterJoint().update();
 
       // Link lengths
       FrameVector2D vectorBCProjected = new FrameVector2D();

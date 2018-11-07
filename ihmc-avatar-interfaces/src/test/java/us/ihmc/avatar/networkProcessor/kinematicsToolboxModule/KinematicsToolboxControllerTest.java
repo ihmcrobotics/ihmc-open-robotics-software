@@ -301,6 +301,7 @@ public class KinematicsToolboxControllerTest
          if (Double.isFinite(joint.getJointLimitLower()) && Double.isFinite(joint.getJointLimitUpper()))
             joint.setQ(0.5 * (joint.getJointLimitLower() + joint.getJointLimitUpper()));
       }
+      ScrewTools.getRootBody(fullRobotModel.getRight()[0].getPredecessor()).updateFramesRecursively();
       return fullRobotModel;
    }
 
@@ -320,6 +321,7 @@ public class KinematicsToolboxControllerTest
          jointLimitUpper -= 0.5 * rangeReduction;
          joint.setQ(RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper));
       }
+      ScrewTools.getRootBody(randomizedFullRobotModel.getRight()[0].getPredecessor()).updateFramesRecursively();
    }
 
    private RobotController createToolboxUpdater()
