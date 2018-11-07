@@ -11,10 +11,10 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -41,7 +41,7 @@ public class CentroidalMomentumHandlerTest
       RigidBodyBasics rootBody = ScrewTools.getRootBody(joints.get(0).getPredecessor());
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, rootBody);
       CentroidalMomentumHandler centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
-      CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody);
+      CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody, worldFrame);
 
       FrameVector3D actualCenterOfMassVelocity = new FrameVector3D();
       FrameVector3D expectedCenterOfMassVelocity = new FrameVector3D();
@@ -53,10 +53,10 @@ public class CentroidalMomentumHandlerTest
          centerOfMassFrame.update();
 
          centroidalMomentumHandler.compute();
-         centerOfMassJacobian.compute();
+         centerOfMassJacobian.reset();
 
          centroidalMomentumHandler.getCenterOfMassVelocity(actualCenterOfMassVelocity);
-         centerOfMassJacobian.getCenterOfMassVelocity(expectedCenterOfMassVelocity);
+         expectedCenterOfMassVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
 
          actualCenterOfMassVelocity.changeFrame(worldFrame);
          expectedCenterOfMassVelocity.changeFrame(worldFrame);
@@ -75,7 +75,7 @@ public class CentroidalMomentumHandlerTest
       RigidBodyBasics rootBody = randomFloatingChain.getElevator();
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, rootBody);
       CentroidalMomentumHandler centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
-      CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody);
+      CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody, worldFrame);
 
       FrameVector3D actualCenterOfMassVelocity = new FrameVector3D();
       FrameVector3D expectedCenterOfMassVelocity = new FrameVector3D();
@@ -86,10 +86,10 @@ public class CentroidalMomentumHandlerTest
          centerOfMassFrame.update();
 
          centroidalMomentumHandler.compute();
-         centerOfMassJacobian.compute();
+         centerOfMassJacobian.reset();
 
          centroidalMomentumHandler.getCenterOfMassVelocity(actualCenterOfMassVelocity);
-         centerOfMassJacobian.getCenterOfMassVelocity(expectedCenterOfMassVelocity);
+         expectedCenterOfMassVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
 
          actualCenterOfMassVelocity.changeFrame(worldFrame);
          expectedCenterOfMassVelocity.changeFrame(worldFrame);

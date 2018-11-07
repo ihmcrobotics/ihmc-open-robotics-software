@@ -27,6 +27,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.spatial.Twist;
@@ -62,7 +63,6 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RecyclingQuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -402,14 +402,14 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       this.robotTimestamp = environment.getRobotTimestamp();
       this.dt = environment.getControlDT();
       this.actualFullRobotModel = environment.getFullRobotModel();
-      this.centerOfMassJacobian = new CenterOfMassJacobian(environment.getFullRobotModel().getElevator());
+      this.centerOfMassJacobian = new CenterOfMassJacobian(environment.getFullRobotModel().getElevator(), environment.getFullRobotModel().getElevator().getBodyFixedFrame());
 
       actualRobotRootJoint = actualFullRobotModel.getRootJoint();
       referenceFrames.updateFrames();
       comFrame = referenceFrames.getCenterOfMassFrame();
 
       feedForwardFullRobotModel = modelFactory.createFullRobotModel();
-      this.feedForwardCenterOfMassJacobian = new CenterOfMassJacobian(feedForwardFullRobotModel.getElevator());
+      this.feedForwardCenterOfMassJacobian = new CenterOfMassJacobian(feedForwardFullRobotModel.getElevator(), feedForwardFullRobotModel.getElevatorFrame());
       feedForwardReferenceFrames = new QuadrupedReferenceFrames(feedForwardFullRobotModel, physicalProperties);
       feedForwardCenterOfMassFrame = new TranslationReferenceFrame("offsetFeedForwardCenterOfMassFrame", feedForwardReferenceFrames.getCenterOfMassFrame());
       feedForwardReferenceFrames.updateFrames();
@@ -945,8 +945,8 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       // compute center of mass position and velocity
       feedForwardCoMPosition.setIncludingFrame(feedForwardCenterOfMassFrame, 0.0, 0.0, 0.0);
       feedForwardCoMPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      feedForwardCenterOfMassJacobian.compute();
-      feedForwardCenterOfMassJacobian.getCenterOfMassVelocity(tempFrameVector);
+      feedForwardCenterOfMassJacobian.reset();
+      tempFrameVector.setIncludingFrame(feedForwardCenterOfMassJacobian.getCenterOfMassVelocity());
       tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
       feedForwardCenterOfMassVelocity.set(tempFrameVector);
 
@@ -961,8 +961,8 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       // compute center of mass position and velocity
       tempCoMPosition.setIncludingFrame(comFrame, 0.0, 0.0, 0.0);
       tempCoMPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      centerOfMassJacobian.compute();
-      centerOfMassJacobian.getCenterOfMassVelocity(tempFrameVector);
+      centerOfMassJacobian.reset();
+      tempFrameVector.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
       tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassVelocity.set(tempFrameVector);
 

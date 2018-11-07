@@ -37,6 +37,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -54,7 +55,6 @@ import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.robotics.screwTheory.MomentumCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -207,7 +207,7 @@ public class HighLevelHumanoidControllerToolbox
       this.yoTime = yoTime;
       this.omega0.set(omega0);
 
-      this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
+      this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -446,7 +446,7 @@ public class HighLevelHumanoidControllerToolbox
    public void update()
    {
       referenceFrames.updateFrames();
-      centerOfMassJacobian.compute();
+      centerOfMassJacobian.reset();
 
       if (referenceFramesVisualizer != null)
          referenceFramesVisualizer.update();
@@ -512,7 +512,7 @@ public class HighLevelHumanoidControllerToolbox
       }
       else
       {
-         centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
+         centerOfMassVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
       }
 
       centerOfMassPosition.changeFrame(worldFrame);
