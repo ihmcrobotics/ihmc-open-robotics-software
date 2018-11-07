@@ -21,6 +21,7 @@ import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -480,12 +481,12 @@ public class ScrewTestTools
       }
    }
 
-   public static void setRandomPositionAndOrientation(FloatingInverseDynamicsJoint rootJoint, Random random)
+   public static void setRandomPositionAndOrientation(FloatingJointBasics rootJoint, Random random)
    {
       rootJoint.setJointConfiguration(EuclidCoreRandomTools.nextRigidBodyTransform(random));
    }
 
-   public static void setRandomVelocity(FloatingInverseDynamicsJoint rootJoint, Random random)
+   public static void setRandomVelocity(FloatingJointBasics rootJoint, Random random)
    {
       Twist jointTwist = new Twist();
       jointTwist.setIncludingFrame(rootJoint.getJointTwist());

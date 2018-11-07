@@ -12,8 +12,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
@@ -24,7 +24,7 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
    private final Object lock = new Object();
    private final ArrayList<GraphicsUpdatable> graphicsToUpdate = new ArrayList<GraphicsUpdatable>();
    private final AtomicLong simTime = new AtomicLong(-1);
-   protected final FloatingInverseDynamicsJoint rootJoint;
+   protected final FloatingJointBasics rootJoint;
    private boolean frameshaveBeenSetUp = false;
    private final ForceSensorDataHolder forceSensorDataHolder;
    private final OneDoFJoint[] allJoints;

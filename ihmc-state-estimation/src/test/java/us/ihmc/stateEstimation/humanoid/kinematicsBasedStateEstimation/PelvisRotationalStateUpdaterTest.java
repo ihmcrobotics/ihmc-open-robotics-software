@@ -22,9 +22,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -134,7 +134,7 @@ public class PelvisRotationalStateUpdaterTest
       Twist twistExpected = new Twist();
       Quaternion rotationEstimated = new Quaternion();
       Twist twistEstimated = new Twist();
-      FloatingInverseDynamicsJoint rootJoint = inverseDynamicsStructure.getRootJoint();
+      FloatingJointBasics rootJoint = inverseDynamicsStructure.getRootJoint();
 
       setRandomRobotConfigurationAndUpdateSensors(joints, inverseDynamicsStructure, stateEstimatorSensorDefinitions, jointAndIMUSensorDataSource);
       

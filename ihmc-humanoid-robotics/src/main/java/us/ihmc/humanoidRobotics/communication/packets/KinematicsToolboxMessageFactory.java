@@ -11,10 +11,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 public class KinematicsToolboxMessageFactory
@@ -161,7 +161,7 @@ public class KinematicsToolboxMessageFactory
          privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
       }
 
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       Point3D privilegedRootJointPosition = new Point3D();
       privilegedRootJointPosition.set(rootJoint.getJointPose().getPosition());
       Quaternion privilegedRootJointOrientation = new Quaternion();

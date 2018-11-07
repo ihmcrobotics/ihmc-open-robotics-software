@@ -6,9 +6,9 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -18,7 +18,7 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
 {
    private final String name;
    protected final FloatingRootJointRobot robot;
-   protected ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint> rootJointPair;
+   protected ImmutablePair<FloatingJoint, FloatingJointBasics> rootJointPair;
    protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
    private final JointDesiredOutputList jointDesiredOutputList;
 
@@ -62,7 +62,7 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
          this.revoluteJoints.add(jointPair);
       }
 
-      rootJointPair = new ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint>(robot.getRootJoint(), fullRobotModel.getRootJoint());
+      rootJointPair = new ImmutablePair<FloatingJoint, FloatingJointBasics>(robot.getRootJoint(), fullRobotModel.getRootJoint());
    }
 
    public String getName()
@@ -125,7 +125,7 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
       }
 
       FloatingJoint floatingJoint = rootJointPair.getLeft();
-      FloatingInverseDynamicsJoint sixDoFJoint = rootJointPair.getRight();
+      FloatingJointBasics sixDoFJoint = rootJointPair.getRight();
 
       RigidBodyTransform transform = new RigidBodyTransform();
       sixDoFJoint.getJointConfiguration(transform);

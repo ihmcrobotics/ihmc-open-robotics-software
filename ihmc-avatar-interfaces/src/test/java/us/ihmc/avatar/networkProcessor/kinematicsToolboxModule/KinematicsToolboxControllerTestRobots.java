@@ -12,6 +12,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
@@ -21,7 +22,6 @@ import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class KinematicsToolboxControllerTestRobots
@@ -112,14 +112,14 @@ public class KinematicsToolboxControllerTestRobots
       }
    }
 
-   public static Pair<FloatingInverseDynamicsJoint, OneDoFJoint[]> createInverseDynamicsRobot(RobotDescription robotDescription)
+   public static Pair<FloatingJointBasics, OneDoFJoint[]> createInverseDynamicsRobot(RobotDescription robotDescription)
    {
       RigidBodyBasics predecessor;
 
       RigidBodyBasics rootBody = new RigidBody("rootBody", ReferenceFrame.getWorldFrame());
-      FloatingInverseDynamicsJoint rootJoint;
+      FloatingJointBasics rootJoint;
 
-      if (robotDescription.getRootJoints().get(0) instanceof FloatingInverseDynamicsJoint)
+      if (robotDescription.getRootJoints().get(0) instanceof FloatingJointBasics)
       {
          FloatingJointDescription rootJointDescription = (FloatingJointDescription) robotDescription.getRootJoints().get(0);
          rootJoint = new SixDoFJoint(rootJointDescription.getName(), rootBody);

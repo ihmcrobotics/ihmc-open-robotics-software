@@ -14,10 +14,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.robotController.RawSensorReader;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -64,7 +64,7 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
    private final Vector3D imuAngularVelocity = new Vector3D();
 
 
-   public PerfectSensorIntoSensorOutputMapReader(FloatingRootJointRobot robot, FloatingInverseDynamicsJoint rootJoint, SensorOutputMap sensorOutputMap)
+   public PerfectSensorIntoSensorOutputMapReader(FloatingRootJointRobot robot, FloatingJointBasics rootJoint, SensorOutputMap sensorOutputMap)
    {
       name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
@@ -95,7 +95,7 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
 
    }
 
-   private void createJointRelations(FloatingRootJointRobot robot, FloatingInverseDynamicsJoint rootJoint)
+   private void createJointRelations(FloatingRootJointRobot robot, FloatingJointBasics rootJoint)
    {
       JointBasics[] jointsArray = ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor());
 

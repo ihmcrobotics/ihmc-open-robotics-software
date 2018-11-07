@@ -22,9 +22,9 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOp
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -42,7 +42,7 @@ public class WholeBodyInverseKinematicsSolver
    private final Map<OneDoFJoint, YoDouble> jointVelocitiesSolution = new HashMap<>();
    private final Map<OneDoFJoint, YoDouble> jointPositionsSolution = new HashMap<>();
 
-   private final FloatingInverseDynamicsJoint rootJoint;
+   private final FloatingJointBasics rootJoint;
    private final OneDoFJoint[] controlledOneDoFJoints;
    private final JointBasics[] jointsToOptimizeFor;
    private final JointIndexHandler jointIndexHandler;
