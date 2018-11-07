@@ -51,6 +51,8 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -254,7 +256,7 @@ public class AtlasAllocationTest
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       RigidBodyBasics chest = fullRobotModel.getChest();
       OneDoFJointBasics[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
-      ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
+      MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, spineClone);
       RigidBodyBasics chestClone = spineClone[spineClone.length - 1].getSuccessor();
       FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());

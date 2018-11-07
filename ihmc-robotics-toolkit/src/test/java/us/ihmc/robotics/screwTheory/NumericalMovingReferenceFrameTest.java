@@ -15,6 +15,8 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 
 public class NumericalMovingReferenceFrameTest
 {
@@ -49,8 +51,8 @@ public class NumericalMovingReferenceFrameTest
       Twist actualTwist = new Twist();
       Twist expectedTwist = new Twist();
 
-      ScrewTestTools.setRandomPositions(joints, random);
-      ScrewTestTools.setRandomVelocities(joints, random);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       jointFramesToFDFrames.values().forEach(NumericalMovingReferenceFrame::update);

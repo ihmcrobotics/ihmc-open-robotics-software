@@ -6,6 +6,8 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -52,7 +54,7 @@ public class RandomRestartInverseKinematicsCalculator implements InverseKinemati
          
          if (!foundSolution)
          {
-            ScrewTestTools.setRandomPositions(joints, random, -Math.PI/2.0, Math.PI/2.0);
+            MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI/2.0, Math.PI/2.0, joints);
          }
          
          restart++;

@@ -43,6 +43,8 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleSO3TrajectoryPoint;
@@ -151,7 +153,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       RigidBodyBasics chest = fullRobotModel.getChest();
 
       OneDoFJointBasics[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
-      ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
+      MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, spineClone);
       RigidBodyBasics chestClone = spineClone[spineClone.length - 1].getSuccessor();
       FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
@@ -282,7 +284,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       for(int i = 0; i < 50; i++)
       {
-         ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
+         MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, spineClone);
          RigidBodyBasics chestClone = spineClone[spineClone.length - 1].getSuccessor();
          FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
          desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
@@ -305,7 +307,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          assertWeightsMatch(xWeight, yWeight, zWeight, chest, scs);
       }
 
-      ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
+      MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, spineClone);
       RigidBodyBasics chestClone = spineClone[spineClone.length - 1].getSuccessor();
       FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
@@ -1209,7 +1211,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       OneDoFJointBasics[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
 
       Random random = new Random(21651L);
-      ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
+      MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, spineClone);
 
       RigidBodyBasics chestClone = spineClone[spineClone.length - 1].getSuccessor();
       FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
@@ -1261,7 +1263,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
       OneDoFJointBasics[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
 
-      ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
+      MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, spineClone);
 
       RigidBodyBasics chestClone = spineClone[spineClone.length - 1].getSuccessor();
       FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());

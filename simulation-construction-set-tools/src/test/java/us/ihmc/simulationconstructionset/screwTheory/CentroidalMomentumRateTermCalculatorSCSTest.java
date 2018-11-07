@@ -19,6 +19,8 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -133,9 +135,9 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
 
       for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
       {
-         ScrewTestTools.setRandomVelocities(joints, random);
-         ScrewTestTools.setRandomPositions(joints, random);
-         ScrewTestTools.setRandomTorques(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.EFFORT, joints);
 
          robot.updateJointPositions_ID_to_SCS();
          robot.updateJointVelocities_ID_to_SCS();

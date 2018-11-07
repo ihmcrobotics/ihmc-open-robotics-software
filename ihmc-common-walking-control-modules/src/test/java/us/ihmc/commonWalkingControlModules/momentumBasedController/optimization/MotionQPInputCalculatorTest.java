@@ -20,6 +20,8 @@ import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
@@ -69,8 +71,8 @@ public class MotionQPInputCalculatorTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         ScrewTestTools.setRandomPositions(joints, random);
-         ScrewTestTools.setRandomVelocities(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
          joints.get(0).updateFramesRecursively();
 
          centerOfMassFrame.update();
@@ -96,8 +98,8 @@ public class MotionQPInputCalculatorTest
 
       for (int i = 0; i < ITERATIONS; i++)
       { // Test with the controlFrame not located at the endEffectorFrame
-         ScrewTestTools.setRandomPositions(joints, random);
-         ScrewTestTools.setRandomVelocities(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
          joints.get(0).updateFramesRecursively();
 
          centerOfMassFrame.update();

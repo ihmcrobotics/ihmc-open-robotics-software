@@ -23,6 +23,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 
 public abstract class MassMatrixCalculatorTest
 {
@@ -54,9 +56,9 @@ public abstract class MassMatrixCalculatorTest
       joints = new ArrayList<RevoluteJoint>();
       Vector3D[] jointAxes = {X, Y, Z, X, Z, Z, X, Y, Z, X};
       ScrewTestTools.createRandomChainRobot("", joints, elevator, jointAxes, random);
-      ScrewTestTools.setRandomPositions(joints, random);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
       elevator.updateFramesRecursively();
-      ScrewTestTools.setRandomVelocities(joints, random);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
    }
 
    protected double computeKineticEnergy(ArrayList<RevoluteJoint> joints)
@@ -142,9 +144,9 @@ public abstract class MassMatrixCalculatorTest
       int nIterations = 10000;
       for (int i = 0; i < nIterations; i++)
       {
-         ScrewTestTools.setRandomPositions(joints, random);
-         ScrewTestTools.setRandomVelocities(joints, random);
-         ScrewTestTools.setRandomAccelerations(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, joints);
          elevator.updateFramesRecursively();
 
          for (int j = 0; j < massMatrixCalculators.size(); j++)

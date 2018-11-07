@@ -70,6 +70,8 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
@@ -2274,7 +2276,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       if (!success)
       {
-         ScrewTestTools.setRandomPositionsWithinJointLimits(upperArmJointsClone.get(robotSide), random);
+         MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, upperArmJointsClone.get(robotSide));
          return computeUpperArmJointAngles(robotSide, temporaryDesiredUpperArmOrientation, false, iteration + 1);
       }
 

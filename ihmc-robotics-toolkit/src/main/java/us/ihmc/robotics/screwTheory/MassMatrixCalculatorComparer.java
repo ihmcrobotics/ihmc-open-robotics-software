@@ -12,6 +12,8 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 
 public class MassMatrixCalculatorComparer
 {
@@ -75,7 +77,7 @@ public class MassMatrixCalculatorComparer
       int nIterations = 10000;
       for (int i = 0; i < nIterations; i++)
       {
-         ScrewTestTools.setRandomPositions(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
          elevator.updateFramesRecursively();
 
          long startTime = System.nanoTime();
@@ -106,7 +108,7 @@ public class MassMatrixCalculatorComparer
          int nIterations = 10000;
          for (int i = 0; i < nIterations; i++)
          {
-            ScrewTestTools.setRandomPositions(joints, random);
+            MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
             elevator.updateFramesRecursively();
             massMatrixCalculator.compute();
          }

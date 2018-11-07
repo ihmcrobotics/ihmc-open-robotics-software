@@ -21,6 +21,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -124,7 +126,7 @@ public class ReachabilityMapSolver
       boolean success = false;
       while (!success && tryNumber++ < numberOfTrials)
       {
-         ScrewTestTools.setRandomPositionsWithinJointLimits(robotArmJoints, random);
+         MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, robotArmJoints);
          success = solveOnce(maximumNumberOfIterations);
       }
       return success;
