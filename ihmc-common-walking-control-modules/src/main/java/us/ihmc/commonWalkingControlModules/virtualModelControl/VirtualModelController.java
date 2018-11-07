@@ -17,12 +17,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -202,13 +202,13 @@ public class VirtualModelController
                      geometricJacobianCalculator.clear();
                      geometricJacobianCalculator.setKinematicChain(vmcDataHandler.getJointsForControl(controlledBody, chainID));
                      geometricJacobianCalculator.setJacobianFrame(defaultRootBody.getBodyFixedFrame());
-                     geometricJacobianCalculator.computeJacobianMatrix();
+                     geometricJacobianCalculator.reset();
 
                      // Apply selection matrix to jacobian
                      int numberOfJoints = vmcDataHandler.jointsInChain(controlledBody, chainID);
                      tmpJMatrix.reshape(taskSize, numberOfJoints);
                      tmpJTMatrix.reshape(numberOfJoints, taskSize);
-                     geometricJacobianCalculator.getJacobianMatrix(selectionMatrix, tmpJMatrix);
+                     CommonOps.mult(selectionMatrix, geometricJacobianCalculator.getJacobianMatrix(), tmpJMatrix);
                      CommonOps.transpose(tmpJMatrix, tmpJTMatrix);
 
                      // insert new jacobian into full objective jacobian
@@ -257,13 +257,13 @@ public class VirtualModelController
                geometricJacobianCalculator.clear();
                geometricJacobianCalculator.setKinematicChain(vmcDataHandler.getJointsForControl(controlledBody, 0));
                geometricJacobianCalculator.setJacobianFrame(defaultRootBody.getBodyFixedFrame());
-               geometricJacobianCalculator.computeJacobianMatrix();
+               geometricJacobianCalculator.reset();
 
                // Apply selection matrix to jacobian
                int numberOfJoints = vmcDataHandler.jointsInChain(controlledBody, 0);
                tmpJMatrix.reshape(taskSize, numberOfJoints);
                tmpJTMatrix.reshape(numberOfJoints, taskSize);
-               geometricJacobianCalculator.getJacobianMatrix(selectionMatrix, tmpJMatrix);
+               CommonOps.mult(selectionMatrix, geometricJacobianCalculator.getJacobianMatrix(), tmpJMatrix);
                CommonOps.transpose(tmpJMatrix, tmpJTMatrix);
 
                // get torques

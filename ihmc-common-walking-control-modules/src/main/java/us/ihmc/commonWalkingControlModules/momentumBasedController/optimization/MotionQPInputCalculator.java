@@ -19,8 +19,10 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
+import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -31,7 +33,6 @@ import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -48,8 +49,6 @@ public class MotionQPInputCalculator
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
    private final OneDoFJoint[] oneDoFJoints;
-
-   private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialVector.SIZE, 1);
 
    private final CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
 
@@ -245,8 +244,7 @@ public class MotionQPInputCalculator
       jacobianCalculator.clear();
       jacobianCalculator.setKinematicChain(base, endEffector);
       jacobianCalculator.setJacobianFrame(controlFrame);
-      jacobianCalculator.computeJacobianMatrix();
-      jacobianCalculator.computeConvectiveTerm();
+      jacobianCalculator.reset();
 
       /*
        * @formatter:off
@@ -256,19 +254,19 @@ public class MotionQPInputCalculator
        * convective term vector resulting from the Coriolis and Centrifugal effects.
        * @formatter:on
        */
-      jacobianCalculator.getConvectiveTerm(convectiveTermMatrix);
       commandToConvert.getDesiredSpatialAcceleration(tempTaskObjective);
-      CommonOps.subtractEquals(tempTaskObjective, convectiveTermMatrix);
+      CommonOps.subtractEquals(tempTaskObjective, jacobianCalculator.getConvectiveTermMatrix());
       CommonOps.mult(tempSelectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
 
       // Compute the M-by-N task Jacobian: J = S * J
       // Step 1, let's get the 'small' Jacobian matrix j.
       // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain which is way smaller than the number of robot DoFs.
-      jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
+      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
+      CommonOps.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
 
       // Dealing with the primary base:
       RigidBodyBasics primaryBase = commandToConvert.getPrimaryBase();
-      List<JointBasics> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+      List<JointReadOnly> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
@@ -288,7 +286,7 @@ public class MotionQPInputCalculator
          boolean isJointUpstreamOfPrimaryBase = false;
          for (int i = jointsUsedInTask.size() - 1; i >= 0; i--)
          {
-            JointBasics joint = jointsUsedInTask.get(i);
+            JointReadOnly joint = jointsUsedInTask.get(i);
 
             if (joint.getSuccessor() == primaryBase)
                isJointUpstreamOfPrimaryBase = true;
@@ -364,7 +362,7 @@ public class MotionQPInputCalculator
       jacobianCalculator.clear();
       jacobianCalculator.setKinematicChain(base, endEffector);
       jacobianCalculator.setJacobianFrame(controlFrame);
-      jacobianCalculator.computeJacobianMatrix();
+      jacobianCalculator.reset();
 
       /*
        * @formatter:off
@@ -379,11 +377,12 @@ public class MotionQPInputCalculator
       // Compute the M-by-N task Jacobian: J = S * J
       // Step 1, let's get the 'small' Jacobian matrix j.
       // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain which is way smaller than the number of robot DoFs.
-      jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
+      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
+      CommonOps.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
 
       // Dealing with the primary base:
       RigidBodyBasics primaryBase = commandToConvert.getPrimaryBase();
-      List<JointBasics> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+      List<JointReadOnly> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
@@ -403,7 +402,7 @@ public class MotionQPInputCalculator
          boolean isJointUpstreamOfPrimaryBase = false;
          for (int i = jointsUsedInTask.size() - 1; i >= 0; i--)
          {
-            JointBasics joint = jointsUsedInTask.get(i);
+            JointReadOnly joint = jointsUsedInTask.get(i);
 
             if (joint.getSuccessor() == primaryBase)
                isJointUpstreamOfPrimaryBase = true;

@@ -7,8 +7,8 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
 
 public class ContactWrenchMatrixCalculator
 {
@@ -51,8 +51,8 @@ public class ContactWrenchMatrixCalculator
          jacobianCalculator.clear();
          jacobianCalculator.setKinematicChain(rootBody, rigidBody);
          jacobianCalculator.setJacobianFrame(wrenchMatrixCalculator.getJacobianFrame());
-         jacobianCalculator.computeJacobianMatrix();
-         jacobianCalculator.getJacobianMatrix(contactableBodyJacobianMatrix);
+         jacobianCalculator.reset();
+         contactableBodyJacobianMatrix.set(jacobianCalculator.getJacobianMatrix());
 
          DenseMatrix64F rhoJacobianMatrix = wrenchMatrixCalculator.getRhoJacobianMatrix(rigidBody);
 
