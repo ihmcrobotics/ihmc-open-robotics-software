@@ -795,6 +795,7 @@ public class FourBarKinematicLoopTest
 
          masterJointA.setQ(qMaster);
          masterJointA.setQd(qdMaster);
+         ScrewTools.getRootBody(masterJointA.getPredecessor()).updateFramesRecursively();
          fourBarKinematicLoop.update();
          fourBarKinematicLoop.getJacobian(jacobian);
 
@@ -904,6 +905,7 @@ public class FourBarKinematicLoopTest
       passiveJointB.setQ(random.nextDouble());
       passiveJointC.setQ(random.nextDouble());
       passiveJointD.setQ(random.nextDouble());
+      elevator.updateFramesRecursively();
    }
 
    private void initializeFourBar(RigidBodyTransform jointAtoElevator, RigidBodyTransform jointBtoA, RigidBodyTransform jointCtoB, RigidBodyTransform jointDtoC,
@@ -922,6 +924,7 @@ public class FourBarKinematicLoopTest
       passiveJointB.setQ(random.nextDouble());
       passiveJointC.setQ(random.nextDouble());
       passiveJointD.setQ(random.nextDouble());
+      elevator.updateFramesRecursively();
    }
 
    private void initializeFourBarWithRandomlyRotatedJointFrames(FramePoint3D jointAPosition, FramePoint3D jointBPosition, FramePoint3D jointCPosition, FramePoint3D jointDPosition,

@@ -1235,6 +1235,7 @@ public class VirtualModelControllerTestHelper
          JointBasics[] jointArray = new JointBasics[joints.size()];
          joints.toArray(jointArray);
          oneDoFJoints = ScrewTools.filterJoints(jointArray, OneDoFJoint.class);
+         elevator.updateFramesRecursively();
 
          scsRobotArm = new SCSRobotFromInverseDynamicsRobotModel("robotArm", elevator.getChildrenJoints().get(0));
          scsRobotArm.setGravity(0);
@@ -1559,6 +1560,7 @@ public class VirtualModelControllerTestHelper
          JointBasics[] jointArray = new JointBasics[joints.size()];
          joints.toArray(jointArray);
          oneDoFJoints = ScrewTools.filterJoints(jointArray, OneDoFJoint.class);
+         elevator.updateFramesRecursively();
 
          scsRobotArm = new SCSRobotFromInverseDynamicsRobotModel("robotArm", elevator.getChildrenJoints().get(0));
          scsRobotArm.setGravity(0);
