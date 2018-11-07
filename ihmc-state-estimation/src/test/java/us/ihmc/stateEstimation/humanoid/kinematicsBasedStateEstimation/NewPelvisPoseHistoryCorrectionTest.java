@@ -285,7 +285,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          pelvisBeforeCorrection_Rotation.setTranslationToZero();
 
          pelvisCorrector.doControl(timeStamp);
-         pelvisAfterCorrection.set(sixDofPelvisJoint.getJointTransform3D());
+         sixDofPelvisJoint.getJointConfiguration(pelvisAfterCorrection);
 
          correctedPelvisverify.set(pelvisAfterCorrection);
          correctedPelvisToVerifyTheTest.set(correctedPelvisverify);
@@ -350,7 +350,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          pelvisBeforeCorrection.set(pelvisTimeStampedTransform3D.getTransform3D());
 
          pelvisCorrector.doControl(timeStamp);
-         pelvisAfterCorrection.set(sixDofPelvisJoint.getJointTransform3D());
+         sixDofPelvisJoint.getJointConfiguration(pelvisAfterCorrection);
          if(checkPacketHasBeenSentNextLoopIteration)
          {
             assertTrue(angleErrorTooBigDetectedAndPacketSent);

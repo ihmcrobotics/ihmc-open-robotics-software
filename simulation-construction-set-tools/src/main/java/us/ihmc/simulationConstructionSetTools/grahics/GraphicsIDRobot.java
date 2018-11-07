@@ -3,6 +3,7 @@ package us.ihmc.simulationConstructionSetTools.grahics;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
@@ -12,6 +13,7 @@ import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.GraphicsObjectsHolder;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.simulationconstructionset.graphics.joints.GraphicsJoint;
+import us.ihmc.simulationconstructionset.util.CommonJoint;
 
 public class GraphicsIDRobot extends GraphicsRobot
 {
@@ -58,9 +60,10 @@ public class GraphicsIDRobot extends GraphicsRobot
          graphics3DObject = graphicsObjectsHolder.getGraphicsObject(inverseDynamicsJoint.getName());
       }
 
-      GraphicsJoint graphicsJoint = new GraphicsJoint(inverseDynamicsJoint.getName(), inverseDynamicsJoint, graphics3DObject, nodeType);
+      CommonJoint wrapJointBasics = wrapJointBasics(inverseDynamicsJoint);
+      GraphicsJoint graphicsJoint = new GraphicsJoint(inverseDynamicsJoint.getName(), wrapJointBasics, graphics3DObject, nodeType);
 
-      registerJoint(inverseDynamicsJoint, graphicsJoint);
+      registerJoint(wrapJointBasics, graphicsJoint);
       return graphicsJoint;
    }
 
@@ -68,5 +71,23 @@ public class GraphicsIDRobot extends GraphicsRobot
    {
       System.err.println("Need to implement " + getClass().getSimpleName() + ".generateGraphics3DObjectFromCollisionMesh()!");
       return null;
+   }
+
+   private static CommonJoint wrapJointBasics(JointBasics jointToWrap)
+   {
+      return new CommonJoint()
+      {
+         @Override
+         public RigidBodyTransform getOffsetTransform3D()
+         {
+            return new RigidBodyTransform(jointToWrap.getFrameBeforeJoint().getTransformToParent());
+         }
+         
+         @Override
+         public RigidBodyTransform getJointTransform3D()
+         {
+            return new RigidBodyTransform(jointToWrap.getFrameAfterJoint().getTransformToParent());
+         }
+      };
    }
 }

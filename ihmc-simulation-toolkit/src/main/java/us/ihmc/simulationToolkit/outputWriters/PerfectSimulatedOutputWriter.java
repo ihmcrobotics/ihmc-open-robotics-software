@@ -127,7 +127,8 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
       FloatingJoint floatingJoint = rootJointPair.getLeft();
       FloatingInverseDynamicsJoint sixDoFJoint = rootJointPair.getRight();
 
-      RigidBodyTransform transform = sixDoFJoint.getJointTransform3D();
+      RigidBodyTransform transform = new RigidBodyTransform();
+      sixDoFJoint.getJointConfiguration(transform);
       floatingJoint.setRotationAndTranslation(transform);
    }
 }

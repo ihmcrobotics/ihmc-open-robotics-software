@@ -875,7 +875,8 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          refFrame.update();
          sixDofPelvisJoint.setJointConfiguration(robotPose);
          pelvisPoseHistoryCorrection.doControl(Conversions.secondsToNanoseconds(scs.getTime()));
-         floatingJoint.setRotationAndTranslation(sixDofPelvisJoint.getJointTransform3D());
+         floatingJoint.setQuaternion(sixDofPelvisJoint.getJointPose().getOrientation());
+         floatingJoint.setPosition(sixDofPelvisJoint.getJointPose().getPosition());
       }
    }
 
