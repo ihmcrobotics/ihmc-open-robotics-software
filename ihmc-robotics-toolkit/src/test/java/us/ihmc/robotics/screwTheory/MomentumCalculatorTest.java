@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -140,9 +141,9 @@ public class MomentumCalculatorTest
       DenseMatrix64F momentumMatrix = new DenseMatrix64F(Momentum.SIZE, 1);
       momentum.get(momentumMatrix);
 
-      CentroidalMomentumMatrix centroidalMomentumMatrix = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
-      centroidalMomentumMatrix.compute();
-      DenseMatrix64F centroidalMomentumMatrixMatrix = centroidalMomentumMatrix.getMatrix();
+      CentroidalMomentumCalculator centroidalMomentumMatrix = new CentroidalMomentumCalculator(elevator, centerOfMassFrame);
+      centroidalMomentumMatrix.reset();
+      DenseMatrix64F centroidalMomentumMatrixMatrix = centroidalMomentumMatrix.getCentroidalMomentumMatrix();
       DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
       ScrewTools.getJointVelocitiesMatrix(jointsArray, jointVelocitiesMatrix);
       DenseMatrix64F momentumFromCentroidalMomentumMatrix = new DenseMatrix64F(Momentum.SIZE, 1);

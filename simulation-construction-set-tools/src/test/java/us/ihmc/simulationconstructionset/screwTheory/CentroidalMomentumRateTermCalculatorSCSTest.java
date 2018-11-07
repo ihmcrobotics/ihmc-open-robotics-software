@@ -12,6 +12,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
+import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -19,8 +21,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
-import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -120,7 +120,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       JointBasics[] idJoints = new JointBasics[numJoints]; 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
 
-      CentroidalMomentumMatrix centroidalMomentumMatrixCalculator = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
+      CentroidalMomentumCalculator centroidalMomentumMatrixCalculator = new CentroidalMomentumCalculator(elevator, centerOfMassFrame);
 
       a.reshape(6, numberOfDoFs);
       aPrevVal.reshape(6, numberOfDoFs);
@@ -129,7 +129,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       
-      CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator = new CentroidalMomentumRateTermCalculator(elevator, centerOfMassFrame);
+      CentroidalMomentumRateCalculator centroidalMomentumRateTermCalculator = new CentroidalMomentumRateCalculator(elevator, centerOfMassFrame);
 
       for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
       {
@@ -143,8 +143,8 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
          elevator.updateFramesRecursively();
          centerOfMassFrame.update();
 
-         centroidalMomentumMatrixCalculator.compute();
-         aPrevVal.set(centroidalMomentumMatrixCalculator.getMatrix());
+         centroidalMomentumMatrixCalculator.reset();
+         aPrevVal.set(centroidalMomentumMatrixCalculator.getCentroidalMomentumMatrix());
 
          robot.doDynamicsAndIntegrate(controlDT);
          robot.updateVelocities();
@@ -161,8 +161,8 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
 
          aTermCalculator.set(centroidalMomentumRateTermCalculator.getCentroidalMomentumMatrix());
          // Compute aDotV numerically
-         centroidalMomentumMatrixCalculator.compute();
-         a.set(centroidalMomentumMatrixCalculator.getMatrix());
+         centroidalMomentumMatrixCalculator.reset();
+         a.set(centroidalMomentumMatrixCalculator.getCentroidalMomentumMatrix());
          MatrixTools.numericallyDifferentiate(aDot, aPrevVal, a, controlDT);
          CommonOps.mult(aDot, v, aDotVNumerical);
 

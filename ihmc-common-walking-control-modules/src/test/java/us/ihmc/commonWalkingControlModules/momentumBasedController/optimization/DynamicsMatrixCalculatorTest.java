@@ -22,6 +22,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -57,7 +58,7 @@ public class DynamicsMatrixCalculatorTest
 
    private InverseDynamicsCalculator inverseDynamicsCalculator;
    private DynamicsMatrixCalculator dynamicsMatrixCalculator;
-   private CentroidalMomentumHandler centroidalMomentumHandler;
+   private CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
 
    private double gravityZ;
 
@@ -377,7 +378,7 @@ public class DynamicsMatrixCalculatorTest
       inverseDynamicsCalculator = new InverseDynamicsCalculator(toolbox.getRootBody(), gravityZ);
       dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, wrenchMatrixCalculator);
 
-      centroidalMomentumHandler = new CentroidalMomentumHandler(twistCalculator.getRootBody(), toolbox.getCenterOfMassFrame());
+      centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(twistCalculator.getRootBody(), toolbox.getCenterOfMassFrame());
 
       degreesOfFreedom = jointIndexHandler.getNumberOfDoFs();
       floatingBaseDoFs = fullHumanoidRobotModel.getRootJoint().getDegreesOfFreedom();
@@ -390,7 +391,7 @@ public class DynamicsMatrixCalculatorTest
 
       wrenchMatrixCalculator.computeMatrices();
       dynamicsMatrixCalculator.compute();
-      centroidalMomentumHandler.compute();
+      centroidalMomentumRateCalculator.reset();
    }
 
    private void solveAndCompare(DenseMatrix64F qddotSolution, DenseMatrix64F rhoSolution, boolean checkRigidBodyDynamics)

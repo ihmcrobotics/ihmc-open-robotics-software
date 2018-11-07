@@ -18,10 +18,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
@@ -48,7 +51,7 @@ public class MotionQPInputCalculator
 
    private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialVector.SIZE, 1);
 
-   private final CentroidalMomentumHandler centroidalMomentumHandler;
+   private final CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
 
    private final JointPrivilegedConfigurationHandler privilegedConfigurationHandler;
 
@@ -72,12 +75,12 @@ public class MotionQPInputCalculator
 
    private final int numberOfDoFs;
 
-   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumHandler centroidalMomentumHandler, JointIndexHandler jointIndexHandler,
+   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumRateCalculator centroidalMomentumRateCalculator, JointIndexHandler jointIndexHandler,
                                   JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.jointIndexHandler = jointIndexHandler;
-      this.centroidalMomentumHandler = centroidalMomentumHandler;
+      this.centroidalMomentumRateCalculator = centroidalMomentumRateCalculator;
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
 
@@ -103,7 +106,7 @@ public class MotionQPInputCalculator
 
    public void initialize()
    {
-      centroidalMomentumHandler.reset();
+      centroidalMomentumRateCalculator.reset();
       allTaskJacobian.reshape(0, numberOfDoFs);
    }
 
@@ -465,7 +468,7 @@ public class MotionQPInputCalculator
       linearMomentum.changeFrame(centerOfMassFrame);
       angularMomentum.get(0, tempTaskObjective);
       linearMomentum.get(3, tempTaskObjective);
-      DenseMatrix64F convectiveTerm = centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm();
+      DenseMatrix64F convectiveTerm = centroidalMomentumRateCalculator.getBiasSpatialForceMatrix();
 
       // Compute the task objective: p = S * ( hDot - ADot qDot )
       CommonOps.subtractEquals(tempTaskObjective, convectiveTerm);
@@ -607,23 +610,27 @@ public class MotionQPInputCalculator
 
    public DenseMatrix64F getCentroidalMomentumMatrix()
    {
-      return centroidalMomentumHandler.getCentroidalMomentumMatrixPart();
+      return centroidalMomentumRateCalculator.getCentroidalMomentumMatrix();
    }
 
    public DenseMatrix64F getCentroidalMomentumConvectiveTerm()
    {
-      return centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm();
+      return centroidalMomentumRateCalculator.getBiasSpatialForceMatrix();
    }
+
+   private final SpatialForce momentumRate = new SpatialForce();
 
    public SpatialForceReadOnly computeCentroidalMomentumRateFromSolution(DenseMatrix64F jointAccelerations)
    {
-      centroidalMomentumHandler.computeCentroidalMomentumRate(jointAccelerations);
-      return centroidalMomentumHandler.getCentroidalMomentumRate();
+      centroidalMomentumRateCalculator.getMomentumRate(jointAccelerations, momentumRate);
+      return momentumRate;
    }
+
+   private final Momentum momentum = new Momentum();
 
    public MomentumReadOnly computeCentroidalMomentumFromSolution(DenseMatrix64F jointVelocities)
    {
-      centroidalMomentumHandler.computeCentroidalMomentum(jointVelocities);
-      return centroidalMomentumHandler.getCentroidalMomentum();
+      centroidalMomentumRateCalculator.getMomentum(jointVelocities, momentum);
+      return momentum;
    }
 }
