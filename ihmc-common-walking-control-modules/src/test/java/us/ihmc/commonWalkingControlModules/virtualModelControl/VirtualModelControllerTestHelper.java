@@ -379,6 +379,8 @@ public class VirtualModelControllerTestHelper
       robotLeg.setSoleFrames(soleFrames);
       robotLeg.createReferenceFrames();
       robotLeg.setOneDoFJoints(joints);
+      elevator.updateFramesRecursively();
+      robotLeg.referenceFrames.updateFrames();
 
       return robotLeg;
    }
@@ -631,6 +633,7 @@ public class VirtualModelControllerTestHelper
          addForcePoint();
 
          oneDoFJoints = ScrewTools.createOneDoFJointPath(elevator, hand);
+         elevator.updateFramesRecursively();
       }
 
       private void addLinkGraphics()
@@ -914,6 +917,7 @@ public class VirtualModelControllerTestHelper
          addForcePoint();
 
          oneDoFJoints = ScrewTools.createOneDoFJointPath(elevator, hand);
+         elevator.updateFramesRecursively();
       }
 
       private void addLinkGraphics()

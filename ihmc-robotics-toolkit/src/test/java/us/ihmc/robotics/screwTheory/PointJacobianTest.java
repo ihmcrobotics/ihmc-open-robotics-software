@@ -74,6 +74,7 @@ public class PointJacobianTest
       point2.changeFrame(endEffector.getBodyFixedFrame());
       double dt = 1e-8;
       ScrewTestTools.integrateVelocities(randomFloatingChain.getRevoluteJoints(), dt);
+      randomFloatingChain.getElevator().updateFramesRecursively();
       point2.changeFrame(base.getBodyFixedFrame());
 
       FrameVector3D pointVelocityFromNumericalDifferentiation = new FrameVector3D(point2);
