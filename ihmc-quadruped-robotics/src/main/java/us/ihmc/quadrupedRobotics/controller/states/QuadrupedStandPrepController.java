@@ -43,11 +43,15 @@ public class QuadrupedStandPrepController implements QuadrupedController
    private final List<MinimumJerkTrajectory> trajectories;
    private final JointDesiredOutputList jointDesiredOutputList;
 
-   private final YoDouble standPrepJointStiffness = new YoDouble("standPrepJointStiffness", registry);
+   private final YoDouble standPrepJointStiffnessSetpoint = new YoDouble("standPrepJointStiffnessSetpoint", registry);
+   private final RateLimitedYoVariable standPrepJointStiffness = new RateLimitedYoVariable("standPrepJointStiffness", registry, 50.0, standPrepJointStiffnessSetpoint, 0.01);
    private final YoDouble standPrepJointDamping = new YoDouble("standPrepJointDamping", registry);
    private final YoDouble standPrepMasterGainSetpoint = new YoDouble("standPrepMasterGainSetpoint", registry);
-   private final RateLimitedYoVariable standPrepMasterGain = new RateLimitedYoVariable("standPrepMasterGain", registry, 1.0 / 5.0, standPrepMasterGainSetpoint, 0.005);
+   private final RateLimitedYoVariable standPrepMasterGain = new RateLimitedYoVariable("standPrepMasterGain", registry, 1.0 / 5.0, standPrepMasterGainSetpoint, 0.01);
    private final double[] previousPositionJointAngles = new double[12];
+
+   private final YoDouble standPrepPositionMasterGainSetpoint = new YoDouble("standPrepPositionMasterGainSetpoint", registry);
+   private final RateLimitedYoVariable standPrepPositionMasterGain = new RateLimitedYoVariable("standPrepPositionMasterGain", registry, 1.0 / 5.0, standPrepPositionMasterGainSetpoint, 0.01);
 
    private final YoBoolean yoUseForceFeedbackControl;
    private final YoBoolean goToPreviousPosition = new YoBoolean("goToPreviousPosition", registry);
@@ -68,8 +72,12 @@ public class QuadrupedStandPrepController implements QuadrupedController
       this.jointDesiredOutputList = environment.getJointDesiredOutputList();
       this.dt = environment.getControlDT();
 
+      standPrepJointStiffnessSetpoint.set(400.0);
       standPrepJointStiffness.set(400.0);
       standPrepJointDamping.set(25.0);
+
+      standPrepPositionMasterGainSetpoint.set(1.0);
+      standPrepPositionMasterGain.set(1.0);
 
       this.trajectories = new ArrayList<>(fullRobotModel.getOneDoFJoints().length);
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
@@ -133,7 +141,9 @@ public class QuadrupedStandPrepController implements QuadrupedController
          goToPreviousPosition.set(false);
       }
 
+      standPrepJointStiffness.update();
       standPrepMasterGain.update();
+      standPrepPositionMasterGain.update();
       fullRobotModel.updateFrames();
 
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
@@ -151,12 +161,16 @@ public class QuadrupedStandPrepController implements QuadrupedController
 
          double effortDesired = jointController.compute(q, qDesired, qd, qdDesired);
          effortDesired *= standPrepMasterGain.getValue();
+         effortDesired = MathTools.clamp(effortDesired, 100.0);
 
          standPrepEffortMap.get(joint).set(effortDesired);
+         jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredTorque(effortDesired);
+
+         qDesired = q + standPrepPositionMasterGain.getDoubleValue() * (qDesired - q);
+         qdDesired = qd + standPrepPositionMasterGain.getDoubleValue() * (qdDesired - qd);
 
          jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredPosition(qDesired);
          jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredVelocity(qdDesired);
-         jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredTorque(effortDesired);
 
          jointDesiredOutputList.getJointDesiredOutput(joint).setStiffness(standPrepJointStiffness.getValue());
          jointDesiredOutputList.getJointDesiredOutput(joint).setDamping(standPrepJointDamping.getValue());
