@@ -250,7 +250,7 @@ public class QuadrupedVirtualModelController
 
             // update joint torque vectors
             jointTorques.get(robotQuadrant)[index].setToZero(joint.getFrameBeforeJoint());
-            joint.getJointAxis(jointAxisTempVector);
+            jointAxisTempVector.setIncludingFrame(joint.getJointAxis());
             double x = tau * jointAxisTempVector.getX();
             double y = tau * jointAxisTempVector.getY();
             double z = tau * jointAxisTempVector.getZ();

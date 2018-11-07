@@ -68,10 +68,4 @@ public class PrismaticJoint extends OneDoFJoint
    {
       return new FrameVector3D(jointAxis);
    }
-
-   @Override
-   public void getJointAxis(FrameVector3D axisToPack)
-   {
-      axisToPack.setIncludingFrame(jointAxis);
-   }
 }
