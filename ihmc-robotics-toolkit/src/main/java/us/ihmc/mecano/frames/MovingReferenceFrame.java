@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.screwTheory.ScrewTheoryException;
 
 /**
@@ -279,7 +280,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
       }
       else
       {
-         Twist parentTwist = parentMovingFrame.getTwistOfFrame();
+         TwistReadOnly parentTwist = parentMovingFrame.getTwistOfFrame();
          twistOfFrame.setIncludingFrame(parentTwist);
          twistOfFrame.changeFrame(this);
 
@@ -307,7 +308,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     * 
     * @return the absolute velocity of this frame. The returned object should not be modified.
     */
-   public Twist getTwistOfFrame()
+   public TwistReadOnly getTwistOfFrame()
    {
       updateTwistOfFrame();
       return twistOfFrame;
