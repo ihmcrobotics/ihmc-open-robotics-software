@@ -4,6 +4,7 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -90,7 +91,7 @@ public class RevoluteJoint extends OneDoFJoint
    }
 
    @Override
-   public FrameVector3D getJointAxis()
+   public FrameVector3DReadOnly getJointAxis()
    {
       return new FrameVector3D(jointAxis);
    }

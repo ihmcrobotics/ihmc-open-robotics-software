@@ -69,7 +69,7 @@ public class TwistCalculatorTest
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
 
-            FrameVector3D jointAxis = joint.getJointAxis();
+            FrameVector3D jointAxis = new FrameVector3D(joint.getJointAxis());
             cumulatedLinearVelocity.changeFrame(jointAxis.getReferenceFrame());
             cumulatedLinearVelocity.scaleAdd(joint.getQd(), jointAxis, cumulatedLinearVelocity);
             cumulatedLinearVelocity.changeFrame(bodyFrame);
@@ -106,7 +106,7 @@ public class TwistCalculatorTest
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
 
-            FrameVector3D jointAxis = joint.getJointAxis();
+            FrameVector3D jointAxis = new FrameVector3D(joint.getJointAxis());
             cumulatedAngularVelocity.changeFrame(jointAxis.getReferenceFrame());
             cumulatedAngularVelocity.scaleAdd(joint.getQd(), jointAxis, cumulatedAngularVelocity);
             cumulatedAngularVelocity.changeFrame(bodyFrame);
@@ -149,7 +149,7 @@ public class TwistCalculatorTest
             while (currentBody.getParentJoint() != null)
             {
                PrismaticJoint parentJoint = (PrismaticJoint) currentBody.getParentJoint();
-               FrameVector3D jointAxis = parentJoint.getJointAxis();
+               FrameVector3D jointAxis = new FrameVector3D(parentJoint.getJointAxis());
                cumulatedLinearVelocity.changeFrame(jointAxis.getReferenceFrame());
                cumulatedLinearVelocity.scaleAdd(parentJoint.getQd(), jointAxis, cumulatedLinearVelocity);
                currentBody = parentJoint.getPredecessor();
@@ -193,7 +193,7 @@ public class TwistCalculatorTest
             while (currentBody.getParentJoint() != null)
             {
                RevoluteJoint parentJoint = (RevoluteJoint) currentBody.getParentJoint();
-               FrameVector3D jointAxis = parentJoint.getJointAxis();
+               FrameVector3D jointAxis = new FrameVector3D(parentJoint.getJointAxis());
                cumulatedAngularVelocity.changeFrame(jointAxis.getReferenceFrame());
                cumulatedAngularVelocity.scaleAdd(parentJoint.getQd(), jointAxis, cumulatedAngularVelocity);
                currentBody = parentJoint.getPredecessor();

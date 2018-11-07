@@ -85,7 +85,7 @@ public class SpatialAccelerationCalculatorTest
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             SpatialAcceleration expectedAcceleration = new SpatialAcceleration(bodyFrame, worldFrame, bodyFrame);
 
-            FrameVector3D jointAxis = joint.getJointAxis();
+            FrameVector3D jointAxis = new FrameVector3D(joint.getJointAxis());
             cumulatedLinearAcceleration.changeFrame(jointAxis.getReferenceFrame());
             cumulatedLinearAcceleration.scaleAdd(joint.getQdd(), jointAxis, cumulatedLinearAcceleration);
             cumulatedLinearAcceleration.changeFrame(bodyFrame);
@@ -147,7 +147,7 @@ public class SpatialAccelerationCalculatorTest
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             SpatialAcceleration expectedAcceleration = new SpatialAcceleration(bodyFrame, worldFrame, bodyFrame);
 
-            FrameVector3D jointAxis = joint.getJointAxis();
+            FrameVector3D jointAxis = new FrameVector3D(joint.getJointAxis());
             cumulatedAngularAcceleration.changeFrame(jointAxis.getReferenceFrame());
             cumulatedAngularAcceleration.scaleAdd(joint.getQdd(), jointAxis, cumulatedAngularAcceleration);
             cumulatedAngularAcceleration.changeFrame(bodyFrame);
