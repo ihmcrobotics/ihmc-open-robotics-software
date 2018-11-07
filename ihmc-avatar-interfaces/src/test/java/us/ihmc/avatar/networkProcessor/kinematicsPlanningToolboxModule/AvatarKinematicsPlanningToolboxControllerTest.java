@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
+import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -282,6 +283,12 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       return object;
    }
 
+   private boolean trackSolution()
+   {
+      KinematicsPlanningToolboxOutputStatus solution = toolboxController.getSolution();
+      return true;
+   }
+
    private void runKinematicsPlanningToolboxController(int numberOfIterations) throws SimulationExceededMaximumTimeException, UnreasonableAccelerationException
    {
       initializationSucceeded.set(false);
@@ -299,6 +306,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
             toolboxUpdater.doControl();
          }
       }
+      trackSolution();
    }
 
    private FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration()
