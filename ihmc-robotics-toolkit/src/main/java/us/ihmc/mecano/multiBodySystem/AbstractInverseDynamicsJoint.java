@@ -254,7 +254,7 @@ public abstract class AbstractInverseDynamicsJoint implements JointBasics
     * @param jointConfigurationTransformToPack transform in which the pose of the frame after joint
     *           expressed in the frame before joint is stored. Modified.
     */
-   public void getJointTransform3D(RigidBodyTransform jointConfigurationTransformToPack)
+   public void getJointConfiguration(RigidBodyTransform jointConfigurationTransformToPack)
    {
       getFrameAfterJoint().getTransformToParent(jointConfigurationTransformToPack);
    }

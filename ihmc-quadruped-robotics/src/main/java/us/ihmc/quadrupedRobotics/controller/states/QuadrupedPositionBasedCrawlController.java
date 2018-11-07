@@ -801,7 +801,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       FloatingJointBasics feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
 
-      actualRobotRootJoint.getJointTransform3D(rootJointPose);
+      actualRobotRootJoint.getJointConfiguration(rootJointPose);
       feedForwardRootJoint.setJointConfiguration(rootJointPose);
 
       feedForwardReferenceFrames.updateFrames();
