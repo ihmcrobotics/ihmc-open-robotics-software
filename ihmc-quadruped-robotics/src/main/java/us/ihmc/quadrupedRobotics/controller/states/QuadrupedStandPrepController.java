@@ -1,10 +1,15 @@
 package us.ihmc.quadrupedRobotics.controller.states;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.controllers.PDController;
+import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -19,6 +24,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * A controller that will track the minimum jerk trajectory to bring joints to a preparatory pose.
@@ -37,12 +43,17 @@ public class QuadrupedStandPrepController implements QuadrupedController
    private final List<MinimumJerkTrajectory> trajectories;
    private final JointDesiredOutputList jointDesiredOutputList;
 
-   private final DoubleParameter standPrepJointStiffness = new DoubleParameter("standPrepJointStiffness", registry, 500.0);
-   private final DoubleParameter standPrepJointDamping = new DoubleParameter("standPrepJointDamping", registry, 25.0);
+   private final YoDouble standPrepJointStiffness = new YoDouble("standPrepJointStiffness", registry);
+   private final YoDouble standPrepJointDamping = new YoDouble("standPrepJointDamping", registry);
+   private final YoDouble standPrepMasterGainSetpoint = new YoDouble("standPrepMasterGainSetpoint", registry);
+   private final RateLimitedYoVariable standPrepMasterGain = new RateLimitedYoVariable("standPrepMasterGain", registry, 1.0 / 5.0, standPrepMasterGainSetpoint, 0.005);
    private final double[] previousPositionJointAngles = new double[12];
 
    private final YoBoolean yoUseForceFeedbackControl;
    private final YoBoolean goToPreviousPosition = new YoBoolean("goToPreviousPosition", registry);
+
+   private final HashMap<OneDoFJoint, YoDouble> standPrepEffortMap = new HashMap<>();
+   private final HashMap<OneDoFJoint, PDController> controllerMap = new HashMap<>();
 
    /**
     * The time from the beginning of the current preparation trajectory in seconds.
@@ -57,10 +68,16 @@ public class QuadrupedStandPrepController implements QuadrupedController
       this.jointDesiredOutputList = environment.getJointDesiredOutputList();
       this.dt = environment.getControlDT();
 
+      standPrepJointStiffness.set(400.0);
+      standPrepJointDamping.set(25.0);
+
       this.trajectories = new ArrayList<>(fullRobotModel.getOneDoFJoints().length);
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
+         OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
+         standPrepEffortMap.put(joint, new YoDouble(joint.getName() + "StandPrepEffort", registry));
          trajectories.add(new MinimumJerkTrajectory());
+         controllerMap.put(joint, new PDController(standPrepJointStiffness, standPrepJointDamping,joint.getName() + "JointController", registry));
       }
 
       yoUseForceFeedbackControl = new YoBoolean("useForceControlStandPrep", registry);
@@ -88,7 +105,8 @@ public class QuadrupedStandPrepController implements QuadrupedController
          double initialVelocity = 0.0;
          double initialAcceleration = 0.0;
 
-         trajectory.setMoveParameters(initialPosition, initialVelocity, initialAcceleration, desiredPosition, 0.0, 0.0, trajectoryTime);
+         desiredPosition = initialPosition + AngleTools.trimAngleMinusPiToPi(desiredPosition - initialPosition);
+         trajectory.setMoveParameters(initialPosition, 0.0, 0.0, desiredPosition, 0.0, 0.0, trajectoryTime);
 
          jointDesiredOutput.clear();
          jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
@@ -115,17 +133,30 @@ public class QuadrupedStandPrepController implements QuadrupedController
          goToPreviousPosition.set(false);
       }
 
+      standPrepMasterGain.update();
       fullRobotModel.updateFrames();
 
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
          OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
          MinimumJerkTrajectory trajectory = trajectories.get(i);
+         PDController jointController = controllerMap.get(joint);
+
+         double q = joint.getQ();
+         double qd = joint.getQd();
 
          trajectory.computeTrajectory(timeInTrajectory);
-         jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredPosition(trajectory.getPosition());
-         jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredVelocity(trajectory.getVelocity());
-         jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredTorque(0.0);
+         double qDesired = trajectory.getPosition();
+         double qdDesired = trajectory.getVelocity();
+
+         double effortDesired = jointController.compute(q, qDesired, qd, qdDesired);
+         effortDesired *= standPrepMasterGain.getValue();
+
+         standPrepEffortMap.get(joint).set(effortDesired);
+
+         jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredPosition(qDesired);
+         jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredVelocity(qdDesired);
+         jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredTorque(effortDesired);
 
          jointDesiredOutputList.getJointDesiredOutput(joint).setStiffness(standPrepJointStiffness.getValue());
          jointDesiredOutputList.getJointDesiredOutput(joint).setDamping(standPrepJointDamping.getValue());

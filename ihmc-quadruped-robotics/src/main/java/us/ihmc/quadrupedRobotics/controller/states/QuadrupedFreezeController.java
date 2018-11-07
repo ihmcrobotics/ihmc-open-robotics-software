@@ -93,6 +93,9 @@ public class QuadrupedFreezeController implements QuadrupedController
          OneDoFJoint oneDoFJoint = joints.get(i);
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint);
          jointDesiredOutput.setDesiredPosition(desiredFreezePositions.get(i).getDoubleValue());
+         jointDesiredOutput.setDesiredVelocity(0.0);
+         jointDesiredOutput.setDesiredAcceleration(0.0);
+         jointDesiredOutput.setDesiredTorque(0.0);
          jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
       }
    }
