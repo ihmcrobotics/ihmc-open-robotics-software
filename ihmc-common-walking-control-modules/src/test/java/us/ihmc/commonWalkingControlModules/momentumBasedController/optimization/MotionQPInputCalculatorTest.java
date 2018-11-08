@@ -52,7 +52,7 @@ public class MotionQPInputCalculatorTest
       ReferenceFrame rootFrame = rootBody.getBodyFixedFrame();
       RigidBodyBasics endEffector = joints.get(numberOfJoints - 1).getSuccessor();
       ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
-      int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(joints);
+      int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(joints);
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("comFrame", worldFrame, rootBody);
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, 0.0);

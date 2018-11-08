@@ -10,6 +10,7 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class JointIndexHandler
@@ -26,7 +27,7 @@ public class JointIndexHandler
       indexedJoints = jointsToIndex;
       indexedOneDoFJoints = ScrewTools.filterJoints(indexedJoints, OneDoFJoint.class);
 
-      numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToIndex);
+      numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToIndex);
       populateColumnIndices();
    }
 
@@ -36,7 +37,7 @@ public class JointIndexHandler
       jointsToIndex.toArray(indexedJoints);
       indexedOneDoFJoints = ScrewTools.filterJoints(indexedJoints, OneDoFJoint.class);
 
-      numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToIndex);
+      numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToIndex);
       populateColumnIndices();
    }
 

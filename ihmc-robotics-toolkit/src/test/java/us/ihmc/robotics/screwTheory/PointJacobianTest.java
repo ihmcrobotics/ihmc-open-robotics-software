@@ -66,7 +66,7 @@ public class PointJacobianTest
 
       JointBasics[] joints = geometricJacobian.getJointsInOrder();
 
-      DenseMatrix64F jointVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(joints), 1);
+      DenseMatrix64F jointVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
       MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocities);
 
       DenseMatrix64F pointVelocityFromJacobianMatrix = new DenseMatrix64F(3, 1);

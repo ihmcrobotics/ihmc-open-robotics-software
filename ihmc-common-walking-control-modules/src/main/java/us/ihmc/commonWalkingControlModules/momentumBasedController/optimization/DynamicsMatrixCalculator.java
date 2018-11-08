@@ -15,6 +15,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.FloatingBaseRigidBodyDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -364,7 +365,7 @@ public class DynamicsMatrixCalculator
    public void extractTorqueMatrix(JointBasics[] joints, DenseMatrix64F torqueMatrixToPack)
    {
       OneDoFJoint[] filteredJoints = ScrewTools.extractRevoluteJoints(joints);
-      int bodyDoFs = ScrewTools.computeDegreesOfFreedom(filteredJoints);
+      int bodyDoFs = MultiBodySystemTools.computeDegreesOfFreedom(filteredJoints);
 
       int startIndex = 0;
       for (int i = 0; i < bodyDoFs; i++)

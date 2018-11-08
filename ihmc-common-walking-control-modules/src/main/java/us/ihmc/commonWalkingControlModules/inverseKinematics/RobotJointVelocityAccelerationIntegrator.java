@@ -7,6 +7,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
@@ -68,7 +69,7 @@ public class RobotJointVelocityAccelerationIntegrator
       int jointConfigurationStartIndex = 0;
       int jointStartIndex = 0;
 
-      int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(joints);
+      int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(joints);
       jointConfigurations.reshape(numberOfDoFs + 1, 1);
       jointVelocities.reshape(numberOfDoFs, 1);
 
@@ -136,7 +137,7 @@ public class RobotJointVelocityAccelerationIntegrator
    {
       int jointStartIndex = 0;
 
-      int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(joints);
+      int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(joints);
       jointVelocities.reshape(numberOfDoFs, 1);
       jointAccelerations.reshape(numberOfDoFs, 1);
 

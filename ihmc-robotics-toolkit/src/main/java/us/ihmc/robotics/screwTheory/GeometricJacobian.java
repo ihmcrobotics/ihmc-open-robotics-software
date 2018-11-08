@@ -12,6 +12,7 @@ import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
  * This class provides a simple tool to compute the Jacobian matrix of a kinematic chain composed of
@@ -86,7 +87,7 @@ public class GeometricJacobian
       this.joints = new JointBasics[joints.length];
       System.arraycopy(joints, 0, this.joints, 0, joints.length);
       this.jacobianFrame = jacobianFrame;
-      this.jacobian = new DenseMatrix64F(SpatialVector.SIZE, ScrewTools.computeDegreesOfFreedom(joints));
+      this.jacobian = new DenseMatrix64F(SpatialVector.SIZE, MultiBodySystemTools.computeDegreesOfFreedom(joints));
       this.jointPathFromBaseToEndEffector = ScrewTools.createJointPath(getBase(), getEndEffector());
       this.allowChangeFrame = allowChangeFrame;
 

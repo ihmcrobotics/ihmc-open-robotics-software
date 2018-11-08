@@ -109,7 +109,7 @@ public final class PointFeedbackControllerTest
       pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
       pointFeedbackController.setEnabled(true);
 
-      int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
+      int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       QPInput motionQPInput = new QPInput(numberOfDoFs);
       LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
       DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
@@ -199,7 +199,7 @@ public final class PointFeedbackControllerTest
       pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
       pointFeedbackController.setEnabled(true);
 
-      int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
+      int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       QPInput motionQPInput = new QPInput(numberOfDoFs);
       LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
       DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);

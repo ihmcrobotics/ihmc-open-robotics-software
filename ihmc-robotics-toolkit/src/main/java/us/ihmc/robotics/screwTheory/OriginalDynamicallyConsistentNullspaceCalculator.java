@@ -18,6 +18,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
  *
@@ -67,7 +68,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
       this.rootJoint = rootJoint;
       this.massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootJoint.getSuccessor());
       jointsInOrder = massMatrixCalculator.getInput().getJointMatrixIndexProvider().getIndexedJointsInOrder().toArray(new JointBasics[0]);
-      this.nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
+      this.nDegreesOfFreedom = MultiBodySystemTools.computeDegreesOfFreedom(jointsInOrder);
       massMatrixSolver = LinearSolverFactory.symmPosDef(nDegreesOfFreedom);
       lambdaSolver = LinearSolverFactory.symmPosDef(nDegreesOfFreedom); // size of matrix is only used to choose algorithm. nDegreesOfFreedom is an upper limit
       pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
@@ -161,7 +162,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
 
    private void resizeMatrices()
    {
-      int nActuatedDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(actuatedJoints);
+      int nActuatedDegreesOfFreedom = MultiBodySystemTools.computeDegreesOfFreedom(actuatedJoints);
 
       S.reshape(nActuatedDegreesOfFreedom, nDegreesOfFreedom);
       Js.reshape(nConstraints, nDegreesOfFreedom);
