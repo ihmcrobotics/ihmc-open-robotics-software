@@ -44,17 +44,6 @@ public class ScrewTools
       return new PassiveRevoluteJoint(jointName, parentBody, transformToParent, jointAxis, isPartOfClosedKinematicLoop);
    }
 
-   public static RigidBodyBasics[] computeSuccessors(JointBasics... joints)
-   {
-      RigidBodyBasics[] ret = new RigidBodyBasics[joints.length];
-      for (int i = 0; i < joints.length; i++)
-      {
-         JointBasics joint = joints[i];
-         ret[i] = joint.getSuccessor();
-      }
-      return ret;
-   }
-
    public static RigidBodyBasics[] computeSubtreeSuccessors(JointBasics... joints)
    {
       ArrayList<RigidBodyBasics> rigidBodySuccessors = new ArrayList<RigidBodyBasics>();
@@ -125,7 +114,7 @@ public class ScrewTools
 
    public static RigidBodyBasics[] computeSubtreeSuccessors(RigidBodyBasics... bodies)
    {
-      return computeSuccessors(computeSubtreeJoints(bodies));
+      return MultiBodySystemTools.collectSuccessors(computeSubtreeJoints(bodies));
    }
 
    public static RigidBodyBasics[] computeSubtreeSuccessors(Set<JointBasics> jointsToExclude, RigidBodyBasics... bodies)
@@ -157,7 +146,7 @@ public class ScrewTools
 
    public static RigidBodyBasics[] computeSupportAndSubtreeSuccessors(RigidBodyBasics... bodies)
    {
-      return computeSuccessors(computeSupportAndSubtreeJoints(bodies));
+      return MultiBodySystemTools.collectSuccessors(computeSupportAndSubtreeJoints(bodies));
    }
 
    public static JointBasics[] computeSupportAndSubtreeJoints(RigidBodyBasics... bodies)
