@@ -7,7 +7,6 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
@@ -269,61 +268,6 @@ public class ScrewToolsTest
       for(int i = 0; i < bodies.length; i++)
       {
          assertTrue(bodies[i].equals(bodyArray[i]));
-      }
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testComputeSubtreeSuccessors_InverseDynamicsJoint_RigidBody()
-   {
-      RigidBodyBasics[] bodies = ScrewTools.computeSubtreeSuccessors(elevator);
-
-      Set<JointBasics> jointsToExclude = new HashSet<JointBasics>();
-      RigidBodyBasics[] subtreeSuccessors = ScrewTools.computeSubtreeSuccessors(jointsToExclude, elevator);
-      assertEquals("Should be equal", bodies.length, subtreeSuccessors.length);
-      for(int i = 0; i < bodies.length; i++)
-      {
-         assertTrue(bodies[i].equals(subtreeSuccessors[i]));
-      }
-
-      jointsToExclude.addAll(joints);
-      subtreeSuccessors = ScrewTools.computeSubtreeSuccessors(jointsToExclude, elevator);
-      assertEquals("Should be equal", 0.0, subtreeSuccessors.length, epsilon);
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testComputeSubtreeSuccessors_RigidBody()
-   {
-      RigidBodyBasics[] successors = ScrewTools.computeSubtreeSuccessors(elevator);
-
-      Set<JointBasics> jointsToExclude = new HashSet<JointBasics>();
-      RigidBodyBasics[] otherSuccessors = ScrewTools.computeSubtreeSuccessors(jointsToExclude, elevator);
-
-      assertEquals("Should be equal", successors.length, otherSuccessors.length);
-      for(int i = 0; i < successors.length; i++)
-      {
-         assertTrue(successors[i].equals(otherSuccessors[i]));
-      }
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testComputeSubtreeSuccessors_InverseDynamicsJoint()
-   {
-      List<JointBasics> jointsList = new ArrayList<JointBasics>();
-      jointsList.addAll(elevator.getChildrenJoints());
-
-      RigidBodyBasics[] successors = ScrewTools.computeSubtreeSuccessors(jointsList.get(0), jointsList.get(1));
-
-
-      Set<JointBasics> jointsToExclude = new HashSet<JointBasics>();
-      RigidBodyBasics[] otherSuccessors = ScrewTools.computeSubtreeSuccessors(jointsToExclude, elevator, elevator);
-
-      assertEquals("Should be equal", successors.length, otherSuccessors.length);
-      for(int i = 0; i < successors.length; i++)
-      {
-         assertTrue(successors[i].equals(otherSuccessors[i]));
       }
    }
 

@@ -46,102 +46,12 @@ public class ScrewTools
 
    public static RigidBodyBasics[] computeSubtreeSuccessors(JointBasics... joints)
    {
-      ArrayList<RigidBodyBasics> rigidBodySuccessors = new ArrayList<RigidBodyBasics>();
-      ArrayList<RigidBodyBasics> rigidBodyStack = new ArrayList<RigidBodyBasics>();
-      for (JointBasics joint : joints)
-      {
-         rigidBodyStack.add(joint.getPredecessor());
-      }
-      while (!rigidBodyStack.isEmpty())
-      {
-         RigidBodyBasics currentBody = rigidBodyStack.remove(0);
-         List<? extends JointBasics> childrenJoints = currentBody.getChildrenJoints();
-         for (JointBasics joint : childrenJoints)
-         {
-            rigidBodyStack.add(joint.getSuccessor());
-            rigidBodySuccessors.add(joint.getSuccessor());
-         }
-      }
-      RigidBodyBasics[] ret = new RigidBodyBasics[rigidBodySuccessors.size()];
-
-      return rigidBodySuccessors.toArray(ret);
-   }
-
-   public static RigidBodyBasics[] computeRigidBodiesAfterThisJoint(JointBasics... joints)
-   {
-      ArrayList<RigidBodyBasics> rigidBodySuccessors = new ArrayList<RigidBodyBasics>();
-      computeRigidBodiesAfterThisJoint(rigidBodySuccessors, joints);
-      RigidBodyBasics[] ret = new RigidBodyBasics[rigidBodySuccessors.size()];
-
-      return rigidBodySuccessors.toArray(ret);
-   }
-
-   public static void computeRigidBodiesAfterThisJoint(ArrayList<RigidBodyBasics> rigidBodySuccessorsToPack, JointBasics... joints)
-   {
-      ArrayList<JointBasics> jointStack = new ArrayList<JointBasics>();
-      for (JointBasics joint : joints)
-      {
-         jointStack.add(joint);
-      }
-      while (!jointStack.isEmpty())
-      {
-         JointBasics currentJoint = jointStack.remove(0);
-         rigidBodySuccessorsToPack.add(currentJoint.getSuccessor());
-         RigidBodyBasics currentBody = currentJoint.getSuccessor();
-         List<? extends JointBasics> childrenJoints = currentBody.getChildrenJoints();
-         for (JointBasics joint : childrenJoints)
-         {
-            jointStack.add(joint);
-         }
-      }
-   }
-
-   public static void computeRigidBodiesFromRootToThisJoint(ArrayList<RigidBodyBasics> rigidBodySuccessorsToPack, JointBasics joint)
-   {
-      RigidBodyBasics predecessorBody = joint.getPredecessor();
-      if (predecessorBody == null)
-         return;
-      if (predecessorBody.isRootBody())
-         return;
-
-      rigidBodySuccessorsToPack.add(predecessorBody);
-      JointBasics parentJoint = predecessorBody.getParentJoint();
-      if (parentJoint == null)
-         return;
-
-      computeRigidBodiesFromRootToThisJoint(rigidBodySuccessorsToPack, parentJoint);
+      return Stream.of(joints).map(JointBasics::getSuccessor).flatMap(RigidBodyBasics::subtreeStream).distinct().toArray(RigidBodyBasics[]::new);
    }
 
    public static RigidBodyBasics[] computeSubtreeSuccessors(RigidBodyBasics... bodies)
    {
       return MultiBodySystemTools.collectSuccessors(computeSubtreeJoints(bodies));
-   }
-
-   public static RigidBodyBasics[] computeSubtreeSuccessors(Set<JointBasics> jointsToExclude, RigidBodyBasics... bodies)
-   {
-      ArrayList<RigidBodyBasics> rigidBodySuccessors = new ArrayList<RigidBodyBasics>();
-      ArrayList<RigidBodyBasics> rigidBodyStack = new ArrayList<RigidBodyBasics>();
-      for (RigidBodyBasics body : bodies)
-      {
-         rigidBodyStack.add(body);
-      }
-      while (!rigidBodyStack.isEmpty())
-      {
-         RigidBodyBasics currentBody = rigidBodyStack.remove(0);
-         List<? extends JointBasics> childrenJoints = currentBody.getChildrenJoints();
-         for (JointBasics joint : childrenJoints)
-         {
-            if (!jointsToExclude.contains(joint))
-            {
-               rigidBodyStack.add(joint.getSuccessor());
-               rigidBodySuccessors.add(joint.getSuccessor());
-            }
-         }
-      }
-
-      RigidBodyBasics[] ret = new RigidBodyBasics[rigidBodySuccessors.size()];
-
-      return rigidBodySuccessors.toArray(ret);
    }
 
    public static RigidBodyBasics[] computeSupportAndSubtreeSuccessors(RigidBodyBasics... bodies)
