@@ -21,11 +21,10 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculatorTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class MotionQPInputCalculatorTest
@@ -93,7 +92,7 @@ public class MotionQPInputCalculatorTest
          spatialAccelerationCalculator.compute();
          SpatialAcceleration achievedSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, endEffectorFrame);
          spatialAccelerationCalculator.getRelativeAcceleration(rootBody, endEffector, achievedSpatialAcceleration);
-         SpatialAccelerationCalculatorTest.assertSpatialAccelerationVectorEquals(achievedSpatialAcceleration, desiredSpatialAcceleration, 1.0e-10);
+         MecanoTestTools.assertSpatialAccelerationEquals(achievedSpatialAcceleration, desiredSpatialAcceleration, 1.0e-10);
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -125,7 +124,7 @@ public class MotionQPInputCalculatorTest
          SpatialAcceleration achievedSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, endEffectorFrame);
          spatialAccelerationCalculator.getRelativeAcceleration(rootBody, endEffector, achievedSpatialAcceleration);
          achievedSpatialAcceleration.changeFrame(controlFrame);
-         SpatialAccelerationCalculatorTest.assertSpatialAccelerationVectorEquals(achievedSpatialAcceleration, desiredSpatialAcceleration, 1.0e-10);
+         MecanoTestTools.assertSpatialAccelerationEquals(achievedSpatialAcceleration, desiredSpatialAcceleration, 1.0e-10);
       }
    }
 }
