@@ -133,36 +133,6 @@ public class ScrewTools
       return pathLength;
    }
 
-   public static OneDoFJointBasics[] cloneOneDoFJointPath(RigidBodyBasics start, RigidBodyBasics end)
-   {
-      return MultiBodySystemFactories.cloneOneDoFJointKinematicChain(start, end);
-   }
-
-   public static OneDoFJointBasics[] cloneOneDoFJointPath(OneDoFJointBasics[] oneDoFJoints)
-   {
-      return cloneJointPathAndFilter(oneDoFJoints, OneDoFJointBasics.class);
-   }
-
-   public static <T extends JointBasics> T[] cloneJointPathAndFilter(T[] joints, Class<T> clazz)
-   {
-      return MultiBodySystemTools.filterJoints(cloneJointPath(joints), clazz);
-   }
-
-   public static <T extends JointBasics> T[] cloneJointPathAndFilter(T[] joints, Class<T> clazz, String suffix)
-   {
-      return MultiBodySystemTools.filterJoints(cloneJointPath(joints, suffix), clazz);
-   }
-
-   public static JointBasics[] cloneJointPath(JointBasics[] inverseDynamicsJoints)
-   {
-      return MultiBodySystemFactories.cloneKinematicChain(inverseDynamicsJoints);
-   }
-
-   public static JointBasics[] cloneJointPath(JointBasics[] inverseDynamicsJoints, String suffix)
-   {
-      return MultiBodySystemFactories.cloneKinematicChain(inverseDynamicsJoints, suffix);
-   }
-
    public static <T extends JointBasics> T[] cloneJointPathDisconnectedFromOriginalRobot(T[] joints, Class<T> clazz, String suffix,
                                                                                          ReferenceFrame rootBodyFrame)
    {

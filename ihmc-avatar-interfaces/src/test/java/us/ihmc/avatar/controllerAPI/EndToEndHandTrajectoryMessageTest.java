@@ -57,6 +57,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
@@ -130,7 +131,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
 
          OneDoFJointBasics[] armOriginal = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
-         OneDoFJointBasics[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
+         OneDoFJointBasics[] armClone = MultiBodySystemFactories.cloneOneDoFJointKinematicChain(chest, hand);
          for (int jointIndex = 0; jointIndex < armOriginal.length; jointIndex++)
          {
             OneDoFJointBasics original = armOriginal[jointIndex];

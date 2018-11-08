@@ -35,6 +35,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -423,7 +424,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
    private ChestTrajectoryMessage createRandomChestMessage(double trajectoryTime, Random random)
    {
-      OneDoFJointBasics[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
+      OneDoFJointBasics[] spineClone = MultiBodySystemFactories.cloneOneDoFJointKinematicChain(pelvis, chest);
       MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, spineClone);
       RigidBodyBasics chestClone = spineClone[spineClone.length - 1].getSuccessor();
       FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
@@ -623,7 +624,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       {
          this.spineJoints = spineJoints;
          this.controllerDT = controllerDT;
-         spineJointClones = ScrewTools.cloneOneDoFJointPath(spineJoints);
+         spineJointClones = MultiBodySystemFactories.cloneOneDoFJointKinematicChain(spineJoints);
          chestClone = spineJointClones[spineJointClones.length - 1].getSuccessor();
 
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)

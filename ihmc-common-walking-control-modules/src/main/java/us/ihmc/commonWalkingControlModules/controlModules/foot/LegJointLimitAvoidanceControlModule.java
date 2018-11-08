@@ -19,6 +19,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
@@ -91,7 +92,7 @@ public class LegJointLimitAvoidanceControlModule
       base = robotModel.getPelvis();
       RigidBodyBasics foot = robotModel.getFoot(robotSide);
       robotJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(base, foot), OneDoFJointBasics.class);
-      ikJoints = MultiBodySystemTools.filterJoints(ScrewTools.cloneJointPath(robotJoints), OneDoFJointBasics.class);
+      ikJoints = MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(robotJoints), OneDoFJointBasics.class);
       jacobian = new GeometricJacobian(ikJoints, ikJoints[ikJoints.length - 1].getSuccessor().getBodyFixedFrame());
 
       inverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterationsForIK, maxStepSize,

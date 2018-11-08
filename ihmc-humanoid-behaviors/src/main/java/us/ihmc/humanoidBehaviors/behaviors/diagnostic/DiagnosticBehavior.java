@@ -71,6 +71,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -492,7 +493,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          armZeroJointAngleConfigurationOffsets.put(robotSide, armZeroJointAngleConfigurationOffset);
 
          upperArmJoints.put(robotSide, MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(chest, upperArmBody), OneDoFJointBasics.class));
-         upperArmJointsClone.put(robotSide, MultiBodySystemTools.filterJoints(ScrewTools.cloneJointPath(upperArmJoints.get(robotSide)), OneDoFJointBasics.class));
+         upperArmJointsClone.put(robotSide, MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(upperArmJoints.get(robotSide)), OneDoFJointBasics.class));
          GeometricJacobian upperArmJacobian = new GeometricJacobian(upperArmJointsClone.get(robotSide),
                                                                     upperArmJointsClone.get(robotSide)[upperArmJointsClone.get(robotSide).length
                                                                           - 1].getSuccessor().getBodyFixedFrame());
@@ -504,7 +505,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          inverseKinematicsForUpperArms.put(robotSide, inverseKinematicsForUpperArm);
 
          lowerArmJoints.put(robotSide, MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(lowerArmBody, hand), OneDoFJointBasics.class));
-         lowerArmJointsClone.put(robotSide, MultiBodySystemTools.filterJoints(ScrewTools.cloneJointPath(lowerArmJoints.get(robotSide)), OneDoFJointBasics.class));
+         lowerArmJointsClone.put(robotSide, MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(lowerArmJoints.get(robotSide)), OneDoFJointBasics.class));
          GeometricJacobian lowerArmJacobian = new GeometricJacobian(lowerArmJointsClone.get(robotSide),
                                                                     lowerArmJointsClone.get(robotSide)[lowerArmJointsClone.get(robotSide).length
                                                                           - 1].getSuccessor().getBodyFixedFrame());
