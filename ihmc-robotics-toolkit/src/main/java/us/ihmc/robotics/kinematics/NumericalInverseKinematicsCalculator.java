@@ -17,6 +17,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -65,7 +66,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
    
    public static NumericalInverseKinematicsCalculator createIKCalculator(JointBasics[] jointsToControl, int maxIterations)
    {
-      JointBasics[] cloneOfControlledJoints = ScrewTools.cloneJointPath(jointsToControl);
+      JointBasics[] cloneOfControlledJoints = MultiBodySystemFactories.cloneKinematicChain(jointsToControl);
 
       int numberOfDoFs = cloneOfControlledJoints.length;
       RigidBodyBasics cloneOfEndEffector = cloneOfControlledJoints[numberOfDoFs - 1].getSuccessor();

@@ -226,7 +226,7 @@ public class TwistCalculatorTest
 
       int numberOfJoints = 10;
       List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
-      List<OneDoFJointBasics> jointsInFuture = Arrays.asList(ScrewTools.cloneOneDoFJointPath(joints.toArray(new OneDoFJointBasics[numberOfJoints])));
+      List<OneDoFJointBasics> jointsInFuture = Arrays.asList(MultiBodySystemFactories.cloneOneDoFJointKinematicChain(joints.toArray(new OneDoFJointBasics[numberOfJoints])));
 
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
 
@@ -323,8 +323,8 @@ public class TwistCalculatorTest
       SixDoFJoint floatingJoint = floatingChain.getRootJoint();
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
       List<Joint> joints = floatingChain.getJoints();
-      List<JointBasics> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new JointBasics[numberOfRevoluteJoints
-            + 1])));
+      List<JointBasics> jointsInFuture = Arrays.asList(MultiBodySystemFactories.cloneKinematicChain(joints.toArray(new JointBasics[numberOfRevoluteJoints
+      + 1])));
       SixDoFJoint floatingJointInFuture = (SixDoFJoint) jointsInFuture.get(0);
       List<RevoluteJoint> revoluteJointsInFuture = MultiBodySystemTools.filterJoints(jointsInFuture, RevoluteJoint.class);
 
@@ -403,8 +403,8 @@ public class TwistCalculatorTest
       SixDoFJoint floatingJoint = floatingChain.getRootJoint();
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
       List<Joint> joints = floatingChain.getJoints();
-      List<JointBasics> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new JointBasics[numberOfRevoluteJoints
-            + 1])));
+      List<JointBasics> jointsInFuture = Arrays.asList(MultiBodySystemFactories.cloneKinematicChain(joints.toArray(new JointBasics[numberOfRevoluteJoints
+      + 1])));
       SixDoFJoint floatingJointInFuture = (SixDoFJoint) jointsInFuture.get(0);
       List<RevoluteJoint> revoluteJointsInFuture = MultiBodySystemTools.filterJoints(jointsInFuture, RevoluteJoint.class);
 
