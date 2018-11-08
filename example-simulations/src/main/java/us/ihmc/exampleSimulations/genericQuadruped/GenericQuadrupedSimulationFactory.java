@@ -59,9 +59,9 @@ public class GenericQuadrupedSimulationFactory
       QuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters(false, CONTROL_DT);
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new GenericQuadrupedPositionBasedCrawlControllerParameters();
-      GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
       GenericQuadrupedHighLevelControllerParameters highLevelControllerParameters = new GenericQuadrupedHighLevelControllerParameters(
             modelFactory.getJointMap());
+      GenericQuadrupedSitDownParameters sitDownParameters = new GenericQuadrupedSitDownParameters();
 
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
@@ -104,6 +104,7 @@ public class GenericQuadrupedSimulationFactory
       simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
       simulationFactory.setInitialOffset(new QuadrupedInitialOffsetAndYaw());
       simulationFactory.setHighLevelControllerParameters(highLevelControllerParameters);
+      simulationFactory.setSitDownParameters(sitDownParameters);
 
       return simulationFactory.createSimulation();
    }
