@@ -8,7 +8,6 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
@@ -22,7 +21,6 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -37,7 +35,6 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
@@ -859,51 +856,5 @@ public class ScrewToolsTest
       matches = ScrewTools.findRigidBodiesWithNames(allBodies, "elevator", "chainABody0", 
             "chainABody1", "chainABody2", "chainABody4", "chainBBody0", "chainBBody1", "chainBBody2", 
             "chainBBody3", "chainBBody4", "chainCBody0", "chainCBody1", "chainCBody2", "chainCBody3", "chainCBody4");
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testAddExternalWrenches()
-   {
-      Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
-      JointBasics[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
-
-      LinkedHashMap<RigidBodyBasics, Wrench> external = new LinkedHashMap<RigidBodyBasics, Wrench>();
-      LinkedHashMap<RigidBodyBasics, Wrench> toAdd = new LinkedHashMap<RigidBodyBasics, Wrench>();
-
-      RigidBodyBasics rigidBody1 = jointsArray[2].getSuccessor(); //testBody1
-      RigidBodyBasics rigidBody2 = jointsArray[0].getSuccessor(); //rootBody
-      RigidBodyBasics rigidBody3 = jointsArray[4].getSuccessor(); //testBody3
-
-      ReferenceFrame frame1 = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame1", theFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
-
-      Wrench externalWrench1 = new Wrench(rigidBody1.getBodyFixedFrame(), theFrame, RandomNumbers.nextDoubleArray(random, 6, 100.0));
-      Wrench externalWrench2 = new Wrench(rigidBody3.getBodyFixedFrame(), theFrame, RandomNumbers.nextDoubleArray(random, 6, 100.0));
-      Wrench addedWrench1 = new Wrench(rigidBody2.getBodyFixedFrame(), frame1, RandomNumbers.nextDoubleArray(random, 6, 100.0));
-      Wrench addedWrench2 = new Wrench(rigidBody3.getBodyFixedFrame(), theFrame, RandomNumbers.nextDoubleArray(random, 6, 100.0));
-
-      external.put(rigidBody1, new Wrench(externalWrench1));
-      external.put(rigidBody3, new Wrench(externalWrench2));
-      toAdd.put(rigidBody2, new Wrench(addedWrench1));
-      toAdd.put(rigidBody3, new Wrench(addedWrench2));
-
-      assertEquals(2, external.keySet().size());
-      assertTrue(external.keySet().contains(rigidBody1));
-      assertTrue(external.keySet().contains(rigidBody3));
-      
-      ScrewTools.addExternalWrenches(external, toAdd);
-
-      assertEquals(3, external.keySet().size());
-      assertTrue(external.keySet().contains(rigidBody1));
-      assertTrue(external.keySet().contains(rigidBody2));
-      assertTrue(external.keySet().contains(rigidBody3));
-
-      Wrench expectedWrench = new Wrench();
-      expectedWrench.setIncludingFrame(externalWrench2);
-      expectedWrench.add(addedWrench2);
-      
-      assertTrue(new FrameVector3D(expectedWrench.getAngularPart()).epsilonEquals(new FrameVector3D(external.get(rigidBody3).getAngularPart()), epsilon));
-      assertTrue(new FrameVector3D(expectedWrench.getLinearPart()).epsilonEquals(new FrameVector3D(external.get(rigidBody3).getLinearPart()), epsilon));
    }
 }

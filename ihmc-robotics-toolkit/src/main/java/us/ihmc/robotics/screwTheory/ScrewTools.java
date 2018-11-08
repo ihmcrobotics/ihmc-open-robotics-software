@@ -1,13 +1,14 @@
 package us.ihmc.robotics.screwTheory;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -25,7 +26,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -38,8 +38,8 @@ public class ScrewTools
       return addPassiveRevoluteJoint(jointName, parentBody, TransformTools.createTranslationTransform(jointOffset), jointAxis, isPartOfClosedKinematicLoop);
    }
 
-   public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBodyBasics parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis,
-                                                              boolean isPartOfClosedKinematicLoop)
+   public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBodyBasics parentBody, RigidBodyTransform transformToParent,
+                                                              Vector3D jointAxis, boolean isPartOfClosedKinematicLoop)
    {
       return new PassiveRevoluteJoint(jointName, parentBody, transformToParent, jointAxis, isPartOfClosedKinematicLoop);
    }
@@ -247,7 +247,8 @@ public class ScrewTools
 
    /**
     * Compute and pack the joint path between two RigidBody in the jointPathToPack. Use the method
-    * {@link #computeDistanceToAncestor(RigidBodyBasics, RigidBodyBasics)} to get the size of the Array to provide.
+    * {@link #computeDistanceToAncestor(RigidBodyBasics, RigidBodyBasics)} to get the size of the Array
+    * to provide.
     * 
     * @param jointPathToPack
     * @param start
@@ -535,65 +536,24 @@ public class ScrewTools
 
    public static JointBasics[] findJointsWithNames(JointBasics[] allJoints, String... jointNames)
    {
-      if (jointNames == null)
-         return null;
+      Set<String> jointNameSet = new HashSet<>(Arrays.asList(jointNames));
+      JointBasics[] result = Stream.of(allJoints).filter(joint -> jointNameSet.contains(joint.getName())).toArray(JointBasics[]::new);
 
-      JointBasics[] ret = new JointBasics[jointNames.length];
-      int index = 0;
-      for (JointBasics joint : allJoints)
-      {
-         for (String jointName : jointNames)
-         {
-            if (joint.getName().equals(jointName))
-               ret[index++] = joint;
-         }
-      }
-
-      if (index != jointNames.length)
+      if (result.length != jointNames.length)
          throw new RuntimeException("Not all joints could be found");
 
-      return ret;
+      return result;
    }
 
-   public static RigidBodyBasics[] findRigidBodiesWithNames(RigidBodyBasics[] allBodies, String... names)
+   public static RigidBodyBasics[] findRigidBodiesWithNames(RigidBodyBasics[] allBodies, String... bodyNames)
    {
-      RigidBodyBasics[] ret = new RigidBodyBasics[names.length];
-      int index = 0;
-      for (RigidBodyBasics body : allBodies)
-      {
-         for (String name : names)
-         {
-            if (body.getName().equals(name))
-            {
-               ret[index++] = body;
-               if (index == names.length)
-                  return ret;
-            }
-         }
-      }
+      Set<String> bodyNameSet = new HashSet<>(Arrays.asList(bodyNames));
+      RigidBodyBasics[] result = Stream.of(allBodies).filter(body -> bodyNameSet.contains(body.getName())).toArray(RigidBodyBasics[]::new);
 
-      if (index != names.length)
+      if (result.length != bodyNames.length)
          throw new RuntimeException("Not all bodies could be found");
 
-      return ret;
-   }
-
-   public static void addExternalWrenches(Map<RigidBodyBasics, Wrench> externalWrenches, Map<RigidBodyBasics, Wrench> wrenchMapToAdd)
-   {
-      for (RigidBodyBasics rigidBody : wrenchMapToAdd.keySet())
-      {
-         Wrench externalWrenchToCompensateFor = wrenchMapToAdd.get(rigidBody);
-
-         Wrench externalWrench = externalWrenches.get(rigidBody);
-         if (externalWrench == null)
-         {
-            externalWrenches.put(rigidBody, new Wrench(externalWrenchToCompensateFor));
-         }
-         else
-         {
-            externalWrench.add(externalWrenchToCompensateFor);
-         }
-      }
+      return result;
    }
 
    public static int computeGeometricJacobianHashCode(JointBasics joints[], ReferenceFrame jacobianFrame, boolean allowChangeFrame)
@@ -610,7 +570,7 @@ public class ScrewTools
    }
 
    public static int computeGeometricJacobianHashCode(JointBasics joints[], int firstIndex, int lastIndex, ReferenceFrame jacobianFrame,
-                                                               boolean allowChangeFrame)
+                                                      boolean allowChangeFrame)
    {
       int jointsHashCode = 1;
       for (int i = firstIndex; i <= lastIndex; i++)
@@ -630,8 +590,8 @@ public class ScrewTools
     * @throws RuntimeException if the body chain is not long enough to reach the desired parent.
     * @param startBody the body to start at.
     * @param numberOfBodies the amount of steps to go up the body chain.
-    * @return the {@link RigidBodyBasics} that is {@code numberOfBodies} higher up the rigid body chain then
-    *         the {@code startBody}.
+    * @return the {@link RigidBodyBasics} that is {@code numberOfBodies} higher up the rigid body chain
+    *         then the {@code startBody}.
     */
    public static RigidBodyBasics goUpBodyChain(RigidBodyBasics startBody, int numberOfBodies)
    {
