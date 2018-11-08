@@ -93,7 +93,7 @@ public class ScrewToolsTest
       }
 
       JointBasics[] subtreeJoints = ScrewTools.computeSubtreeJoints(firstLevelSubTrees.get(2));
-      RigidBodyBasics[] lastSubTree = ScrewTools.computeSuccessors(subtreeJoints);
+      RigidBodyBasics[] lastSubTree = MultiBodySystemTools.collectSuccessors(subtreeJoints);
       RigidBodyBasics halfwayDownLastSubTree = lastSubTree[3];
       exclusions.add(halfwayDownLastSubTree);
 
@@ -123,7 +123,7 @@ public class ScrewToolsTest
       for (RigidBodyBasics rigidBody : exclusions)
       {
          excludedBodies.add(rigidBody);
-         RigidBodyBasics[] subTree = ScrewTools.computeSuccessors(ScrewTools.computeSubtreeJoints(rigidBody));
+         RigidBodyBasics[] subTree = MultiBodySystemTools.collectSuccessors(ScrewTools.computeSubtreeJoints(rigidBody));
          excludedBodies.addAll(Arrays.asList(subTree));
       }
 
@@ -261,8 +261,9 @@ public class ScrewToolsTest
          JointBasics joint = joints.get(i);
          bodyArray[i] = joint.getSuccessor();
       }
+      JointBasics[] joints1 = {joints.get(0), joints.get(1), joints.get(2)};
 
-      RigidBodyBasics[] bodies = ScrewTools.computeSuccessors(joints.get(0), joints.get(1), joints.get(2));
+      RigidBodyBasics[] bodies = MultiBodySystemTools.collectSuccessors(joints1);
 
       assertEquals("Should be equal", bodyArray.length, bodies.length);
       for(int i = 0; i < bodies.length; i++)
