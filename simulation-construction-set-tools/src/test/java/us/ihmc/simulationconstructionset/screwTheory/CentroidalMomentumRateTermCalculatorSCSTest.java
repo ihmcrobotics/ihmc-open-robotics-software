@@ -22,6 +22,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -156,7 +157,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
          centerOfMassFrame.update();
          
          robot.packIdJoints(idJoints);
-         ScrewTools.getJointVelocitiesMatrix(idJoints, v);
+         MultiBodySystemTools.extractJointsState(idJoints, JointStateType.VELOCITY, v);
 
          centroidalMomentumRateTermCalculator.reset();
          aDotVAnalytical.set(centroidalMomentumRateTermCalculator.getBiasSpatialForceMatrix());

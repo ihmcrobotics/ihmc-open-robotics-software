@@ -22,6 +22,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -66,7 +67,7 @@ public class PointJacobianTest
       JointBasics[] joints = geometricJacobian.getJointsInOrder();
 
       DenseMatrix64F jointVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(joints), 1);
-      ScrewTools.getJointVelocitiesMatrix(joints, jointVelocities);
+      MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocities);
 
       DenseMatrix64F pointVelocityFromJacobianMatrix = new DenseMatrix64F(3, 1);
       CommonOps.mult(pointJacobian.getJacobianMatrix(), jointVelocities, pointVelocityFromJacobianMatrix);

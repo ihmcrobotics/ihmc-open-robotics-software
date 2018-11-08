@@ -22,13 +22,13 @@ import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
-import us.ihmc.mecano.multiBodySystem.SphericalJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -504,50 +504,6 @@ public class ScrewTools
       return ret;
    }
 
-   public static void getJointVelocitiesMatrix(JointBasics[] joints, DenseMatrix64F jointVelocitiesMatrixToPack)
-   {
-      int rowStart = 0;
-      for (JointBasics joint : joints)
-      {
-         int dof = joint.getDegreesOfFreedom();
-         joint.getJointVelocity(rowStart, jointVelocitiesMatrixToPack);
-         rowStart += dof;
-      }
-   }
-
-   public static void getJointVelocitiesMatrix(Iterable<? extends JointBasics> joints, DenseMatrix64F jointVelocitiesMatrixToPack)
-   {
-      int rowStart = 0;
-      for (JointBasics joint : joints)
-      {
-         int dof = joint.getDegreesOfFreedom();
-         joint.getJointVelocity(rowStart, jointVelocitiesMatrixToPack);
-         rowStart += dof;
-      }
-   }
-
-   public static void getJointAccelerationsMatrix(Iterable<? extends JointBasics> joints, DenseMatrix64F desiredJointAccelerationsMatrixToPack)
-   {
-      int rowStart = 0;
-      for (JointBasics joint : joints)
-      {
-         int dof = joint.getDegreesOfFreedom();
-         joint.getJointAcceleration(rowStart, desiredJointAccelerationsMatrixToPack);
-         rowStart += dof;
-      }
-   }
-
-   public static void getJointAccelerationsMatrix(JointBasics[] joints, DenseMatrix64F desiredJointAccelerationsMatrixToPack)
-   {
-      int rowStart = 0;
-      for (JointBasics joint : joints)
-      {
-         int dof = joint.getDegreesOfFreedom();
-         joint.getJointAcceleration(rowStart, desiredJointAccelerationsMatrixToPack);
-         rowStart += dof;
-      }
-   }
-
    /**
     * Calculates the number of degrees of freedom of the kinematic chain that starts from
     * {@code ancestor} to end to {@code descendant}.
@@ -620,80 +576,6 @@ public class ScrewTools
                                                                      zero, gravitationalAcceleration);
 
       return rootAcceleration;
-   }
-
-   public static void getJointPositions(JointBasics[] joints, DenseMatrix64F jointPositionsToPack)
-   {
-      int rowStart = 0;
-      for (JointBasics joint : joints)
-      {
-         joint.getJointConfiguration(rowStart, jointPositionsToPack);
-         rowStart += joint.getDegreesOfFreedom();
-         if (joint instanceof SixDoFJoint || joint instanceof SphericalJoint)
-            rowStart++; // Because of stupid quaternions
-      }
-   }
-
-   public static void setJointPositions(JointBasics[] joints, DenseMatrix64F jointPositions)
-   {
-      int rowStart = 0;
-      for (JointBasics joint : joints)
-      {
-         joint.setJointConfiguration(rowStart, jointPositions);
-         rowStart += joint.getDegreesOfFreedom();
-         if (joint instanceof SixDoFJoint || joint instanceof SphericalJoint)
-            rowStart++; // Because of stupid quaternions
-      }
-   }
-
-   public static void setJointAccelerations(JointBasics[] jointList, DenseMatrix64F jointAccelerations)
-   {
-      int rowStart = 0;
-      for (JointBasics joint : jointList)
-      {
-         joint.setJointAcceleration(rowStart, jointAccelerations);
-         rowStart += joint.getDegreesOfFreedom();
-      }
-   }
-
-   public static void setJointAccelerations(Iterable<? extends JointBasics> jointList, DenseMatrix64F jointAccelerations)
-   {
-      int rowStart = 0;
-      for (JointBasics joint : jointList)
-      {
-         joint.setJointAcceleration(rowStart, jointAccelerations);
-         rowStart += joint.getDegreesOfFreedom();
-      }
-   }
-
-   public static void setJointTorques(JointBasics[] jointList, DenseMatrix64F jointTorques)
-   {
-      int rowStart = 0;
-      for (JointBasics joint : jointList)
-      {
-         joint.setJointTau(rowStart, jointTorques);
-         rowStart += joint.getDegreesOfFreedom();
-      }
-   }
-
-   public static void setVelocities(JointBasics[] jointList, DenseMatrix64F jointVelocities)
-   {
-      int rowStart = 0;
-      for (JointBasics joint : jointList)
-      {
-         joint.setJointVelocity(rowStart, jointVelocities);
-         rowStart += joint.getDegreesOfFreedom();
-      }
-   }
-
-   public static void setJointAccelerations(OneDoFJoint[] jointList, DenseMatrix64F jointAccelerations)
-   {
-      int rowStart = 0;
-      for (OneDoFJoint joint : jointList)
-      {
-         joint.setQdd(jointAccelerations.get(rowStart, 0));
-         rowStart += joint.getDegreesOfFreedom();
-      }
    }
 
    public static void computeIndicesForJoint(JointBasics[] jointsInOrder, TIntArrayList listToPackIndices, JointBasics... jointsToComputeIndicesFor)
