@@ -36,10 +36,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -65,7 +65,7 @@ public final class SpatialFeedbackControllerTest
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
       YoVariableRegistry registry = new YoVariableRegistry("Dummy");
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBodyBasics elevator = randomFloatingChain.getElevator();
       RigidBodyBasics endEffector = joints.get(joints.size() - 1).getSuccessor();
@@ -172,7 +172,7 @@ public final class SpatialFeedbackControllerTest
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
       YoVariableRegistry registry = new YoVariableRegistry("Dummy");
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBodyBasics elevator = randomFloatingChain.getElevator();
       RigidBodyBasics endEffector = joints.get(joints.size() - 1).getSuccessor();

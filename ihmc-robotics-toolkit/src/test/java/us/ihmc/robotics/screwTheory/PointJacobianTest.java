@@ -20,6 +20,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.robotics.random.RandomGeometry;
 
 /**
@@ -47,8 +49,8 @@ public class PointJacobianTest
       {
          X, Y, Z, Y, Y, X
       };
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
-      randomFloatingChain.setRandomPositionsAndVelocities(random);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      randomFloatingChain.nextState(random, JointStateType.CONFIGURATION, JointStateType.VELOCITY);
 
       RigidBodyBasics base = randomFloatingChain.getRootJoint().getSuccessor();
       RigidBodyBasics endEffector = randomFloatingChain.getLeafBody();
@@ -93,8 +95,8 @@ public class PointJacobianTest
       {
          X, Y, Z, Y, Y, X
       };
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
-      randomFloatingChain.setRandomPositionsAndVelocities(random);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      randomFloatingChain.nextState(random, JointStateType.CONFIGURATION, JointStateType.VELOCITY);
 
       RigidBodyBasics base = randomFloatingChain.getRootJoint().getSuccessor();
       RigidBodyBasics endEffector = randomFloatingChain.getLeafBody();

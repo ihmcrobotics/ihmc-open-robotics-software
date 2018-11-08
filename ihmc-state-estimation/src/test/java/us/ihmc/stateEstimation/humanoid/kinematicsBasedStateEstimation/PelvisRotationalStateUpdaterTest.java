@@ -27,7 +27,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -62,7 +62,7 @@ public class PelvisRotationalStateUpdaterTest
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
 
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(randomFloatingChain.getRevoluteJoints());
       
       FullInverseDynamicsStructure inverseDynamicsStructure = createFullInverseDynamicsStructure(randomFloatingChain, joints);
@@ -90,7 +90,7 @@ public class PelvisRotationalStateUpdaterTest
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
 
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(randomFloatingChain.getRevoluteJoints());
       
       FullInverseDynamicsStructure inverseDynamicsStructure = createFullInverseDynamicsStructure(randomFloatingChain, joints);
@@ -119,7 +119,7 @@ public class PelvisRotationalStateUpdaterTest
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
 
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(randomFloatingChain.getRevoluteJoints());
       
       FullInverseDynamicsStructure inverseDynamicsStructure = createFullInverseDynamicsStructure(randomFloatingChain, joints);
@@ -262,7 +262,7 @@ public class PelvisRotationalStateUpdaterTest
       return imuDefinition;
    }
 
-   private static FullInverseDynamicsStructure createFullInverseDynamicsStructure(ScrewTestTools.RandomFloatingChain randomFloatingChain,
+   private static FullInverseDynamicsStructure createFullInverseDynamicsStructure(RandomFloatingRevoluteJointChain randomFloatingChain,
          ArrayList<RevoluteJoint> joints)
    {
       int indexOfEstimationParentJoint = RandomNumbers.nextInt(random, 0, joints.size() - 1);

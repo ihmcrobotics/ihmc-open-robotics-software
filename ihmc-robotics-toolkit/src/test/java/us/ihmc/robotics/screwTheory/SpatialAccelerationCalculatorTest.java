@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.multiBodySystem.Joint;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -32,9 +33,9 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
 public class SpatialAccelerationCalculatorTest
 {
@@ -290,10 +291,10 @@ public class SpatialAccelerationCalculatorTest
       Random random = new Random(435345L);
 
       int numberOfRevoluteJoints = 100;
-      RandomFloatingChain floatingChain = new RandomFloatingChain(random, numberOfRevoluteJoints);
+      RandomFloatingRevoluteJointChain floatingChain = new RandomFloatingRevoluteJointChain(random, numberOfRevoluteJoints);
       SixDoFJoint floatingJoint = floatingChain.getRootJoint();
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
-      List<JointBasics> joints = floatingChain.getInverseDynamicsJoints();
+      List<Joint> joints = floatingChain.getJoints();
       List<JointBasics> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new JointBasics[numberOfRevoluteJoints
             + 1])));
       SixDoFJoint floatingJointInFuture = (SixDoFJoint) jointsInFuture.get(0);
@@ -383,10 +384,10 @@ public class SpatialAccelerationCalculatorTest
       Random random = new Random(435345L);
 
       int numberOfRevoluteJoints = 100;
-      RandomFloatingChain floatingChain = new RandomFloatingChain(random, numberOfRevoluteJoints);
+      RandomFloatingRevoluteJointChain floatingChain = new RandomFloatingRevoluteJointChain(random, numberOfRevoluteJoints);
       SixDoFJoint floatingJoint = floatingChain.getRootJoint();
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
-      List<JointBasics> joints = floatingChain.getInverseDynamicsJoints();
+      List<Joint> joints = floatingChain.getJoints();
       List<JointBasics> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new JointBasics[numberOfRevoluteJoints
             + 1])));
       SixDoFJoint floatingJointInFuture = (SixDoFJoint) jointsInFuture.get(0);
@@ -492,10 +493,10 @@ public class SpatialAccelerationCalculatorTest
       Random random = new Random(435345L);
 
       int numberOfRevoluteJoints = 100;
-      RandomFloatingChain floatingChain = new RandomFloatingChain(random, numberOfRevoluteJoints);
+      RandomFloatingRevoluteJointChain floatingChain = new RandomFloatingRevoluteJointChain(random, numberOfRevoluteJoints);
       SixDoFJoint floatingJoint = floatingChain.getRootJoint();
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
-      List<JointBasics> joints = floatingChain.getInverseDynamicsJoints();
+      List<Joint> joints = floatingChain.getJoints();
       List<JointBasics> jointsNoVelocity = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new JointBasics[numberOfRevoluteJoints
             + 1]), ""));
       SixDoFJoint floatingJointNoVelocity = (SixDoFJoint) jointsNoVelocity.get(0);

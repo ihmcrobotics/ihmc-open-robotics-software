@@ -21,9 +21,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.testing.JUnitTools;
@@ -104,7 +104,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
-      ScrewTestTools.RandomFloatingChain idRobot = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+      RandomFloatingRevoluteJointChain idRobot = new RandomFloatingRevoluteJointChain(random, jointAxes);
       RigidBodyBasics elevator = idRobot.getElevator();
       joints.addAll(idRobot.getRevoluteJoints());
 
