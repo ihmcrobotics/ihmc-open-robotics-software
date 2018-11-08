@@ -465,29 +465,6 @@ public class ScrewTools
       return clone;
    }
 
-   /**
-    * Traverses up the kinematic chain from the candidate descendant towards the root body, checking to
-    * see if each parent body is the ancestor in question.
-    * 
-    * @param candidateDescendant
-    * @param ancestor
-    * @return
-    */
-   public static boolean isAncestor(RigidBodyBasics candidateDescendant, RigidBodyBasics ancestor)
-   {
-      RigidBodyBasics currentBody = candidateDescendant;
-      while (!currentBody.isRootBody())
-      {
-         if (currentBody == ancestor)
-         {
-            return true;
-         }
-         currentBody = currentBody.getParentJoint().getPredecessor();
-      }
-
-      return currentBody == ancestor;
-   }
-
    public static int computeDistanceToAncestor(RigidBodyBasics descendant, RigidBodyBasics ancestor)
    {
       int ret = 0;

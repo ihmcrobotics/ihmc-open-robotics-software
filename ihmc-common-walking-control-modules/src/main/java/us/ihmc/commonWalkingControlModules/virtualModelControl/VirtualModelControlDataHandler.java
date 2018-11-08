@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class VirtualModelControlDataHandler
@@ -68,7 +69,7 @@ public class VirtualModelControlDataHandler
       {
          boolean rightOrder = true;
          if (length > 1)
-            ScrewTools.isAncestor(jointsToUse[1].getPredecessor(), jointsToUse[0].getPredecessor());
+            MultiBodySystemTools.isAncestor(jointsToUse[1].getPredecessor(), jointsToUse[0].getPredecessor());
 
          OneDoFJoint[] orderedJointsToUse;
          if (rightOrder)
