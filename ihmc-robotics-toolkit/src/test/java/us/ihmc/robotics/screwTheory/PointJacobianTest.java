@@ -21,6 +21,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -75,7 +76,8 @@ public class PointJacobianTest
       FramePoint3D point2 = new FramePoint3D(point);
       point2.changeFrame(endEffector.getBodyFixedFrame());
       double dt = 1e-8;
-      ScrewTestTools.integrateVelocities(randomFloatingChain.getRevoluteJoints(), dt);
+      MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(dt);
+      integrator.integrateFromVelocity(randomFloatingChain.getRevoluteJoints());
       randomFloatingChain.getElevator().updateFramesRecursively();
       point2.changeFrame(base.getBodyFixedFrame());
 

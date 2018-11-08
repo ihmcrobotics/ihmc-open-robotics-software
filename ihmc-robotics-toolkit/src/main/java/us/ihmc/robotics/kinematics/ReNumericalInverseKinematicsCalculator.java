@@ -11,14 +11,15 @@ import org.ejml.ops.NormOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
 /**
@@ -187,11 +188,9 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
    private boolean exponentialCoordinatesOK()
    {
       Twist twist = new Twist(jacobian.getEndEffectorFrame(), jacobian.getBaseFrame(), jacobian.getJacobianFrame(), error);
-      RotationMatrix rotationCheck = new RotationMatrix();
-      rotationCheck.setIdentity();
-      Vector3D positionCheck = new Vector3D();
-      ScrewTestTools.integrate(rotationCheck, positionCheck, 1.0, twist);
-      RigidBodyTransform transformCheck = new RigidBodyTransform(rotationCheck, positionCheck);
+      Pose3D poseCheck = new Pose3D();
+      new MultiBodySystemStateIntegrator(1.0).integrate(twist, poseCheck);
+      RigidBodyTransform transformCheck = new RigidBodyTransform(poseCheck.getOrientation(), poseCheck.getPosition());
 
       return transformCheck.epsilonEquals(errorTransform, 1e-5);
    }
