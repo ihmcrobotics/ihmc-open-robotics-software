@@ -18,7 +18,6 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.mecano.multiBodySystem.Joint;
@@ -31,6 +30,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoRandomTools;
+import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
@@ -79,7 +79,7 @@ public class TwistCalculatorTest
             cumulatedLinearVelocity.changeFrame(bodyFrame);
             expectedTwist.getLinearPart().set(cumulatedLinearVelocity);
 
-            assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
+            MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
          }
       }
    }
@@ -162,7 +162,7 @@ public class TwistCalculatorTest
             cumulatedLinearVelocity.changeFrame(bodyFrame);
             expectedTwist.getLinearPart().set(cumulatedLinearVelocity);
 
-            assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
+            MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
          }
       }
    }
@@ -254,7 +254,7 @@ public class TwistCalculatorTest
             ReferenceFrame bodyFrameInFuture = jointsInFuture.get(jointIndex).getSuccessor().getBodyFixedFrame();
             Twist expectedTwist = computeExpectedTwistByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
 
-            assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+            MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
          }
       }
    }
@@ -300,7 +300,7 @@ public class TwistCalculatorTest
             ReferenceFrame bodyFrameInFuture = jointsInFuture.get(jointIndex).getSuccessor().getBodyFixedFrame();
             Twist expectedTwist = computeExpectedTwistByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
 
-            assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+            MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
          }
       }
    }
@@ -364,7 +364,7 @@ public class TwistCalculatorTest
             ReferenceFrame bodyFrameInFuture = jointsInFuture.get(jointIndex).getSuccessor().getBodyFixedFrame();
             Twist expectedTwist = computeExpectedTwistByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
 
-            assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+            MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
 
             Point3D bodyFixedPoint = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
             FramePoint3D frameBodyFixedPoint = new FramePoint3D(bodyFrame, bodyFixedPoint);
@@ -444,7 +444,7 @@ public class TwistCalculatorTest
             ReferenceFrame bodyFrameInFuture = jointsInFuture.get(jointIndex).getSuccessor().getBodyFixedFrame();
             Twist expectedTwist = computeExpectedTwistByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
 
-            assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+            MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
 
             // Assert relative twist
             for (int baseJointIndex = 0; baseJointIndex < numberOfRevoluteJoints + 1; baseJointIndex++)
@@ -457,7 +457,7 @@ public class TwistCalculatorTest
                ReferenceFrame baseFrameInFuture = jointsInFuture.get(baseJointIndex).getSuccessor().getBodyFixedFrame();
                Twist expectedRelativeTwist = computeExpectedRelativeTwistByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, baseFrame, baseFrameInFuture);
 
-               assertTwistEquals(expectedRelativeTwist, actualRelativeTwist, 1.0e-5);
+               MecanoTestTools.assertTwistEquals(expectedRelativeTwist, actualRelativeTwist, 1.0e-5);
 
                Point3D bodyFixedPoint = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
                FramePoint3D frameBodyFixedPoint = new FramePoint3D(bodyFrame, bodyFixedPoint);
@@ -478,30 +478,6 @@ public class TwistCalculatorTest
                EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity, actualAngularVelocity, 1.0e-5);
             }
          }
-      }
-   }
-
-   public static void assertTwistEquals(Twist expectedTwist, Twist actualTwist, double epsilon) throws AssertionError
-   {
-      assertTwistEquals(null, expectedTwist, actualTwist, epsilon);
-   }
-
-   public static void assertTwistEquals(String messagePrefix, Twist expectedTwist, Twist actualTwist, double epsilon) throws AssertionError
-   {
-      try
-      {
-         assertTrue(expectedTwist.epsilonEquals(actualTwist, epsilon));
-      }
-      catch (AssertionError e)
-      {
-         Vector3D difference = new Vector3D();
-         difference.sub(expectedTwist.getLinearPart(), actualTwist.getLinearPart());
-         double linearPartDifference = difference.length();
-         difference.sub(expectedTwist.getAngularPart(), actualTwist.getAngularPart());
-         double angularPartDifference = difference.length();
-         messagePrefix = messagePrefix != null ? messagePrefix + " " : "";
-         throw new AssertionError(messagePrefix + "expected:\n<" + expectedTwist + ">\n but was:\n<" + actualTwist + ">\n difference: linear part: "
-               + linearPartDifference + ", angular part: " + angularPartDifference);
       }
    }
 

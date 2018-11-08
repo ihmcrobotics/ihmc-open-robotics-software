@@ -26,6 +26,7 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -90,7 +91,7 @@ public class GeometricJacobianTest
          randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(rootBody.getBodyFixedFrame(), expectedTwist);
          rootJacobian.getTwist(jointVelocitiesMatrix, actualTwist);
 
-         TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
+         MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
 
          RigidBodyBasics randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
          GeometricJacobian jacobian = new GeometricJacobian(randomBase, randomEndEffector, randomEndEffector.getBodyFixedFrame());
@@ -102,7 +103,7 @@ public class GeometricJacobianTest
          randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(randomBase.getBodyFixedFrame(), expectedTwist);
          jacobian.getTwist(jointVelocitiesMatrix, actualTwist);
 
-         TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
+         MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
       }
    }
 
@@ -143,7 +144,7 @@ public class GeometricJacobianTest
          randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(rootBody.getBodyFixedFrame(), expectedTwist);
          rootJacobian.getTwist(jointVelocitiesMatrix, actualTwist);
 
-         TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
+         MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
 
          RigidBodyBasics randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
          GeometricJacobian jacobian = new GeometricJacobian(randomBase, randomEndEffector, randomEndEffector.getBodyFixedFrame());
@@ -155,7 +156,7 @@ public class GeometricJacobianTest
          randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(randomBase.getBodyFixedFrame(), expectedTwist);
          jacobian.getTwist(jointVelocitiesMatrix, actualTwist);
 
-         TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
+         MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
       }
    }
 
