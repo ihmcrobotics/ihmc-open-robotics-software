@@ -20,6 +20,7 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -49,7 +50,7 @@ public class CenterOfMassReferenceFrameTest
          jointAxes[i] = RandomGeometry.nextVector3D(random);
       }
 
-      ScrewTestTools.createRandomChainRobot("test", joints, floatingBody, jointAxes, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "test", floatingBody, jointAxes));
       ReferenceFrame centerOfMassReferenceFrame = new CenterOfMassReferenceFrame("com", elevator.getBodyFixedFrame(), elevator);
 
       sixDoFJoint.setJointPosition(RandomGeometry.nextVector3D(random));

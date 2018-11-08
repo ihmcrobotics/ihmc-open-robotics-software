@@ -51,7 +51,7 @@ public class TwistCalculatorTest
    {
       Random random = new Random(234234L);
       int numberOfJoints = 20;
-      List<PrismaticJoint> prismaticJoints = ScrewTestTools.createRandomChainRobotWithPrismaticJoints(numberOfJoints, random);
+      List<PrismaticJoint> prismaticJoints = MultiBodySystemRandomTools.nextPrismaticJointChain(random, numberOfJoints);
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, prismaticJoints.get(random.nextInt(numberOfJoints)).getPredecessor());
 
       for (int i = 0; i < 100; i++)
@@ -88,7 +88,7 @@ public class TwistCalculatorTest
    {
       Random random = new Random(234234L);
       int numberOfJoints = 20;
-      List<RevoluteJoint> revoluteJoints = ScrewTestTools.createRandomChainRobot(numberOfJoints, random);
+      List<RevoluteJoint> revoluteJoints = MultiBodySystemRandomTools.nextRevoluteJointChain(random, numberOfJoints);
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, revoluteJoints.get(random.nextInt(numberOfJoints)).getPredecessor());
 
       for (int i = 0; i < 100; i++)
@@ -127,7 +127,7 @@ public class TwistCalculatorTest
    {
       Random random = new Random(234234L);
       int numberOfJoints = 100;
-      List<PrismaticJoint> prismaticJoints = ScrewTestTools.createRandomTreeRobotWithPrismaticJoints(numberOfJoints, random);
+      List<PrismaticJoint> prismaticJoints = MultiBodySystemRandomTools.nextPrismaticJointTree(random, numberOfJoints);
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, prismaticJoints.get(random.nextInt(numberOfJoints)).getPredecessor());
 
       for (int i = 0; i < 100; i++)
@@ -171,7 +171,7 @@ public class TwistCalculatorTest
    {
       Random random = new Random(234234L);
       int numberOfJoints = 100;
-      List<RevoluteJoint> revoluteJoints = ScrewTestTools.createRandomTreeRobot(numberOfJoints, random);
+      List<RevoluteJoint> revoluteJoints = MultiBodySystemRandomTools.nextRevoluteJointTree(random, numberOfJoints);
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, revoluteJoints.get(random.nextInt(numberOfJoints)).getPredecessor());
 
       for (int i = 0; i < 100; i++)
@@ -218,7 +218,7 @@ public class TwistCalculatorTest
       Random random = new Random(234234L);
 
       int numberOfJoints = 10;
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
       List<OneDoFJoint> jointsInFuture = Arrays.asList(ScrewTools.cloneOneDoFJointPath(joints.toArray(new OneDoFJoint[numberOfJoints])));
 
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
@@ -264,7 +264,7 @@ public class TwistCalculatorTest
       Random random = new Random(234234L);
 
       int numberOfJoints = 100;
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomTreeRobotWithOneDoFJoints(numberOfJoints, random);
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointTree(random, numberOfJoints);
       List<OneDoFJoint> jointsInFuture = Arrays.asList(ScrewTools.cloneOneDoFJointPath(joints.toArray(new OneDoFJoint[numberOfJoints])));
 
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
@@ -583,7 +583,7 @@ public class TwistCalculatorTest
    {
       Random random = new Random();
       int numberOfJoints = 5;
-      List<RevoluteJoint> randomChainRobot = ScrewTestTools.createRandomChainRobot(numberOfJoints, random);
+      List<RevoluteJoint> randomChainRobot = MultiBodySystemRandomTools.nextRevoluteJointChain(random, numberOfJoints);
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, randomChainRobot.get(0).getPredecessor());
 
       Twist dummyTwist = new Twist();

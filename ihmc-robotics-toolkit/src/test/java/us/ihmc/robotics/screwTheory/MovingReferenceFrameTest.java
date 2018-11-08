@@ -35,7 +35,7 @@ public class MovingReferenceFrameTest
       Random random = new Random(435423L);
 
       int numberOfJoints = 100;
-      List<PrismaticJoint> joints = ScrewTestTools.createRandomChainRobotWithPrismaticJoints(numberOfJoints, random);
+      List<PrismaticJoint> joints = MultiBodySystemRandomTools.nextPrismaticJointChain(random, numberOfJoints);
 
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
       Twist actualTwist = new Twist();
@@ -69,7 +69,7 @@ public class MovingReferenceFrameTest
       Random random = new Random(435423L);
 
       int numberOfJoints = 100;
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
 
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
       Twist actualTwist = new Twist();
@@ -103,7 +103,7 @@ public class MovingReferenceFrameTest
       Random random = new Random(435423L);
 
       int numberOfJoints = 100;
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomTreeRobotWithOneDoFJoints(numberOfJoints, random);
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointTree(random, numberOfJoints);
 
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
       Twist actualTwist = new Twist();

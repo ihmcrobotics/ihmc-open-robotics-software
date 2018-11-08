@@ -34,7 +34,7 @@ public class NumericalMovingReferenceFrameTest
       int numberOfJoints = 20;
       double updateDT = 1.0e-8;
 
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
 
       Map<MovingReferenceFrame, NumericalMovingReferenceFrame> jointFramesToFDFrames = new HashMap<>();
       for (OneDoFJoint joint : joints)

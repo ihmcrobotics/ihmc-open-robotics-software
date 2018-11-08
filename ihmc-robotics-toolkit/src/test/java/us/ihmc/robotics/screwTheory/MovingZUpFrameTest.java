@@ -174,7 +174,7 @@ public class MovingZUpFrameTest
       int numberOfJoints = 20;
       double updateDT = 1.0e-8;
 
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
 
       Map<MovingZUpFrame, NumericalMovingReferenceFrame> jointFramesToFDFrames = new HashMap<>();
       for (OneDoFJoint joint : joints)
@@ -224,7 +224,7 @@ public class MovingZUpFrameTest
       Random random = new Random(3452345L);
       int numberOfJoints = 20;
 
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
 
       Map<ZUpFrame, MovingZUpFrame> zUpFramesToMovingZUpFrames = new HashMap<>();
       for (OneDoFJoint joint : joints)

@@ -55,7 +55,7 @@ public abstract class MassMatrixCalculatorTest
       Random random = new Random();
       joints = new ArrayList<RevoluteJoint>();
       Vector3D[] jointAxes = {X, Y, Z, X, Z, Z, X, Y, Z, X};
-      ScrewTestTools.createRandomChainRobot("", joints, elevator, jointAxes, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "", elevator, jointAxes));
       MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
       elevator.updateFramesRecursively();
       MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);

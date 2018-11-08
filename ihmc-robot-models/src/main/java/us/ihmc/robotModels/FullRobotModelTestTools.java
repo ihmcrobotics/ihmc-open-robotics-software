@@ -20,6 +20,7 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
@@ -86,13 +87,13 @@ public class FullRobotModelTestTools
          elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
 
          rootJoint = new SixDoFJoint("rootJoint", elevator);
-         pelvis = ScrewTestTools.addRandomRigidBody("pelvis", random, rootJoint);
+         pelvis = MultiBodySystemRandomTools.nextRigidBody(random, "pelvis", rootJoint);
 
          addSpine(random);
-         chest = ScrewTestTools.addRandomRigidBody("chest", random, spineJoints.get(SpineJointName.SPINE_YAW));
+         chest = MultiBodySystemRandomTools.nextRigidBody(random, "chest", spineJoints.get(SpineJointName.SPINE_YAW));
 
          addNeck(random);
-         head = ScrewTestTools.addRandomRigidBody("head", random, neckJoints.get(NeckJointName.DISTAL_NECK_PITCH));
+         head = MultiBodySystemRandomTools.nextRigidBody(random, "head", neckJoints.get(NeckJointName.DISTAL_NECK_PITCH));
 
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -154,13 +155,13 @@ public class FullRobotModelTestTools
 
       private void addSpine(Random random)
       {
-         RevoluteJoint spineRoll = ScrewTestTools.addRandomRevoluteJoint("spineRoll", roll, random, pelvis);
-         RigidBodyBasics trunnion1 = ScrewTestTools.addRandomRigidBody("spineTrunnion1", random, spineRoll);
+         RevoluteJoint spineRoll = MultiBodySystemRandomTools.nextRevoluteJoint(random, "spineRoll", roll, pelvis);
+         RigidBodyBasics trunnion1 = MultiBodySystemRandomTools.nextRigidBody(random, "spineTrunnion1", spineRoll);
 
-         RevoluteJoint spinePitch = ScrewTestTools.addRandomRevoluteJoint("spinePitch", pitch, random, trunnion1);
-         RigidBodyBasics trunnion2 = ScrewTestTools.addRandomRigidBody("spineTrunnion2", random, spinePitch);
+         RevoluteJoint spinePitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, "spinePitch", pitch, trunnion1);
+         RigidBodyBasics trunnion2 = MultiBodySystemRandomTools.nextRigidBody(random, "spineTrunnion2", spinePitch);
 
-         RevoluteJoint spineYaw = ScrewTestTools.addRandomRevoluteJoint("spineYaw", yaw, random, trunnion2);
+         RevoluteJoint spineYaw = MultiBodySystemRandomTools.nextRevoluteJoint(random, "spineYaw", yaw, trunnion2);
 
          spineJoints.put(SpineJointName.SPINE_ROLL, spineRoll);
          spineJoints.put(SpineJointName.SPINE_PITCH, spinePitch);
@@ -173,13 +174,13 @@ public class FullRobotModelTestTools
 
       private void addNeck(Random random)
       {
-         RevoluteJoint lowerNeckPitch = ScrewTestTools.addRandomRevoluteJoint("lowerNeckPitch", pitch, random, chest);
-         RigidBodyBasics trunnion1 = ScrewTestTools.addRandomRigidBody("neckTrunnion1", random, lowerNeckPitch);
+         RevoluteJoint lowerNeckPitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, "lowerNeckPitch", pitch, chest);
+         RigidBodyBasics trunnion1 = MultiBodySystemRandomTools.nextRigidBody(random, "neckTrunnion1", lowerNeckPitch);
 
-         RevoluteJoint neckYaw = ScrewTestTools.addRandomRevoluteJoint("neckYaw", yaw, random, trunnion1);
-         RigidBodyBasics trunnion2 = ScrewTestTools.addRandomRigidBody("neckTrunnion2", random, neckYaw);
+         RevoluteJoint neckYaw = MultiBodySystemRandomTools.nextRevoluteJoint(random, "neckYaw", yaw, trunnion1);
+         RigidBodyBasics trunnion2 = MultiBodySystemRandomTools.nextRigidBody(random, "neckTrunnion2", neckYaw);
 
-         RevoluteJoint upperNeckPitch = ScrewTestTools.addRandomRevoluteJoint("upperNeckPitch", pitch, random, trunnion2);
+         RevoluteJoint upperNeckPitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, "upperNeckPitch", pitch, trunnion2);
 
          neckJoints.put(NeckJointName.PROXIMAL_NECK_PITCH, lowerNeckPitch);
          neckJoints.put(NeckJointName.DISTAL_NECK_YAW, neckYaw);
@@ -194,26 +195,26 @@ public class FullRobotModelTestTools
       {
          String prefix = robotSide.getShortLowerCaseName();
 
-         RevoluteJoint shoulderYaw = ScrewTestTools.addRandomRevoluteJoint(prefix + "_shoulderYaw", yaw, random, chest);
-         RigidBodyBasics shoulderTrunnion = ScrewTestTools.addRandomRigidBody(prefix + "_shoulderTrunnion", random, shoulderYaw);
+         RevoluteJoint shoulderYaw = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_shoulderYaw", yaw, chest);
+         RigidBodyBasics shoulderTrunnion = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_shoulderTrunnion", shoulderYaw);
 
-         RevoluteJoint shoulderRoll = ScrewTestTools.addRandomRevoluteJoint(prefix + "_shoulderRoll", roll, random, shoulderTrunnion);
-         RigidBodyBasics shoulder = ScrewTestTools.addRandomRigidBody(prefix + "_shoulder", random, shoulderRoll);
+         RevoluteJoint shoulderRoll = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_shoulderRoll", roll, shoulderTrunnion);
+         RigidBodyBasics shoulder = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_shoulder", shoulderRoll);
 
-         RevoluteJoint shoulderPitch = ScrewTestTools.addRandomRevoluteJoint(prefix + "_shoulderPitch", pitch, random, shoulder);
-         RigidBodyBasics upperArm = ScrewTestTools.addRandomRigidBody(prefix + "_upperArm", random, shoulderPitch);
+         RevoluteJoint shoulderPitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_shoulderPitch", pitch, shoulder);
+         RigidBodyBasics upperArm = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_upperArm", shoulderPitch);
 
-         RevoluteJoint elbowPitch = ScrewTestTools.addRandomRevoluteJoint(prefix + "_elbowPitch", pitch, random, upperArm);
-         RigidBodyBasics lowerArm = ScrewTestTools.addRandomRigidBody(prefix + "_lowerArm", random, elbowPitch);
+         RevoluteJoint elbowPitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_elbowPitch", pitch, upperArm);
+         RigidBodyBasics lowerArm = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_lowerArm", elbowPitch);
 
-         RevoluteJoint elbowYaw = ScrewTestTools.addRandomRevoluteJoint(prefix + "_elbowYaw", yaw, random, lowerArm);
-         RigidBodyBasics forearm = ScrewTestTools.addRandomRigidBody(prefix + "_forearm", random, elbowYaw);
+         RevoluteJoint elbowYaw = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_elbowYaw", yaw, lowerArm);
+         RigidBodyBasics forearm = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_forearm", elbowYaw);
 
-         RevoluteJoint firstWristPitch = ScrewTestTools.addRandomRevoluteJoint(prefix + "_firstWristPitch", pitch, random, forearm);
-         RigidBodyBasics wristTrunnion1 = ScrewTestTools.addRandomRigidBody(prefix + "_wristTrunnion1", random, firstWristPitch);
+         RevoluteJoint firstWristPitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_firstWristPitch", pitch, forearm);
+         RigidBodyBasics wristTrunnion1 = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_wristTrunnion1", firstWristPitch);
 
-         RevoluteJoint wristRoll = ScrewTestTools.addRandomRevoluteJoint(prefix + "_wristRoll", roll, random, wristTrunnion1);
-         RigidBodyBasics hand = ScrewTestTools.addRandomRigidBody(prefix + "_hand", random, wristRoll);
+         RevoluteJoint wristRoll = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_wristRoll", roll, wristTrunnion1);
+         RigidBodyBasics hand = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_hand", wristRoll);
 
          armJoints.get(robotSide).put(ArmJointName.SHOULDER_YAW, shoulderYaw);
          armJoints.get(robotSide).put(ArmJointName.SHOULDER_ROLL, shoulderRoll);
@@ -247,23 +248,23 @@ public class FullRobotModelTestTools
       {
          String prefix = robotSide.getShortLowerCaseName();
 
-         RevoluteJoint hipYaw = ScrewTestTools.addRandomRevoluteJoint(prefix + "_hipYaw", yaw, random, pelvis);
-         RigidBodyBasics hipTrunnion = ScrewTestTools.addRandomRigidBody(prefix + "_hipTrunnion", random, hipYaw);
+         RevoluteJoint hipYaw = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_hipYaw", yaw, pelvis);
+         RigidBodyBasics hipTrunnion = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_hipTrunnion", hipYaw);
 
-         RevoluteJoint hipRoll = ScrewTestTools.addRandomRevoluteJoint(prefix + "_hipRoll", roll, random, hipTrunnion);
-         RigidBodyBasics hip = ScrewTestTools.addRandomRigidBody(prefix + "_hip", random, hipRoll);
+         RevoluteJoint hipRoll = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_hipRoll", roll, hipTrunnion);
+         RigidBodyBasics hip = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_hip", hipRoll);
 
-         RevoluteJoint hipPitch = ScrewTestTools.addRandomRevoluteJoint(prefix + "_hipPitch", pitch, random, hip);
-         RigidBodyBasics upperLeg = ScrewTestTools.addRandomRigidBody(prefix + "_upperLeg", random, hipPitch);
+         RevoluteJoint hipPitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_hipPitch", pitch, hip);
+         RigidBodyBasics upperLeg = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_upperLeg", hipPitch);
 
-         RevoluteJoint kneePitch = ScrewTestTools.addRandomRevoluteJoint(prefix + "_kneePitch", pitch, random, upperLeg);
-         RigidBodyBasics lowerLeg = ScrewTestTools.addRandomRigidBody(prefix + "_lowerLeg", random, kneePitch);
+         RevoluteJoint kneePitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_kneePitch", pitch, upperLeg);
+         RigidBodyBasics lowerLeg = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_lowerLeg", kneePitch);
 
-         RevoluteJoint ankleRoll = ScrewTestTools.addRandomRevoluteJoint(prefix + "_ankleRoll", roll, random, lowerLeg);
-         RigidBodyBasics ankleTrunnion = ScrewTestTools.addRandomRigidBody(prefix + "_ankleTrunnion", random, ankleRoll);
+         RevoluteJoint ankleRoll = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_ankleRoll", roll, lowerLeg);
+         RigidBodyBasics ankleTrunnion = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_ankleTrunnion", ankleRoll);
 
-         RevoluteJoint anklePitch = ScrewTestTools.addRandomRevoluteJoint(prefix + "_anklePitch", pitch, random, ankleTrunnion);
-         RigidBodyBasics foot = ScrewTestTools.addRandomRigidBody(prefix + "_foot", random, anklePitch);
+         RevoluteJoint anklePitch = MultiBodySystemRandomTools.nextRevoluteJoint(random, prefix + "_anklePitch", pitch, ankleTrunnion);
+         RigidBodyBasics foot = MultiBodySystemRandomTools.nextRigidBody(random, prefix + "_foot", anklePitch);
 
          legJoints.get(robotSide).put(LegJointName.HIP_YAW, hipYaw);
          legJoints.get(robotSide).put(LegJointName.HIP_ROLL, hipRoll);

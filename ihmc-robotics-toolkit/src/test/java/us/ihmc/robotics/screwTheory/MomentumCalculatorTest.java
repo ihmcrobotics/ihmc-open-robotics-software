@@ -28,6 +28,7 @@ import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.testing.JUnitTools;
 
@@ -126,7 +127,7 @@ public class MomentumCalculatorTest
          jointAxes[i] = jointAxis;
       }
 
-      ScrewTestTools.createRandomChainRobot("randomChain", joints, elevator, jointAxes, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "randomChain", elevator, jointAxes));
       JointBasics[] jointsArray = new RevoluteJoint[joints.size()];
       joints.toArray(jointsArray);
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("comFrame", world, elevator);

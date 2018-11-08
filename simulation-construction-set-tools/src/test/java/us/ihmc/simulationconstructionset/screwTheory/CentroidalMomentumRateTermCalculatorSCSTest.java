@@ -67,7 +67,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
-      ScrewTestTools.createRandomChainRobot("blop", joints, elevator, jointAxes, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "blop", elevator, jointAxes));
       SCSRobotFromInverseDynamicsRobotModel robot = new SCSRobotFromInverseDynamicsRobotModel("robot", elevator.getChildrenJoints().get(0));
 
       assertAAndADotV(random, joints, elevator, robot,numberOfJoints);
@@ -81,11 +81,11 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
 
       ArrayList<RevoluteJoint> joints = new ArrayList<>();
       RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
-      RevoluteJoint rootJoint = ScrewTestTools.addRandomRevoluteJoint("rootJoint", random, elevator); // Just to make sure there is only one root joint for the SCS robot
-      RigidBodyBasics rootBody = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
+      RevoluteJoint rootJoint = MultiBodySystemRandomTools.nextRevoluteJoint(random, "rootJoint", elevator); // Just to make sure there is only one root joint for the SCS robot
+      RigidBodyBasics rootBody = MultiBodySystemRandomTools.nextRigidBody(random, "rootBody", rootJoint);
 
       int numberOfJoints = 10; 
-      ScrewTestTools.createRandomTreeRobot(joints, rootBody, numberOfJoints - 1, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointTree(random, rootBody, numberOfJoints - 1));
       joints.add(0, rootJoint);
       SCSRobotFromInverseDynamicsRobotModel robot = new SCSRobotFromInverseDynamicsRobotModel("robot", rootJoint);
 
