@@ -29,14 +29,14 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvironmentInterface
+public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final List<Robot> contactableRobots = new ArrayList<Robot>();
    private final CombinedTerrainObject3D combinedTerrainObject;
    private final double WALL_HEIGHT = 2.4384;
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
-   public DarpaRoboticsChallengeFinalsEnvironment(boolean door, boolean drill, boolean valve, boolean wakling, boolean stairs)
+   public DRCFinalsEnvironment(boolean door, boolean drill, boolean valve, boolean wakling, boolean stairs)
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
