@@ -17,6 +17,7 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 
 public class MovingMidFrameTest
 {
@@ -33,6 +34,7 @@ public class MovingMidFrameTest
       Random random = new Random(3452345L);
       int numberOfJoints = 20;
       double updateDT = 1.0e-8;
+      MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(updateDT);
 
       List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
 
@@ -64,7 +66,7 @@ public class MovingMidFrameTest
 
       for (int i = 0; i < 100; i++)
       {
-         ScrewTestTools.integrateVelocities(joints, updateDT);
+         integrator.integrateFromVelocity(joints);
          joints.get(0).getPredecessor().updateFramesRecursively();
          jointFramesToFDFrames.keySet().forEach(MovingReferenceFrame::update);
          jointFramesToFDFrames.values().forEach(MovingReferenceFrame::update);

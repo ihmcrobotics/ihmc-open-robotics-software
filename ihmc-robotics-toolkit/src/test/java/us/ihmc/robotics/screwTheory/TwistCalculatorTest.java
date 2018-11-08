@@ -33,6 +33,7 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
+import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -323,6 +324,7 @@ public class TwistCalculatorTest
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
 
       double dt = 1.0e-8;
+      MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(dt);
 
       for (int i = 0; i < 100; i++)
       {
@@ -335,7 +337,7 @@ public class TwistCalculatorTest
          floatingJointInFuture.setJointConfiguration(floatingJoint);
          floatingJointInFuture.setJointTwist(floatingJoint);
          floatingJointInFuture.setJointAcceleration(floatingJoint);
-         ScrewTestTools.integrateVelocities(floatingJointInFuture, dt);
+         integrator.integrateFromVelocity(floatingJointInFuture);
 
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -1.0, 1.0, revoluteJoints);
          MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, -1.0, 1.0, revoluteJoints);
@@ -402,6 +404,7 @@ public class TwistCalculatorTest
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor());
 
       double dt = 1.0e-8;
+      MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(dt);
 
       for (int i = 0; i < 50; i++)
       {
@@ -414,7 +417,7 @@ public class TwistCalculatorTest
          floatingJointInFuture.setJointConfiguration(floatingJoint);
          floatingJointInFuture.setJointTwist(floatingJoint);
          floatingJointInFuture.setJointAcceleration(floatingJoint);
-         ScrewTestTools.integrateVelocities(floatingJointInFuture, dt);
+         integrator.integrateFromVelocity(floatingJointInFuture);
 
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -1.0, 1.0, revoluteJoints);
          MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, -1.0, 1.0, revoluteJoints);
