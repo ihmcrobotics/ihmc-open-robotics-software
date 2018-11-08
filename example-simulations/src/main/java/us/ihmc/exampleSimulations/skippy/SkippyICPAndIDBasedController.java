@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -63,7 +64,8 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
 
    private void setupGraphics(YoGraphicsListRegistry graphicsListRegistry)
    {
-      RigidBodyBasics[] bodies = ScrewTools.computeRigidBodiesAfterThisJoint(skippy.getTorso().getParentJoint());
+      JointBasics[] joints = {skippy.getTorso().getParentJoint()};
+      RigidBodyBasics[] bodies = ScrewTools.computeSubtreeSuccessors(joints);
       for (RigidBodyBasics body : bodies)
       {
          YoGraphicReferenceFrame referenceFrameBody = new YoGraphicReferenceFrame(body.getBodyFixedFrame(), registry, true, 0.4);

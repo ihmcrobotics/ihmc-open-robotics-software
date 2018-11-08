@@ -66,7 +66,8 @@ public class VirtualModelController
 
       if (DISPLAY_GRAVITY_WRENCHES)
       {
-         RigidBodyBasics[] allBodies = ScrewTools.computeRigidBodiesAfterThisJoint(defaultRootBody.getParentJoint());
+         JointBasics[] joints = {defaultRootBody.getParentJoint()};
+         RigidBodyBasics[] allBodies = ScrewTools.computeSubtreeSuccessors(joints);
          this.allBodies = Arrays.asList(allBodies);
          for (int i = 0; i < allBodies.length; i++)
             gravityWrenchMap.put(allBodies[i], new Wrench(allBodies[i].getBodyFixedFrame(), ReferenceFrame.getWorldFrame()));
