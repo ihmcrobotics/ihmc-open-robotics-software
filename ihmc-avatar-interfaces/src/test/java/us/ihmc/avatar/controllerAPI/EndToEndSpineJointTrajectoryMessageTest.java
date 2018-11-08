@@ -32,7 +32,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
@@ -66,7 +65,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
    private RigidBodyBasics pelvis;
    private RigidBodyBasics chest;
-   private OneDoFJoint[] spineJoints;
+   private OneDoFJointBasics[] spineJoints;
    private int numberOfJoints;
    private ControllerSpy controllerSpy;
 
@@ -346,7 +345,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         OneDoFJoint joint = spineJoints[jointIdx];
+         OneDoFJointBasics joint = spineJoints[jointIdx];
          assertNumberOfTrajectoryPoints(numberOfPoints[jointIdx] + 1, joint, scs);
       }
 
@@ -376,7 +375,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       assertDesiredsContinous(controllerSpy);
    }
 
-   private static void assertNumberOfTrajectoryPoints(int points, OneDoFJoint joint, SimulationConstructionSet scs)
+   private static void assertNumberOfTrajectoryPoints(int points, OneDoFJointBasics joint, SimulationConstructionSet scs)
    {
       String bodyName = "utorso";
       String prefix = bodyName + "Jointspace";
@@ -385,7 +384,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       assertEquals("Unexpected number of trajectory points for " + jointName, points, numberOfPoints.getIntegerValue());
    }
 
-   private static void assertNumberOfTrajectoryPointsInGenerator(int points, OneDoFJoint joint, SimulationConstructionSet scs)
+   private static void assertNumberOfTrajectoryPointsInGenerator(int points, OneDoFJointBasics joint, SimulationConstructionSet scs)
    {
       String bodyName = "utorso";
       String prefix = bodyName + "Jointspace";
@@ -394,7 +393,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       assertEquals("Unexpected number of trajectory points for " + jointName, points, numberOfPoints.getIntegerValue());
    }
 
-   private static void assertNumberOfTrajectoryPointsInQueue(int points, OneDoFJoint joint, SimulationConstructionSet scs)
+   private static void assertNumberOfTrajectoryPointsInQueue(int points, OneDoFJointBasics joint, SimulationConstructionSet scs)
    {
       String bodyName = "utorso";
       String prefix = bodyName + "Jointspace";
@@ -408,14 +407,14 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       double[] jointDesireds = new double[numberOfJoints];
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         OneDoFJoint joint = spineJoints[jointIdx];
+         OneDoFJointBasics joint = spineJoints[jointIdx];
          double desired = getRandomJointAngleInRange(random, joint);
          jointDesireds[jointIdx] = desired;
       }
       return HumanoidMessageTools.createSpineTrajectoryMessage(trajectoryTime, jointDesireds);
    }
 
-   private double getRandomJointAngleInRange(Random random, OneDoFJoint joint)
+   private double getRandomJointAngleInRange(Random random, OneDoFJointBasics joint)
    {
       double jointLimitUpper = joint.getJointLimitUpper();
       double jointLimitLower = joint.getJointLimitLower();
@@ -462,13 +461,13 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       assertDesiredsMatchAfterExecution(message, spineJoints, drcSimulationTestHelper.getSimulationConstructionSet());
    }
 
-   private static void assertDesiredsMatchAfterExecution(SpineTrajectoryMessage message, OneDoFJoint[] spineJoints, SimulationConstructionSet scs)
+   private static void assertDesiredsMatchAfterExecution(SpineTrajectoryMessage message, OneDoFJointBasics[] spineJoints, SimulationConstructionSet scs)
    {
       for (int jointIdx = 0; jointIdx < spineJoints.length; jointIdx++)
       {
          OneDoFJointTrajectoryMessage jointTrajectory = message.getJointspaceTrajectory().getJointTrajectoryMessages().get(jointIdx);
          double desired = jointTrajectory.getTrajectoryPoints().getLast().getPosition();
-         OneDoFJoint joint = spineJoints[jointIdx];
+         OneDoFJointBasics joint = spineJoints[jointIdx];
          assertJointDesired(scs, joint, desired);
       }
    }
@@ -491,13 +490,13 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       EuclidCoreTestTools.assertQuaternionEquals(desired, controllerDesired, DESIRED_QUAT_EPSILON);
    }
 
-   private static void assertJointDesired(SimulationConstructionSet scs, OneDoFJoint joint, double desired)
+   private static void assertJointDesired(SimulationConstructionSet scs, OneDoFJointBasics joint, double desired)
    {
       YoDouble scsDesired = findJointDesired(scs, joint);
       assertEquals(desired, scsDesired.getDoubleValue(), DESIRED_EPSILON);
    }
 
-   private static YoDouble findJointDesired(SimulationConstructionSet scs, OneDoFJoint joint)
+   private static YoDouble findJointDesired(SimulationConstructionSet scs, OneDoFJointBasics joint)
    {
       String jointName = joint.getName();
       String namespace = jointName + "PDController";
@@ -513,7 +512,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       return getBooleanYoVariable(scs, variable, namespace);
    }
 
-   private static YoBoolean findJointControlEnabled(SimulationConstructionSet scs, OneDoFJoint joint)
+   private static YoBoolean findJointControlEnabled(SimulationConstructionSet scs, OneDoFJointBasics joint)
    {
       String jointName = joint.getName();
       String namespace = jointName + "PDController";
@@ -602,12 +601,12 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private class ControllerSpy extends SimpleRobotController
    {
       private final double controllerDT;
-      private final OneDoFJoint[] spineJoints;
-      private final OneDoFJoint[] spineJointClones;
+      private final OneDoFJointBasics[] spineJoints;
+      private final OneDoFJointBasics[] spineJointClones;
       private final RigidBodyBasics chestClone;
 
-      private final Map<OneDoFJoint, YoBoolean> jointControlEnabled = new HashMap<>();
-      private final Map<OneDoFJoint, YoDouble> jointDesiredsMap = new HashMap<>();
+      private final Map<OneDoFJointBasics, YoBoolean> jointControlEnabled = new HashMap<>();
+      private final Map<OneDoFJointBasics, YoDouble> jointDesiredsMap = new HashMap<>();
 
       private final YoBoolean orientationControlEnabled;
       private final YoFrameQuaternion desiredOrientation;
@@ -620,7 +619,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
       private final QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
 
-      public ControllerSpy(OneDoFJoint[] spineJoints, SimulationConstructionSet scs, double controllerDT)
+      public ControllerSpy(OneDoFJointBasics[] spineJoints, SimulationConstructionSet scs, double controllerDT)
       {
          this.spineJoints = spineJoints;
          this.controllerDT = controllerDT;
@@ -629,7 +628,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
          {
-            OneDoFJoint joint = spineJoints[jointIdx];
+            OneDoFJointBasics joint = spineJoints[jointIdx];
             jointDesiredsMap.put(joint, findJointDesired(scs, joint));
             jointControlEnabled.put(joint, findJointControlEnabled(scs, joint));
          }

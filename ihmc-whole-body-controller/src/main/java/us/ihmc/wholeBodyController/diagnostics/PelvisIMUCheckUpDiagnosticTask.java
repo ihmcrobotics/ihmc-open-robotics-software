@@ -13,16 +13,13 @@ import java.util.logging.Logger;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -36,6 +33,9 @@ import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTask;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 {
@@ -63,8 +63,8 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
    private final DiagnosticParameters diagnosticParameters;
 
-   private final EnumMap<Axis, List<OneDoFJoint>> jointsToWiggleLists = new EnumMap<>(Axis.class);
-   private final EnumMap<Axis, Set<OneDoFJoint>> jointsToWiggle = new EnumMap<>(Axis.class);
+   private final EnumMap<Axis, List<OneDoFJointBasics>> jointsToWiggleLists = new EnumMap<>(Axis.class);
+   private final EnumMap<Axis, Set<OneDoFJointBasics>> jointsToWiggle = new EnumMap<>(Axis.class);
    private final EnumMap<Axis, YoDouble> desiredJointPositionOffsets = new EnumMap<>(Axis.class);
    private final EnumMap<Axis, YoDouble> desiredJointVelocityOffsets = new EnumMap<>(Axis.class);
 
@@ -180,9 +180,9 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       functionGenerator.setResetTime(checkUpDuration.getDoubleValue());
       functionGenerator.setMode(YoFunctionGeneratorMode.SINE);
 
-      Set<OneDoFJoint> yawJointsAttachedToPelvis = new HashSet<>();
-      Set<OneDoFJoint> pitchJointsAttachedToPelvis = new HashSet<>();
-      Set<OneDoFJoint> rollJointsAttachedToPelvis = new HashSet<>();
+      Set<OneDoFJointBasics> yawJointsAttachedToPelvis = new HashSet<>();
+      Set<OneDoFJointBasics> pitchJointsAttachedToPelvis = new HashSet<>();
+      Set<OneDoFJointBasics> rollJointsAttachedToPelvis = new HashSet<>();
 
       yawJointsAttachedToPelvis.add(fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW));
       pitchJointsAttachedToPelvis.add(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH));
@@ -204,7 +204,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       for (Axis axis : Axis.values)
       {
          List<OneDoFJointSensorValidityChecker> jointValidityCheckerList = new ArrayList<>();
-         for (OneDoFJoint joint : jointsToWiggle.get(axis))
+         for (OneDoFJointBasics joint : jointsToWiggle.get(axis))
          {
             jointValidityCheckerList.add(toolbox.getJointSensorValidityChecker(joint));
          }
@@ -528,7 +528,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    }
 
    @Override
-   public double getDesiredJointPositionOffset(OneDoFJoint joint)
+   public double getDesiredJointPositionOffset(OneDoFJointBasics joint)
    {
       for (Axis axis : Axis.values)
       {
@@ -539,7 +539,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    }
 
    @Override
-   public double getDesiredJointVelocityOffset(OneDoFJoint joint)
+   public double getDesiredJointVelocityOffset(OneDoFJointBasics joint)
    {
       for (Axis axis : Axis.values)
       {

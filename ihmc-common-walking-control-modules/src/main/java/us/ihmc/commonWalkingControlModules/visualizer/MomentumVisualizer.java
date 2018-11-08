@@ -8,7 +8,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.robotics.screwTheory.MomentumCalculator;
@@ -26,7 +26,7 @@ public class MomentumVisualizer implements Updatable
    private final Momentum momentum = new Momentum(ReferenceFrame.getWorldFrame());
    private final FrameVector3D frameVector = new FrameVector3D();
 
-   public MomentumVisualizer(String name, OneDoFJoint rootJoint, YoVariableRegistry registry,
+   public MomentumVisualizer(String name, OneDoFJointBasics rootJoint, YoVariableRegistry registry,
          YoGraphicsListRegistry graphicsRegistry)
    {
       this(name, registry, graphicsRegistry, rootJoint.getSuccessor());

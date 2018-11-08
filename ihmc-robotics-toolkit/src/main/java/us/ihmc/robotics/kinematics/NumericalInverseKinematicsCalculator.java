@@ -13,8 +13,8 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -29,7 +29,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
 {
    private final InverseJacobianSolver inverseJacobianCalculator;
    
-   private final OneDoFJoint[] oneDoFJoints;
+   private final OneDoFJointBasics[] oneDoFJoints;
    private final double tolerance;
    private final int maxIterations;
    private final double maxStepSize;
@@ -93,7 +93,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
       numberOfDoF = jacobian.getNumberOfColumns();
       inverseJacobianCalculator = InverseJacobianSolver.createInverseJacobianSolver(numberOfConstraints, numberOfDoF, false);
 
-      oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
       if (oneDoFJoints.length != jacobian.getJointsInOrder().length)
          throw new RuntimeException("Can currently only handle OneDoFJoints");
 
@@ -168,7 +168,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
       bestToPack.set(jointAnglesMinimumError);
    }
    
-   public void getBest(LinkedHashMap<OneDoFJoint, Double> bestToPack)
+   public void getBest(LinkedHashMap<OneDoFJointBasics, Double> bestToPack)
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
          bestToPack.put(oneDoFJoints[i], jointAnglesMinimumError.get(i, 0));
@@ -245,7 +245,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint oneDoFJoint = oneDoFJoints[i];
+         OneDoFJointBasics oneDoFJoint = oneDoFJoints[i];
          double newQ = oneDoFJoint.getQ() - jointAnglesCorrection.get(i, 0);
          if (limitJointAngles) 
             newQ = Math.min(oneDoFJoint.getJointLimitUpper(), Math.max(newQ, oneDoFJoint.getJointLimitLower()));

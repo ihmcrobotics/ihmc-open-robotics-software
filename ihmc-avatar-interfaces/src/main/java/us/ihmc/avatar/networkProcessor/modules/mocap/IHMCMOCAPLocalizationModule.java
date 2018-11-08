@@ -29,8 +29,8 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -245,7 +245,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       TFloatArrayList newJointAngles = packet.getJointAngles();
       TFloatArrayList newJointVelocities = packet.getJointAngles();
       TFloatArrayList newJointTorques = packet.getJointTorques();
-      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
       for (int i = 0; i < newJointAngles.size(); i++)
       {

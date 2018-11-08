@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -53,7 +53,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       for (WrenchCalculatorInterface groundContactPointBasedWrenchCalculator : groundContactPointBasedWrenchCalculators)
       {
          Joint forceTorqueSensorJoint = groundContactPointBasedWrenchCalculator.getJoint();
-         OneDoFJoint sensorParentJoint;
+         OneDoFJointBasics sensorParentJoint;
          if (forceTorqueSensorJoint instanceof OneDegreeOfFreedomJoint)
             sensorParentJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint((OneDegreeOfFreedomJoint) forceTorqueSensorJoint);
          else
@@ -102,7 +102,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
-         OneDoFJoint oneDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(oneDegreeOfFreedomJoint);
+         OneDoFJointBasics oneDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(oneDegreeOfFreedomJoint);
 
          stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
       }

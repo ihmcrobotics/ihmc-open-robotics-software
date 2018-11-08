@@ -1,18 +1,19 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
 import us.ihmc.commons.MathTools;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * {@link JointTorqueCommand} is a command meant to be submitted to the
@@ -96,7 +97,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     * @param joint the joint to be controlled.
     * @param desiredTorque the joint torque to be achieved in the next control tick.
     */
-   public void addJoint(OneDoFJoint joint, double desiredTorque)
+   public void addJoint(OneDoFJointBasics joint, double desiredTorque)
    {
       joints.add(joint);
       jointNames.add(joint.getName());

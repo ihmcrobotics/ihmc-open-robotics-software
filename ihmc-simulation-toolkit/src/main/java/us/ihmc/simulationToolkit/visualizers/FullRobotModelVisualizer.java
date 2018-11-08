@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullRobotModel;
@@ -32,7 +32,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    private SimulationConstructionSet scs;
    private YoVariableRegistry robotRegistry;
    private FloatingJointBasics rootJoint;
-   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
+   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJointBasics>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>>();
   
    private volatile long latestTimestamp = 0;
    
@@ -46,13 +46,13 @@ public class FullRobotModelVisualizer implements RobotVisualizer
       robotRegistry = robot.getRobotsYoVariableRegistry();
       rootJoint = fullRobotModel.getRootJoint();
       revoluteJoints.clear();
-      OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
-      for (OneDoFJoint revoluteJoint : revoluteJointsArray)
+      OneDoFJointBasics[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
+      for (OneDoFJointBasics revoluteJoint : revoluteJointsArray)
       {
          String name = revoluteJoint.getName();
          OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(name);
          
-         ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
+         ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJointBasics> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>(oneDoFJoint, revoluteJoint);
          revoluteJoints.add(jointPair);
       }
       setMainRegistry(robotRegistry, null, null);
@@ -110,10 +110,10 @@ public class FullRobotModelVisualizer implements RobotVisualizer
          robot.setPositionInWorld(rootJoint.getJointPose().getPosition());
       }
       
-      for (ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
+      for (ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair : revoluteJoints)
       {
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
-         OneDoFJoint revoluteJoint = jointPair.getRight();
+         OneDoFJointBasics revoluteJoint = jointPair.getRight();
 
          pinJoint.setQ(revoluteJoint.getQ());
          pinJoint.setQd(revoluteJoint.getQd());

@@ -11,9 +11,9 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -27,7 +27,7 @@ public class OneDoFJointQuinticTrajectoryGeneratorTest
    private ReferenceFrame parentFrame = ReferenceFrame.constructARootFrame("rootFrame");
 
    private RigidBodyBasics elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
-   private OneDoFJoint joint = new RevoluteJoint("revoluteJoint", elevator, new Vector3D());
+   private OneDoFJointBasics joint = new RevoluteJoint("revoluteJoint", elevator, new Vector3D());
 
    private DoubleProvider trajectoryTimeProvider;
 

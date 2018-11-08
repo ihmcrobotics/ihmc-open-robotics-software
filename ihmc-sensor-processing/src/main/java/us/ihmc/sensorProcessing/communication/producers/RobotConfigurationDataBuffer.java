@@ -11,8 +11,8 @@ import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
@@ -230,7 +230,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
 
    private static class FullRobotModelCache
    {
-      private final OneDoFJoint[] allJoints;
+      private final OneDoFJointBasics[] allJoints;
       private final long jointNameHash;
 
       private FullRobotModelCache(FullRobotModel fullRobotModel)

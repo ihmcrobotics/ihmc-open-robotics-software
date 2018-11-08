@@ -5,7 +5,7 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandInterface;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -13,7 +13,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class SlowLoopControllerCoreCommandHolder
 {
    private final Map<String, RigidBodyBasics> fastLoopRigidBodyMap = new HashMap<>();
-   private final Map<String, OneDoFJoint> fastLoopJointMap = new HashMap<>();
+   private final Map<String, OneDoFJointBasics> fastLoopJointMap = new HashMap<>();
 
    private final ControllerCoreCommandDataCopier intermediateCommandDataCopier = new ControllerCoreCommandDataCopier();
    private final ControllerCoreCommandDataCopier fastLoopCommandDataCopier = new ControllerCoreCommandDataCopier();
@@ -21,7 +21,7 @@ public class SlowLoopControllerCoreCommandHolder
    public SlowLoopControllerCoreCommandHolder(FullHumanoidRobotModel fastLoopFullRobotModel)
    {
       setupRigidBodyMap(fastLoopFullRobotModel, fastLoopRigidBodyMap);
-      for (OneDoFJoint joint : fastLoopFullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics joint : fastLoopFullRobotModel.getOneDoFJoints())
          fastLoopJointMap.put(joint.getName(), joint);
    }
 

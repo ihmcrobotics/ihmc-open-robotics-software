@@ -22,7 +22,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 /**
@@ -40,7 +40,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    protected final Map<String, Double> qbias = new HashMap<>();
    protected final FullHumanoidRobotModel fullRobotModel;
 
-   protected final OneDoFJoint[] joints;
+   protected final OneDoFJointBasics[] joints;
    protected final ArrayList<Map<String, Double>> q = new ArrayList<>();
    protected final ArrayList<Map<String, Double>> qout = new ArrayList<>();
 

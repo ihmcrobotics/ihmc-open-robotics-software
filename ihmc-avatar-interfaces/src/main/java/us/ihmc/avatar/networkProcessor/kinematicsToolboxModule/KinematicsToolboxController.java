@@ -40,9 +40,9 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
@@ -91,8 +91,8 @@ public class KinematicsToolboxController extends ToolboxController
     * Array containing all the one degree-of-freedom joints of the desired robot except for the
     * finger joints that are not handled by this solver.
     */
-   private final OneDoFJoint[] oneDoFJoints;
-   private final Map<Integer, OneDoFJoint> jointHashCodeMap = new HashMap<>();
+   private final OneDoFJointBasics[] oneDoFJoints;
+   private final Map<Integer, OneDoFJointBasics> jointHashCodeMap = new HashMap<>();
 
    /**
     * Reference frame centered at the robot's center of mass. It is used to hold the initial center
@@ -207,14 +207,14 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoInteger numberOfActiveCommands = new YoInteger("numberOfActiveCommands", registry);
 
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                      FloatingJointBasics rootJoint, OneDoFJoint[] oneDoFJoints, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                      FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints, YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoVariableRegistry parentRegistry)
    {
       this(commandInputManager, statusOutputManager, rootJoint, oneDoFJoints, null, yoGraphicsListRegistry, parentRegistry);
    }
 
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                      FloatingJointBasics rootJoint, OneDoFJoint[] oneDoFJoints, Collection<RigidBodyBasics> controllableRigidBodies,
+                                      FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints, Collection<RigidBodyBasics> controllableRigidBodies,
                                       YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -612,7 +612,7 @@ public class KinematicsToolboxController extends ToolboxController
       return rootJoint;
    }
 
-   public OneDoFJoint[] getDesiredOneDoFJoint()
+   public OneDoFJointBasics[] getDesiredOneDoFJoint()
    {
       return oneDoFJoints;
    }

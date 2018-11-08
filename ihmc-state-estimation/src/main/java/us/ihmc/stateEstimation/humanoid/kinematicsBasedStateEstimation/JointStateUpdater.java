@@ -1,8 +1,8 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -27,7 +27,7 @@ public class JointStateUpdater
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final RigidBodyBasics rootBody;
 
-   private OneDoFJoint[] oneDoFJoints;
+   private OneDoFJointBasics[] oneDoFJoints;
    private final SensorOutputMapReadOnly sensorMap;
    private final IMUBasedJointStateEstimator iMUBasedJointStateEstimator;
 
@@ -42,7 +42,7 @@ public class JointStateUpdater
       this.sensorMap = sensorOutputMapReadOnly;
 
       JointBasics[] joints = ScrewTools.computeSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
-      this.oneDoFJoints = MultiBodySystemTools.filterJoints(joints, OneDoFJoint.class);
+      this.oneDoFJoints = MultiBodySystemTools.filterJoints(joints, OneDoFJointBasics.class);
 
       if (stateEstimatorParameters == null)
       {
@@ -58,7 +58,7 @@ public class JointStateUpdater
       parentRegistry.addChild(registry);
    }
 
-   public void setJointsToUpdate(OneDoFJoint[] oneDoFJoints)
+   public void setJointsToUpdate(OneDoFJointBasics[] oneDoFJoints)
    {
       this.oneDoFJoints = oneDoFJoints;
    }
@@ -121,7 +121,7 @@ public class JointStateUpdater
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint oneDoFJoint = oneDoFJoints[i];
+         OneDoFJointBasics oneDoFJoint = oneDoFJoints[i];
 
          double positionSensorData = sensorMap.getJointPositionProcessedOutput(oneDoFJoint);
          double velocitySensorData = sensorMap.getJointVelocityProcessedOutput(oneDoFJoint);

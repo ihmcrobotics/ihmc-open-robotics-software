@@ -1,8 +1,8 @@
 package us.ihmc.robotDataLogger.jointState;
 
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class JointHolderFactory
 {
@@ -12,9 +12,9 @@ public class JointHolderFactory
       {
          return new SiXDoFJointHolder((SixDoFJoint) joint);
       }
-      else if(joint instanceof OneDoFJoint)
+      else if(joint instanceof OneDoFJointBasics)
       {
-         return new OneDoFJointHolder((OneDoFJoint) joint);
+         return new OneDoFJointHolder((OneDoFJointBasics) joint);
       }
       else
       {

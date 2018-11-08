@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ValkyrieHandStateCommunicator implements RobotController
 {
-   private final SideDependentList<EnumMap<ValkyrieHandJointName, OneDoFJoint>> handJoints = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
+   private final SideDependentList<EnumMap<ValkyrieHandJointName, OneDoFJointBasics>> handJoints = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
 
    private final HandJointAnglePacket packet;
    private final IHMCRealtimeROS2Publisher<HandJointAnglePacket> publisher;
@@ -30,7 +30,7 @@ public class ValkyrieHandStateCommunicator implements RobotController
       {
          for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
          {
-            OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointEnum.getJointName(robotside));
+            OneDoFJointBasics joint = fullRobotModel.getOneDoFJointByName(jointEnum.getJointName(robotside));
             handJoints.get(robotside).put(jointEnum, joint);
          }
       }

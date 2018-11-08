@@ -43,9 +43,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
@@ -73,8 +73,8 @@ public class RigidBodyControlManagerTest
    private YoDouble yoTime;
    private RigidBodyBasics bodyToControl;
 
-   private OneDoFJoint joint1;
-   private OneDoFJoint joint2;
+   private OneDoFJointBasics joint1;
+   private OneDoFJointBasics joint2;
 
    private double q1_init = random.nextDouble();
    private double q2_init = random.nextDouble();

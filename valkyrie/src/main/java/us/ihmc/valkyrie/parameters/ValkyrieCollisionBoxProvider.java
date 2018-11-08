@@ -13,7 +13,7 @@ import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBox;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionCylinder;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionSphere;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -31,13 +31,13 @@ public class ValkyrieCollisionBoxProvider implements CollisionBoxProvider
    public ValkyrieCollisionBoxProvider(FullHumanoidRobotModel robotModel)
    {
       collisions.put(robotModel.getRootJoint().getName(), new ArrayList<>());
-      for (OneDoFJoint joint : robotModel.getOneDoFJoints())
+      for (OneDoFJointBasics joint : robotModel.getOneDoFJoints())
          collisions.put(joint.getName(), new ArrayList<>());
 
       for (RobotSide robotSide : RobotSide.values)
       {
          { // Shoulder roll
-            OneDoFJoint shoulderRollJoint = robotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL);
+            OneDoFJointBasics shoulderRollJoint = robotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL);
             if (shoulderRollJoint != null)
             {
                String jointName = shoulderRollJoint.getName();
@@ -58,7 +58,7 @@ public class ValkyrieCollisionBoxProvider implements CollisionBoxProvider
          }
 
          { // Elbow
-            OneDoFJoint elbowPitchJoint = robotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH);
+            OneDoFJointBasics elbowPitchJoint = robotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH);
 
             if (elbowPitchJoint != null)
             {

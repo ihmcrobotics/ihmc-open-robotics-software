@@ -7,9 +7,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -20,12 +20,12 @@ public class JointIndexHandler
 
    private final int numberOfDoFs;
    private final JointBasics[] indexedJoints;
-   private final OneDoFJoint[] indexedOneDoFJoints;
+   private final OneDoFJointBasics[] indexedOneDoFJoints;
 
    public JointIndexHandler(JointBasics[] jointsToIndex)
    {
       indexedJoints = jointsToIndex;
-      indexedOneDoFJoints = MultiBodySystemTools.filterJoints(indexedJoints, OneDoFJoint.class);
+      indexedOneDoFJoints = MultiBodySystemTools.filterJoints(indexedJoints, OneDoFJointBasics.class);
 
       numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToIndex);
       populateColumnIndices();
@@ -35,7 +35,7 @@ public class JointIndexHandler
    {
       indexedJoints = new JointBasics[jointsToIndex.size()];
       jointsToIndex.toArray(indexedJoints);
-      indexedOneDoFJoints = MultiBodySystemTools.filterJoints(indexedJoints, OneDoFJoint.class);
+      indexedOneDoFJoints = MultiBodySystemTools.filterJoints(indexedJoints, OneDoFJointBasics.class);
 
       numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToIndex);
       populateColumnIndices();
@@ -155,7 +155,7 @@ public class JointIndexHandler
       return indexedJoints;
    }
 
-   public OneDoFJoint[] getIndexedOneDoFJoints()
+   public OneDoFJointBasics[] getIndexedOneDoFJoints()
    {
       return indexedOneDoFJoints;
    }
@@ -175,7 +175,7 @@ public class JointIndexHandler
       return true;
    }
 
-   public int getOneDoFJointIndex(OneDoFJoint joint)
+   public int getOneDoFJointIndex(OneDoFJointBasics joint)
    {
       int[] jointIndices = columnsForJoints.get(joint);
       if (jointIndices == null)

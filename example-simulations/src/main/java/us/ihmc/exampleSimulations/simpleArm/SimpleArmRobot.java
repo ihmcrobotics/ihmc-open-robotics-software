@@ -10,9 +10,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.simulationconstructionset.GroundContactModel;
@@ -48,7 +48,7 @@ public class SimpleArmRobot extends Robot
       ARM_3,
    }
 
-   private final EnumMap<ArmJoint, OneDoFJoint> jointMap = new EnumMap<>(ArmJoint.class);
+   private final EnumMap<ArmJoint, OneDoFJointBasics> jointMap = new EnumMap<>(ArmJoint.class);
    private final EnumMap<ArmJoint, OneDegreeOfFreedomJoint> scsJointMap = new EnumMap<>(ArmJoint.class);
    private final EnumMap<ArmBody, RigidBodyBasics> bodyMap = new EnumMap<>(ArmBody.class);
 
@@ -203,7 +203,7 @@ public class SimpleArmRobot extends Robot
       }
    }
 
-   public OneDoFJoint getJoint(ArmJoint jointName)
+   public OneDoFJointBasics getJoint(ArmJoint jointName)
    {
       return jointMap.get(jointName);
    }
@@ -217,7 +217,7 @@ public class SimpleArmRobot extends Robot
    {
       for (ArmJoint joint : ArmJoint.values)
       {
-         OneDoFJoint idJoint = jointMap.get(joint);
+         OneDoFJointBasics idJoint = jointMap.get(joint);
          OneDegreeOfFreedomJoint scsJoint = scsJointMap.get(joint);
          idJoint.setQ(scsJoint.getQYoVariable().getDoubleValue());
          idJoint.setQd(scsJoint.getQDYoVariable().getDoubleValue());
@@ -229,7 +229,7 @@ public class SimpleArmRobot extends Robot
    {
       for (ArmJoint joint : ArmJoint.values)
       {
-         OneDoFJoint idJoint = jointMap.get(joint);
+         OneDoFJointBasics idJoint = jointMap.get(joint);
          OneDegreeOfFreedomJoint scsJoint = scsJointMap.get(joint);
          scsJoint.setTau(idJoint.getTau());
       }

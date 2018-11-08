@@ -50,8 +50,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -321,14 +321,14 @@ public class MessageTools
       return message;
    }
 
-   public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(OneDoFJoint[] joints)
+   public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(OneDoFJointBasics[] joints)
    {
       KinematicsToolboxOutputStatus message = new KinematicsToolboxOutputStatus();
       message.setJointNameHash(Arrays.hashCode(joints));
       return message;
    }
 
-   public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(FloatingJointBasics rootJoint, OneDoFJoint[] newJointData)
+   public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(FloatingJointBasics rootJoint, OneDoFJointBasics[] newJointData)
    {
       KinematicsToolboxOutputStatus message = new KinematicsToolboxOutputStatus();
       message.setJointNameHash(Arrays.hashCode(newJointData));
@@ -720,7 +720,7 @@ public class MessageTools
    }
 
    public static void unpackDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingJointBasics rootJointToUpdate,
-                                              OneDoFJoint[] jointsToUpdate)
+                                              OneDoFJointBasics[] jointsToUpdate)
    {
       int jointNameHash = Arrays.hashCode(jointsToUpdate);
 
@@ -735,7 +735,7 @@ public class MessageTools
    }
 
    public static void packDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingJointBasics rootJoint,
-                                            OneDoFJoint[] newJointData)
+                                            OneDoFJointBasics[] newJointData)
    {
       int jointNameHash = Arrays.hashCode(newJointData);
 
@@ -801,7 +801,7 @@ public class MessageTools
     * @param rootJointOrientation the privileged root joint orientation. Not modified.
     * @param jointHashCodes allows to safely identify to which joint each angle in
     *           {@link #privilegedJointAngles} belongs to. The hash code can be obtained from
-    *           {@link OneDoFJoint#hashCode()}. Not modified.
+    *           {@link OneDoFJointBasics#hashCode()}. Not modified.
     * @param jointAngles the privileged joint angles. Not modified.
     * @throws IllegalArgumentException if the lengths of {@code jointAngles} and {@code jointHashCodes}
     *            are different.
@@ -829,7 +829,7 @@ public class MessageTools
     * 
     * @param jointHashCodes allows to safely identify to which joint each angle in
     *           {@link #privilegedJointAngles} belongs to. The hash code can be obtained from
-    *           {@link OneDoFJoint#hashCode()}. Not modified.
+    *           {@link OneDoFJointBasics#hashCode()}. Not modified.
     * @param jointAngles the privileged joint angles. Not modified.
     * @throws IllegalArgumentException if the lengths of {@code jointAngles} and {@code jointHashCodes}
     *            are different.

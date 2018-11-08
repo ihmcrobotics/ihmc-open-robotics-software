@@ -24,9 +24,8 @@ import us.ihmc.commons.nio.FileTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class ReachabilityMapFileWriter
 {
@@ -58,7 +57,7 @@ public class ReachabilityMapFileWriter
       }
    }
 
-   public void initialize(OneDoFJoint[] robotArmJoints, Voxel3DGrid gridToWrite)
+   public void initialize(OneDoFJointBasics[] robotArmJoints, Voxel3DGrid gridToWrite)
    {
       createDescriptionSheet(robotName, robotArmJoints, gridToWrite);
 
@@ -77,7 +76,7 @@ public class ReachabilityMapFileWriter
       return Paths.get("resources", pathNames.toArray(new String[0]));
    }
 
-   private void createDescriptionSheet(String robotName, OneDoFJoint[] robotArmJoints, Voxel3DGrid gridToWrite)
+   private void createDescriptionSheet(String robotName, OneDoFJointBasics[] robotArmJoints, Voxel3DGrid gridToWrite)
    {
       HSSFSheet descriptionSheet = workbook.createSheet("Description");
       int currentRowIndex = 0;
@@ -232,7 +231,7 @@ public class ReachabilityMapFileWriter
       SphereVoxelShape sphereVoxelShape = new SphereVoxelShape(gridFrame, 0.1, 10, 12, SphereVoxelType.graspOrigin);
       Voxel3DGrid voxel3dGrid = new Voxel3DGrid(gridFrame, sphereVoxelShape, 10, 0.1);
       RobotArm robot = new RobotArm();
-      OneDoFJoint[] armJoints = MultiBodySystemTools.filterJoints(robot.getJacobian().getJointsInOrder(), OneDoFJoint.class);
+      OneDoFJointBasics[] armJoints = MultiBodySystemTools.filterJoints(robot.getJacobian().getJointsInOrder(), OneDoFJointBasics.class);
       ReachabilityMapFileWriter reachabilityMapFileWriter = new ReachabilityMapFileWriter(robot.getName(), ReachabilityMapFileWriter.class);
       reachabilityMapFileWriter.initialize(armJoints, voxel3dGrid);
 

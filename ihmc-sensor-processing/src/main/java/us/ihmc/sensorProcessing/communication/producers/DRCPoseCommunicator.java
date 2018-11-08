@@ -11,7 +11,7 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -92,7 +92,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       }
 
       ForceSensorDefinition[] forceSensorDefinitions = jointConfigurationGathererAndProducer.getForceSensorDefinitions();
-      OneDoFJoint[] joints = jointConfigurationGathererAndProducer.getJoints();
+      OneDoFJointBasics[] joints = jointConfigurationGathererAndProducer.getJoints();
       robotConfigurationData = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, imuDefinitions);
       robotConfigurationDataPublisher = ROS2Tools.createPublisher(realtimeRos2Node, RobotConfigurationData.class, publisherTopicNameGenerator);
 

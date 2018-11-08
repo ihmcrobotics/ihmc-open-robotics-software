@@ -1,20 +1,19 @@
 package us.ihmc.quadrupedRobotics.output;
 
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StateChangeSmootherComponent implements OutputProcessorComponent
 {
@@ -49,7 +48,7 @@ public class StateChangeSmootherComponent implements OutputProcessorComponent
    @Override
    public void setFullRobotModel(FullRobotModel fullRobotModel)
    {
-      for (OneDoFJoint oneDoFJoint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics oneDoFJoint : fullRobotModel.getOneDoFJoints())
       {
          String jointName = oneDoFJoint.getName();
 

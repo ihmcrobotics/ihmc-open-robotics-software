@@ -9,17 +9,16 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class VirtualModelControlDataHandler
 {
    public final List<RigidBodyBasics> controlledBodies = new ArrayList<>();
-   private final Map<RigidBodyBasics, List<OneDoFJoint[]>> jointChainsForControl = new LinkedHashMap<>();
-   private final List<OneDoFJoint> controlledJoints = new ArrayList <>();
+   private final Map<RigidBodyBasics, List<OneDoFJointBasics[]>> jointChainsForControl = new LinkedHashMap<>();
+   private final List<OneDoFJointBasics> controlledJoints = new ArrayList <>();
    public int numberOfControlledJoints = 0;
 
    private final Map<RigidBodyBasics, Wrench> desiredWrenches = new LinkedHashMap<>();
@@ -61,7 +60,7 @@ public class VirtualModelControlDataHandler
       }
    }
 
-   public void addJointsForControl(RigidBodyBasics controlledBody, OneDoFJoint[] jointsToUse)
+   public void addJointsForControl(RigidBodyBasics controlledBody, OneDoFJointBasics[] jointsToUse)
    {
       // check joint order
       int length = jointsToUse.length;
@@ -71,12 +70,12 @@ public class VirtualModelControlDataHandler
          if (length > 1)
             MultiBodySystemTools.isAncestor(jointsToUse[1].getPredecessor(), jointsToUse[0].getPredecessor());
 
-         OneDoFJoint[] orderedJointsToUse;
+         OneDoFJointBasics[] orderedJointsToUse;
          if (rightOrder)
             orderedJointsToUse = jointsToUse;
          else
          {
-            orderedJointsToUse = new OneDoFJoint[length];
+            orderedJointsToUse = new OneDoFJointBasics[length];
             for (int i = 0; i < length; i++)
                orderedJointsToUse[i] = jointsToUse[length - 1 - i];
          }
@@ -139,7 +138,7 @@ public class VirtualModelControlDataHandler
       return controlledJoints.indexOf(jointChainsForControl.get(controlledBody).get(chainID)[jointNumberInChain]);
    }
 
-   public List<OneDoFJoint> getControlledJoints()
+   public List<OneDoFJointBasics> getControlledJoints()
    {
       return controlledJoints;
    }
@@ -149,7 +148,7 @@ public class VirtualModelControlDataHandler
       return controlledBodies;
    }
 
-   public OneDoFJoint[] getJointsForControl(RigidBodyBasics controlledBody, int chainID)
+   public OneDoFJointBasics[] getJointsForControl(RigidBodyBasics controlledBody, int chainID)
    {
       return jointChainsForControl.get(controlledBody).get(chainID);
    }

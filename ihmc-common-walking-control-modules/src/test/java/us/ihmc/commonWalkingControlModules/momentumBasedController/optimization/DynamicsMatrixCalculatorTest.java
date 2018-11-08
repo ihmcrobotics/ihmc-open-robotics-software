@@ -24,9 +24,9 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.Wrench;
@@ -38,7 +38,6 @@ import us.ihmc.robotModels.FullRobotModelTestTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -83,7 +82,7 @@ public class DynamicsMatrixCalculatorTest
 
       gravityZ = 9.81;
 
-      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
 
       for (int i = 0; i < iters; i++)
@@ -112,7 +111,7 @@ public class DynamicsMatrixCalculatorTest
 
       gravityZ = 0.0;
 
-      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
 
       for (int i = 0; i < iters; i++)
@@ -141,7 +140,7 @@ public class DynamicsMatrixCalculatorTest
 
       gravityZ = 0.0;
 
-      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
 
       for (int i = 0; i < iters; i++)
@@ -165,7 +164,7 @@ public class DynamicsMatrixCalculatorTest
 
       gravityZ = 9.81;
 
-      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
 
       for (int i = 0; i < iters; i++)
@@ -189,7 +188,7 @@ public class DynamicsMatrixCalculatorTest
 
       gravityZ = 9.81;
 
-      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
 
       for (int i = 0; i < iters; i++)
@@ -214,7 +213,7 @@ public class DynamicsMatrixCalculatorTest
 
       gravityZ = 9.81;
 
-      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
 
       for (int i = 0; i < iters; i++)
@@ -241,7 +240,7 @@ public class DynamicsMatrixCalculatorTest
 
       gravityZ = 0.0;
 
-      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
 
       for (int i = 0; i < iters; i++)
@@ -269,7 +268,7 @@ public class DynamicsMatrixCalculatorTest
 
       gravityZ = 9.81;
 
-      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
 
       for (int i = 0; i < iters; i++)
@@ -297,7 +296,7 @@ public class DynamicsMatrixCalculatorTest
 
       gravityZ = 9.81;
 
-      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
 
       for (int i = 0; i < iters; i++)
@@ -321,7 +320,7 @@ public class DynamicsMatrixCalculatorTest
 
       gravityZ = 9.81;
 
-      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
 
       for (int i = 0; i < iters; i++)

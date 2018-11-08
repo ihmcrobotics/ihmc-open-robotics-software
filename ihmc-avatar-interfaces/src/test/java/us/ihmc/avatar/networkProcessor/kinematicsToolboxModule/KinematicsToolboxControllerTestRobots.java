@@ -9,12 +9,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
@@ -115,7 +115,7 @@ public class KinematicsToolboxControllerTestRobots
       }
    }
 
-   public static Pair<FloatingJointBasics, OneDoFJoint[]> createInverseDynamicsRobot(RobotDescription robotDescription)
+   public static Pair<FloatingJointBasics, OneDoFJointBasics[]> createInverseDynamicsRobot(RobotDescription robotDescription)
    {
       RigidBodyBasics predecessor;
 
@@ -142,7 +142,7 @@ public class KinematicsToolboxControllerTestRobots
          addJointsRecursively((OneDoFJointDescription) robotDescription.getRootJoints().get(0), predecessor);
       }
 
-      return new ImmutablePair<>(rootJoint, MultiBodySystemTools.filterJoints(ScrewTools.computeSubtreeJoints(predecessor), OneDoFJoint.class));
+      return new ImmutablePair<>(rootJoint, MultiBodySystemTools.filterJoints(ScrewTools.computeSubtreeJoints(predecessor), OneDoFJointBasics.class));
    }
 
    
@@ -155,7 +155,7 @@ public class KinematicsToolboxControllerTestRobots
       Vector3D offset = new Vector3D();
       joint.getOffsetFromParentJoint(offset);
 
-      OneDoFJoint inverseDynamicsJoint;
+      OneDoFJointBasics inverseDynamicsJoint;
 
       if (joint instanceof PinJointDescription)
       {

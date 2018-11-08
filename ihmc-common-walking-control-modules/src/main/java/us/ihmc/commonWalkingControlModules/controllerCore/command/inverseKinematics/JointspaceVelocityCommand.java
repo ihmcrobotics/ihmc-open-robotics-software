@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
 
-import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.*;
+import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +14,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 
 /**
@@ -106,13 +106,13 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     * The joint is added at the last position, i.e. at the index
     * {@code i == this.getNumberOfJoints()}. Note that it is registered as a hard constraint. It is
     * highly recommended to set the weight afterwards or simply use
-    * {@link #addJoint(OneDoFJoint, double, double)} instead.
+    * {@link #addJoint(OneDoFJointBasics, double, double)} instead.
     * </p>
     * 
     * @param joint the joint to be controlled.
     * @param desiredAcceleration the joint velocity to be achieved in the next control tick.
     */
-   public void addJoint(OneDoFJoint joint, double desiredVelocity)
+   public void addJoint(OneDoFJointBasics joint, double desiredVelocity)
    {
       addJoint(joint, desiredVelocity, HARD_CONSTRAINT);
    }
@@ -128,7 +128,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     * @param desiredAcceleration the joint velocity to be achieved in the next control tick.
     * @param weight positive value that denotes the priority of the joint task.
     */
-   public void addJoint(OneDoFJoint joint, double desiredVelocity, double weight)
+   public void addJoint(OneDoFJointBasics joint, double desiredVelocity, double weight)
    {
       joints.add(joint);
       jointNames.add(joint.getName());

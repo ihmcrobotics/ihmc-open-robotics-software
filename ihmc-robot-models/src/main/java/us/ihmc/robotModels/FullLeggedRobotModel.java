@@ -2,15 +2,13 @@ package us.ihmc.robotModels;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface FullLeggedRobotModel<E extends Enum<E> & RobotSegment<E>> extends FullRobotModel
 {
@@ -25,11 +23,11 @@ public interface FullLeggedRobotModel<E extends Enum<E> & RobotSegment<E>> exten
    MovingReferenceFrame getFrameAfterLegJoint(E robotSegment, LegJointName legJointName);
 
    /**
-    * Return the {@link OneDoFJoint} describing the the corresponding leg joint.
+    * Return the {@link OneDoFJointBasics} describing the the corresponding leg joint.
     * @param robotSegment Refers to which leg the joint belongs to (assuming there is only one left leg and one right leg).
     * @param legJointName Refers to the joint's name.
     */
-   OneDoFJoint getLegJoint(E robotSegment, LegJointName legJointName);
+   OneDoFJointBasics getLegJoint(E robotSegment, LegJointName legJointName);
 
    /**
     * Returns the {@link RigidBodyBasics} describing the left or right foot of this robot.

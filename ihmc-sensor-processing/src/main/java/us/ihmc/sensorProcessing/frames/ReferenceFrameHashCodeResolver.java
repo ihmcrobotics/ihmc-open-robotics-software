@@ -8,7 +8,7 @@ import java.util.List;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSextant;
@@ -49,7 +49,7 @@ public class ReferenceFrameHashCodeResolver
       }
 
       // a little repetitive, but better than recursion
-      for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
          ReferenceFrame frameBeforeJoint = joint.getFrameBeforeJoint();
          ReferenceFrame frameAfterJoint = joint.getFrameAfterJoint();

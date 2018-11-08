@@ -11,8 +11,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -142,7 +142,7 @@ public class KinematicsToolboxMessageFactory
     * @param fullRobotModel the robot that is currently at the desired privileged configuration. Not
     *           modified.
     * @param useDesiredJointAngles whether the privileged joint angles are using
-    *           {@link OneDoFJoint#getqDesired()} or {@link OneDoFJoint#getQ()}.
+    *           {@link OneDoFJointBasics#getqDesired()} or {@link OneDoFJointBasics#getQ()}.
     * @return the message containing the new privileged configuration ready to be sent to the
     *         {@code KinematicsToolboxModule}.
     */
@@ -150,7 +150,7 @@ public class KinematicsToolboxMessageFactory
    {
       KinematicsToolboxConfigurationMessage message = new KinematicsToolboxConfigurationMessage();
 
-      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
       int[] jointHashCodes = new int[oneDoFJoints.length];
       float[] privilegedJointAngles = new float[oneDoFJoints.length];

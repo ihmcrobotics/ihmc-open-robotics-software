@@ -7,9 +7,9 @@ import java.util.Map;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
@@ -45,19 +45,19 @@ public interface FullRobotModel
    RigidBodyBasics getElevator();
 
    /**
-    * Return the {@link OneDoFJoint} describing the the corresponding spine joint.
+    * Return the {@link OneDoFJointBasics} describing the the corresponding spine joint.
     * @param spineJointName Refers to the joint's name.
     */
-   OneDoFJoint getSpineJoint(SpineJointName spineJointName);
+   OneDoFJointBasics getSpineJoint(SpineJointName spineJointName);
 
    RigidBodyBasics getEndEffector(Enum<?> segmentEnum);
 
    /**
-    * Return the {@link OneDoFJoint} describing the the corresponding leg joint.
+    * Return the {@link OneDoFJointBasics} describing the the corresponding leg joint.
     * @param robotSide Refers to which leg the joint belongs to (assuming there is only one left and one right leg).
     * @param neckJointName Refers to the joint's name.
     */
-   OneDoFJoint getNeckJoint(NeckJointName neckJointName);
+   OneDoFJointBasics getNeckJoint(NeckJointName neckJointName);
 
    
    /**
@@ -106,21 +106,21 @@ public interface FullRobotModel
    ReferenceFrame getHeadBaseFrame();
 
    /** Returns all the one DoF joints that this robot has. */
-   OneDoFJoint[] getOneDoFJoints();
+   OneDoFJointBasics[] getOneDoFJoints();
 
-   Map<String, OneDoFJoint> getOneDoFJointsAsMap();
+   Map<String, OneDoFJointBasics> getOneDoFJointsAsMap();
 
-   void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack);
+   void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack);
 
    /** Returns all one DoF joints, excluding joints that do not exist in the controller. */
-   OneDoFJoint[] getControllableOneDoFJoints();
+   OneDoFJointBasics[] getControllableOneDoFJoints();
 
    /**
     *  Gets all the one DoF joints that this robot has.
     *
     *  @param oneDoFJointsToPack {@code List<OneDoFJoint>} that will be packed will all the one DoF joints.
     */
-   void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack);
+   void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack);
 
    /**
     * Gets the one DoF joint with the given name.
@@ -128,14 +128,14 @@ public interface FullRobotModel
     * @param name Name of the OneDoFJoint to return.
     * @return
     */
-   OneDoFJoint getOneDoFJointByName(String name);
+   OneDoFJointBasics getOneDoFJointByName(String name);
 
    /**
     *  Gets all one DoF joints, excluding joints that do not exist in the controller.
     *
     *  @param oneDoFJointsToPack {@code List<OneDoFJoint>} that will be packed will the controllable one DoF joints.
     */
-   void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack);
+   void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack);
 
    /**
     * Returns all the IMUDefinitions corresponding to each IMU attached to this robot.

@@ -1,6 +1,6 @@
 package us.ihmc.simulationToolkit.controllers;
 
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
@@ -18,10 +18,10 @@ public class JointLowLevelJointControlSimulator implements RobotController
 
    private final double controlDT;
    private final OneDegreeOfFreedomJoint simulatedJoint;
-   private final OneDoFJoint controllerJoint;
+   private final OneDoFJointBasics controllerJoint;
    private final JointDesiredOutputReadOnly jointDesiredOutput;
 
-   public JointLowLevelJointControlSimulator(OneDegreeOfFreedomJoint simulatedJoint, OneDoFJoint highLevelControllerOutputJoint,
+   public JointLowLevelJointControlSimulator(OneDegreeOfFreedomJoint simulatedJoint, OneDoFJointBasics highLevelControllerOutputJoint,
                                              JointDesiredOutputReadOnly jointDesiredOutput, boolean isUpperBodyJoint,
                                              boolean isBackJoint, boolean isExoJoint, double totalMass, double controlDT)
    {

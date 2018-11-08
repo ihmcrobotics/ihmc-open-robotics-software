@@ -14,11 +14,10 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class KinematicSolver implements InverseKinematicsCalculator
 {
@@ -46,7 +45,7 @@ public class KinematicSolver implements InverseKinematicsCalculator
    private final DenseMatrix64F inverseTerm;
 
    private final GeometricJacobian jacobian;
-   private final OneDoFJoint[] oneDoFJoints;
+   private final OneDoFJointBasics[] oneDoFJoints;
 
    private final double dampingConstant;
 
@@ -70,7 +69,7 @@ public class KinematicSolver implements InverseKinematicsCalculator
       this.jacobian = jacobian;
       this.tolerance = tolerance;
       this.maxIterations = maxIterations;
-      this.oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      this.oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
       nDoF = MultiBodySystemTools.computeDegreesOfFreedom(oneDoFJoints);
 
       jacobianMethod = new DenseMatrix64F(nDoF, nDoF);

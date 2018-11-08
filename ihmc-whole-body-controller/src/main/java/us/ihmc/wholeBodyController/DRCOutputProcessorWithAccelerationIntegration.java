@@ -3,8 +3,8 @@ package us.ihmc.wholeBodyController;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -60,7 +60,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
    private final YoDouble kPosArmJointTorque = new YoDouble("kPosArmJointTorque",
          "Gain for position control in order to achieve acceleration control using additional joint torque (Arms only)", registry);
 
-   private PairList<OneDoFJoint, JointDesiredOutputBasics> jointStateAndData;
+   private PairList<OneDoFJointBasics, JointDesiredOutputBasics> jointStateAndData;
    private LinkedHashMap<JointDesiredOutputBasics, YoDouble> alphaDesiredVelocityMap;
    private LinkedHashMap<JointDesiredOutputBasics, YoDouble> alphaDesiredPositionMap;
    private LinkedHashMap<JointDesiredOutputBasics, YoDouble> velocityTorqueMap;
@@ -177,7 +177,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       for (int i = 0; i < jointStateAndData.size(); i++)
       {
          JointDesiredOutputBasics jointData = jointStateAndData.second(i);
-         OneDoFJoint jointState = jointStateAndData.first(i);
+         OneDoFJointBasics jointState = jointStateAndData.first(i);
          YoDouble qd_d_joint = desiredVelocities.get(jointData);
          YoDouble q_d_joint = desiredPositions.get(jointData);
 
@@ -216,7 +216,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       }
    }
 
-   private void integrateAccelerationsToGetDesiredVelocities(OneDoFJoint jointState, JointDesiredOutputBasics lowLevelJointData, YoDouble qd_d_joint, YoDouble q_d_joint)
+   private void integrateAccelerationsToGetDesiredVelocities(OneDoFJointBasics jointState, JointDesiredOutputBasics lowLevelJointData, YoDouble qd_d_joint, YoDouble q_d_joint)
    {
       double currentPosition = jointState.getQ();
       double currentVelocity = jointState.getQd();
@@ -281,15 +281,15 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
          }
       }
 
-      ArrayList<OneDoFJoint> armOneDoFJoints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> armOneDoFJoints = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics hand = controllerRobotModel.getHand(robotSide);
          if (hand != null)
          {
             JointBasics[] armJoints = ScrewTools.createJointPath(controllerRobotModel.getChest(), hand);
-            OneDoFJoint[] filterArmJoints = MultiBodySystemTools.filterJoints(armJoints, OneDoFJoint.class);
-            for (OneDoFJoint armJoint : filterArmJoints)
+            OneDoFJointBasics[] filterArmJoints = MultiBodySystemTools.filterJoints(armJoints, OneDoFJointBasics.class);
+            for (OneDoFJointBasics armJoint : filterArmJoints)
                armOneDoFJoints.add(armJoint);
          }
       }
@@ -308,7 +308,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
 
       for (int i = 0; i < jointStateAndData.size(); i++)
       {
-         final OneDoFJoint jointState = jointStateAndData.first(i);
+         final OneDoFJointBasics jointState = jointStateAndData.first(i);
          final JointDesiredOutputBasics jointData = jointStateAndData.second(i);
          
          final YoBoolean doAccelerationIntegration = new YoBoolean("doAccelerationIntegration_" + jointState.getName(), registry);

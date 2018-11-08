@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccele
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 /**
  * {@link SpatialFeedbackControlCommand} is a command meant to be submitted to the
@@ -34,7 +34,7 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
 {
    private final int initialCapacity = 15;
    private final List<String> jointNamesToComputeDesiredPositionFor = new ArrayList<>(initialCapacity);
-   private final List<OneDoFJoint> jointsToComputeDesiredPositionFor = new ArrayList<>(initialCapacity);
+   private final List<OneDoFJointBasics> jointsToComputeDesiredPositionFor = new ArrayList<>(initialCapacity);
    private final RecyclingArrayList<JointAccelerationIntegrationParameters> jointParameters = new RecyclingArrayList<>(initialCapacity,
                                                                                                                        JointAccelerationIntegrationParameters.class);
 
@@ -72,7 +72,7 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
     * @param joint the joint for which the desired acceleration is to be integrated to desired
     *           velocity and desired acceleration.
     */
-   public void addJointToComputeDesiredPositionFor(OneDoFJoint joint)
+   public void addJointToComputeDesiredPositionFor(OneDoFJointBasics joint)
    {
       jointNamesToComputeDesiredPositionFor.add(joint.getName());
       jointsToComputeDesiredPositionFor.add(joint);
@@ -156,7 +156,7 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
       }
    }
 
-   public void retrieveJointsFromName(Map<String, ? extends OneDoFJoint> nameToJointMap)
+   public void retrieveJointsFromName(Map<String, ? extends OneDoFJointBasics> nameToJointMap)
    {
       for (int i = 0; i < getNumberOfJointsToComputeDesiredPositionFor(); i++)
       {
@@ -164,7 +164,7 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
       }
    }
 
-   public OneDoFJoint getJointToComputeDesiredPositionFor(int jointIndex)
+   public OneDoFJointBasics getJointToComputeDesiredPositionFor(int jointIndex)
    {
       return jointsToComputeDesiredPositionFor.get(jointIndex);
    }

@@ -11,9 +11,9 @@ import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -102,7 +102,7 @@ public class JointStateUpdaterTest
 
    private static void readAndCheckJointVelocities(ArrayList<RevoluteJoint> jointsWithVelocitySensor, SensorOutputMapReadOnly sensorMap)
    {
-      for (OneDoFJoint joint : jointsWithVelocitySensor)
+      for (OneDoFJointBasics joint : jointsWithVelocitySensor)
       {
          double sensorValue = sensorMap.getJointVelocityProcessedOutput(joint);
          double robotJointValue = joint.getQd();
@@ -113,7 +113,7 @@ public class JointStateUpdaterTest
 
    private static void readAndCheckJointPositions(ArrayList<RevoluteJoint> jointsWithPositionSensor, SensorOutputMapReadOnly sensorMap)
    {
-      for (OneDoFJoint joint : jointsWithPositionSensor)
+      for (OneDoFJointBasics joint : jointsWithPositionSensor)
       {
          double sensorValue = sensorMap.getJointPositionProcessedOutput(joint);
          double robotJointValue = joint.getQ();
@@ -125,13 +125,13 @@ public class JointStateUpdaterTest
    private static void fillSensorsWithRandomPositionsAndVelocities(ArrayList<RevoluteJoint> jointsWithPositionSensor,
          ArrayList<RevoluteJoint> jointsWithVelocitySensor, SensorProcessing sensorMap)
    {
-      for (OneDoFJoint joint : jointsWithPositionSensor)
+      for (OneDoFJointBasics joint : jointsWithPositionSensor)
       {
          double randPosition = RandomNumbers.nextDouble(random, -5000.0, 5000.0);
          sensorMap.setJointPositionSensorValue(joint, randPosition);
       }
       
-      for (OneDoFJoint joint : jointsWithVelocitySensor)
+      for (OneDoFJointBasics joint : jointsWithVelocitySensor)
       {
          double randVelocity = RandomNumbers.nextDouble(random, -5000.0, 5000.0);
          sensorMap.setJointVelocitySensorValue(joint, randVelocity);
@@ -171,7 +171,7 @@ public class JointStateUpdaterTest
          ArrayList<RevoluteJoint> jointsWithVelocitySensor)
    {
       StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
-      for (OneDoFJoint joint : jointsWithPositionSensor)
+      for (OneDoFJointBasics joint : jointsWithPositionSensor)
          stateEstimatorSensorDefinitions.addJointSensorDefinition(joint);
       return stateEstimatorSensorDefinitions;
    }

@@ -1,13 +1,13 @@
 package us.ihmc.robotDataLogger.jointState;
 
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotDataLogger.JointType;
 
 public class OneDoFJointHolder implements JointHolder
 {
-   private final OneDoFJoint joint;
+   private final OneDoFJointBasics joint;
    
-   public OneDoFJointHolder(OneDoFJoint joint)
+   public OneDoFJointHolder(OneDoFJointBasics joint)
    {
       this.joint = joint;
    }

@@ -17,7 +17,7 @@ import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleJointNameMapAndCo
 import us.ihmc.exampleSimulations.beetle.planning.FootStepPlanner;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullRobotModel;
@@ -103,7 +103,7 @@ public class HexapodStepController
       {
          String name = prefix + robotSextant.toString();
          String jointName = jointMap.getJointNameBeforeFoot(robotSextant);
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          RigidBodyBasics shinRigidBody = oneDoFJoint.getSuccessor();
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSextant);
          FramePose3D footInShinFrame = new FramePose3D(footFrame);

@@ -17,10 +17,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
@@ -109,7 +109,7 @@ public class MovingBaseRobotArm extends Robot
    private final FilteredVelocityYoFrameVector controlFrameLinearAcceleration;
    private final FilteredVelocityYoFrameVector controlFrameAngularAcceleration;
 
-   private final Map<OneDoFJoint, OneDegreeOfFreedomJoint> idToSCSJointMap = new HashMap<>();
+   private final Map<OneDoFJointBasics, OneDegreeOfFreedomJoint> idToSCSJointMap = new HashMap<>();
 
    public MovingBaseRobotArm(double dt)
    {
@@ -327,9 +327,9 @@ public class MovingBaseRobotArm extends Robot
 
    public void updateSCSRobotJointTaus(JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
-      for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
+      for (Entry<OneDoFJointBasics, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
-         OneDoFJoint oneDoFJoint = pair.getKey();
+         OneDoFJointBasics oneDoFJoint = pair.getKey();
          JointDesiredOutputReadOnly data = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(oneDoFJoint); 
 
          if (data.hasDesiredTorque())
@@ -342,9 +342,9 @@ public class MovingBaseRobotArm extends Robot
 
    public void updateSCSRobotJointConfiguration(JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
-      for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
+      for (Entry<OneDoFJointBasics, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
-         OneDoFJoint oneDoFJoint = pair.getKey();
+         OneDoFJointBasics oneDoFJoint = pair.getKey();
          JointDesiredOutputReadOnly data = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(oneDoFJoint); 
 
          if (data.hasDesiredPosition())
@@ -363,7 +363,7 @@ public class MovingBaseRobotArm extends Robot
 
    public void updateIDRobot()
    {
-      for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
+      for (Entry<OneDoFJointBasics, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
          pair.getKey().setQ(pair.getValue().getQ());
          pair.getKey().setQd(pair.getValue().getQD());
@@ -375,7 +375,7 @@ public class MovingBaseRobotArm extends Robot
    {
       Random random = new Random();
 
-      for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
+      for (Entry<OneDoFJointBasics, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
          OneDegreeOfFreedomJoint joint = pair.getValue();
 

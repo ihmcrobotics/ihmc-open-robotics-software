@@ -18,8 +18,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -89,7 +89,7 @@ public class VirtualModelController
 
    public void registerControlledBody(RigidBodyBasics controlledBody, RigidBodyBasics baseOfControl)
    {
-      OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(baseOfControl, controlledBody);
+      OneDoFJointBasics[] joints = ScrewTools.createOneDoFJointPath(baseOfControl, controlledBody);
       if (joints.length > 1)
       {
          if (MultiBodySystemTools.isAncestor(joints[1].getPredecessor(), joints[0].getPredecessor()))
@@ -97,7 +97,7 @@ public class VirtualModelController
          else // need to reorder them
          {
             int size = joints.length;
-            OneDoFJoint[] newJoints = new OneDoFJoint[size];
+            OneDoFJointBasics[] newJoints = new OneDoFJointBasics[size];
             for (int i = 0; i < size; i++)
             {
                newJoints[i] = joints[size - i - 1];
@@ -111,7 +111,7 @@ public class VirtualModelController
       }
    }
 
-   public void registerControlledBody(RigidBodyBasics controlledBody, OneDoFJoint[] jointsToUse)
+   public void registerControlledBody(RigidBodyBasics controlledBody, OneDoFJointBasics[] jointsToUse)
    {
       vmcDataHandler.addBodyForControl(controlledBody);
       vmcDataHandler.addJointsForControl(controlledBody, jointsToUse);

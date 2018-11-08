@@ -26,8 +26,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
@@ -88,7 +88,7 @@ public class KinematicsToolboxHelper
     * @param oneDoFJoints the one degree-of-freedom joints to update. Modified.
     */
    static void setRobotStateFromControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput, FloatingJointBasics rootJoint,
-                                                     OneDoFJoint[] oneDoFJoints)
+                                                     OneDoFJointBasics[] oneDoFJoints)
    {
       RootJointDesiredConfigurationDataReadOnly outputForRootJoint = controllerCoreOutput.getRootJointDesiredConfigurationData();
 
@@ -99,7 +99,7 @@ public class KinematicsToolboxHelper
       }
 
       JointDesiredOutputListReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
-      for (OneDoFJoint joint : oneDoFJoints)
+      for (OneDoFJointBasics joint : oneDoFJoints)
       {
          if (output.hasDataForJoint(joint))
          {
@@ -129,7 +129,7 @@ public class KinematicsToolboxHelper
     * @param oneDoFJoints the one degree-of-freedom joints to update. Modified.
     */
    static void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingJointBasics desiredRootJoint,
-                                                       OneDoFJoint[] oneDoFJoints)
+                                                       OneDoFJointBasics[] oneDoFJoints)
    {
       TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
 
@@ -167,7 +167,7 @@ public class KinematicsToolboxHelper
     * @param oneDoFJoints the one degree-of-freedom joints to update. Modified.
     */
    static void setRobotStateFromPrivilegedConfigurationData(KinematicsToolboxConfigurationCommand commandWithPrivilegedConfiguration,
-                                                            FloatingJointBasics desiredRootJoint, Map<Integer, OneDoFJoint> jointHashCodeMap)
+                                                            FloatingJointBasics desiredRootJoint, Map<Integer, OneDoFJointBasics> jointHashCodeMap)
    {
       boolean hasPrivilegedJointAngles = commandWithPrivilegedConfiguration.hasPrivilegedJointAngles();
 
@@ -178,7 +178,7 @@ public class KinematicsToolboxHelper
 
          for (int i = 0; i < privilegedJointAngles.size(); i++)
          {
-            OneDoFJoint joint = jointHashCodeMap.get(jointHashCodes.get(i));
+            OneDoFJointBasics joint = jointHashCodeMap.get(jointHashCodes.get(i));
             joint.setQ(privilegedJointAngles.get(i));
             joint.setQd(0.0);
          }

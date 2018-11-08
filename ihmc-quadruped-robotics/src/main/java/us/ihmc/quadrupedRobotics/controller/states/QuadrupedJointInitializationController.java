@@ -2,14 +2,14 @@ package us.ihmc.quadrupedRobotics.controller.states;
 
 import java.util.BitSet;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
+import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
-import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -48,10 +48,10 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
    @Override
    public void onEntry()
    {
-      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] joints = fullRobotModel.getOneDoFJoints();
       for (int i = 0; i < joints.length; i++)
       {
-         OneDoFJoint joint = joints[i];
+         OneDoFJointBasics joint = joints[i];
          if (fullRobotModel.getNameForOneDoFJoint(joint).getRole() == JointRole.LEG)
          {
             if (forceFeedbackControlEnabled.getBooleanValue())
@@ -65,10 +65,10 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
    @Override
    public void doAction(double timeInState)
    {
-      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] joints = fullRobotModel.getOneDoFJoints();
       for (int i = 0; i < joints.length; i++)
       {
-         OneDoFJoint joint = joints[i];
+         OneDoFJointBasics joint = joints[i];
 
          // Only set a desired if the actuator has just come online.
          if (!initialized.get(i)) //FIXME && joint.isOnline())

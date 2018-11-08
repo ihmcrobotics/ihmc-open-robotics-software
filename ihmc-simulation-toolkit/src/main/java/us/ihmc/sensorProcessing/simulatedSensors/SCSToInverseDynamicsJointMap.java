@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -23,10 +23,10 @@ public class SCSToInverseDynamicsJointMap
    private final LinkedHashMap<FloatingJointBasics, FloatingJoint> sixDofToFloatingJointMap = new LinkedHashMap<FloatingJointBasics, FloatingJoint>();
    private final LinkedHashMap<FloatingJoint, FloatingJointBasics> floatingToSixDofToJointMap = new LinkedHashMap<FloatingJoint, FloatingJointBasics>();
 
-   private final LinkedHashMap<OneDoFJoint, OneDegreeOfFreedomJoint> oneDoFToSCSJointMap = new LinkedHashMap<OneDoFJoint, OneDegreeOfFreedomJoint>();
-   private final LinkedHashMap<OneDegreeOfFreedomJoint, OneDoFJoint> scsToOneDoFJointMap = new LinkedHashMap<OneDegreeOfFreedomJoint, OneDoFJoint>();
+   private final LinkedHashMap<OneDoFJointBasics, OneDegreeOfFreedomJoint> oneDoFToSCSJointMap = new LinkedHashMap<OneDoFJointBasics, OneDegreeOfFreedomJoint>();
+   private final LinkedHashMap<OneDegreeOfFreedomJoint, OneDoFJointBasics> scsToOneDoFJointMap = new LinkedHashMap<OneDegreeOfFreedomJoint, OneDoFJointBasics>();
 
-   public void addLinkedJoints(OneDegreeOfFreedomJoint currentJoint, OneDoFJoint currentIDJoint)
+   public void addLinkedJoints(OneDegreeOfFreedomJoint currentJoint, OneDoFJointBasics currentIDJoint)
    {
       oneDoFToSCSJointMap.put(currentIDJoint, currentJoint);
       scsToOneDoFJointMap.put(currentJoint, currentIDJoint);
@@ -44,7 +44,7 @@ public class SCSToInverseDynamicsJointMap
     * @param oneDegreeOfFreedomJoint the simulated joint. Not modified.
     * @return the corresponding inverse dynamics joint.
     */
-   public OneDoFJoint getInverseDynamicsOneDoFJoint(OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint)
+   public OneDoFJointBasics getInverseDynamicsOneDoFJoint(OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint)
    {
       return scsToOneDoFJointMap.get(oneDegreeOfFreedomJoint);
    }
@@ -64,7 +64,7 @@ public class SCSToInverseDynamicsJointMap
     * 
     * @return the collection of the registered inverse dynamics joints.
     */
-   public Collection<OneDoFJoint> getInverseDynamicsOneDoFJoints()
+   public Collection<OneDoFJointBasics> getInverseDynamicsOneDoFJoints()
    {
       return scsToOneDoFJointMap.values();
    }
@@ -110,7 +110,7 @@ public class SCSToInverseDynamicsJointMap
       }
       else if (joint instanceof OneDegreeOfFreedomJoint)
       {
-         OneDoFJoint parentOneDoFJoint = scsToOneDoFJointMap.get(joint);
+         OneDoFJointBasics parentOneDoFJoint = scsToOneDoFJointMap.get(joint);
 
          return parentOneDoFJoint.getSuccessor();
       }
@@ -126,7 +126,7 @@ public class SCSToInverseDynamicsJointMap
     * @param the inverse dynamics joint. Not modified.
     * @return the corresponding simulated joint.
     */
-   public OneDegreeOfFreedomJoint getSimulatedOneDegreeOfFreedomJoint(OneDoFJoint inverseDynamicsJoint)
+   public OneDegreeOfFreedomJoint getSimulatedOneDegreeOfFreedomJoint(OneDoFJointBasics inverseDynamicsJoint)
    {
       return oneDoFToSCSJointMap.get(inverseDynamicsJoint);
    }
@@ -144,13 +144,13 @@ public class SCSToInverseDynamicsJointMap
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = new SCSToInverseDynamicsJointMap();
 
       JointBasics[] inverseDynamicsJoints = ScrewTools.computeSubtreeJoints(sixDoFRootJoint.getSuccessor());
-      LinkedHashMap<String, OneDoFJoint> inverseDynamicsJointsByName = new LinkedHashMap<String, OneDoFJoint>();
+      LinkedHashMap<String, OneDoFJointBasics> inverseDynamicsJointsByName = new LinkedHashMap<String, OneDoFJointBasics>();
 
       for (JointBasics inverseDynamicsJoint : inverseDynamicsJoints)
       {
-         if (inverseDynamicsJoint instanceof OneDoFJoint)
+         if (inverseDynamicsJoint instanceof OneDoFJointBasics)
          {
-            inverseDynamicsJointsByName.put(inverseDynamicsJoint.getName(), (OneDoFJoint) inverseDynamicsJoint);
+            inverseDynamicsJointsByName.put(inverseDynamicsJoint.getName(), (OneDoFJointBasics) inverseDynamicsJoint);
          }
          else
          {
@@ -173,7 +173,7 @@ public class SCSToInverseDynamicsJointMap
          String name = oneDegreeOfFreedomJoint.getName();
          if (inverseDynamicsJointsByName.containsKey(name))
          {
-            OneDoFJoint oneDoFJoint = inverseDynamicsJointsByName.get(name);
+            OneDoFJointBasics oneDoFJoint = inverseDynamicsJointsByName.get(name);
 
             scsToInverseDynamicsJointMap.addLinkedJoints(oneDegreeOfFreedomJoint, oneDoFJoint);
          }

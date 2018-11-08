@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotModels.FullLeggedRobotModel;
@@ -98,7 +98,7 @@ public class QuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         for (OneDoFJoint oneDoFJoint : fullRobotModel.getLegJointsList(robotQuadrant))
+         for (OneDoFJointBasics oneDoFJoint : fullRobotModel.getLegJointsList(robotQuadrant))
          {
             MovingReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
             QuadrupedJointName legJointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);

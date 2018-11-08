@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullLeggedRobotModel;
@@ -33,7 +33,7 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry;
    private final GeometricJacobian jacobian;
-   private final OneDoFJoint[] jointsFromRootToSole;
+   private final OneDoFJointBasics[] jointsFromRootToSole;
 
    private final DenseMatrix64F jacobianInverse;
    private final DenseMatrix64F footWrench = new DenseMatrix64F(6, 1);
@@ -84,7 +84,7 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
    {
       for(int i = 0; i < jointsFromRootToSole.length; i++)
       {
-         OneDoFJoint oneDoFJoint = jointsFromRootToSole[i];
+         OneDoFJointBasics oneDoFJoint = jointsFromRootToSole[i];
          jointTorques.set(i, 0, oneDoFJoint.getTau());
       }
       

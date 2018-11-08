@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -19,7 +19,7 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
    private final String name;
    protected final FloatingRootJointRobot robot;
    protected ImmutablePair<FloatingJoint, FloatingJointBasics> rootJointPair;
-   protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
+   protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJointBasics>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>>();
    private final JointDesiredOutputList jointDesiredOutputList;
 
    public PerfectSimulatedOutputWriter(FloatingRootJointRobot robot)
@@ -51,14 +51,14 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
    public void setFullRobotModel(FullRobotModel fullRobotModel)
    {
       revoluteJoints.clear();
-      OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
 
-      for (OneDoFJoint revoluteJoint : revoluteJointsArray)
+      for (OneDoFJointBasics revoluteJoint : revoluteJointsArray)
       {
          String name = revoluteJoint.getName();
          OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(name);
 
-         ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
+         ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJointBasics> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>(oneDoFJoint, revoluteJoint);
          this.revoluteJoints.add(jointPair);
       }
 
@@ -80,9 +80,9 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
    {
       for (int i = 0; i < revoluteJoints.size(); i++)
       {
-         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = revoluteJoints.get(i);
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = revoluteJoints.get(i);
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
-         OneDoFJoint revoluteJoint = jointPair.getRight();
+         OneDoFJointBasics revoluteJoint = jointPair.getRight();
 
          double tau;
          if (jointDesiredOutputList != null)
@@ -98,9 +98,9 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
    {
       for (int i = 0; i < revoluteJoints.size(); i++)
       {
-         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = revoluteJoints.get(i);
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = revoluteJoints.get(i);
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
-         OneDoFJoint revoluteJoint = jointPair.getRight();
+         OneDoFJointBasics revoluteJoint = jointPair.getRight();
          
          double q = jointDesiredOutputList.getJointDesiredOutput(revoluteJoint).getDesiredPosition();
          pinJoint.setQ(q);
@@ -117,9 +117,9 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
    {
       for (int i = 0; i < revoluteJoints.size(); i++)
       {
-         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = revoluteJoints.get(i);
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = revoluteJoints.get(i);
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
-         OneDoFJoint revoluteJoint = jointPair.getRight();
+         OneDoFJointBasics revoluteJoint = jointPair.getRight();
 
          pinJoint.setQ(revoluteJoint.getQ());
       }

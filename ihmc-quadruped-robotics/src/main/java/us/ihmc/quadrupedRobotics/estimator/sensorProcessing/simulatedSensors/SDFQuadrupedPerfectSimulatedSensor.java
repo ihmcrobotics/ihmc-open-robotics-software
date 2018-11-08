@@ -3,8 +3,8 @@ package us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors;
 import java.util.ArrayList;
 
 import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.sensorProcessors.FootSwitchOutputReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -24,7 +24,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
 {
    private final QuadrantDependentList<ContactBasedFootSwitch> footSwitches = new QuadrantDependentList<>();
 
-   private final OneDoFJoint[] sensorOneDoFJoints;
+   private final OneDoFJointBasics[] sensorOneDoFJoints;
 
    private final YoBoolean enableDrives;
 
@@ -83,7 +83,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
-   public double getJointPositionProcessedOutput(OneDoFJoint oneDoFJoint)
+   public double getJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint)
    {
       for(int i = 0; i < sensorOneDoFJoints.length; i++)
       {
@@ -96,7 +96,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
-   public double getJointVelocityProcessedOutput(OneDoFJoint oneDoFJoint)
+   public double getJointVelocityProcessedOutput(OneDoFJointBasics oneDoFJoint)
    {
       for(int i = 0; i < sensorOneDoFJoints.length; i++)
       {
@@ -109,7 +109,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
-   public double getJointAccelerationProcessedOutput(OneDoFJoint oneDoFJoint)
+   public double getJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint)
    {
       for(int i = 0; i < sensorOneDoFJoints.length; i++)
       {
@@ -122,7 +122,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
-   public double getJointTauProcessedOutput(OneDoFJoint oneDoFJoint)
+   public double getJointTauProcessedOutput(OneDoFJointBasics oneDoFJoint)
    {
       for(int i = 0; i < sensorOneDoFJoints.length; i++)
       {
@@ -135,7 +135,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
-   public boolean isJointEnabled(OneDoFJoint oneDoFJoint)
+   public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
    {
       for(int i = 0; i < sensorOneDoFJoints.length; i++)
       {

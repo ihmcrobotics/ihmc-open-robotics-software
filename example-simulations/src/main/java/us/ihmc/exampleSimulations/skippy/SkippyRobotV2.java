@@ -13,10 +13,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
@@ -78,7 +78,7 @@ public class SkippyRobotV2 extends Robot
       ELEVATOR, LEG, TORSO, SHOULDER
    }
 
-   private final EnumMap<SkippyJoint, OneDoFJoint> jointMap = new EnumMap<>(SkippyJoint.class);
+   private final EnumMap<SkippyJoint, OneDoFJointBasics> jointMap = new EnumMap<>(SkippyJoint.class);
    private final EnumMap<SkippyJoint, PinJoint> scsJointMap = new EnumMap<>(SkippyJoint.class);
    private final EnumMap<SkippyBody, RigidBodyBasics> bodyMap = new EnumMap<>(SkippyBody.class);
    private final FloatingJoint scsRootJoint;
@@ -242,7 +242,7 @@ public class SkippyRobotV2 extends Robot
       // update joint angles and velocities
       for (SkippyJoint joint : SkippyJoint.values)
       {
-         OneDoFJoint idJoint = jointMap.get(joint);
+         OneDoFJointBasics idJoint = jointMap.get(joint);
          OneDegreeOfFreedomJoint scsJoint = scsJointMap.get(joint);
          idJoint.setQ(scsJoint.getQYoVariable().getDoubleValue());
          idJoint.setQd(scsJoint.getQDYoVariable().getDoubleValue());
@@ -273,7 +273,7 @@ public class SkippyRobotV2 extends Robot
    {
       for (SkippyJoint joint : SkippyJoint.values())
       {
-         OneDoFJoint idJoint = jointMap.get(joint);
+         OneDoFJointBasics idJoint = jointMap.get(joint);
          OneDegreeOfFreedomJoint scsJoint = scsJointMap.get(joint);
          scsJoint.setTau(idJoint.getTau());
       }

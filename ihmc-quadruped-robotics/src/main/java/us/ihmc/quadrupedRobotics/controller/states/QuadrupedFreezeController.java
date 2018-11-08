@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedRobotics.controller.states;
 
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import java.util.ArrayList;
+
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
@@ -11,15 +13,12 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.ArrayList;
 
 public class QuadrupedFreezeController implements QuadrupedController
 {
@@ -38,7 +37,7 @@ public class QuadrupedFreezeController implements QuadrupedController
 
    private final JointDesiredOutputList jointDesiredOutputList;
    private final ArrayList<YoDouble> desiredFreezePositions = new ArrayList<>();
-   private final ArrayList<OneDoFJoint> joints = new ArrayList<>();
+   private final ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
 
    public QuadrupedFreezeController(QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                     QuadrupedControlMode controlMode, YoVariableRegistry parentRegistry)
@@ -53,7 +52,7 @@ public class QuadrupedFreezeController implements QuadrupedController
       feetManager = controlManagerFactory.getOrCreateFeetManager();
       fullRobotModel = controllerToolbox.getRuntimeEnvironment().getFullRobotModel();
 
-      for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
          if (fullRobotModel.getNameForOneDoFJoint(joint).getRole() == JointRole.LEG)
          {
@@ -76,7 +75,7 @@ public class QuadrupedFreezeController implements QuadrupedController
 
       for (int i = 0; i < joints.size(); i++)
       {
-         OneDoFJoint joint = joints.get(i);
+         OneDoFJointBasics joint = joints.get(i);
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
          double desiredPosition = jointDesiredOutput.hasDesiredPosition() ? jointDesiredOutput.getDesiredPosition() : joint.getQ();
          desiredFreezePositions.get(i).set(desiredPosition);
@@ -95,7 +94,7 @@ public class QuadrupedFreezeController implements QuadrupedController
       // Initialize force feedback
       for (int i = 0; i < joints.size(); i++)
       {
-         OneDoFJoint oneDoFJoint = joints.get(i);
+         OneDoFJointBasics oneDoFJoint = joints.get(i);
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint);
          jointDesiredOutput.clear();
          jointDesiredOutput.setStiffness(freezeJointStiffness.getValue());
@@ -119,7 +118,7 @@ public class QuadrupedFreezeController implements QuadrupedController
    public void onExit()
    {
       yoUseForceFeedbackControl.set(true);
-      for (OneDoFJoint oneDoFJoint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics oneDoFJoint : fullRobotModel.getOneDoFJoints())
       {
          QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (jointName.getRole().equals(JointRole.LEG))

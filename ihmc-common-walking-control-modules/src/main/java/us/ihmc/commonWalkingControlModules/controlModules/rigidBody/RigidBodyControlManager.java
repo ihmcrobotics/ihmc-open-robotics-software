@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
@@ -53,7 +53,7 @@ public class RigidBodyControlManager
    private final double[] initialJointPositions;
    private final FramePose3D homePose;
 
-   private final OneDoFJoint[] jointsToControl;
+   private final OneDoFJointBasics[] jointsToControl;
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final YoBoolean stateSwitched;
@@ -501,7 +501,7 @@ public class RigidBodyControlManager
       return ret;
    }
 
-   public OneDoFJoint[] getControlledJoints()
+   public OneDoFJointBasics[] getControlledJoints()
    {
       return jointsToControl;
    }

@@ -8,7 +8,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -28,11 +28,11 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDescription implements FullHumanoidRobotModel
 {
-   private SideDependentList<EnumMap<ArmJointName, OneDoFJoint>> armJointLists;
-   private SideDependentList<EnumMap<LegJointName, OneDoFJoint>> legJointLists;
+   private SideDependentList<EnumMap<ArmJointName, OneDoFJointBasics>> armJointLists;
+   private SideDependentList<EnumMap<LegJointName, OneDoFJointBasics>> legJointLists;
 
-   private SideDependentList<ArrayList<OneDoFJoint>> armJointIDsList;
-   private SideDependentList<ArrayList<OneDoFJoint>> legJointIDsList;
+   private SideDependentList<ArrayList<OneDoFJointBasics>> armJointIDsList;
+   private SideDependentList<ArrayList<OneDoFJointBasics>> legJointIDsList;
 
    private RigidBodyBasics[] endEffectors = new RigidBodyBasics[4];
    private SideDependentList<RigidBodyBasics> feet;
@@ -44,7 +44,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
 
    private final SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
    private final SideDependentList<MovingReferenceFrame> handControlFrames = new SideDependentList<>();
-   private final ArrayList<OneDoFJoint> oneDoFJointsExcludingHands = new ArrayList<>();
+   private final ArrayList<OneDoFJointBasics> oneDoFJointsExcludingHands = new ArrayList<>();
 
    private HumanoidJointNameMap humanoidJointNameMap;
 
@@ -110,7 +110,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       int i = 0;
       if (limb == LimbName.ARM)
       {
-         for (OneDoFJoint joint : armJointIDsList.get(side))
+         for (OneDoFJointBasics joint : armJointIDsList.get(side))
          {
             joint.setQ(q[i]);
             i++;
@@ -118,7 +118,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       }
       else if (limb == LimbName.LEG)
       {
-         for (OneDoFJoint jnt : legJointIDsList.get(side))
+         for (OneDoFJointBasics jnt : legJointIDsList.get(side))
          {
             jnt.setQ(q[i]);
             i++;
@@ -174,14 +174,14 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
 
    /** {@inheritDoc} */
    @Override
-   public OneDoFJoint[] getControllableOneDoFJoints()
+   public OneDoFJointBasics[] getControllableOneDoFJoints()
    {
-      return oneDoFJointsExcludingHands.toArray(new OneDoFJoint[oneDoFJointsExcludingHands.size()]);
+      return oneDoFJointsExcludingHands.toArray(new OneDoFJointBasics[oneDoFJointsExcludingHands.size()]);
    }
 
    /** {@inheritDoc} */
    @Override
-   public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+   public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
    {
       oneDoFJointsToPack.addAll(oneDoFJointsExcludingHands);
    }
@@ -195,7 +195,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
 
    /** {@inheritDoc} */
    @Override
-   public OneDoFJoint getLegJoint(RobotSide robotSide, LegJointName legJointName)
+   public OneDoFJointBasics getLegJoint(RobotSide robotSide, LegJointName legJointName)
    {
       return legJointLists.get(robotSide).get(legJointName);
    }
@@ -217,7 +217,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
 
    /** {@inheritDoc} */
    @Override
-   public OneDoFJoint getArmJoint(RobotSide robotSide, ArmJointName armJointName)
+   public OneDoFJointBasics getArmJoint(RobotSide robotSide, ArmJointName armJointName)
    {
       return armJointLists.get(robotSide).get(armJointName);
    }
@@ -341,7 +341,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
    //   }
 
    @Override
-   protected void mapRigidBody(JointDescription joint, OneDoFJoint inverseDynamicsJoint, RigidBodyBasics rigidBody)
+   protected void mapRigidBody(JointDescription joint, OneDoFJointBasics inverseDynamicsJoint, RigidBodyBasics rigidBody)
    {
       initializeLists();
 
@@ -417,7 +417,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       }
    }
 
-   private void getAllJointsExcludingHands(ArrayList<OneDoFJoint> jointsToPack)
+   private void getAllJointsExcludingHands(ArrayList<OneDoFJointBasics> jointsToPack)
    {
       getOneDoFJoints(jointsToPack);
       for (RobotSide robotSide : RobotSide.values)
@@ -425,8 +425,8 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
          RigidBodyBasics hand = getHand(robotSide);
          if (hand != null)
          {
-            OneDoFJoint[] fingerJoints = MultiBodySystemTools.filterJoints(ScrewTools.computeSubtreeJoints(hand), OneDoFJoint.class);
-            for (OneDoFJoint fingerJoint : fingerJoints)
+            OneDoFJointBasics[] fingerJoints = MultiBodySystemTools.filterJoints(ScrewTools.computeSubtreeJoints(hand), OneDoFJointBasics.class);
+            for (OneDoFJointBasics fingerJoint : fingerJoints)
             {
                jointsToPack.remove(fingerJoint);
             }

@@ -67,7 +67,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.JointStateType;
@@ -163,11 +163,11 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private final YoFrameVector2D pelvisShiftScaleFactor;
 
-   private final SideDependentList<OneDoFJoint[]> upperArmJoints = new SideDependentList<OneDoFJoint[]>();
-   private final SideDependentList<OneDoFJoint[]> lowerArmJoints = new SideDependentList<OneDoFJoint[]>();
+   private final SideDependentList<OneDoFJointBasics[]> upperArmJoints = new SideDependentList<OneDoFJointBasics[]>();
+   private final SideDependentList<OneDoFJointBasics[]> lowerArmJoints = new SideDependentList<OneDoFJointBasics[]>();
 
-   private final SideDependentList<OneDoFJoint[]> upperArmJointsClone = new SideDependentList<OneDoFJoint[]>();
-   private final SideDependentList<OneDoFJoint[]> lowerArmJointsClone = new SideDependentList<OneDoFJoint[]>();
+   private final SideDependentList<OneDoFJointBasics[]> upperArmJointsClone = new SideDependentList<OneDoFJointBasics[]>();
+   private final SideDependentList<OneDoFJointBasics[]> lowerArmJointsClone = new SideDependentList<OneDoFJointBasics[]>();
 
    private final SideDependentList<Double> elbowJointSign = new SideDependentList<>();
 
@@ -452,8 +452,8 @@ public class DiagnosticBehavior extends AbstractBehavior
          // The following one works for Valkyrie but doesn't work for Atlas
          //         RigidBody upperArmBody = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH).getPredecessor();
          // Pretty hackish but will work for now: Consider the elbow joint to be the fourth joint of the chain
-         OneDoFJoint[] armJoints = MultiBodySystemTools.filterJoints(ScrewTools.createJointPath(chest, hand), OneDoFJoint.class);
-         OneDoFJoint elbowJoint = armJoints[3];
+         OneDoFJointBasics[] armJoints = MultiBodySystemTools.filterJoints(ScrewTools.createJointPath(chest, hand), OneDoFJointBasics.class);
+         OneDoFJointBasics elbowJoint = armJoints[3];
          double jointSign = -Math.signum(elbowJoint.getJointLimitLower() + elbowJoint.getJointLimitUpper());
          elbowJointSign.put(robotSide, jointSign);
 
@@ -491,8 +491,8 @@ public class DiagnosticBehavior extends AbstractBehavior
          armZeroJointAngleConfigurationOffset.invert();
          armZeroJointAngleConfigurationOffsets.put(robotSide, armZeroJointAngleConfigurationOffset);
 
-         upperArmJoints.put(robotSide, MultiBodySystemTools.filterJoints(ScrewTools.createJointPath(chest, upperArmBody), OneDoFJoint.class));
-         upperArmJointsClone.put(robotSide, MultiBodySystemTools.filterJoints(ScrewTools.cloneJointPath(upperArmJoints.get(robotSide)), OneDoFJoint.class));
+         upperArmJoints.put(robotSide, MultiBodySystemTools.filterJoints(ScrewTools.createJointPath(chest, upperArmBody), OneDoFJointBasics.class));
+         upperArmJointsClone.put(robotSide, MultiBodySystemTools.filterJoints(ScrewTools.cloneJointPath(upperArmJoints.get(robotSide)), OneDoFJointBasics.class));
          GeometricJacobian upperArmJacobian = new GeometricJacobian(upperArmJointsClone.get(robotSide),
                                                                     upperArmJointsClone.get(robotSide)[upperArmJointsClone.get(robotSide).length
                                                                           - 1].getSuccessor().getBodyFixedFrame());
@@ -503,8 +503,8 @@ public class DiagnosticBehavior extends AbstractBehavior
          inverseKinematicsForUpperArm.setSelectionMatrix(angularSelectionMatrix);
          inverseKinematicsForUpperArms.put(robotSide, inverseKinematicsForUpperArm);
 
-         lowerArmJoints.put(robotSide, MultiBodySystemTools.filterJoints(ScrewTools.createJointPath(lowerArmBody, hand), OneDoFJoint.class));
-         lowerArmJointsClone.put(robotSide, MultiBodySystemTools.filterJoints(ScrewTools.cloneJointPath(lowerArmJoints.get(robotSide)), OneDoFJoint.class));
+         lowerArmJoints.put(robotSide, MultiBodySystemTools.filterJoints(ScrewTools.createJointPath(lowerArmBody, hand), OneDoFJointBasics.class));
+         lowerArmJointsClone.put(robotSide, MultiBodySystemTools.filterJoints(ScrewTools.cloneJointPath(lowerArmJoints.get(robotSide)), OneDoFJointBasics.class));
          GeometricJacobian lowerArmJacobian = new GeometricJacobian(lowerArmJointsClone.get(robotSide),
                                                                     lowerArmJointsClone.get(robotSide)[lowerArmJointsClone.get(robotSide).length
                                                                           - 1].getSuccessor().getBodyFixedFrame());
@@ -2241,7 +2241,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       if (iteration == 0)
       {
-         for (OneDoFJoint joint : upperArmJointsClone.get(robotSide))
+         for (OneDoFJointBasics joint : upperArmJointsClone.get(robotSide))
             joint.setQ(0.0);
       }
       else if (iteration >= 15)
@@ -2284,7 +2284,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       for (int i = 0; i < upperArmJointsClone.get(robotSide).length; i++)
       {
-         OneDoFJoint joint = upperArmJointsClone.get(robotSide)[i];
+         OneDoFJointBasics joint = upperArmJointsClone.get(robotSide)[i];
          double qDesired = joint.getQ();
          double qLow = joint.getJointLimitLower();
          double qUp = joint.getJointLimitUpper();
@@ -2306,7 +2306,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       temporaryDesiredHandOrientation.checkReferenceFrameMatch(lowerArmsFrames.get(robotSide));
       //      desiredHandOrientation.applyTransform(armZeroJointAngleConfigurationOffsets.get(robotSide));
 
-      for (OneDoFJoint joint : lowerArmJointsClone.get(robotSide))
+      for (OneDoFJointBasics joint : lowerArmJointsClone.get(robotSide))
          joint.setQ(0.0);
 
       if (mirrorOrientationForRightSide)

@@ -39,8 +39,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.Wrench;
@@ -136,7 +136,7 @@ public class HighLevelHumanoidControllerToolbox
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final JointBasics[] controlledJoints;
-   private final OneDoFJoint[] controlledOneDoFJoints;
+   private final OneDoFJointBasics[] controlledOneDoFJoints;
 
    private final SideDependentList<Wrench> handWrenches = new SideDependentList<>();
 
@@ -261,7 +261,7 @@ public class HighLevelHumanoidControllerToolbox
       }
 
       controlledJoints = computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
-      controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJoint.class);
+      controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -279,8 +279,8 @@ public class HighLevelHumanoidControllerToolbox
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         OneDoFJoint anklePitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
-         OneDoFJoint ankleRollJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
+         OneDoFJointBasics anklePitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
+         OneDoFJointBasics ankleRollJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
 
          FrameVector3DReadOnly pitchJointAxis;
          FrameVector3DReadOnly rollJointAxis;
@@ -931,7 +931,7 @@ public class HighLevelHumanoidControllerToolbox
       return controlledJoints;
    }
 
-   public OneDoFJoint[] getControlledOneDoFJoints()
+   public OneDoFJointBasics[] getControlledOneDoFJoints()
    {
       return controlledOneDoFJoints;
    }
