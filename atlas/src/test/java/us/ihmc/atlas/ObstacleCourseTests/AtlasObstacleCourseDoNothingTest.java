@@ -42,7 +42,14 @@ public class AtlasObstacleCourseDoNothingTest extends DRCObstacleCourseDoNothing
    @Test(timeout = 100000)
    public void testDoNothingShapeCollision() throws SimulationExceededMaximumTimeException
    {
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, false, true);
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, false, true)
+      {
+         @Override
+         public double getSimulateDT()
+         {
+            return 0.0001;
+         }
+      };
       super.testDoNothing1();
    }
 }
