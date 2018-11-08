@@ -18,6 +18,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -56,7 +57,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
       double trajectoryTime = 0.5;
       RigidBodyBasics chest = fullRobotModel.getChest();
       RigidBodyBasics head = fullRobotModel.getHead();
-      OneDoFJointBasics[] neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
+      OneDoFJointBasics[] neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
       int numberOfJoints = neckJoints.length;
       double[] desiredJointPositions = new double[numberOfJoints];
       double[] desiredJointVelcoties = new double[numberOfJoints];

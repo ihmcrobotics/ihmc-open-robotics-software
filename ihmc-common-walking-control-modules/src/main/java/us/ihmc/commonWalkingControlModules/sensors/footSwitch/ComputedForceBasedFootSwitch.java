@@ -12,6 +12,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullLeggedRobotModel;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotSegment;
@@ -69,7 +70,7 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
       soleFrame = robotModel.getSoleFrame(robotSegment);
       jacobian = new GeometricJacobian(body, foot, soleFrame);
       
-      jointsFromRootToSole = ScrewTools.createOneDoFJointPath(body, foot);
+      jointsFromRootToSole = MultiBodySystemTools.createOneDoFJointPath(body, foot);
       
       jointTorques = new DenseMatrix64F(jointsFromRootToSole.length, 1);
       jacobianInverse = new DenseMatrix64F(jointsFromRootToSole.length, 3);

@@ -16,6 +16,7 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
@@ -59,7 +60,7 @@ public class SphereRobotModel implements FullRobotModel
 
       centerOfMassJacobian = new CenterOfMassJacobian(elevator, worldFrame);
 
-      oneDoFJoints = ScrewTools.createOneDoFJointPath(elevator, body);
+      oneDoFJoints = MultiBodySystemTools.createOneDoFJointPath(elevator, body);
       totalMass = TotalMassCalculator.computeSubTreeMass(body);
    }
 

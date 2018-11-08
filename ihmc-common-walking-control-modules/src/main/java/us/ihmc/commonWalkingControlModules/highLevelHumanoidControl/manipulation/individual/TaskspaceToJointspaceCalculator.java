@@ -147,7 +147,7 @@ public class TaskspaceToJointspaceCalculator
       RigidBodyTransform transformToParent = originalBaseFrame.getTransformToDesiredFrame(originalBaseParentJointFrame);
       localBaseFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(localBaseFrameName, localBaseParentJointFrame, transformToParent);
 
-      originalJoints = ScrewTools.createOneDoFJointPath(base, endEffector);
+      originalJoints = MultiBodySystemTools.createOneDoFJointPath(base, endEffector);
       localJoints = ScrewTools.cloneJointPathDisconnectedFromOriginalRobot(originalJoints, OneDoFJointBasics.class, "Local", localBaseParentJointFrame);
       numberOfDoF = localJoints.length;
 

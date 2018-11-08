@@ -38,7 +38,7 @@ public class JointTorqueFromForceSensorVisualizer
       for (RigidBodyBasics rigidBody : allRigidBodies)
       {
          RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
-         OneDoFJointBasics[] oneDoFJoints = ScrewTools.createOneDoFJointPath(rootBody, rigidBody);
+         OneDoFJointBasics[] oneDoFJoints = MultiBodySystemTools.createOneDoFJointPath(rootBody, rigidBody);
 
          GeometricJacobian jacobian = new GeometricJacobian(oneDoFJoints, rigidBody.getBodyFixedFrame());
          jacobians.put(rigidBody, jacobian);

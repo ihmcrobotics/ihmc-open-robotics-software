@@ -633,7 +633,7 @@ public class VirtualModelControllerTestHelper
          addLinkGraphics();
          addForcePoint();
 
-         oneDoFJoints = ScrewTools.createOneDoFJointPath(elevator, hand);
+         oneDoFJoints = MultiBodySystemTools.createOneDoFJointPath(elevator, hand);
          elevator.updateFramesRecursively();
       }
 
@@ -917,7 +917,7 @@ public class VirtualModelControllerTestHelper
          addLinkGraphics();
          addForcePoint();
 
-         oneDoFJoints = ScrewTools.createOneDoFJointPath(elevator, hand);
+         oneDoFJoints = MultiBodySystemTools.createOneDoFJointPath(elevator, hand);
          elevator.updateFramesRecursively();
       }
 

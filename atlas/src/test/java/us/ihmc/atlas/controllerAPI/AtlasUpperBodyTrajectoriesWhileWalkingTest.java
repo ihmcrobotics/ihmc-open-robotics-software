@@ -150,7 +150,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       {
          RigidBodyBasics chest = fullRobotModel.getChest();
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-         OneDoFJointBasics[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
+         OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
          armsJoints.put(robotSide, armJoints);
          int numberOfJoints = MultiBodySystemTools.computeDegreesOfFreedom(armJoints);
 

@@ -23,6 +23,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -71,7 +72,7 @@ public class RigidBodyControlManager
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
       stateSwitched = new YoBoolean(namePrefix + "StateSwitched", registry);
 
-      jointsToControl = ScrewTools.createOneDoFJointPath(baseBody, bodyToControl);
+      jointsToControl = MultiBodySystemTools.createOneDoFJointPath(baseBody, bodyToControl);
 
       initialJointPositions = new double[jointsToControl.length];
 

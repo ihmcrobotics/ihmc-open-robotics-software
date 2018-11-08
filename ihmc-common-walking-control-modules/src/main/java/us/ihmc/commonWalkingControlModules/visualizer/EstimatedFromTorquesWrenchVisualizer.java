@@ -21,6 +21,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableBody;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -78,7 +79,7 @@ public class EstimatedFromTorquesWrenchVisualizer
    {
       for (RigidBodyBasics rigidBody : rigidBodies)
       {
-         OneDoFJointBasics[] joints = ScrewTools.createOneDoFJointPath(rootBody, rigidBody);
+         OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(rootBody, rigidBody);
          jointLists.put(rigidBody, joints);
          if (jacobianHolder != null)
          {

@@ -287,7 +287,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
          RigidBodyBasics hand = controllerRobotModel.getHand(robotSide);
          if (hand != null)
          {
-            JointBasics[] armJoints = ScrewTools.createJointPath(controllerRobotModel.getChest(), hand);
+            JointBasics[] armJoints = MultiBodySystemTools.createJointPath(controllerRobotModel.getChest(), hand);
             OneDoFJointBasics[] filterArmJoints = MultiBodySystemTools.filterJoints(armJoints, OneDoFJointBasics.class);
             for (OneDoFJointBasics armJoint : filterArmJoints)
                armOneDoFJoints.add(armJoint);

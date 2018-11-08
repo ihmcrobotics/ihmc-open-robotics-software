@@ -112,7 +112,7 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         JointBasics[] jointPath = ScrewTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getFoot(robotSide));
+         JointBasics[] jointPath = MultiBodySystemTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getFoot(robotSide));
          actuatedJoints.addAll(Arrays.asList(jointPath));
       }
 

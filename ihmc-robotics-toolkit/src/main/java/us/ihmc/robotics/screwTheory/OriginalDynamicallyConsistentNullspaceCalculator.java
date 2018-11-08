@@ -88,7 +88,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
    {
       constrainedBodiesAndSelectionMatrices.put(body, selectionMatrix);
       nConstraints += selectionMatrix.getNumRows();
-      JointBasics[] jointPath = ScrewTools.createJointPath(rootJoint.getPredecessor(), body);
+      JointBasics[] jointPath = MultiBodySystemTools.createJointPath(rootJoint.getPredecessor(), body);
       this.supportingBodyToJointPathMap.put(body, Arrays.asList(jointPath));
    }
 

@@ -21,6 +21,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -89,7 +90,7 @@ public class KinematicsToolboxOutputConverter
    {
       RigidBodyBasics hand = fullRobotModelToUseForConversion.getHand(robotSide);
       RigidBodyBasics chest = fullRobotModelToUseForConversion.getChest();
-      OneDoFJointBasics[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
+      OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
       int numberOfArmJoints = armJoints.length;
       double[] desiredJointPositions = new double[numberOfArmJoints];
       for (int i = 0; i < numberOfArmJoints; i++)

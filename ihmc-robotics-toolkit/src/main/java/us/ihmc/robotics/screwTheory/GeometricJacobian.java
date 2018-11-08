@@ -88,7 +88,7 @@ public class GeometricJacobian
       System.arraycopy(joints, 0, this.joints, 0, joints.length);
       this.jacobianFrame = jacobianFrame;
       this.jacobian = new DenseMatrix64F(SpatialVector.SIZE, MultiBodySystemTools.computeDegreesOfFreedom(joints));
-      this.jointPathFromBaseToEndEffector = ScrewTools.createJointPath(getBase(), getEndEffector());
+      this.jointPathFromBaseToEndEffector = MultiBodySystemTools.createJointPath(getBase(), getEndEffector());
       this.allowChangeFrame = allowChangeFrame;
 
       hashCode = ScrewTools.computeGeometricJacobianHashCode(joints, jacobianFrame, allowChangeFrame);
@@ -125,7 +125,7 @@ public class GeometricJacobian
     */
    public GeometricJacobian(RigidBodyBasics ancestor, RigidBodyBasics descendant, ReferenceFrame jacobianFrame)
    {
-      this(ScrewTools.createJointPath(ancestor, descendant), jacobianFrame, true);
+      this(MultiBodySystemTools.createJointPath(ancestor, descendant), jacobianFrame, true);
    }
 
    /**

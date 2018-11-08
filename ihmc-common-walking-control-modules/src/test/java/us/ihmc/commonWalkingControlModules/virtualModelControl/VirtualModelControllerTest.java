@@ -23,6 +23,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -58,7 +59,7 @@ public class VirtualModelControllerTest
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       Wrench wrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
-      JointBasics[] controlledJoints = ScrewTools.createJointPath(pelvis, foot);
+      JointBasics[] controlledJoints = MultiBodySystemTools.createJointPath(pelvis, foot);
       GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, pelvis.getBodyFixedFrame());
       jacobian.compute();
 
@@ -568,7 +569,7 @@ public class VirtualModelControllerTest
 
       DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
 
-      JointBasics[] controlledJoints = ScrewTools.createJointPath(pelvis, endEffector);
+      JointBasics[] controlledJoints = MultiBodySystemTools.createJointPath(pelvis, endEffector);
       GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, pelvis.getBodyFixedFrame());
       jacobian.compute();
 
@@ -784,7 +785,7 @@ public class VirtualModelControllerTest
 
       simulationTestingParameters.setKeepSCSUp(false);
 
-      OneDoFJointBasics[] controlledJoints = ScrewTools.createOneDoFJointPath(base, endEffector);
+      OneDoFJointBasics[] controlledJoints = MultiBodySystemTools.createOneDoFJointPath(base, endEffector);
       GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, base.getBodyFixedFrame());
       jacobian.compute();
 

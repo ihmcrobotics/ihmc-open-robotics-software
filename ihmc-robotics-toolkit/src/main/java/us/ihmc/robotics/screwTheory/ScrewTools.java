@@ -75,7 +75,7 @@ public class ScrewTools
       for (RigidBodyBasics rigidBody : bodies)
       {
          RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
-         JointBasics[] jointPath = createJointPath(rootBody, rigidBody);
+         JointBasics[] jointPath = MultiBodySystemTools.createJointPath(rootBody, rigidBody);
          supportSet.addAll(Arrays.asList(jointPath));
       }
 
@@ -107,16 +107,6 @@ public class ScrewTools
 
       JointBasics[] ret = new JointBasics[subtree.size()];
       return subtree.toArray(ret);
-   }
-
-   public static OneDoFJointBasics[] createOneDoFJointPath(RigidBodyBasics start, RigidBodyBasics end)
-   {
-      return MultiBodySystemTools.createOneDoFJointPath(start, end);
-   }
-
-   public static JointBasics[] createJointPath(RigidBodyBasics start, RigidBodyBasics end)
-   {
-      return MultiBodySystemTools.createJointPath(start, end);
    }
 
    /**

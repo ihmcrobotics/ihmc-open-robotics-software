@@ -128,7 +128,7 @@ public class QuadrupedVirtualModelController
       {
          RigidBodyBasics foot = fullRobotModel.getFoot(robotQuadrant);
          RigidBodyBasics body = fullRobotModel.getRootJoint().getSuccessor();
-         legJoints.set(robotQuadrant, MultiBodySystemTools.filterJoints(ScrewTools.createJointPath(body, foot), OneDoFJointBasics.class));
+         legJoints.set(robotQuadrant, MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(body, foot), OneDoFJointBasics.class));
          footJacobian.set(robotQuadrant, new GeometricJacobian(legJoints.get(robotQuadrant), body.getBodyFixedFrame()));
          soleJacobian.set(robotQuadrant, new PointJacobian());
          legEffortVector.set(robotQuadrant, new DenseMatrix64F(legJoints.get(robotQuadrant).length, 1));

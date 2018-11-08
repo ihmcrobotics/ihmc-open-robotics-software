@@ -57,7 +57,7 @@ public class UnloadedAnkleControlModule
       foot = fullRobotModel.getFoot(robotSide);
       RigidBodyBasics shin = ScrewTools.goUpBodyChain(foot, ankleIKSolver.getNumberOfJoints());
       shinFrame = shin.getParentJoint().getFrameAfterJoint();
-      OneDoFJointBasics[] ankleJoints = MultiBodySystemTools.filterJoints(ScrewTools.createJointPath(shin, foot), OneDoFJointBasics.class);
+      OneDoFJointBasics[] ankleJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(shin, foot), OneDoFJointBasics.class);
       jointDesiredOutputList = new JointDesiredOutputList(ankleJoints);
       parentRegistry.addChild(registry);
    }

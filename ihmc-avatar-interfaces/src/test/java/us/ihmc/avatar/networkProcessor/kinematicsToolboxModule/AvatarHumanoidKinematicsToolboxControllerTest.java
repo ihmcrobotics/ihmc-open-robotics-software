@@ -37,6 +37,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -451,7 +452,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
    {
       percentOfMotionRangeAllowed = MathTools.clamp(percentOfMotionRangeAllowed, 0.0, 1.0);
 
-      OneDoFJointBasics[] joints = ScrewTools.createOneDoFJointPath(base, body);
+      OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(base, body);
 
       randomizeJointPositions(random, joints, percentOfMotionRangeAllowed);
    }
