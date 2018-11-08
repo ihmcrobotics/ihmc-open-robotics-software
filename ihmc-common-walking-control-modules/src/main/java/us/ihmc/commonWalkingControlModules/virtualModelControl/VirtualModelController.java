@@ -22,6 +22,7 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -90,7 +91,7 @@ public class VirtualModelController
       OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(baseOfControl, controlledBody);
       if (joints.length > 1)
       {
-         if (ScrewTools.isAncestor(joints[1].getPredecessor(), joints[0].getPredecessor()))
+         if (MultiBodySystemTools.isAncestor(joints[1].getPredecessor(), joints[0].getPredecessor()))
             registerControlledBody(controlledBody, joints);
          else // need to reorder them
          {

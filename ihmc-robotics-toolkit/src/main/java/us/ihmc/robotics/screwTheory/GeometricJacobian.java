@@ -340,7 +340,7 @@ public class GeometricJacobian
       {
          JointBasics joint = joints[i];
          JointBasics previousJoint = joints[i - 1];
-         if (ScrewTools.isAncestor(previousJoint.getPredecessor(), joint.getPredecessor()))
+         if (MultiBodySystemTools.isAncestor(previousJoint.getPredecessor(), joint.getPredecessor()))
             throw new RuntimeException("joints must be in order from ancestor to descendant");
       }
    }
