@@ -197,7 +197,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
-         OneDoFJointBasics[] legJoints = MultiBodySystemTools.filterJoints(ScrewTools.createJointPath(pelvis, foot), OneDoFJointBasics.class);
+         OneDoFJointBasics[] legJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(pelvis, foot), OneDoFJointBasics.class);
          Set<String> jointNames = new HashSet<>();
          Arrays.asList(legJoints).stream().forEach(legJoint -> jointNames.add(legJoint.getName()));
          legJointNames.put(robotSide, jointNames);

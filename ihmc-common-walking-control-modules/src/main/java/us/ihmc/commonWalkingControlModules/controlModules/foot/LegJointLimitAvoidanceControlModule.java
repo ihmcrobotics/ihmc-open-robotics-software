@@ -90,7 +90,7 @@ public class LegJointLimitAvoidanceControlModule
       robotModel = controllerToolbox.getFullRobotModel();
       base = robotModel.getPelvis();
       RigidBodyBasics foot = robotModel.getFoot(robotSide);
-      robotJoints = MultiBodySystemTools.filterJoints(ScrewTools.createJointPath(base, foot), OneDoFJointBasics.class);
+      robotJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(base, foot), OneDoFJointBasics.class);
       ikJoints = MultiBodySystemTools.filterJoints(ScrewTools.cloneJointPath(robotJoints), OneDoFJointBasics.class);
       jacobian = new GeometricJacobian(ikJoints, ikJoints[ikJoints.length - 1].getSuccessor().getBodyFixedFrame());
 

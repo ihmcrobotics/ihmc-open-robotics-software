@@ -117,7 +117,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
          this.referenceFrames = referenceFrames;
 
          this.fullRobotModel = fullRobotModel;
-         JointBasics[] joints = ScrewTools.createJointPath(fullRobotModel.getRootJoint().getSuccessor(), fullRobotModel.getFoot(robotQuadrant));
+         JointBasics[] joints = MultiBodySystemTools.createJointPath(fullRobotModel.getRootJoint().getSuccessor(), fullRobotModel.getFoot(robotQuadrant));
          jointsToControl = MultiBodySystemTools.filterJoints(joints, OneDoFJointBasics.class);
 
          closedFormInverseKinematicsCalculator = QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator.createFromLegAttachmentFrame(robotQuadrant,

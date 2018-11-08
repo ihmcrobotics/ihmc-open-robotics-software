@@ -91,7 +91,7 @@ public class QuadrupedSoleForceEstimator
       {
          RigidBodyBasics body = fullRobotModel.getRootJoint().getSuccessor();
          RigidBodyBasics foot = fullRobotModel.getFoot(robotQuadrant);
-         legJoints.set(robotQuadrant, MultiBodySystemTools.filterJoints(ScrewTools.createJointPath(body, foot), OneDoFJointBasics.class));
+         legJoints.set(robotQuadrant, MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(body, foot), OneDoFJointBasics.class));
          footJacobian.set(robotQuadrant, new GeometricJacobian(legJoints.get(robotQuadrant), body.getBodyFixedFrame()));
          soleJacobian.set(robotQuadrant, new PointJacobian());
          int jacobianRows = 3;

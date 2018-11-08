@@ -89,7 +89,7 @@ public class VirtualModelController
 
    public void registerControlledBody(RigidBodyBasics controlledBody, RigidBodyBasics baseOfControl)
    {
-      OneDoFJointBasics[] joints = ScrewTools.createOneDoFJointPath(baseOfControl, controlledBody);
+      OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(baseOfControl, controlledBody);
       if (joints.length > 1)
       {
          if (MultiBodySystemTools.isAncestor(joints[1].getPredecessor(), joints[0].getPredecessor()))

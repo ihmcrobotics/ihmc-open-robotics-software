@@ -565,7 +565,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
       chest = fullRobotModel.getChest();
-      spineJoints = ScrewTools.createOneDoFJointPath(pelvis, chest);
+      spineJoints = MultiBodySystemTools.createOneDoFJointPath(pelvis, chest);
       numberOfJoints = spineJoints.length;
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 

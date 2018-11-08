@@ -33,6 +33,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -107,7 +108,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       {
          RigidBodyBasics chest = fullRobotModel.getChest();
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-         OneDoFJointBasics[] arm = ScrewTools.createOneDoFJointPath(chest, hand);
+         OneDoFJointBasics[] arm = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
          OneDoFJointBasics[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
          for (int i = 0; i < armClone.length; i++)
          {
@@ -237,7 +238,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       {
          RigidBodyBasics chest = fullRobotModel.getChest();
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-         OneDoFJointBasics[] arm = ScrewTools.createOneDoFJointPath(chest, hand);
+         OneDoFJointBasics[] arm = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
          OneDoFJointBasics[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
          for (int i = 0; i < armClone.length; i++)
          {
@@ -360,7 +361,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       {
          RigidBodyBasics chest = fullRobotModel.getChest();
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-         OneDoFJointBasics[] arm = ScrewTools.createOneDoFJointPath(chest, hand);
+         OneDoFJointBasics[] arm = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
          OneDoFJointBasics[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
          for (int i = 0; i < armClone.length; i++)
          {

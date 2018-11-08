@@ -28,6 +28,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -149,7 +150,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       head = fullRobotModel.getHead();
       chest = fullRobotModel.getChest();
-      neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
+      neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
       numberOfJoints = neckJoints.length;
 
       drcSimulationTestHelper.getSimulationConstructionSet().hideAllYoGraphics();

@@ -21,6 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -29,7 +30,7 @@ public class WholeBodyTrajectoryToolboxHelper
 {
    public static double kinematicsChainLimitScore(RigidBodyBasics start, RigidBodyBasics end)
    {
-      return jointsLimitScore(ScrewTools.createOneDoFJointPath(start, end));
+      return jointsLimitScore(MultiBodySystemTools.createOneDoFJointPath(start, end));
    }
 
    public static double jointsLimitScore(Collection<OneDoFJointBasics> jointsToScore)

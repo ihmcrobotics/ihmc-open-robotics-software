@@ -830,7 +830,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       {
          RigidBodyBasics chest = robot.getChest();
          RigidBodyBasics hand = robot.getHand(robotSide);
-         Arrays.stream(ScrewTools.createOneDoFJointPath(chest, hand)).forEach(j -> setJointPositionToMidRange(j));
+         Arrays.stream(MultiBodySystemTools.createOneDoFJointPath(chest, hand)).forEach(j -> setJointPositionToMidRange(j));
       }
       return robot;
    }

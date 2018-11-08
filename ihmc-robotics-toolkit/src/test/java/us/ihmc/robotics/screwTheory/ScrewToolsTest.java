@@ -382,7 +382,7 @@ public class ScrewToolsTest
       }
 
       RigidBodyBasics start = allBodies[0] , end = allBodies[allBodies.length - 1];
-      JointBasics[] jointPath = ScrewTools.createJointPath(start, end);
+      JointBasics[] jointPath = MultiBodySystemTools.createJointPath(start, end);
       for(int i = 0; i < jointPath.length; i++)
       {
          assertTrue(jointPath[i].getName().equalsIgnoreCase("chainCjoint" + i));
