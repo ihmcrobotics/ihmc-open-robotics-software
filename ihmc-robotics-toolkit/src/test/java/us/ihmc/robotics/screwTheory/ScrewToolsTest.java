@@ -486,9 +486,9 @@ public class ScrewToolsTest
       RigidBodyBasics d2 = allBodies[2]; //chainAbody1
       RigidBodyBasics d3 = allBodies[3]; //chainAbody2
 
-      assertEquals(0, ScrewTools.computeDistanceToAncestor(d0, d0)); //self
-      assertEquals(3, ScrewTools.computeDistanceToAncestor(d3, d0)); //ancestor
-      assertEquals(-1, ScrewTools.computeDistanceToAncestor(d0, d3)); //descendant 
+      assertEquals(0, MultiBodySystemTools.computeDistanceToAncestor(d0, d0)); //self
+      assertEquals(3, MultiBodySystemTools.computeDistanceToAncestor(d3, d0)); //ancestor
+      assertEquals(-1, MultiBodySystemTools.computeDistanceToAncestor(d0, d3)); //descendant 
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

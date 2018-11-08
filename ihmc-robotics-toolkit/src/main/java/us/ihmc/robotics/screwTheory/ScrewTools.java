@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ejml.data.DenseMatrix64F;
-
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -28,7 +26,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -224,13 +221,13 @@ public class ScrewTools
       boolean flip = false;
       RigidBodyBasics descendant = start;
       RigidBodyBasics ancestor = end;
-      int pathLength = computeDistanceToAncestor(descendant, ancestor);
+      int pathLength = MultiBodySystemTools.computeDistanceToAncestor(descendant, ancestor);
       if (pathLength < 0)
       {
          flip = true;
          descendant = end;
          ancestor = start;
-         pathLength = computeDistanceToAncestor(end, start);
+         pathLength = MultiBodySystemTools.computeDistanceToAncestor(end, start);
       }
 
       JointBasics[] ret = new JointBasics[pathLength];
@@ -262,13 +259,13 @@ public class ScrewTools
       boolean flip = false;
       RigidBodyBasics descendant = start;
       RigidBodyBasics ancestor = end;
-      int pathLength = computeDistanceToAncestor(descendant, ancestor);
+      int pathLength = MultiBodySystemTools.computeDistanceToAncestor(descendant, ancestor);
       if (pathLength < 0)
       {
          flip = true;
          descendant = end;
          ancestor = start;
-         pathLength = computeDistanceToAncestor(end, start);
+         pathLength = MultiBodySystemTools.computeDistanceToAncestor(end, start);
       }
 
       if (jointPathToPack == null || jointPathToPack.length < pathLength)
@@ -463,22 +460,6 @@ public class ScrewTools
       Vector3D comOffsetCopy = new Vector3D(comOffset);
       RigidBodyBasics clone = new RigidBody(nameOriginal + cloneSuffix, parentJointOfClone, massMomentOfInertiaPartCopy, mass, comOffsetCopy);
       return clone;
-   }
-
-   public static int computeDistanceToAncestor(RigidBodyBasics descendant, RigidBodyBasics ancestor)
-   {
-      int ret = 0;
-      RigidBodyBasics currentBody = descendant;
-      while (!currentBody.isRootBody() && (currentBody != ancestor))
-      {
-         ret++;
-         currentBody = currentBody.getParentJoint().getPredecessor();
-      }
-
-      if (currentBody != ancestor)
-         ret = -1;
-
-      return ret;
    }
 
    public static SpatialAcceleration createGravitationalSpatialAcceleration(RigidBodyBasics rootBody, double gravity)
