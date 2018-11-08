@@ -10,12 +10,12 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class DarpaRoboticsChallengeTrialsWalkingEnvironment implements CommonAvatarEnvironmentInterface
+public class DRCTrialsWalkingEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject3D;
 
 
-   public DarpaRoboticsChallengeTrialsWalkingEnvironment()
+   public DRCTrialsWalkingEnvironment()
    {
       combinedTerrainObject3D = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
