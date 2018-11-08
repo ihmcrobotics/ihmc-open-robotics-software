@@ -1,6 +1,5 @@
 package us.ihmc.robotics.screwTheory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -21,6 +20,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -86,24 +86,7 @@ public class ScrewTools
 
    public static JointBasics[] computeSubtreeJoints(List<RigidBodyBasics> rootBodies)
    {
-      ArrayList<JointBasics> subtree = new ArrayList<JointBasics>();
-      ArrayList<RigidBodyBasics> rigidBodyStack = new ArrayList<RigidBodyBasics>();
-      rigidBodyStack.addAll(rootBodies);
-
-      while (!rigidBodyStack.isEmpty())
-      {
-         RigidBodyBasics currentBody = rigidBodyStack.remove(0);
-         List<? extends JointBasics> childrenJoints = currentBody.getChildrenJoints();
-         for (JointBasics joint : childrenJoints)
-         {
-            RigidBodyBasics successor = joint.getSuccessor();
-            rigidBodyStack.add(successor);
-            subtree.add(joint);
-         }
-      }
-
-      JointBasics[] ret = new JointBasics[subtree.size()];
-      return subtree.toArray(ret);
+      return rootBodies.stream().flatMap(root -> SubtreeStreams.fromChildren(root)).toArray(JointBasics[]::new);
    }
 
    /**
