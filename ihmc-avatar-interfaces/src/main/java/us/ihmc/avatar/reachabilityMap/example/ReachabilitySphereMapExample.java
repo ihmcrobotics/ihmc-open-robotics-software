@@ -4,6 +4,7 @@ import us.ihmc.avatar.reachabilityMap.ReachabilityMapListener;
 import us.ihmc.avatar.reachabilityMap.ReachabilitySphereMapCalculator;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -21,7 +22,7 @@ public class ReachabilitySphereMapExample
       scs.addStaticLinkGraphics(coordinate);
       scs.startOnAThread();
 
-      OneDoFJoint[] armJoints = ScrewTools.filterJoints(robot.getJacobian().getJointsInOrder(), OneDoFJoint.class);
+      OneDoFJoint[] armJoints = MultiBodySystemTools.filterJoints(robot.getJacobian().getJointsInOrder(), OneDoFJoint.class);
       ReachabilitySphereMapCalculator reachabilitySphereMapCalculator = new ReachabilitySphereMapCalculator(armJoints, scs);
 //      reachabilitySphereMapCalculator.setControlFrameFixedInEndEffector(robot.getControlFrame());
       ReachabilityMapListener listener = new ReachabilityMapListener()

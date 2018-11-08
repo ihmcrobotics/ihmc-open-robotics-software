@@ -8,6 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -40,7 +41,7 @@ public class IMUBasedJointVelocityEstimator
       this.childIMU = childIMU;
       this.jacobian = jacobian;
 
-      joints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      joints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
       if (joints.length > 3)
       {
          throw new IllegalArgumentException("Cannot solve for more than 3 DoF betwen IMUs. " + joints.length + " DoF were given");

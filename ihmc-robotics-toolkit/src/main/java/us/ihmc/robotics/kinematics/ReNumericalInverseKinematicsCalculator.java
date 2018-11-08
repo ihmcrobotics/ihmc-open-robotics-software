@@ -68,7 +68,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
       this.jacobian = jacobian;
       this.solver = LinearSolverFactory.leastSquares(SpatialVector.SIZE, jacobian.getNumberOfColumns()); // new DampedLeastSquaresSolver(jacobian.getNumberOfColumns());
 
-      this.oneDoFJoints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      this.oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
       oneDoFJointsSeed = oneDoFJoints.clone();
 
       if (oneDoFJoints.length != jacobian.getJointsInOrder().length)

@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -287,7 +288,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
          if (hand != null)
          {
             JointBasics[] armJoints = ScrewTools.createJointPath(controllerRobotModel.getChest(), hand);
-            OneDoFJoint[] filterArmJoints = ScrewTools.filterJoints(armJoints, OneDoFJoint.class);
+            OneDoFJoint[] filterArmJoints = MultiBodySystemTools.filterJoints(armJoints, OneDoFJoint.class);
             for (OneDoFJoint armJoint : filterArmJoints)
                armOneDoFJoints.add(armJoint);
          }

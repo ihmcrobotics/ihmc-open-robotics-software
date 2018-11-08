@@ -19,6 +19,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotDescription.Plane;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -91,8 +92,7 @@ public class RobotTools
 
          allSCSOneDoFJoints = new ArrayList<OneDegreeOfFreedomJoint>();
          getAllOneDegreeOfFreedomJoints(allSCSOneDoFJoints);
-         allIDOneDoFJoints = new ArrayList<OneDoFJoint>(Arrays.asList(ScrewTools.filterJoints(ScrewTools.computeSubtreeJoints(rootJoint.getPredecessor()),
-               OneDoFJoint.class)));
+         allIDOneDoFJoints = new ArrayList<OneDoFJoint>(Arrays.asList(MultiBodySystemTools.filterJoints(ScrewTools.computeSubtreeJoints(rootJoint.getPredecessor()), OneDoFJoint.class)));
 
          if (allIDOneDoFJoints.size() != allSCSOneDoFJoints.size())
             throw new RuntimeException("Should not get there...");

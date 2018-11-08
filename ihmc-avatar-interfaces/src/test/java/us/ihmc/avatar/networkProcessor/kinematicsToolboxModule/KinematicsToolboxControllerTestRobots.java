@@ -16,6 +16,7 @@ import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
@@ -141,7 +142,7 @@ public class KinematicsToolboxControllerTestRobots
          addJointsRecursively((OneDoFJointDescription) robotDescription.getRootJoints().get(0), predecessor);
       }
 
-      return new ImmutablePair<>(rootJoint, ScrewTools.filterJoints(ScrewTools.computeSubtreeJoints(predecessor), OneDoFJoint.class));
+      return new ImmutablePair<>(rootJoint, MultiBodySystemTools.filterJoints(ScrewTools.computeSubtreeJoints(predecessor), OneDoFJoint.class));
    }
 
    

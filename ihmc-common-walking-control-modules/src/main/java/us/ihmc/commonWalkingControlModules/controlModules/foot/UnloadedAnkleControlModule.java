@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -56,7 +57,7 @@ public class UnloadedAnkleControlModule
       foot = fullRobotModel.getFoot(robotSide);
       RigidBodyBasics shin = ScrewTools.goUpBodyChain(foot, ankleIKSolver.getNumberOfJoints());
       shinFrame = shin.getParentJoint().getFrameAfterJoint();
-      OneDoFJoint[] ankleJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(shin, foot), OneDoFJoint.class);
+      OneDoFJoint[] ankleJoints = MultiBodySystemTools.filterJoints(ScrewTools.createJointPath(shin, foot), OneDoFJoint.class);
       jointDesiredOutputList = new JointDesiredOutputList(ankleJoints);
       parentRegistry.addChild(registry);
    }

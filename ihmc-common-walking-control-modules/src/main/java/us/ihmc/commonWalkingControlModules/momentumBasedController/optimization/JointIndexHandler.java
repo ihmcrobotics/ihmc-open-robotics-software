@@ -25,7 +25,7 @@ public class JointIndexHandler
    public JointIndexHandler(JointBasics[] jointsToIndex)
    {
       indexedJoints = jointsToIndex;
-      indexedOneDoFJoints = ScrewTools.filterJoints(indexedJoints, OneDoFJoint.class);
+      indexedOneDoFJoints = MultiBodySystemTools.filterJoints(indexedJoints, OneDoFJoint.class);
 
       numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToIndex);
       populateColumnIndices();
@@ -35,7 +35,7 @@ public class JointIndexHandler
    {
       indexedJoints = new JointBasics[jointsToIndex.size()];
       jointsToIndex.toArray(indexedJoints);
-      indexedOneDoFJoints = ScrewTools.filterJoints(indexedJoints, OneDoFJoint.class);
+      indexedOneDoFJoints = MultiBodySystemTools.filterJoints(indexedJoints, OneDoFJoint.class);
 
       numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToIndex);
       populateColumnIndices();

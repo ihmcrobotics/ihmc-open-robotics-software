@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -81,7 +82,7 @@ public class PlaybackPoseSequenceReader
          jointNames.toArray(jointNamesArray);
 
          JointBasics[] inverseDynamicsJoints = ScrewTools.findJointsWithNames(allJoints, jointNamesArray);
-         OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(inverseDynamicsJoints, OneDoFJoint.class);
+         OneDoFJoint[] oneDoFJoints = MultiBodySystemTools.filterJoints(inverseDynamicsJoints, OneDoFJoint.class);
          double[] jointAngles = new double[oneDoFJoints.length];
 
          String textPose = br.readLine();    // read one line of text (one pose)

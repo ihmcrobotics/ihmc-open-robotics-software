@@ -70,7 +70,7 @@ public class KinematicSolver implements InverseKinematicsCalculator
       this.jacobian = jacobian;
       this.tolerance = tolerance;
       this.maxIterations = maxIterations;
-      this.oneDoFJoints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      this.oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
       nDoF = MultiBodySystemTools.computeDegreesOfFreedom(oneDoFJoints);
 
       jacobianMethod = new DenseMatrix64F(nDoF, nDoF);

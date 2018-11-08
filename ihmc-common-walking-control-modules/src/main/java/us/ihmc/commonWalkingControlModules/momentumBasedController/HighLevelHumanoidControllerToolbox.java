@@ -44,6 +44,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
@@ -260,7 +261,7 @@ public class HighLevelHumanoidControllerToolbox
       }
 
       controlledJoints = computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
-      controlledOneDoFJoints = ScrewTools.filterJoints(controlledJoints, OneDoFJoint.class);
+      controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJoint.class);
 
       if (yoGraphicsListRegistry != null)
       {

@@ -25,6 +25,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class ReachabilityMapFileWriter
@@ -231,7 +232,7 @@ public class ReachabilityMapFileWriter
       SphereVoxelShape sphereVoxelShape = new SphereVoxelShape(gridFrame, 0.1, 10, 12, SphereVoxelType.graspOrigin);
       Voxel3DGrid voxel3dGrid = new Voxel3DGrid(gridFrame, sphereVoxelShape, 10, 0.1);
       RobotArm robot = new RobotArm();
-      OneDoFJoint[] armJoints = ScrewTools.filterJoints(robot.getJacobian().getJointsInOrder(), OneDoFJoint.class);
+      OneDoFJoint[] armJoints = MultiBodySystemTools.filterJoints(robot.getJacobian().getJointsInOrder(), OneDoFJoint.class);
       ReachabilityMapFileWriter reachabilityMapFileWriter = new ReachabilityMapFileWriter(robot.getName(), ReachabilityMapFileWriter.class);
       reachabilityMapFileWriter.initialize(armJoints, voxel3dGrid);
 

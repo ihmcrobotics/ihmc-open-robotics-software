@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -87,7 +88,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
       this.orientationDiscount = orientationDiscount;
       this.solveOrientation = solveOrientation;
       
-      this.oneDoFJoints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      this.oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
       if (oneDoFJoints.length != jacobian.getJointsInOrder().length)
          throw new RuntimeException("Can currently only handle OneDoFJoints");
       

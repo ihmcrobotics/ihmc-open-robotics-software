@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -87,7 +88,7 @@ public class QuadrupedSoleForceEstimator
       {
          RigidBodyBasics body = fullRobotModel.getRootJoint().getSuccessor();
          RigidBodyBasics foot = fullRobotModel.getFoot(robotQuadrant);
-         legJoints.set(robotQuadrant, ScrewTools.filterJoints(ScrewTools.createJointPath(body, foot), OneDoFJoint.class));
+         legJoints.set(robotQuadrant, MultiBodySystemTools.filterJoints(ScrewTools.createJointPath(body, foot), OneDoFJoint.class));
          footJacobian.set(robotQuadrant, new GeometricJacobian(legJoints.get(robotQuadrant), body.getBodyFixedFrame()));
          soleJacobian.set(robotQuadrant, new PointJacobian());
          int jacobianRows = 3;
