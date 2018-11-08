@@ -227,7 +227,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          }
          drcSimulationTestHelper.publishToController(message);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0 * getRobotModel().getControllerDT());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
          String bodyName = fullRobotModel.getHand(robotSide).getName();
@@ -253,7 +253,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          }
          drcSimulationTestHelper.publishToController(message);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0 * getRobotModel().getControllerDT());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
          String bodyName = fullRobotModel.getHand(robotSide).getName();
