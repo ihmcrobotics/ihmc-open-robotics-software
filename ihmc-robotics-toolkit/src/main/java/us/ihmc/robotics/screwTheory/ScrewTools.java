@@ -8,21 +8,14 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
-import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.geometry.TransformTools;
 
@@ -131,82 +124,6 @@ public class ScrewTools
          jointPathToPack[k] = null;
 
       return pathLength;
-   }
-
-   public static <T extends JointBasics> T[] cloneJointPathDisconnectedFromOriginalRobot(T[] joints, Class<T> clazz, String suffix,
-                                                                                         ReferenceFrame rootBodyFrame)
-   {
-      return MultiBodySystemTools.filterJoints(cloneJointPathDisconnectedFromOriginalRobot(joints, suffix, rootBodyFrame), clazz);
-   }
-
-   public static JointBasics[] cloneJointPathDisconnectedFromOriginalRobot(JointBasics[] inverseDynamicsJoints, String suffix, ReferenceFrame rootBodyFrame)
-   {
-      JointBasics[] cloned = new JointBasics[inverseDynamicsJoints.length];
-
-      for (int i = 0; i < inverseDynamicsJoints.length; i++)
-      {
-         if (inverseDynamicsJoints[i] instanceof RevoluteJoint)
-         {
-            RevoluteJoint jointOriginal = (RevoluteJoint) inverseDynamicsJoints[i];
-
-            RigidBodyBasics predecessorOriginal = jointOriginal.getPredecessor();
-            RigidBodyBasics predecessorCopy;
-
-            if (i > 0)
-            {
-               predecessorCopy = cloned[i - 1].getSuccessor();
-            }
-            else
-            {
-               String predecessorNameOriginal = predecessorOriginal.getName();
-               predecessorCopy = new RigidBody(predecessorNameOriginal + suffix, rootBodyFrame);
-            }
-
-            cloned[i] = cloneOneDoFJoint(jointOriginal, suffix, predecessorCopy);
-         }
-         else
-         {
-            throw new RuntimeException("Not implemented for joints of the type: " + inverseDynamicsJoints[i].getClass().getSimpleName());
-         }
-
-         cloneRigidBody(inverseDynamicsJoints[i].getSuccessor(), suffix, cloned[i]);
-      }
-      return cloned;
-   }
-
-   private static OneDoFJointBasics cloneOneDoFJoint(OneDoFJointBasics original, String cloneSuffix, RigidBodyBasics clonePredecessor)
-   {
-      String jointNameOriginal = original.getName();
-      RigidBodyTransform jointTransform = new RigidBodyTransform();
-      original.getJointOffset(jointTransform);
-      Vector3D jointAxisCopy = new Vector3D(original.getJointAxis());
-      OneDoFJointBasics clone;
-
-      if (original instanceof RevoluteJoint)
-         clone = new RevoluteJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform, jointAxisCopy);
-      else if (original instanceof PrismaticJoint)
-         clone = new PrismaticJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform, jointAxisCopy);
-      else
-         throw new RuntimeException("Unhandled type of " + OneDoFJointBasics.class.getSimpleName() + ": " + original.getClass().getSimpleName());
-
-      clone.setJointLimitLower(original.getJointLimitLower());
-      clone.setJointLimitUpper(original.getJointLimitUpper());
-      clone.setVelocityLimits(original.getVelocityLimitLower(), original.getVelocityLimitUpper());
-      clone.setEffortLimits(original.getEffortLimitLower(), original.getEffortLimitUpper());
-      return clone;
-   }
-
-   private static RigidBodyBasics cloneRigidBody(RigidBodyBasics original, String cloneSuffix, JointBasics parentJointOfClone)
-   {
-      FramePoint3D comOffset = new FramePoint3D();
-      original.getCenterOfMass(comOffset);
-      comOffset.changeFrame(original.getParentJoint().getFrameAfterJoint());
-      String nameOriginal = original.getName();
-      Matrix3D massMomentOfInertiaPartCopy = new Matrix3D(original.getInertia().getMomentOfInertia());
-      double mass = original.getInertia().getMass();
-      Vector3D comOffsetCopy = new Vector3D(comOffset);
-      RigidBodyBasics clone = new RigidBody(nameOriginal + cloneSuffix, parentJointOfClone, massMomentOfInertiaPartCopy, mass, comOffsetCopy);
-      return clone;
    }
 
    public static SpatialAcceleration createGravitationalSpatialAcceleration(RigidBodyBasics rootBody, double gravity)
