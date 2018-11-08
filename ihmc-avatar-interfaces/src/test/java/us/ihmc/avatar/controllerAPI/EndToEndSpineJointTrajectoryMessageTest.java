@@ -37,6 +37,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -661,7 +662,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
             DenseMatrix64F jointPositions = new DenseMatrix64F(spineJoints.length, 1);
             for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
                jointPositions.set(jointIdx, jointDesiredsMap.get(spineJoints[jointIdx]).getDoubleValue());
-            ScrewTools.setJointPositions(spineJointClones, jointPositions);
+            MultiBodySystemTools.insertJointsState(spineJointClones, JointStateType.CONFIGURATION, jointPositions);
             FrameQuaternion chestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
             chestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
             currentDesiredOrientation.set(chestOrientation);

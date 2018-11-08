@@ -86,7 +86,7 @@ public class GeometricJacobianTest
          rootJacobian.compute();
 
          DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(rootJacobian.getNumberOfColumns(), 1);
-         ScrewTools.getJointVelocitiesMatrix(rootJacobian.getJointsInOrder(), jointVelocitiesMatrix);
+         MultiBodySystemTools.extractJointsState(rootJacobian.getJointsInOrder(), JointStateType.VELOCITY, jointVelocitiesMatrix);
 
          randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(rootBody.getBodyFixedFrame(), expectedTwist);
          rootJacobian.getTwist(jointVelocitiesMatrix, actualTwist);
@@ -98,7 +98,7 @@ public class GeometricJacobianTest
          jacobian.compute();
 
          jointVelocitiesMatrix.reshape(jacobian.getNumberOfColumns(), 1);
-         ScrewTools.getJointVelocitiesMatrix(jacobian.getJointsInOrder(), jointVelocitiesMatrix);
+         MultiBodySystemTools.extractJointsState(jacobian.getJointsInOrder(), JointStateType.VELOCITY, jointVelocitiesMatrix);
 
          randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(randomBase.getBodyFixedFrame(), expectedTwist);
          jacobian.getTwist(jointVelocitiesMatrix, actualTwist);
@@ -139,7 +139,7 @@ public class GeometricJacobianTest
          rootJacobian.compute();
 
          DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(rootJacobian.getNumberOfColumns(), 1);
-         ScrewTools.getJointVelocitiesMatrix(rootJacobian.getJointsInOrder(), jointVelocitiesMatrix);
+         MultiBodySystemTools.extractJointsState(rootJacobian.getJointsInOrder(), JointStateType.VELOCITY, jointVelocitiesMatrix);
 
          randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(rootBody.getBodyFixedFrame(), expectedTwist);
          rootJacobian.getTwist(jointVelocitiesMatrix, actualTwist);
@@ -151,7 +151,7 @@ public class GeometricJacobianTest
          jacobian.compute();
 
          jointVelocitiesMatrix.reshape(jacobian.getNumberOfColumns(), 1);
-         ScrewTools.getJointVelocitiesMatrix(jacobian.getJointsInOrder(), jointVelocitiesMatrix);
+         MultiBodySystemTools.extractJointsState(jacobian.getJointsInOrder(), JointStateType.VELOCITY, jointVelocitiesMatrix);
 
          randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(randomBase.getBodyFixedFrame(), expectedTwist);
          jacobian.getTwist(jointVelocitiesMatrix, actualTwist);

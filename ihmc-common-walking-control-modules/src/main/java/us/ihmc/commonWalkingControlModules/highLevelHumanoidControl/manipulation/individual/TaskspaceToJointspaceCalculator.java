@@ -21,6 +21,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.kinematics.InverseJacobianSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -298,7 +300,7 @@ public class TaskspaceToJointspaceCalculator
    public void initialize(DenseMatrix64F jointAngles)
    {
       setLocalBaseFrameToActualAndResetFilters();
-      ScrewTools.setJointPositions(localJoints, jointAngles);
+      MultiBodySystemTools.insertJointsState(localJoints, JointStateType.CONFIGURATION, jointAngles);
       localJoints[0].updateFramesRecursively();
    }
 
@@ -757,7 +759,7 @@ public class TaskspaceToJointspaceCalculator
 
    public void getDesiredJointAccelerationsIntoOneDoFJoints(OneDoFJoint[] joints)
    {
-      ScrewTools.setJointAccelerations(joints, desiredJointAccelerations);
+      MultiBodySystemTools.insertJointsState(joints, JointStateType.ACCELERATION, desiredJointAccelerations);
    }
 
    public double computeDeterminant()

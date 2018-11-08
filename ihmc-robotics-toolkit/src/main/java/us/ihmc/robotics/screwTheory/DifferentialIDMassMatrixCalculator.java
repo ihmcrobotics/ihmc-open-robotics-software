@@ -12,6 +12,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
@@ -64,7 +66,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
       for (int i = 0 ; i < totalNumberOfDoFs; i++)
       {
          tmpDesiredJointAccelerationsMatrix.set(i, 0, 1.0);
-         ScrewTools.setJointAccelerations(jointsInOrder, tmpDesiredJointAccelerationsMatrix);
+         MultiBodySystemTools.insertJointsState(jointsInOrder, JointStateType.ACCELERATION, tmpDesiredJointAccelerationsMatrix);
          
          idCalculator.compute();
          tmpTauMatrix.set(idCalculator.getJointTauMatrix());
@@ -88,8 +90,8 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
 
    private void storeJointState()
    {
-      ScrewTools.getJointAccelerationsMatrix(jointsInOrder, storedJointDesiredAccelerations);
-      ScrewTools.getJointVelocitiesMatrix(jointsInOrder, storedJointVelocities);
+      MultiBodySystemTools.extractJointsState(jointsInOrder, JointStateType.ACCELERATION, storedJointDesiredAccelerations);
+      MultiBodySystemTools.extractJointsState(jointsInOrder, JointStateType.VELOCITY, storedJointVelocities);
       for (JointBasics joint : jointsInOrder)
       {
          DenseMatrix64F tauMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
@@ -106,8 +108,8 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
    
    private void restoreJointState()
    {
-      ScrewTools.setJointAccelerations(jointsInOrder, storedJointDesiredAccelerations);
-      ScrewTools.setVelocities(jointsInOrder, storedJointVelocities);
+      MultiBodySystemTools.insertJointsState(jointsInOrder, JointStateType.ACCELERATION, storedJointDesiredAccelerations);
+      MultiBodySystemTools.insertJointsState(jointsInOrder, JointStateType.VELOCITY, storedJointVelocities);
       
       for (JointBasics joint : jointsInOrder)
       {

@@ -37,6 +37,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -138,8 +139,8 @@ public final class SpatialFeedbackControllerTest
 
          integrator.integrateJointAccelerations(jointsToOptimizeFor, jointAccelerations);
          integrator.integrateJointVelocities(jointsToOptimizeFor, integrator.getJointVelocities());
-         ScrewTools.setVelocities(jointsToOptimizeFor, integrator.getJointVelocities());
-         ScrewTools.setJointPositions(jointsToOptimizeFor, integrator.getJointConfigurations());
+         MultiBodySystemTools.insertJointsState(jointsToOptimizeFor, JointStateType.VELOCITY, integrator.getJointVelocities());
+         MultiBodySystemTools.insertJointsState(jointsToOptimizeFor, JointStateType.CONFIGURATION, integrator.getJointConfigurations());
          elevator.updateFramesRecursively();
 
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
@@ -276,8 +277,8 @@ public final class SpatialFeedbackControllerTest
 
          integrator.integrateJointAccelerations(jointsToOptimizeFor, jointAccelerationsFromJerryQP);
          integrator.integrateJointVelocities(jointsToOptimizeFor, integrator.getJointVelocities());
-         ScrewTools.setVelocities(jointsToOptimizeFor, integrator.getJointVelocities());
-         ScrewTools.setJointPositions(jointsToOptimizeFor, integrator.getJointConfigurations());
+         MultiBodySystemTools.insertJointsState(jointsToOptimizeFor, JointStateType.VELOCITY, integrator.getJointVelocities());
+         MultiBodySystemTools.insertJointsState(jointsToOptimizeFor, JointStateType.CONFIGURATION, integrator.getJointConfigurations());
          elevator.updateFramesRecursively();
 
          assertArrayEquals(jointAccelerations.data, jointAccelerationsFromJerryQP.data, 1.0e-4);

@@ -32,6 +32,7 @@ import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelTestTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -417,7 +418,7 @@ public class DynamicsMatrixCalculatorTest
       dynamicsMatrixCalculator.computeJointTorques(dynamicsMatrixTauSolution, qddotSolution, rhoSolution);
 
       // compute torques using inverse dynamics calculator
-      ScrewTools.setJointAccelerations(jointIndexHandler.getIndexedJoints(), qddotSolution);
+      MultiBodySystemTools.insertJointsState(jointIndexHandler.getIndexedJoints(), JointStateType.ACCELERATION, qddotSolution);
       inverseDynamicsCalculator.compute();
       inverseDynamicsCalculator.writeComputedJointWrenches(SubtreeStreams.fromChildren(toolbox.getRootBody()).toArray(JointBasics[]::new));
 

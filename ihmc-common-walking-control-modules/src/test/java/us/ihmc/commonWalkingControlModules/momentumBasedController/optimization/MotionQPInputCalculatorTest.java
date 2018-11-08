@@ -23,6 +23,7 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -87,7 +88,7 @@ public class MotionQPInputCalculatorTest
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.solve(motionQPInput.taskObjective, desiredJointAccelerations);
 
-         ScrewTools.setJointAccelerations(joints, desiredJointAccelerations);
+         MultiBodySystemTools.insertJointsState(joints, JointStateType.ACCELERATION, desiredJointAccelerations);
 
          spatialAccelerationCalculator.compute();
          SpatialAcceleration achievedSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, endEffectorFrame);
@@ -118,7 +119,7 @@ public class MotionQPInputCalculatorTest
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.solve(motionQPInput.taskObjective, desiredJointAccelerations);
 
-         ScrewTools.setJointAccelerations(joints, desiredJointAccelerations);
+         MultiBodySystemTools.insertJointsState(joints, JointStateType.ACCELERATION, desiredJointAccelerations);
 
          spatialAccelerationCalculator.compute();
          SpatialAcceleration achievedSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, endEffectorFrame);

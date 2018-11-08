@@ -504,10 +504,10 @@ public class ScrewToolsTest
       {       //create original matrix
          originalVelocities.set(i, random.nextDouble());
       }
-      ScrewTools.setVelocities(jointsArray, originalVelocities); //set velocities from matrix
+      MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.VELOCITY, originalVelocities); //set velocities from matrix
       DenseMatrix64F newVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
 
-      ScrewTools.getJointVelocitiesMatrix(jointsArray, newVelocities);//pack new matrix
+      MultiBodySystemTools.extractJointsState(jointsArray, JointStateType.VELOCITY, newVelocities);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
       {
          assertEquals("Should be equal velocities", originalVelocities.get(i), newVelocities.get(i), epsilon);
@@ -532,10 +532,10 @@ public class ScrewToolsTest
       {       //create original matrix
          originalVelocities.set(i, random.nextDouble());
       }
-      ScrewTools.setVelocities(jointsArray, originalVelocities); //set velocities from matrix
+      MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.VELOCITY, originalVelocities); //set velocities from matrix
       DenseMatrix64F newVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
 
-      ScrewTools.getJointVelocitiesMatrix(jointsList, newVelocities);//pack new matrix
+      MultiBodySystemTools.extractJointsState(jointsList, JointStateType.VELOCITY, newVelocities);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
       {
          assertEquals("Should be equal velocities", originalVelocities.get(i), newVelocities.get(i), epsilon);
@@ -555,10 +555,10 @@ public class ScrewToolsTest
       {       //create original matrix
          originalAccel.set(i, random.nextDouble());
       }
-      ScrewTools.setJointAccelerations(jointsArray, originalAccel); //set velocities from matrix
+      MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.ACCELERATION, originalAccel); //set velocities from matrix
       DenseMatrix64F newAccelerations = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
 
-      ScrewTools.getJointAccelerationsMatrix(jointsArray, newAccelerations);//pack new matrix
+      MultiBodySystemTools.extractJointsState(jointsArray, JointStateType.ACCELERATION, newAccelerations);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
       {
          assertEquals("Should be equal velocities", originalAccel.get(i), newAccelerations.get(i), epsilon);
@@ -645,7 +645,7 @@ public class ScrewToolsTest
          jointAccelerations.set(i, random.nextDouble());
       }
 
-      ScrewTools.setJointAccelerations(jointsArray, jointAccelerations);
+      MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.ACCELERATION, jointAccelerations);
 
       DenseMatrix64F sixDoFAccel = new DenseMatrix64F(6, 1);
       jointsArray[0].getJointAcceleration(0, sixDoFAccel);
@@ -677,7 +677,7 @@ public class ScrewToolsTest
          jointVelocities.set(i, random.nextDouble());
       }
 
-      ScrewTools.setVelocities(jointsArray, jointVelocities);
+      MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.VELOCITY, jointVelocities);
 
       DenseMatrix64F sixDoFVeloc = new DenseMatrix64F(6, 1);
       jointsArray[0].getJointVelocity(0, sixDoFVeloc);

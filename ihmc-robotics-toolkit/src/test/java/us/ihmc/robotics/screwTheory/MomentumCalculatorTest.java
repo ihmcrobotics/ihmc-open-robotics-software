@@ -28,7 +28,9 @@ import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.testing.JUnitTools;
 
@@ -146,7 +148,7 @@ public class MomentumCalculatorTest
       centroidalMomentumMatrix.reset();
       DenseMatrix64F centroidalMomentumMatrixMatrix = centroidalMomentumMatrix.getCentroidalMomentumMatrix();
       DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
-      ScrewTools.getJointVelocitiesMatrix(jointsArray, jointVelocitiesMatrix);
+      MultiBodySystemTools.extractJointsState(jointsArray, JointStateType.VELOCITY, jointVelocitiesMatrix);
       DenseMatrix64F momentumFromCentroidalMomentumMatrix = new DenseMatrix64F(Momentum.SIZE, 1);
       CommonOps.mult(centroidalMomentumMatrixMatrix, jointVelocitiesMatrix, momentumFromCentroidalMomentumMatrix);
 

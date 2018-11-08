@@ -2,7 +2,7 @@ package us.ihmc.wholeBodyController;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
@@ -19,6 +19,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.ColumnSpaceProjector;
@@ -61,7 +63,7 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
    private final DenseMatrix64F vActuated;
    private final DenseMatrix64F tempCoMVelocityMatrix = new DenseMatrix64F(3, 1);
    private final Vector3D tempCoMVelocity = new Vector3D();
-   private final Collection<JointBasics> actuatedJoints;
+   private final List<JointBasics> actuatedJoints;
    private final ColumnSpaceProjector projector;
 
    private final YoFrameVector3D centroidalLinearMomentum;
@@ -153,12 +155,12 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
       this.constrainedComJacobianConditionNumber.set(NormOps.conditionP2(constrainedCenterOfMassJacobian));
       this.constrainedComJacobianSigmaMin.set(computeSmallestSingularValue(constrainedCenterOfMassJacobian));
 
-      ScrewTools.getJointVelocitiesMatrix(allJoints, v);
+      MultiBodySystemTools.extractJointsState(allJoints, JointStateType.VELOCITY, v);
       CommonOps.mult(centerOfMassJacobian, v, tempCoMVelocityMatrix);
       tempCoMVelocity.set(tempCoMVelocityMatrix);
       comVelocity.set(tempCoMVelocity);
 
-      ScrewTools.getJointVelocitiesMatrix(actuatedJoints, vActuated);
+      MultiBodySystemTools.extractJointsState(actuatedJoints, JointStateType.VELOCITY, vActuated);
 
 //    CommonOps.mult(constrainedCenterOfMassJacobian, vActuated, tempCoMVelocityMatrix);
 //    MatrixTools.denseMatrixToVector3d(tempCoMVelocityMatrix, tempCoMVelocity, 0, 0);
