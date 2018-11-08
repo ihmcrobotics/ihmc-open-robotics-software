@@ -34,6 +34,7 @@ import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -319,7 +320,7 @@ public class TwistCalculatorTest
       List<JointBasics> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new JointBasics[numberOfRevoluteJoints
             + 1])));
       SixDoFJoint floatingJointInFuture = (SixDoFJoint) jointsInFuture.get(0);
-      List<RevoluteJoint> revoluteJointsInFuture = ScrewTools.filterJoints(jointsInFuture, RevoluteJoint.class);
+      List<RevoluteJoint> revoluteJointsInFuture = MultiBodySystemTools.filterJoints(jointsInFuture, RevoluteJoint.class);
 
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
 
@@ -399,7 +400,7 @@ public class TwistCalculatorTest
       List<JointBasics> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new JointBasics[numberOfRevoluteJoints
             + 1])));
       SixDoFJoint floatingJointInFuture = (SixDoFJoint) jointsInFuture.get(0);
-      List<RevoluteJoint> revoluteJointsInFuture = ScrewTools.filterJoints(jointsInFuture, RevoluteJoint.class);
+      List<RevoluteJoint> revoluteJointsInFuture = MultiBodySystemTools.filterJoints(jointsInFuture, RevoluteJoint.class);
 
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor());
 

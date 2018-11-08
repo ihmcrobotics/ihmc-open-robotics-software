@@ -31,6 +31,7 @@ import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -131,7 +132,7 @@ public class MovingBaseRobotArmController implements RobotController
       allPossibleCommands.addCommand(basePointCommand);
       allPossibleCommands.addCommand(handSpatialCommand);
 
-      JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(ScrewTools.filterJoints(controlledJoints, OneDoFJoint.class));
+      JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJoint.class));
       
       
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, allPossibleCommands, lowLevelControllerCoreOutput, registry);
@@ -144,7 +145,7 @@ public class MovingBaseRobotArmController implements RobotController
 
       trajectory = new StraightLinePoseTrajectoryGenerator("handTrajectory", false, baseFrame, registry, true, yoGraphicsListRegistry);
 
-      robotJointLimitWatcher = new RobotJointLimitWatcher(ScrewTools.filterJoints(controlledJoints, OneDoFJoint.class));
+      robotJointLimitWatcher = new RobotJointLimitWatcher(MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJoint.class));
       registry.addChild(robotJointLimitWatcher.getYoVariableRegistry());
 
       initialize();

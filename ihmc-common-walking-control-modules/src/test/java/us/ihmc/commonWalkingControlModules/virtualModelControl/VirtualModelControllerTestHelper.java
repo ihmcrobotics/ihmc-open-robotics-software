@@ -37,6 +37,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PIDController;
@@ -1234,7 +1235,7 @@ public class VirtualModelControllerTestHelper
 
          JointBasics[] jointArray = new JointBasics[joints.size()];
          joints.toArray(jointArray);
-         oneDoFJoints = ScrewTools.filterJoints(jointArray, OneDoFJoint.class);
+         oneDoFJoints = MultiBodySystemTools.filterJoints(jointArray, OneDoFJoint.class);
          elevator.updateFramesRecursively();
 
          scsRobotArm = new SCSRobotFromInverseDynamicsRobotModel("robotArm", elevator.getChildrenJoints().get(0));
@@ -1559,7 +1560,7 @@ public class VirtualModelControllerTestHelper
 
          JointBasics[] jointArray = new JointBasics[joints.size()];
          joints.toArray(jointArray);
-         oneDoFJoints = ScrewTools.filterJoints(jointArray, OneDoFJoint.class);
+         oneDoFJoints = MultiBodySystemTools.filterJoints(jointArray, OneDoFJoint.class);
          elevator.updateFramesRecursively();
 
          scsRobotArm = new SCSRobotFromInverseDynamicsRobotModel("robotArm", elevator.getChildrenJoints().get(0));

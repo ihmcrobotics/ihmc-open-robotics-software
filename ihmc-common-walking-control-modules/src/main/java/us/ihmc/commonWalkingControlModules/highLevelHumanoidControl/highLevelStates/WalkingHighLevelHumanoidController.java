@@ -61,6 +61,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -146,7 +147,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       feet = controllerToolbox.getContactableFeet();
 
-      allOneDoFjoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
+      allOneDoFjoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
@@ -196,7 +197,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
-         OneDoFJoint[] legJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(pelvis, foot), OneDoFJoint.class);
+         OneDoFJoint[] legJoints = MultiBodySystemTools.filterJoints(ScrewTools.createJointPath(pelvis, foot), OneDoFJoint.class);
          Set<String> jointNames = new HashSet<>();
          Arrays.asList(legJoints).stream().forEach(legJoint -> jointNames.add(legJoint.getName()));
          legJointNames.put(robotSide, jointNames);
@@ -228,8 +229,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       String[] jointNamesRestrictiveLimits = walkingControllerParameters.getJointsWithRestrictiveLimits();
       JointLimitParameters limitParameters = walkingControllerParameters.getJointLimitParametersForJointsWithRestictiveLimits();
-      OneDoFJoint[] jointsWithRestrictiveLimit = ScrewTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints, jointNamesRestrictiveLimits),
-                                                                         OneDoFJoint.class);
+      OneDoFJoint[] jointsWithRestrictiveLimit = MultiBodySystemTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints, jointNamesRestrictiveLimits), OneDoFJoint.class);
       for (OneDoFJoint joint : jointsWithRestrictiveLimit)
       {
          if (limitParameters == null)

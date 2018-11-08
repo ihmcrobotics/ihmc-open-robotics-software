@@ -22,6 +22,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -114,7 +115,7 @@ public class ReachabilityMapFileLoader
       }
 
       JointBasics[] joints = ScrewTools.findJointsWithNames(ScrewTools.computeSubtreeJoints(rootBody), jointNames.toArray(new String[0]));
-      OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
+      OneDoFJoint[] oneDoFJoints = MultiBodySystemTools.filterJoints(joints, OneDoFJoint.class);
 
       if (oneDoFJoints.length != jointNames.size())
       {

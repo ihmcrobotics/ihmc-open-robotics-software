@@ -213,7 +213,7 @@ public class ScrewTools
 
    public static OneDoFJoint[] createOneDoFJointPath(RigidBodyBasics start, RigidBodyBasics end)
    {
-      return filterJoints(createJointPath(start, end), OneDoFJoint.class);
+      return MultiBodySystemTools.filterJoints(createJointPath(start, end), OneDoFJoint.class);
    }
 
    public static JointBasics[] createJointPath(RigidBodyBasics start, RigidBodyBasics end)
@@ -300,12 +300,12 @@ public class ScrewTools
 
    public static <T extends JointBasics> T[] cloneJointPathAndFilter(T[] joints, Class<T> clazz)
    {
-      return filterJoints(cloneJointPath(joints), clazz);
+      return MultiBodySystemTools.filterJoints(cloneJointPath(joints), clazz);
    }
 
    public static <T extends JointBasics> T[] cloneJointPathAndFilter(T[] joints, Class<T> clazz, String suffix)
    {
-      return filterJoints(cloneJointPath(joints, suffix), clazz);
+      return MultiBodySystemTools.filterJoints(cloneJointPath(joints, suffix), clazz);
    }
 
    public static JointBasics[] cloneJointPath(JointBasics[] inverseDynamicsJoints)
@@ -389,7 +389,7 @@ public class ScrewTools
    public static <T extends JointBasics> T[] cloneJointPathDisconnectedFromOriginalRobot(T[] joints, Class<T> clazz, String suffix,
                                                                                          ReferenceFrame rootBodyFrame)
    {
-      return filterJoints(cloneJointPathDisconnectedFromOriginalRobot(joints, suffix, rootBodyFrame), clazz);
+      return MultiBodySystemTools.filterJoints(cloneJointPathDisconnectedFromOriginalRobot(joints, suffix, rootBodyFrame), clazz);
    }
 
    public static JointBasics[] cloneJointPathDisconnectedFromOriginalRobot(JointBasics[] inverseDynamicsJoints, String suffix, ReferenceFrame rootBodyFrame)
@@ -530,76 +530,6 @@ public class ScrewTools
          }
 
          startIndex += nDegreesOfFreedom;
-      }
-   }
-
-   public static RevoluteJoint[] extractRevoluteJoints(JointBasics[] allJoints)
-   {
-      if (allJoints == null)
-         return null;
-
-      ArrayList<RevoluteJoint> revoluteJointsList = new ArrayList<RevoluteJoint>();
-      for (JointBasics joint : allJoints)
-      {
-         if (joint instanceof RevoluteJoint)
-            revoluteJointsList.add((RevoluteJoint) joint);
-      }
-
-      RevoluteJoint[] revoluteJointArray = new RevoluteJoint[revoluteJointsList.size()];
-      revoluteJointsList.toArray(revoluteJointArray);
-
-      return revoluteJointArray;
-   }
-
-   public static <T extends JointBasics> int computeNumberOfJointsOfType(Class<T> clazz, JointBasics[] joints)
-   {
-      int ret = 0;
-      for (JointBasics joint : joints)
-      {
-         if (clazz.isAssignableFrom(joint.getClass()))
-            ret++;
-      }
-
-      return ret;
-   }
-
-   public static <T extends JointBasics> T[] filterJoints(JointBasics[] source, Class<T> clazz)
-   {
-      @SuppressWarnings("unchecked")
-      T[] retArray = (T[]) Array.newInstance(clazz, ScrewTools.computeNumberOfJointsOfType(clazz, source));
-      filterJoints(source, retArray, clazz);
-      return retArray;
-   }
-
-   @SuppressWarnings("unchecked")
-   public static <T extends JointBasics> void filterJoints(JointBasics[] source, T[] dest, Class<T> clazz)
-   {
-      int index = 0;
-      for (JointBasics joint : source)
-      {
-         if (clazz.isAssignableFrom(joint.getClass()))
-         {
-            dest[index++] = (T) joint;
-         }
-      }
-   }
-
-   public static <T extends JointBasics> List<T> filterJoints(List<JointBasics> source, Class<T> clazz)
-   {
-      List<T> retList = new ArrayList<>();
-      filterJoints(source, retList, clazz);
-      return retList;
-   }
-
-   @SuppressWarnings("unchecked")
-   public static <T extends JointBasics> void filterJoints(List<JointBasics> source, List<T> dest, Class<T> clazz)
-   {
-      for (JointBasics joint : source)
-      {
-         if (clazz.isAssignableFrom(joint.getClass()))
-         {
-            dest.add((T) joint);
-         }
       }
    }
 

@@ -17,6 +17,7 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -92,7 +93,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
       numberOfDoF = jacobian.getNumberOfColumns();
       inverseJacobianCalculator = InverseJacobianSolver.createInverseJacobianSolver(numberOfConstraints, numberOfDoF, false);
 
-      oneDoFJoints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
       if (oneDoFJoints.length != jacobian.getJointsInOrder().length)
          throw new RuntimeException("Can currently only handle OneDoFJoints");
 

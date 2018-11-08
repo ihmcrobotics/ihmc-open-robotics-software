@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
@@ -364,7 +365,7 @@ public class DynamicsMatrixCalculator
 
    public void extractTorqueMatrix(JointBasics[] joints, DenseMatrix64F torqueMatrixToPack)
    {
-      OneDoFJoint[] filteredJoints = ScrewTools.extractRevoluteJoints(joints);
+      OneDoFJoint[] filteredJoints = MultiBodySystemTools.filterJoints(joints, RevoluteJoint.class);
       int bodyDoFs = MultiBodySystemTools.computeDegreesOfFreedom(filteredJoints);
 
       int startIndex = 0;

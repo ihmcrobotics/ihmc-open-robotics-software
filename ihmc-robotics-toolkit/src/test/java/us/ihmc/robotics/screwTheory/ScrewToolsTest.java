@@ -725,7 +725,7 @@ public class ScrewToolsTest
       RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       JointBasics[] jointsArr = ScrewTools.computeSubtreeJoints(chain.getElevator());
 
-      RevoluteJoint[] revoluteJoints = ScrewTools.extractRevoluteJoints(jointsArr);
+      RevoluteJoint[] revoluteJoints = MultiBodySystemTools.filterJoints(jointsArr, RevoluteJoint.class);
       assertEquals(jointsArr.length - 1, revoluteJoints.length);
       for(int i = 0; i < revoluteJoints.length; i++)
       {
@@ -741,8 +741,8 @@ public class ScrewToolsTest
       RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       JointBasics[] jointsArr = ScrewTools.computeSubtreeJoints(chain.getElevator());
 
-      int number6DoF = ScrewTools.computeNumberOfJointsOfType(SixDoFJoint.class, jointsArr);
-      int numberRev = ScrewTools.computeNumberOfJointsOfType(RevoluteJoint.class, jointsArr);
+      int number6DoF = MultiBodySystemTools.computeNumberOfJointsOfType(SixDoFJoint.class, jointsArr);
+      int numberRev = MultiBodySystemTools.computeNumberOfJointsOfType(RevoluteJoint.class, jointsArr);
 
       assertEquals(1, number6DoF);
       assertEquals(jointsArr.length - 1, numberRev);      
@@ -756,10 +756,10 @@ public class ScrewToolsTest
       RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       JointBasics[] jointsArr = ScrewTools.computeSubtreeJoints(chain.getElevator());
 
-      RevoluteJoint[] justRevolutes = ScrewTools.filterJoints(jointsArr, RevoluteJoint.class);
+      RevoluteJoint[] justRevolutes = MultiBodySystemTools.filterJoints(jointsArr, RevoluteJoint.class);
       assertEquals(jointsArr.length - 1, justRevolutes.length);
 
-      SixDoFJoint[] justSix = ScrewTools.filterJoints(jointsArr, SixDoFJoint.class);
+      SixDoFJoint[] justSix = MultiBodySystemTools.filterJoints(jointsArr, SixDoFJoint.class);
       assertEquals(1, justSix.length);
       assertTrue(justSix[0] instanceof SixDoFJoint);
 
@@ -787,11 +787,11 @@ public class ScrewToolsTest
       JointBasics[] jointsArr = ScrewTools.computeSubtreeJoints(chain.getElevator());
 
       RevoluteJoint[] justRevolutes = new RevoluteJoint[jointsArr.length - 1];
-      ScrewTools.filterJoints(jointsArr, justRevolutes, RevoluteJoint.class);
+      MultiBodySystemTools.filterJoints(jointsArr, justRevolutes, RevoluteJoint.class);
       assertEquals(jointsArr.length - 1, justRevolutes.length);
 
       SixDoFJoint[] justSix = new SixDoFJoint[1];
-      ScrewTools.filterJoints(jointsArr, justSix, SixDoFJoint.class);
+      MultiBodySystemTools.filterJoints(jointsArr, justSix, SixDoFJoint.class);
       assertEquals(1, justSix.length);
       assertTrue(justSix[0] instanceof SixDoFJoint);
 

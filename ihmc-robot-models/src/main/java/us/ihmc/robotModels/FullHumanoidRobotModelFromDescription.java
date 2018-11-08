@@ -10,6 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
@@ -424,7 +425,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
          RigidBodyBasics hand = getHand(robotSide);
          if (hand != null)
          {
-            OneDoFJoint[] fingerJoints = ScrewTools.filterJoints(ScrewTools.computeSubtreeJoints(hand), OneDoFJoint.class);
+            OneDoFJoint[] fingerJoints = MultiBodySystemTools.filterJoints(ScrewTools.computeSubtreeJoints(hand), OneDoFJoint.class);
             for (OneDoFJoint fingerJoint : fingerJoints)
             {
                jointsToPack.remove(fingerJoint);
