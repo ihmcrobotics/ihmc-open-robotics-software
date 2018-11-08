@@ -30,6 +30,7 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -527,7 +528,7 @@ public class MotionQPInputCalculator
     */
    public boolean convertJointspaceAccelerationCommand(JointspaceAccelerationCommand commandToConvert, QPInput motionQPInputToPack)
    {
-      int taskSize = ScrewTools.computeDegreesOfFreedom(commandToConvert.getJoints());
+      int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(commandToConvert.getJoints());
 
       if (taskSize == 0)
          return false;
@@ -567,7 +568,7 @@ public class MotionQPInputCalculator
     */
    public boolean convertJointspaceVelocityCommand(JointspaceVelocityCommand commandToConvert, QPInput motionQPInputToPack)
    {
-      int taskSize = ScrewTools.computeDegreesOfFreedom(commandToConvert.getJoints());
+      int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(commandToConvert.getJoints());
 
       if (taskSize == 0)
          return false;

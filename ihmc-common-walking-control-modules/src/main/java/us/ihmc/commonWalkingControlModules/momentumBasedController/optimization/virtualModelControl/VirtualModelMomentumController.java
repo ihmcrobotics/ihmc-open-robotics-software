@@ -18,6 +18,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -117,7 +118,7 @@ public class VirtualModelMomentumController
     */
    public boolean addJointTorqueCommand(JointTorqueCommand commandToAdd)
    {
-      int taskSize = ScrewTools.computeDegreesOfFreedom(commandToAdd.getJoints());
+      int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(commandToAdd.getJoints());
 
       if (taskSize == 0)
          return false;

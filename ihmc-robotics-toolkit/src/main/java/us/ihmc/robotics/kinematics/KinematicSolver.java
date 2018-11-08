@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -70,7 +71,7 @@ public class KinematicSolver implements InverseKinematicsCalculator
       this.tolerance = tolerance;
       this.maxIterations = maxIterations;
       this.oneDoFJoints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
-      nDoF = ScrewTools.computeDegreesOfFreedom(oneDoFJoints);
+      nDoF = MultiBodySystemTools.computeDegreesOfFreedom(oneDoFJoints);
 
       jacobianMethod = new DenseMatrix64F(nDoF, nDoF);
       jacobianTranspose = new DenseMatrix64F(nDoF, nDoF);

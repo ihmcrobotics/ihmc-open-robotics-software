@@ -99,7 +99,7 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
       }
 
       allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-      v = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(allJoints), 1);
+      v = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(allJoints), 1);
 
       DenseMatrix64F orientationSelectionMatrix = new DenseMatrix64F(SpatialVector.SIZE / 2, SpatialVector.SIZE);
       orientationSelectionMatrix.set(0, 0, 1.0);
@@ -125,7 +125,7 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
          constrainedCentroidalMomentumMatrixCalculator.addActuatedJoint(actuatedJoint);
       }
 
-      int nActuatedDoFs = ScrewTools.computeDegreesOfFreedom(actuatedJoints);
+      int nActuatedDoFs = MultiBodySystemTools.computeDegreesOfFreedom(actuatedJoints);
       vActuated = new DenseMatrix64F(nActuatedDoFs, 1);
 
       DampedLeastSquaresSolver columnSpaceProjectorSolver = new DampedLeastSquaresSolver(momentumSelectionMatrix.getNumRows());

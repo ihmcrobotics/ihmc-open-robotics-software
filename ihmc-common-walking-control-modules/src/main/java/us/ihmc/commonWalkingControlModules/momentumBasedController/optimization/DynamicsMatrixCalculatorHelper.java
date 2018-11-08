@@ -9,6 +9,7 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -30,9 +31,9 @@ public class DynamicsMatrixCalculatorHelper
       this.coriolisMatrixCalculator = coriolisMatrixCalculator;
       this.jointIndexHandler = jointIndexHandler;
 
-      degreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointIndexHandler.getIndexedJoints());
+      degreesOfFreedom = MultiBodySystemTools.computeDegreesOfFreedom(jointIndexHandler.getIndexedJoints());
       OneDoFJoint[] bodyJoints = jointIndexHandler.getIndexedOneDoFJoints();
-      bodyDoFs = ScrewTools.computeDegreesOfFreedom(bodyJoints);
+      bodyDoFs = MultiBodySystemTools.computeDegreesOfFreedom(bodyJoints);
       floatingBaseDoFs = degreesOfFreedom - bodyDoFs;
 
       for (JointBasics joint : bodyJoints)

@@ -19,6 +19,7 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -72,7 +73,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
 
       if (oneDoFJoints.length != jacobian.getJointsInOrder().length)
          throw new RuntimeException("Can currently only handle OneDoFJoints");
-      int nDoF = ScrewTools.computeDegreesOfFreedom(oneDoFJoints);
+      int nDoF = MultiBodySystemTools.computeDegreesOfFreedom(oneDoFJoints);
       correction = new DenseMatrix64F(nDoF, 1);
       current = new DenseMatrix64F(nDoF, 1);
       best = new DenseMatrix64F(nDoF, 1);

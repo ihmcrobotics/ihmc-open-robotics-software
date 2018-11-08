@@ -25,6 +25,7 @@ import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public abstract class MassMatrixCalculatorTest
 {
@@ -134,7 +135,7 @@ public abstract class MassMatrixCalculatorTest
          }
       });
       ArrayList<DenseMatrix64F> massMatrices = new ArrayList<DenseMatrix64F>();
-      int nDoFs = ScrewTools.computeDegreesOfFreedom(joints);
+      int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(joints);
       for (int i = 0; i < massMatrixCalculators.size(); i++)
       {
          massMatrices.add(new DenseMatrix64F(nDoFs, nDoFs));
