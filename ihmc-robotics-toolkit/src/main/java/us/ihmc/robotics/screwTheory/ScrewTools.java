@@ -2,11 +2,9 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -19,7 +17,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
-import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -175,80 +172,12 @@ public class ScrewTools
 
    public static JointBasics[] cloneJointPath(JointBasics[] inverseDynamicsJoints)
    {
-      String clonedJointNameSuffix = "Copy";
-
-      return cloneJointPath(inverseDynamicsJoints, clonedJointNameSuffix);
+      return MultiBodySystemFactories.cloneKinematicChain(inverseDynamicsJoints);
    }
 
    public static JointBasics[] cloneJointPath(JointBasics[] inverseDynamicsJoints, String suffix)
    {
-      JointBasics[] cloned = new JointBasics[inverseDynamicsJoints.length];
-      Map<RigidBodyBasics, RigidBodyBasics> originalToClonedRigidBodies = new HashMap<>();
-
-      for (int i = 0; i < inverseDynamicsJoints.length; i++)
-      {
-         if (inverseDynamicsJoints[i] instanceof OneDoFJointBasics)
-         {
-            OneDoFJointBasics jointOriginal = (OneDoFJointBasics) inverseDynamicsJoints[i];
-
-            RigidBodyBasics predecessorOriginal = jointOriginal.getPredecessor();
-            RigidBodyBasics predecessorCopy = originalToClonedRigidBodies.get(predecessorOriginal);
-
-            if (predecessorCopy == null)
-            {
-               if (predecessorOriginal.isRootBody())
-               {
-                  predecessorCopy = predecessorOriginal;
-                  originalToClonedRigidBodies.put(predecessorOriginal, predecessorCopy);
-               }
-               else if (originalToClonedRigidBodies.isEmpty())
-               {
-                  String predecessorNameOriginal = predecessorOriginal.getName();
-                  ReferenceFrame predecessorFrameAfterParentJointOriginal = predecessorOriginal.getParentJoint().getFrameAfterJoint();
-                  predecessorCopy = new RigidBody(predecessorNameOriginal + suffix, predecessorFrameAfterParentJointOriginal);
-                  originalToClonedRigidBodies.put(predecessorOriginal, predecessorCopy);
-               }
-               else
-               {
-                  throw new RuntimeException("Unexpected state during cloning operation.");
-               }
-            }
-
-            cloned[i] = cloneOneDoFJoint(jointOriginal, suffix, predecessorCopy);
-         }
-         else if (inverseDynamicsJoints[i] instanceof SixDoFJoint)
-         {
-            SixDoFJoint jointOriginal = (SixDoFJoint) inverseDynamicsJoints[i];
-            RigidBodyBasics rootBody = jointOriginal.getPredecessor();
-
-            if (rootBody.getParentJoint() != null)
-               throw new RuntimeException("The SixDoFJoint predecessor is not the root body. Case not handled.");
-
-            String rootBodyNameOriginal = rootBody.getName();
-            ReferenceFrame rootBodyFrame = rootBody.getBodyFixedFrame();
-            RigidBodyBasics rootBodyCopy = new RigidBody(rootBodyNameOriginal + suffix, rootBodyFrame);
-            originalToClonedRigidBodies.put(rootBody, rootBodyCopy);
-
-            String jointNameOriginal = jointOriginal.getName();
-            SixDoFJoint jointCopy = new SixDoFJoint(jointNameOriginal + suffix, rootBodyCopy);
-            cloned[i] = jointCopy;
-         }
-         else
-         {
-            throw new RuntimeException("Not implemented for joints of the type: " + inverseDynamicsJoints[i].getClass().getSimpleName());
-         }
-
-         RigidBodyBasics successorOriginal = inverseDynamicsJoints[i].getSuccessor();
-         RigidBodyBasics successorCopy = originalToClonedRigidBodies.get(successorOriginal);
-         if (successorCopy == null)
-         {
-            successorCopy = cloneRigidBody(successorOriginal, suffix, cloned[i]);
-            originalToClonedRigidBodies.put(successorOriginal, successorCopy);
-         }
-
-         cloned[i].setSuccessor(successorCopy);
-      }
-      return cloned;
+      return MultiBodySystemFactories.cloneKinematicChain(inverseDynamicsJoints, suffix);
    }
 
    public static <T extends JointBasics> T[] cloneJointPathDisconnectedFromOriginalRobot(T[] joints, Class<T> clazz, String suffix,
