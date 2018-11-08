@@ -389,7 +389,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public double getSimulateDT()
    {
-      return 0.0001; //0.00003875;
+      return getEstimatorDT() / 3.0;
    }
 
    @Override
