@@ -53,7 +53,7 @@ public class SpatialAccelerationCalculatorTest
    {
       Random random = new Random(234234L);
       int numberOfJoints = 20;
-      List<PrismaticJoint> prismaticJoints = ScrewTestTools.createRandomChainRobotWithPrismaticJoints(numberOfJoints, random);
+      List<PrismaticJoint> prismaticJoints = MultiBodySystemRandomTools.nextPrismaticJointChain(random, numberOfJoints);
       RigidBodyBasics randomBody = prismaticJoints.get(random.nextInt(numberOfJoints)).getPredecessor();
       RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(randomBody);
       boolean doAccelerationTerms = true;
@@ -115,7 +115,7 @@ public class SpatialAccelerationCalculatorTest
    {
       Random random = new Random(234234L);
       int numberOfJoints = 20;
-      List<RevoluteJoint> revoluteJoints = ScrewTestTools.createRandomChainRobot(numberOfJoints, random);
+      List<RevoluteJoint> revoluteJoints = MultiBodySystemRandomTools.nextRevoluteJointChain(random, numberOfJoints);
       RigidBodyBasics randomBody = revoluteJoints.get(random.nextInt(numberOfJoints)).getPredecessor();
       RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(randomBody);
       boolean doAccelerationTerms = true;
@@ -227,7 +227,7 @@ public class SpatialAccelerationCalculatorTest
       Random random = new Random(234234L);
 
       int numberOfJoints = 10;
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
       List<OneDoFJoint> jointsInFuture = Arrays.asList(ScrewTools.cloneOneDoFJointPath(joints.toArray(new OneDoFJoint[numberOfJoints])));
 
       RigidBodyBasics randomBody = joints.get(random.nextInt(joints.size())).getPredecessor();

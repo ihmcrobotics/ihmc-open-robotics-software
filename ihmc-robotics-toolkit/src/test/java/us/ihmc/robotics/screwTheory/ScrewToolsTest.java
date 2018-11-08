@@ -38,6 +38,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
@@ -109,13 +110,13 @@ public class ScrewToolsTest
       joints = new ArrayList<RevoluteJoint>();
 
       Vector3D[] jointAxes1 = {X, Y, Z, Y, X};
-      ScrewTestTools.createRandomChainRobot("chainA", joints, elevator, jointAxes1, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "chainA", elevator, jointAxes1));
 
       Vector3D[] jointAxes2 = {Z, X, Y, X, X};
-      ScrewTestTools.createRandomChainRobot("chainB", joints, elevator, jointAxes2, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "chainB", elevator, jointAxes2));
 
       Vector3D[] jointAxes3 = {Y, Y, X, X, X};
-      ScrewTestTools.createRandomChainRobot("chainC", joints, elevator, jointAxes3, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "chainC", elevator, jointAxes3));
    }
 
    private Set<RigidBodyBasics> getExcludedRigidBodies()

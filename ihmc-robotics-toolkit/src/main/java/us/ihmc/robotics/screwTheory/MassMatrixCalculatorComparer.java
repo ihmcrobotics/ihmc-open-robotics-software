@@ -34,7 +34,7 @@ public class MassMatrixCalculatorComparer
       joints = new ArrayList<RevoluteJoint>();
       elevator = new RigidBody("elevator", worldFrame);
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
-      ScrewTestTools.createRandomChainRobot("", joints, elevator, jointAxes, random);
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "", elevator, jointAxes));
 
 
       diffIdMassMatricCalculator = new DifferentialIDMassMatrixCalculator(worldFrame, elevator);

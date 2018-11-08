@@ -68,7 +68,7 @@ public class GeometricJacobianTest
 
       int numberOfJoints = random.nextInt(100);
 
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
       RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getSuccessor());
 
       Twist expectedTwist = new Twist();

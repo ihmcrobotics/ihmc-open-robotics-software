@@ -38,7 +38,7 @@ public class MovingMidFootZUpGroundFrameTest
       int numberOfJoints = 20;
       double updateDT = 1.0e-8;
 
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
 
       Map<MovingMidFootZUpGroundFrame, NumericalMovingReferenceFrame> jointFramesToFDFrames = new HashMap<>();
       for (int i = 0; i < 5; i++)
@@ -95,7 +95,7 @@ public class MovingMidFootZUpGroundFrameTest
       Random random = new Random(3452345L);
       int numberOfJoints = 20;
 
-      List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
 
       Map<MidFootZUpGroundFrame, MovingMidFootZUpGroundFrame> zUpFramesToMovingZUpFrames = new HashMap<>();
       for (int i = 0; i < 5; i++)

@@ -47,7 +47,7 @@ public class MotionQPInputCalculatorTest
 
       int numberOfJoints = 20;
 
-      List<RevoluteJoint> joints = ScrewTestTools.createRandomChainRobot(numberOfJoints, random);
+      List<RevoluteJoint> joints = MultiBodySystemRandomTools.nextRevoluteJointChain(random, numberOfJoints);
       RigidBodyBasics rootBody = joints.get(0).getPredecessor();
       ReferenceFrame rootFrame = rootBody.getBodyFixedFrame();
       RigidBodyBasics endEffector = joints.get(numberOfJoints - 1).getSuccessor();
