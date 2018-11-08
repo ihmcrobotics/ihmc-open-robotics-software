@@ -33,11 +33,6 @@ public class ScrewTools
       return new PassiveRevoluteJoint(jointName, parentBody, transformToParent, jointAxis, isPartOfClosedKinematicLoop);
    }
 
-   public static RigidBodyBasics[] computeSubtreeSuccessors(JointBasics... joints)
-   {
-      return Stream.of(joints).map(JointBasics::getSuccessor).flatMap(RigidBodyBasics::subtreeStream).distinct().toArray(RigidBodyBasics[]::new);
-   }
-
    public static RigidBodyBasics[] computeSubtreeSuccessors(RigidBodyBasics... bodies)
    {
       return MultiBodySystemTools.collectSuccessors(computeSubtreeJoints(bodies));

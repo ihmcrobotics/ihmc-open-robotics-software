@@ -145,7 +145,7 @@ public class SpatialAccelerationCalculator
       this.doVelocityTerms = doVelocityTerms;
       this.doAccelerationTerms = doAccelerationTerms;
 
-      int numberOfRigidBodies = ScrewTools.computeSubtreeSuccessors(ScrewTools.computeSubtreeJoints(rootBody)).length;
+      int numberOfRigidBodies = MultiBodySystemTools.collectSubtreeSuccessors(ScrewTools.computeSubtreeJoints(rootBody)).length;
       while (unnassignedAccelerations.size() < numberOfRigidBodies)
          unnassignedAccelerations.add(new SpatialAcceleration());
       rigidBodiesWithAssignedAcceleration = new ArrayList<>(numberOfRigidBodies);
