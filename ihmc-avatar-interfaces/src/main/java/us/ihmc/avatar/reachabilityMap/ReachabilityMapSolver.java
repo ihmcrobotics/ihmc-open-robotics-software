@@ -19,7 +19,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
@@ -52,12 +52,12 @@ public class ReachabilityMapSolver
    private final CommandInputManager commandInputManager = new CommandInputManager(KinematicsToolboxModule.supportedCommands());
    private final StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
    private final RigidBodyBasics endEffector;
-   private final OneDoFJoint[] robotArmJoints;
+   private final OneDoFJointBasics[] robotArmJoints;
    private final RigidBodyTransform controlFramePoseInEndEffector = new RigidBodyTransform();
    private final SelectionMatrix3D angularSelection = new SelectionMatrix3D(null, true, true, true);
    private final RobotConfigurationData defaultArmConfiguration;
 
-   public ReachabilityMapSolver(OneDoFJoint[] robotArmJoints, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public ReachabilityMapSolver(OneDoFJointBasics[] robotArmJoints, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.robotArmJoints = robotArmJoints;
       endEffector = robotArmJoints[robotArmJoints.length - 1].getSuccessor();
@@ -188,7 +188,7 @@ public class ReachabilityMapSolver
       return isSolutionGood;
    }
 
-   public OneDoFJoint[] getRobotArmJoints()
+   public OneDoFJointBasics[] getRobotArmJoints()
    {
       return robotArmJoints;
    }

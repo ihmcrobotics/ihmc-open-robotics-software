@@ -16,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -110,38 +109,14 @@ public class ScrewTools
       return subtree.toArray(ret);
    }
 
-   public static OneDoFJoint[] createOneDoFJointPath(RigidBodyBasics start, RigidBodyBasics end)
+   public static OneDoFJointBasics[] createOneDoFJointPath(RigidBodyBasics start, RigidBodyBasics end)
    {
-      return MultiBodySystemTools.filterJoints(createJointPath(start, end), OneDoFJoint.class);
+      return MultiBodySystemTools.createOneDoFJointPath(start, end);
    }
 
    public static JointBasics[] createJointPath(RigidBodyBasics start, RigidBodyBasics end)
    {
-      boolean flip = false;
-      RigidBodyBasics descendant = start;
-      RigidBodyBasics ancestor = end;
-      int pathLength = MultiBodySystemTools.computeDistanceToAncestor(descendant, ancestor);
-      if (pathLength < 0)
-      {
-         flip = true;
-         descendant = end;
-         ancestor = start;
-         pathLength = MultiBodySystemTools.computeDistanceToAncestor(end, start);
-      }
-
-      JointBasics[] ret = new JointBasics[pathLength];
-      RigidBodyBasics currentBody = descendant;
-      int i = 0;
-      while (currentBody != ancestor)
-      {
-         int j = flip ? pathLength - 1 - i : i;
-         JointBasics parentJoint = currentBody.getParentJoint();
-         ret[j] = parentJoint;
-         currentBody = parentJoint.getPredecessor();
-         i++;
-      }
-
-      return ret;
+      return MultiBodySystemTools.createJointPath(start, end);
    }
 
    /**
@@ -193,9 +168,9 @@ public class ScrewTools
       return MultiBodySystemFactories.cloneOneDoFJointKinematicChain(start, end);
    }
 
-   public static OneDoFJoint[] cloneOneDoFJointPath(OneDoFJoint[] oneDoFJoints)
+   public static OneDoFJointBasics[] cloneOneDoFJointPath(OneDoFJointBasics[] oneDoFJoints)
    {
-      return cloneJointPathAndFilter(oneDoFJoints, OneDoFJoint.class);
+      return cloneJointPathAndFilter(oneDoFJoints, OneDoFJointBasics.class);
    }
 
    public static <T extends JointBasics> T[] cloneJointPathAndFilter(T[] joints, Class<T> clazz)
@@ -222,9 +197,9 @@ public class ScrewTools
 
       for (int i = 0; i < inverseDynamicsJoints.length; i++)
       {
-         if (inverseDynamicsJoints[i] instanceof OneDoFJoint)
+         if (inverseDynamicsJoints[i] instanceof OneDoFJointBasics)
          {
-            OneDoFJoint jointOriginal = (OneDoFJoint) inverseDynamicsJoints[i];
+            OneDoFJointBasics jointOriginal = (OneDoFJointBasics) inverseDynamicsJoints[i];
 
             RigidBodyBasics predecessorOriginal = jointOriginal.getPredecessor();
             RigidBodyBasics predecessorCopy = originalToClonedRigidBodies.get(predecessorOriginal);
@@ -327,20 +302,20 @@ public class ScrewTools
       return cloned;
    }
 
-   private static OneDoFJoint cloneOneDoFJoint(OneDoFJoint original, String cloneSuffix, RigidBodyBasics clonePredecessor)
+   private static OneDoFJointBasics cloneOneDoFJoint(OneDoFJointBasics original, String cloneSuffix, RigidBodyBasics clonePredecessor)
    {
       String jointNameOriginal = original.getName();
       RigidBodyTransform jointTransform = new RigidBodyTransform();
       original.getJointOffset(jointTransform);
       Vector3D jointAxisCopy = new Vector3D(original.getJointAxis());
-      OneDoFJoint clone;
+      OneDoFJointBasics clone;
 
       if (original instanceof RevoluteJoint)
          clone = new RevoluteJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform, jointAxisCopy);
       else if (original instanceof PrismaticJoint)
          clone = new PrismaticJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform, jointAxisCopy);
       else
-         throw new RuntimeException("Unhandled type of " + OneDoFJoint.class.getSimpleName() + ": " + original.getClass().getSimpleName());
+         throw new RuntimeException("Unhandled type of " + OneDoFJointBasics.class.getSimpleName() + ": " + original.getClass().getSimpleName());
 
       clone.setJointLimitLower(original.getJointLimitLower());
       clone.setJointLimitUpper(original.getJointLimitUpper());

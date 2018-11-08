@@ -28,8 +28,8 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -159,8 +159,8 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final ExecutionTimer calculateNextThreeFootStepsOneOffTimer = new ExecutionTimer("calculateNextThreeFootStepsOneOffTimer", registry);
    private boolean oneOffHappened = false;
 
-   private final OneDoFJoint[] oneDoFJointsFeedforward;
-   private final OneDoFJoint[] oneDoFJointsActual;
+   private final OneDoFJointBasics[] oneDoFJointsFeedforward;
+   private final OneDoFJointBasics[] oneDoFJointsActual;
 
    private final FramePoint3D desiredCoMFramePosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final FramePose3D desiredCoMFramePose = new FramePose3D(ReferenceFrame.getWorldFrame());
@@ -790,8 +790,8 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    {
       for (int i = 0; i < oneDoFJointsActual.length; i++)
       {
-         OneDoFJoint oneDoFJoint = oneDoFJointsActual[i];
-         OneDoFJoint oneDoFJointFeedforward = oneDoFJointsFeedforward[i];
+         OneDoFJointBasics oneDoFJoint = oneDoFJointsActual[i];
+         OneDoFJointBasics oneDoFJointFeedforward = oneDoFJointsFeedforward[i];
 
          oneDoFJointFeedforward.setQ(jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).getDesiredPosition());
       }
@@ -851,8 +851,8 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    {
       for (int i = 0; i < oneDoFJointsActual.length; i++)
       {
-         OneDoFJoint oneDoFJoint = oneDoFJointsActual[i];
-         OneDoFJoint oneDoFJointFeedforward = oneDoFJointsFeedforward[i];
+         OneDoFJointBasics oneDoFJoint = oneDoFJointsActual[i];
+         OneDoFJointBasics oneDoFJointFeedforward = oneDoFJointsFeedforward[i];
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint);
 
          //		   oneDoFJointFeedforward.setQ(oneDoFJoint.getQ());
@@ -1353,7 +1353,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       {
          for (int i = 0; i < oneDoFJointsActual.length; i++)
          {
-            OneDoFJoint actualOneDoFJoint = oneDoFJointsActual[i];
+            OneDoFJointBasics actualOneDoFJoint = oneDoFJointsActual[i];
 
             double initialPosition = initialPositions.get(i);
 
@@ -1387,7 +1387,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          initialPositions.clear();
          for (int i = 0; i < oneDoFJointsActual.length; i++)
          {
-            OneDoFJoint actualOneDoFJoint = oneDoFJointsActual[i];
+            OneDoFJointBasics actualOneDoFJoint = oneDoFJointsActual[i];
             initialPositions.add(jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).getDesiredPosition());
          }
       }
@@ -2207,7 +2207,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    @Override
    public void onEntry()
    {
-      for (OneDoFJoint oneDofJoint : oneDoFJointsActual)
+      for (OneDoFJointBasics oneDofJoint : oneDoFJointsActual)
       {
          // FIXME
 //         oneDofJoint.setUnderPositionControl(true);

@@ -32,8 +32,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotDescription.JointDescription;
@@ -95,7 +95,7 @@ public class KinematicsToolboxControllerTest
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       RobotDescription robotDescription = new KinematicsToolboxControllerTestRobots.SevenDoFArm();
-      Pair<FloatingJointBasics, OneDoFJoint[]> desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDescription);
+      Pair<FloatingJointBasics, OneDoFJointBasics[]> desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDescription);
       commandInputManager = new CommandInputManager(KinematicsToolboxModule.supportedCommands());
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(MultiBodySystemTools.getRootBody(desiredFullRobotModel.getRight()[0].getSuccessor())));
 
@@ -128,7 +128,7 @@ public class KinematicsToolboxControllerTest
       }
    }
 
-   private void snapGhostToFullRobotModel(Pair<FloatingJointBasics, OneDoFJoint[]> fullHumanoidRobotModel)
+   private void snapGhostToFullRobotModel(Pair<FloatingJointBasics, OneDoFJointBasics[]> fullHumanoidRobotModel)
    {
       new JointAnglesWriter(ghost, fullHumanoidRobotModel.getLeft(), fullHumanoidRobotModel.getRight()).updateRobotConfigurationBasedOnFullRobotModel();
    }
@@ -170,7 +170,7 @@ public class KinematicsToolboxControllerTest
    @Test(timeout = 30000)
    public void testHoldBodyPose() throws Exception
    {
-      Pair<FloatingJointBasics, OneDoFJoint[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
+      Pair<FloatingJointBasics, OneDoFJointBasics[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       snapGhostToFullRobotModel(initialFullRobotModel);
 
       RigidBodyBasics hand = ScrewTools.findRigidBodiesWithNames(ScrewTools.computeSubtreeSuccessors(initialFullRobotModel.getRight()), "handLink")[0];
@@ -195,10 +195,10 @@ public class KinematicsToolboxControllerTest
       if (VERBOSE)
          PrintTools.info(this, "Entering: testRandomHandPositions");
       Random random = new Random(2135);
-      Pair<FloatingJointBasics, OneDoFJoint[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
+      Pair<FloatingJointBasics, OneDoFJointBasics[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
 
-      Pair<FloatingJointBasics, OneDoFJoint[]> randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration();
+      Pair<FloatingJointBasics, OneDoFJointBasics[]> randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration();
 
       for (int i = 0; i < 10; i++)
       {
@@ -233,10 +233,10 @@ public class KinematicsToolboxControllerTest
       if (VERBOSE)
          PrintTools.info(this, "Entering: testRandomHandPoses");
       Random random = new Random(2134);
-      Pair<FloatingJointBasics, OneDoFJoint[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
+      Pair<FloatingJointBasics, OneDoFJointBasics[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
 
-      Pair<FloatingJointBasics, OneDoFJoint[]> randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration();
+      Pair<FloatingJointBasics, OneDoFJointBasics[]> randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration();
 
       double averageSolutionQuality = 0.0;
       double worstSolutionQuality = -1.0;
@@ -293,11 +293,11 @@ public class KinematicsToolboxControllerTest
       finalSolutionQuality.set(toolboxController.getSolution().getSolutionQuality());
    }
 
-   private Pair<FloatingJointBasics, OneDoFJoint[]> createFullRobotModelAtInitialConfiguration()
+   private Pair<FloatingJointBasics, OneDoFJointBasics[]> createFullRobotModelAtInitialConfiguration()
    {
       RobotDescription robotDescription = new KinematicsToolboxControllerTestRobots.SevenDoFArm();
-      Pair<FloatingJointBasics, OneDoFJoint[]> fullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDescription);
-      for (OneDoFJoint joint : fullRobotModel.getRight())
+      Pair<FloatingJointBasics, OneDoFJointBasics[]> fullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDescription);
+      for (OneDoFJointBasics joint : fullRobotModel.getRight())
       {
          if (Double.isFinite(joint.getJointLimitLower()) && Double.isFinite(joint.getJointLimitUpper()))
             joint.setQ(0.5 * (joint.getJointLimitLower() + joint.getJointLimitUpper()));
@@ -306,10 +306,10 @@ public class KinematicsToolboxControllerTest
       return fullRobotModel;
    }
 
-   private void randomizeJointPositions(Random random, Pair<FloatingJointBasics, OneDoFJoint[]> randomizedFullRobotModel,
+   private void randomizeJointPositions(Random random, Pair<FloatingJointBasics, OneDoFJointBasics[]> randomizedFullRobotModel,
                                         double percentOfMotionRangeAllowed)
    {
-      for (OneDoFJoint joint : randomizedFullRobotModel.getRight())
+      for (OneDoFJointBasics joint : randomizedFullRobotModel.getRight())
       {
          double jointLimitLower = joint.getJointLimitLower();
          if (Double.isInfinite(jointLimitLower))
@@ -408,9 +408,9 @@ public class KinematicsToolboxControllerTest
       }
    }
 
-   private RobotConfigurationData extractRobotConfigurationData(Pair<FloatingJointBasics, OneDoFJoint[]> initialFullRobotModel)
+   private RobotConfigurationData extractRobotConfigurationData(Pair<FloatingJointBasics, OneDoFJointBasics[]> initialFullRobotModel)
    {
-      OneDoFJoint[] joints = initialFullRobotModel.getRight();
+      OneDoFJointBasics[] joints = initialFullRobotModel.getRight();
       RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, new ForceSensorDefinition[0], new IMUDefinition[0]);
       RobotConfigurationDataFactory.packJointState(robotConfigurationData, Arrays.stream(joints).collect(Collectors.toList()));
 

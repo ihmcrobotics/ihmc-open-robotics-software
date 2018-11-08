@@ -10,8 +10,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -76,13 +76,13 @@ public class PlaybackPoseSequenceReader
             throw new RuntimeException("Expecting poseDuration on first line. Got " + jointNames.get(0));
          jointNames.remove(0);
 
-         OneDoFJoint[] allJoints = fullRobotModel.getOneDoFJoints();
+         OneDoFJointBasics[] allJoints = fullRobotModel.getOneDoFJoints();
 
          jointNamesArray = new String[jointNames.size()];
          jointNames.toArray(jointNamesArray);
 
          JointBasics[] inverseDynamicsJoints = ScrewTools.findJointsWithNames(allJoints, jointNamesArray);
-         OneDoFJoint[] oneDoFJoints = MultiBodySystemTools.filterJoints(inverseDynamicsJoints, OneDoFJoint.class);
+         OneDoFJointBasics[] oneDoFJoints = MultiBodySystemTools.filterJoints(inverseDynamicsJoints, OneDoFJointBasics.class);
          double[] jointAngles = new double[oneDoFJoints.length];
 
          String textPose = br.readLine();    // read one line of text (one pose)

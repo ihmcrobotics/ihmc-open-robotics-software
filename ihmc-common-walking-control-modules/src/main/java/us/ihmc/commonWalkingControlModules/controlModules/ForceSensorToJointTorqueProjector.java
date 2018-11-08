@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorData;
@@ -38,7 +38,7 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
       RigidBodyBasics currentBody = sensorLinkBody;
       for(int i=0;i<numberOfJointFromSensor;i++)
       {
-         FrameVector3D jAxis = new FrameVector3D(((OneDoFJoint)currentBody.getParentJoint()).getJointAxis());
+         FrameVector3D jAxis = new FrameVector3D(((OneDoFJointBasics)currentBody.getParentJoint()).getJointAxis());
          yoTorqueInJoints.add(new ImmutablePair<>(jAxis,new YoDouble("NegGRFWrenchIn"+ currentBody.getParentJoint().getName(), registry)));
          currentBody=currentBody.getParentJoint().getPredecessor();
       }

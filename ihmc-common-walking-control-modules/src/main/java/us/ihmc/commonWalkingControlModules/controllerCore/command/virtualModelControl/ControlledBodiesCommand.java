@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class ControlledBodiesCommand implements VirtualModelControlCommand<ControlledBodiesCommand>
 {
    private List<RigidBodyBasics> controlledBodies = new ArrayList<>();
    private List<RigidBodyBasics> basesForControl = new ArrayList<>();
-   private List<OneDoFJoint[]> jointsToUse = new ArrayList<>();
+   private List<OneDoFJointBasics[]> jointsToUse = new ArrayList<>();
 
    public ControlledBodiesCommand()
    {
@@ -42,12 +42,12 @@ public class ControlledBodiesCommand implements VirtualModelControlCommand<Contr
       addBodyToControl(controlledBody, baseForControl, null);
    }
 
-   public void addBodyToControl(RigidBodyBasics controlledBody, OneDoFJoint[] jointsToUse)
+   public void addBodyToControl(RigidBodyBasics controlledBody, OneDoFJointBasics[] jointsToUse)
    {
       addBodyToControl(controlledBody, null, jointsToUse);
    }
 
-   public void addBodyToControl(RigidBodyBasics controlledBody, RigidBodyBasics baseForControl, OneDoFJoint[] jointsToUse)
+   public void addBodyToControl(RigidBodyBasics controlledBody, RigidBodyBasics baseForControl, OneDoFJointBasics[] jointsToUse)
    {
       controlledBodies.add(controlledBody);
       basesForControl.add(baseForControl);
@@ -69,7 +69,7 @@ public class ControlledBodiesCommand implements VirtualModelControlCommand<Contr
       return basesForControl.get(i);
    }
 
-   public OneDoFJoint[] getJointsToUse(int i)
+   public OneDoFJointBasics[] getJointsToUse(int i)
    {
       return jointsToUse.get(i);
    }
@@ -84,7 +84,7 @@ public class ControlledBodiesCommand implements VirtualModelControlCommand<Contr
       return basesForControl;
    }
 
-   public List<OneDoFJoint[]> getAllJointsToUse()
+   public List<OneDoFJointBasics[]> getAllJointsToUse()
    {
       return jointsToUse;
    }

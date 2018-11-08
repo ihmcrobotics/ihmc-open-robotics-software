@@ -29,11 +29,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -371,7 +371,7 @@ public class VirtualModelControllerTestHelper
       soleFrames.put(RobotSide.LEFT, leftSoleFrame);
       soleFrames.put(RobotSide.RIGHT, rightSoleFrame);
 
-      OneDoFJoint[] joints = {l_leg_hpz, l_leg_hpx, l_leg_hpy, l_leg_kny, l_leg_akx, l_leg_aky, r_leg_hpz, r_leg_hpx, r_leg_hpy, r_leg_kny, r_leg_akx, r_leg_aky};
+      OneDoFJointBasics[] joints = {l_leg_hpz, l_leg_hpx, l_leg_hpy, l_leg_kny, l_leg_akx, l_leg_aky, r_leg_hpz, r_leg_hpx, r_leg_hpy, r_leg_kny, r_leg_akx, r_leg_aky};
 
       robotLeg.setPelvis(pelvisBody);
       robotLeg.setFeet(feet);
@@ -613,7 +613,7 @@ public class VirtualModelControllerTestHelper
 
       private ExternalForcePoint externalForcePoint;
 
-      private final OneDoFJoint[] oneDoFJoints;
+      private final OneDoFJointBasics[] oneDoFJoints;
 
       PlanarRobotArm()
       {
@@ -719,13 +719,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
+      public OneDoFJointBasics getSpineJoint(SpineJointName spineJointName)
       {
          return null;
       }
 
       @Override
-      public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
+      public OneDoFJointBasics getNeckJoint(NeckJointName neckJointName)
       {
          return null;
       }
@@ -749,15 +749,15 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint[] getOneDoFJoints()
+      public OneDoFJointBasics[] getOneDoFJoints()
       {
          return oneDoFJoints;
       }
 
       @Override
-      public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
       {
-         List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
+         List<OneDoFJointBasics> list = Arrays.asList(oneDoFJoints);
 
          for (int i = 0; i < list.size(); i++)
             oneDoFJointsToPack.set(i, list.get(i));
@@ -811,18 +811,18 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint[] getControllableOneDoFJoints()
+      public OneDoFJointBasics[] getControllableOneDoFJoints()
       {
          return null;
       }
 
       @Override
-      public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
       {
       }
 
       @Override
-      public OneDoFJoint getOneDoFJointByName(String name)
+      public OneDoFJointBasics getOneDoFJointByName(String name)
       {
          return null;
       }
@@ -858,13 +858,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
       {
          return null;
       }
 
       @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
       {
       }
 
@@ -889,7 +889,7 @@ public class VirtualModelControllerTestHelper
 
       private ExternalForcePoint externalForcePoint;
 
-      private final OneDoFJoint[] oneDoFJoints;
+      private final OneDoFJointBasics[] oneDoFJoints;
 
       RobotArm()
       {
@@ -1003,13 +1003,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
+      public OneDoFJointBasics getSpineJoint(SpineJointName spineJointName)
       {
          return null;
       }
 
       @Override
-      public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
+      public OneDoFJointBasics getNeckJoint(NeckJointName neckJointName)
       {
          return null;
       }
@@ -1033,15 +1033,15 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint[] getOneDoFJoints()
+      public OneDoFJointBasics[] getOneDoFJoints()
       {
          return oneDoFJoints;
       }
 
       @Override
-      public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
       {
-         List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
+         List<OneDoFJointBasics> list = Arrays.asList(oneDoFJoints);
 
          for (int i = 0; i < list.size(); i++)
             oneDoFJointsToPack.set(i, list.get(i));
@@ -1112,18 +1112,18 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint[] getControllableOneDoFJoints()
+      public OneDoFJointBasics[] getControllableOneDoFJoints()
       {
          return null;
       }
 
       @Override
-      public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
       {
       }
 
       @Override
-      public OneDoFJoint getOneDoFJointByName(String name)
+      public OneDoFJointBasics getOneDoFJointByName(String name)
       {
          return null;
       }
@@ -1159,13 +1159,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
       {
          return null;
       }
 
       @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
       {
       }
 
@@ -1194,7 +1194,7 @@ public class VirtualModelControllerTestHelper
       private ExternalForcePoint externalForcePoint1;
       private ExternalForcePoint externalForcePoint2;
 
-      private final OneDoFJoint[] oneDoFJoints;
+      private final OneDoFJointBasics[] oneDoFJoints;
 
       ForkedRobotArm()
       {
@@ -1235,7 +1235,7 @@ public class VirtualModelControllerTestHelper
 
          JointBasics[] jointArray = new JointBasics[joints.size()];
          joints.toArray(jointArray);
-         oneDoFJoints = MultiBodySystemTools.filterJoints(jointArray, OneDoFJoint.class);
+         oneDoFJoints = MultiBodySystemTools.filterJoints(jointArray, OneDoFJointBasics.class);
          elevator.updateFramesRecursively();
 
          scsRobotArm = new SCSRobotFromInverseDynamicsRobotModel("robotArm", elevator.getChildrenJoints().get(0));
@@ -1339,13 +1339,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
+      public OneDoFJointBasics getSpineJoint(SpineJointName spineJointName)
       {
          return null;
       }
 
       @Override
-      public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
+      public OneDoFJointBasics getNeckJoint(NeckJointName neckJointName)
       {
          return null;
       }
@@ -1369,15 +1369,15 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint[] getOneDoFJoints()
+      public OneDoFJointBasics[] getOneDoFJoints()
       {
          return oneDoFJoints;
       }
 
       @Override
-      public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
       {
-         List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
+         List<OneDoFJointBasics> list = Arrays.asList(oneDoFJoints);
 
          for (int i = 0; i < list.size(); i++)
             oneDoFJointsToPack.set(i, list.get(i));
@@ -1448,18 +1448,18 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint[] getControllableOneDoFJoints()
+      public OneDoFJointBasics[] getControllableOneDoFJoints()
       {
          return null;
       }
 
       @Override
-      public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
       {
       }
 
       @Override
-      public OneDoFJoint getOneDoFJointByName(String name)
+      public OneDoFJointBasics getOneDoFJointByName(String name)
       {
          return null;
       }
@@ -1495,13 +1495,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
       {
          return null;
       }
 
       @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
       {
       }
 
@@ -1529,7 +1529,7 @@ public class VirtualModelControllerTestHelper
       private ExternalForcePoint externalForcePoint1;
       private ExternalForcePoint externalForcePoint2;
 
-      private final OneDoFJoint[] oneDoFJoints;
+      private final OneDoFJointBasics[] oneDoFJoints;
 
       PlanarForkedRobotArm()
       {
@@ -1560,7 +1560,7 @@ public class VirtualModelControllerTestHelper
 
          JointBasics[] jointArray = new JointBasics[joints.size()];
          joints.toArray(jointArray);
-         oneDoFJoints = MultiBodySystemTools.filterJoints(jointArray, OneDoFJoint.class);
+         oneDoFJoints = MultiBodySystemTools.filterJoints(jointArray, OneDoFJointBasics.class);
          elevator.updateFramesRecursively();
 
          scsRobotArm = new SCSRobotFromInverseDynamicsRobotModel("robotArm", elevator.getChildrenJoints().get(0));
@@ -1664,13 +1664,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
+      public OneDoFJointBasics getSpineJoint(SpineJointName spineJointName)
       {
          return null;
       }
 
       @Override
-      public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
+      public OneDoFJointBasics getNeckJoint(NeckJointName neckJointName)
       {
          return null;
       }
@@ -1694,15 +1694,15 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint[] getOneDoFJoints()
+      public OneDoFJointBasics[] getOneDoFJoints()
       {
          return oneDoFJoints;
       }
 
       @Override
-      public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
       {
-         List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
+         List<OneDoFJointBasics> list = Arrays.asList(oneDoFJoints);
 
          for (int i = 0; i < list.size(); i++)
             oneDoFJointsToPack.set(i, list.get(i));
@@ -1756,18 +1756,18 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint[] getControllableOneDoFJoints()
+      public OneDoFJointBasics[] getControllableOneDoFJoints()
       {
          return null;
       }
 
       @Override
-      public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
       {
       }
 
       @Override
-      public OneDoFJoint getOneDoFJointByName(String name)
+      public OneDoFJointBasics getOneDoFJointByName(String name)
       {
          return null;
       }
@@ -1803,13 +1803,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
       {
          return null;
       }
 
       @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
       {
       }
 
@@ -1828,7 +1828,7 @@ public class VirtualModelControllerTestHelper
       private SideDependentList<RigidBodyBasics> feet = new SideDependentList<>();
       private SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
       private SixDoFJoint rootJoint;
-      private OneDoFJoint[] joints;
+      private OneDoFJointBasics[] joints;
 
       private CommonHumanoidReferenceFrames referenceFrames;
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -1870,7 +1870,7 @@ public class VirtualModelControllerTestHelper
          this.soleFrames.set(soleFrames);
       }
 
-      void setOneDoFJoints(OneDoFJoint[] joints)
+      void setOneDoFJoints(OneDoFJointBasics[] joints)
       {
          this.joints = joints;
       }
@@ -1905,13 +1905,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
+      public OneDoFJointBasics getSpineJoint(SpineJointName spineJointName)
       {
          return null;
       }
 
       @Override
-      public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
+      public OneDoFJointBasics getNeckJoint(NeckJointName neckJointName)
       {
          return null;
       }
@@ -1935,16 +1935,16 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint[] getOneDoFJoints()
+      public OneDoFJointBasics[] getOneDoFJoints()
       {
          return joints;
       }
 
       @Override
-      public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
       {
          oneDoFJointsToPack.clear();
-         for (OneDoFJoint joint : joints)
+         for (OneDoFJointBasics joint : joints)
             oneDoFJointsToPack.add(joint);
       }
 
@@ -1982,18 +1982,18 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJoint[] getControllableOneDoFJoints()
+      public OneDoFJointBasics[] getControllableOneDoFJoints()
       {
          return null;
       }
 
       @Override
-      public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
       {
       }
 
       @Override
-      public OneDoFJoint getOneDoFJointByName(String name)
+      public OneDoFJointBasics getOneDoFJointByName(String name)
       {
          return null;
       }
@@ -2029,13 +2029,13 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
       {
          return null;
       }
 
       @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
       {
       }
 
@@ -2468,7 +2468,7 @@ public class VirtualModelControllerTestHelper
 
       private final SCSRobotFromInverseDynamicsRobotModel scsRobot;
       private final FullRobotModel controllerModel;
-      private final OneDoFJoint[] controlledJoints;
+      private final OneDoFJointBasics[] controlledJoints;
 
       private final VirtualModelController virtualModelController;
 
@@ -2479,7 +2479,7 @@ public class VirtualModelControllerTestHelper
       private List<RigidBodyBasics> endEffectors = new ArrayList<>();
       private final DenseMatrix64F selectionMatrix;
 
-      DummyArmController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJoint[] controlledJoints,
+      DummyArmController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJointBasics[] controlledJoints,
             List<ForcePointController> forcePointControllers, VirtualModelController virtualModelController, List<RigidBodyBasics> endEffectors,
             List<YoFixedFrameWrench> yoDesiredWrenches, DenseMatrix64F selectionMatrix)
       {
@@ -2532,7 +2532,7 @@ public class VirtualModelControllerTestHelper
          DenseMatrix64F jointTorques = virtualModelControlSolution.getJointTorques();
          for (int i = 0; i < controlledJoints.length; i++)
          {
-            OneDoFJoint joint = controlledJoints[i];
+            OneDoFJointBasics joint = controlledJoints[i];
             double tau = jointTorques.get(i, 0);
             yoJointTorques.get(joint).set(tau);
             joint.setTau(tau);

@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commons.MathTools;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
@@ -22,7 +22,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    private final JointspaceVelocityCommand inverseKinematicsOutput = new JointspaceVelocityCommand();
    private final JointTorqueCommand virtualModelControlOutput = new JointTorqueCommand();
 
-   private final OneDoFJoint joint;
+   private final OneDoFJointBasics joint;
 
    private final YoBoolean isEnabled;
 
@@ -59,7 +59,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
    private final YoDouble weightForSolver;
 
-   public OneDoFJointFeedbackController(OneDoFJoint joint, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
+   public OneDoFJointFeedbackController(OneDoFJointBasics joint, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
                                         YoVariableRegistry parentRegistry)
    {
       String jointName = joint.getName();
@@ -282,7 +282,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       qDDAchieved.set(joint.getQdd());
    }
 
-   public OneDoFJoint getJoint()
+   public OneDoFJointBasics getJoint()
    {
       return joint;
    }

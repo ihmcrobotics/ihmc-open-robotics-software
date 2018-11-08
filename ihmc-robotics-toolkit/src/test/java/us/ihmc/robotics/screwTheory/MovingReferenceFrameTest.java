@@ -13,6 +13,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.JointStateType;
@@ -52,7 +53,7 @@ public class MovingReferenceFrameTest
 
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {
-            OneDoFJoint joint = joints.get(jointIndex);
+            OneDoFJointBasics joint = joints.get(jointIndex);
             RigidBodyBasics body = joint.getSuccessor();
             MovingReferenceFrame bodyFrame = body.getBodyFixedFrame();
 
@@ -86,7 +87,7 @@ public class MovingReferenceFrameTest
 
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {
-            OneDoFJoint joint = joints.get(jointIndex);
+            OneDoFJointBasics joint = joints.get(jointIndex);
             RigidBodyBasics body = joint.getSuccessor();
             MovingReferenceFrame bodyFrame = body.getBodyFixedFrame();
 
@@ -120,7 +121,7 @@ public class MovingReferenceFrameTest
 
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {
-            OneDoFJoint joint = joints.get(jointIndex);
+            OneDoFJointBasics joint = joints.get(jointIndex);
             RigidBodyBasics body = joint.getSuccessor();
             MovingReferenceFrame bodyFrame = body.getBodyFixedFrame();
 

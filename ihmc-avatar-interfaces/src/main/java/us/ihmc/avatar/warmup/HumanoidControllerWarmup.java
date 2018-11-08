@@ -38,9 +38,9 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -81,7 +81,7 @@ public abstract class HumanoidControllerWarmup
 
    private FullHumanoidRobotModel fullRobotModel;
    private HumanoidReferenceFrames referenceFrames;
-   private OneDoFJoint[] oneDoFJoints;
+   private OneDoFJointBasics[] oneDoFJoints;
 
    private HighLevelControlManagerFactory managerFactory;
    private HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -176,7 +176,7 @@ public abstract class HumanoidControllerWarmup
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
          JointDesiredOutputReadOnly jointDesireds = controllerOutput.getJointDesiredOutput(joint);
 
          if (jointDesireds == null)

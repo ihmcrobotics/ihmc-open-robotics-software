@@ -13,12 +13,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -51,15 +51,15 @@ public class FullRobotModelTestTools
 
       private final SixDoFJoint rootJoint;
 
-      private final LinkedHashMap<String, OneDoFJoint> oneDoFJoints = new LinkedHashMap<>();
+      private final LinkedHashMap<String, OneDoFJointBasics> oneDoFJoints = new LinkedHashMap<>();
 
-      private final HashMap<SpineJointName, OneDoFJoint> spineJoints = new HashMap<>();
-      private final HashMap<NeckJointName, OneDoFJoint> neckJoints = new HashMap<>();
+      private final HashMap<SpineJointName, OneDoFJointBasics> spineJoints = new HashMap<>();
+      private final HashMap<NeckJointName, OneDoFJointBasics> neckJoints = new HashMap<>();
 
-      private final SideDependentList<HashMap<ArmJointName, OneDoFJoint>> armJoints = new SideDependentList<>();
-      private final SideDependentList<HashMap<LegJointName, OneDoFJoint>> legJoints = new SideDependentList<>();
-      private final SideDependentList<ArrayList<OneDoFJoint>> armJointIDsList = new SideDependentList<>();
-      private final SideDependentList<ArrayList<OneDoFJoint>> legJointIDsList = new SideDependentList<>();
+      private final SideDependentList<HashMap<ArmJointName, OneDoFJointBasics>> armJoints = new SideDependentList<>();
+      private final SideDependentList<HashMap<LegJointName, OneDoFJointBasics>> legJoints = new SideDependentList<>();
+      private final SideDependentList<ArrayList<OneDoFJointBasics>> armJointIDsList = new SideDependentList<>();
+      private final SideDependentList<ArrayList<OneDoFJointBasics>> legJointIDsList = new SideDependentList<>();
 
       private final LegJointName[] legJointNames;
       private final ArmJointName[] armJointNames;
@@ -315,7 +315,7 @@ public class FullRobotModelTestTools
          return elevator;
       }
 
-      @Override public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
+      @Override public OneDoFJointBasics getSpineJoint(SpineJointName spineJointName)
       {
          return spineJoints.get(spineJointName);
       }
@@ -325,7 +325,7 @@ public class FullRobotModelTestTools
          return null;
       }
 
-      @Override public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
+      @Override public OneDoFJointBasics getNeckJoint(NeckJointName neckJointName)
       {
          return neckJoints.get(neckJointName);
       }
@@ -375,28 +375,28 @@ public class FullRobotModelTestTools
          return head.getParentJoint().getFrameAfterJoint();
       }
 
-      @Override public OneDoFJoint[] getOneDoFJoints()
+      @Override public OneDoFJointBasics[] getOneDoFJoints()
       {
-         OneDoFJoint[] oneDoFJointsAsArray = new OneDoFJoint[oneDoFJoints.size()];
+         OneDoFJointBasics[] oneDoFJointsAsArray = new OneDoFJointBasics[oneDoFJoints.size()];
          oneDoFJoints.values().toArray(oneDoFJointsAsArray);
          return oneDoFJointsAsArray;
       }
 
-      @Override public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      @Override public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
       {
          return oneDoFJoints;
       }
 
-      @Override public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
+      @Override public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
       {
          oneDoFJointsToPack.clear();
          JointBasics parent = oneDoFJointAtEndOfChain;
 
          while (parent != rootJoint)
          {
-            if (parent instanceof OneDoFJoint)
+            if (parent instanceof OneDoFJointBasics)
             {
-               oneDoFJointsToPack.add((OneDoFJoint) parent);
+               oneDoFJointsToPack.add((OneDoFJointBasics) parent);
             }
 
             parent = parent.getPredecessor().getParentJoint();
@@ -405,23 +405,23 @@ public class FullRobotModelTestTools
          Collections.reverse(oneDoFJointsToPack);
       }
 
-      @Override public OneDoFJoint[] getControllableOneDoFJoints()
+      @Override public OneDoFJointBasics[] getControllableOneDoFJoints()
       {
          return getOneDoFJoints();
       }
 
-      @Override public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      @Override public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
       {
-         Collection<OneDoFJoint> values = oneDoFJoints.values();
+         Collection<OneDoFJointBasics> values = oneDoFJoints.values();
          oneDoFJointsToPack.addAll(values);
       }
 
-      @Override public OneDoFJoint getOneDoFJointByName(String name)
+      @Override public OneDoFJointBasics getOneDoFJointByName(String name)
       {
          return oneDoFJoints.get(name);
       }
 
-      @Override public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+      @Override public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
       {
          getOneDoFJoints(oneDoFJointsToPack);
       }
@@ -451,12 +451,12 @@ public class FullRobotModelTestTools
          return legJoints.get(robotSide).get(legJointName).getFrameAfterJoint();
       }
 
-      @Override public OneDoFJoint getLegJoint(RobotSide robotSide, LegJointName legJointName)
+      @Override public OneDoFJointBasics getLegJoint(RobotSide robotSide, LegJointName legJointName)
       {
          return legJoints.get(robotSide).get(legJointName);
       }
 
-      @Override public OneDoFJoint getArmJoint(RobotSide robotSide, ArmJointName armJointName)
+      @Override public OneDoFJointBasics getArmJoint(RobotSide robotSide, ArmJointName armJointName)
       {
          return armJoints.get(robotSide).get(armJointName);
       }
@@ -501,7 +501,7 @@ public class FullRobotModelTestTools
          int i = 0;
          if (limb == LimbName.ARM)
          {
-            for (OneDoFJoint joint : armJointIDsList.get(side))
+            for (OneDoFJointBasics joint : armJointIDsList.get(side))
             {
                joint.setQ(q[i]);
                i++;
@@ -509,7 +509,7 @@ public class FullRobotModelTestTools
          }
          else if (limb == LimbName.LEG)
          {
-            for (OneDoFJoint jnt : legJointIDsList.get(side))
+            for (OneDoFJointBasics jnt : legJointIDsList.get(side))
             {
                jnt.setQ(q[i]);
                i++;

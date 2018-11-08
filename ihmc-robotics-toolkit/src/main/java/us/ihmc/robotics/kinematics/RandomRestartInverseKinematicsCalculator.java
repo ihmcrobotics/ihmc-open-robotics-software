@@ -5,18 +5,17 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class RandomRestartInverseKinematicsCalculator implements InverseKinematicsCalculator
 {
    private final Random random = new Random(1984L);
    private final NumericalInverseKinematicsCalculator inverseKinematicsCalculator;
-   private final OneDoFJoint[] joints;;
+   private final OneDoFJointBasics[] joints;;
    private final int maxRestarts;
    private final double restartTolerance; 
    
@@ -26,7 +25,7 @@ public class RandomRestartInverseKinematicsCalculator implements InverseKinemati
    public RandomRestartInverseKinematicsCalculator(int maxRestarts, double restartTolerance, GeometricJacobian jacobian, NumericalInverseKinematicsCalculator inverseKinematicsCalculator)
    {
       this.inverseKinematicsCalculator = inverseKinematicsCalculator;
-      this.joints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      this.joints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
       this.maxRestarts = maxRestarts;
       this.restartTolerance = restartTolerance;
    }

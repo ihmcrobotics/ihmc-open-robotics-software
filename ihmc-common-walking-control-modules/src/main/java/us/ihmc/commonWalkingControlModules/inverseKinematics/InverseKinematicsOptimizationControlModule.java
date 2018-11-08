@@ -21,11 +21,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -40,12 +39,12 @@ public class InverseKinematicsOptimizationControlModule
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final WholeBodyControllerBoundCalculator boundCalculator;
 
-   private final OneDoFJoint[] oneDoFJoints;
+   private final OneDoFJointBasics[] oneDoFJoints;
    private final JointBasics[] jointsToOptimizeFor;
    private final int numberOfDoFs;
 
-   private final Map<OneDoFJoint, YoDouble> jointMaximumVelocities = new HashMap<>();
-   private final Map<OneDoFJoint, YoDouble> jointMinimumVelocities = new HashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointMaximumVelocities = new HashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointMinimumVelocities = new HashMap<>();
    private final DenseMatrix64F qDotMinMatrix, qDotMaxMatrix;
    private final JointIndexHandler jointIndexHandler;
 
@@ -69,7 +68,7 @@ public class InverseKinematicsOptimizationControlModule
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
          jointMaximumVelocities.put(joint, new YoDouble("qd_max_qp_" + joint.getName(), registry));
          jointMinimumVelocities.put(joint, new YoDouble("qd_min_qp_" + joint.getName(), registry));
       }
@@ -143,7 +142,7 @@ public class InverseKinematicsOptimizationControlModule
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
 
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
          double qDDotMin = qDotMinMatrix.get(jointIndex, 0);

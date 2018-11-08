@@ -17,8 +17,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
@@ -61,9 +61,9 @@ public class DRCInverseDynamicsCalculatorTestHelper
    private final SimulationConstructionSet scs;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
-   private final LinkedHashMap<OneDoFJoint, YoDouble> computedJointTorques = new LinkedHashMap<OneDoFJoint, YoDouble>();
-   private final LinkedHashMap<OneDoFJoint, YoDouble> computedJointAccelerations = new LinkedHashMap<OneDoFJoint, YoDouble>();
-   private final LinkedHashMap<OneDoFJoint, YoDouble> differenceJointTorques = new LinkedHashMap<OneDoFJoint, YoDouble>();
+   private final LinkedHashMap<OneDoFJointBasics, YoDouble> computedJointTorques = new LinkedHashMap<OneDoFJointBasics, YoDouble>();
+   private final LinkedHashMap<OneDoFJointBasics, YoDouble> computedJointAccelerations = new LinkedHashMap<OneDoFJointBasics, YoDouble>();
+   private final LinkedHashMap<OneDoFJointBasics, YoDouble> differenceJointTorques = new LinkedHashMap<OneDoFJointBasics, YoDouble>();
 
    private final YoFrameVector3D computedRootJointLinearAcceleration = new YoFrameVector3D("qdd_computed_root_linear", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D computedRootJointAngularAcceleration;
@@ -107,7 +107,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
+         OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
 
          YoDouble computedJointTorque = new YoDouble("tau_computed_" + oneDegreeOfFreedomJoint.getName(), registry);
          computedJointTorques.put(oneDoFJoint, computedJointTorque);
@@ -175,7 +175,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
+         OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
 
          double inverseDynamicsTorque = oneDoFJoint.getTau();
          oneDegreeOfFreedomJoint.setTau(inverseDynamicsTorque);
@@ -198,7 +198,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
          OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = oneDegreeOfFreedomJoints.get(i);
          OneDegreeOfFreedomJoint otherOneDegreeOfFreedomJoint = otherOneDegreeOfFreedomJoints.get(i);
 
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
+         OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
 
          double inverseDynamicsTorque = oneDoFJoint.getTau();
          oneDegreeOfFreedomJoint.setTau(inverseDynamicsTorque);
@@ -251,7 +251,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
+         OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
 
          double inverseDynamicsAcceleration = oneDoFJoint.getQdd();
          double simulatedRobotAcceleration = oneDegreeOfFreedomJoint.getQDDYoVariable().getDoubleValue();
@@ -311,7 +311,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
+         OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
 
          double inverseDynamicsTorque = oneDoFJoint.getTau();
          double simulatedRobotTorque = oneDegreeOfFreedomJoint.getTauYoVariable().getDoubleValue();
@@ -364,7 +364,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
+         OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
 
          oneDoFJoint.setQ(oneDegreeOfFreedomJoint.getQYoVariable().getDoubleValue());
          oneDoFJoint.setQd(oneDegreeOfFreedomJoint.getQDYoVariable().getDoubleValue());
@@ -422,7 +422,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
+         OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
 
          oneDegreeOfFreedomJoint.setQ(oneDoFJoint.getQ());
          oneDegreeOfFreedomJoint.setQd(oneDoFJoint.getQd());
@@ -442,7 +442,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
+         OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
          oneDoFJoint.setQdd(RandomNumbers.nextDouble(random, maxJointAcceleration));
       }
    }
@@ -463,7 +463,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
+         OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
 
          double robotJointAcceleration = oneDegreeOfFreedomJoint.getQDDYoVariable().getDoubleValue();
          oneDoFJoint.setQdd(robotJointAcceleration);
@@ -485,7 +485,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
          if (groundContactPointBasedWrenchCalculator instanceof GroundContactPointBasedWrenchCalculator)
          {
             Joint joint = groundContactPointBasedWrenchCalculator.getJoint();
-            OneDoFJoint oneDoFJoint;
+            OneDoFJointBasics oneDoFJoint;
             if (joint instanceof OneDegreeOfFreedomJoint)
                oneDoFJoint = fullRobotModel.getOneDoFJointByName(joint.getName());
             else
@@ -615,10 +615,10 @@ public class DRCInverseDynamicsCalculatorTestHelper
       double roll = RandomNumbers.nextDouble(random, Math.PI / 20.0);
       rootJoint.getJointPose().setOrientationYawPitchRoll(yaw, pitch, roll);
 
-      ArrayList<OneDoFJoint> oneDoFJoints = new ArrayList<OneDoFJoint>();
+      ArrayList<OneDoFJointBasics> oneDoFJoints = new ArrayList<OneDoFJointBasics>();
       fullRobotModel.getOneDoFJoints(oneDoFJoints);
 
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          double lowerLimit = oneDoFJoint.getJointLimitLower();
          double upperLimit = oneDoFJoint.getJointLimitUpper();

@@ -5,8 +5,8 @@ import java.util.List;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 
 public class CollisionShapeTester
@@ -17,8 +17,8 @@ public class CollisionShapeTester
    {
       addJoint(collissionBoxProvider, fullRobotModel.getRootJoint());
 
-      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
-      for (OneDoFJoint joint : joints)
+      OneDoFJointBasics[] joints = fullRobotModel.getOneDoFJoints();
+      for (OneDoFJointBasics joint : joints)
       {
          addJoint(collissionBoxProvider, joint);
       }

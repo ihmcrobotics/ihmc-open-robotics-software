@@ -1,14 +1,14 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public interface JointDesiredOutputListReadOnly
 {
-   boolean hasDataForJoint(OneDoFJoint joint);
+   boolean hasDataForJoint(OneDoFJointBasics joint);
 
-   OneDoFJoint getOneDoFJoint(int index);
+   OneDoFJointBasics getOneDoFJoint(int index);
 
-   JointDesiredOutputReadOnly getJointDesiredOutput(OneDoFJoint joint);
+   JointDesiredOutputReadOnly getJointDesiredOutput(OneDoFJointBasics joint);
 
    JointDesiredOutputReadOnly getJointDesiredOutputFromHash(int jointHashCode);
 
@@ -16,18 +16,18 @@ public interface JointDesiredOutputListReadOnly
 
    int getNumberOfJointsWithDesiredOutput();
 
-   default void insertDesiredTorquesIntoOneDoFJoints(OneDoFJoint[] oneDoFJoints)
+   default void insertDesiredTorquesIntoOneDoFJoints(OneDoFJointBasics[] oneDoFJoints)
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
          JointDesiredOutputReadOnly jointDesiredOutput = getJointDesiredOutput(joint);
          if (jointDesiredOutput != null)
             joint.setTau(jointDesiredOutput.getDesiredTorque());
       }
    }
 
-   default boolean hasControlModeForJoint(OneDoFJoint joint)
+   default boolean hasControlModeForJoint(OneDoFJointBasics joint)
    {
       JointDesiredOutputReadOnly jointDesiredOutput = getJointDesiredOutputFromHash(joint.hashCode());
       if (jointDesiredOutput == null)
@@ -45,7 +45,7 @@ public interface JointDesiredOutputListReadOnly
          return jointDesiredOutput.hasControlMode();
    }
 
-   default JointDesiredControlMode getJointControlMode(OneDoFJoint joint)
+   default JointDesiredControlMode getJointControlMode(OneDoFJointBasics joint)
    {
       JointDesiredOutputReadOnly jointDesiredOutput = getJointDesiredOutputFromHash(joint.hashCode());
       if (jointDesiredOutput == null)
@@ -61,7 +61,7 @@ public interface JointDesiredOutputListReadOnly
       return jointDesiredOutput.getControlMode();
    }
 
-   default boolean hasDesiredTorqueForJoint(OneDoFJoint joint)
+   default boolean hasDesiredTorqueForJoint(OneDoFJointBasics joint)
    {
       JointDesiredOutputReadOnly jointDesiredOutput = getJointDesiredOutputFromHash(joint.hashCode());
       if (jointDesiredOutput == null)
@@ -79,7 +79,7 @@ public interface JointDesiredOutputListReadOnly
          return jointDesiredOutput.hasDesiredTorque();
    }
 
-   default double getDesiredJointTorque(OneDoFJoint joint)
+   default double getDesiredJointTorque(OneDoFJointBasics joint)
    {
       JointDesiredOutputReadOnly jointDesiredOutput = getJointDesiredOutputFromHash(joint.hashCode());
       if (jointDesiredOutput == null)
@@ -95,7 +95,7 @@ public interface JointDesiredOutputListReadOnly
       return jointDesiredOutput.getDesiredTorque();
    }
 
-   default boolean hasDesiredPositionForJoint(OneDoFJoint joint)
+   default boolean hasDesiredPositionForJoint(OneDoFJointBasics joint)
    {
       JointDesiredOutputReadOnly jointDesiredOutput = getJointDesiredOutputFromHash(joint.hashCode());
       if (jointDesiredOutput == null)
@@ -113,7 +113,7 @@ public interface JointDesiredOutputListReadOnly
          return jointDesiredOutput.hasDesiredPosition();
    }
 
-   default double getDesiredJointPosition(OneDoFJoint joint)
+   default double getDesiredJointPosition(OneDoFJointBasics joint)
    {
       JointDesiredOutputReadOnly jointDesiredOutput = getJointDesiredOutputFromHash(joint.hashCode());
       if (jointDesiredOutput == null)
@@ -129,7 +129,7 @@ public interface JointDesiredOutputListReadOnly
       return jointDesiredOutput.getDesiredPosition();
    }
 
-   default boolean hasDesiredVelocityForJoint(OneDoFJoint joint)
+   default boolean hasDesiredVelocityForJoint(OneDoFJointBasics joint)
    {
       JointDesiredOutputReadOnly lowLevelJointData = getJointDesiredOutputFromHash(joint.hashCode());
       if (lowLevelJointData == null)
@@ -147,7 +147,7 @@ public interface JointDesiredOutputListReadOnly
          return lowLevelJointData.hasDesiredVelocity();
    }
 
-   default double getDesiredJointVelocity(OneDoFJoint joint)
+   default double getDesiredJointVelocity(OneDoFJointBasics joint)
    {
       JointDesiredOutputReadOnly jointDesiredOutput = getJointDesiredOutputFromHash(joint.hashCode());
       if (jointDesiredOutput == null)
@@ -163,7 +163,7 @@ public interface JointDesiredOutputListReadOnly
       return jointDesiredOutput.getDesiredVelocity();
    }
 
-   default boolean hasDesiredAcceleration(OneDoFJoint joint)
+   default boolean hasDesiredAcceleration(OneDoFJointBasics joint)
    {
       JointDesiredOutputReadOnly jointDesiredOutput = getJointDesiredOutputFromHash(joint.hashCode());
       if (jointDesiredOutput == null)
@@ -181,7 +181,7 @@ public interface JointDesiredOutputListReadOnly
          return jointDesiredOutput.hasDesiredAcceleration();
    }
 
-   default double getDesiredJointAcceleration(OneDoFJoint joint)
+   default double getDesiredJointAcceleration(OneDoFJointBasics joint)
    {
       JointDesiredOutputReadOnly jointDesiredOutput = getJointDesiredOutputFromHash(joint.hashCode());
       if (jointDesiredOutput == null)
@@ -197,7 +197,7 @@ public interface JointDesiredOutputListReadOnly
       return jointDesiredOutput.getDesiredAcceleration();
    }
 
-   default boolean pollResetJointIntegrators(OneDoFJoint joint)
+   default boolean pollResetJointIntegrators(OneDoFJointBasics joint)
    {
       JointDesiredOutputReadOnly lowLevelJointData = getJointDesiredOutputFromHash(joint.hashCode());
       if (lowLevelJointData == null)
@@ -213,7 +213,7 @@ public interface JointDesiredOutputListReadOnly
       return lowLevelJointData.pollResetIntegratorsRequest();
    }
 
-   default boolean peekResetJointIntegrators(OneDoFJoint joint)
+   default boolean peekResetJointIntegrators(OneDoFJointBasics joint)
    {
       JointDesiredOutputReadOnly lowLevelJointData = getJointDesiredOutputFromHash(joint.hashCode());
       if (lowLevelJointData == null)
@@ -229,7 +229,7 @@ public interface JointDesiredOutputListReadOnly
       return lowLevelJointData.peekResetIntegratorsRequest();
    }
 
-   static void throwJointNotRegisteredException(OneDoFJoint joint)
+   static void throwJointNotRegisteredException(OneDoFJointBasics joint)
    {
       throw new RuntimeException("The joint: " + joint.getName() + " has not been registered.");
    }

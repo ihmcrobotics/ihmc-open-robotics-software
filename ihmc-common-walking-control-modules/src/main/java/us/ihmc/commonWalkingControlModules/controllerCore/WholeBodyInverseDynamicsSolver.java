@@ -37,16 +37,15 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -68,14 +67,14 @@ public class WholeBodyInverseDynamicsSolver
    private final FloatingJointBasics rootJoint;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
-   private final Map<OneDoFJoint, YoDouble> jointAccelerationsSolution = new HashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointAccelerationsSolution = new HashMap<>();
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final WrenchVisualizer wrenchVisualizer;
    private final JointAccelerationIntegrationCalculator jointAccelerationIntegrationCalculator;
    private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
-   private final OneDoFJoint[] controlledOneDoFJoints;
+   private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final JointBasics[] jointsToOptimizeFor;
 
    private final YoFrameVector3D yoDesiredMomentumRateLinear;
@@ -114,7 +113,7 @@ public class WholeBodyInverseDynamicsSolver
 
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = controlledOneDoFJoints[i];
+         OneDoFJointBasics joint = controlledOneDoFJoints[i];
          YoDouble jointAccelerationSolution = new YoDouble("qdd_qp_" + joint.getName(), registry);
          jointAccelerationsSolution.put(joint, jointAccelerationSolution);
       }
@@ -234,7 +233,7 @@ public class WholeBodyInverseDynamicsSolver
 
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = controlledOneDoFJoints[i];
+         OneDoFJointBasics joint = controlledOneDoFJoints[i];
          jointAccelerationsSolution.get(joint).set(joint.getQdd());
       }
 
@@ -247,7 +246,7 @@ public class WholeBodyInverseDynamicsSolver
    {
       for (int i = 0; i < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
       {
-         OneDoFJoint joint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(i);
+         OneDoFJointBasics joint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(i);
          if (jointDesiredOutputList.hasDataForJoint(joint))
          {
             JointDesiredOutputReadOnly jointDesiredOutputOther = jointDesiredOutputList.getJointDesiredOutput(joint);

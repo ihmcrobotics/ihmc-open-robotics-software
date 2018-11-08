@@ -12,9 +12,9 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotController.RawSensorReader;
@@ -39,7 +39,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final FloatingJointBasics rootJoint;
    private final ReferenceFrames referenceFrames;
 
-   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
+   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>>();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoLong timestamp = new YoLong("timestamp", registry);
@@ -75,13 +75,13 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
       for (JointBasics joint : jointsArray)
       {
-         if (joint instanceof OneDoFJoint)
+         if (joint instanceof OneDoFJointBasics)
          {
-            OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
+            OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) joint;
             String name = oneDoFJoint.getName();
             OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = robot.getOneDegreeOfFreedomJoint(name);
 
-            ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDegreeOfFreedomJoint, oneDoFJoint);
+            ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>(oneDegreeOfFreedomJoint, oneDoFJoint);
             revoluteJoints.add(jointPair);
          }
       }
@@ -186,9 +186,9 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    {
       for (int i = 0; i < revoluteJoints.size(); i++)
       {
-         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = revoluteJoints.get(i);
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = revoluteJoints.get(i);
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
-         OneDoFJoint revoluteJoint = jointPair.getRight();
+         OneDoFJointBasics revoluteJoint = jointPair.getRight();
 
          if (pinJoint == null) continue;
 
@@ -223,25 +223,25 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    @Override
-   public double getJointPositionProcessedOutput(OneDoFJoint oneDoFJoint)
+   public double getJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getQ();
    }
 
    @Override
-   public double getJointVelocityProcessedOutput(OneDoFJoint oneDoFJoint)
+   public double getJointVelocityProcessedOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getQd();
    }
 
    @Override
-   public double getJointAccelerationProcessedOutput(OneDoFJoint oneDoFJoint)
+   public double getJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getQdd();
    }
 
    @Override
-   public double getJointTauProcessedOutput(OneDoFJoint oneDoFJoint)
+   public double getJointTauProcessedOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getTau();
    }
@@ -259,31 +259,31 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    @Override
-   public double getJointPositionRawOutput(OneDoFJoint oneDoFJoint)
+   public double getJointPositionRawOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getQ();
    }
 
    @Override
-   public double getJointVelocityRawOutput(OneDoFJoint oneDoFJoint)
+   public double getJointVelocityRawOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getQd();
    }
 
    @Override
-   public double getJointAccelerationRawOutput(OneDoFJoint oneDoFJoint)
+   public double getJointAccelerationRawOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getQdd();
    }
 
    @Override
-   public double getJointTauRawOutput(OneDoFJoint oneDoFJoint)
+   public double getJointTauRawOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getTau();
    }
 
    @Override
-   public boolean isJointEnabled(OneDoFJoint oneDoFJoint)
+   public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
    {
       return true; //oneDoFJoint.isEnabled();
    }

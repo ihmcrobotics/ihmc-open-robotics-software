@@ -14,9 +14,9 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
@@ -59,7 +59,7 @@ public class RegistrySendBufferTest
          int numberOfJoints = random.nextInt(4000);
          for(int j = 0; j < numberOfJoints; j++)
          {
-            OneDoFJoint sendJoint = new RevoluteJoint("Joint" + j, elevator, new Vector3D(1, 0, 0));
+            OneDoFJointBasics sendJoint = new RevoluteJoint("Joint" + j, elevator, new Vector3D(1, 0, 0));
             sendJoint.setQ(random.nextDouble() * Math.PI * 2.0);
             sendJoint.setQd(random.nextDouble() * Math.PI * 2.0);
             sendJointHolders.add(new OneDoFJointHolder(sendJoint));

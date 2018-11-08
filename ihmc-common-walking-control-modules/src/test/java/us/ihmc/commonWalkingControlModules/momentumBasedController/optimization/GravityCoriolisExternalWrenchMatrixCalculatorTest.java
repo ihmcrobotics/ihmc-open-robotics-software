@@ -19,9 +19,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
@@ -72,7 +72,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
 
       gravityZ = 9.81;
 
-      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
       JointBasics[] allJoints = jointIndexHandler.getIndexedJoints();
 

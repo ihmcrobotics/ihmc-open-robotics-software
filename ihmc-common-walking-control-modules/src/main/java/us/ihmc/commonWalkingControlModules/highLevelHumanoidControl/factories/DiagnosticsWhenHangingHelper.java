@@ -9,10 +9,10 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpPreserveYReferenceFrame;
@@ -26,7 +26,7 @@ public class DiagnosticsWhenHangingHelper
 {
    private static final boolean DEBUG = false;
 
-   private final OneDoFJoint parentJoint;
+   private final OneDoFJointBasics parentJoint;
    private final boolean isSpineJoint;
 
    private final CenterOfMassCalculator centerOfMassCalculator;
@@ -44,12 +44,12 @@ public class DiagnosticsWhenHangingHelper
 
    private final YoDouble torqueCorrectionAlpha;
 
-   public DiagnosticsWhenHangingHelper(OneDoFJoint parentJoint, boolean preserveY, YoVariableRegistry registry)
+   public DiagnosticsWhenHangingHelper(OneDoFJointBasics parentJoint, boolean preserveY, YoVariableRegistry registry)
    {
       this(parentJoint, preserveY, false, null, registry);
    }
 
-   public DiagnosticsWhenHangingHelper(OneDoFJoint parentJoint, boolean preserveY, boolean isSpineJoint,
+   public DiagnosticsWhenHangingHelper(OneDoFJointBasics parentJoint, boolean preserveY, boolean isSpineJoint,
          SideDependentList<JointBasics> topLegJointsIfSpine, YoVariableRegistry registry)
    {
       this.parentJoint = parentJoint;

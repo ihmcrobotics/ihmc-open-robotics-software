@@ -33,8 +33,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
@@ -99,7 +99,7 @@ public class WholeBodyVirtualModelControlSolver
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
       jointIndexHandler = toolbox.getJointIndexHandler();
-      OneDoFJoint[] controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
+      OneDoFJointBasics[] controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, JointDesiredControlMode.EFFORT);
 
@@ -204,7 +204,7 @@ public class WholeBodyVirtualModelControlSolver
       if (rootJoint != null)
          rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
 
-      for (OneDoFJoint joint : jointIndexHandler.getIndexedOneDoFJoints())
+      for (OneDoFJointBasics joint : jointIndexHandler.getIndexedOneDoFJoints())
       {
          int[] jointIndices = jointIndexHandler.getJointIndices(joint);
 

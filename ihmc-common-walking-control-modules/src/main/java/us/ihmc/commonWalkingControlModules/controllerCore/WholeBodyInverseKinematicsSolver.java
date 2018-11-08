@@ -21,9 +21,9 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOp
 import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOptimizationException;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -39,11 +39,11 @@ public class WholeBodyInverseKinematicsSolver
 
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
-   private final Map<OneDoFJoint, YoDouble> jointVelocitiesSolution = new HashMap<>();
-   private final Map<OneDoFJoint, YoDouble> jointPositionsSolution = new HashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointVelocitiesSolution = new HashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointPositionsSolution = new HashMap<>();
 
    private final FloatingJointBasics rootJoint;
-   private final OneDoFJoint[] controlledOneDoFJoints;
+   private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final JointBasics[] jointsToOptimizeFor;
    private final JointIndexHandler jointIndexHandler;
 
@@ -71,7 +71,7 @@ public class WholeBodyInverseKinematicsSolver
 
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = controlledOneDoFJoints[i];
+         OneDoFJointBasics joint = controlledOneDoFJoints[i];
          YoDouble jointVelocitySolution = new YoDouble("qd_qp_" + joint.getName(), registry);
          YoDouble jointPositionSolution = new YoDouble("q_qp_" + joint.getName(), registry);
          jointVelocitySolution.set(Double.NaN);
@@ -123,7 +123,7 @@ public class WholeBodyInverseKinematicsSolver
 
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = controlledOneDoFJoints[i];
+         OneDoFJointBasics joint = controlledOneDoFJoints[i];
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
          double desiredVelocity = jointVelocities.get(jointIndex, 0);
          lowLevelOneDoFJointDesiredDataHolder.setDesiredJointVelocity(joint, desiredVelocity);

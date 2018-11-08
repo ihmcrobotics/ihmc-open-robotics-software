@@ -62,9 +62,9 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessa
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -147,7 +147,7 @@ public class WalkingControllerTest
    private FullHumanoidRobotModel fullRobotModel;
    private HumanoidReferenceFrames referenceFrames;
    private PerfectSimulatedOutputWriter writer;
-   private OneDoFJoint[] oneDoFJoints;
+   private OneDoFJointBasics[] oneDoFJoints;
 
    private WalkingHighLevelHumanoidController walkingController;
    private WholeBodyControllerCore controllerCore;
@@ -260,12 +260,12 @@ public class WalkingControllerTest
       {
          RigidBodyBasics chest = fullRobotModel.getChest();
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-         OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(chest, hand);
+         OneDoFJointBasics[] joints = ScrewTools.createOneDoFJointPath(chest, hand);
          ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
 
          for (int jointIdx = 0; jointIdx < joints.length; jointIdx++)
          {
-            OneDoFJoint joint = joints[jointIdx];
+            OneDoFJointBasics joint = joints[jointIdx];
             double angle1 = MathTools.clamp(Math.toRadians(45.0), joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
             double angle2 = MathTools.clamp(0.0, joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
             OneDoFJointTrajectoryMessage jointTrajectoryMessage = message.getJointspaceTrajectory().getJointTrajectoryMessages().add();
@@ -327,7 +327,7 @@ public class WalkingControllerTest
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
          JointDesiredOutputReadOnly jointDesireds = controllerOutput.getJointDesiredOutput(joint);
 
          if (jointDesireds.hasDesiredAcceleration())
@@ -550,7 +550,7 @@ public class WalkingControllerTest
 
       writer = new PerfectSimulatedOutputWriter(robot, fullRobotModel);
 
-      for (OneDoFJoint revoluteJoint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics revoluteJoint : fullRobotModel.getOneDoFJoints())
       {
          String name = revoluteJoint.getName();
          OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(name);

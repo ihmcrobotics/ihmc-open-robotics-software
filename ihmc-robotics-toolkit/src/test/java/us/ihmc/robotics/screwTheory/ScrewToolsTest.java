@@ -25,13 +25,13 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PlanarJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.tools.JointStateType;
@@ -596,11 +596,11 @@ public class ScrewToolsTest
          assertEquals("Should be equal accelerations", jointAccelerations.get(i), sixDoFAccel.get(i), epsilon);
       }
 
-      OneDoFJoint joint;
+      OneDoFJointBasics joint;
 
       for(int i = 6; i < jointAccelerations.getNumRows() * jointAccelerations.getNumCols(); i++)
       {
-         joint = (OneDoFJoint)jointsArray[i - 5]; //1 - 6
+         joint = (OneDoFJointBasics)jointsArray[i - 5]; //1 - 6
          assertEquals("Should be equal accelerations", jointAccelerations.get(i), joint.getQdd(), epsilon);
       }
    }
@@ -628,11 +628,11 @@ public class ScrewToolsTest
          assertEquals("Should be equal velocitiess", jointVelocities.get(i), sixDoFVeloc.get(i), epsilon);
       }
 
-      OneDoFJoint joint;
+      OneDoFJointBasics joint;
 
       for(int i = 6; i < jointVelocities.getNumRows() * jointVelocities.getNumCols(); i++)
       {
-         joint = (OneDoFJoint)jointsArray[i - 5]; //1 - 6
+         joint = (OneDoFJointBasics)jointsArray[i - 5]; //1 - 6
          assertEquals("Should be equal velocities", jointVelocities.get(i), joint.getQd(), epsilon);
       }
    }

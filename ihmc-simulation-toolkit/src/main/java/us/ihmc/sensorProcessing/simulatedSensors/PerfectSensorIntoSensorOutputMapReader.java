@@ -13,9 +13,9 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.robotController.RawSensorReader;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -42,8 +42,8 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
    private final String name;
    private final FloatingRootJointRobot robot;
 
-   private final HashMap<OneDegreeOfFreedomJoint, OneDoFJoint> reverseJointLookupMap = new HashMap<>();
-   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
+   private final HashMap<OneDegreeOfFreedomJoint, OneDoFJointBasics> reverseJointLookupMap = new HashMap<>();
+   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>>();
 
    private final ArrayList<ImmutablePair<IMUMount, IMUSensor>> imus = new ArrayList<>();
 
@@ -101,13 +101,13 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
 
       for (JointBasics joint : jointsArray)
       {
-         if (joint instanceof OneDoFJoint)
+         if (joint instanceof OneDoFJointBasics)
          {
-            OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
+            OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) joint;
             String name = oneDoFJoint.getName();
             OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = robot.getOneDegreeOfFreedomJoint(name);
 
-            ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDegreeOfFreedomJoint,
+            ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>(oneDegreeOfFreedomJoint,
                                                                                                                                     oneDoFJoint);
             revoluteJoints.add(jointPair);
             reverseJointLookupMap.put(oneDegreeOfFreedomJoint, oneDoFJoint);
@@ -221,9 +221,9 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
    {
       for (int i = 0; i < revoluteJoints.size(); i++)
       {
-         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = revoluteJoints.get(i);
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = revoluteJoints.get(i);
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
-         OneDoFJoint revoluteJoint = jointPair.getRight();
+         OneDoFJointBasics revoluteJoint = jointPair.getRight();
 
          if (pinJoint == null)
             continue;

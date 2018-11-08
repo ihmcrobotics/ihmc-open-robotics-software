@@ -12,7 +12,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
@@ -58,9 +58,9 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
    }
 
 
-   private ArrayList<OneDoFJoint> getArmJoints()
+   private ArrayList<OneDoFJointBasics> getArmJoints()
    {
-      ArrayList<OneDoFJoint> armJoints = new ArrayList<OneDoFJoint>();
+      ArrayList<OneDoFJointBasics> armJoints = new ArrayList<OneDoFJointBasics>();
       for (int i = 0; i < joints.length; i++)
       {
          if (joints[i].getName().matches(".*arm.*"))

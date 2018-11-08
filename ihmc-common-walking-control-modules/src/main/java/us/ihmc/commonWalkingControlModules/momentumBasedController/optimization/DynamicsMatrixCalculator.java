@@ -8,18 +8,17 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.FloatingBaseRigidBodyDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class DynamicsMatrixCalculator
 {
@@ -365,7 +364,7 @@ public class DynamicsMatrixCalculator
 
    public void extractTorqueMatrix(JointBasics[] joints, DenseMatrix64F torqueMatrixToPack)
    {
-      OneDoFJoint[] filteredJoints = MultiBodySystemTools.filterJoints(joints, RevoluteJoint.class);
+      OneDoFJointBasics[] filteredJoints = MultiBodySystemTools.filterJoints(joints, RevoluteJoint.class);
       int bodyDoFs = MultiBodySystemTools.computeDegreesOfFreedom(filteredJoints);
 
       int startIndex = 0;

@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -23,9 +22,9 @@ import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSextant;
@@ -87,7 +86,7 @@ public class HexapodSimulationController implements RobotController
       WholeBodyControlCoreToolbox toolbox = makeControllerToolbox();
       this.controllerCore = new WholeBodyControllerCore(toolbox, feedbackControlCommandList, lowLevelControllerCoreOutput, registry);
 
-      for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
          YoGraphicReferenceFrame frame = new YoGraphicReferenceFrame(joint.getFrameBeforeJoint(), registry, true, 0.1);
          referenceFrameGraphics.add(frame);
@@ -106,7 +105,7 @@ public class HexapodSimulationController implements RobotController
          footRigidBodies.set(robotSextant, endEffector);
 
          String jointNameBeforeFoot = jointMap.getJointNameBeforeFoot(robotSextant);
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointNameBeforeFoot);
+         OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointNameBeforeFoot);
          ReferenceFrame soleFrame = referenceFrames.getFootFrame(robotSextant);
          for (GroundContactPoint groundContactPoint : groundContactPoints)
          {

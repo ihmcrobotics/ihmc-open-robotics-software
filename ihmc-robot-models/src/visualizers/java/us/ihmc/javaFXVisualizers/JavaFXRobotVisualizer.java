@@ -10,7 +10,7 @@ import javafx.scene.Node;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -25,7 +25,7 @@ public class JavaFXRobotVisualizer
    private GraphicsRobot graphicsRobot;
    private JavaFXGraphics3DNode robotRootNode;
    private final FullHumanoidRobotModel fullRobotModel;
-   private final OneDoFJoint[] allJoints;
+   private final OneDoFJointBasics[] allJoints;
    private final int jointNameHash;
    private final AtomicReference<RigidBodyTransform> newRootJointPoseReference = new AtomicReference<>(null);
    private final AtomicReference<float[]> newJointConfigurationReference = new AtomicReference<>(null);
@@ -73,10 +73,10 @@ public class JavaFXRobotVisualizer
       };
    }
 
-   public static int calculateJointNameHash(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
+   public static int calculateJointNameHash(OneDoFJointBasics[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
    {
       CRC32 crc = new CRC32();
-      for (OneDoFJoint joint : joints)
+      for (OneDoFJointBasics joint : joints)
       {
          crc.update(joint.getName().getBytes());
       }

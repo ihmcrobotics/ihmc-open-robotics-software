@@ -26,6 +26,7 @@ import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.JointStateType;
@@ -222,7 +223,7 @@ public class TwistCalculatorTest
 
       int numberOfJoints = 10;
       List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
-      List<OneDoFJoint> jointsInFuture = Arrays.asList(ScrewTools.cloneOneDoFJointPath(joints.toArray(new OneDoFJoint[numberOfJoints])));
+      List<OneDoFJointBasics> jointsInFuture = Arrays.asList(ScrewTools.cloneOneDoFJointPath(joints.toArray(new OneDoFJointBasics[numberOfJoints])));
 
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
 
@@ -246,7 +247,7 @@ public class TwistCalculatorTest
 
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {
-            OneDoFJoint joint = joints.get(jointIndex);
+            OneDoFJointBasics joint = joints.get(jointIndex);
             RigidBodyBasics body = joint.getSuccessor();
             Twist actualTwist = new Twist();
             twistCalculator.getTwistOfBody(body, actualTwist);
@@ -268,7 +269,7 @@ public class TwistCalculatorTest
 
       int numberOfJoints = 100;
       List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointTree(random, numberOfJoints);
-      List<OneDoFJoint> jointsInFuture = Arrays.asList(ScrewTools.cloneOneDoFJointPath(joints.toArray(new OneDoFJoint[numberOfJoints])));
+      List<OneDoFJointBasics> jointsInFuture = Arrays.asList(ScrewTools.cloneOneDoFJointPath(joints.toArray(new OneDoFJointBasics[numberOfJoints])));
 
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
 
@@ -292,7 +293,7 @@ public class TwistCalculatorTest
 
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {
-            OneDoFJoint joint = joints.get(jointIndex);
+            OneDoFJointBasics joint = joints.get(jointIndex);
             RigidBodyBasics body = joint.getSuccessor();
             Twist actualTwist = new Twist();
             twistCalculator.getTwistOfBody(body, actualTwist);

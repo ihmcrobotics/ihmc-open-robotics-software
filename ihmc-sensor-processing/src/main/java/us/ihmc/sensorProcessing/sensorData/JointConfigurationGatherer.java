@@ -5,11 +5,11 @@ import java.util.Arrays;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -20,7 +20,7 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 
 public class JointConfigurationGatherer
 {
-   private final ArrayList<OneDoFJoint> joints = new ArrayList<>();
+   private final ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
 
    private final FloatingJointBasics rootJoint;
    private final Vector3D rootTranslation = new Vector3D();
@@ -112,9 +112,9 @@ public class JointConfigurationGatherer
       }
    }
 
-   public OneDoFJoint[] getJoints()
+   public OneDoFJointBasics[] getJoints()
    {
-      return joints.toArray(new OneDoFJoint[joints.size()]);
+      return joints.toArray(new OneDoFJointBasics[joints.size()]);
    }
 
    public ForceSensorDefinition[] getForceSensorDefinitions()

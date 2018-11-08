@@ -16,8 +16,8 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -179,7 +179,7 @@ public class VirtualModelMomentumControllerTestHelper
 
       private final SCSRobotFromInverseDynamicsRobotModel scsRobot;
       private final FullRobotModel controllerModel;
-      private final OneDoFJoint[] controlledJoints;
+      private final OneDoFJointBasics[] controlledJoints;
 
       private final VirtualModelMomentumController virtualModelController;
 
@@ -190,7 +190,7 @@ public class VirtualModelMomentumControllerTestHelper
       private List<RigidBodyBasics> endEffectors = new ArrayList<>();
       private final SelectionMatrix6D selectionMatrix;
 
-      DummyArmMomentumController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJoint[] controlledJoints,
+      DummyArmMomentumController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJointBasics[] controlledJoints,
                                         List<VirtualModelControllerTestHelper.ForcePointController> forcePointControllers,
                                         VirtualModelMomentumController virtualModelController, List<RigidBodyBasics> endEffectors,
                                         List<YoFixedFrameWrench> yoDesiredWrenches, SelectionMatrix6D selectionMatrix)
@@ -244,7 +244,7 @@ public class VirtualModelMomentumControllerTestHelper
          DenseMatrix64F jointTorques = virtualModelControlSolution.getJointTorques();
          for (int i = 0; i < controlledJoints.length; i++)
          {
-            OneDoFJoint joint = controlledJoints[i];
+            OneDoFJointBasics joint = controlledJoints[i];
             double tau = jointTorques.get(i, 0);
             yoJointTorques.get(joint).set(tau);
             joint.setTau(tau);

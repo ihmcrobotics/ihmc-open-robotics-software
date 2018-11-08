@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -123,12 +123,12 @@ public class HumanoidControllerWarumupTools
    {
       RigidBodyBasics chest = fullRobotModel.getChest();
       RigidBodyBasics hand = fullRobotModel.getHand(side);
-      OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(chest, hand);
+      OneDoFJointBasics[] joints = ScrewTools.createOneDoFJointPath(chest, hand);
       ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(side);
 
       for (int jointIdx = 0; jointIdx < joints.length; jointIdx++)
       {
-         OneDoFJoint joint = joints[jointIdx];
+         OneDoFJointBasics joint = joints[jointIdx];
          double angle1 = MathTools.clamp(Math.toRadians(45.0), joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
          double angle2 = MathTools.clamp(0.0, joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
          OneDoFJointTrajectoryMessage jointTrajectoryMessage = message.getJointspaceTrajectory().getJointTrajectoryMessages().add();

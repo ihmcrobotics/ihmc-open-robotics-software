@@ -2,11 +2,11 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.stream.Stream;
 
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PlanarJoint;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.SphericalJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class InverseDynamicsJointStateChecksum
@@ -36,8 +36,8 @@ public class InverseDynamicsJointStateChecksum
          return newJointChecksumUpdater(checksum, (SixDoFJoint) joint);
       if (joint instanceof PlanarJoint)
          return newJointChecksumUpdater(checksum, (PlanarJoint) joint);
-      if (joint instanceof OneDoFJoint)
-         return newJointChecksumUpdater(checksum, (OneDoFJoint) joint);
+      if (joint instanceof OneDoFJointBasics)
+         return newJointChecksumUpdater(checksum, (OneDoFJointBasics) joint);
       if (joint instanceof SphericalJoint)
          return newJointChecksumUpdater(checksum, (SphericalJoint) joint);
       throw new RuntimeException("Unhandled type of joint: " + joint.getClass().getSimpleName());
@@ -70,7 +70,7 @@ public class InverseDynamicsJointStateChecksum
       };
    }
 
-   public static ChecksumUpdater newJointChecksumUpdater(GenericCRC32 checksum, OneDoFJoint joint)
+   public static ChecksumUpdater newJointChecksumUpdater(GenericCRC32 checksum, OneDoFJointBasics joint)
    {
       return () -> {
          checksum.update(joint.getQ());

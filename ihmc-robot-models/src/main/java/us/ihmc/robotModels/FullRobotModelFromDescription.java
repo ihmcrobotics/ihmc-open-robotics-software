@@ -15,12 +15,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
@@ -38,7 +38,6 @@ import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -48,8 +47,8 @@ public class FullRobotModelFromDescription implements FullRobotModel
    protected final RobotDescription description;
 
    protected final JointNameMap sdfJointNameMap;
-   protected final EnumMap<NeckJointName, OneDoFJoint> neckJoints = new EnumMap<>(NeckJointName.class);
-   protected final EnumMap<SpineJointName, OneDoFJoint> spineJoints = new EnumMap<>(SpineJointName.class);
+   protected final EnumMap<NeckJointName, OneDoFJointBasics> neckJoints = new EnumMap<>(NeckJointName.class);
+   protected final EnumMap<SpineJointName, OneDoFJointBasics> spineJoints = new EnumMap<>(SpineJointName.class);
    protected final String[] sensorLinksToTrack;
 //   protected final SDFLinkHolder rootLink;
    protected RigidBodyBasics head;
@@ -58,7 +57,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
    private final RigidBodyBasics elevator;
    protected final SixDoFJoint rootJoint;
    private final RigidBodyBasics rootLink;
-   private final LinkedHashMap<String, OneDoFJoint> oneDoFJoints = new LinkedHashMap<String, OneDoFJoint>();
+   private final LinkedHashMap<String, OneDoFJointBasics> oneDoFJoints = new LinkedHashMap<String, OneDoFJointBasics>();
    private final ArrayList<IMUDefinition> imuDefinitions = new ArrayList<IMUDefinition>();
    private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
    private final ArrayList<ContactSensorDefinition> contactSensorDefinitions = new ArrayList<ContactSensorDefinition>();
@@ -204,14 +203,14 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    /** {@inheritDoc} */
    @Override
-   public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
+   public OneDoFJointBasics getSpineJoint(SpineJointName spineJointName)
    {
       return spineJoints.get(spineJointName);
    }
 
    /** {@inheritDoc} */
    @Override
-   public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
+   public OneDoFJointBasics getNeckJoint(NeckJointName neckJointName)
    {
       return neckJoints.get(neckJointName);
    }
@@ -239,43 +238,43 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    /** {@inheritDoc} */
    @Override
-   public OneDoFJoint[] getOneDoFJoints()
+   public OneDoFJointBasics[] getOneDoFJoints()
    {
-      OneDoFJoint[] oneDoFJointsAsArray = new OneDoFJoint[oneDoFJoints.size()];
+      OneDoFJointBasics[] oneDoFJointsAsArray = new OneDoFJointBasics[oneDoFJoints.size()];
       oneDoFJoints.values().toArray(oneDoFJointsAsArray);
       return oneDoFJointsAsArray;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+   public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
    {
-      Collection<OneDoFJoint> values = oneDoFJoints.values();
+      Collection<OneDoFJointBasics> values = oneDoFJoints.values();
       oneDoFJointsToPack.addAll(values);
    }
 
    /** {@inheritDoc} */
    @Override
-   public OneDoFJoint[] getControllableOneDoFJoints()
+   public OneDoFJointBasics[] getControllableOneDoFJoints()
    {
       return getOneDoFJoints();
    }
 
    /** {@inheritDoc} */
    @Override
-   public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+   public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
    {
       getOneDoFJoints(oneDoFJointsToPack);
    }
 
    @Override
-   public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+   public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
    {
       return Collections.unmodifiableMap(oneDoFJoints);
    }
 
    @Override
-   public OneDoFJoint getOneDoFJointByName(String name)
+   public OneDoFJointBasics getOneDoFJointByName(String name)
    {
       return oneDoFJoints.get(name);
    }
@@ -384,7 +383,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
       Vector3D offset = new Vector3D();
       joint.getOffsetFromParentJoint(offset);
 
-      OneDoFJoint inverseDynamicsJoint;
+      OneDoFJointBasics inverseDynamicsJoint;
 
       if (joint instanceof PinJointDescription)
       {
@@ -447,7 +446,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
       }
    }
 
-   protected void mapRigidBody(JointDescription joint, OneDoFJoint inverseDynamicsJoint, RigidBodyBasics rigidBody)
+   protected void mapRigidBody(JointDescription joint, OneDoFJointBasics inverseDynamicsJoint, RigidBodyBasics rigidBody)
    {
       if (rigidBody.getName().equals(sdfJointNameMap.getHeadName()))
       {
@@ -482,16 +481,16 @@ public class FullRobotModelFromDescription implements FullRobotModel
    }
 
    @Override
-   public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
+   public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
    {
       oneDoFJointsToPack.clear();
       JointBasics parent = oneDoFJointAtEndOfChain;
 
       while (parent != rootJoint)
       {
-         if (parent instanceof OneDoFJoint)
+         if (parent instanceof OneDoFJointBasics)
          {
-            oneDoFJointsToPack.add((OneDoFJoint) parent);
+            oneDoFJointsToPack.add((OneDoFJointBasics) parent);
          }
 
          parent = parent.getPredecessor().getParentJoint();

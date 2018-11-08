@@ -7,9 +7,9 @@ import com.esotericsoftware.minlog.Log;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
@@ -92,9 +92,9 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
 
       for (JointBasics joint : ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()))
       {
-         if (joint instanceof OneDoFJoint)
+         if (joint instanceof OneDoFJointBasics)
          {
-            OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
+            OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) joint;
             stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
             if (effortJointHandles.containsKey(joint.getName()))
             {

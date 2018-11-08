@@ -24,7 +24,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.ihmcPerception.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -93,7 +93,7 @@ public class MultisenseTestBenchWithZeroPoseModuleNetworkProcessor implements Pa
       rosJointStatePublisher = new RosJointStatePublisher(false);
 
       fullRobotModel = robotModel.createFullRobotModel();
-      OneDoFJoint[] controllableOneDoFJoints = fullRobotModel.getControllableOneDoFJoints();
+      OneDoFJointBasics[] controllableOneDoFJoints = fullRobotModel.getControllableOneDoFJoints();
 
       jointNamesList = new ArrayList<>(controllableOneDoFJoints.length);
 

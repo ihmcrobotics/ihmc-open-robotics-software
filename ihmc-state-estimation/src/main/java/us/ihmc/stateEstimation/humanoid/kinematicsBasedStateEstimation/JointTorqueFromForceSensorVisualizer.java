@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -25,7 +25,7 @@ public class JointTorqueFromForceSensorVisualizer
    private final List<RigidBodyBasics> allRigidBodies;
    private final Map<RigidBodyBasics, FootSwitchInterface> footSwitches;
    private final Map<RigidBodyBasics, GeometricJacobian> jacobians;
-   private final Map<OneDoFJoint, YoDouble> jointTorques;
+   private final Map<OneDoFJointBasics, YoDouble> jointTorques;
 
    public JointTorqueFromForceSensorVisualizer(Map<RigidBodyBasics, FootSwitchInterface> footSwitches, YoVariableRegistry parentRegistry)
    {
@@ -38,12 +38,12 @@ public class JointTorqueFromForceSensorVisualizer
       for (RigidBodyBasics rigidBody : allRigidBodies)
       {
          RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
-         OneDoFJoint[] oneDoFJoints = ScrewTools.createOneDoFJointPath(rootBody, rigidBody);
+         OneDoFJointBasics[] oneDoFJoints = ScrewTools.createOneDoFJointPath(rootBody, rigidBody);
 
          GeometricJacobian jacobian = new GeometricJacobian(oneDoFJoints, rigidBody.getBodyFixedFrame());
          jacobians.put(rigidBody, jacobian);
 
-         for (OneDoFJoint joint : oneDoFJoints)
+         for (OneDoFJointBasics joint : oneDoFJoints)
          {
             if (!jointTorques.containsKey(joint))
             {
@@ -78,7 +78,7 @@ public class JointTorqueFromForceSensorVisualizer
 
          for (int j = 0; j < joints.length; j++)
          {
-            OneDoFJoint joint = (OneDoFJoint) joints[j];
+            OneDoFJointBasics joint = (OneDoFJointBasics) joints[j];
             jointTorques.get(joint).set(jointTorquesMatrix.get(j, 0));
          }
       }

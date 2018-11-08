@@ -1,9 +1,9 @@
 package us.ihmc.valkyrieRosControl.sliderBoardControl;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -13,7 +13,7 @@ class PositionJointHolder extends ValkyrieSliderBoardJointHolder
    private final PositionJointHandle handle;
    private final DeltaLimitedYoVariable positionStepSizeLimiter;
 
-   public PositionJointHolder(ValkyrieRosControlSliderBoard valkyrieRosControlSliderBoard, OneDoFJoint joint, PositionJointHandle handle,
+   public PositionJointHolder(ValkyrieRosControlSliderBoard valkyrieRosControlSliderBoard, OneDoFJointBasics joint, PositionJointHandle handle,
          YoVariableRegistry parentRegistry, double dt)
    {
       super(valkyrieRosControlSliderBoard, joint, parentRegistry, dt);

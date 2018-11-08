@@ -10,12 +10,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PlanarJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
@@ -38,10 +38,10 @@ public class RobotTools
       private final FloatingJointBasics idFloatingJoint;
       private final FloatingSCSJoint scsFloatingJoint;
 
-      private final LinkedHashMap<OneDoFJoint, OneDegreeOfFreedomJoint> idToSCSJointMap = new LinkedHashMap<OneDoFJoint, OneDegreeOfFreedomJoint>();
-      private final LinkedHashMap<OneDegreeOfFreedomJoint, OneDoFJoint> scsToIDJointMap = new LinkedHashMap<OneDegreeOfFreedomJoint, OneDoFJoint>();
+      private final LinkedHashMap<OneDoFJointBasics, OneDegreeOfFreedomJoint> idToSCSJointMap = new LinkedHashMap<OneDoFJointBasics, OneDegreeOfFreedomJoint>();
+      private final LinkedHashMap<OneDegreeOfFreedomJoint, OneDoFJointBasics> scsToIDJointMap = new LinkedHashMap<OneDegreeOfFreedomJoint, OneDoFJointBasics>();
 
-      private final ArrayList<OneDoFJoint> allIDOneDoFJoints;
+      private final ArrayList<OneDoFJointBasics> allIDOneDoFJoints;
       private final ArrayList<OneDegreeOfFreedomJoint> allSCSOneDoFJoints;
 
       // Temporary variables
@@ -82,8 +82,8 @@ public class RobotTools
             scsFloatingJoint = null;
             idFloatingJoint = null;
 
-            idToSCSJointMap.put((OneDoFJoint) rootJoint, (OneDegreeOfFreedomJoint) scsRootJoint);
-            scsToIDJointMap.put((OneDegreeOfFreedomJoint) scsRootJoint, (OneDoFJoint) rootJoint);
+            idToSCSJointMap.put((OneDoFJointBasics) rootJoint, (OneDegreeOfFreedomJoint) scsRootJoint);
+            scsToIDJointMap.put((OneDegreeOfFreedomJoint) scsRootJoint, (OneDoFJointBasics) rootJoint);
          }
          else
          {
@@ -92,7 +92,7 @@ public class RobotTools
 
          allSCSOneDoFJoints = new ArrayList<OneDegreeOfFreedomJoint>();
          getAllOneDegreeOfFreedomJoints(allSCSOneDoFJoints);
-         allIDOneDoFJoints = new ArrayList<OneDoFJoint>(Arrays.asList(MultiBodySystemTools.filterJoints(ScrewTools.computeSubtreeJoints(rootJoint.getPredecessor()), OneDoFJoint.class)));
+         allIDOneDoFJoints = new ArrayList<OneDoFJointBasics>(Arrays.asList(MultiBodySystemTools.filterJoints(ScrewTools.computeSubtreeJoints(rootJoint.getPredecessor()), OneDoFJointBasics.class)));
 
          if (allIDOneDoFJoints.size() != allSCSOneDoFJoints.size())
             throw new RuntimeException("Should not get there...");
@@ -107,7 +107,7 @@ public class RobotTools
 
          for (int i = 0; i < allIDOneDoFJoints.size(); i++)
          {
-            OneDoFJoint idJoint = allIDOneDoFJoints.get(i);
+            OneDoFJointBasics idJoint = allIDOneDoFJoints.get(i);
 
             idToSCSJointMap.put(idJoint, scsJointsByName.get(idJoint.getName()));
             scsToIDJointMap.put(scsJointsByName.get(idJoint.getName()), idJoint);
@@ -124,7 +124,7 @@ public class RobotTools
 
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
          {
-            OneDoFJoint idJoint = scsToIDJointMap.get(scsJoint);
+            OneDoFJointBasics idJoint = scsToIDJointMap.get(scsJoint);
             scsJoint.setQ(idJoint.getQ());
          }
       }
@@ -145,7 +145,7 @@ public class RobotTools
 
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
          {
-            OneDoFJoint idJoint = scsToIDJointMap.get(scsJoint);
+            OneDoFJointBasics idJoint = scsToIDJointMap.get(scsJoint);
             scsJoint.setQd(idJoint.getQd());
          }
       }
@@ -161,7 +161,7 @@ public class RobotTools
 
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
          {
-            OneDoFJoint idJoint = scsToIDJointMap.get(scsJoint);
+            OneDoFJointBasics idJoint = scsToIDJointMap.get(scsJoint);
             idJoint.setQ(scsJoint.getQYoVariable().getDoubleValue());
          }
       }
@@ -181,7 +181,7 @@ public class RobotTools
 
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
          {
-            OneDoFJoint idJoint = scsToIDJointMap.get(scsJoint);
+            OneDoFJointBasics idJoint = scsToIDJointMap.get(scsJoint);
             idJoint.setQd(scsJoint.getQDYoVariable().getDoubleValue());
          }
       }
@@ -190,7 +190,7 @@ public class RobotTools
       {
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
          {
-            OneDoFJoint idJoint = scsToIDJointMap.get(scsJoint);
+            OneDoFJointBasics idJoint = scsToIDJointMap.get(scsJoint);
             scsJoint.setTau(idJoint.getTau());
          }
       }

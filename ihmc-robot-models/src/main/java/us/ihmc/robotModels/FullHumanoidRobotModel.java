@@ -1,7 +1,7 @@
 package us.ihmc.robotModels;
 
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LimbName;
@@ -23,11 +23,11 @@ public interface FullHumanoidRobotModel extends FullLeggedRobotModel<RobotSide>
    RigidBodyBasics getPelvis();
 
    /**
-    * Return the {@link OneDoFJoint} describing the the corresponding arm joint.
+    * Return the {@link OneDoFJointBasics} describing the the corresponding arm joint.
     * @param robotSide Refers to which arm the joint belongs to (assuming there is only one left arm and one right arm).
     * @param armJointName Refers to the joint's name.
     */
-   OneDoFJoint getArmJoint(RobotSide robotSide, ArmJointName armJointName);
+   OneDoFJointBasics getArmJoint(RobotSide robotSide, ArmJointName armJointName);
 
    /**
     * Returns the {@link RigidBodyBasics} describing the left or right hand of this robot.

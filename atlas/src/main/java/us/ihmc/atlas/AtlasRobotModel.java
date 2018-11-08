@@ -43,7 +43,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -320,7 +320,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
          for (ArmJointName armJointName : armJointNames)
          {
-            OneDoFJoint armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
+            OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
             if (armJoint == null)
                continue;
 

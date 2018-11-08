@@ -11,10 +11,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -38,7 +38,7 @@ public class SphereRobotModel implements FullRobotModel
    private final RigidBodyBasics body;
 
    private final SixDoFJoint floatingJoint;
-   private final OneDoFJoint[] oneDoFJoints;
+   private final OneDoFJointBasics[] oneDoFJoints;
 
    private final ReferenceFrame centerOfMassFrame;
 
@@ -95,46 +95,46 @@ public class SphereRobotModel implements FullRobotModel
       return null;
    }
 
-   public OneDoFJoint[] getOneDoFJoints()
+   public OneDoFJointBasics[] getOneDoFJoints()
    {
       return oneDoFJoints;
    }
 
-   public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+   public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
    {
       return null;
    }
 
-   @Override public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
+   @Override public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
    {
 
    }
 
-   public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+   public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
    {
-      List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
+      List<OneDoFJointBasics> list = Arrays.asList(oneDoFJoints);
 
       for (int i = 0; i < list.size(); i++)
          oneDoFJointsToPack.set(i, list.get(i));
    }
 
-   @Override public OneDoFJoint getOneDoFJointByName(String name)
+   @Override public OneDoFJointBasics getOneDoFJointByName(String name)
    {
       return null;
    }
 
    @Override
-   public OneDoFJoint[] getControllableOneDoFJoints()
+   public OneDoFJointBasics[] getControllableOneDoFJoints()
    {
       return null;
    }
 
    @Override
-   public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
+   public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
    {
    }
 
-   public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
+   public OneDoFJointBasics getSpineJoint(SpineJointName spineJointName)
    {
       return null;
    }
@@ -144,7 +144,7 @@ public class SphereRobotModel implements FullRobotModel
       return null;
    }
 
-   public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
+   public OneDoFJointBasics getNeckJoint(NeckJointName neckJointName)
    {
       return null;
    }

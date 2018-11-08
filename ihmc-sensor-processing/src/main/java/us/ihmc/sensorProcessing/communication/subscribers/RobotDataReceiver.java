@@ -11,8 +11,8 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
@@ -27,7 +27,7 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
    protected final FloatingJointBasics rootJoint;
    private boolean frameshaveBeenSetUp = false;
    private final ForceSensorDataHolder forceSensorDataHolder;
-   private final OneDoFJoint[] allJoints;
+   private final OneDoFJointBasics[] allJoints;
    private final int jointNameHash;
 
    public RobotDataReceiver(FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolder)
@@ -35,7 +35,7 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
       this(fullRobotModel, fullRobotModel.getOneDoFJoints(), forceSensorDataHolder);
    }
    
-   protected RobotDataReceiver(FullRobotModel fullRobotModel, OneDoFJoint[] allJoints, ForceSensorDataHolder forceSensorDataHolder)
+   protected RobotDataReceiver(FullRobotModel fullRobotModel, OneDoFJointBasics[] allJoints, ForceSensorDataHolder forceSensorDataHolder)
    {
       this.allJoints = allJoints; 
       jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());

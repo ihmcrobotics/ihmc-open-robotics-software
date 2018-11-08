@@ -24,7 +24,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
@@ -48,7 +48,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
 
    private RigidBodyBasics head;
    private RigidBodyBasics chest;
-   private OneDoFJoint[] neckJoints;
+   private OneDoFJointBasics[] neckJoints;
    private int numberOfJoints;
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 29.0)

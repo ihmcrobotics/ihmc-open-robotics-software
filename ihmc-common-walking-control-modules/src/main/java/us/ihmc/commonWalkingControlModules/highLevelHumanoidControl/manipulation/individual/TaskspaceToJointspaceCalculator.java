@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
@@ -59,8 +59,8 @@ public class TaskspaceToJointspaceCalculator
    private final FramePose3D desiredControlFramePose = new FramePose3D();
    private final Twist desiredControlFrameTwist = new Twist();
 
-   private final OneDoFJoint[] originalJoints;
-   private final OneDoFJoint[] localJoints;
+   private final OneDoFJointBasics[] originalJoints;
+   private final OneDoFJointBasics[] localJoints;
    private final ReferenceFrame originalBaseFrame;
    private final ReferenceFrame localBaseFrame;
    private final ReferenceFrame originalBaseParentJointFrame;
@@ -148,7 +148,7 @@ public class TaskspaceToJointspaceCalculator
       localBaseFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(localBaseFrameName, localBaseParentJointFrame, transformToParent);
 
       originalJoints = ScrewTools.createOneDoFJointPath(base, endEffector);
-      localJoints = ScrewTools.cloneJointPathDisconnectedFromOriginalRobot(originalJoints, OneDoFJoint.class, "Local", localBaseParentJointFrame);
+      localJoints = ScrewTools.cloneJointPathDisconnectedFromOriginalRobot(originalJoints, OneDoFJointBasics.class, "Local", localBaseParentJointFrame);
       numberOfDoF = localJoints.length;
 
       originalEndEffectorFrame = endEffector.getBodyFixedFrame();
@@ -241,9 +241,9 @@ public class TaskspaceToJointspaceCalculator
 
       for (int i = 0; i < numberOfDoF; i++)
       {
-         OneDoFJoint originalJoint = originalJoints[i];
+         OneDoFJointBasics originalJoint = originalJoints[i];
          RigidBodyBasics originalBody = originalJoint.getSuccessor();
-         OneDoFJoint localJoint = localJoints[i];
+         OneDoFJointBasics localJoint = localJoints[i];
          RigidBodyBasics localBody = localJoint.getSuccessor();
 
          originalToLocalFramesMap.put(originalJoint.getFrameAfterJoint(), localJoint.getFrameAfterJoint());
@@ -490,7 +490,7 @@ public class TaskspaceToJointspaceCalculator
 
       for (int i = 0; i < numberOfDoF; i++)
       {
-         OneDoFJoint joint = localJoints[i];
+         OneDoFJointBasics joint = localJoints[i];
          double qDotDesired = MathTools.clamp(desiredJointVelocities.get(i, 0), maximumJointVelocity.getDoubleValue());
          double qDotDotDesired = (qDotDesired - joint.getQd()) / controlDT;
          qDotDotDesired = MathTools.clamp(qDotDotDesired, maximumJointAcceleration.getDoubleValue());
@@ -757,7 +757,7 @@ public class TaskspaceToJointspaceCalculator
       desiredJointVelocitiesToPack.set(desiredJointVelocities);
    }
 
-   public void getDesiredJointAccelerationsIntoOneDoFJoints(OneDoFJoint[] joints)
+   public void getDesiredJointAccelerationsIntoOneDoFJoints(OneDoFJointBasics[] joints)
    {
       MultiBodySystemTools.insertJointsState(joints, JointStateType.ACCELERATION, desiredJointAccelerations);
    }

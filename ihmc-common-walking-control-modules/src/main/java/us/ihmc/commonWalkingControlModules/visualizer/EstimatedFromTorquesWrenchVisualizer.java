@@ -19,7 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableBody;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -40,7 +40,7 @@ public class EstimatedFromTorquesWrenchVisualizer
    private final Map<RigidBodyBasics, YoGraphicVector> forceVisualizers = new LinkedHashMap<>();
    private final Map<RigidBodyBasics, YoGraphicVector> torqueVisualizers = new LinkedHashMap<>();
    private final Map<RigidBodyBasics, GeometricJacobian> jacobians = new LinkedHashMap<>();
-   private final Map<RigidBodyBasics, OneDoFJoint[]> jointLists = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, OneDoFJointBasics[]> jointLists = new LinkedHashMap<>();
 
    private final FrameVector3D tempVector = new FrameVector3D();
    private final FramePoint3D tempPoint = new FramePoint3D();
@@ -78,7 +78,7 @@ public class EstimatedFromTorquesWrenchVisualizer
    {
       for (RigidBodyBasics rigidBody : rigidBodies)
       {
-         OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(rootBody, rigidBody);
+         OneDoFJointBasics[] joints = ScrewTools.createOneDoFJointPath(rootBody, rigidBody);
          jointLists.put(rigidBody, joints);
          if (jacobianHolder != null)
          {
@@ -149,7 +149,7 @@ public class EstimatedFromTorquesWrenchVisualizer
          pseudoInverseSolver.setA(jacobianMatrix);
          pseudoInverseSolver.invert(jacobianInverseMatrix);
 
-         OneDoFJoint[] joints = jointLists.get(rigidBody);
+         OneDoFJointBasics[] joints = jointLists.get(rigidBody);
          for (int jointIndex = 0; jointIndex < jointLists.get(rigidBody).length; jointIndex++)
             jointChainTorquesVector.set(jointIndex, 0, joints[jointIndex].getTau());
 

@@ -2,16 +2,14 @@ package us.ihmc.quadrupedRobotics.controller.states;
 
 import java.util.ArrayList;
 
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -27,7 +25,7 @@ public class QuadrupedDoNothingController implements QuadrupedController
 
    private final JointDesiredOutputList jointDesiredOutputList;
    private final ArrayList<YoDouble> desiredDoNothingTorques = new ArrayList<>();
-   private final ArrayList<OneDoFJoint> legJoints = new ArrayList<>();
+   private final ArrayList<OneDoFJointBasics> legJoints = new ArrayList<>();
    private final QuadrupedFeetManager feetManager;
 
    private final YoBoolean forceFeedbackControlEnabled;
@@ -38,7 +36,7 @@ public class QuadrupedDoNothingController implements QuadrupedController
       FullQuadrupedRobotModel fullRobotModel = environment.getFullRobotModel();
       this.jointDesiredOutputList = environment.getJointDesiredOutputList();
 
-      for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
             legJoints.add(joint);
             desiredDoNothingTorques.add(new YoDouble(joint.getName() + "DoNothingTorque", registry));
@@ -56,7 +54,7 @@ public class QuadrupedDoNothingController implements QuadrupedController
    {
       for (int i = 0; i < legJoints.size(); i++)
       {
-         OneDoFJoint joint = legJoints.get(i);
+         OneDoFJointBasics joint = legJoints.get(i);
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
          if (forceFeedbackControlEnabled.getBooleanValue())
             jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
@@ -74,7 +72,7 @@ public class QuadrupedDoNothingController implements QuadrupedController
    {
       for (int i = 0; i < legJoints.size(); i++)
       {
-         OneDoFJoint joint = legJoints.get(i);
+         OneDoFJointBasics joint = legJoints.get(i);
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
          jointDesiredOutput.setDesiredTorque(desiredDoNothingTorques.get(i).getDoubleValue());
       }

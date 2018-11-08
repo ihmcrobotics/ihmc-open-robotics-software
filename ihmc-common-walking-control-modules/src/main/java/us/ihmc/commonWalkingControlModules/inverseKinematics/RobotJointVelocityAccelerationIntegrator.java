@@ -2,16 +2,15 @@ package us.ihmc.commonWalkingControlModules.inverseKinematics;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class RobotJointVelocityAccelerationIntegrator
 {
@@ -75,9 +74,9 @@ public class RobotJointVelocityAccelerationIntegrator
 
       for (int i = 0; i < joints.length; i++)
       {
-         if (joints[i] instanceof OneDoFJoint)
+         if (joints[i] instanceof OneDoFJointBasics)
          {
-            OneDoFJoint joint = (OneDoFJoint) joints[i];
+            OneDoFJointBasics joint = (OneDoFJointBasics) joints[i];
 
             double qDot = MathTools.clamp(jointVelocitiesToIntegrate.get(jointStartIndex, 0), maximumOneDoFJointVelocity);
 
@@ -143,9 +142,9 @@ public class RobotJointVelocityAccelerationIntegrator
 
       for (int i = 0; i < joints.length; i++)
       {
-         if (joints[i] instanceof OneDoFJoint)
+         if (joints[i] instanceof OneDoFJointBasics)
          {
-            OneDoFJoint joint = (OneDoFJoint) joints[i];
+            OneDoFJointBasics joint = (OneDoFJointBasics) joints[i];
 
             double qDDot = MathTools.clamp(jointAccelerationsToIntegrate.get(jointStartIndex, 0), maximumOneDoFJointAcceleration);
 

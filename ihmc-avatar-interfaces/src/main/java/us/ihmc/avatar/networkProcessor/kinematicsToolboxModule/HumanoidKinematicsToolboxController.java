@@ -25,7 +25,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -318,7 +318,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          for (LegJointName legJointName : desiredFullRobotModel.getRobotSpecificJointNames().getLegJointNames())
          {
-            OneDoFJoint joint = desiredFullRobotModel.getLegJoint(robotSide, legJointName);
+            OneDoFJointBasics joint = desiredFullRobotModel.getLegJoint(robotSide, legJointName);
             double reductionFactor = legJointLimitReductionFactors.get(legJointName).getDoubleValue();
             jointLimitReductionCommand.addReductionFactor(joint, reductionFactor);
          }

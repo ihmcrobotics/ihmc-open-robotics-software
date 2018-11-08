@@ -15,13 +15,12 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 /**
  * @author twan
@@ -31,8 +30,8 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
 {
    private final GeometricJacobian jacobian;
    private final LinearSolver<DenseMatrix64F> solver;
-   private final OneDoFJoint[] oneDoFJoints;
-   private final OneDoFJoint[] oneDoFJointsSeed;
+   private final OneDoFJointBasics[] oneDoFJoints;
+   private final OneDoFJointBasics[] oneDoFJointsSeed;
 
    private final double tolerance;
    private final int maxIterations;
@@ -68,7 +67,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
       this.jacobian = jacobian;
       this.solver = LinearSolverFactory.leastSquares(SpatialVector.SIZE, jacobian.getNumberOfColumns()); // new DampedLeastSquaresSolver(jacobian.getNumberOfColumns());
 
-      this.oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      this.oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
       oneDoFJointsSeed = oneDoFJoints.clone();
 
       if (oneDoFJoints.length != jacobian.getJointsInOrder().length)
@@ -227,7 +226,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint oneDoFJoint;
+         OneDoFJointBasics oneDoFJoint;
          if (useSeed)
          {
             oneDoFJoint = oneDoFJointsSeed[i];
