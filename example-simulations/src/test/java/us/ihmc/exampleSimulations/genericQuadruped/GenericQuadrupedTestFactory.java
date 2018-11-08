@@ -106,10 +106,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters(false, CONTROL_DT);
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new GenericQuadrupedPositionBasedCrawlControllerParameters();
       GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
-      GenericQuadrupedJointNameMapAndContactDefinition jointMap = new GenericQuadrupedJointNameMapAndContactDefinition(
-            new GenericQuadrupedPhysicalProperties());
       GenericQuadrupedHighLevelControllerParameters highLevelControllerParameters = new GenericQuadrupedHighLevelControllerParameters(
-            jointMap);
+            modelFactory.getJointMap());
 
       fullRobotModel = modelFactory.createFullRobotModel();
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());

@@ -20,9 +20,9 @@ public class GenericQuadrupedHighLevelControllerParameters implements HighLevelC
    private final GenericQuadrupedStandPrepParameters standPrepParameters = new GenericQuadrupedStandPrepParameters();
    private final List<GroupParameter<JointDesiredBehaviorReadOnly>> walkingJointBehavior = new ArrayList<>();
    private final List<GroupParameter<JointDesiredBehaviorReadOnly>> nonWalkingJointBehavior = new ArrayList<>();
-   private final GenericQuadrupedJointNameMapAndContactDefinition jointMap;
+   private final QuadrupedJointNameMap jointMap;
 
-   public GenericQuadrupedHighLevelControllerParameters(GenericQuadrupedJointNameMapAndContactDefinition jointMap)
+   public GenericQuadrupedHighLevelControllerParameters(QuadrupedJointNameMap jointMap)
    {
       this.jointMap = jointMap;
       setUpNonWalkingJointBehavior();
@@ -99,9 +99,9 @@ public class GenericQuadrupedHighLevelControllerParameters implements HighLevelC
 
    private void setUpNonWalkingJointBehavior()
    {
-      configureSymmetricBehavior(nonWalkingJointBehavior, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.POSITION, 500.0, 10.0);
-      configureSymmetricBehavior(nonWalkingJointBehavior, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.POSITION, 500.0, 10.0);
-      configureSymmetricBehavior(nonWalkingJointBehavior, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.POSITION, 500.0, 10.0);
+      configureSymmetricBehavior(nonWalkingJointBehavior, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 500.0, 25.0);
+      configureSymmetricBehavior(nonWalkingJointBehavior, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 500.0, 25.0);
+      configureSymmetricBehavior(nonWalkingJointBehavior, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 500.0, 25.0);
    }
 
    private static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviorParameterList, QuadrupedJointNameMap jointMap,
