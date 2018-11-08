@@ -151,6 +151,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       Wrench rootJointWrench = new Wrench(bodyFixedFrame, bodyFixedFrame);
       rootJointWrench.setIncludingFrame(rootJoint.getJointWrench());
+      rootJointWrench.changeFrame(bodyFixedFrame);
 
       FrameVector3D rootJointForce = new FrameVector3D(rootJointWrench.getLinearPart());
       FrameVector3D rootJointTorque = new FrameVector3D(rootJointWrench.getAngularPart());
