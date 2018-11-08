@@ -16,6 +16,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 
 public class MovingReferenceFrameTest
@@ -57,7 +58,7 @@ public class MovingReferenceFrameTest
 
             twistCalculator.getTwistOfBody(body, expectedTwist);
             bodyFrame.getTwistOfFrame(actualTwist);
-            TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+            MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
          }
       }
    }
@@ -91,7 +92,7 @@ public class MovingReferenceFrameTest
 
             twistCalculator.getTwistOfBody(body, expectedTwist);
             bodyFrame.getTwistOfFrame(actualTwist);
-            TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+            MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
          }
       }
    }
@@ -125,13 +126,13 @@ public class MovingReferenceFrameTest
 
             twistCalculator.getTwistOfBody(body, expectedTwist);
             bodyFrame.getTwistOfFrame(actualTwist);
-            TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+            MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
 
             twistCalculator.getTwistOfBody(body, expectedTwist);
             expectedTwist.setBodyFrame(joint.getFrameAfterJoint());
             expectedTwist.changeFrame(joint.getFrameAfterJoint());
             joint.getFrameAfterJoint().getTwistOfFrame(actualTwist);
-            TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+            MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
 
             for (JointBasics child : body.getChildrenJoints())
             {
@@ -139,7 +140,7 @@ public class MovingReferenceFrameTest
                expectedTwist.setBodyFrame(child.getFrameBeforeJoint());
                expectedTwist.changeFrame(child.getFrameBeforeJoint());
                child.getFrameBeforeJoint().getTwistOfFrame(actualTwist);
-               TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+               MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
             }
          }
       }

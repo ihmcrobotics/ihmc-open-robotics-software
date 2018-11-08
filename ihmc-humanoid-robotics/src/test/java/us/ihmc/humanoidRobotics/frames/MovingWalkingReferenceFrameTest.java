@@ -18,6 +18,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.robotics.screwTheory.NumericalMovingReferenceFrame;
@@ -105,7 +106,7 @@ public class MovingWalkingReferenceFrameTest
       expectedTwist.setBodyFrame(actual);
       expectedTwist.changeFrame(actual);
 
-      TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, epsilon);
+      MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, epsilon);
    }
 
    private static MovingReferenceFrame createMovingReferenceFrame(String name, ReferenceFrame parentFrame, Random random, DoubleProvider timeProvider)

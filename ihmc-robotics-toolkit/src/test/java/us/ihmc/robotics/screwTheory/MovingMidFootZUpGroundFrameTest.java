@@ -19,6 +19,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
@@ -85,7 +86,7 @@ public class MovingMidFootZUpGroundFrameTest
             expectedTwist.setBodyFrame(entry.getValue());
             expectedTwist.changeFrame(entry.getValue());
 
-            TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+            MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
          }
       }
    }
