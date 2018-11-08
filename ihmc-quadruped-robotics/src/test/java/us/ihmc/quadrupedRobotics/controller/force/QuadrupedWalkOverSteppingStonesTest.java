@@ -75,7 +75,7 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-      
+
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       List<QuadrupedTimedStepMessage> steps = getSteps(environment.getBaseBlockFrame());

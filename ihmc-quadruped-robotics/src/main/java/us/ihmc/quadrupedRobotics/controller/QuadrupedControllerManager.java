@@ -16,10 +16,16 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedSitDownControllerState;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedSitDownParameters;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedWalkingControllerState;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.output.JointIntegratorComponent;
+import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
+import us.ihmc.quadrupedRobotics.output.StateChangeSmootherComponent;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
@@ -50,11 +56,12 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class QuadrupedControllerManager implements RobotController, CloseableAndDisposable
 {
+   private static final HighLevelControllerName sitDownStateName = HighLevelControllerName.CUSTOM1;
+
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoEnum<HighLevelControllerName> requestedControllerState = new YoEnum<>("requestedControllerState", registry, HighLevelControllerName.class,
-                                                                                         true);
+   private final YoEnum<HighLevelControllerName> requestedControllerState;
    private final AtomicReference<HighLevelControllerName> requestedControllerStateReference = new AtomicReference<>();
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
 
@@ -73,16 +80,23 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    private final HighLevelStateChangeStatusMessage stateChangeMessage = new HighLevelStateChangeStatusMessage();
    private final WalkingControllerFailureStatusMessage walkingControllerFailureStatusMessage = new WalkingControllerFailureStatusMessage();
 
-   public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties, HighLevelControllerName initialControllerState)
+   public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
+                                     HighLevelControllerName initialControllerState)
    {
       this.controllerToolbox = new QuadrupedControllerToolbox(runtimeEnvironment, physicalProperties, registry, runtimeEnvironment.getGraphicsListRegistry());
       this.runtimeEnvironment = runtimeEnvironment;
       this.lowLevelControllerOutput = runtimeEnvironment.getJointDesiredOutputList();
-      this.yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(runtimeEnvironment.getFullRobotModel().getControllableOneDoFJoints(), registry);
+      this.yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(
+            runtimeEnvironment.getFullRobotModel().getControllableOneDoFJoints(), registry);
 
       // Initialize control modules
       this.controlManagerFactory = new QuadrupedControlManagerFactory(controllerToolbox, physicalProperties, runtimeEnvironment.getGraphicsListRegistry(),
                                                                       registry);
+
+      HighLevelControllerName.setName(sitDownStateName, QuadrupedSitDownControllerState.name);
+      requestedControllerState = new YoEnum<>("requestedControllerState", registry, HighLevelControllerName.class,
+                                              true);
+
 
       commandInputManager = new CommandInputManager(QuadrupedControllerAPIDefinition.getQuadrupedSupportedCommands());
       try
@@ -110,8 +124,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       outputProcessor = outputProcessorBuilder.build();
 
       requestedControllerState.set(null);
-      requestedControllerState.addVariableChangedListener(v ->
-      {
+      requestedControllerState.addVariableChangedListener(v -> {
          HighLevelControllerName currentRequestedState = requestedControllerState.getEnumValue();
          if (currentRequestedState != null)
          {
@@ -120,7 +133,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          }
       });
 
-      if(initialControllerState == null)
+      if (initialControllerState == null)
       {
          initialControllerState = runtimeEnvironment.getHighLevelControllerParameters().getDefaultInitialControllerState();
       }
@@ -220,10 +233,12 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       return motionStatusHolder;
    }
 
-   private StateMachine<HighLevelControllerName, HighLevelControllerState> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment, HighLevelControllerName initialControllerState)
+   private StateMachine<HighLevelControllerName, HighLevelControllerState> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
+                                                                                             HighLevelControllerName initialControllerState)
    {
       OneDoFJointBasics[] controlledJoints = runtimeEnvironment.getFullRobotModel().getControllableOneDoFJoints();
       HighLevelControllerParameters highLevelControllerParameters = runtimeEnvironment.getHighLevelControllerParameters();
+      QuadrupedSitDownParameters sitDownParameters = runtimeEnvironment.getSitDownParameters();
       JointDesiredOutputList jointDesiredOutputList = runtimeEnvironment.getJointDesiredOutputList();
 
       DoNothingControllerState doNothingState = new DoNothingControllerState(controlledJoints, highLevelControllerParameters);
@@ -238,6 +253,9 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       SmoothTransitionControllerState exitWalkingState = new SmoothTransitionControllerState("exitWalking", HighLevelControllerName.EXIT_WALKING, walkingState,
                                                                                              freezeState, controlledJoints, highLevelControllerParameters);
 
+      QuadrupedSitDownControllerState sitDownState = new QuadrupedSitDownControllerState(sitDownStateName, controlledJoints, highLevelControllerParameters,
+                                                                                         sitDownParameters, jointDesiredOutputList);
+
       StateMachineFactory<HighLevelControllerName, HighLevelControllerState> factory = new StateMachineFactory<>(HighLevelControllerName.class);
       factory.setNamePrefix("controller").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
 
@@ -248,6 +266,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       factory.addState(HighLevelControllerName.WALKING, walkingState);
       factory.addState(HighLevelControllerName.STAND_TRANSITION_STATE, standTransitionState);
       factory.addState(HighLevelControllerName.EXIT_WALKING, exitWalkingState);
+      factory.addState(sitDownStateName, sitDownState);
 
       // Manually triggered events to transition to main controllers.
       factory.addTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.STAND_TRANSITION_STATE, createRequestedTransition(HighLevelControllerName.WALKING));
@@ -281,13 +300,12 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       factory.addTransition(fallbackControllerState, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
 
 
-      factory.addStateChangedListener((from, to) ->
-      {
-            byte fromByte = from == null ? -1 : from.toByte();
-            byte toByte = to == null ? -1 : to.toByte();
-            stateChangeMessage.setInitialHighLevelControllerName(fromByte);
-            stateChangeMessage.setEndHighLevelControllerName(toByte);
-            statusMessageOutputManager.reportStatusMessage(stateChangeMessage);
+      factory.addStateChangedListener((to, from) -> {
+         byte fromByte = from == null ? -1 : from.toByte();
+         byte toByte = to == null ? -1 : to.toByte();
+         stateChangeMessage.setInitialHighLevelControllerName(fromByte);
+         stateChangeMessage.setEndHighLevelControllerName(toByte);
+         statusMessageOutputManager.reportStatusMessage(stateChangeMessage);
       });
 
       registry.addChild(doNothingState.getYoVariableRegistry());
@@ -297,6 +315,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       registry.addChild(walkingState.getYoVariableRegistry());
       registry.addChild(standTransitionState.getYoVariableRegistry());
       registry.addChild(exitWalkingState.getYoVariableRegistry());
+      registry.addChild(sitDownState.getYoVariableRegistry());
 
       return factory.build(initialControllerState);
    }
@@ -311,7 +330,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = stateMachine.getCurrentState().getOutputForLowLevelController();
       for (int jointIndex = 0; jointIndex < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); jointIndex++)
       {
-         OneDoFJoint controlledJoint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(jointIndex);
+         OneDoFJointBasics controlledJoint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(jointIndex);
          JointDesiredOutputReadOnly lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(controlledJoint);
 
          if (!lowLevelJointData.hasControlMode())
