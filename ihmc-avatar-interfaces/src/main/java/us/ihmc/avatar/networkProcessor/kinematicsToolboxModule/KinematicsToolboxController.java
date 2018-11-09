@@ -47,7 +47,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -332,12 +331,12 @@ public class KinematicsToolboxController extends ToolboxController
    private FeedbackControlCommandList createControllerCoreTemplate(Collection<RigidBodyBasics> controllableRigidBodies)
    {
       FeedbackControlCommandList template = new FeedbackControlCommandList();
-      Collection<RigidBodyBasics> rigidBodies;
+      Collection<? extends RigidBodyBasics> rigidBodies;
 
       if (controllableRigidBodies != null)
          rigidBodies = controllableRigidBodies;
       else
-         rigidBodies = Arrays.asList(ScrewTools.computeSupportAndSubtreeSuccessors(rootBody));
+         rigidBodies = rootBody.subtreeList();
 
       rigidBodies.stream().map(this::createFeedbackControlCommand).forEach(template::addCommand);
       return template;

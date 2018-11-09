@@ -8,6 +8,7 @@ import us.ihmc.mecano.multiBodySystem.SphericalJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public class InverseDynamicsJointStateChecksum
@@ -15,13 +16,11 @@ public class InverseDynamicsJointStateChecksum
    protected final GenericCRC32 checksum;
    private final ChecksumUpdater[] checksumUpdaters;
 
-   public InverseDynamicsJointStateChecksum(RigidBodyBasics rootJoint, GenericCRC32 checksum)
+   public InverseDynamicsJointStateChecksum(RigidBodyBasics rootBody, GenericCRC32 checksum)
    {
       this.checksum = checksum;
-      RigidBodyBasics[] rootBodies = {rootJoint};
 
-      JointBasics[] joints = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
-      checksumUpdaters = Stream.of(joints).map(joint -> newJointChecksumUpdater(checksum, joint)).toArray(ChecksumUpdater[]::new);
+      checksumUpdaters = SubtreeStreams.fromChildren(rootBody).map(joint -> newJointChecksumUpdater(checksum, joint)).toArray(ChecksumUpdater[]::new);
    }
 
    public void calculate()

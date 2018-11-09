@@ -24,7 +24,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.KinematicPoint;
@@ -144,8 +143,7 @@ public class FixedBaseRobotArm extends Robot
 
    private void setJointLimits()
    {
-      RigidBodyBasics[] rootBodies = {elevator};
-      RevoluteJoint[] allJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(rootBodies), RevoluteJoint.class);
+      RevoluteJoint[] allJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(elevator), RevoluteJoint.class);
       for (RevoluteJoint revoluteJoint : allJoints)
       {
          revoluteJoint.setJointLimitUpper(Math.PI);

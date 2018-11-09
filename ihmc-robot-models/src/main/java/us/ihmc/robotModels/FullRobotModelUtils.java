@@ -6,7 +6,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class FullRobotModelUtils
 {
@@ -24,8 +23,7 @@ public class FullRobotModelUtils
          RigidBodyBasics hand = model.getHand(robotSide);
          if (hand != null)
          {
-            RigidBodyBasics[] rootBodies = {hand};
-            OneDoFJointBasics[] fingerJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(rootBodies), OneDoFJointBasics.class);
+            OneDoFJointBasics[] fingerJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(hand), OneDoFJointBasics.class);
             for (OneDoFJointBasics fingerJoint : fingerJoints)
             {
                jointsToPack.remove(fingerJoint);

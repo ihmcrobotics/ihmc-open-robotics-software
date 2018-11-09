@@ -15,7 +15,7 @@ public class CenterOfMassAccelerationCalculator
 
    public CenterOfMassAccelerationCalculator(RigidBodyBasics rootBody, SpatialAccelerationCalculator spatialAccelerationCalculator)
    {
-      this(rootBody, ScrewTools.computeSupportAndSubtreeSuccessors(rootBody), spatialAccelerationCalculator);
+      this(rootBody, rootBody.subtreeArray(), spatialAccelerationCalculator);
    }
 
    public CenterOfMassAccelerationCalculator(RigidBodyBasics base, RigidBodyBasics[] rigidBodies, SpatialAccelerationCalculator spatialAccelerationCalculator)

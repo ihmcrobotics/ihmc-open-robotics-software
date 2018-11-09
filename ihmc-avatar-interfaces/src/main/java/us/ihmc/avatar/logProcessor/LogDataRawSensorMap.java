@@ -6,11 +6,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -97,9 +94,8 @@ public class LogDataRawSensorMap
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
 
       StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
-      RigidBodyBasics[] rootBodies = {rootJoint.getSuccessor()};
 
-      for (JointBasics joint : MultiBodySystemTools.collectSubtreeJoints(rootBodies))
+      for (JointBasics joint : rootJoint.subtreeIterable())
       {
          if (joint instanceof OneDoFJointBasics)
          {

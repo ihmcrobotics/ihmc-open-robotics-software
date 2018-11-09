@@ -38,8 +38,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
       
       idCalculator = new InverseDynamicsCalculator(rootBody, false, true);
       idCalculator.setRootAcceleration(zeroRootAcceleration);
-      RigidBodyBasics[] rootBodies = {rootBody};
-      jointsInOrder = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
+      jointsInOrder = MultiBodySystemTools.collectSubtreeJoints(rootBody);
       totalNumberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsInOrder);
       massMatrix = new DenseMatrix64F(totalNumberOfDoFs, totalNumberOfDoFs);
       

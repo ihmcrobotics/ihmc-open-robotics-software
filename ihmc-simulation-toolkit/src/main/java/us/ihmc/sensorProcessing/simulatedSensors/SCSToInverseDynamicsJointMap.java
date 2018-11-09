@@ -143,9 +143,8 @@ public class SCSToInverseDynamicsJointMap
    public static SCSToInverseDynamicsJointMap createByName(FloatingJoint floatingRootJoint, FloatingJointBasics sixDoFRootJoint)
    {
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = new SCSToInverseDynamicsJointMap();
-      RigidBodyBasics[] rootBodies = {sixDoFRootJoint.getSuccessor()};
 
-      JointBasics[] inverseDynamicsJoints = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
+      JointBasics[] inverseDynamicsJoints = MultiBodySystemTools.collectSubtreeJoints(sixDoFRootJoint.getSuccessor());
       LinkedHashMap<String, OneDoFJointBasics> inverseDynamicsJointsByName = new LinkedHashMap<String, OneDoFJointBasics>();
 
       for (JointBasics inverseDynamicsJoint : inverseDynamicsJoints)

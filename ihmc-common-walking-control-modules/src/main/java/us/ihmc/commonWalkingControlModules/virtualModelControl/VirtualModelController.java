@@ -24,7 +24,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class VirtualModelController
@@ -60,9 +59,8 @@ public class VirtualModelController
    {
       this.defaultRootBody = defaultRootBody;
       this.centerOfMassFrame = centerOfMassFrame;
-      RigidBodyBasics[] rootBodies = {defaultRootBody};
 
-      for (JointBasics joint : MultiBodySystemTools.collectSubtreeJoints(rootBodies))
+      for (JointBasics joint : defaultRootBody.childrenSubtreeIterable())
          jointTorques.put(joint, new MutableDouble());
 
       if (DISPLAY_GRAVITY_WRENCHES)

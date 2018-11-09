@@ -92,8 +92,7 @@ public class RobotTools
 
          allSCSOneDoFJoints = new ArrayList<OneDegreeOfFreedomJoint>();
          getAllOneDegreeOfFreedomJoints(allSCSOneDoFJoints);
-         RigidBodyBasics[] rootBodies = {rootJoint.getPredecessor()};
-         allIDOneDoFJoints = new ArrayList<OneDoFJointBasics>(Arrays.asList(MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(rootBodies), OneDoFJointBasics.class)));
+         allIDOneDoFJoints = new ArrayList<OneDoFJointBasics>(Arrays.asList(MultiBodySystemTools.filterJoints(rootJoint.subtreeArray(), OneDoFJointBasics.class)));
 
          if (allIDOneDoFJoints.size() != allSCSOneDoFJoints.size())
             throw new RuntimeException("Should not get there...");

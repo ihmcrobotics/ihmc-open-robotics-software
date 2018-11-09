@@ -30,7 +30,6 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
@@ -151,10 +150,9 @@ public class HexapodSimulationController implements RobotController
          i++;
       }
       controlledBodies[i] = fullRobotModel.getRootBody();
-      RigidBodyBasics[] rootBodies = {fullRobotModel.getElevator()};
 
       //Joints to Control
-      JointBasics[] controlledJoints = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
+      JointBasics[] controlledJoints = MultiBodySystemTools.collectSubtreeJoints(fullRobotModel.getElevator());
 
       ControllerCoreOptimizationSettings momentumOptimizationSettings = getMomentumOptimizationSettings();
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();

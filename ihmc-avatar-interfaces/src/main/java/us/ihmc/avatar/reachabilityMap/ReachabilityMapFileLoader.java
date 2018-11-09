@@ -113,9 +113,8 @@ public class ReachabilityMapFileLoader
          jointNames.add(currentCell.getStringCellValue());
          currentCell = currentRow.getCell(currentIndexValue++);
       }
-      RigidBodyBasics[] rootBodies = {rootBody};
 
-      JointBasics[] joints = ScrewTools.findJointsWithNames(MultiBodySystemTools.collectSubtreeJoints(rootBodies), jointNames.toArray(new String[0]));
+      JointBasics[] joints = ScrewTools.findJointsWithNames(MultiBodySystemTools.collectSubtreeJoints(rootBody), jointNames.toArray(new String[0]));
       OneDoFJointBasics[] oneDoFJoints = MultiBodySystemTools.filterJoints(joints, OneDoFJointBasics.class);
 
       if (oneDoFJoints.length != jointNames.size())
@@ -198,14 +197,11 @@ public class ReachabilityMapFileLoader
    {
       if (parentFrameName.equals(worldFrame.getName()))
          return worldFrame;
-      RigidBodyBasics[] rootBodies = {rootBody};
-      
-      JointBasics[] allInverseDynamicsJoints = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
 
       if (parentFrameName.equals(rootBody.getBodyFixedFrame().getName()))
          return rootBody.getBodyFixedFrame();
 
-      for (JointBasics joint : allInverseDynamicsJoints)
+      for (JointBasics joint : rootBody.childrenSubtreeIterable())
       {
          ReferenceFrame frameAfterJoint = joint.getFrameAfterJoint();
          ReferenceFrame frameBeforeJoint = joint.getFrameBeforeJoint();
