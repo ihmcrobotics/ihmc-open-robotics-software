@@ -182,36 +182,6 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 30000)
-   public void testMessages() throws Exception, UnreasonableAccelerationException
-   {
-      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
-      snapGhostToFullRobotModel(initialFullRobotModel);
-
-      RobotSide robotSide = RobotSide.LEFT;
-      RigidBody endEffector = initialFullRobotModel.getHand(robotSide);
-      TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
-      List<Pose3DReadOnly> keyFramePoses = new ArrayList<Pose3DReadOnly>();
-      List<Point3DReadOnly> desiredCOMPoints = new ArrayList<Point3DReadOnly>();
-
-      KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
-                                                                                                                                          keyFrameTimes,
-                                                                                                                                          keyFramePoses);
-      KinematicsPlanningToolboxCenterOfMassMessage comMessage = HumanoidMessageTools.createKinematicsPlanningToolboxCenterOfMassMessage(keyFrameTimes,
-                                                                                                                                        desiredCOMPoints);
-
-      commandInputManager.submitMessage(endEffectorMessage);
-      commandInputManager.submitMessage(comMessage);
-
-      int numberOfIterations = 250;
-
-      runKinematicsPlanningToolboxController(numberOfIterations);
-
-      assertTrue("Poor solution quality: " + toolboxController.getSolution().getSolutionQuality(),
-                 toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
    public void testRaiseUpHand() throws Exception, UnreasonableAccelerationException
    {
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
@@ -261,6 +231,51 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       KinematicsPlanningToolboxRigidBodyMessage holdAnotherHandMessage = KinematicsPlanningToolboxMessageFactory.holdRigidBodyCurrentPose(initialFullRobotModel.getHand(robotSide.getOppositeSide()),
                                                                                                                                           keyFrameTimes);
       commandInputManager.submitMessage(holdAnotherHandMessage);
+
+      RobotConfigurationData robotConfigurationData = AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
+      toolboxController.updateRobotConfigurationData(robotConfigurationData);
+      toolboxController.updateCapturabilityBasedStatus(AvatarHumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
+
+      int numberOfIterations = 350;
+
+      runKinematicsPlanningToolboxController(numberOfIterations);
+
+      assertTrue("Poor solution quality: " + toolboxController.getSolution().getSolutionQuality(),
+                 toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 30000)
+   public void testReachToAPoint() throws Exception, UnreasonableAccelerationException
+   {
+      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
+      snapGhostToFullRobotModel(initialFullRobotModel);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      RigidBody endEffector = initialFullRobotModel.getHand(robotSide);
+      double trajectoryTime = 5.0;
+
+      Pose3D desiredPose = new Pose3D();
+      desiredPose.setPosition(0.5, 0.3, 1.0);
+      desiredPose.appendYawRotation(-0.5 * Math.PI);
+      desiredPose.appendPitchRotation(0.5 * Math.PI);
+      desiredPose.appendYawRotation(0.2 * Math.PI);
+      TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
+      List<Pose3DReadOnly> keyFramePoses = new ArrayList<Pose3DReadOnly>();
+
+      keyFrameTimes.add(trajectoryTime);
+      Pose3D pose = new Pose3D(desiredPose);
+      keyFramePoses.add(pose);
+      scs.addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(pose));
+
+      KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
+                                                                                                                                          keyFrameTimes,
+                                                                                                                                          keyFramePoses);
+
+      endEffectorMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+      endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+
+      commandInputManager.submitMessage(endEffectorMessage);
 
       RobotConfigurationData robotConfigurationData = AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
