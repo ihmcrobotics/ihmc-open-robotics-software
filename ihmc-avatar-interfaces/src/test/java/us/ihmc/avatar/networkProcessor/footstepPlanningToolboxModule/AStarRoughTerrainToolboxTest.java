@@ -45,7 +45,7 @@ public class AStarRoughTerrainToolboxTest extends RoughTerrainDataSetTest
 
    public static void main(String[] args) throws Exception
    {
-      String testName = bollards;
+      String testName = corridor;
       AStarRoughTerrainToolboxTest test = new AStarRoughTerrainToolboxTest();
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       VISUALIZE = true;

@@ -233,9 +233,6 @@ public class RemoteUIMessageConverter
 
    private void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus packet)
    {
-      if (verbose)
-         PrintTools.info("Processing a footstep planning result from the toolbox.");
-      
       PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsList();
       FootstepDataListMessage footstepDataListMessage = packet.getFootstepDataList();
       int plannerRequestId = packet.getPlanId();
@@ -249,7 +246,6 @@ public class RemoteUIMessageConverter
       ThreadTools.sleep(1000);
      
       
-//      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.SequenceIdTopic, sequenceId);
@@ -261,7 +257,6 @@ public class RemoteUIMessageConverter
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic, lowLevelGoal.getPosition());
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic, lowLevelGoal.getOrientation());
       }
-     
 
       if (verbose)
          PrintTools.info("Received a footstep planning result from the toolbox.");
