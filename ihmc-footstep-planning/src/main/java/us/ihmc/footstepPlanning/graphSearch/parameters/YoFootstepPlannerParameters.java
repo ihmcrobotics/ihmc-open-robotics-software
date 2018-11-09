@@ -348,26 +348,13 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       if (parametersPacket.getBodyGroundClearance() != -1.0)
          setBodyGroundClearance(parametersPacket.getBodyGroundClearance());
       if (parametersPacket.getBodyBoxHeight() != -1.0)
-      {
          setBodyBoxHeight(parametersPacket.getBodyBoxHeight());
-         PrintTools.info("received height" + parametersPacket.getBodyBoxHeight());
-      }
       if (parametersPacket.getBodyBoxDepth() != -1.0)
-      {
          setBodyBoxDepth(parametersPacket.getBodyBoxDepth());         
-         PrintTools.info("received depth" + parametersPacket.getBodyBoxDepth());
-      }
-
       if (parametersPacket.getBodyBoxWidth() != -1.0)
-      {
          setBodyBoxWidth(parametersPacket.getBodyBoxWidth());
-         PrintTools.info("received width" + parametersPacket.getBodyBoxWidth());
-      }
       if (parametersPacket.getBodyBoxBaseX() != -1.0)
-      {
          setBodyBoxBaseX(parametersPacket.getBodyBoxBaseX());
-         PrintTools.info("received base X" + parametersPacket.getBodyBoxBaseX());
-      }
       if (parametersPacket.getBodyBoxBaseY() != -1.0)
          setBodyBoxBaseY(parametersPacket.getBodyBoxBaseY());
       if (parametersPacket.getBodyBoxBaseZ() != -1.0)
