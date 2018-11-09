@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class RemoteUIMessageConverter
 {
-   private static final boolean verbose = false;
+   private static final boolean verbose = true;
 
    private final RealtimeRos2Node ros2Node;
 
@@ -243,6 +243,8 @@ public class RemoteUIMessageConverter
       List<? extends Point3DReadOnly> bodyPath = packet.getBodyPath();
       Pose3D lowLevelGoal = packet.getLowLevelPlannerGoal();
 
+      ThreadTools.sleep(100);
+      
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
@@ -252,6 +254,7 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathDataTopic, bodyPath);
       messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic, lowLevelGoal.getPosition());
       messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic, lowLevelGoal.getOrientation());
+     
 
       if (verbose)
          PrintTools.info("Received a footstep planning result from the toolbox.");
@@ -299,15 +302,6 @@ public class RemoteUIMessageConverter
       {
          return;
       }
-
-      PrintTools.info("Body box height sending : " + parameters.getBodyBoxHeight());
-      PrintTools.info("Body box depth sending : " + parameters.getBodyBoxDepth());
-      PrintTools.info("Body box width sending : " + parameters.getBodyBoxWidth());
-      PrintTools.info("Body box z sending : " + parameters.getBodyBoxBaseZ());
-      PrintTools.info("Body box x sending : " + parameters.getBodyBoxBaseX());
-      PrintTools.info("Body box y sending : " + parameters.getBodyBoxBaseY());
-
-
       
       packet.setCheckForBodyBoxCollisions(parameters.checkForBodyBoxCollisions());
       packet.setIdealFootstepWidth(parameters.getIdealFootstepWidth());
