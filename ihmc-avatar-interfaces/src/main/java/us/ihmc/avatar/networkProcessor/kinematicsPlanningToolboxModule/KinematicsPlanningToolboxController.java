@@ -20,9 +20,11 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -125,6 +127,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          for (int i = 0; i < commands.size(); i++)
             rigidBodyCommands.add(commands.get(i));
       }
+      else
+         return false;
 
       if (commandInputManager.isNewCommandAvailable(KinematicsPlanningToolboxCenterOfMassCommand.class))
       {
@@ -140,7 +144,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       if (!updateInitialRobotConfigurationToIKController())
          return false;
-
+      
       if (!updateToolboxConfiguration())
          return false;
 
@@ -201,6 +205,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          if (i == 0) // save key frame times for the first rigid body message.
             for (int j = 0; j < command.getNumberOfWayPoints(); j++)
                keyFrameTimes.add(command.getWayPointTime(j));
+
          else if (!checkKeyFrameTimes(command))
             new Exception(command.getClass().getSimpleName() + " must have same key frame times with the first KinematicsPlanningToolboxRigidBodyMessage.");
       }
@@ -225,7 +230,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          for (int i = 0; i < getNumberOfKeyFrames(); i++)
          {
             KinematicsToolboxCenterOfMassMessage comMessage = KinematicsToolboxMessageFactory.holdCenterOfMassCurrentPosition(getDesiredFullRobotModel().getRootBody(),
-                                                                                                                              true, true, true);
+                                                                                                                              true, true, false);
 
             ikCenterOfMassMessages.add(comMessage);
          }
@@ -249,9 +254,12 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    {
       if (solutionQualityConvergenceDetector.isSolved())
       {
+         PrintTools.info("solved " + solutionQualityConvergenceDetector.isValid());
          if (!appendRobotConfigurationOnToolboxSolution() || indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
          {
             isDone.set(true);
+            solution.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
+            reportMessage(solution);
          }
          else
          {
@@ -281,6 +289,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       {
          solution.setSolutionQuality(solution.getSolutionQuality() + ikController.getSolution().getSolutionQuality());
          solution.getRobotConfigurations().add().set(new KinematicsToolboxOutputStatus(ikController.getSolution()));
+         
+         PrintTools.info(""+solution.getRobotConfigurations().get(0).getDesiredJointAngles().get(15));
 
          return true;
       }
@@ -298,6 +308,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          List<KinematicsToolboxRigidBodyMessage> rigidBodyMessages = ikRigidBodyMessageMap.get(ikRigidBodies.get(i));
          ikCommandInputManager.submitMessage(rigidBodyMessages.get(indexOfCurrentKeyFrame.getIntegerValue()));
       }
+
+      PrintTools.info("indexOfCurrentKeyFrame.getIntegerValue() " + indexOfCurrentKeyFrame.getIntegerValue());
+
       if (ikCenterOfMassMessages.get(indexOfCurrentKeyFrame.getIntegerValue()) != null)
          ikCommandInputManager.submitMessage(ikCenterOfMassMessages.get(indexOfCurrentKeyFrame.getIntegerValue()));
       if (ikConfigurationMessage.get() != null)
