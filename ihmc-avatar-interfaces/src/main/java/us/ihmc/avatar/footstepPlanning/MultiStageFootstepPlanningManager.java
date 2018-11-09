@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
-   private static final boolean debug = false;
+   private static final boolean debug = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -178,7 +178,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private FootstepPlanningStage cleanupPlanningStage(FootstepPlanningStage planningStage)
    {
       stepPlanningStagesInProgress.remove(planningStage);
-      planningStage.requestInitialize();
       planningStage.destroyStageRunnable();
       planningTasks.remove(planningStage).cancel(true);
       planningStagePool.add(planningStage);
@@ -191,9 +190,12 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       globalSequenceIndex.set(0);
       pathPlanningStagesInProgress.clear();
 
-      for (FootstepPlanningStage stepPlanningStageInProgress : stepPlanningStagesInProgress.iterator())
+      if (!stepPlanningStagesInProgress.isEmpty())
       {
-         planningStagePool.add(cleanupPlanningStage(stepPlanningStageInProgress));
+         for (FootstepPlanningStage stepPlanningStageInProgress : stepPlanningStagesInProgress.iterator())
+         {
+            cleanupPlanningStage(stepPlanningStageInProgress);
+         }
       }
 
       completedPathPlans.clear();
@@ -213,9 +215,12 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDonePlanningSteps.set(true);
       isDone.set(true);
 
-      for (FootstepPlanningStage stage : stepPlanningStagesInProgress.iterator())
+      if (!stepPlanningStagesInProgress.isEmpty())
       {
-         stage.cancelPlanning();
+         for (FootstepPlanningStage stage : stepPlanningStagesInProgress.iterator())
+         {
+            stage.cancelPlanning();
+         }
       }
    }
 
@@ -296,7 +301,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       completedPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
 
-      planningStagePool.add(cleanupPlanningStage(stageFinished));
+      cleanupPlanningStage(stageFinished);
 
       if (debug)
          PrintTools.info("Stage " + stageFinished.getStageId() + " just finished planning its steps.");
@@ -362,6 +367,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       if (debug)
       {
          PrintTools.info("Starting to plan. Plan id: " + request.getPlannerRequestId() + ". Timeout: " + request.getTimeout());
+         PrintTools.info("Start position = " + request.getStanceFootPositionInWorld() + ", Orientation = " + request.getStanceFootOrientationInWorld());
+         PrintTools.info("Goal position = " + request.getGoalPositionInWorld() + ", Orientation = " + request.getGoalOrientationInWorld());
+
       }
 
       if (requestedPlannerType != null)
@@ -482,6 +490,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          isDonePlanningSteps.set(noMoreStepsToPlan);
 
       boolean isDone = stepPlanningStagesInProgress.isEmpty();
+      isDone &= latestRequestReference.get() == null;
       isDone &= pathPlanningStagesInProgress.isEmpty();
       isDone &= planningObjectivePool.isEmpty();
       isDone &= !goalRecommendationHandler.hasNewFootstepPlannerObjectives();
@@ -557,6 +566,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          }
 
          totalFootstepPlan.addFootstepPlan(footstepPlan);
+  
       }
 
       footstepPlan.set(totalFootstepPlan);
@@ -585,7 +595,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void processRequest(FootstepPlanningRequestPacket request)
    {
-      latestRequestReference.set(request);
+      latestRequestReference.set(request);     
    }
 
    public void processPlannerParameters(FootstepPlannerParametersPacket parameters)
@@ -726,14 +736,15 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public void clear()
       {
-         this.getCopyForWriting();
-         this.commit();
+         List<T> updatedList = getCopyForWriting();
+         updatedList.clear();
+         commit();
       }
 
       public void add(T objectToAdd)
       {
-         List<T> existingList = this.getCopyForReading();
-         List<T> updatedList = this.getCopyForWriting();
+         List<T> existingList = getCopyForReading();
+         List<T> updatedList = getCopyForWriting();
          updatedList.clear();
          if (existingList != null)
             updatedList.addAll(existingList);
@@ -744,8 +755,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public T remove(int indexToRemove)
       {
-         List<T> existingList = this.getCopyForReading();
-         List<T> updatedList = this.getCopyForWriting();
+         List<T> existingList = getCopyForReading();
+         List<T> updatedList = getCopyForWriting();
          updatedList.clear();
          if (existingList != null)
             updatedList.addAll(existingList);
@@ -758,11 +769,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public Iterable<T> iterable()
       {
-         return this.getCopyForReading();
+         return getCopyForReading();
       }
    }
 
-   class ConcurrentPairList<L, R> extends ConcurrentCopier<PairList<L, R>>
+   private class ConcurrentPairList<L, R> extends ConcurrentCopier<PairList<L, R>>
    {
       public ConcurrentPairList()
       {
@@ -771,7 +782,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public boolean isEmpty()
       {
-         PairList<L, R> readCopy = this.getCopyForReading();
+         PairList<L, R> readCopy = getCopyForReading();
          if (readCopy == null)
             return true;
          else
@@ -780,14 +791,16 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public void clear()
       {
-         this.getCopyForWriting();
-         this.commit();
+         PairList<L, R> updatedList = getCopyForWriting();
+         updatedList.clear();
+         
+         commit();
       }
 
       public void add(L leftObjectToAdd, R rightObjectToAdd)
       {
-         PairList<L, R> existingList = this.getCopyForReading();
-         PairList<L, R> updatedList = this.getCopyForWriting();
+         PairList<L, R> existingList = getCopyForReading();
+         PairList<L, R> updatedList = getCopyForWriting();
          updatedList.clear();
          if (existingList != null)
             updatedList.addAll(existingList);
@@ -798,8 +811,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public ImmutablePair<L, R> remove(int indexToRemove)
       {
-         PairList<L, R> existingList = this.getCopyForReading();
-         PairList<L, R> updatedList = this.getCopyForWriting();
+         PairList<L, R> existingList = getCopyForReading();
+         PairList<L, R> updatedList = getCopyForWriting();
          updatedList.clear();
          if (existingList != null)
             updatedList.addAll(existingList);
@@ -812,7 +825,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public Iterable<ImmutablePair<L, R>> iterable()
       {
-         return this.getCopyForReading();
+         return getCopyForReading();
       }
    }
 
@@ -825,42 +838,52 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public boolean isEmpty()
       {
-         return this.getCopyForReading().isEmpty();
+         Map<K, V> existingMap = getCopyForReading();
+         
+         if (existingMap != null)
+            return getCopyForReading().isEmpty();
+         else
+            return true;
       }
 
       public Iterable<K> iterator()
       {
-         return this.getCopyForReading().keySet();
+         Map<K, V> existingMap = getCopyForReading();
+         if (existingMap != null)
+            return existingMap.keySet();
+         else
+            return null;
       }
 
       public void clear()
       {
-         this.getCopyForWriting();
-         this.commit();
+         Map<K, V> updatedMap = getCopyForWriting();
+         updatedMap.clear();
+         commit();
       }
 
       public void put(K key, V value)
       {
-         Map<K, V> existingMap = this.getCopyForReading();
-         Map<K, V> updatedMap = this.getCopyForWriting();
+         Map<K, V> existingMap = getCopyForReading();
+         Map<K, V> updatedMap = getCopyForWriting();
          updatedMap.clear();
          if (existingMap != null)
             updatedMap.putAll(existingMap);
          updatedMap.put(key, value);
 
-         this.commit();
+         commit();
       }
 
       public V remove(K key)
       {
-         Map<K, V> existingMap = this.getCopyForReading();
-         Map<K, V> updatedMap = this.getCopyForWriting();
+         Map<K, V> existingMap = getCopyForReading();
+         Map<K, V> updatedMap = getCopyForWriting();
          updatedMap.clear();
          if (existingMap != null)
             updatedMap.putAll(existingMap);
          V objectToReturn = updatedMap.remove(key);
 
-         this.commit();
+         commit();
 
          return objectToReturn;
       }
