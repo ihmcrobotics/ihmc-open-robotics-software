@@ -367,9 +367,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       if (debug)
       {
          PrintTools.info("Starting to plan. Plan id: " + request.getPlannerRequestId() + ". Timeout: " + request.getTimeout());
-         PrintTools.info("Start position = " + request.getStanceFootPositionInWorld() + ", Orientation = " + request.getStanceFootOrientationInWorld());
-         PrintTools.info("Goal position = " + request.getGoalPositionInWorld() + ", Orientation = " + request.getGoalOrientationInWorld());
-
       }
 
       if (requestedPlannerType != null)
