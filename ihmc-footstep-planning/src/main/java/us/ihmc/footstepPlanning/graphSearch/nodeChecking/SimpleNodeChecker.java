@@ -5,23 +5,25 @@ import java.util.List;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class SimpleNodeChecker extends FootstepNodeChecker
 {
    @Override
-   public boolean isNodeValid(FootstepNode node, FootstepNode previosNode)
+   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
       if(!hasPlanarRegions())
          return true;
 
       Point2D nodePosition = new Point2D(node.getX(), node.getY());
       List<PlanarRegion> intersection = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(nodePosition);
-      if (intersection == null)
-         return false;
+      boolean intersectsPlanarRegions = intersection != null;
+      if(!intersectsPlanarRegions)
+         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
 
-      return intersection != null;
+      return intersectsPlanarRegions;
    }
 
    @Override

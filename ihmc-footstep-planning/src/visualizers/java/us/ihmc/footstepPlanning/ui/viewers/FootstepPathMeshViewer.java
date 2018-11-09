@@ -1,45 +1,114 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
+import controller_msgs.msg.dds.FootstepNodeDataListMessage;
+import controller_msgs.msg.dds.FootstepNodeDataMessage;
 import javafx.animation.AnimationTimer;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
-import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
+import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public class FootstepPathMeshViewer extends AnimationTimer
 {
-   private static final boolean VERBOSE = false;
    private static final ConvexPolygon2D defaultFootPolygon = PlannerTools.createDefaultFootPolygon();
+   private final Group root = new Group();
+   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+
+   private final AtomicReference<Boolean> showSolution;
+   private final AtomicReference<Boolean> showIntermediatePlan;
+   private final AtomicBoolean solutionWasReceived = new AtomicBoolean(false);
+   private final AtomicBoolean reset = new AtomicBoolean(false);
 
    private final MeshView footstepPathMeshView = new MeshView();
    private final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
-   private final JavaFXMultiColorMeshBuilder meshBuilder;
+   private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
+   private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
 
-   public FootstepPathMeshViewer()
+   private static final SideDependentList<Color> solutionFootstepColors = new SideDependentList<>(Color.GREEN, Color.RED);
+   private static final SideDependentList<Color> intermediateFootstepColors = new SideDependentList<>(Color.rgb(160, 160, 160), Color.rgb(160, 160, 160));
+
+   public FootstepPathMeshViewer(Messager messager)
    {
-      TextureColorPalette2D colorPalette = new TextureColorPalette2D();
-      colorPalette.setHueBrightnessBased(0.9);
-      meshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
+      messager.registerTopicListener(FootstepPlanTopic, footstepPlan -> executorService.submit(() ->
+                                                                                               {
+                                                                                                  solutionWasReceived.set(true);
+                                                                                                  processFootstepPath(footstepPlan);
+                                                                                               }));
+
+      messager.registerTopicListener(NodeDataTopic, nodeData -> executorService.submit(() ->
+                                                                                       {
+                                                                                          solutionWasReceived.set(false);
+                                                                                          processLowestCostNodeList(nodeData);
+                                                                                       }));
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, data -> reset.set(true));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
+
+      showSolution = messager.createInput(ShowFootstepPlanTopic, true);
+      showIntermediatePlan = messager.createInput(ShowNodeDataTopic, true);
    }
 
-   public void processFootstepPath(FootstepPlan plan)
+   private void processLowestCostNodeList(FootstepNodeDataListMessage message)
+   {
+      if(message.getIsFootstepGraph())
+         return;
+
+      IDLSequence.Object<FootstepNodeDataMessage> nodeDataList = message.getNodeData();
+      FootstepPlan footstepPlan = new FootstepPlan();
+      for (int i = 0; i < nodeDataList.size(); i++)
+      {
+         addNodeDataToFootstepPlan(footstepPlan, nodeDataList.get(i));
+      }
+
+      processFootstepPath(footstepPlan);
+   }
+
+   private static void addNodeDataToFootstepPlan(FootstepPlan footstepPlan, FootstepNodeDataMessage nodeData)
+   {
+      RobotSide robotSide = RobotSide.fromByte(nodeData.getRobotSide());
+
+      RigidBodyTransform footstepPose = new RigidBodyTransform();
+      footstepPose.setRotationYawAndZeroTranslation(nodeData.getYawIndex() * FootstepNode.gridSizeYaw);
+      footstepPose.setTranslationX(nodeData.getXIndex() * FootstepNode.gridSizeXY);
+      footstepPose.setTranslationY(nodeData.getYIndex() * FootstepNode.gridSizeXY);
+
+      RigidBodyTransform snapTransform = new RigidBodyTransform();
+      snapTransform.set(nodeData.getSnapRotation(), nodeData.getSnapTranslation());
+      snapTransform.transform(footstepPose);
+      footstepPlan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
+   }
+
+   private synchronized void processFootstepPath(FootstepPlan plan)
    {
       meshBuilder.clear();
+      SideDependentList<Color> colors = solutionWasReceived.get() ? solutionFootstepColors : intermediateFootstepColors;
 
       FramePose3D footPose = new FramePose3D();
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
@@ -48,8 +117,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
          SimpleFootstep footstep = plan.getFootstep(i);
-         Color regionColor = footstep.getRobotSide().equals(RobotSide.RIGHT) ? Color.RED : Color.GREEN;
-         regionColor = Color.hsb(regionColor.getHue(), 0.9, 1.0);
+         Color regionColor = colors.get(footstep.getRobotSide());
 
          footstep.getSoleFramePose(footPose);
          footPose.get(transformToWorld);
@@ -76,19 +144,41 @@ public class FootstepPathMeshViewer extends AnimationTimer
    @Override
    public void handle(long now)
    {
-      Pair<Mesh, Material> newMeshAndMaterial = meshReference.getAndSet(null);
+      boolean addIntermediatePlan = showIntermediatePlan.get() && !solutionWasReceived.get() && root.getChildren().isEmpty();
+      boolean addFinalPlan = showSolution.get() && solutionWasReceived.get() && root.getChildren().isEmpty();
+      if(addIntermediatePlan || addFinalPlan)
+         root.getChildren().add(footstepPathMeshView);
 
+      boolean removeIntermediatePlan = !showIntermediatePlan.get() && !solutionWasReceived.get() && !root.getChildren().isEmpty();
+      boolean removeFinalPlan = !showSolution.get() && solutionWasReceived.get() && !root.getChildren().isEmpty();
+      if(removeIntermediatePlan || removeFinalPlan)
+         root.getChildren().clear();
+
+      if(reset.getAndSet(false))
+      {
+         footstepPathMeshView.setMesh(null);
+         footstepPathMeshView.setMaterial(null);
+         meshReference.set(null);
+         return;
+      }
+
+      Pair<Mesh, Material> newMeshAndMaterial = meshReference.getAndSet(null);
       if (newMeshAndMaterial != null)
       {
-         if (VERBOSE)
-            PrintTools.info(this, "Rendering body path line.");
          footstepPathMeshView.setMesh(newMeshAndMaterial.getKey());
          footstepPathMeshView.setMaterial(newMeshAndMaterial.getValue());
       }
    }
 
+   @Override
+   public void stop()
+   {
+      super.stop();
+      executorService.shutdownNow();
+   }
+
    public Node getRoot()
    {
-      return footstepPathMeshView;
+      return root;
    }
 }
