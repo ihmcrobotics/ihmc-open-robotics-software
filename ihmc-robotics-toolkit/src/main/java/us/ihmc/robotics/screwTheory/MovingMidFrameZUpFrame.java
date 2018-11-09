@@ -92,12 +92,11 @@ public class MovingMidFrameZUpFrame extends MovingReferenceFrame
       double distanceFromTwo = EuclidCoreTools.norm(originTwo.getX(), originTwo.getY());
 
       double omegaZFromOne = linearVelocityOne.getX() / distanceFromOne;
-      omegaZFromOne = Math.copySign(omegaZFromOne, originOne.getY());
+      omegaZFromOne = omegaZFromOne * Math.signum(originOne.getY());
 
       double omegaZFromTwo = linearVelocityTwo.getX() / distanceFromTwo;
-      omegaZFromTwo = -Math.copySign(omegaZFromTwo, originTwo.getY());
+      omegaZFromTwo = omegaZFromTwo * Math.signum(originTwo.getY());
 
-      twistRelativeToParentToPack.setAngularPartZ(0.5 * (omegaZFromOne + omegaZFromTwo));
-      twistRelativeToParentToPack.setAngularPartZ(omegaZFromTwo);
+      twistRelativeToParentToPack.setAngularPartZ(-0.5 * (omegaZFromOne + omegaZFromTwo));
    }
 }
