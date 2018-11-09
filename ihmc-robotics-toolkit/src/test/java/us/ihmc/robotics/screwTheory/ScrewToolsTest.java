@@ -728,7 +728,7 @@ public class ScrewToolsTest
       assertEquals(jointsArr.length - 1, revoluteJoints.length);
       for(int i = 0; i < revoluteJoints.length; i++)
       {
-         assertEquals("testjoint" + i, revoluteJoints[i].getName());
+         assertEquals("testJoint" + i, revoluteJoints[i].getName());
       }
    }
 
@@ -830,7 +830,7 @@ public class ScrewToolsTest
       {
          //good  
       }
-      matches = ScrewTools.findJointsWithNames(allJoints, "chainAjoint0");
+      matches = ScrewTools.findJointsWithNames(allJoints, "chainAJoint0");
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -855,9 +855,9 @@ public class ScrewToolsTest
       {
          //good  
       }
-      matches = ScrewTools.findRigidBodiesWithNames(allBodies, "elevator", "chainAbody0", 
-            "chainAbody1", "chainAbody2", "chainAbody4", "chainBbody0", "chainBbody1", "chainBbody2", 
-            "chainBbody3", "chainBbody4", "chainCbody0", "chainCbody1", "chainCbody2", "chainCbody3", "chainCbody4");
+      matches = ScrewTools.findRigidBodiesWithNames(allBodies, "elevator", "chainABody0", 
+            "chainABody1", "chainABody2", "chainABody4", "chainBBody0", "chainBBody1", "chainBBody2", 
+            "chainBBody3", "chainBBody4", "chainCBody0", "chainCBody1", "chainCBody2", "chainCBody3", "chainCBody4");
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
