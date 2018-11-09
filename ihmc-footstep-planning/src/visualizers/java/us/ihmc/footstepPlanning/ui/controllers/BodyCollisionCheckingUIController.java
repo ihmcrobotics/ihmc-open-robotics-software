@@ -2,15 +2,10 @@ package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.BodyCollisionPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.ui.components.BodyCollisionPlannerParametersProperty;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
-import us.ihmc.footstepPlanning.ui.components.SettableBodyCollisionPlannerParameters;
 import us.ihmc.footstepPlanning.ui.components.SettableFootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
@@ -18,7 +13,7 @@ import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMess
 public class BodyCollisionCheckingUIController
 {
    private JavaFXMessager messager;
-   private final BodyCollisionPlannerParametersProperty parametersProperty = new BodyCollisionPlannerParametersProperty(this, "bodyCollisionParametersProperty");
+   private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty(this, "bodyCollisionParametersProperty");
 
    @FXML
    private ToggleButton enableBodyCollisionChecking;
@@ -55,24 +50,24 @@ public class BodyCollisionCheckingUIController
       parametersProperty.bidirectionalBindBodyBoxBaseY(bodyBoxBaseY.valueProperty());
       parametersProperty.bidirectionalBindBodyBoxBaseZ(bodyBoxBaseZ.valueProperty());
 
-//      messager.bindBidirectional(FootstepPlannerMessagerAPI.BodyCollisionParametersTopic, parametersProperty, createConverter(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
    }
 
 
-   private PropertyToMessageTypeConverter<BodyCollisionPlannerParameters, SettableBodyCollisionPlannerParameters> createConverter()
+   private PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters> createConverter()
    {
-      return new PropertyToMessageTypeConverter<BodyCollisionPlannerParameters, SettableBodyCollisionPlannerParameters>()
+      return new PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters>()
       {
          @Override
-         public BodyCollisionPlannerParameters convert(SettableBodyCollisionPlannerParameters propertyValue)
+         public FootstepPlannerParameters convert(SettableFootstepPlannerParameters propertyValue)
          {
             return propertyValue;
          }
 
          @Override
-         public SettableBodyCollisionPlannerParameters interpret(BodyCollisionPlannerParameters messageContent)
+         public SettableFootstepPlannerParameters interpret(FootstepPlannerParameters messageContent)
          {
-            return new SettableBodyCollisionPlannerParameters(messageContent);
+            return new SettableFootstepPlannerParameters(messageContent);
          }
       };
    }

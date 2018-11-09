@@ -53,7 +53,7 @@ public class RemoteUIMessageConverter
 
    private final String robotName;
 
-   private final AtomicReference<FootstepPlannerParameters> plannerParametersReference = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlannerParameters> plannerParametersReference;
    private final AtomicReference<Point3D> plannerStartPositionReference;
    private final AtomicReference<Quaternion> plannerStartOrientationReference;
    private final AtomicReference<Point3D> plannerGoalPositionReference;
@@ -94,10 +94,7 @@ public class RemoteUIMessageConverter
       this.robotName = robotName;
       this.ros2Node = ros2Node;
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, message ->
-      {
-         // TODO set parameters from message-based parameters
-      });
+      plannerParametersReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerParametersTopic);
       plannerStartPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic);
       plannerStartOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion());
       plannerGoalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic);
