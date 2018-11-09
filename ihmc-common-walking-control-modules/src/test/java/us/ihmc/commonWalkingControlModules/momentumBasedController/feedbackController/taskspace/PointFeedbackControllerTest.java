@@ -168,13 +168,13 @@ public final class PointFeedbackControllerTest
       FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.nextFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, 0.0, 1.0, joints);
       joints.get(0).getPredecessor().updateFramesRecursively();
       FramePoint3D desiredPosition = new FramePoint3D();
       desiredPosition.setIncludingFrame(bodyFixedPointToControl);
       desiredPosition.changeFrame(worldFrame);
       MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, 0.0, 1.0, joints);
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
