@@ -1,10 +1,10 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 
 public class FullInverseDynamicsStructure
 {
@@ -19,7 +19,8 @@ public class FullInverseDynamicsStructure
       this.elevator = elevator;
       this.rootJoint = rootInverseDynamicsJoint;
 
-      spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, 0.0);
+      spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, ReferenceFrame.getWorldFrame());
+      spatialAccelerationCalculator.setGravitionalAcceleration(-0.0);
 
       this.estimationLink = estimationLink;
    }
@@ -51,7 +52,7 @@ public class FullInverseDynamicsStructure
 
    public void updateInternalState()
    {
-      spatialAccelerationCalculator.compute();
+      spatialAccelerationCalculator.reset();
    }
 
    public static FullInverseDynamicsStructure createInverseDynamicStructure(FullRobotModel fullRobotModel)

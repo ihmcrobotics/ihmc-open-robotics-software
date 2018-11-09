@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
+import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -24,8 +25,6 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class MotionQPInputCalculatorTest
@@ -55,7 +54,8 @@ public class MotionQPInputCalculatorTest
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(joints);
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("comFrame", worldFrame, rootBody);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, 0.0);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, ReferenceFrame.getWorldFrame());
+      spatialAccelerationCalculator.setGravitionalAcceleration(-0.0);
       JointIndexHandler jointIndexHandler = new JointIndexHandler(joints);
       YoVariableRegistry registry = new YoVariableRegistry("dummyRegistry");
       CentroidalMomentumRateCalculator centroidalMomentumHandler = new CentroidalMomentumRateCalculator(rootBody, centerOfMassFrame);
@@ -90,9 +90,9 @@ public class MotionQPInputCalculatorTest
 
          MultiBodySystemTools.insertJointsState(joints, JointStateType.ACCELERATION, desiredJointAccelerations);
 
-         spatialAccelerationCalculator.compute();
+         spatialAccelerationCalculator.reset();
          SpatialAcceleration achievedSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, endEffectorFrame);
-         spatialAccelerationCalculator.getRelativeAcceleration(rootBody, endEffector, achievedSpatialAcceleration);
+         achievedSpatialAcceleration.setIncludingFrame(spatialAccelerationCalculator.getRelativeAcceleration(rootBody, endEffector));
          MecanoTestTools.assertSpatialAccelerationEquals(achievedSpatialAcceleration, desiredSpatialAcceleration, 1.0e-10);
       }
 
@@ -121,9 +121,9 @@ public class MotionQPInputCalculatorTest
 
          MultiBodySystemTools.insertJointsState(joints, JointStateType.ACCELERATION, desiredJointAccelerations);
 
-         spatialAccelerationCalculator.compute();
+         spatialAccelerationCalculator.reset();
          SpatialAcceleration achievedSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, endEffectorFrame);
-         spatialAccelerationCalculator.getRelativeAcceleration(rootBody, endEffector, achievedSpatialAcceleration);
+         achievedSpatialAcceleration.setIncludingFrame(spatialAccelerationCalculator.getRelativeAcceleration(rootBody, endEffector));
          achievedSpatialAcceleration.changeFrame(controlFrame);
          MecanoTestTools.assertSpatialAccelerationEquals(achievedSpatialAcceleration, desiredSpatialAcceleration, 1.0e-10);
       }

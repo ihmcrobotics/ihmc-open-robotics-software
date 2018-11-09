@@ -3,6 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class CenterOfMassAccelerationCalculator
@@ -35,7 +36,7 @@ public class CenterOfMassAccelerationCalculator
          double mass = rigidBody.getInertia().getMass();
          rigidBody.getCenterOfMass(comLocation);
 
-         spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(base, rigidBody, comLocation, linkLinearMomentumDot);
+         linkLinearMomentumDot.setIncludingFrame(spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(base, rigidBody, comLocation));
          linkLinearMomentumDot.scale(mass);
 
          if (firstIteration)
