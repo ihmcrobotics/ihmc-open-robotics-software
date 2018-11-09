@@ -117,8 +117,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
    private void assertAAndADotV(Random random, ArrayList<RevoluteJoint> joints, RigidBodyBasics elevator, SCSRobotFromInverseDynamicsRobotModel robot,int numJoints)
          throws UnreasonableAccelerationException
    {
-      RigidBodyBasics[] rootBodies = {elevator};
-      int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(MultiBodySystemTools.collectSubtreeJoints(rootBodies));
+      int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(MultiBodySystemTools.collectSubtreeJoints(elevator));
       DenseMatrix64F v = new DenseMatrix64F(numberOfDoFs, 1);
 
       JointBasics[] idJoints = new JointBasics[numJoints]; 

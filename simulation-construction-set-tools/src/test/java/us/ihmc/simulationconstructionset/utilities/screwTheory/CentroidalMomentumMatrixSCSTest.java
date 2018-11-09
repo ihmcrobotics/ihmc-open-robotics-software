@@ -26,7 +26,6 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -137,9 +136,7 @@ public class CentroidalMomentumMatrixSCSTest
    public static Momentum computeCoMMomentum(RigidBodyBasics elevator, ReferenceFrame centerOfMassFrame, CentroidalMomentumCalculator centroidalMomentumMatrix)
    {
       DenseMatrix64F mat = centroidalMomentumMatrix.getCentroidalMomentumMatrix();
-      RigidBodyBasics[] rootBodies = {elevator};
-//      InverseDynamicsJoint[] jointList = ScrewTools.computeJointsInOrder(elevator); //deprecated method
-      JointBasics[] jointList = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
+      JointBasics[] jointList = MultiBodySystemTools.collectSubtreeJoints(elevator);
 
       DenseMatrix64F jointVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointList), 1);
       MultiBodySystemTools.extractJointsState(jointList, JointStateType.VELOCITY, jointVelocities);

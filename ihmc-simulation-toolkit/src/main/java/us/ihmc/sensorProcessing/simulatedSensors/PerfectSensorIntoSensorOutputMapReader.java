@@ -16,11 +16,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.robotController.RawSensorReader;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
@@ -99,10 +96,7 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
 
    private void createJointRelations(FloatingRootJointRobot robot, FloatingJointBasics rootJoint)
    {
-      RigidBodyBasics[] rootBodies = {rootJoint.getSuccessor()};
-      JointBasics[] jointsArray = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
-
-      for (JointBasics joint : jointsArray)
+      for (JointBasics joint : rootJoint.subtreeIterable())
       {
          if (joint instanceof OneDoFJointBasics)
          {

@@ -566,7 +566,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private RigidBodyBasics getRigidBodyHasSameName(FullHumanoidRobotModel fullRobotModel, RigidBodyBasics givenRigidBody)
    {
       RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(fullRobotModel.getElevator());
-      RigidBodyBasics[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
+      RigidBodyBasics[] allRigidBodies = rootBody.subtreeArray();
       for (RigidBodyBasics rigidBody : allRigidBodies)
          if (givenRigidBody.getName().equals(rigidBody.getName()))
             return rigidBody;

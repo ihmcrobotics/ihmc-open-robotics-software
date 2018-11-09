@@ -21,10 +21,8 @@ public abstract class AbstractInverseDynamicsCopier
    public void setRigidBodies(RigidBodyBasics originalBody, RigidBodyBasics targetBody)
    {
       jointPairs.clear();
-      RigidBodyBasics[] rootBodies = {originalBody};
-      JointBasics[] originalJoints = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
-      RigidBodyBasics[] rootBodies1 = {targetBody};
-      JointBasics[] targetJoints = MultiBodySystemTools.collectSubtreeJoints(rootBodies1);
+      JointBasics[] originalJoints = MultiBodySystemTools.collectSubtreeJoints(originalBody);
+      JointBasics[] targetJoints = MultiBodySystemTools.collectSubtreeJoints(targetBody);
       
       for(int i = 0; i < originalJoints.length; i++)
       {      

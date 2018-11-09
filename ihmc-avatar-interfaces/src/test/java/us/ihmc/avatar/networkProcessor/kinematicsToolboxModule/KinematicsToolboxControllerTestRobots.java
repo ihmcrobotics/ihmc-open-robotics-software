@@ -141,9 +141,8 @@ public class KinematicsToolboxControllerTestRobots
          predecessor = rootBody;
          addJointsRecursively((OneDoFJointDescription) robotDescription.getRootJoints().get(0), predecessor);
       }
-      RigidBodyBasics[] rootBodies = {predecessor};
 
-      return new ImmutablePair<>(rootJoint, MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(rootBodies), OneDoFJointBasics.class));
+      return new ImmutablePair<>(rootJoint, MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(predecessor), OneDoFJointBasics.class));
    }
 
    

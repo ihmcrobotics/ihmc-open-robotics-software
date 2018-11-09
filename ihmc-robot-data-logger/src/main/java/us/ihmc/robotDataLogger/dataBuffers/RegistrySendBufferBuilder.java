@@ -6,12 +6,10 @@ import java.util.List;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointHolderFactory;
 import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -54,9 +52,7 @@ public class RegistrySendBufferBuilder implements us.ihmc.concurrent.Builder<Reg
 
       if (rootBody != null)
       {
-         RigidBodyBasics[] rootBodies = {rootBody};
-         JointBasics[] joints = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
-         for (JointBasics joint : joints)
+         for (JointBasics joint : rootBody.childrenSubtreeIterable())
          {
             JointHolder jointHolder = JointHolderFactory.getJointHolder(joint);
             jointHolders.add(jointHolder);

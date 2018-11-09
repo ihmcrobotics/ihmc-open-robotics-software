@@ -16,7 +16,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 /**
@@ -36,30 +35,27 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, new HumanoidReferenceFrames(fullRobotModel));
 
       RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(fullRobotModel.getElevator());
-      RigidBodyBasics[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
-      for (RigidBodyBasics rigidBody : allRigidBodies)
+      for (RigidBodyBasics rigidBody : rootBody.subtreeIterable())
          rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody);
    }
 
    public KinematicsToolboxCommandConverter(RigidBodyBasics rootBody)
    {
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
-      RigidBodyBasics[] rootBodies = {rootBody};
-      for (JointBasics joint : MultiBodySystemTools.collectSubtreeJoints(rootBodies))
+      for (JointBasics joint : rootBody.childrenSubtreeIterable())
       {
          referenceFrames.add(joint.getFrameAfterJoint());
          referenceFrames.add(joint.getFrameBeforeJoint());
       }
 
-      for (RigidBodyBasics rigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(rootBody))
+      for (RigidBodyBasics rigidBody : rootBody.subtreeIterable())
       {
          referenceFrames.add(rigidBody.getBodyFixedFrame());
       }
 
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(referenceFrames);
 
-      RigidBodyBasics[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
-      for (RigidBodyBasics rigidBody : allRigidBodies)
+      for (RigidBodyBasics rigidBody : rootBody.subtreeIterable())
          rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody);
    }
 

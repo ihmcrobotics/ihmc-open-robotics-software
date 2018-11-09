@@ -425,8 +425,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
          RigidBodyBasics hand = getHand(robotSide);
          if (hand != null)
          {
-            RigidBodyBasics[] rootBodies = {hand};
-            OneDoFJointBasics[] fingerJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(rootBodies), OneDoFJointBasics.class);
+            OneDoFJointBasics[] fingerJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(hand), OneDoFJointBasics.class);
             for (OneDoFJointBasics fingerJoint : fingerJoints)
             {
                jointsToPack.remove(fingerJoint);

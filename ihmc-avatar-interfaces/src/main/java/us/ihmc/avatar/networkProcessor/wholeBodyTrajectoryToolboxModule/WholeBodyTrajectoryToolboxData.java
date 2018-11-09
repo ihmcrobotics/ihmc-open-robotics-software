@@ -12,7 +12,6 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsSolver;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
@@ -20,10 +19,7 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Wayp
 import us.ihmc.manipulation.planning.exploringSpatial.SpatialData;
 import us.ihmc.manipulation.planning.exploringSpatial.SpatialNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 /**
  * This class is for packing input of the controller as like as a packet
@@ -128,7 +124,7 @@ public class WholeBodyTrajectoryToolboxData
          }
 
          ConstrainedRigidBodyTrajectory constrainedRigidBodyTrajectory = null;
-         for (RigidBodyBasics candidateRigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(MultiBodySystemTools.getRootBody(fullRobotModel.getElevator())))
+         for (RigidBodyBasics candidateRigidBody : fullRobotModel.getElevator().subtreeIterable())
          {
             if (candidateRigidBody.getName() == rigidBody.getName())
             {
@@ -258,7 +254,7 @@ public class WholeBodyTrajectoryToolboxData
       {
          RigidBodyBasics rigidBody = allRigidBodies.get(i);
 
-         for (RigidBodyBasics candidateRigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(MultiBodySystemTools.getRootBody(fullRobotModel.getElevator())))
+         for (RigidBodyBasics candidateRigidBody : fullRobotModel.getElevator().subtreeIterable())
          {
             if (candidateRigidBody.getName() == rigidBody.getName())
             {

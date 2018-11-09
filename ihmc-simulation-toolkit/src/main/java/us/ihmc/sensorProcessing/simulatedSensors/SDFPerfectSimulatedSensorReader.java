@@ -15,12 +15,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotController.RawSensorReader;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -72,11 +69,8 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       this.forceSensorDataHolderToUpdate = forceSensorDataHolderToUpdate;
 
       this.rootJoint = rootJoint;
-      RigidBodyBasics[] rootBodies = {rootJoint.getSuccessor()};
 
-      JointBasics[] jointsArray = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
-
-      for (JointBasics joint : jointsArray)
+      for (JointBasics joint : rootJoint.subtreeIterable())
       {
          if (joint instanceof OneDoFJointBasics)
          {
