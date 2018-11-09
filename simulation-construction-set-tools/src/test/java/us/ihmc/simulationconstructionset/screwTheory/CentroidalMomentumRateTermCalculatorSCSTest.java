@@ -38,7 +38,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
 
    private static final int NUMBER_OF_ITERATIONS = 10;
 
-   private final double controlDT = 0.00000005;
+   private final double controlDT = 1.0e-8;
 
    private final DenseMatrix64F a = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F aPrevVal = new DenseMatrix64F(0, 0);
