@@ -1,5 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
+import java.util.stream.Stream;
+
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
@@ -15,7 +17,7 @@ public class MomentumCalculator
 
    public MomentumCalculator(RigidBodyBasics... rigidBodies)
    {
-      rigidBodiesInOrders = rigidBodies;
+      rigidBodiesInOrders = Stream.of(rigidBodies).filter(body -> body.getInertia() != null).toArray(RigidBodyBasics[]::new);
    }
 
    public MomentumCalculator(RigidBodyBasics rootBody)
