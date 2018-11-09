@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -48,7 +49,8 @@ public class CenterOfMassAccelerationCalculatorTest
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoF", elevator);
       new RigidBody("body", sixDoFJoint, getRandomDiagonalMatrix(random), mass, new Vector3D());
       SpatialAcceleration rootAcceleration = new SpatialAcceleration(elevatorFrame, worldFrame, elevatorFrame);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, rootAcceleration, true);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, ReferenceFrame.getWorldFrame());
+      spatialAccelerationCalculator.setRootAcceleration(rootAcceleration);
       CenterOfMassAccelerationCalculator comAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
 
       ReferenceFrame frameAfterJoint = sixDoFJoint.getFrameAfterJoint();
@@ -63,7 +65,7 @@ public class CenterOfMassAccelerationCalculatorTest
       RotationMatrix rotationMatrix = new RotationMatrix();
       rotationMatrix.set(sixDoFJoint.getJointPose().getOrientation());
 
-      spatialAccelerationCalculator.compute();
+      spatialAccelerationCalculator.reset();
       FrameVector3D comAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());
       comAccelerationCalculator.getCoMAcceleration(comAcceleration);
 
@@ -88,7 +90,8 @@ public class CenterOfMassAccelerationCalculatorTest
       RigidBodyBasics r2 = new RigidBody("r2", j2, getRandomDiagonalMatrix(random), random.nextDouble(), getRandomVector(random));
 
       SpatialAcceleration rootAcceleration = new SpatialAcceleration(elevatorFrame, worldFrame, elevatorFrame);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, rootAcceleration, true);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, ReferenceFrame.getWorldFrame());
+      spatialAccelerationCalculator.setRootAcceleration(rootAcceleration);
       CenterOfMassAccelerationCalculator comAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
 
       double qdd1 = random.nextDouble();
@@ -104,7 +107,7 @@ public class CenterOfMassAccelerationCalculatorTest
       j2.setQdd(qdd2);
       elevator.updateFramesRecursively();
 
-      spatialAccelerationCalculator.compute();
+      spatialAccelerationCalculator.reset();
       FrameVector3D comAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());
       comAccelerationCalculator.getCoMAcceleration(comAcceleration);
 
@@ -135,10 +138,11 @@ public class CenterOfMassAccelerationCalculatorTest
       elevator.updateFramesRecursively();
 
       SpatialAcceleration rootAcceleration = new SpatialAcceleration(elevatorFrame, worldFrame, elevatorFrame);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, rootAcceleration, true);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, ReferenceFrame.getWorldFrame());
+      spatialAccelerationCalculator.setRootAcceleration(rootAcceleration);
       CenterOfMassAccelerationCalculator comAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
 
-      spatialAccelerationCalculator.compute();
+      spatialAccelerationCalculator.reset();
       FrameVector3D comAcceleration = new FrameVector3D(worldFrame);
       comAccelerationCalculator.getCoMAcceleration(comAcceleration);
 
@@ -163,10 +167,11 @@ public class CenterOfMassAccelerationCalculatorTest
       new RigidBody("r2", j2, getRandomDiagonalMatrix(random), random.nextDouble(), getRandomVector(random));
 
       SpatialAcceleration rootAcceleration = new SpatialAcceleration(elevatorFrame, worldFrame, elevatorFrame);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, rootAcceleration, true);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, ReferenceFrame.getWorldFrame());
+      spatialAccelerationCalculator.setRootAcceleration(rootAcceleration);
       CenterOfMassAccelerationCalculator comAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
 
-      spatialAccelerationCalculator.compute();
+      spatialAccelerationCalculator.reset();
       FrameVector3D comAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());
       comAccelerationCalculator.getCoMAcceleration(comAcceleration);
    }

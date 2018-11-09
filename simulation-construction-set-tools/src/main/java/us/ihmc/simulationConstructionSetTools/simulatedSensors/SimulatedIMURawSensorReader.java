@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
@@ -12,7 +13,6 @@ import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.robotics.math.corruptors.NoisyYoDouble;
 import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
 import us.ihmc.robotics.robotController.RawSensorReader;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -93,7 +93,8 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
       this.rigidBody = rigidBody;
       this.imuFrame = imuFrame;
       this.twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootBody);
-      this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, rootAcceleration, true);
+      this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, ReferenceFrame.getWorldFrame());
+      spatialAccelerationCalculator.setRootAcceleration(rootAcceleration);
 
       name = getClass().getSimpleName() + imuIndex;
       registry = new YoVariableRegistry(name);
@@ -157,9 +158,9 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    public void read()
    {
       twistCalculator.compute();
-      spatialAccelerationCalculator.compute();
+      spatialAccelerationCalculator.reset();
       twistCalculator.getTwistOfBody(rigidBody, twist);    // Twist of bodyCoM and not IMU!
-      spatialAccelerationCalculator.getAccelerationOfBody(rigidBody, spatialAcceleration);
+      spatialAcceleration.setIncludingFrame(spatialAccelerationCalculator.getAccelerationOfBody(rigidBody));
       spatialAcceleration.changeFrame(worldFrame, twist, twist);
 
       updatePerfectOrientation();
