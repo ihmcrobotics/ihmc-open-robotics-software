@@ -90,7 +90,7 @@ public class NumericalInverseKinematicsCalculatorTest
       GeometricJacobian jacobian = new GeometricJacobian(randomFloatingChain.getRootJoint().getSuccessor(), randomFloatingChain.getLeafBody(),
                                       randomFloatingChain.getLeafBody().getBodyFixedFrame());
 
-      RandomRestartInverseKinematicsCalculator calculator = createCalculator(jacobian, 300);
+      RandomRestartInverseKinematicsCalculator calculator = createCalculator(jacobian, 500);
 
       List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
 

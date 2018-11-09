@@ -79,6 +79,7 @@ public class GeometricJacobianTest
       {
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
          MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, -10.0, 10.0, joints);
+         rootBody.updateFramesRecursively();
 
          int randomEndEffectorIndex = random.nextInt(numberOfJoints);
          RigidBodyBasics randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
