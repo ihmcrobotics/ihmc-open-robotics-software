@@ -243,7 +243,7 @@ public final class PointFeedbackControllerTest
          CommonOps.scale(-1.0, solverInput_f);
 
          for (int diag = 0; diag < numberOfDoFs; diag++)
-            solverInput_H.add(diag, diag, 1e-8);
+            solverInput_H.add(diag, diag, 1e-5);
 
          jerryQPSolver.clear();
          jerryQPSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
@@ -261,7 +261,7 @@ public final class PointFeedbackControllerTest
          MultiBodySystemTools.insertJointsState(jointsToOptimizeFor, JointStateType.CONFIGURATION, integrator.getJointConfigurations());
          elevator.updateFramesRecursively();
 
-         assertArrayEquals(jointAccelerations.data, jointAccelerationsFromJerryQP.data, 1.0e-5);
+         assertArrayEquals(jointAccelerations.data, jointAccelerationsFromJerryQP.data, 1.0e-4);
          assertArrayEquals(jointAccelerations.data, jointAccelerationsFromQPOASES.data, 2.0e-1);
 
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
