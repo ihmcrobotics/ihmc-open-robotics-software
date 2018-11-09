@@ -526,7 +526,7 @@ public class ScrewTools
    public static JointBasics[] findJointsWithNames(JointBasics[] allJoints, String... jointNames)
    {
       Set<String> jointNameSet = new HashSet<>(Arrays.asList(jointNames));
-      JointBasics[] result = Stream.of(allJoints).filter(joint -> jointNameSet.contains(joint.getName())).toArray(JointBasics[]::new);
+      JointBasics[] result = Stream.of(allJoints).distinct().filter(joint -> jointNameSet.contains(joint.getName())).toArray(JointBasics[]::new);
 
       if (result.length != jointNames.length)
          throw new RuntimeException("Not all joints could be found");
@@ -537,7 +537,7 @@ public class ScrewTools
    public static RigidBodyBasics[] findRigidBodiesWithNames(RigidBodyBasics[] allBodies, String... bodyNames)
    {
       Set<String> bodyNameSet = new HashSet<>(Arrays.asList(bodyNames));
-      RigidBodyBasics[] result = Stream.of(allBodies).filter(body -> bodyNameSet.contains(body.getName())).toArray(RigidBodyBasics[]::new);
+      RigidBodyBasics[] result = Stream.of(allBodies).distinct().filter(body -> bodyNameSet.contains(body.getName())).toArray(RigidBodyBasics[]::new);
 
       if (result.length != bodyNames.length)
          throw new RuntimeException("Not all bodies could be found");
