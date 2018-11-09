@@ -2,7 +2,6 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -14,7 +13,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -35,46 +33,12 @@ public class ScrewTools
 
    public static RigidBodyBasics[] computeSubtreeSuccessors(RigidBodyBasics... bodies)
    {
-      return MultiBodySystemTools.collectSuccessors(computeSubtreeJoints(bodies));
+      return MultiBodySystemTools.collectSuccessors(MultiBodySystemTools.collectSubtreeJoints(bodies));
    }
 
    public static RigidBodyBasics[] computeSupportAndSubtreeSuccessors(RigidBodyBasics... bodies)
    {
-      return MultiBodySystemTools.collectSuccessors(computeSupportAndSubtreeJoints(bodies));
-   }
-
-   public static JointBasics[] computeSupportAndSubtreeJoints(RigidBodyBasics... bodies)
-   {
-      Set<JointBasics> ret = new LinkedHashSet<JointBasics>();
-      for (RigidBodyBasics body : bodies)
-      {
-         ret.addAll(Arrays.asList(computeSupportJoints(body)));
-         ret.addAll(Arrays.asList(computeSubtreeJoints(body)));
-      }
-      return ret.toArray(new JointBasics[ret.size()]);
-   }
-
-   public static JointBasics[] computeSupportJoints(RigidBodyBasics... bodies)
-   {
-      Set<JointBasics> supportSet = new LinkedHashSet<JointBasics>();
-      for (RigidBodyBasics rigidBody : bodies)
-      {
-         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
-         JointBasics[] jointPath = MultiBodySystemTools.createJointPath(rootBody, rigidBody);
-         supportSet.addAll(Arrays.asList(jointPath));
-      }
-
-      return supportSet.toArray(new JointBasics[supportSet.size()]);
-   }
-
-   public static JointBasics[] computeSubtreeJoints(RigidBodyBasics... rootBodies)
-   {
-      return computeSubtreeJoints(Arrays.asList(rootBodies));
-   }
-
-   public static JointBasics[] computeSubtreeJoints(List<RigidBodyBasics> rootBodies)
-   {
-      return rootBodies.stream().flatMap(root -> SubtreeStreams.fromChildren(root)).toArray(JointBasics[]::new);
+      return MultiBodySystemTools.collectSuccessors(MultiBodySystemTools.collectSupportAndSubtreeJoints(bodies));
    }
 
    /**

@@ -24,7 +24,8 @@ public class FullRobotModelUtils
          RigidBodyBasics hand = model.getHand(robotSide);
          if (hand != null)
          {
-            OneDoFJointBasics[] fingerJoints = MultiBodySystemTools.filterJoints(ScrewTools.computeSubtreeJoints(hand), OneDoFJointBasics.class);
+            RigidBodyBasics[] rootBodies = {hand};
+            OneDoFJointBasics[] fingerJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(rootBodies), OneDoFJointBasics.class);
             for (OneDoFJointBasics fingerJoint : fingerJoints)
             {
                jointsToPack.remove(fingerJoint);

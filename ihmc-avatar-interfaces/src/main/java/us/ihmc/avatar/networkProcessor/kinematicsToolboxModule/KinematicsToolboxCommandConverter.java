@@ -44,7 +44,8 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
    public KinematicsToolboxCommandConverter(RigidBodyBasics rootBody)
    {
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
-      for (JointBasics joint : ScrewTools.computeSubtreeJoints(rootBody))
+      RigidBodyBasics[] rootBodies = {rootBody};
+      for (JointBasics joint : MultiBodySystemTools.collectSubtreeJoints(rootBodies))
       {
          referenceFrames.add(joint.getFrameAfterJoint());
          referenceFrames.add(joint.getFrameBeforeJoint());

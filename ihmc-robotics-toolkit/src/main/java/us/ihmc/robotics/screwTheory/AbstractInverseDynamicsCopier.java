@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public abstract class AbstractInverseDynamicsCopier
 {  
@@ -20,8 +21,10 @@ public abstract class AbstractInverseDynamicsCopier
    public void setRigidBodies(RigidBodyBasics originalBody, RigidBodyBasics targetBody)
    {
       jointPairs.clear();
-      JointBasics[] originalJoints = ScrewTools.computeSubtreeJoints(originalBody);
-      JointBasics[] targetJoints = ScrewTools.computeSubtreeJoints(targetBody);
+      RigidBodyBasics[] rootBodies = {originalBody};
+      JointBasics[] originalJoints = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
+      RigidBodyBasics[] rootBodies1 = {targetBody};
+      JointBasics[] targetJoints = MultiBodySystemTools.collectSubtreeJoints(rootBodies1);
       
       for(int i = 0; i < originalJoints.length; i++)
       {      

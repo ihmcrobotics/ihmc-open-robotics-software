@@ -8,6 +8,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -142,8 +143,9 @@ public class SCSToInverseDynamicsJointMap
    public static SCSToInverseDynamicsJointMap createByName(FloatingJoint floatingRootJoint, FloatingJointBasics sixDoFRootJoint)
    {
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = new SCSToInverseDynamicsJointMap();
+      RigidBodyBasics[] rootBodies = {sixDoFRootJoint.getSuccessor()};
 
-      JointBasics[] inverseDynamicsJoints = ScrewTools.computeSubtreeJoints(sixDoFRootJoint.getSuccessor());
+      JointBasics[] inverseDynamicsJoints = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
       LinkedHashMap<String, OneDoFJointBasics> inverseDynamicsJointsByName = new LinkedHashMap<String, OneDoFJointBasics>();
 
       for (JointBasics inverseDynamicsJoint : inverseDynamicsJoints)

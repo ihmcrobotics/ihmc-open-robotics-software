@@ -167,7 +167,8 @@ public class MovingBaseRobotArm extends Robot
 
    private void setJointLimits()
    {
-      RevoluteJoint[] allJoints = MultiBodySystemTools.filterJoints(ScrewTools.computeSubtreeJoints(elevator), RevoluteJoint.class);
+      RigidBodyBasics[] rootBodies = {elevator};
+      RevoluteJoint[] allJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(rootBodies), RevoluteJoint.class);
       for (RevoluteJoint revoluteJoint : allJoints)
       {
          revoluteJoint.setJointLimitUpper(Math.PI);

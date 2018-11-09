@@ -34,7 +34,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -114,7 +113,7 @@ public class FixedBaseRobotArmController implements RobotController
       double gravityZ = robotArm.getGravity();
       RigidBodyBasics hand = robotArm.getHand();
       RigidBodyBasics elevator = robotArm.getElevator();
-      JointBasics[] controlledJoints = ScrewTools.computeSupportAndSubtreeJoints(elevator);
+      JointBasics[] controlledJoints = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
 
       ControllerCoreOptimizationSettings optimizationSettings = new RobotArmControllerCoreOptimizationSettings();

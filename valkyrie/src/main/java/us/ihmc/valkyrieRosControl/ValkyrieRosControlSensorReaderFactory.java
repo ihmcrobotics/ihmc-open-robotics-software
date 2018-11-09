@@ -10,6 +10,8 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
@@ -89,8 +91,9 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
       ArrayList<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles = new ArrayList<>();
 
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
+      RigidBodyBasics[] rootBodies = {rootJoint.getSuccessor()};
 
-      for (JointBasics joint : ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()))
+      for (JointBasics joint : MultiBodySystemTools.collectSubtreeJoints(rootBodies))
       {
          if (joint instanceof OneDoFJointBasics)
          {

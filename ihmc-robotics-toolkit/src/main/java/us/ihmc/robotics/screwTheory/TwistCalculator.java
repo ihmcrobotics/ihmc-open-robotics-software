@@ -83,8 +83,9 @@ public class TwistCalculator
       this.inertialFrame = inertialFrame;
       this.rootBody = MultiBodySystemTools.getRootBody(body);
       this.rootTwist = new Twist(rootBody.getBodyFixedFrame(), inertialFrame, rootBody.getBodyFixedFrame());
+      RigidBodyBasics[] rootBodies = {rootBody};
 
-      int numberOfRigidBodies = MultiBodySystemTools.collectSubtreeSuccessors(ScrewTools.computeSubtreeJoints(rootBody)).length;
+      int numberOfRigidBodies = MultiBodySystemTools.collectSubtreeSuccessors(MultiBodySystemTools.collectSubtreeJoints(rootBodies)).length;
       while (unnassignedTwists.size() < numberOfRigidBodies)
          unnassignedTwists.add(new Twist());
       assignedTwists = new ArrayList<>(numberOfRigidBodies);
