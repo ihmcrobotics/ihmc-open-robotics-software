@@ -1,22 +1,22 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
-import java.util.List;
-
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.List;
 
 public class SnapBasedNodeChecker extends FootstepNodeChecker
 {
@@ -26,18 +26,11 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepNodeSnapper snapper;
 
-   private BipedalFootstepPlannerListener listener;
-
    public SnapBasedNodeChecker(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper)
    {
       this.parameters = parameters;
       this.footPolygons = footPolygons;
       this.snapper = snapper;
-   }
-
-   public void addPlannerListener(BipedalFootstepPlannerListener listener)
-   {
-      this.listener = listener;
    }
 
    @Override
@@ -64,7 +57,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          {
             PrintTools.debug("Was not able to snap node:\n" + node);
          }
-         notifyPlannerListenerThatNodeIsRejected(node, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
+         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
          return false;
       }
 
@@ -77,7 +70,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          {
             PrintTools.debug("Node does not have enough foothold area. It only has " + Math.floor(100.0 * area / footArea) + "% foothold:\n" + node);
          }
-         notifyPlannerListenerThatNodeIsRejected(node, BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
+         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
          return false;
       }
 
@@ -100,17 +93,19 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          {
             PrintTools.debug("Too much height difference (" + Math.round(100.0 * heightChange) + "cm) to previous node:\n" + node);
          }
-         notifyPlannerListenerThatNodeIsRejected(node, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
+         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
          return false;
       }
 
-      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition, snapper.getOrCreateNearbyRegions(node.getRoundedX(), node.getRoundedY()), parameters.getBodyGroundClearance()))
+      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition,
+                                                       snapper.getOrCreateNearbyRegions(node.getRoundedX(), node.getRoundedY()),
+                                                       parameters.getBodyGroundClearance()))
       {
          if (DEBUG)
          {
             PrintTools.debug("Found a obstacle between the nodes " + node + " and " + previousNode);
          }
-         notifyPlannerListenerThatNodeIsRejected(node, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
+         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
          return false;
       }
 
@@ -182,11 +177,5 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    public void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform)
    {
       snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeTransform));
-   }
-
-   private void notifyPlannerListenerThatNodeIsRejected(FootstepNode node, BipedalFootstepPlannerNodeRejectionReason rejectionReason)
-   {
-      if(listener != null)
-         listener.nodeUnderConsiderationWasRejected(node, rejectionReason);
    }
 }
