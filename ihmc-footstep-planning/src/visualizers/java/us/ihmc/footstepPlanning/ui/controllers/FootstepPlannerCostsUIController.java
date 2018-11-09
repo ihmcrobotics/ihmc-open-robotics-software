@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class FootstepPlannerCostsUIController
 {
    private JavaFXMessager messager;
-   private final FootstepPlannerCostParametersProperty property = new FootstepPlannerCostParametersProperty(this, "footstepPlannerCostParametersProperty");
+   private final FootstepPlannerParametersProperty property = new FootstepPlannerParametersProperty(this, "footstepPlannerCostParametersProperty");
 
    @FXML
    private ToggleButton useQuadraticHeightCost;
@@ -60,7 +60,7 @@ public class FootstepPlannerCostsUIController
 
    public void setPlannerParameters(FootstepPlannerParameters parameters)
    {
-      property.setPlannerParameters(parameters.getCostParameters());
+      property.setPlannerParameters(parameters);
    }
 
    public void setupControls()
@@ -85,7 +85,7 @@ public class FootstepPlannerCostsUIController
       heuristicsWeightValueFactory = heuristicsWeight.getValueFactory();
 
       AtomicReference<FootstepPlannerType> plannerType = messager.createInput(FootstepPlannerMessagerAPI.PlannerTypeTopic);
-      AtomicReference<FootstepPlannerCostParameters> plannerParameters = messager.createInput(FootstepPlannerMessagerAPI.PlannerCostParametersTopic);
+      AtomicReference<FootstepPlannerParameters> plannerParameters = messager.createInput(FootstepPlannerMessagerAPI.PlannerParametersTopic);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerTypeTopic, createPlannerTypeChangeListener(plannerType, plannerParameters));
 
@@ -105,28 +105,28 @@ public class FootstepPlannerCostsUIController
       property.bidirectionalBindStepUpWeight(stepUpWeight.getValueFactory().valueProperty());
       property.bidirectionalBindStepDownWeight(stepDownWeight.getValueFactory().valueProperty());
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerCostParametersTopic, property, createConverter(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, property, createConverter(), true);
    }
 
-   private PropertyToMessageTypeConverter<FootstepPlannerCostParameters, SettableFootstepPlannerCostParameters> createConverter()
+   private PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters> createConverter()
    {
-      return new PropertyToMessageTypeConverter<FootstepPlannerCostParameters, SettableFootstepPlannerCostParameters>()
+      return new PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters>()
       {
          @Override
-         public FootstepPlannerCostParameters convert(SettableFootstepPlannerCostParameters propertyValue)
+         public FootstepPlannerParameters convert(SettableFootstepPlannerParameters propertyValue)
          {
             return propertyValue;
          }
 
          @Override
-         public SettableFootstepPlannerCostParameters interpret(FootstepPlannerCostParameters messageContent)
+         public SettableFootstepPlannerParameters interpret(FootstepPlannerParameters messageContent)
          {
-            return new SettableFootstepPlannerCostParameters(messageContent);
+            return new SettableFootstepPlannerParameters(messageContent);
          }
       };
    }
 
-   private TopicListener<FootstepPlannerType> createPlannerTypeChangeListener(AtomicReference<FootstepPlannerType> plannerType, AtomicReference<FootstepPlannerCostParameters> plannerParameters)
+   private TopicListener<FootstepPlannerType> createPlannerTypeChangeListener(AtomicReference<FootstepPlannerType> plannerType, AtomicReference<FootstepPlannerParameters> plannerParameters)
    {
       return new TopicListener<FootstepPlannerType>()
       {
@@ -141,16 +141,16 @@ public class FootstepPlannerCostsUIController
             switch (footstepPlannerType)
             {
             case A_STAR:
-               weight = plannerParameters.get().getAStarHeuristicsWeight().getValue();
+               weight = plannerParameters.get().getCostParameters().getAStarHeuristicsWeight().getValue();
                break;
             case VIS_GRAPH_WITH_A_STAR:
-               weight = plannerParameters.get().getVisGraphWithAStarHeuristicsWeight().getValue();
+               weight = plannerParameters.get().getCostParameters().getVisGraphWithAStarHeuristicsWeight().getValue();
                break;
             case PLANAR_REGION_BIPEDAL:
-               weight = plannerParameters.get().getDepthFirstHeuristicsWeight().getValue();
+               weight = plannerParameters.get().getCostParameters().getDepthFirstHeuristicsWeight().getValue();
                break;
             case SIMPLE_BODY_PATH:
-               weight = plannerParameters.get().getBodyPathBasedHeuristicsWeight().getValue();
+               weight = plannerParameters.get().getCostParameters().getBodyPathBasedHeuristicsWeight().getValue();
                break;
             default:
                weight = 0.0;

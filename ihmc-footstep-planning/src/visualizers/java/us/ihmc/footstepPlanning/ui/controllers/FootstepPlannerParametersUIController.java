@@ -7,18 +7,15 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.MessagerPlannerParameters;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
-import us.ihmc.footstepPlanning.ui.components.MessagerPlannerParametersProperty;
 import us.ihmc.footstepPlanning.ui.components.SettableFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.ui.components.SettableMessagerPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 
 public class FootstepPlannerParametersUIController
 {
    private JavaFXMessager messager;
-   private final MessagerPlannerParametersProperty parametersProperty = new MessagerPlannerParametersProperty(this, "footstepPlannerParametersProperty");
+   private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
 
    @FXML
    private Spinner<Double> plannerTimeout;
@@ -103,20 +100,20 @@ public class FootstepPlannerParametersUIController
       }
    };
 
-   private PropertyToMessageTypeConverter<MessagerPlannerParameters, SettableMessagerPlannerParameters> createConverter()
+   private PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters> createConverter()
    {
-      return new PropertyToMessageTypeConverter<MessagerPlannerParameters, SettableMessagerPlannerParameters>()
+      return new PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters>()
       {
          @Override
-         public MessagerPlannerParameters convert(SettableMessagerPlannerParameters propertyValue)
+         public FootstepPlannerParameters convert(SettableFootstepPlannerParameters propertyValue)
          {
             return propertyValue;
          }
 
          @Override
-         public SettableMessagerPlannerParameters interpret(MessagerPlannerParameters messageContent)
+         public SettableFootstepPlannerParameters interpret(FootstepPlannerParameters messageContent)
          {
-            return new SettableMessagerPlannerParameters(messageContent);
+            return new SettableFootstepPlannerParameters(messageContent);
          }
       };
    }
