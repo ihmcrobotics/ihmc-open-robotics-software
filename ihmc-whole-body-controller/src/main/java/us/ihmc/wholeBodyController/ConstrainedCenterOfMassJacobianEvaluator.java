@@ -27,7 +27,6 @@ import us.ihmc.robotics.linearAlgebra.ColumnSpaceProjector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ConstrainedCenterOfMassJacobianCalculator;
 import us.ihmc.robotics.screwTheory.ConstrainedCentroidalMomentumMatrixCalculator;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -98,7 +97,7 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
          constrainedCentroidalMomentumMatrixCalculator.addConstraint(foot, selectionMatrix);
       }
 
-      allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
+      allJoints = MultiBodySystemTools.collectSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       v = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(allJoints), 1);
 
       DenseMatrix64F orientationSelectionMatrix = new DenseMatrix64F(SpatialVector.SIZE / 2, SpatialVector.SIZE);

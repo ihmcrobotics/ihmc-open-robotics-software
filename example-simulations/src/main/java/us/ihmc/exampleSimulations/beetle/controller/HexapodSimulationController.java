@@ -26,6 +26,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
@@ -150,9 +151,10 @@ public class HexapodSimulationController implements RobotController
          i++;
       }
       controlledBodies[i] = fullRobotModel.getRootBody();
+      RigidBodyBasics[] rootBodies = {fullRobotModel.getElevator()};
 
       //Joints to Control
-      JointBasics[] controlledJoints = ScrewTools.computeSubtreeJoints(fullRobotModel.getElevator());
+      JointBasics[] controlledJoints = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
 
       ControllerCoreOptimizationSettings momentumOptimizationSettings = getMomentumOptimizationSettings();
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();

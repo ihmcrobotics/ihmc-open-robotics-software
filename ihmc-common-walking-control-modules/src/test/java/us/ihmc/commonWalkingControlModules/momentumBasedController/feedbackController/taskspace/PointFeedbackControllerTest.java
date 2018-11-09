@@ -46,7 +46,6 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public final class PointFeedbackControllerTest
@@ -88,7 +87,7 @@ public final class PointFeedbackControllerTest
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      JointBasics[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
+      JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
@@ -178,7 +177,7 @@ public final class PointFeedbackControllerTest
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      JointBasics[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
+      JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
@@ -288,7 +287,7 @@ public final class PointFeedbackControllerTest
       RigidBodyBasics endEffector = joints.get(joints.size() - 1).getSuccessor();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      JointBasics[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
+      JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,

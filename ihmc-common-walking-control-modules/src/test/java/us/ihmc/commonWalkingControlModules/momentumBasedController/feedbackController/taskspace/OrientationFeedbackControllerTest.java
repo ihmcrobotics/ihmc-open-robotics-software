@@ -33,9 +33,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class OrientationFeedbackControllerTest
@@ -62,7 +62,7 @@ public class OrientationFeedbackControllerTest
       RigidBodyBasics endEffector = joints.get(joints.size() - 1).getSuccessor();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      JointBasics[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
+      JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,

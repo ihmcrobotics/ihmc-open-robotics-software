@@ -5,7 +5,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -41,7 +40,7 @@ public class JointStateUpdater
 
       this.sensorMap = sensorOutputMapReadOnly;
 
-      JointBasics[] joints = ScrewTools.computeSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
+      JointBasics[] joints = MultiBodySystemTools.collectSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
       this.oneDoFJoints = MultiBodySystemTools.filterJoints(joints, OneDoFJointBasics.class);
 
       if (stateEstimatorParameters == null)

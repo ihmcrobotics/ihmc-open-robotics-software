@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public class AfterJointReferenceFrameNameMap
 {
@@ -13,7 +14,8 @@ public class AfterJointReferenceFrameNameMap
    
    public AfterJointReferenceFrameNameMap(RigidBodyBasics base)
    {
-      JointBasics[] joints = ScrewTools.computeSubtreeJoints(base);
+      RigidBodyBasics[] rootBodies = {base};
+      JointBasics[] joints = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
       
       for(JointBasics joint : joints)
       {

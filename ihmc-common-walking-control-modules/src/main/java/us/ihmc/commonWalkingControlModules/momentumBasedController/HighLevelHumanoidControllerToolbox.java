@@ -409,7 +409,7 @@ public class HighLevelHumanoidControllerToolbox
    public static JointBasics[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, JointBasics... jointsToRemove)
    {
       List<JointBasics> joints = new ArrayList<JointBasics>();
-      JointBasics[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
+      JointBasics[] allJoints = MultiBodySystemTools.collectSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       joints.addAll(Arrays.asList(allJoints));
 
       for (RobotSide robotSide : RobotSide.values)
@@ -417,7 +417,8 @@ public class HighLevelHumanoidControllerToolbox
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          if (hand != null)
          {
-            List<JointBasics> fingerJoints = Arrays.asList(ScrewTools.computeSubtreeJoints(hand));
+            RigidBodyBasics[] rootBodies = {hand};
+            List<JointBasics> fingerJoints = Arrays.asList(MultiBodySystemTools.collectSubtreeJoints(rootBodies));
             joints.removeAll(fingerJoints);
          }
       }

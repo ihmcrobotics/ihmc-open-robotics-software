@@ -144,8 +144,9 @@ public class SpatialAccelerationCalculator
       this.rootBody = MultiBodySystemTools.getRootBody(body);
       this.doVelocityTerms = doVelocityTerms;
       this.doAccelerationTerms = doAccelerationTerms;
+      RigidBodyBasics[] rootBodies = {rootBody};
 
-      int numberOfRigidBodies = MultiBodySystemTools.collectSubtreeSuccessors(ScrewTools.computeSubtreeJoints(rootBody)).length;
+      int numberOfRigidBodies = MultiBodySystemTools.collectSubtreeSuccessors(MultiBodySystemTools.collectSubtreeJoints(rootBodies)).length;
       while (unnassignedAccelerations.size() < numberOfRigidBodies)
          unnassignedAccelerations.add(new SpatialAcceleration());
       rigidBodiesWithAssignedAcceleration = new ArrayList<>(numberOfRigidBodies);

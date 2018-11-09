@@ -33,7 +33,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -110,7 +109,7 @@ public class MovingBaseRobotArmController implements RobotController
       RigidBodyBasics hand = robotArm.getHand();
       RigidBodyBasics base = robotArm.getBase();
       RigidBodyBasics elevator = robotArm.getElevator();
-      JointBasics[] controlledJoints = ScrewTools.computeSupportAndSubtreeJoints(elevator);
+      JointBasics[] controlledJoints = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
 
       ControllerCoreOptimizationSettings optimizationSettings = new RobotArmControllerCoreOptimizationSettings();

@@ -60,8 +60,9 @@ public class VirtualModelController
    {
       this.defaultRootBody = defaultRootBody;
       this.centerOfMassFrame = centerOfMassFrame;
+      RigidBodyBasics[] rootBodies = {defaultRootBody};
 
-      for (JointBasics joint : ScrewTools.computeSubtreeJoints(defaultRootBody))
+      for (JointBasics joint : MultiBodySystemTools.collectSubtreeJoints(rootBodies))
          jointTorques.put(joint, new MutableDouble());
 
       if (DISPLAY_GRAVITY_WRENCHES)

@@ -137,8 +137,9 @@ public class CentroidalMomentumMatrixSCSTest
    public static Momentum computeCoMMomentum(RigidBodyBasics elevator, ReferenceFrame centerOfMassFrame, CentroidalMomentumCalculator centroidalMomentumMatrix)
    {
       DenseMatrix64F mat = centroidalMomentumMatrix.getCentroidalMomentumMatrix();
+      RigidBodyBasics[] rootBodies = {elevator};
 //      InverseDynamicsJoint[] jointList = ScrewTools.computeJointsInOrder(elevator); //deprecated method
-      JointBasics[] jointList = ScrewTools.computeSubtreeJoints(elevator);
+      JointBasics[] jointList = MultiBodySystemTools.collectSubtreeJoints(rootBodies);
 
       DenseMatrix64F jointVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointList), 1);
       MultiBodySystemTools.extractJointsState(jointList, JointStateType.VELOCITY, jointVelocities);

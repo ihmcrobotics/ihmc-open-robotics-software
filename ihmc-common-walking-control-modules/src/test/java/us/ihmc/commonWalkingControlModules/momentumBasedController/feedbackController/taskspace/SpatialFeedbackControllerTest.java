@@ -41,7 +41,6 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public final class SpatialFeedbackControllerTest
@@ -86,7 +85,7 @@ public final class SpatialFeedbackControllerTest
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      JointBasics[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
+      JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
 
@@ -193,7 +192,7 @@ public final class SpatialFeedbackControllerTest
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      JointBasics[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
+      JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null,
