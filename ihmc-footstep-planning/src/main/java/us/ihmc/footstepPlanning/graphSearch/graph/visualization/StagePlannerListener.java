@@ -19,9 +19,9 @@ import java.util.List;
 
 public class StagePlannerListener extends MessageBasedPlannerListener
 {
-   public StagePlannerListener(FootstepNodeSnapperReadOnly snapper, long occupancyMapBroadcastDt)
+   public StagePlannerListener(FootstepNodeSnapperReadOnly snapper)
    {
-      super(snapper, occupancyMapBroadcastDt);
+      super(snapper, -1);
    }
 
    @Override

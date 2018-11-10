@@ -16,7 +16,7 @@ public abstract class ToolboxController
    protected static final boolean DEBUG = false;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final StatusMessageOutputManager statusOutputManager;
+   protected final StatusMessageOutputManager statusOutputManager;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
    
    private ScheduledFuture<?> futureToListenTo;
