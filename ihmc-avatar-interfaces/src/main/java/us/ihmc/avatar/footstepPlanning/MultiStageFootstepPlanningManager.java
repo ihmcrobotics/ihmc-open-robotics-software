@@ -16,6 +16,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.RosBasedPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -96,6 +98,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final ScheduledExecutorService executorService;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
+   private final MultiStagePlannerListener plannerListener;
+
    public MultiStageFootstepPlanningManager(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
                                             StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry,
                                             YoGraphicsListRegistry graphicsListRegistry, long tickDurationMs)
@@ -120,9 +124,12 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone.set(false);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
 
+      long updateFrequency = 1000;
+      plannerListener = new MultiStagePlannerListener(statusOutputManager, updateFrequency);
+
       for (int i = 0; i < numberOfCores; i++)
       {
-         FootstepPlanningStage planningStage = new FootstepPlanningStage(i, contactPointParameters, footstepPlannerParameters, activePlanner, planId,
+         FootstepPlanningStage planningStage = new FootstepPlanningStage(i, contactPointParameters, footstepPlannerParameters, activePlanner, plannerListener, planId,
                                                                          graphicsListRegistry, tickDurationMs);
          planningStage.addCompletionCallback(this);
          planningStage.setPlannerGoalRecommendationHandler(goalRecommendationHandler);
@@ -152,7 +159,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private FootstepPlanningStage createNewFootstepPlanningStage()
    {
       FootstepPlanningStage stage = new FootstepPlanningStage(allPlanningStages.getCopyForReading().size(), contactPointParameters, footstepPlanningParameters,
-                                                              activePlanner, planId, null, tickDurationMs);
+                                                              activePlanner, plannerListener, planId, null, tickDurationMs);
       stage.addCompletionCallback(this);
       stage.setPlannerGoalRecommendationHandler(goalRecommendationHandler);
       return stage;
@@ -480,11 +487,16 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       {
          sendMessageToUI("Result of step planning: " + planId.getIntegerValue() + ", " + stepStatus.toString());
          concatenateFootstepPlans();
+         FootstepPlan footstepPlan = this.footstepPlan.getAndSet(null);
          statusOutputManager
-               .reportStatusMessage(packStepResult(footstepPlan.getAndSet(null), bodyPathPlan.getAndSet(null), stepStatus, plannerTime.getDoubleValue()));
+               .reportStatusMessage(packStepResult(footstepPlan, bodyPathPlan.getAndSet(null), stepStatus, plannerTime.getDoubleValue()));
+
+         plannerListener.plannerFinished(null);
       }
       if (stepPlanningStatusChanged) // step planning just started or just finished, so this flag needs updating.
          isDonePlanningSteps.set(noMoreStepsToPlan);
+
+      plannerListener.tickAndUpdate();
 
       boolean isDone = stepPlanningStagesInProgress.isEmpty();
       isDone &= latestRequestReference.get() == null;
@@ -696,7 +708,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void sleep()
    {
-
       if (debug)
          PrintTools.debug(this, "Going to sleep");
 
