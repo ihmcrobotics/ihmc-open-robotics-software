@@ -124,7 +124,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone.set(false);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
 
-      long updateFrequency = 1000;
+      long updateFrequency = 500;
       plannerListener = new MultiStagePlannerListener(statusOutputManager, updateFrequency);
 
       for (int i = 0; i < numberOfCores; i++)
@@ -159,7 +159,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private FootstepPlanningStage createNewFootstepPlanningStage()
    {
       FootstepPlanningStage stage = new FootstepPlanningStage(allPlanningStages.getCopyForReading().size(), contactPointParameters, footstepPlanningParameters,
-                                                              activePlanner, plannerListener, planId, null, tickDurationMs);
+                                                              activePlanner, null, planId, null, tickDurationMs);
       stage.addCompletionCallback(this);
       stage.setPlannerGoalRecommendationHandler(goalRecommendationHandler);
       return stage;

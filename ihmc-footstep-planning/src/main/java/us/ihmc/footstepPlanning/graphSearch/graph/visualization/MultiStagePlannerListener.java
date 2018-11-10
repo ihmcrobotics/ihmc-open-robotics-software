@@ -33,6 +33,11 @@ public class MultiStagePlannerListener implements BipedalFootstepPlannerListener
       this.occupancyMapBroadcastDt = occupancyMapBroadcastDt;
    }
 
+   public long getBroadcastDt()
+   {
+      return occupancyMapBroadcastDt;
+   }
+
    public void addStagePlannerListener(StagePlannerListener listener)
    {
       listeners.add(listener);
@@ -67,15 +72,18 @@ public class MultiStagePlannerListener implements BipedalFootstepPlannerListener
          FootstepNodeDataListMessage nodeDataListMessage = null;
          for (StagePlannerListener listener : listeners)
          {
-            FootstepPlannerOccupancyMapMessage stageOccupancyMap = listener.packOccupancyMapMessage();
-            occupancyMapMessage.getOccupiedCells().addAll(stageOccupancyMap.getOccupiedCells());
+            Object<FootstepPlannerCellMessage> occupiedCells = listener.packOccupancyMapMessage().getOccupiedCells();
+            for (int i = 0; i < occupiedCells.size(); i++)
+               occupancyMapMessage.getOccupiedCells().add().set(occupiedCells.get(i));
 
             FootstepNodeDataListMessage stageNodeList = listener.packLowestCostPlanMessage();
             if (stageNodeList != null)
             {
                if (nodeDataListMessage == null)
                   nodeDataListMessage = new FootstepNodeDataListMessage();
-               nodeDataListMessage.getNodeData().addAll(stageNodeList.getNodeData());
+               Object<FootstepNodeDataMessage> stageNodeData = stageNodeList.getNodeData();
+               for (int i = 0; i < stageNodeData.size(); i++)
+                  nodeDataListMessage.getNodeData().add().set(stageNodeData.get(i));
             }
          }
 
@@ -95,7 +103,8 @@ public class MultiStagePlannerListener implements BipedalFootstepPlannerListener
       for (StagePlannerListener listener : listeners)
       {
          FootstepPlannerOccupancyMapMessage stageOccupancyMap = listener.packOccupancyMapMessage();
-         occupancyMapMessage.getOccupiedCells().addAll(stageOccupancyMap.getOccupiedCells());
+         for (int i = 0; i < stageOccupancyMap.getOccupiedCells().size(); i++)
+            occupancyMapMessage.getOccupiedCells().add().set(stageOccupancyMap.getOccupiedCells().get(i));
       }
       broadcastOccupancyMap(occupancyMapMessage);
    }

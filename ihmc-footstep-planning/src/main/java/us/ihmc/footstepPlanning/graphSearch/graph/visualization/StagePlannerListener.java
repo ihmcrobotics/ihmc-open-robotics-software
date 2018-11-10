@@ -25,12 +25,16 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    private final HashSet<PlannerCell> exploredCells = new HashSet<>();
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
 
-   private final ConcurrentList<FootstepPlannerCellMessage> occupiedCells = new ConcurrentList<>(FootstepPlannerCellMessage.class);
-   private final ConcurrentList<FootstepNodeDataMessage> nodeData = new ConcurrentList<>(FootstepNodeDataMessage.class);
+   private final ConcurrentList<FootstepPlannerCellMessage> occupiedCells = new ConcurrentList<>();
+   private final ConcurrentList<FootstepNodeDataMessage> nodeData = new ConcurrentList<>();
 
-   public StagePlannerListener(FootstepNodeSnapperReadOnly snapper)
+   private final long occupancyMapBroadcastDt;
+   private long lastBroadcastTime = -1;
+
+   public StagePlannerListener(FootstepNodeSnapperReadOnly snapper, long occupancyMapBroadcastDt)
    {
       this.snapper = snapper;
+      this.occupancyMapBroadcastDt = occupancyMapBroadcastDt;
    }
 
    @Override
@@ -66,8 +70,16 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    @Override
    public void tickAndUpdate()
    {
-      updateOccupiedCells();
-      updateNodeData();
+      long currentTime = System.currentTimeMillis();
+
+      if (lastBroadcastTime == -1)
+         lastBroadcastTime = currentTime;
+
+      if (currentTime - lastBroadcastTime > occupancyMapBroadcastDt)
+      {
+         updateOccupiedCells();
+         updateNodeData();
+      }
    }
 
    @Override
@@ -78,24 +90,31 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private void updateOccupiedCells()
    {
+      occupiedCells.clear();
       PlannerCell[] plannerCells = exploredCells.toArray(new PlannerCell[0]);
+      List<FootstepPlannerCellMessage> cellMessages = new ArrayList<>();
       for (int i = 0; i < plannerCells.length; i++)
       {
-         FootstepPlannerCellMessage plannerCell = occupiedCells.add();
+         FootstepPlannerCellMessage plannerCell = new FootstepPlannerCellMessage();
          plannerCell.setXIndex(plannerCells[i].xIndex);
          plannerCell.setYIndex(plannerCells[i].yIndex);
+         cellMessages.add(plannerCell);
       }
+      occupiedCells.addAll(cellMessages);
    }
 
    private void updateNodeData()
    {
       nodeData.clear();
+      List<FootstepNodeDataMessage> messageList = new ArrayList<>();
       for (int i = 0; i < lowestCostPlan.size(); i++)
       {
          FootstepNode node = lowestCostPlan.get(i);
-         FootstepNodeDataMessage nodeDataMessage = nodeData.add();
+         FootstepNodeDataMessage nodeDataMessage = new FootstepNodeDataMessage();
          setNodeDataMessage(nodeDataMessage, node, -1);
+         messageList.add(nodeDataMessage);
       }
+      nodeData.addAll(messageList);
 
       lowestCostPlan.clear();
    }
@@ -103,9 +122,9 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    FootstepPlannerOccupancyMapMessage packOccupancyMapMessage()
    {
       FootstepPlannerOccupancyMapMessage message = new FootstepPlannerOccupancyMapMessage();
-      Object<FootstepPlannerCellMessage> occupiedCells = message.getOccupiedCells();
-      for (int i = 0; i < this.occupiedCells.size(); i++)
-         occupiedCells.add().set(this.occupiedCells.get(i));
+      //      Object<FootstepPlannerCellMessage> occupiedCells = message.getOccupiedCells();
+      //      for (int i = 0; i < this.occupiedCells.size(); i++)
+      //         occupiedCells.add().set(this.occupiedCells.get(i));
 
       return message;
    }
@@ -113,9 +132,9 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    FootstepNodeDataListMessage packLowestCostPlanMessage()
    {
       FootstepNodeDataListMessage nodeDataListMessage = new FootstepNodeDataListMessage();
-      Object<FootstepNodeDataMessage> nodeDataList = nodeDataListMessage.getNodeData();
-      for (int i = 0; i < nodeData.size(); i++)
-         nodeDataList.add().set(nodeData.get(i));
+      //      Object<FootstepNodeDataMessage> nodeDataList = nodeDataListMessage.getNodeData();
+      //      for (int i = 0; i < nodeData.size(); i++)
+      //         nodeDataList.add().set(nodeData.get(i));
 
       nodeDataListMessage.setIsFootstepGraph(false);
 
@@ -140,17 +159,11 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       snapData.getSnapTransform().get(snapRotationToSet, snapTranslationToSet);
    }
 
-
-
    private class ConcurrentList<T> extends ConcurrentCopier<List<T>>
    {
-      private final Supplier<T> supplier;
-
-      public ConcurrentList(Class<T> clazz)
+      public ConcurrentList()
       {
          super(ArrayList::new);
-
-         supplier = SupplierBuilder.createFromEmptyConstructor(clazz);
       }
 
       public void clear()
@@ -159,18 +172,11 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
          commit();
       }
 
-      public T add()
-      {
-         T newValue = supplier.get();
-         add(newValue);
-
-         return newValue;
-      }
-
       public void add(T element)
       {
          List<T> currentSet = getCopyForReading();
          List<T> updatedSet = getCopyForWriting();
+         updatedSet.clear();
          if (currentSet != null)
             updatedSet.addAll(currentSet);
          updatedSet.add(element);
@@ -181,6 +187,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       {
          List<T> currentSet = getCopyForReading();
          List<T> updatedSet = getCopyForWriting();
+         updatedSet.clear();
          if (currentSet != null)
             updatedSet.addAll(currentSet);
          updatedSet.addAll(collection);
