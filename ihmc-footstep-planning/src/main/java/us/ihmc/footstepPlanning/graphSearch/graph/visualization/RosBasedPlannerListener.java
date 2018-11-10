@@ -10,7 +10,6 @@ import us.ihmc.ros2.RealtimeRos2Node;
 
 public class RosBasedPlannerListener extends MessageBasedPlannerListener
 {
-
    private final StatusMessageOutputManager statusMessageOutputManager;
 
    public RosBasedPlannerListener(StatusMessageOutputManager statusMessageOutputManager, FootstepNodeSnapperReadOnly snapper, long broadcastDtMillis)
