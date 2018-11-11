@@ -26,6 +26,7 @@ public class FootstepPlannerMessagerAPI
 
    private static final CategoryTheme PlanarRegion = apiFactory.createCategoryTheme("PlanarRegion");
    private static final CategoryTheme Start = apiFactory.createCategoryTheme("Start");
+   private static final CategoryTheme Intermediate = apiFactory.createCategoryTheme("Intermediate");
    private static final CategoryTheme Goal = apiFactory.createCategoryTheme("Goal");
    private static final CategoryTheme PositionTheme = apiFactory.createCategoryTheme("PositionTheme");
    private static final CategoryTheme OrientationTheme = apiFactory.createCategoryTheme("OrientationTheme");
@@ -106,11 +107,11 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<RobotSide> InitialSupportSideTopic = Root.child(Start).topic(Side);
    public static final Topic<Point3D> StartPositionTopic = Root.child(FootstepPlan).child(Start).topic(Position);
    public static final Topic<Point3D> GoalPositionTopic = Root.child(FootstepPlan).child(Goal).topic(Position);
-   public static final Topic<Point3D> LowLevelGoalPositionTopic = Root.child(FootstepPlan).child(Goal).topic(Position);
-   public static final Topic<Quaternion> LowLevelGoalOrientationTopic = Root.child(FootstepPlan).child(Goal).topic(Orientation);
+   public static final Topic<Point3D> LowLevelGoalPositionTopic = Root.child(FootstepPlan).child(Intermediate).topic(Position);
 
    public static final Topic<Quaternion> StartOrientationTopic = Root.child(FootstepPlan).child(Start).topic(Orientation);
    public static final Topic<Quaternion> GoalOrientationTopic = Root.child(FootstepPlan).child(Goal).topic(Orientation);
+   public static final Topic<Quaternion> LowLevelGoalOrientationTopic = Root.child(FootstepPlan).child(Intermediate).topic(Orientation);
 
    public static final Topic<Boolean> GlobalResetTopic = Root.topic(Reset);
 
