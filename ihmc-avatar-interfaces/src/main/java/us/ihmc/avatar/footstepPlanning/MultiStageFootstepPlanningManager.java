@@ -567,6 +567,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       int firstPlan = Integer.MAX_VALUE;
       FootstepPlan totalFootstepPlan = new FootstepPlan();
+
       for (ImmutablePair<Integer, FootstepPlan> footstepPlanPairs : completedStepPlans)
       {
          FootstepPlan footstepPlan = footstepPlanPairs.getRight();
@@ -579,7 +580,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          }
 
          totalFootstepPlan.addFootstepPlan(footstepPlan);
-  
       }
 
       footstepPlan.set(totalFootstepPlan);

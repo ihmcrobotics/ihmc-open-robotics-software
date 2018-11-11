@@ -43,6 +43,8 @@ public class SettableFootstepPlannerCostParameters implements FootstepPlannerCos
       this.costPerStep = parameters.getCostPerStep();
       this.forwardWeight = parameters.getForwardWeight();
       this.lateralWeight = parameters.getLateralWeight();
+      this.stepUpWeight = parameters.getStepUpWeight();
+      this.stepDownWeight = parameters.getStepDownWeight();
 
       this.aStarHeuristicsWeight = parameters.getAStarHeuristicsWeight().getValue();
       this.visGraphWithAStarHeuristicsWeight = parameters.getVisGraphWithAStarHeuristicsWeight().getValue();
