@@ -249,7 +249,7 @@ public class RemoteUIMessageConverter
       List<? extends Point3DReadOnly> bodyPath = packet.getBodyPath();
       Pose3D lowLevelGoal = packet.getLowLevelPlannerGoal();
 
-      ThreadTools.sleep(1000);
+      ThreadTools.sleep(100);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
