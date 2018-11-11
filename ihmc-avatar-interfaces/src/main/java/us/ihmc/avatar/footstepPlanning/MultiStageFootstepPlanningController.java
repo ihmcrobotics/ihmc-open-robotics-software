@@ -103,9 +103,9 @@ public class MultiStageFootstepPlanningController
          PrintTools.debug(this, "Waking up");
 
       createPlannerRunnable();
+      stageManager.wakeUp();
       managerTask = executorService.scheduleAtFixedRate(managerRunnable, 0, tickTimeMs, TimeUnit.MILLISECONDS);
 
-      stageManager.wakeUp();
       receivedInput.set(true);
    }
 

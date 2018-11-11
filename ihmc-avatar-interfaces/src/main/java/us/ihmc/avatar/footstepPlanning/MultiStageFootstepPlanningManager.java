@@ -354,6 +354,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private boolean initialize()
    {
       isDone.set(false);
+      isDonePlanningPath.set(false);
+      isDonePlanningSteps.set(false);
       requestedPlanarRegions.set(false);
       plannerTime.set(0.0);
 
@@ -503,6 +505,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone &= pathPlanningStagesInProgress.isEmpty();
       isDone &= planningObjectivePool.isEmpty();
       isDone &= !goalRecommendationHandler.hasNewFootstepPlannerObjectives();
+      isDone &= isDonePlanningPath.getBooleanValue();
+      isDone &= isDonePlanningSteps.getBooleanValue();
       this.isDone.set(isDone);
    }
 
@@ -604,6 +608,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void processRequest(FootstepPlanningRequestPacket request)
    {
+      isDone.set(false);
+      isDonePlanningSteps.set(false);
+      isDonePlanningPath.set(false);
       latestRequestReference.set(request);     
    }
 
