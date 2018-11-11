@@ -24,9 +24,9 @@
             </rowConstraints>
             <children>
                 <ToggleButton fx:id="useQuadraticDistanceCost" mnemonicParsing="false" text="Use quadratic distance"
-                              GridPane.rowIndex="2"/>
+                              GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                 <ToggleButton fx:id="useQuadraticHeightCost" mnemonicParsing="false" text="Use quadratic height"
-                              GridPane.rowIndex="3"/>
+                              GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
                 <Label text="Cost per step" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
                 <Label text="Heuristics weight" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
