@@ -87,13 +87,14 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       if (lastUpdateTime == -1)
          lastUpdateTime = currentTime;
 
-      if (currentTime - lastUpdateTime > occupancyMapUpdateDt)
-      {
-         updateOccupiedCells();
-         updateNodeData();
+      boolean isTimeForUpdate = currentTime - lastUpdateTime > occupancyMapUpdateDt;
+      if (!isTimeForUpdate)
+         return;
 
-         lastUpdateTime = currentTime;
-      }
+      updateOccupiedCells();
+      updateNodeData();
+
+      lastUpdateTime = currentTime;
    }
 
    @Override
@@ -211,17 +212,6 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
          commit();
       }
 
-      public void add(T element)
-      {
-         List<T> currentSet = getCopyForReading();
-         List<T> updatedSet = getCopyForWriting();
-         updatedSet.clear();
-         if (currentSet != null)
-            updatedSet.addAll(currentSet);
-         updatedSet.add(element);
-         commit();
-      }
-
       public void addAll(Collection<? extends T> collection)
       {
          List<T> currentSet = getCopyForReading();
@@ -237,11 +227,6 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       {
          List<T> currentSet = getCopyForReading();
          return currentSet.toArray(ts);
-      }
-
-      public T get(int index)
-      {
-         return getCopyForReading().get(index);
       }
 
       public boolean isEmpty()
