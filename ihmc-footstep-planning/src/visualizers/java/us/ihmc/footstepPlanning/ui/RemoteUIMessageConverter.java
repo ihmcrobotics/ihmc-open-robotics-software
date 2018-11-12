@@ -62,7 +62,6 @@ public class RemoteUIMessageConverter
    private final AtomicReference<FootstepPlannerType> plannerTypeReference;
    private final AtomicReference<Double> plannerTimeoutReference;
    private final AtomicReference<RobotSide> plannerInitialSupportSideReference;
-   private final AtomicReference<Integer> plannerSequenceIdReference;
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Double> plannerHorizonLengthReference;
    private final AtomicReference<Boolean> acceptNewPlanarRegionsReference;
@@ -103,7 +102,6 @@ public class RemoteUIMessageConverter
       plannerTypeReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTypeTopic, FootstepPlannerType.A_STAR);
       plannerTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, 5.0);
       plannerInitialSupportSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSideTopic, RobotSide.LEFT);
-      plannerSequenceIdReference = messager.createInput(FootstepPlannerMessagerAPI.SequenceIdTopic);
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
       plannerHorizonLengthReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic);
       acceptNewPlanarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, true);
@@ -177,7 +175,6 @@ public class RemoteUIMessageConverter
       FootstepPlannerType plannerType = FootstepPlannerType.fromByte(packet.getRequestedFootstepPlannerType());
       RobotSide initialSupportSide = RobotSide.fromByte(packet.getInitialStanceRobotSide());
       int plannerRequestId = packet.getPlannerRequestId();
-      int sequenceId = (int) packet.getSequenceId();
 
       double timeout = packet.getTimeout();
       double horizonLength = packet.getHorizonLength();
@@ -196,7 +193,6 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSideTopic, initialSupportSide);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
-      messager.submitMessage(FootstepPlannerMessagerAPI.SequenceIdTopic, sequenceId);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength);
    }
@@ -239,11 +235,8 @@ public class RemoteUIMessageConverter
 
    private void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus packet)
    {
-      PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsList();
       FootstepDataListMessage footstepDataListMessage = packet.getFootstepDataList();
       int plannerRequestId = packet.getPlanId();
-      int sequenceId = (int) packet.getSequenceId();
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
       FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
       FootstepPlan footstepPlan = convertToFootstepPlan(footstepDataListMessage);
       List<? extends Point3DReadOnly> bodyPath = packet.getBodyPath();
@@ -252,8 +245,7 @@ public class RemoteUIMessageConverter
       ThreadTools.sleep(100);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
-      messager.submitMessage(FootstepPlannerMessagerAPI.SequenceIdTopic, sequenceId);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResultTopic, result);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, packet.getTimeTaken());
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathDataTopic, bodyPath);
@@ -377,8 +369,6 @@ public class RemoteUIMessageConverter
          packet.setTimeout(plannerTimeoutReference.get());
       if (plannerTypeReference.get() != null)
          packet.setRequestedFootstepPlannerType(plannerTypeReference.get().toByte());
-      if (plannerSequenceIdReference.get() != null)
-         packet.setSequenceId(plannerSequenceIdReference.get());
       if (plannerRequestIdReference.get() != null)
          packet.setPlannerRequestId(plannerRequestIdReference.get());
       if (plannerHorizonLengthReference.get() != null)

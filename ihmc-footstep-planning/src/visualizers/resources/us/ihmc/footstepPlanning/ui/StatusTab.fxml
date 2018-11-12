@@ -49,10 +49,10 @@
                 <TextField fx:id="plannerStatus" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
 
                 <Label text="Request ID" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-                <Label text="Sequence ID" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
+                <Label text="Received Request ID" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
 
                 <TextField fx:id="requestID" editable="false" GridPane.columnIndex="4" GridPane.rowIndex="2"/>
-                <TextField fx:id="sequenceID" editable="false" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
+                <TextField fx:id="receivedRequestId" editable="false" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
 
                 <Label text="Time Taken" GridPane.halignment="RIGHT" GridPane.columnIndex="5" GridPane.rowIndex="2"/>
                 <Label text="Planning Result" GridPane.halignment="RIGHT" GridPane.columnIndex="5" GridPane.rowIndex="3"/>
