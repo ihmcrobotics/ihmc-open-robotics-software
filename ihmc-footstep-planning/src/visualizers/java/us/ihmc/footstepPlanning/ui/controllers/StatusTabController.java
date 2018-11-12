@@ -44,7 +44,8 @@ public class StatusTabController
       if (verbose)
          PrintTools.info(this, "Clicked compute path...");
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, currentPlannerRequestId.get() + 1);
+      int newRequestID = currentPlannerRequestId.get() + 1;
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, newRequestID);
       messager.submitMessage(ComputePathTopic, true);
    }
    
