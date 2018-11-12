@@ -281,7 +281,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       factory.addTransition(fallbackControllerState, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
 
 
-      factory.addStateChangedListener((to, from) ->
+      factory.addStateChangedListener((from, to) ->
       {
             byte fromByte = from == null ? -1 : from.toByte();
             byte toByte = to == null ? -1 : to.toByte();
