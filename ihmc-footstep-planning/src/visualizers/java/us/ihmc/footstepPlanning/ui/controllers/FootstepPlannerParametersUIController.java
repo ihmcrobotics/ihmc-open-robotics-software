@@ -23,25 +23,25 @@ public class FootstepPlannerParametersUIController
    private Spinner<Double> horizonLength;
 
    @FXML
-   private Slider maxStepLength;
+   private Spinner<Double> maxStepLength;
    @FXML
-   private Slider minStepWidth;
+   private Spinner<Double> maxStepWidth;
    @FXML
-   private Slider maxStepYaw;
+   private Spinner<Double> minStepWidth;
 
    @FXML
-   private Slider minStepLength;
+   private Spinner<Double> minStepLength;
    @FXML
-   private Slider maxStepZ;
+   private Spinner<Double> maxStepZ;
    @FXML
-   private Slider minStepYaw;
+   private Spinner<Double> minSurfaceIncline;
 
    @FXML
-   private Slider minFootholdPercent;
+   private Spinner<Double> maxStepYaw;
    @FXML
-   private Slider minSurfaceIncline;
+   private Spinner<Double> minStepYaw;
    @FXML
-   private Slider maxStepWidth;
+   private Spinner<Double> minFootholdPercent;
 
 
    public void attachMessager(JavaFXMessager messager)
@@ -58,6 +58,18 @@ public class FootstepPlannerParametersUIController
    {
       plannerTimeout.setValueFactory(createTimeoutValueFactory());
       horizonLength.setValueFactory(createHorizonValueFactory());
+      maxStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.05));
+      maxStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
+      minStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
+
+      minStepLength.setValueFactory(new DoubleSpinnerValueFactory(-0.6, 0.0, 0.0, 0.05));
+      maxStepZ.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
+      minSurfaceIncline.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
+
+
+      maxStepYaw.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
+      minStepYaw.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.1));
+      minFootholdPercent.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
    }
 
    public void bindControls()
@@ -66,15 +78,17 @@ public class FootstepPlannerParametersUIController
 
 //      parametersProperty.bidirectionalBindIdealFootstepWidth();
 //      parametersProperty.bidirectionalBindIdealFootstepLength();
-      parametersProperty.bidirectionalBindMaxStepReach(maxStepLength.valueProperty());
-      parametersProperty.bidirectionalBindMaxStepYaw(maxStepYaw.valueProperty());
-      parametersProperty.bidirectionalBindMinStepWidth(minStepWidth.valueProperty());
-      parametersProperty.bidirectionalBindMinStepLength(minStepLength.valueProperty());
-      parametersProperty.bidirectionalBindMinStepYaw(minStepYaw.valueProperty());
-      parametersProperty.bidirectionalBindMaxStepZ(maxStepZ.valueProperty());
-      parametersProperty.bidirectionalBindMinFootholdPercent(minFootholdPercent.valueProperty());
-      parametersProperty.bidirectionalBindMinSurfaceIncline(minSurfaceIncline.valueProperty());
-      parametersProperty.bidirectionalBindMaxStepWidth(maxStepWidth.valueProperty());
+      parametersProperty.bidirectionalBindMaxStepReach(maxStepLength.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaxStepWidth(maxStepWidth.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinStepWidth(minStepWidth.getValueFactory().valueProperty());
+
+      parametersProperty.bidirectionalBindMinStepLength(minStepLength.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaxStepZ(maxStepZ.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinSurfaceIncline(minSurfaceIncline.getValueFactory().valueProperty());
+
+      parametersProperty.bidirectionalBindMaxStepYaw(maxStepYaw.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinStepYaw(minStepYaw.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinFootholdPercent(minFootholdPercent.getValueFactory().valueProperty());
 
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, plannerTimeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
