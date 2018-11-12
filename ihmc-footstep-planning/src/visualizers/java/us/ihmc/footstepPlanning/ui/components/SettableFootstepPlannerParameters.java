@@ -7,6 +7,12 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double idealFootstepWidth;
    private double idealFootstepLength;
 
+   private double wiggleInsideDelta;
+   private boolean wiggleIntoConvexHullOfPlanarRegions;
+   private boolean rejectIfCannotFullyWiggleInside;
+   private double maximumXYWiggleDistance;
+   private double maximumYawWiggle;
+
    private double maxStepReach;
    private double maxStepYaw;
    private double minStepWidth;
@@ -16,7 +22,19 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minFootholdPercent;
    private double minSurfaceIncline;
    private double maxStepWidth;
+   private double minXClearanceFromStance;
+   private double minYClearanceFromStance;
 
+   private double maximumStepXWhenForwardAndDown;
+   private double maximumStepZWhenForwardAndDown;
+   private double maximumZPenetrationOnValleyRegions;
+   private double cliffHeightToAvoid;
+   private double minimumDistanceFromCliffBottoms;
+
+   private boolean returnBestEffortPlan;
+   private int minimumStepsForBestEffortPlan;
+
+   private double bodyGroundClearance;
    private boolean checkForBodyBoxCollisions;
    private double bodyBoxWidth;
    private double bodyBoxHeight;
@@ -38,6 +56,13 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    {
       this.idealFootstepWidth = footstepPlannerParameters.getIdealFootstepWidth();
       this.idealFootstepLength = footstepPlannerParameters.getIdealFootstepLength();
+
+      this.wiggleInsideDelta = footstepPlannerParameters.getWiggleInsideDelta();
+      this.wiggleIntoConvexHullOfPlanarRegions = footstepPlannerParameters.getWiggleIntoConvexHullOfPlanarRegions();
+      this.rejectIfCannotFullyWiggleInside = footstepPlannerParameters.getRejectIfCannotFullyWiggleInside();
+      this.maximumXYWiggleDistance = footstepPlannerParameters.getMaximumXYWiggleDistance();
+      this.maximumYawWiggle = footstepPlannerParameters.getMaximumYawWiggle();
+
       this.maxStepReach = footstepPlannerParameters.getMaximumStepReach();
       this.maxStepYaw = footstepPlannerParameters.getMaximumStepYaw();
       this.minStepWidth = footstepPlannerParameters.getMinimumStepWidth();
@@ -47,7 +72,19 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.maxStepWidth = footstepPlannerParameters.getMaximumStepWidth();
       this.minFootholdPercent = footstepPlannerParameters.getMinimumFootholdPercent();
       this.minSurfaceIncline = footstepPlannerParameters.getMinimumSurfaceInclineRadians();
+      this.minXClearanceFromStance = footstepPlannerParameters.getMinXClearanceFromStance();
+      this.minYClearanceFromStance = footstepPlannerParameters.getMinYClearanceFromStance();
 
+      this.maximumStepXWhenForwardAndDown = footstepPlannerParameters.getMaximumStepXWhenForwardAndDown();
+      this.maximumStepZWhenForwardAndDown = footstepPlannerParameters.getMaximumStepZWhenForwardAndDown();
+      this.maximumZPenetrationOnValleyRegions = footstepPlannerParameters.getMaximumZPenetrationOnValleyRegions();
+      this.cliffHeightToAvoid = footstepPlannerParameters.getCliffHeightToAvoid();
+      this.minimumDistanceFromCliffBottoms = footstepPlannerParameters.getMinimumDistanceFromCliffBottoms();
+
+      this.returnBestEffortPlan = footstepPlannerParameters.getReturnBestEffortPlan();
+      this.minimumStepsForBestEffortPlan = footstepPlannerParameters.getMinimumStepsForBestEffortPlan();
+
+      this.bodyGroundClearance = footstepPlannerParameters.getBodyGroundClearance();
       this.checkForBodyBoxCollisions = footstepPlannerParameters.checkForBodyBoxCollisions();
       this.bodyBoxHeight = footstepPlannerParameters.getBodyBoxHeight();
       this.bodyBoxWidth = footstepPlannerParameters.getBodyBoxWidth();
@@ -59,14 +96,39 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.costParameters.set(footstepPlannerParameters.getCostParameters());
    }
 
-   public void setIdealFootstepWidth(double idealFootstepLength)
+   public void setIdealFootstepWidth(double idealFootstepWidth)
    {
-      this.idealFootstepLength = idealFootstepLength;
+      this.idealFootstepWidth = idealFootstepWidth;
    }
 
    public void setIdealFootstepLength(double idealFootstepLength)
    {
       this.idealFootstepLength = idealFootstepLength;
+   }
+
+   public void setWiggleInsideDelta(double wiggleInsideDelta)
+   {
+      this.wiggleInsideDelta = wiggleInsideDelta;
+   }
+
+   public void setWiggleIntoConvexHullOfPlanarRegions(boolean wiggleIntoConvexHullOfPlanarRegions)
+   {
+      this.wiggleIntoConvexHullOfPlanarRegions = wiggleIntoConvexHullOfPlanarRegions;
+   }
+
+   public void setRejectIfCannotFullyWiggleInside(boolean rejectIfCannotFullyWiggleInside)
+   {
+      this.rejectIfCannotFullyWiggleInside = rejectIfCannotFullyWiggleInside;
+   }
+
+   public void setMaximumXYWiggleDistance(double maximumXYWiggleDistance)
+   {
+      this.maximumXYWiggleDistance = maximumXYWiggleDistance;
+   }
+
+   public void setMaximumYawWiggle(double maximumYawWiggle)
+   {
+      this.maximumYawWiggle = maximumYawWiggle;
    }
 
    public void setMaximumStepReach(double maxStepReach)
@@ -112,6 +174,51 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public void setMinimumSurfaceInclineRadians(double minSurfaceIncline)
    {
       this.minSurfaceIncline = minSurfaceIncline;
+   }
+
+   public void setMaximumStepXWhenForwardAndDown(double maximumStepXWhenForwardAndDown)
+   {
+      this.maximumStepXWhenForwardAndDown = maximumStepXWhenForwardAndDown;
+   }
+
+   public void setMaximumStepZWhenForwardAndDown(double maximumStepZWhenForwardAndDown)
+   {
+      this.maximumStepZWhenForwardAndDown = maximumStepZWhenForwardAndDown;
+   }
+
+   public void setMinXClearanceFromStance(double minXClearanceFromStance)
+   {
+      this.minXClearanceFromStance = minXClearanceFromStance;
+   }
+
+   public void setMinYClearanceFromStance(double minYClearanceFromStance)
+   {
+      this.minYClearanceFromStance = minYClearanceFromStance;
+   }
+
+   public void setMaximumZPenetrationOnValleyRegions(double maximumZPenetrationOnValleyRegions)
+   {
+      this.maximumZPenetrationOnValleyRegions = maximumZPenetrationOnValleyRegions;
+   }
+
+   public void setCliffHeightToAvoid(double cliffHeightToAvoid)
+   {
+      this.cliffHeightToAvoid = cliffHeightToAvoid;
+   }
+
+   public void setMinimumDistanceFromCliffBottoms(double minimumDistanceFromCliffBottoms)
+   {
+      this.minimumDistanceFromCliffBottoms = minimumDistanceFromCliffBottoms;
+   }
+
+   public void setReturnBestEffortPlan(boolean returnBestEffortPlan)
+   {
+      this.returnBestEffortPlan = returnBestEffortPlan;
+   }
+
+   public void setMinimumStepsForBestEffortPlan(int minimumStepsForBestEffortPlan)
+   {
+      this.minimumStepsForBestEffortPlan = minimumStepsForBestEffortPlan;
    }
 
    public void setYawWeight(double yawWeight)
@@ -184,6 +291,11 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       costParameters.setBodyPathBasedHeuristicsWeight(heuristicsWeight);
    }
 
+   public void setBodyGroundClearance(double bodyGroundClearance)
+   {
+      this.bodyGroundClearance = bodyGroundClearance;
+   }
+
    public void setCheckForBodyBoxCollisions(boolean checkForBodyBoxCollisions)
    {
       this.checkForBodyBoxCollisions = checkForBodyBoxCollisions;
@@ -232,6 +344,36 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    }
 
    @Override
+   public double getWiggleInsideDelta()
+   {
+      return wiggleInsideDelta;
+   }
+
+   @Override
+   public boolean getWiggleIntoConvexHullOfPlanarRegions()
+   {
+      return wiggleIntoConvexHullOfPlanarRegions;
+   }
+
+   @Override
+   public boolean getRejectIfCannotFullyWiggleInside()
+   {
+      return rejectIfCannotFullyWiggleInside;
+   }
+
+   @Override
+   public double getMaximumXYWiggleDistance()
+   {
+      return maximumXYWiggleDistance;
+   }
+
+   @Override
+   public double getMaximumYawWiggle()
+   {
+      return maximumYawWiggle;
+   }
+
+   @Override
    public double getMaximumStepReach()
    {
       return maxStepReach;
@@ -274,6 +416,30 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    }
 
    @Override
+   public double getMaximumStepXWhenForwardAndDown()
+   {
+      return maximumStepXWhenForwardAndDown;
+   }
+
+   @Override
+   public double getMaximumStepZWhenForwardAndDown()
+   {
+      return maximumStepZWhenForwardAndDown;
+   }
+
+   @Override
+   public double getMinXClearanceFromStance()
+   {
+      return minXClearanceFromStance;
+   }
+
+   @Override
+   public double getMinYClearanceFromStance()
+   {
+      return minYClearanceFromStance;
+   }
+
+   @Override
    public double getMinimumFootholdPercent()
    {
       return minFootholdPercent;
@@ -283,6 +449,42 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getMinimumSurfaceInclineRadians()
    {
       return minSurfaceIncline;
+   }
+
+   @Override
+   public double getMaximumZPenetrationOnValleyRegions()
+   {
+      return maximumZPenetrationOnValleyRegions;
+   }
+
+   @Override
+   public double getCliffHeightToAvoid()
+   {
+      return cliffHeightToAvoid;
+   }
+
+   @Override
+   public double getMinimumDistanceFromCliffBottoms()
+   {
+      return minimumDistanceFromCliffBottoms;
+   }
+
+   @Override
+   public boolean getReturnBestEffortPlan()
+   {
+      return returnBestEffortPlan;
+   }
+
+   @Override
+   public int getMinimumStepsForBestEffortPlan()
+   {
+      return minimumStepsForBestEffortPlan;
+   }
+
+   @Override
+   public double getBodyGroundClearance()
+   {
+      return bodyGroundClearance;
    }
 
    @Override
