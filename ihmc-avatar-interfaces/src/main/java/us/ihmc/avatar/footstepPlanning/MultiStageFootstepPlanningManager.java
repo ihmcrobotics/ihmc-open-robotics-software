@@ -304,7 +304,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       completedStepResults.add(stepPlanningResult);
 
       if (stepPlanningResult != null && stepPlanningResult.validForExecution())
-         completedStepPlans.add(stageFinished.getPlanSequenceId(), stageFinished.getPlan());
+      {
+         int sequence = stageFinished.getPlanSequenceId();
+         FootstepPlan plan = stageFinished.getPlan();
+         completedStepPlans.add(sequence, plan);
+      }
 
       completedPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
 
@@ -490,8 +494,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          sendMessageToUI("Result of step planning: " + planId.getIntegerValue() + ", " + stepStatus.toString());
          concatenateFootstepPlans();
          FootstepPlan footstepPlan = this.footstepPlan.getAndSet(null);
-         statusOutputManager
-               .reportStatusMessage(packStepResult(footstepPlan, bodyPathPlan.getAndSet(null), stepStatus, plannerTime.getDoubleValue()));
+         FootstepPlanningToolboxOutputStatus footstepPlanMessage = packStepResult(footstepPlan, bodyPathPlan.getAndSet(null), stepStatus, plannerTime.getDoubleValue());
+         statusOutputManager.reportStatusMessage(footstepPlanMessage);
 
          plannerListener.plannerFinished(null);
       }

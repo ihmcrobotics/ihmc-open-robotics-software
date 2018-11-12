@@ -130,12 +130,12 @@ public class MultiStagePlannerListener implements BipedalFootstepPlannerListener
 
    private void broadcastNodeData(FootstepNodeDataListMessage message)
    {
-      statusMessageOutputManager.reportStatusMessage(message);
+//      statusMessageOutputManager.reportStatusMessage(message);
    }
 
    private void broadcastOccupancyMap(FootstepPlannerOccupancyMapMessage message)
    {
-      statusMessageOutputManager.reportStatusMessage(message);
+//      statusMessageOutputManager.reportStatusMessage(message);
    }
 
 }
