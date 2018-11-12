@@ -289,7 +289,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       BodyPathPlan bodyPathPlan = stageFinished.getPathPlan();
 
-      if (pathPlanningResult.validForExecution() && bodyPathPlan != null)
+      if (pathPlanningResult != null && pathPlanningResult.validForExecution() && bodyPathPlan != null)
          completedPathPlans.add(stageFinished.getPlanSequenceId(), bodyPathPlan);
 
       FootstepPlannerObjective objective = pathPlanningStagesInProgress.remove(stageFinished);
@@ -303,7 +303,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    {
       completedStepResults.add(stepPlanningResult);
 
-      if (stepPlanningResult.validForExecution())
+      if (stepPlanningResult != null && stepPlanningResult.validForExecution())
          completedStepPlans.add(stageFinished.getPlanSequenceId(), stageFinished.getPlan());
 
       completedPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
