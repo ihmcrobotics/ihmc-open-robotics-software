@@ -66,34 +66,46 @@ public class MultiStagePlannerListener implements BipedalFootstepPlannerListener
       if (lastBroadcastTime == -1)
          lastBroadcastTime = currentTime;
 
-      if (currentTime - lastBroadcastTime > occupancyMapBroadcastDt)
+      boolean isTimeForBroadcast = currentTime - lastBroadcastTime > occupancyMapBroadcastDt;
+      if (!isTimeForBroadcast)
+         return;
+
+      boolean areListenersUpdated = true;
+      for (StagePlannerListener listener : listeners)
+         areListenersUpdated &= listener.hasNodeData() && listener.hasOccupiedCells();
+
+      if (!areListenersUpdated)
+         return;
+
+      FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
+      FootstepNodeDataListMessage nodeDataListMessage = null;
+      for (StagePlannerListener listener : listeners)
       {
-         FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
-         FootstepNodeDataListMessage nodeDataListMessage = null;
-         for (StagePlannerListener listener : listeners)
+         FootstepPlannerOccupancyMapMessage stageOccupancyMap = listener.packOccupancyMapMessage();
+         if (stageOccupancyMap != null)
          {
-            Object<FootstepPlannerCellMessage> occupiedCells = listener.packOccupancyMapMessage().getOccupiedCells();
+            Object<FootstepPlannerCellMessage> occupiedCells = stageOccupancyMap.getOccupiedCells();
             for (int i = 0; i < occupiedCells.size(); i++)
                occupancyMapMessage.getOccupiedCells().add().set(occupiedCells.get(i));
-
-            FootstepNodeDataListMessage stageNodeList = listener.packLowestCostPlanMessage();
-            if (stageNodeList != null)
-            {
-               if (nodeDataListMessage == null)
-                  nodeDataListMessage = new FootstepNodeDataListMessage();
-               Object<FootstepNodeDataMessage> stageNodeData = stageNodeList.getNodeData();
-               for (int i = 0; i < stageNodeData.size(); i++)
-                  nodeDataListMessage.getNodeData().add().set(stageNodeData.get(i));
-            }
          }
 
-         broadcastOccupancyMap(occupancyMapMessage);
-
-         if (nodeDataListMessage != null)
-            broadcastNodeData(nodeDataListMessage);
-
-         lastBroadcastTime = currentTime;
+         FootstepNodeDataListMessage stageNodeList = listener.packLowestCostPlanMessage();
+         if (stageNodeList != null)
+         {
+            if (nodeDataListMessage == null)
+               nodeDataListMessage = new FootstepNodeDataListMessage();
+            Object<FootstepNodeDataMessage> stageNodeData = stageNodeList.getNodeData();
+            for (int i = 0; i < stageNodeData.size(); i++)
+               nodeDataListMessage.getNodeData().add().set(stageNodeData.get(i));
+         }
       }
+
+      broadcastOccupancyMap(occupancyMapMessage);
+
+      if (nodeDataListMessage != null)
+         broadcastNodeData(nodeDataListMessage);
+
+      lastBroadcastTime = currentTime;
    }
 
    @Override
@@ -103,8 +115,11 @@ public class MultiStagePlannerListener implements BipedalFootstepPlannerListener
       for (StagePlannerListener listener : listeners)
       {
          FootstepPlannerOccupancyMapMessage stageOccupancyMap = listener.packOccupancyMapMessage();
-         for (int i = 0; i < stageOccupancyMap.getOccupiedCells().size(); i++)
-            occupancyMapMessage.getOccupiedCells().add().set(stageOccupancyMap.getOccupiedCells().get(i));
+         if (stageOccupancyMap != null)
+         {
+            for (int i = 0; i < stageOccupancyMap.getOccupiedCells().size(); i++)
+               occupancyMapMessage.getOccupiedCells().add().set(stageOccupancyMap.getOccupiedCells().get(i));
+         }
       }
       broadcastOccupancyMap(occupancyMapMessage);
    }
