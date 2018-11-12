@@ -25,7 +25,6 @@ public class MultiStagePlannerListener implements BipedalFootstepPlannerListener
    private final FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
    private final FootstepNodeDataListMessage nodeDataListMessage = new FootstepNodeDataListMessage();
 
-
    private final long occupancyMapBroadcastDt;
    private long lastBroadcastTime = -1;
 
