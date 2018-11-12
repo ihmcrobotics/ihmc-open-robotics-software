@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 
 import java.util.Random;
@@ -34,7 +35,9 @@ public enum FootstepPlanningResult
 
    public static FootstepPlanningResult getWorstResult(FootstepPlanningResult resultA, FootstepPlanningResult resultB)
    {
-      return fromByte((byte) Math.max(resultA.toByte(), resultB.toByte()));
+      byte aResult = (byte) MathTools.clamp(resultA.toByte(), OPTIMAL_SOLUTION.toByte(), PLANNER_FAILED.toByte());
+      byte bResult = (byte) MathTools.clamp(resultB.toByte(), OPTIMAL_SOLUTION.toByte(), PLANNER_FAILED.toByte());
+      return fromByte((byte) Math.max(aResult, bResult));
    }
 
    public byte toByte()
