@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import junit.framework.AssertionFailedError;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.idl.IDLSequence.Object;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerState;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;

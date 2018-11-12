@@ -15,7 +15,6 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
-import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedWalkingControllerState;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
@@ -250,30 +249,37 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       factory.addState(HighLevelControllerName.STAND_TRANSITION_STATE, standTransitionState);
       factory.addState(HighLevelControllerName.EXIT_WALKING, exitWalkingState);
 
-      // Always allow all transitions to DO_NOTHING and FREEZE
+      // Manually triggered events to transition to main controllers.
+      factory.addTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.STAND_TRANSITION_STATE, createRequestedTransition(HighLevelControllerName.WALKING));
+      factory.addTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.STAND_TRANSITION_STATE, createRequestedTransition(HighLevelControllerName.STAND_TRANSITION_STATE));
+      factory.addTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
+      factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.STAND_TRANSITION_STATE, createRequestedTransition(HighLevelControllerName.WALKING));
+      factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
+      factory.addTransition(HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
+      factory.addTransition(HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
+
+      factory.addTransition(HighLevelControllerName.DO_NOTHING_BEHAVIOR, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
+      factory.addTransition(HighLevelControllerName.WALKING, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
+      factory.addTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
+      factory.addTransition(HighLevelControllerName.STAND_TRANSITION_STATE, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
+
+      // Trigger do nothing
       for (HighLevelControllerName state : HighLevelControllerName.values)
       {
-         if(!state.equals(HighLevelControllerName.DO_NOTHING_BEHAVIOR))
-         {
-            factory.addTransition(state, HighLevelControllerName.DO_NOTHING_BEHAVIOR, createRequestedTransition(HighLevelControllerName.DO_NOTHING_BEHAVIOR));
-         }
-         else if(!state.equals(HighLevelControllerName.FREEZE_STATE))
-         {
-            factory.addTransition(state, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
-         }
+         factory.addTransition(state, HighLevelControllerName.DO_NOTHING_BEHAVIOR, createRequestedTransition(HighLevelControllerName.DO_NOTHING_BEHAVIOR));
       }
 
       // Set up standard operating transitions
-      factory.addTransition(HighLevelControllerName.DO_NOTHING_BEHAVIOR, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
-      factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
       factory.addDoneTransition(HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.STAND_READY);
-      factory.addTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.STAND_TRANSITION_STATE, createRequestedTransition(HighLevelControllerName.STAND_TRANSITION_STATE));
       factory.addDoneTransition(HighLevelControllerName.STAND_TRANSITION_STATE, HighLevelControllerName.WALKING);
 
       // Set up walking controller failure transition
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       BooleanProvider isFallDetected = controllerToolbox.getFallDetector().getIsFallDetected();
       factory.addTransition(HighLevelControllerName.WALKING, fallbackControllerState, t -> isFallDetected.getValue());
+      factory.addTransition(HighLevelControllerName.FREEZE_STATE, fallbackControllerState, t -> isFallDetected.getValue());
+      factory.addTransition(fallbackControllerState, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
+
 
       factory.addStateChangedListener((to, from) ->
       {
