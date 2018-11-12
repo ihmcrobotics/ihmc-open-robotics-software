@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepNodeDataListMessage;
 import controller_msgs.msg.dds.FootstepNodeDataMessage;
 import controller_msgs.msg.dds.FootstepPlannerCellMessage;
 import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -22,7 +23,6 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    private final FootstepNodeSnapperReadOnly snapper;
    private final HashMap<FootstepNode, BipedalFootstepPlannerNodeRejectionReason> rejectionReasons = new HashMap<>();
    private final HashMap<FootstepNode, List<FootstepNode>> childMap = new HashMap<>();
-   private final HashMap<PlannerCell, List<FootstepNode>> cellMap = new HashMap<>();
    private final HashSet<PlannerCell> exploredCells = new HashSet<>();
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
 
@@ -63,10 +63,6 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
          PlannerCell plannerCell = new PlannerCell(node.getXIndex(), node.getYIndex());
 
          exploredCells.add(plannerCell);
-
-         if (!cellMap.containsKey(plannerCell))
-            cellMap.put(plannerCell, new ArrayList<>());
-         cellMap.get(plannerCell).add(node);
       }
    }
 
@@ -116,16 +112,6 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
          FootstepPlannerCellMessage plannerCell = cellMessages.add();
          plannerCell.setXIndex(plannerCells[i].xIndex);
          plannerCell.setYIndex(plannerCells[i].yIndex);
-
-         List<FootstepNode> cellNodes = cellMap.get(plannerCells[i]);
-         boolean nodeIsValid = false;
-         for (int nodeIndex = 0; nodeIndex < cellNodes.size(); nodeIndex++)
-         {
-            if (!rejectionReasons.containsKey(cellNodes.get(nodeIndex)))
-               nodeIsValid = true;
-         }
-
-         plannerCell.setNodeIsValid(nodeIsValid);
       }
       occupiedCells.addAll(cellMessages);
 
