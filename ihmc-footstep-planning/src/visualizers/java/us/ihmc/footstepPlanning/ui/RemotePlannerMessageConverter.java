@@ -44,7 +44,7 @@ public class RemotePlannerMessageConverter
    private final AtomicReference<FootstepPlanningResult> resultReference;
    private final AtomicReference<FootstepPlan> footstepPlanReference;
    private final AtomicReference<Integer> plannerRequestIdReference;
-   private final AtomicReference<Integer> sequenceIdReference;
+   private final AtomicReference<Integer> receivedPlanIdReference;
    private final AtomicReference<Boolean> acceptNewPlanarRegionsReference;
 
    public static RemotePlannerMessageConverter createRemoteConverter(Messager messager, String robotName)
@@ -72,7 +72,7 @@ public class RemotePlannerMessageConverter
       resultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResultTopic);
       footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanTopic);
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, 0);
-      sequenceIdReference = messager.createInput(FootstepPlannerMessagerAPI.SequenceIdTopic, 0);
+      receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic, 0);
       acceptNewPlanarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, true);
 
       registerPubSubs(ros2Node);
@@ -127,7 +127,6 @@ public class RemotePlannerMessageConverter
       FootstepPlannerType plannerType = FootstepPlannerType.fromByte(packet.getRequestedFootstepPlannerType());
       RobotSide initialSupportSide = RobotSide.fromByte(packet.getInitialStanceRobotSide());
       int plannerRequestId = packet.getPlannerRequestId();
-      int sequenceId = (int) packet.getSequenceId();
 
       double timeout = packet.getTimeout();
       double horizonLength = packet.getHorizonLength();
@@ -145,7 +144,6 @@ public class RemotePlannerMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSideTopic, initialSupportSide);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
-      messager.submitMessage(FootstepPlannerMessagerAPI.SequenceIdTopic, sequenceId);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength);
 
@@ -192,8 +190,8 @@ public class RemotePlannerMessageConverter
       planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
       result.setFootstepPlanningResult(planningResult.toByte());
       result.getFootstepDataList().set(convertToFootstepDataListMessage(footstepPlan));
-      result.setSequenceId(sequenceIdReference.get());
       result.setPlanId(plannerRequestIdReference.get());
+      receivedPlanIdReference.set(plannerRequestIdReference.get());;
 
       outputStatusPublisher.publish(result);
    }
@@ -209,7 +207,6 @@ public class RemotePlannerMessageConverter
 
       planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
       result.setFootstepPlanningResult(planningResult.toByte());
-      result.setSequenceId(sequenceIdReference.get());
       result.setPlanId(plannerRequestIdReference.get());
 
       outputStatusPublisher.publish(result);

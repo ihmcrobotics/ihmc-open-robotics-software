@@ -60,7 +60,7 @@ public class FootstepPlannerMessagerAPI
    private static final TypedTopicTheme<Double> PlannerTimeTaken = apiFactory.createTypedTopicTheme("PlannerTimeTaken");
    private static final TypedTopicTheme<Double> PlannerHorizonLength = apiFactory.createTypedTopicTheme("PlannerHorizonLength");
    private static final TypedTopicTheme<Integer> PlannerRequestId = apiFactory.createTypedTopicTheme("PlannerRequestId");
-   private static final TypedTopicTheme<Integer> SequenceId = apiFactory.createTypedTopicTheme("SequenceId");
+   private static final TypedTopicTheme<Integer> ReceivedPlanId = apiFactory.createTypedTopicTheme("ReceivedPlanId");
    private static final TypedTopicTheme<FootstepPlannerType> FootstepPlannerType = apiFactory.createTypedTopicTheme("FootstepPlannerType");
    private static final TypedTopicTheme<FootstepPlanningResult> FootstepPlannerResult = apiFactory.createTypedTopicTheme("FootstepPlannerResult");
    private static final TypedTopicTheme<FootstepPlannerStatus> FootstepPlannerStatus = apiFactory.createTypedTopicTheme("FootstepPlannerStatus");
@@ -96,7 +96,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepPlanningResult> PlanningResultTopic = Root.child(FootstepPlan).topic(FootstepPlannerResult);
    public static final Topic<FootstepPlannerStatus> PlannerStatusTopic = Root.child(FootstepPlan).topic(FootstepPlannerStatus);
    public static final Topic<Integer> PlannerRequestIdTopic = Root.child(FootstepPlan).topic(PlannerRequestId);
-   public static final Topic<Integer> SequenceIdTopic = Root.child(FootstepPlan).topic(SequenceId);
+   public static final Topic<Integer> ReceivedPlanIdTopic = Root.child(FootstepPlan).topic(ReceivedPlanId);
 
    public static final Topic<Boolean> StartPositionEditModeEnabledTopic = Root.child(Start).child(EditMode).child(PositionTheme).topic(Enable);
    public static final Topic<Boolean> GoalPositionEditModeEnabledTopic = Root.child(Goal).child(EditMode).child(PositionTheme).topic(Enable);

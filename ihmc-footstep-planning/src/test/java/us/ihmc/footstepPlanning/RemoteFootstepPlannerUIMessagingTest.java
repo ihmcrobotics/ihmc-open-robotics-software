@@ -227,7 +227,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          FootstepPlannerType planningType = FootstepPlannerType.generateRandomPlannerType(random);
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
-         int sequenceId = RandomNumbers.nextInt(random, 1, 100);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
          messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, goalPosition);
@@ -238,7 +237,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
          messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSideTopic, robotSide);
-         messager.submitMessage(FootstepPlannerMessagerAPI.SequenceIdTopic, sequenceId);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength);
 
@@ -266,7 +264,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          assertEquals("Planner types aren't equal.", planningType, FootstepPlannerType.fromByte(packet.getRequestedFootstepPlannerType()));
          assertEquals("Initial support sides aren't equal.", robotSide, RobotSide.fromByte(packet.getInitialStanceRobotSide()));
 
-         assertEquals("Sequence Ids aren't equal.", sequenceId, packet.getSequenceId(), epsilon);
          assertEquals("Planner Request Ids aren't equal.", plannerRequestId, packet.getPlannerRequestId(), epsilon);
          assertEquals("Planner horizon lengths aren't equal.", horizonLength, packet.getHorizonLength(), epsilon);
 
@@ -295,7 +292,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       AtomicReference<Double> timeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeoutTopic);
       AtomicReference<RobotSide> robotSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSideTopic);
 
-      AtomicReference<Integer> sequenceIdReference = messager.createInput(FootstepPlannerMessagerAPI.SequenceIdTopic);
       AtomicReference<Integer> plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
 
       AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
@@ -336,7 +332,7 @@ public class RemoteFootstepPlannerUIMessagingTest
          long sleepDuration = 10;
          while (startPositionReference.get() == null || goalPositionReference.get() == null || timeoutReference.get() == null
                || planningTypeReference.get() == null || robotSideReference.get() == null || startOrientationReference.get() == null
-               || goalOrientationReference.get() == null || sequenceIdReference.get() == null || plannerRequestIdReference.get() == null
+               || goalOrientationReference.get() == null || plannerRequestIdReference.get() == null
                || plannerHorizonLengthReference.get() == null || planarRegionsListReference.get() == null)
          {
             assertFalse("Timed out waiting on the results.", currentWaitTime > maxWaitTime);
@@ -352,7 +348,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          assertEquals("Initial support sides aren't equal.", robotSide, robotSideReference.getAndSet(null));
          EuclidCoreTestTools.assertQuaternionEquals("Start orientations aren't equal.", startOrientation, startOrientationReference.getAndSet(null), epsilon);
          EuclidCoreTestTools.assertQuaternionEquals("Goal orientations aren't equal.", goalOrientation, goalOrientationReference.getAndSet(null), epsilon);
-         assertEquals("Sequence Ids aren't equal.", sequenceId, sequenceIdReference.getAndSet(null), epsilon);
          assertEquals("Planner Request Ids aren't equal.", plannerRequestId, plannerRequestIdReference.getAndSet(null), epsilon);
          assertEquals("Planner horizon lengths aren't equal.", horizonLength, plannerHorizonLengthReference.getAndSet(null), epsilon);
          checkPlanarRegionListsAreEqual(planarRegionsList, planarRegionsListReference.getAndSet(null));
@@ -382,7 +377,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          FootstepPlannerType planningType = FootstepPlannerType.generateRandomPlannerType(random);
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
-         int sequenceId = RandomNumbers.nextInt(random, 1, 100);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
          messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, goalPosition);
@@ -393,7 +387,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
          messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSideTopic, robotSide);
-         messager.submitMessage(FootstepPlannerMessagerAPI.SequenceIdTopic, sequenceId);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength);
 
@@ -430,8 +423,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       localNode.spin();
       AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
       AtomicReference<FootstepPlan> footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanTopic);
-      AtomicReference<Integer> sequenceIdReference = messager.createInput(FootstepPlannerMessagerAPI.SequenceIdTopic);
-      AtomicReference<Integer> plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
+      AtomicReference<Integer> receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic);
       AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResultTopic);
       AtomicReference<Double> timeTakenReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic);
       AtomicReference<List<? extends Point3DReadOnly>> bodyPathReference = messager.createInput(FootstepPlannerMessagerAPI.BodyPathDataTopic);
@@ -481,8 +473,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
          checkPlanarRegionListsAreEqual(planarRegionsList, planarRegionsListReference.getAndSet(null));
          checkFootstepPlansAreEqual(footstepDataListMessage, footstepPlanReference.getAndSet(null));
-         assertEquals("Planner Ids aren't equal.", planId, plannerRequestIdReference.getAndSet(null), epsilon);
-         assertEquals("Sequence Ids aren't equal.", sequenceId, sequenceIdReference.getAndSet(null), epsilon);
+         assertEquals("Planner Ids aren't equal.", planId, receivedPlanIdReference.getAndSet(null), epsilon);
          assertEquals("Planner results aren't equal.", result, plannerResultReference.getAndSet(null));
          assertEquals("Time taken results aren't equal.", timeTaken, timeTakenReference.getAndSet(null));
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Low level goal position results aren't equal.", lowLevelGoalPosition, lowLevelPositionGoalReference.getAndSet(null), epsilon);
