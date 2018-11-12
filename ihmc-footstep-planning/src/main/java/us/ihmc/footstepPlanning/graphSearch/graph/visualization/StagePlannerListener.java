@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.FootstepNodeDataListMessage;
 import controller_msgs.msg.dds.FootstepNodeDataMessage;
 import controller_msgs.msg.dds.FootstepPlannerCellMessage;
 import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
-import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -15,7 +14,7 @@ import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerList
 import us.ihmc.idl.IDLSequence.Object;
 
 import java.util.*;
-import java.util.function.Supplier;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StagePlannerListener implements BipedalFootstepPlannerListener
 {
@@ -27,6 +26,9 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private final ConcurrentList<FootstepPlannerCellMessage> occupiedCells = new ConcurrentList<>();
    private final ConcurrentList<FootstepNodeDataMessage> nodeData = new ConcurrentList<>();
+
+   private final AtomicBoolean hasOccupiedCells = new AtomicBoolean(true);
+   private final AtomicBoolean hasNodeData = new AtomicBoolean(true);
 
    private final long occupancyMapBroadcastDt;
    private long lastBroadcastTime = -1;
@@ -101,6 +103,8 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
          cellMessages.add(plannerCell);
       }
       occupiedCells.addAll(cellMessages);
+
+      hasOccupiedCells.set(true);
    }
 
    private void updateNodeData()
@@ -117,26 +121,48 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       nodeData.addAll(messageList);
 
       lowestCostPlan.clear();
+
+      hasNodeData.set(true);
+   }
+
+   public boolean hasOccupiedCells()
+   {
+      return hasOccupiedCells.get();
+   }
+
+   public boolean hasNodeData()
+   {
+      return hasNodeData.get();
    }
 
    FootstepPlannerOccupancyMapMessage packOccupancyMapMessage()
    {
+      if (occupiedCells.isEmpty())
+         return null;
+
       FootstepPlannerOccupancyMapMessage message = new FootstepPlannerOccupancyMapMessage();
-      //      Object<FootstepPlannerCellMessage> occupiedCells = message.getOccupiedCells();
-      //      for (int i = 0; i < this.occupiedCells.size(); i++)
-      //         occupiedCells.add().set(this.occupiedCells.get(i));
+      Object<FootstepPlannerCellMessage> occupiedCells = message.getOccupiedCells();
+      for (int i = 0; i < this.occupiedCells.size(); i++)
+         occupiedCells.add().set(this.occupiedCells.get(i));
+
+      hasOccupiedCells.set(false);
 
       return message;
    }
 
    FootstepNodeDataListMessage packLowestCostPlanMessage()
    {
+      if (nodeData.isEmpty())
+         return null;
+
       FootstepNodeDataListMessage nodeDataListMessage = new FootstepNodeDataListMessage();
-      //      Object<FootstepNodeDataMessage> nodeDataList = nodeDataListMessage.getNodeData();
-      //      for (int i = 0; i < nodeData.size(); i++)
-      //         nodeDataList.add().set(nodeData.get(i));
+      Object<FootstepNodeDataMessage> nodeDataList = nodeDataListMessage.getNodeData();
+      for (int i = 0; i < nodeData.size(); i++)
+         nodeDataList.add().set(nodeData.get(i));
 
       nodeDataListMessage.setIsFootstepGraph(false);
+
+      hasNodeData.set(false);
 
       return nodeDataListMessage;
    }
