@@ -22,6 +22,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    private final FootstepNodeSnapperReadOnly snapper;
    private final HashMap<FootstepNode, BipedalFootstepPlannerNodeRejectionReason> rejectionReasons = new HashMap<>();
    private final HashMap<FootstepNode, List<FootstepNode>> childMap = new HashMap<>();
+   private final HashMap<PlannerCell, List<FootstepNode>> cellMap = new HashMap<>();
    private final HashSet<PlannerCell> exploredCells = new HashSet<>();
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
 
@@ -30,7 +31,6 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private final RecyclingArrayList<FootstepNodeDataMessage> nodeDataMessageList = new RecyclingArrayList<>(FootstepNodeDataMessage::new);
    private final RecyclingArrayList<FootstepPlannerCellMessage> cellMessages = new RecyclingArrayList<>(FootstepPlannerCellMessage::new);
-
 
    private final ConcurrentList<FootstepPlannerCellMessage> occupiedCells = new ConcurrentList<>();
    private final ConcurrentList<FootstepNodeDataMessage> nodeData = new ConcurrentList<>();
@@ -60,7 +60,13 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       else
       {
          childMap.computeIfAbsent(previousNode, n -> new ArrayList<>()).add(node);
-         exploredCells.add(new PlannerCell(node.getXIndex(), node.getYIndex()));
+         PlannerCell plannerCell = new PlannerCell(node.getXIndex(), node.getYIndex());
+
+         exploredCells.add(plannerCell);
+
+         if (!cellMap.containsKey(plannerCell))
+            cellMap.put(plannerCell, new ArrayList<>());
+         cellMap.get(plannerCell).add(node);
       }
    }
 
@@ -110,6 +116,16 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
          FootstepPlannerCellMessage plannerCell = cellMessages.add();
          plannerCell.setXIndex(plannerCells[i].xIndex);
          plannerCell.setYIndex(plannerCells[i].yIndex);
+
+         List<FootstepNode> cellNodes = cellMap.get(plannerCells[i]);
+         boolean nodeIsValid = false;
+         for (int nodeIndex = 0; nodeIndex < cellNodes.size(); nodeIndex++)
+         {
+            if (!rejectionReasons.containsKey(cellNodes.get(nodeIndex)))
+               nodeIsValid = true;
+         }
+
+         plannerCell.setNodeIsValid(nodeIsValid);
       }
       occupiedCells.addAll(cellMessages);
 
