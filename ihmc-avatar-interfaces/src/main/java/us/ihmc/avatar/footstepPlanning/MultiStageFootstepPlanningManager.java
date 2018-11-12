@@ -124,7 +124,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone.set(false);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
 
-      long updateFrequency = 500;
+      long updateFrequency = 1000;
       plannerListener = new MultiStagePlannerListener(statusOutputManager, updateFrequency);
 
       for (int i = 0; i < numberOfCores; i++)

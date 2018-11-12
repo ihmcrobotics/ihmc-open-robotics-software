@@ -22,6 +22,10 @@ public class MultiStagePlannerListener implements BipedalFootstepPlannerListener
 {
    private final StatusMessageOutputManager statusMessageOutputManager;
 
+   private final FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
+   private final FootstepNodeDataListMessage nodeDataListMessage = new FootstepNodeDataListMessage();
+
+
    private final long occupancyMapBroadcastDt;
    private long lastBroadcastTime = -1;
 
@@ -77,32 +81,33 @@ public class MultiStagePlannerListener implements BipedalFootstepPlannerListener
       if (!areListenersUpdated)
          return;
 
-      FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
-      FootstepNodeDataListMessage nodeDataListMessage = null;
+      Object<FootstepPlannerCellMessage> occupiedCells = occupancyMapMessage.getOccupiedCells();
+      Object<FootstepNodeDataMessage> nodeData = nodeDataListMessage.getNodeData();
+      occupiedCells.clear();
+      nodeData.clear();
+
       for (StagePlannerListener listener : listeners)
       {
          FootstepPlannerOccupancyMapMessage stageOccupancyMap = listener.packOccupancyMapMessage();
          if (stageOccupancyMap != null)
          {
-            Object<FootstepPlannerCellMessage> occupiedCells = stageOccupancyMap.getOccupiedCells();
-            for (int i = 0; i < occupiedCells.size(); i++)
-               occupancyMapMessage.getOccupiedCells().add().set(occupiedCells.get(i));
+            Object<FootstepPlannerCellMessage> stageOccupiedCells = stageOccupancyMap.getOccupiedCells();
+            for (int i = 0; i < stageOccupiedCells.size(); i++)
+               occupiedCells.add().set(stageOccupiedCells.get(i));
          }
 
          FootstepNodeDataListMessage stageNodeList = listener.packLowestCostPlanMessage();
          if (stageNodeList != null)
          {
-            if (nodeDataListMessage == null)
-               nodeDataListMessage = new FootstepNodeDataListMessage();
             Object<FootstepNodeDataMessage> stageNodeData = stageNodeList.getNodeData();
             for (int i = 0; i < stageNodeData.size(); i++)
-               nodeDataListMessage.getNodeData().add().set(stageNodeData.get(i));
+               nodeData.add().set(stageNodeData.get(i));
          }
       }
 
       broadcastOccupancyMap(occupancyMapMessage);
 
-      if (nodeDataListMessage != null)
+      if (!nodeData.isEmpty())
          broadcastNodeData(nodeDataListMessage);
 
       lastBroadcastTime = currentTime;
