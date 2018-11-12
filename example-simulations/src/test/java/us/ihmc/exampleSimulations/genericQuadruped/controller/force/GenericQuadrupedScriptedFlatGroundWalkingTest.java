@@ -35,7 +35,13 @@ public class GenericQuadrupedScriptedFlatGroundWalkingTest extends QuadrupedScri
    @Override
    public Point3D getFinalPlanarPosition()
    {
-      return new Point3D(1.684, 0.077, 0.0);
+      List<QuadrupedTimedStepMessage> steps = getSteps();
+      Point3D finalPosition = new Point3D();
+      for (int i = steps.size() - 1; i > steps.size() -  4; i--)
+         finalPosition.add(steps.get(i).getQuadrupedStepMessage().getGoalPosition());
+      finalPosition.scale(0.25);
+
+      return finalPosition;
    }
 
    @Override

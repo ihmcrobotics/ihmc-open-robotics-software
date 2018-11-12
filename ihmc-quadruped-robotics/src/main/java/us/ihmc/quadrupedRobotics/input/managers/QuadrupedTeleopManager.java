@@ -13,7 +13,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -119,7 +118,7 @@ public class QuadrupedTeleopManager
       ROS2Tools.createCallbackSubscription(ros2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator, s -> controllerStateChangeMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator, s -> steppingStateChangeMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> timestampNanos.set(s.takeNextData().timestamp_));
-      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedRequestedControllerStateMessage.class, controllerPubGenerator, s -> paused.set(true));
+      ROS2Tools.createCallbackSubscription(ros2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> paused.set(true));
 
       MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
