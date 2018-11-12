@@ -389,9 +389,7 @@ public class RemoteFootstepPlannerUIMessagingTest
          messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSideTopic, robotSide);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength);
-
-         // TODO convert parameters to message-based parameters
-//         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, randomParameters);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, randomParameters);
 
          messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
 
@@ -471,7 +469,6 @@ public class RemoteFootstepPlannerUIMessagingTest
             ThreadTools.sleep(100);
          }
 
-         checkPlanarRegionListsAreEqual(planarRegionsList, planarRegionsListReference.getAndSet(null));
          checkFootstepPlansAreEqual(footstepDataListMessage, footstepPlanReference.getAndSet(null));
          assertEquals("Planner Ids aren't equal.", planId, receivedPlanIdReference.getAndSet(null), epsilon);
          assertEquals("Planner results aren't equal.", result, plannerResultReference.getAndSet(null));

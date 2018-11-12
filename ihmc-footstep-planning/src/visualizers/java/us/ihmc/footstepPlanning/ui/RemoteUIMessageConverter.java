@@ -200,13 +200,11 @@ public class RemoteUIMessageConverter
    private void processBodyPathPlanMessage(BodyPathPlanMessage packet)
    {
       PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsList();
-      int plannerRequestId = packet.getPlanId();
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
       FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
       List<? extends Point3DReadOnly> bodyPath = packet.getBodyPath();
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResultTopic, result);
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathDataTopic, bodyPath);
 
