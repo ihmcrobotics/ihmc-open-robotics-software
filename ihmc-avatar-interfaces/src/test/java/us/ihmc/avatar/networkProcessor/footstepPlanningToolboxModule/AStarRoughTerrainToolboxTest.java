@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
 import org.junit.Test;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -44,7 +45,7 @@ public class AStarRoughTerrainToolboxTest extends RoughTerrainDataSetTest
 
    public static void main(String[] args) throws Exception
    {
-      String testName = bollards;
+      String testName = corridor;
       AStarRoughTerrainToolboxTest test = new AStarRoughTerrainToolboxTest();
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       VISUALIZE = true;
@@ -60,6 +61,8 @@ public class AStarRoughTerrainToolboxTest extends RoughTerrainDataSetTest
 
 
       test.runAssertions(getTestData(testName));
+
+      ThreadTools.sleepForever();
       PrintTools.info("Test passed.");
    }
 }

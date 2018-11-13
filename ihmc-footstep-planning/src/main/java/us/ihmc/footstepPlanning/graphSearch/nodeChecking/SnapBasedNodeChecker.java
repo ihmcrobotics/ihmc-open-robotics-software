@@ -46,7 +46,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    {
       if (previousNode != null && node.equals(previousNode))
       {
-         throw new RuntimeException("Checking node assuming it is following itself.");
+         throw new IllegalArgumentException("Checking node assuming it is following itself.");
       }
 
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);

@@ -1,9 +1,6 @@
 package us.ihmc.footstepPlanning.communication;
 
-import controller_msgs.msg.dds.BodyPathPlanMessage;
-import controller_msgs.msg.dds.BodyPathPlanStatisticsMessage;
-import controller_msgs.msg.dds.FootstepPlannerStatusMessage;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
@@ -28,6 +25,8 @@ public class FootstepPlannerCommunicationProperties
       statusMessages.add(FootstepPlannerStatusMessage.class);
       statusMessages.add(BodyPathPlanMessage.class);
       statusMessages.add(BodyPathPlanStatisticsMessage.class);
+      statusMessages.add(FootstepNodeDataListMessage.class);
+      statusMessages.add(FootstepPlannerOccupancyMapMessage.class);
 
       toolboxSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
 
