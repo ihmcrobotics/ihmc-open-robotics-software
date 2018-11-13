@@ -69,6 +69,17 @@ float64 minimum_step_length
 # Field default value -1.0
 float64 minimum_step_yaw
 
+# Large steps forward and up can cause the robot to surpass its torque limits.
+# These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+# it's very close to saturating its torque limits.
+# Field default value -1.0
+float64 maximum_step_reach_when_stepping_up
+
+# Large steps forward and up can cause the robot to surpass its torque limits.
+# These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+# it's very close to saturating its torque limits.
+float64 maximum_step_z_when_stepping_up
+
 # Maximum step length when stepping forward and down.
 # 
 # Large steps forward and down are rejected by the planner if two criteria are met:
