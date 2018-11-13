@@ -34,7 +34,7 @@ public class ValkyrieFeedbackControllerSettings implements FeedbackControllerSet
          return null;
 
       GroupParameter<Double> pelvisGroup = new GroupParameter<>(jointMap.getPelvisName(), 25.0);
-      GroupParameter<Double> chestGroup = new GroupParameter<>(jointMap.getChestName(), 25.0);
+      GroupParameter<Double> chestGroup = new GroupParameter<>(jointMap.getChestName(), 16.0);
       GroupParameter<Double> footGroup = new GroupParameter<>("foot", 16.0, new ArrayList<>());
       GroupParameter<Double> armJointsGroup = new GroupParameter<>("armJoints", 25.0, new ArrayList<>());
 

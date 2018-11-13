@@ -41,6 +41,8 @@ public class PlanarRegionViewer
    private final AnimationTimer renderMeshAnimation;
    private final AtomicReference<Boolean> show;
 
+   private static final PlanarRegionColorPicker colorPicker = new PlanarRegionColorPicker();
+
    public PlanarRegionViewer(Messager messager, Topic<PlanarRegionsList> planarRegionDataTopic, Topic<Boolean> showPlanarRegionsTopic)
    {
       messager.registerTopicListener(planarRegionDataTopic, this::buildMeshAndMaterialOnThread);
@@ -117,7 +119,7 @@ public class PlanarRegionViewer
          }
 
          MeshView regionMeshView = new MeshView(meshBuilder.generateMesh());
-         regionMeshView.setMaterial(new PhongMaterial(getRegionColor(regionId, opacity.get())));
+         regionMeshView.setMaterial(new PhongMaterial(getRegionColor(regionId)));
          regionMeshViews.add(regionMeshView);
       }
 
@@ -132,12 +134,34 @@ public class PlanarRegionViewer
 
    public static Color getRegionColor(int regionId, double opacity)
    {
-      java.awt.Color awtColor = new java.awt.Color(regionId);
+      java.awt.Color awtColor = colorPicker.getColor(regionId);
       return Color.rgb(awtColor.getRed(), awtColor.getGreen(), awtColor.getBlue(), opacity);
    }
 
    public Node getRoot()
    {
       return root;
+   }
+
+   /**
+    * Keeps a list N of good colors to render planar regions. Region i is given color i mod N
+    */
+   private static class PlanarRegionColorPicker
+   {
+      private final ArrayList<java.awt.Color> colors = new ArrayList<>();
+
+      PlanarRegionColorPicker()
+      {
+         colors.add(new java.awt.Color(104, 130, 219));
+         colors.add(new java.awt.Color(113, 168, 133));
+         colors.add(new java.awt.Color(196, 182, 56));
+         colors.add(new java.awt.Color(190, 89, 110));
+         colors.add(new java.awt.Color(150, 150, 155));
+      }
+
+      java.awt.Color getColor(int regionId)
+      {
+         return colors.get(Math.abs(regionId % colors.size()));
+      }
    }
 }

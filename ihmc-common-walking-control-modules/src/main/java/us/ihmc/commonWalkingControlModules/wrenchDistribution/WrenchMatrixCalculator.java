@@ -61,7 +61,9 @@ public class WrenchMatrixCalculator
    private final DenseMatrix64F rhoPreviousMatrix;
 
    private final DenseMatrix64F copRegularizationJacobian;
+   private final DenseMatrix64F copRegularizationObjective;
    private final DenseMatrix64F copRateRegularizationJacobian;
+   private final DenseMatrix64F copRateRegularizationObjective;
    private final DenseMatrix64F activeRhoMatrix;
 
    private final DenseMatrix64F rhoMaxMatrix;
@@ -112,7 +114,9 @@ public class WrenchMatrixCalculator
       rhoPreviousMatrix = new DenseMatrix64F(rhoSize, 1);
 
       copRegularizationJacobian = new DenseMatrix64F(copTaskSize, rhoSize);
+      copRegularizationObjective = new DenseMatrix64F(copTaskSize, 1);
       copRateRegularizationJacobian = new DenseMatrix64F(copTaskSize, rhoSize);
+      copRateRegularizationObjective = new DenseMatrix64F(copTaskSize, 1);
       activeRhoMatrix = new DenseMatrix64F(rhoSize, 1);
 
       rhoMaxMatrix = new DenseMatrix64F(rhoSize, 1);
@@ -181,6 +185,7 @@ public class WrenchMatrixCalculator
       centerOfPressureCommands.add().set(command);
    }
 
+   // FIXME The formulation of the objective should be unified with PlaneContactStateToWrenchMatrixHelper.computeCopObjectiveJacobian(...)
    public boolean getCenterOfPressureInput(QPInput inputToPack)
    {
       int commands = centerOfPressureCommands.size();
@@ -366,7 +371,9 @@ public class WrenchMatrixCalculator
          CommonOps.insert(helper.getRhoRateWeight(), rhoRateWeightMatrix, rhoStartIndex, rhoStartIndex);
 
          CommonOps.insert(helper.getCoPRegularizationJacobian(), copRegularizationJacobian, copStartIndex, rhoStartIndex);
+         CommonOps.insert(helper.getCoPRegularizationObjective(), copRegularizationObjective, copStartIndex, 0);
          CommonOps.insert(helper.getCoPRateRegularizationJacobian(), copRateRegularizationJacobian, copStartIndex, rhoStartIndex);
+         CommonOps.insert(helper.getCoPRateRegularizationObjective(), copRateRegularizationObjective, copStartIndex, 0);
 
          CommonOps.insert(helper.getCoPRegularizationWeight(), copRegularizationWeight, copStartIndex, copStartIndex);
          CommonOps.insert(helper.getCoPRateRegularizationWeight(), copRateRegularizationWeight, copStartIndex, copStartIndex);
@@ -453,9 +460,19 @@ public class WrenchMatrixCalculator
       return copRegularizationJacobian;
    }
 
+   public DenseMatrix64F getCoPRegularizationObjective()
+   {
+      return copRegularizationObjective;
+   }
+
    public DenseMatrix64F getCoPRateRegularizationJacobian()
    {
       return copRateRegularizationJacobian;
+   }
+
+   public DenseMatrix64F getCoPRateRegularizationObjective()
+   {
+      return copRateRegularizationObjective;
    }
 
    public DenseMatrix64F getCoPRegularizationWeight()

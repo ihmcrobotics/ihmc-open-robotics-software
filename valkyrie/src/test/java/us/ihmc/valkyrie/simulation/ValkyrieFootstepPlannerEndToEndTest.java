@@ -26,6 +26,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE})
 public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPlannerEndToEndTest
 {
+   private static final boolean showCollisionGraphics = true;
    private DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 
    @Override
@@ -50,7 +51,7 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
 
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 120000)
+   @Test(timeout = 300000)
    public void testWalkingBetweenBollardsAStarPlanner()
    {
       super.testWalkingBetweenBollardsAStarPlanner();
@@ -91,7 +92,9 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
       public ValkyrieLegCollisionDetectorScript(int simTicksPerCollisionCheck)
       {
          super(simTicksPerCollisionCheck);
-         setupGraphics();
+
+         if(showCollisionGraphics)
+            setupGraphics();
       }
 
       @Override
@@ -118,14 +121,14 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
 
          tempTransform.setIdentity();
          tempTransform.setTranslationZ(shinZOffset + 0.5 * shinLength);
-         shapeFactory.addShape(leftShin, tempTransform, new CylinderShapeDescription<>(shinRadius, shinLength), false, 0b01, 0b00);
-         shapeFactory.addShape(rightShin, tempTransform, new CylinderShapeDescription<>(shinRadius, shinLength), false, 0b01, 0b00);
+         shapeFactory.addShape(leftShin, tempTransform, new CylinderShapeDescription<>(shinRadius, shinLength), false, 0b01, 0b10);
+         shapeFactory.addShape(rightShin, tempTransform, new CylinderShapeDescription<>(shinRadius, shinLength), false, 0b01, 0b10);
 
          tempTransform.setTranslation(thighXOffset, thighYOffset, thighZOffset + 0.5 * thighLength);
          shapeFactory.addShape(leftThigh, tempTransform, new CylinderShapeDescription<>(thighRadius, thighLength), false, 0b01, 0b10);
 
          tempTransform.setTranslation(thighXOffset, - thighYOffset, thighZOffset + 0.5 * thighLength);
-         shapeFactory.addShape(rightThigh, new RigidBodyTransform(), new CylinderShapeDescription<>(thighRadius, thighLength), false, 0b01, 0b00);
+         shapeFactory.addShape(rightThigh, tempTransform, new CylinderShapeDescription<>(thighRadius, thighLength), false, 0b01, 0b10);
 
          shapeFactory.addShape(shapeFactory.createBox(0.5 * bollardEnvironment.getBollardWidth(), 0.5 * bollardEnvironment.getBollardWidth(), bollardEnvironment.getBollardHeight()));
          shapeFactory.addShape(shapeFactory.createBox(0.5 * bollardEnvironment.getBollardWidth(), 0.5 * bollardEnvironment.getBollardWidth(), bollardEnvironment.getBollardHeight()));

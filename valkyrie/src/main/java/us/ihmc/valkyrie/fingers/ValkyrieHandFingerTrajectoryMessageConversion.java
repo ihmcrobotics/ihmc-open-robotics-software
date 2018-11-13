@@ -13,8 +13,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ValkyrieHandFingerTrajectoryMessageConversion
 {
-   public static double trajectoryTime = 3.0;
-   public static double extendedTimeRatioForThumb = 1.5;
+   /*
+    * TODO Somehow make it YoDoubles again.
+    * The fingers seem to be pretty slow, so kinda pointless reducing this one.
+    * In addition, the comms to the fingers seems flaky, going faster increases
+    * the chances to trigger a limit fault.
+    */
+   public static double trajectoryTime = 5.0;
+   public static double extendedTimeRatioForThumb = 1.25; // Making sure the thumb does not crush the finger when closing.
    public static double basicGripThumbRollClosingTime = 1.0; // TODO.
 
    public static double trajectoryTimeForSim = 0.5;

@@ -20,7 +20,8 @@ public class QuadrupedJointIntegrator
    private final YoDouble integratedPosition;
    private boolean resetIntegrators;
 
-   public QuadrupedJointIntegrator(OneDoFJoint controllerJoint, JointDesiredOutputBasics jointDesiredSetpoints, double controlDT, YoVariableRegistry parentRegistry)
+   public QuadrupedJointIntegrator(OneDoFJoint controllerJoint, JointDesiredOutputBasics jointDesiredSetpoints, double controlDT,
+                                   YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
 
@@ -65,9 +66,8 @@ public class QuadrupedJointIntegrator
       if (!jointDesiredSetpoints.hasDesiredVelocity())
       {
          double kd = jointDesiredSetpoints.hasVelocityIntegrationBreakFrequency() ?
-               AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointDesiredSetpoints.getVelocityIntegrationBreakFrequency(), controlDT) :
-               1.0;
-         integratedVelocity.add(kd * (controllerJoint.getQd() - integratedVelocity.getDoubleValue()) + jointDesiredSetpoints.getDesiredAcceleration() * controlDT);
+               1.0 - AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointDesiredSetpoints.getVelocityIntegrationBreakFrequency(), controlDT) : 1.0;
+         integratedVelocity.sub(kd * integratedVelocity.getDoubleValue() + jointDesiredSetpoints.getDesiredAcceleration() * controlDT);
          jointDesiredSetpoints.setDesiredVelocity(integratedVelocity.getDoubleValue());
       }
       else
@@ -79,8 +79,7 @@ public class QuadrupedJointIntegrator
       if (!jointDesiredSetpoints.hasDesiredPosition())
       {
          double kp = jointDesiredSetpoints.hasPositionIntegrationBreakFrequency() ?
-               AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointDesiredSetpoints.getPositionIntegrationBreakFrequency(), controlDT) :
-               1.0;
+               1.0 - AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointDesiredSetpoints.getPositionIntegrationBreakFrequency(), controlDT) : 1.0;
          integratedPosition.add(kp * (controllerJoint.getQ() - integratedPosition.getDoubleValue()) + integratedVelocity.getDoubleValue() * controlDT);
          jointDesiredSetpoints.setDesiredPosition(integratedPosition.getDoubleValue());
       }

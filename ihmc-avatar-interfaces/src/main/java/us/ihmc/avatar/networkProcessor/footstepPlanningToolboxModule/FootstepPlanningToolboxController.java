@@ -17,7 +17,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MessageBasedPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MessagerBasedPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.RosBasedPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -27,6 +32,8 @@ import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedFootstepPlanne
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -48,14 +55,13 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlanningToolboxController extends ToolboxController
 {
-   private static final boolean debug = false;
-
    private final YoEnum<FootstepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry, FootstepPlannerType.class);
    private final EnumMap<FootstepPlannerType, FootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
 
@@ -109,14 +115,44 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private AStarFootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons)
    {
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlanningParameters);
-      AStarFootstepPlanner planner = AStarFootstepPlanner.createPlanner(footstepPlanningParameters, null, footPolygons, expansion, registry);
+
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, footstepPlanningParameters);
+      FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlanningParameters);
+
+      SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlanningParameters, footPolygons, snapper);
+      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(footstepPlanningParameters, snapper);
+      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlanningParameters, snapper, footPolygons);
+
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(footstepPlanningParameters.getCostParameters().getAStarHeuristicsWeight(), footstepPlanningParameters);
+
+      FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
+//      nodeChecker.addPlannerListener(nu);
+
+      FootstepCostBuilder costBuilder = new FootstepCostBuilder();
+      costBuilder.setFootstepPlannerParameters(footstepPlanningParameters);
+      costBuilder.setSnapper(snapper);
+      costBuilder.setIncludeHeightCost(true);
+      costBuilder.setIncludeHeightCost(true);
+      costBuilder.setIncludePitchAndRollCost(true);
+
+      FootstepCost footstepCost = costBuilder.buildCost();
+
+      long updateFrequency = 1000;
+      RosBasedPlannerListener plannerListener = new RosBasedPlannerListener(statusOutputManager, snapper, updateFrequency);
+
+      snapBasedNodeChecker.addPlannerListener(plannerListener);
+      bodyCollisionNodeChecker.addPlannerListener(plannerListener);
+
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(footstepPlanningParameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, plannerListener,
+                                                              registry);
+
       return planner;
    }
 
    private DepthFirstFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
    {
-      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, footstepPlanningParameters, null);
-      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, null, footstepPlanningParameters);
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, footstepPlanningParameters);
+      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, footstepPlanningParameters);
       ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
 
       DepthFirstFootstepPlanner footstepPlanner = new DepthFirstFootstepPlanner(footstepPlanningParameters, snapper, nodeChecker, stepCostCalculator, registry);
@@ -141,7 +177,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       toolboxTime.add(dt);
       if (toolboxTime.getDoubleValue() > 20.0)
       {
-         if (debug)
+         if (DEBUG)
             PrintTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
          reportMessage(packStepResult(null, null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
          isDone.set(true);
@@ -183,8 +219,16 @@ public class FootstepPlanningToolboxController extends ToolboxController
       sendMessageToUI("Result: " + planId.getIntegerValue() + ", " + status.toString());
 
       reportMessage(packStepResult(footstepPlan, bodyPathPlan, status));
+      
+      finishUp();
+   }
+   
+   public void finishUp()
+   {
+      if (DEBUG)
+         PrintTools.info("Finishing up the planner");
+      plannerMap.get(activePlanner.getEnumValue()).cancelPlanning();
       reportMessage(packStatus(FootstepPlannerStatus.IDLE));
-
       isDone.set(true);
    }
 
@@ -204,9 +248,13 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       FootstepPlannerParametersPacket parameters = latestParametersReference.getAndSet(null);
       if (parameters != null)
+      {
+         if (DEBUG)
+            PrintTools.info("Processing new planning parameters.");
          footstepPlanningParameters.set(parameters);
+      }
 
-      if (debug)
+      if (DEBUG)
       {
          PrintTools.info("Starting to plan. Plan id: " + request.getPlannerRequestId() + ". Timeout: " + request.getTimeout());
       }
@@ -253,7 +301,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
          planner.setTimeout(timeout);
          this.timeout.set(timeout);
 
-         if (debug)
+         if (DEBUG)
          {
             PrintTools.info("Setting timeout to " + timeout);
          }
@@ -279,7 +327,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private BodyPathPlanMessage packPathResult(BodyPathPlan bodyPathPlan, FootstepPlanningResult status)
    {
-      if (debug)
+      if (DEBUG)
       {
          PrintTools.info("Finished planning path. Result: " + status);
       }
@@ -302,7 +350,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private FootstepPlanningToolboxOutputStatus packStepResult(FootstepPlan footstepPlan, BodyPathPlan bodyPathPlan, FootstepPlanningResult status)
    {
-      if (debug)
+      if (DEBUG)
       {
          PrintTools.info("Finished planning. Result: " + status);
       }
@@ -355,6 +403,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    public void processPlannerParameters(FootstepPlannerParametersPacket parameters)
    {
+      if (DEBUG)
+         PrintTools.info("Received new planning parameters");
       latestParametersReference.set(parameters);
    }
 

@@ -4,10 +4,11 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
-public class MessagerVisGraphAStarDataSetTest extends MessagerPlannerDataSetTest
+public class MessagerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
    public FootstepPlannerType getPlannerType()
@@ -20,7 +21,7 @@ public class MessagerVisGraphAStarDataSetTest extends MessagerPlannerDataSetTest
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 90.0)
    public void testDatasetsWithoutOcclusion()
    {
-      runAssertionsOnAllDatasetsWithoutOcclusions(dataset -> runAssertions(dataset));
+      super.testDatasetsWithoutOcclusion();
    }
 
    @Override
@@ -28,7 +29,7 @@ public class MessagerVisGraphAStarDataSetTest extends MessagerPlannerDataSetTest
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    public void testDatasetsWithoutOcclusionInDevelopment()
    {
-      runAssertionsOnAllDatasetsWithoutOcclusionsInDevelopment(dataset -> runAssertions(dataset));
+      super.testDatasetsWithoutOcclusionInDevelopment();
    }
 
    public static void main(String[] args) throws Exception

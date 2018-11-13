@@ -7,6 +7,9 @@ uint32 sequence_id
 # to run slower.
 bool check_for_body_box_collisions false
 
+# Sets whether or not to perform the defined heuristic search policies.
+bool perform_heuristic_search_policies false
+
 # Returns the ideal step width for walking on flat ground.
 float64 ideal_footstep_width -1.0
 
@@ -188,8 +191,18 @@ float64 body_box_width -1.0
 
 # Some node checkers will check if a bounding box that describes the body of the robot will move
 # through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
-# collisions, this defines the height of the center of the box.
-float64 body_box_center_height -1.0
+# collisions, this defines the x-offset of a bounding box relative to the average frame between sequential footsteps.
+float64 body_box_base_x -1.0
+
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the y-offset of a bounding box relative to the average frame between sequential footsteps.
+float64 body_box_base_y -1.0
+
+# Some node checkers will check if a bounding box that describes the body of the robot will move
+# through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+# collisions, this defines the z-offset of a bounding box relative to the average frame between sequential footsteps.
+float64 body_box_base_z -1.0
 
 # Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
 # Nodes are only added to the expanded list if they are outside the box around the stance foot defined by

@@ -33,6 +33,16 @@ public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGr
       setNavigableRegions(other.navigableRegions);
    }
 
+   public void setStartMapId(int mapId)
+   {
+      startMapId = mapId;
+   }
+
+   public void setGoalMapId(int mapId)
+   {
+      goalMapId = mapId;
+   }
+
    public void setStartVisibilityMapInWorld(int mapId, VisibilityMap startMap)
    {
       startMapId = mapId;

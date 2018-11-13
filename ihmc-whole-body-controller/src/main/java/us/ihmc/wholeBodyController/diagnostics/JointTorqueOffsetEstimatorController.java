@@ -317,6 +317,15 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
       }
    }
 
+   public double getJointCalibrationPosition(OneDoFJoint joint)
+   {
+      YoDouble yoDesiredPosition = desiredPositions.get(joint);
+      if (yoDesiredPosition != null)
+         return yoDesiredPosition.getValue();
+      else
+         return 0.0;
+   }
+
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return lowLevelOneDoFJointDesiredDataHolder;

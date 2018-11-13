@@ -116,8 +116,6 @@ public abstract class MessagerFootstepPlannerOnRoughTerrainTest
       ui = null;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20)
-   @Test(timeout = 30000000)
    public void test()
    {
       List<String> testsToRun = getTestsToRun();

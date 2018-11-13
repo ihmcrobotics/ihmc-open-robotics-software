@@ -56,7 +56,13 @@ public class AngleTools
    public static double computeAngleAverage(double angleA, double angleB)
    {
       // average = A + (B-A)/2 = (A+B)/2
-      double average = angleA + 0.5 * AngleTools.computeAngleDifferenceMinusPiToPi(angleB, angleA);
+      return interpolateAngle(angleA, angleB, 0.5);
+   }
+
+   public static double interpolateAngle(double angleA, double angleB, double alpha)
+   {
+      // A + alpha * (B-A)/2
+      double average = angleA + alpha * AngleTools.computeAngleDifferenceMinusPiToPi(angleB, angleA);
       return trimAngleMinusPiToPi(average);
    }
 

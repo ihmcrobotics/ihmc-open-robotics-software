@@ -36,9 +36,9 @@ module controller_msgs
         @defaultValue(value=255)
         octet type;
         geometry_msgs::msg::dds::Pose pose_in_world;
-        sequence<geometry_msgs::msg::dds::Point> raw_points_in_local;
-        sequence<geometry_msgs::msg::dds::Point> navigable_extrusions_in_local;
-        sequence<geometry_msgs::msg::dds::Point> non_navigable_extrusions_in_local;
+        sequence<geometry_msgs::msg::dds::Point, 25> raw_points_in_local;
+        sequence<geometry_msgs::msg::dds::Point, 25> navigable_extrusions_in_local;
+        sequence<geometry_msgs::msg::dds::Point, 25> non_navigable_extrusions_in_local;
       };
     };
   };

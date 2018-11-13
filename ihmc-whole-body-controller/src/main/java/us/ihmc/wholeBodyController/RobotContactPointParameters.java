@@ -37,7 +37,6 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
    protected final ArrayList<String> additionalContactNames = new ArrayList<>();
    protected final ArrayList<RigidBodyTransform> additionalContactTransforms = new ArrayList<>();
 
-
    private boolean useSoftGroundContactParameters;
 
    public RobotContactPointParameters(LeggedJointNameMap<E> jointMap, double footWidth, double footLength,
@@ -64,14 +63,14 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
 
    protected void createFootContactPoints(FootContactPoints<E> footContactPoints)
    {
-      Map<String, List<Tuple3DBasics>> simulationContactPoints = footContactPoints.getSimulationContactPoints(footLength, footWidth, toeWidth, jointMap, soleToAnkleFrameTransforms);
+      Map<String, List<Tuple3DBasics>> simulationContactPoints = footContactPoints.getSimulationContactPoints(footLength, footWidth, toeWidth, jointMap,
+                                                                                                              soleToAnkleFrameTransforms);
       for (String parentJointName : simulationContactPoints.keySet())
       {
          List<Tuple3DBasics> points = simulationContactPoints.get(parentJointName);
          for (Tuple3DBasics point : points)
             addSimulationContactPoint(parentJointName, point);
       }
-
 
       SegmentDependentList<E, List<Tuple2DBasics>> controllerContactPoints = footContactPoints.getControllerContactPoints(footLength, footWidth, toeWidth);
       for (E segment : robotSegments)
@@ -82,7 +81,7 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
             controllerFootGroundContactPoints.get(segment).add(new Point2D(point));
       }
 
-      SegmentDependentList<E,Tuple2DBasics> toeOffContactPoints = footContactPoints.getToeOffContactPoints(footLength, footWidth, toeWidth);
+      SegmentDependentList<E, Tuple2DBasics> toeOffContactPoints = footContactPoints.getToeOffContactPoints(footLength, footWidth, toeWidth);
       SegmentDependentList<E, LineSegment2D> toeOffContactLines = footContactPoints.getToeOffContactLines(footLength, footWidth, toeWidth);
       for (E segment : robotSegments)
       {
@@ -180,19 +179,29 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
 
    public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel)
    {
+      setupGroundContactModelParameters(linearGroundContactModel, 0.0001);
+   }
+
+   public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel, double simDT)
+   {
+      // The gains were computed for simDT = 0.0001sec. This assumes that the gains should be inversely proportional to the simulation DT.
+      double simDTRef = 0.0001;
+
       if (useSoftGroundContactParameters)
       {
-         linearGroundContactModel.setZStiffness(4000.0);
-         linearGroundContactModel.setZDamping(750.0);
-         linearGroundContactModel.setXYStiffness(50000.0);
-         linearGroundContactModel.setXYDamping(1000.0);
+         double scale = Math.pow(simDTRef / simDT, 0.25);
+         linearGroundContactModel.setZStiffness(4000.0 * scale);
+         linearGroundContactModel.setZDamping(750.0 * scale);
+         linearGroundContactModel.setXYStiffness(50000.0 * scale);
+         linearGroundContactModel.setXYDamping(1000.0 * scale);
       }
       else
       {
-         linearGroundContactModel.setZStiffness(2000.0);
-         linearGroundContactModel.setZDamping(1500.0);
-         linearGroundContactModel.setXYStiffness(50000.0);
-         linearGroundContactModel.setXYDamping(2000.0);
+         double scale = Math.pow(simDTRef / simDT, 0.6);
+         linearGroundContactModel.setZStiffness(2000.0 * scale);
+         linearGroundContactModel.setZDamping(1500.0 * scale);
+         linearGroundContactModel.setXYStiffness(50000.0 * scale);
+         linearGroundContactModel.setXYDamping(2000.0 * scale);
       }
    }
 
