@@ -44,6 +44,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
    private static final boolean debug = true;
+   
+   private static final int absoluteMaxNumberOfStages = 4;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -127,7 +129,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       long updateFrequency = 1000;
       plannerListener = new MultiStagePlannerListener(statusOutputManager, updateFrequency);
 
-      for (int i = 0; i < numberOfCores; i++)
+      for (int i = 0; i < Math.min(numberOfCores, absoluteMaxNumberOfStages); i++)
       {
          FootstepPlanningStage planningStage = new FootstepPlanningStage(i, contactPointParameters, footstepPlannerParameters, activePlanner, plannerListener, planId,
                                                                          graphicsListRegistry, tickDurationMs);
@@ -496,8 +498,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          FootstepPlan footstepPlan = this.footstepPlan.getAndSet(null);
          FootstepPlanningToolboxOutputStatus footstepPlanMessage = packStepResult(footstepPlan, bodyPathPlan.getAndSet(null), stepStatus, plannerTime.getDoubleValue());
          statusOutputManager.reportStatusMessage(footstepPlanMessage);
-
-         plannerListener.plannerFinished(null);
       }
       if (stepPlanningStatusChanged) // step planning just started or just finished, so this flag needs updating.
          isDonePlanningSteps.set(noMoreStepsToPlan);
@@ -511,7 +511,17 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone &= !goalRecommendationHandler.hasNewFootstepPlannerObjectives();
       isDone &= isDonePlanningPath.getBooleanValue();
       isDone &= isDonePlanningSteps.getBooleanValue();
+      
+      if (isDone)
+      {
+         ThreadTools.sleep(100);
+         plannerListener.plannerFinished(null);
+      }
+      
+      
       this.isDone.set(isDone);
+      
+      
    }
 
    private static FootstepPlanningResult getWorstResult(List<FootstepPlanningResult> results)
