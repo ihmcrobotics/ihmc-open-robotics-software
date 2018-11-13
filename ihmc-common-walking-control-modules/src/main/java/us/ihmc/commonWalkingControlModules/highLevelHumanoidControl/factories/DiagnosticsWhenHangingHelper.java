@@ -110,7 +110,7 @@ public class DiagnosticsWhenHangingHelper
       }
       else
       {
-         subSystem = MultiBodySystemReadOnly.toMultiBodySystemInput(parentJoint.getSuccessor());
+         subSystem = MultiBodySystemReadOnly.toMultiBodySystemInput(parentJoint.subtreeList());
       }
 
       CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(subSystem, jointZUpFrame);
