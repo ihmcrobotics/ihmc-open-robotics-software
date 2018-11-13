@@ -53,6 +53,11 @@ public class MultiStageFootstepPlanningModule
    private final YoVariableServer yoVariableServer;
 
    private final MultiStageFootstepPlanningController footstepPlanningController;
+   
+   public MultiStageFootstepPlanningModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer)
+   {
+      this(drcRobotModel, modelProvider, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
+   }
 
    public MultiStageFootstepPlanningModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer,
                                            DomainFactory.PubSubImplementation pubSubImplementation)

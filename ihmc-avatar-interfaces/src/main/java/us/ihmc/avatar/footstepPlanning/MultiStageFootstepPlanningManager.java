@@ -427,11 +427,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       {
          plannerGoal.setTimeout(timeout);
          this.timeout.set(timeout);
-
-         if (debug)
-         {
-            PrintTools.info("Setting timeout to " + timeout);
-         }
       }
       else
       {
@@ -513,11 +508,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone &= isDonePlanningSteps.getBooleanValue();
       
       if (isDone)
-      {
-         ThreadTools.sleep(100);
          plannerListener.plannerFinished(null);
-      }
-      
       
       this.isDone.set(isDone);
       
