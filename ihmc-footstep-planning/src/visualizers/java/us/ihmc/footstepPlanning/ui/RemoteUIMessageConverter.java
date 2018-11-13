@@ -65,6 +65,8 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Double> plannerHorizonLengthReference;
    private final AtomicReference<Boolean> acceptNewPlanarRegionsReference;
+   private final AtomicReference<Integer> currentPlanRequestId;
+
 
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
@@ -105,6 +107,7 @@ public class RemoteUIMessageConverter
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
       plannerHorizonLengthReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic);
       acceptNewPlanarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, true);
+      currentPlanRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, 0);
 
       registerPubSubs(ros2Node);
 
@@ -163,8 +166,6 @@ public class RemoteUIMessageConverter
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
    {
-      PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsListMessage();
-
       if (verbose)
          PrintTools.info("Received a planning request.");
 
@@ -179,8 +180,6 @@ public class RemoteUIMessageConverter
       double timeout = packet.getTimeout();
       double horizonLength = packet.getHorizonLength();
 
-      messager
-            .submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
       messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, startPosition);
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, goalPosition);
 
@@ -240,6 +239,9 @@ public class RemoteUIMessageConverter
       List<? extends Point3DReadOnly> bodyPath = packet.getBodyPath();
       Pose3D lowLevelGoal = packet.getLowLevelPlannerGoal();
 
+      if (plannerRequestId > currentPlanRequestId.get())
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
+     
       ThreadTools.sleep(100);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);

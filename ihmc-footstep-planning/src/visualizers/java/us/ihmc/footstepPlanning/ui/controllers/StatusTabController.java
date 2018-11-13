@@ -64,7 +64,7 @@ public class StatusTabController
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
-      currentPlannerRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
+      currentPlannerRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, -1);
    }
 
    private void setupControls()
