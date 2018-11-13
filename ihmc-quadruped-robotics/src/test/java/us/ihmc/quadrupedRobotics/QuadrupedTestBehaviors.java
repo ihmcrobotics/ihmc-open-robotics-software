@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import junit.framework.AssertionFailedError;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerState;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
@@ -50,6 +51,19 @@ public class QuadrupedTestBehaviors
       variables.getUserTrigger().set(QuadrupedPositionControllerRequestedEvent.REQUEST_CRAWL);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyZ(), variables.getYoComPositionInputZ().getDoubleValue(), 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getPositionControllerState(), QuadrupedPositionControllerState.CRAWL));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
+      conductor.simulate();
+   }
+
+   public static void sitDown(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables)
+   {
+      variables.getUserTrigger().set(HighLevelControllerName.STAND_READY);
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.STAND_READY));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.25));
+      conductor.simulate();
+
+      variables.getUserTrigger().set(QuadrupedControllerManager.sitDownStateName);
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.FREEZE_STATE));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
       conductor.simulate();
    }

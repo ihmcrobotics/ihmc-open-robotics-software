@@ -56,7 +56,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class QuadrupedControllerManager implements RobotController, CloseableAndDisposable
 {
-   private static final HighLevelControllerName sitDownStateName = HighLevelControllerName.CUSTOM1;
+   public static final HighLevelControllerName sitDownStateName = HighLevelControllerName.CUSTOM1;
 
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
@@ -272,15 +272,19 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       factory.addTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.STAND_TRANSITION_STATE, createRequestedTransition(HighLevelControllerName.WALKING));
       factory.addTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.STAND_TRANSITION_STATE, createRequestedTransition(HighLevelControllerName.STAND_TRANSITION_STATE));
       factory.addTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
+      factory.addTransition(HighLevelControllerName.STAND_READY, sitDownStateName, createRequestedTransition(sitDownStateName));
       factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.STAND_TRANSITION_STATE, createRequestedTransition(HighLevelControllerName.WALKING));
       factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
       factory.addTransition(HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
-      factory.addTransition(HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
+      factory.addTransition(HighLevelControllerName.WALKING, HighLevelControllerName.STAND_READY, createRequestedTransition(HighLevelControllerName.STAND_READY));
+
+      factory.addTransition(sitDownStateName, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
 
       factory.addTransition(HighLevelControllerName.DO_NOTHING_BEHAVIOR, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
       factory.addTransition(HighLevelControllerName.WALKING, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
       factory.addTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
       factory.addTransition(HighLevelControllerName.STAND_TRANSITION_STATE, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
+      factory.addTransition(HighLevelControllerName.EXIT_WALKING, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
 
       // Trigger do nothing
       for (HighLevelControllerName state : HighLevelControllerName.values)
@@ -300,7 +304,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       factory.addTransition(fallbackControllerState, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
 
 
-      factory.addStateChangedListener((to, from) -> {
+      factory.addStateChangedListener((from, to) -> {
          byte fromByte = from == null ? -1 : from.toByte();
          byte toByte = to == null ? -1 : to.toByte();
          stateChangeMessage.setInitialHighLevelControllerName(fromByte);
