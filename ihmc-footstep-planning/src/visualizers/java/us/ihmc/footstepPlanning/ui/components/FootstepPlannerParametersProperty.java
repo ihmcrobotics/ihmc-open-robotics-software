@@ -133,6 +133,11 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToBooleanProperty(property, checkForBodyBoxCollision);
    }
 
+   public void bidirectionalBindPerformHeuristicSearchPolicies(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, performHeuristicSearchPolicies);
+   }
+
    public void bidirectionalBindBodyBoxWidth(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, bodyBoxWidth);
