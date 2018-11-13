@@ -66,7 +66,6 @@ public class FootstepPathMeshViewer extends AnimationTimer
          processLowestCostNodeList(nodeData);
       }));
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, data -> reset.set(true));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
 
       showSolution = messager.createInput(ShowFootstepPlanTopic, true);
