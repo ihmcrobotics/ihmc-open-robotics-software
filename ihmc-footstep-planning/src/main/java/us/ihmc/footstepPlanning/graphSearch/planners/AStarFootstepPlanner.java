@@ -15,9 +15,6 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MessageBasedPlannerListener;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MessagerBasedPlannerListener;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.RosBasedPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.NodeComparator;
@@ -38,12 +35,11 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import java.security.InvalidParameterException;
 import java.util.*;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
    private final String name = getClass().getSimpleName();
