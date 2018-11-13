@@ -5,6 +5,9 @@ uint32 sequence_id
 # to run slower.
 bool check_for_body_box_collisions
 
+# Sets whether or not to perform the defined heuristic search policies.
+bool perform_heuristic_search_policies
+
 # Returns the ideal step width for walking on flat ground.
 # Field default value -1.0
 float64 ideal_footstep_width

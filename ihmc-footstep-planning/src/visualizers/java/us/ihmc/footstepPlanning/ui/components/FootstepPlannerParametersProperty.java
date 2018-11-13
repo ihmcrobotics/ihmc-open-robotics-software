@@ -39,6 +39,7 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField bodyPathBasedHeuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getBodyPathBasedHeuristicsWeight, SettableFootstepPlannerParameters::setBodyPathBasedHeuristicsWeight);
 
    private BooleanField checkForBodyBoxCollision = new BooleanField(SettableFootstepPlannerParameters::checkForBodyBoxCollisions, SettableFootstepPlannerParameters::setCheckForBodyBoxCollisions);
+   private BooleanField performHeuristicSearchPolicies = new BooleanField(SettableFootstepPlannerParameters::performHeuristicSearchPolicies, SettableFootstepPlannerParameters::setPerformHeuristicSearchPolicies);
    private DoubleField bodyBoxWidth = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxWidth, SettableFootstepPlannerParameters::setBodyBoxWidth);
    private DoubleField bodyBoxDepth = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxDepth, SettableFootstepPlannerParameters::setBodyBoxDepth);
    private DoubleField bodyBoxHeight = new DoubleField(SettableFootstepPlannerParameters::getBodyBoxHeight, SettableFootstepPlannerParameters::setBodyBoxHeight);

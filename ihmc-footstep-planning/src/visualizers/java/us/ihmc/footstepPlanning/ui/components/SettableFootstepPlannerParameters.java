@@ -36,6 +36,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    private double bodyGroundClearance;
    private boolean checkForBodyBoxCollisions;
+   private boolean performHeuristicSearchPolicies;
    private double bodyBoxWidth;
    private double bodyBoxHeight;
    private double bodyBoxDepth;
@@ -86,6 +87,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
       this.bodyGroundClearance = footstepPlannerParameters.getBodyGroundClearance();
       this.checkForBodyBoxCollisions = footstepPlannerParameters.checkForBodyBoxCollisions();
+      this.performHeuristicSearchPolicies = footstepPlannerParameters.performHeuristicSearchPolicies();
       this.bodyBoxHeight = footstepPlannerParameters.getBodyBoxHeight();
       this.bodyBoxWidth = footstepPlannerParameters.getBodyBoxWidth();
       this.bodyBoxDepth = footstepPlannerParameters.getBodyBoxDepth();
@@ -301,6 +303,11 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.checkForBodyBoxCollisions = checkForBodyBoxCollisions;
    }
 
+   public void setPerformHeuristicSearchPolicies(boolean performHeuristicSearchPolicies)
+   {
+      this.performHeuristicSearchPolicies = performHeuristicSearchPolicies;
+   }
+
    public void setBodyBoxWidth(double bodyBoxWidth)
    {
       this.bodyBoxWidth = bodyBoxWidth;
@@ -491,6 +498,12 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public boolean checkForBodyBoxCollisions()
    {
       return checkForBodyBoxCollisions;
+   }
+
+   @Override
+   public boolean performHeuristicSearchPolicies()
+   {
+      return performHeuristicSearchPolicies;
    }
 
    @Override

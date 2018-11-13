@@ -13,6 +13,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoBoolean checkForBodyBoxCollisions = new YoBoolean("checkForBodyBoxCollisions", registry);
+   private final YoBoolean performHeuristicSearchPolicies = new YoBoolean("performHeuristicSearchPolicies", registry);
    private final YoDouble maximumStepReach = new YoDouble("maximumStepReach", registry);
    private final YoDouble minimumFootholdPercent = new YoDouble("minimumFootholdPercent", registry);
    private final YoDouble idealFootstepLength = new YoDouble("idealFootstepLength", registry);
@@ -59,6 +60,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void set(FootstepPlannerParameters defaults)
    {
       setCheckForBodyBoxCollisions(defaults.checkForBodyBoxCollisions());
+      setPerformHeuristicSearchPolicies(defaults.performHeuristicSearchPolicies());
       maximumStepReach.set(defaults.getMaximumStepReach());
       minimumFootholdPercent.set(defaults.getMinimumFootholdPercent());
       idealFootstepLength.set(defaults.getIdealFootstepLength());
@@ -99,6 +101,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public boolean checkForBodyBoxCollisions()
    {
       return checkForBodyBoxCollisions.getBooleanValue();
+   }
+
+   @Override
+   public boolean performHeuristicSearchPolicies()
+   {
+      return performHeuristicSearchPolicies.getBooleanValue();
    }
 
    @Override
@@ -302,6 +310,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void set(FootstepPlannerParametersPacket parametersPacket)
    {
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
+      setPerformHeuristicSearchPolicies(parametersPacket.getPerformHeuristicSearchPolicies());
       if (parametersPacket.getIdealFootstepWidth() != -1.0)
          setIdealFootstepWidth(parametersPacket.getIdealFootstepWidth());
       if (parametersPacket.getIdealFootstepLength() != -1.0)
@@ -370,6 +379,11 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void setCheckForBodyBoxCollisions(boolean checkForBodyBoxCollisions)
    {
       this.checkForBodyBoxCollisions.set(checkForBodyBoxCollisions);
+   }
+
+   public void setPerformHeuristicSearchPolicies(boolean performHeuristicSearchPolicies)
+   {
+      this.performHeuristicSearchPolicies.set(performHeuristicSearchPolicies);
    }
 
    public void setIdealFootstepWidth(double idealFootstepWidth)

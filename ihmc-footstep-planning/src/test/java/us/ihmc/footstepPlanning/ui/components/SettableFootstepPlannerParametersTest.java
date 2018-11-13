@@ -38,6 +38,7 @@ public class SettableFootstepPlannerParametersTest
          parameters = FootstepPlanningTestTools.createRandomParameters(random);
 
          settableParameters.setCheckForBodyBoxCollisions(parameters.checkForBodyBoxCollisions());
+         settableParameters.setPerformHeuristicSearchPolicies(parameters.performHeuristicSearchPolicies());
          settableParameters.setIdealFootstepWidth(parameters.getIdealFootstepWidth());
          settableParameters.setIdealFootstepLength(parameters.getIdealFootstepLength());
          settableParameters.setWiggleInsideDelta(parameters.getWiggleInsideDelta());
