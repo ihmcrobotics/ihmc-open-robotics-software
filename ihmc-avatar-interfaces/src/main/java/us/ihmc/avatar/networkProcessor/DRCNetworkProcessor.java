@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
@@ -78,7 +79,7 @@ public class DRCNetworkProcessor
       if (!params.isFootstepPlanningToolboxEnabled())
          return;
 
-      new FootstepPlanningToolboxModule(robotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled());
+      new MultiStageFootstepPlanningModule(robotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled());
    }
 
    private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
