@@ -21,6 +21,8 @@ public class FootstepPlannerParametersUIController
    @FXML
    private ToggleButton returnBestEffortPlan;
    @FXML
+   private ToggleButton performHeuristicSearchPolicies;
+   @FXML
    private Spinner<Double> plannerTimeout;
    @FXML
    private Spinner<Double> horizonLength;
@@ -79,9 +81,8 @@ public class FootstepPlannerParametersUIController
    {
       setupControls();
 
-//      parametersProperty.bidirectionalBindIdealFootstepWidth();
-//      parametersProperty.bidirectionalBindIdealFootstepLength();
       parametersProperty.bidirectionalBindReturnBestEffortPlan(returnBestEffortPlan.selectedProperty());
+      parametersProperty.bidirectionalBindPerformHeuristicSearchPolicies(performHeuristicSearchPolicies.selectedProperty());
 
       parametersProperty.bidirectionalBindMaxStepReach(maxStepLength.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMaxStepWidth(maxStepWidth.getValueFactory().valueProperty());
