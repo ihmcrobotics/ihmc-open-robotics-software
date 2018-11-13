@@ -129,7 +129,7 @@ public interface FootstepPlannerParameters
    }
 
    /**
-    * The robot can't step as far forward when stepping up if it has any kind of torque limitations in the legs.
+    * Maximum step reach when stepping up.
     *
     * <p>
     * Long steps forward are rejected by the planner if two criteria are met:
@@ -150,6 +150,23 @@ public interface FootstepPlannerParameters
       return getMaximumStepReach();
    }
 
+   /**
+    * Step height for considering stepping up.
+    *
+    * <p>
+    * Long steps forward are rejected by the planner if two criteria are met:
+    * <ul>
+    *    <li> The x-position of the value of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
+    * </ul>
+    * </p>
+    *
+    * <p>
+    *    Large steps forward and up can cause the robot to surpass its torque limits.
+    *    These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+    *    it's very close to saturating its torque limits.
+    * </p>
+    */
    default double getMaximumStepZWhenSteppingUp()
    {
       return Double.POSITIVE_INFINITY;

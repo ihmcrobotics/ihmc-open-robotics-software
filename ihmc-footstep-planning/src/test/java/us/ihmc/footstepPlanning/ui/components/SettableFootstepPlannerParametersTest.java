@@ -47,6 +47,8 @@ public class SettableFootstepPlannerParametersTest
          settableParameters.setMinimumStepWidth(parameters.getMinimumStepWidth());
          settableParameters.setMinimumStepLength(parameters.getMinimumStepLength());
          settableParameters.setMinimumStepYaw(parameters.getMinimumStepYaw());
+         settableParameters.setMaximumStepReachWhenSteppingUp(parameters.getMaximumStepReachWhenSteppingUp());
+         settableParameters.setMaximumStepZWhenSteppingUp(parameters.getMaximumStepZWhenSteppingUp());
          settableParameters.setMaximumStepXWhenForwardAndDown(parameters.getMaximumStepXWhenForwardAndDown());
          settableParameters.setMaximumStepZWhenForwardAndDown(parameters.getMaximumStepZWhenForwardAndDown());
          settableParameters.setMaximumStepZ(parameters.getMaximumStepZ());
