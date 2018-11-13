@@ -113,7 +113,8 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
       return true;
    }
 
-   private boolean checkIfGoodFootstep(FootstepNode nodeToExpand, FootstepNode previousNode, RigidBodyTransform soleTransform, RigidBodyTransform previousSoleTransform)
+   private boolean checkIfGoodFootstep(FootstepNode nodeToExpand, FootstepNode previousNode, RigidBodyTransform soleTransform,
+                                       RigidBodyTransform previousSoleTransform)
    {
       parentSoleFrame.setTransformAndUpdate(previousSoleTransform);
       parentSoleZupFrame.update();
@@ -164,6 +165,13 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
       if (stepReach.getDoubleValue() > parameters.getMaximumStepReach())
       {
          rejectNode(nodeToExpand, previousNode, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR);
+         return false;
+      }
+
+      if (stepReach.getDoubleValue() > parameters.getMaximumStepReachWhenSteppingUp() && solePositionInParentZUpFrame.getZ() > parameters
+            .getMaximumStepZWhenSteppingUp())
+      {
+         rejectNode(nodeToExpand, previousNode, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH);
          return false;
       }
 
