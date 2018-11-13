@@ -17,6 +17,8 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class QuadrupedTestBehaviors
 {
+   private static double stateCompletionSafetyFactory;
+
    public static void readyXGait(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedTeleopManager stepTeleopManager) throws AssertionFailedError
    {
       standUp(conductor, variables);
@@ -33,7 +35,7 @@ public class QuadrupedTestBehaviors
 
       variables.getUserTrigger().set(HighLevelControllerName.STAND_PREP_STATE);
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.STAND_READY));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, stateCompletionSafetyFactory * variables.getTimeInStandPrep()));
       conductor.simulate();
    }
 
@@ -64,7 +66,7 @@ public class QuadrupedTestBehaviors
 
       variables.getUserTrigger().set(QuadrupedControllerManager.sitDownStateName);
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.FREEZE_STATE));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, stateCompletionSafetyFactory * variables.getExitWalkingTransitionDuration()));
       conductor.simulate();
    }
 
@@ -82,10 +84,9 @@ public class QuadrupedTestBehaviors
       teleopManager.requestSteppingState();
       conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(QuadrupedTestGoals.bodyHeight(variables, 0.1));
-      conductor.addTimeLimit(variables.getYoTime(), 4.5);
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.WALKING));
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.STAND));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, stateCompletionSafetyFactory * variables.getToWaklkingTransitionDuration()));
       conductor.simulate();
    }
 
