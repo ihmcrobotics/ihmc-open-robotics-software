@@ -294,8 +294,6 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       AtomicReference<Integer> plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
 
-      AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
-
       AtomicReference<Double> plannerHorizonLengthReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic);
 
       for (int iter = 0; iter < iters; iter++)
@@ -333,7 +331,7 @@ public class RemoteFootstepPlannerUIMessagingTest
          while (startPositionReference.get() == null || goalPositionReference.get() == null || timeoutReference.get() == null
                || planningTypeReference.get() == null || robotSideReference.get() == null || startOrientationReference.get() == null
                || goalOrientationReference.get() == null || plannerRequestIdReference.get() == null
-               || plannerHorizonLengthReference.get() == null || planarRegionsListReference.get() == null)
+               || plannerHorizonLengthReference.get() == null )
          {
             assertFalse("Timed out waiting on the results.", currentWaitTime > maxWaitTime);
 
@@ -350,7 +348,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          EuclidCoreTestTools.assertQuaternionEquals("Goal orientations aren't equal.", goalOrientation, goalOrientationReference.getAndSet(null), epsilon);
          assertEquals("Planner Request Ids aren't equal.", plannerRequestId, plannerRequestIdReference.getAndSet(null), epsilon);
          assertEquals("Planner horizon lengths aren't equal.", horizonLength, plannerHorizonLengthReference.getAndSet(null), epsilon);
-         checkPlanarRegionListsAreEqual(planarRegionsList, planarRegionsListReference.getAndSet(null));
 
          for (int i = 0; i < 100; i++)
             ThreadTools.sleep(10);
