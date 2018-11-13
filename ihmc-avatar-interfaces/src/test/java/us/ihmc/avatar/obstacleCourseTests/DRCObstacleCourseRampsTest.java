@@ -100,7 +100,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       double stepDuration = walkingControllerParameters.getDefaultTransferTime() + walkingControllerParameters.getDefaultSwingTime();
       double totalDuration = footstepDataList.getFootstepDataList().size() * stepDuration;
       totalDuration += walkingControllerParameters.getDefaultFinalTransferTime() - walkingControllerParameters.getDefaultTransferTime() + walkingControllerParameters.getDefaultInitialTransferTime();
-      totalDuration += 0.5;
+      totalDuration += 3.0;
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(totalDuration);
 
