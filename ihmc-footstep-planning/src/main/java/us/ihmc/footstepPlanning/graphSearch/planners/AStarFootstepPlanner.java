@@ -3,10 +3,14 @@ package us.ihmc.footstepPlanning.graphSearch.planners;
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
@@ -20,6 +24,8 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -29,7 +35,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import java.security.InvalidParameterException;
 import java.util.*;
 
 public class AStarFootstepPlanner implements FootstepPlanner
@@ -47,6 +52,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private PriorityQueue<FootstepNode> stack;
    private FootstepNode startNode;
    private FootstepNode endNode;
+
+   private PlanarRegionsList planarRegionsList;
 
    private final FramePose3D goalPoseInWorld = new FramePose3D();
 
@@ -69,6 +76,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private final YoBoolean initialize = new YoBoolean("initialize", registry);
 
    private final YoBoolean validGoalNode = new YoBoolean("validGoalNode", registry);
+   private final YoBoolean abortPlanning = new YoBoolean("abortPlanning", registry);
 
    public AStarFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics,
                                FootstepNodeExpansion expansion, FootstepCost stepCostCalculator, FootstepNodeSnapper snapper, YoVariableRegistry parentRegistry)
@@ -174,6 +182,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
    {
       nodeChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
+      this.planarRegionsList = planarRegionsList;
    }
 
    @Override
@@ -181,17 +190,21 @@ public class AStarFootstepPlanner implements FootstepPlanner
    {
       if (initialize.getBooleanValue())
       {
-         initialize();
+         boolean success = initialize();
          initialize.set(false);
+         if (!success)
+            return FootstepPlanningResult.PLANNER_FAILED;
       }
 
       if (debug)
          PrintTools.info("A* planner has initialized");
 
-      planInternal();
+      if (!planInternal())
+         return FootstepPlanningResult.PLANNER_FAILED;
+
       FootstepPlanningResult result = checkResult();
 
-      if(result.validForExecution() && listener != null)
+      if (result.validForExecution() && listener != null)
          listener.plannerFinished(null);
 
       if (debug)
@@ -251,12 +264,17 @@ public class AStarFootstepPlanner implements FootstepPlanner
    {
    }
 
-   private void initialize()
+   private boolean initialize()
    {
       if (startNode == null)
          throw new NullPointerException("Need to set initial conditions before planning.");
       if (goalNodes == null)
          throw new NullPointerException("Need to set goal before planning.");
+
+      abortPlanning.set(false);
+
+      if (planarRegionsList != null)
+         checkStartHasPlanarRegion();
 
       graph.initialize(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
@@ -267,7 +285,12 @@ public class AStarFootstepPlanner implements FootstepPlanner
       {
          boolean validGoalNode = nodeChecker.isNodeValid(goalNodes.get(robotSide), null);
          if (!validGoalNode && !parameters.getReturnBestEffortPlan())
-            throw new InvalidParameterException("Goal node isn't valid. To plan without a valid goal node, best effort planning must be enabled");
+         {
+            if (debug)
+               PrintTools.info("Goal node isn't valid. To plan without a valid goal node, best effort planning must be enabled");
+
+            return false;
+         }
 
          this.validGoalNode.set(validGoalNode && this.validGoalNode.getBooleanValue());
       }
@@ -281,6 +304,43 @@ public class AStarFootstepPlanner implements FootstepPlanner
          listener.addNode(startNode, null);
          listener.tickAndUpdate();
       }
+
+      return true;
+   }
+
+   private void checkStartHasPlanarRegion()
+   {
+      Point3D startPoint = new Point3D(startNode.getX(), startNode.getY(), 0.0);
+      Point3DReadOnly startPos = PlanarRegionTools
+            .projectPointToPlanesVertically(startPoint, snapper.getOrCreateSteppableRegions(startNode.getRoundedX(), startNode.getRoundedY()));
+
+      if (startPos == null)
+      {
+         if (debug)
+            PrintTools.info("adding plane at start foot");
+         addPlanarRegionAtZeroHeight(startNode.getX(), startNode.getY());
+      }
+   }
+
+   private void addPlanarRegionAtZeroHeight(double xLocation, double yLocation)
+   {
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
+      polygon.addVertex(0.3, 0.3);
+      polygon.addVertex(-0.3, 0.3);
+      polygon.addVertex(0.3, -0.3);
+      polygon.addVertex(-0.3, -0.25);
+      polygon.update();
+
+      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(), new Vector3D(xLocation, yLocation, 0.0)), polygon);
+      planarRegionsList.addPlanarRegion(planarRegion);
+   }
+
+   @Override
+   public void cancelPlanning()
+   {
+      if (debug)
+         PrintTools.info("Cancel has been requested.");
+      abortPlanning.set(true);
    }
 
    public void requestInitialize()
@@ -288,7 +348,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       initialize.set(true);
    }
 
-   private void planInternal()
+   private boolean planInternal()
    {
       long planningStartTime = System.nanoTime();
 
@@ -300,11 +360,13 @@ public class AStarFootstepPlanner implements FootstepPlanner
       {
          if (initialize.getBooleanValue())
          {
-            initialize();
+            boolean success = initialize();
             rejectedNodesCount = 0;
             expandedNodesCount = 0;
             iterations = 0;
             initialize.set(false);
+            if (!success)
+               return false;
          }
 
          iterations++;
@@ -340,12 +402,17 @@ public class AStarFootstepPlanner implements FootstepPlanner
                stack.add(neighbor);
          }
 
-         if(listener != null)
+         if (listener != null)
             listener.tickAndUpdate();
 
          long timeInNano = System.nanoTime();
-         if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime) > timeout.getDoubleValue())
+         if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime) > timeout.getDoubleValue() || abortPlanning.getBooleanValue())
+         {
+            if (abortPlanning.getBooleanValue())
+               PrintTools.info("Abort planning requested.");
+            abortPlanning.set(false);
             break;
+         }
       }
 
       long timeInNano = System.nanoTime();
@@ -353,6 +420,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
       percentRejectedNodes.set(100.0 * rejectedNodesCount / expandedNodesCount);
       itarationCount.set(iterations);
       numberOfExpandedNodes.set(expandedNodesCount / iterations);
+
+      return true;
    }
 
    private boolean checkAndHandleNodeAtGoal(FootstepNode nodeToExpand)
@@ -382,7 +451,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       if (endNode == null || heuristics.compute(nodeToExpand, goalNodes.get(nodeToExpand.getRobotSide())) < heuristics
             .compute(endNode, goalNodes.get(endNode.getRobotSide())))
       {
-         if(listener != null)
+         if (listener != null)
             listener.reportLowestCostNodeList(graph.getPathFromStart(nodeToExpand));
          endNode = nodeToExpand;
       }

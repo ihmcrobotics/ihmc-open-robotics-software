@@ -55,6 +55,13 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
                                            s -> footstepPlanningToolboxController.processPlanningStatisticsRequest());
       textToSpeechPublisher = ROS2Tools.createPublisher(realtimeRos2Node, TextToSpeechPacket.class, ROS2Tools::generateDefaultTopicName);
    }
+   
+   @Override
+   public void sleep()
+   {
+      footstepPlanningToolboxController.finishUp();
+      super.sleep();
+   }
 
    @Override
    public ToolboxController getToolboxController()

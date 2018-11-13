@@ -16,6 +16,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.RosBasedPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -41,7 +43,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
-   private static final boolean debug = false;
+   private static final boolean debug = true;
+   
+   private static final int absoluteMaxNumberOfStages = 4;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -96,6 +100,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final ScheduledExecutorService executorService;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
+   private final MultiStagePlannerListener plannerListener;
+
    public MultiStageFootstepPlanningManager(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
                                             StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry,
                                             YoGraphicsListRegistry graphicsListRegistry, long tickDurationMs)
@@ -120,9 +126,12 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone.set(false);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
 
-      for (int i = 0; i < numberOfCores; i++)
+      long updateFrequency = 1000;
+      plannerListener = new MultiStagePlannerListener(statusOutputManager, updateFrequency);
+
+      for (int i = 0; i < Math.min(numberOfCores, absoluteMaxNumberOfStages); i++)
       {
-         FootstepPlanningStage planningStage = new FootstepPlanningStage(i, contactPointParameters, footstepPlannerParameters, activePlanner, planId,
+         FootstepPlanningStage planningStage = new FootstepPlanningStage(i, contactPointParameters, footstepPlannerParameters, activePlanner, plannerListener, planId,
                                                                          graphicsListRegistry, tickDurationMs);
          planningStage.addCompletionCallback(this);
          planningStage.setPlannerGoalRecommendationHandler(goalRecommendationHandler);
@@ -152,7 +161,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private FootstepPlanningStage createNewFootstepPlanningStage()
    {
       FootstepPlanningStage stage = new FootstepPlanningStage(allPlanningStages.getCopyForReading().size(), contactPointParameters, footstepPlanningParameters,
-                                                              activePlanner, planId, null, tickDurationMs);
+                                                              activePlanner, null, planId, null, tickDurationMs);
       stage.addCompletionCallback(this);
       stage.setPlannerGoalRecommendationHandler(goalRecommendationHandler);
       return stage;
@@ -178,7 +187,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private FootstepPlanningStage cleanupPlanningStage(FootstepPlanningStage planningStage)
    {
       stepPlanningStagesInProgress.remove(planningStage);
-      planningStage.requestInitialize();
       planningStage.destroyStageRunnable();
       planningTasks.remove(planningStage).cancel(true);
       planningStagePool.add(planningStage);
@@ -191,9 +199,12 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       globalSequenceIndex.set(0);
       pathPlanningStagesInProgress.clear();
 
-      for (FootstepPlanningStage stepPlanningStageInProgress : stepPlanningStagesInProgress.iterator())
+      if (!stepPlanningStagesInProgress.isEmpty())
       {
-         planningStagePool.add(cleanupPlanningStage(stepPlanningStageInProgress));
+         for (FootstepPlanningStage stepPlanningStageInProgress : stepPlanningStagesInProgress.iterator())
+         {
+            cleanupPlanningStage(stepPlanningStageInProgress);
+         }
       }
 
       completedPathPlans.clear();
@@ -205,6 +216,21 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       completedStepResults.clear();
 
       planningObjectivePool.clear();
+   }
+
+   private void cancelAllActiveStages()
+   {
+      isDonePlanningPath.set(true);
+      isDonePlanningSteps.set(true);
+      isDone.set(true);
+
+      if (!stepPlanningStagesInProgress.isEmpty())
+      {
+         for (FootstepPlanningStage stage : stepPlanningStagesInProgress.iterator())
+         {
+            stage.cancelPlanning();
+         }
+      }
    }
 
    private void assignGoalsToAvailablePlanners()
@@ -265,7 +291,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       BodyPathPlan bodyPathPlan = stageFinished.getPathPlan();
 
-      if (pathPlanningResult.validForExecution() && bodyPathPlan != null)
+      if (pathPlanningResult != null && pathPlanningResult.validForExecution() && bodyPathPlan != null)
          completedPathPlans.add(stageFinished.getPlanSequenceId(), bodyPathPlan);
 
       FootstepPlannerObjective objective = pathPlanningStagesInProgress.remove(stageFinished);
@@ -279,12 +305,16 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    {
       completedStepResults.add(stepPlanningResult);
 
-      if (stepPlanningResult.validForExecution())
-         completedStepPlans.add(stageFinished.getPlanSequenceId(), stageFinished.getPlan());
+      if (stepPlanningResult != null && stepPlanningResult.validForExecution())
+      {
+         int sequence = stageFinished.getPlanSequenceId();
+         FootstepPlan plan = stageFinished.getPlan();
+         completedStepPlans.add(sequence, plan);
+      }
 
       completedPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
 
-      planningStagePool.add(cleanupPlanningStage(stageFinished));
+      cleanupPlanningStage(stageFinished);
 
       if (debug)
          PrintTools.info("Stage " + stageFinished.getStageId() + " just finished planning its steps.");
@@ -330,6 +360,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private boolean initialize()
    {
       isDone.set(false);
+      isDonePlanningPath.set(false);
+      isDonePlanningSteps.set(false);
       requestedPlanarRegions.set(false);
       plannerTime.set(0.0);
 
@@ -395,11 +427,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       {
          plannerGoal.setTimeout(timeout);
          this.timeout.set(timeout);
-
-         if (debug)
-         {
-            PrintTools.info("Setting timeout to " + timeout);
-         }
       }
       else
       {
@@ -463,17 +490,29 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       {
          sendMessageToUI("Result of step planning: " + planId.getIntegerValue() + ", " + stepStatus.toString());
          concatenateFootstepPlans();
-         statusOutputManager
-               .reportStatusMessage(packStepResult(footstepPlan.getAndSet(null), bodyPathPlan.getAndSet(null), stepStatus, plannerTime.getDoubleValue()));
+         FootstepPlan footstepPlan = this.footstepPlan.getAndSet(null);
+         FootstepPlanningToolboxOutputStatus footstepPlanMessage = packStepResult(footstepPlan, bodyPathPlan.getAndSet(null), stepStatus, plannerTime.getDoubleValue());
+         statusOutputManager.reportStatusMessage(footstepPlanMessage);
       }
       if (stepPlanningStatusChanged) // step planning just started or just finished, so this flag needs updating.
          isDonePlanningSteps.set(noMoreStepsToPlan);
 
+      plannerListener.tickAndUpdate();
+
       boolean isDone = stepPlanningStagesInProgress.isEmpty();
+      isDone &= latestRequestReference.get() == null;
       isDone &= pathPlanningStagesInProgress.isEmpty();
       isDone &= planningObjectivePool.isEmpty();
       isDone &= !goalRecommendationHandler.hasNewFootstepPlannerObjectives();
+      isDone &= isDonePlanningPath.getBooleanValue();
+      isDone &= isDonePlanningSteps.getBooleanValue();
+      
+      if (isDone)
+         plannerListener.plannerFinished(null);
+      
       this.isDone.set(isDone);
+      
+      
    }
 
    private static FootstepPlanningResult getWorstResult(List<FootstepPlanningResult> results)
@@ -533,6 +572,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       int firstPlan = Integer.MAX_VALUE;
       FootstepPlan totalFootstepPlan = new FootstepPlan();
+
       for (ImmutablePair<Integer, FootstepPlan> footstepPlanPairs : completedStepPlans)
       {
          FootstepPlan footstepPlan = footstepPlanPairs.getRight();
@@ -573,7 +613,10 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void processRequest(FootstepPlanningRequestPacket request)
    {
-      latestRequestReference.set(request);
+      isDone.set(false);
+      isDonePlanningSteps.set(false);
+      isDonePlanningPath.set(false);
+      latestRequestReference.set(request);     
    }
 
    public void processPlannerParameters(FootstepPlannerParametersPacket parameters)
@@ -680,6 +723,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       if (debug)
          PrintTools.debug(this, "Going to sleep");
 
+      cancelAllActiveStages();
       cleanupAllPlanningStages();
 
       for (FootstepPlanningStage planningTask : planningTasks.iterator())
@@ -712,14 +756,15 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public void clear()
       {
-         this.getCopyForWriting();
-         this.commit();
+         List<T> updatedList = getCopyForWriting();
+         updatedList.clear();
+         commit();
       }
 
       public void add(T objectToAdd)
       {
-         List<T> existingList = this.getCopyForReading();
-         List<T> updatedList = this.getCopyForWriting();
+         List<T> existingList = getCopyForReading();
+         List<T> updatedList = getCopyForWriting();
          updatedList.clear();
          if (existingList != null)
             updatedList.addAll(existingList);
@@ -730,8 +775,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public T remove(int indexToRemove)
       {
-         List<T> existingList = this.getCopyForReading();
-         List<T> updatedList = this.getCopyForWriting();
+         List<T> existingList = getCopyForReading();
+         List<T> updatedList = getCopyForWriting();
          updatedList.clear();
          if (existingList != null)
             updatedList.addAll(existingList);
@@ -744,11 +789,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public Iterable<T> iterable()
       {
-         return this.getCopyForReading();
+         return getCopyForReading();
       }
    }
 
-   class ConcurrentPairList<L, R> extends ConcurrentCopier<PairList<L, R>>
+   private class ConcurrentPairList<L, R> extends ConcurrentCopier<PairList<L, R>>
    {
       public ConcurrentPairList()
       {
@@ -757,7 +802,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public boolean isEmpty()
       {
-         PairList<L, R> readCopy = this.getCopyForReading();
+         PairList<L, R> readCopy = getCopyForReading();
          if (readCopy == null)
             return true;
          else
@@ -766,14 +811,16 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public void clear()
       {
-         this.getCopyForWriting();
-         this.commit();
+         PairList<L, R> updatedList = getCopyForWriting();
+         updatedList.clear();
+         
+         commit();
       }
 
       public void add(L leftObjectToAdd, R rightObjectToAdd)
       {
-         PairList<L, R> existingList = this.getCopyForReading();
-         PairList<L, R> updatedList = this.getCopyForWriting();
+         PairList<L, R> existingList = getCopyForReading();
+         PairList<L, R> updatedList = getCopyForWriting();
          updatedList.clear();
          if (existingList != null)
             updatedList.addAll(existingList);
@@ -784,8 +831,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public ImmutablePair<L, R> remove(int indexToRemove)
       {
-         PairList<L, R> existingList = this.getCopyForReading();
-         PairList<L, R> updatedList = this.getCopyForWriting();
+         PairList<L, R> existingList = getCopyForReading();
+         PairList<L, R> updatedList = getCopyForWriting();
          updatedList.clear();
          if (existingList != null)
             updatedList.addAll(existingList);
@@ -798,7 +845,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public Iterable<ImmutablePair<L, R>> iterable()
       {
-         return this.getCopyForReading();
+         return getCopyForReading();
       }
    }
 
@@ -811,42 +858,52 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       public boolean isEmpty()
       {
-         return this.getCopyForReading().isEmpty();
+         Map<K, V> existingMap = getCopyForReading();
+         
+         if (existingMap != null)
+            return getCopyForReading().isEmpty();
+         else
+            return true;
       }
 
       public Iterable<K> iterator()
       {
-         return this.getCopyForReading().keySet();
+         Map<K, V> existingMap = getCopyForReading();
+         if (existingMap != null)
+            return existingMap.keySet();
+         else
+            return null;
       }
 
       public void clear()
       {
-         this.getCopyForWriting();
-         this.commit();
+         Map<K, V> updatedMap = getCopyForWriting();
+         updatedMap.clear();
+         commit();
       }
 
       public void put(K key, V value)
       {
-         Map<K, V> existingMap = this.getCopyForReading();
-         Map<K, V> updatedMap = this.getCopyForWriting();
+         Map<K, V> existingMap = getCopyForReading();
+         Map<K, V> updatedMap = getCopyForWriting();
          updatedMap.clear();
          if (existingMap != null)
             updatedMap.putAll(existingMap);
          updatedMap.put(key, value);
 
-         this.commit();
+         commit();
       }
 
       public V remove(K key)
       {
-         Map<K, V> existingMap = this.getCopyForReading();
-         Map<K, V> updatedMap = this.getCopyForWriting();
+         Map<K, V> existingMap = getCopyForReading();
+         Map<K, V> updatedMap = getCopyForWriting();
          updatedMap.clear();
          if (existingMap != null)
             updatedMap.putAll(existingMap);
          V objectToReturn = updatedMap.remove(key);
 
-         this.commit();
+         commit();
 
          return objectToReturn;
       }

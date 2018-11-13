@@ -21,6 +21,14 @@ public interface FootstepPlannerParameters
    }
 
    /**
+    * Sets whether or not to perform the defined heuristic search policies.
+    */
+   default boolean performHeuristicSearchPolicies()
+   {
+      return true;
+   }
+
+   /**
     * Returns the ideal step width for walking on flat ground.
     */
    double getIdealFootstepWidth();

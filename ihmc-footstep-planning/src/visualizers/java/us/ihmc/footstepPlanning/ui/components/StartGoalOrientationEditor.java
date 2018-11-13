@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class StartGoalOrientationEditor extends AnimationTimer
 {
-   private static final boolean VERBOSE = true;
+   private static final boolean VERBOSE = false;
 
    private final EventHandler<MouseEvent> rayCastInterceptor;
    private final EventHandler<MouseEvent> leftClickInterceptor;
