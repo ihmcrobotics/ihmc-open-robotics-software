@@ -266,6 +266,14 @@ public class FootstepPlanningTestTools
             return checkForBodyCollisions;
          }
 
+         private final boolean performHeuristicSearchPolicies = random.nextBoolean();
+
+         @Override
+         public boolean performHeuristicSearchPolicies()
+         {
+            return performHeuristicSearchPolicies;
+         }
+
          private final double minXClearance = RandomNumbers.nextDouble(random, 0.01, 1.0);
 
          @Override
@@ -432,6 +440,7 @@ public class FootstepPlanningTestTools
    public static void assertParametersEqual(FootstepPlannerParameters parameters, SettableFootstepPlannerParameters other)
    {
       assertEquals(parameters.checkForBodyBoxCollisions(), other.checkForBodyBoxCollisions());
+      assertEquals(parameters.performHeuristicSearchPolicies(), other.performHeuristicSearchPolicies());
       assertEquals(parameters.getIdealFootstepWidth(), other.getIdealFootstepWidth(), epsilon);
       assertEquals(parameters.getIdealFootstepLength(), other.getIdealFootstepLength(), epsilon);
       assertEquals(parameters.getWiggleInsideDelta(), other.getWiggleInsideDelta(), epsilon);

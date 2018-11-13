@@ -301,6 +301,7 @@ public class RemoteUIMessageConverter
       }
 
       packet.setCheckForBodyBoxCollisions(parameters.checkForBodyBoxCollisions());
+      packet.setPerformHeuristicSearchPolicies(parameters.performHeuristicSearchPolicies());
       packet.setIdealFootstepWidth(parameters.getIdealFootstepWidth());
       packet.setIdealFootstepLength(parameters.getIdealFootstepLength());
       packet.setWiggleInsideDelta(parameters.getWiggleInsideDelta());
