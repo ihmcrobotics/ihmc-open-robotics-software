@@ -24,8 +24,11 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
             </rowConstraints>
             <children>
-                <Label text="Planner Timeout" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                <Label text="Planner Horizon" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                <ToggleButton fx:id="returnBestEffortPlan" mnemonicParsing="false" text="Return Best Effort Plan"
+                              GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.columnSpan="2" prefWidth="250.0"/>
+
+                <Label text="Planner Timeout" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                <Label text="Planner Horizon" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
 
                 <Label text="Max step length" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
                 <Label text="Max step width" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
@@ -39,8 +42,8 @@
                 <Label text="Min step yaw" GridPane.halignment="RIGHT" GridPane.columnIndex="7" GridPane.rowIndex="3"/>
                 <Label text="Min foothold percent" GridPane.halignment="RIGHT" GridPane.columnIndex="7" GridPane.rowIndex="4"/>
 
-                <Spinner fx:id="plannerTimeout" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-                <Spinner fx:id="horizonLength" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+                <Spinner fx:id="plannerTimeout" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+                <Spinner fx:id="horizonLength" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="4"/>
 
                 <Spinner fx:id="maxStepLength" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="2"/>
                 <Spinner fx:id="maxStepWidth" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="3"/>

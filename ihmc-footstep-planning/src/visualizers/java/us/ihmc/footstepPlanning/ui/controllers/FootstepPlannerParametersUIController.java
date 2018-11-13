@@ -5,6 +5,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.ToggleButton;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
@@ -17,6 +18,8 @@ public class FootstepPlannerParametersUIController
    private JavaFXMessager messager;
    private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
 
+   @FXML
+   private ToggleButton returnBestEffortPlan;
    @FXML
    private Spinner<Double> plannerTimeout;
    @FXML
@@ -78,6 +81,8 @@ public class FootstepPlannerParametersUIController
 
 //      parametersProperty.bidirectionalBindIdealFootstepWidth();
 //      parametersProperty.bidirectionalBindIdealFootstepLength();
+      parametersProperty.bidirectionalBindReturnBestEffortPlan(returnBestEffortPlan.selectedProperty());
+
       parametersProperty.bidirectionalBindMaxStepReach(maxStepLength.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMaxStepWidth(maxStepWidth.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinStepWidth(minStepWidth.getValueFactory().valueProperty());

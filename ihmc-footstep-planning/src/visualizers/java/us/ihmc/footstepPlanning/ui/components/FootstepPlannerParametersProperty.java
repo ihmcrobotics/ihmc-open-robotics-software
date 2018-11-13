@@ -22,6 +22,7 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField minSurfaceIncline = new DoubleField(SettableFootstepPlannerParameters::getMinimumSurfaceInclineRadians, SettableFootstepPlannerParameters::setMinimumSurfaceInclineRadians);
    private DoubleField maxStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepWidth, SettableFootstepPlannerParameters::setMaximumStepWidth);
 
+   private BooleanField returnBestEffortPlan = new BooleanField(SettableFootstepPlannerParameters::getReturnBestEffortPlan, SettableFootstepPlannerParameters::setReturnBestEffortPlan);
    private BooleanField useQuadraticDistanceCost = new BooleanField(SettableFootstepPlannerParameters::useQuadraticDistanceCost, SettableFootstepPlannerParameters::setUseQuadraticDistanceCost);
    private BooleanField useQuadraticHeightCost = new BooleanField(SettableFootstepPlannerParameters::useQuadraticHeightCost, SettableFootstepPlannerParameters::setUseQuadraticHeightCost);
    private DoubleField yawWeight = new DoubleField(SettableFootstepPlannerParameters::getYawWeight, SettableFootstepPlannerParameters::setYawWeight);
@@ -74,6 +75,11 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    public void bidirectionalBindIdealFootstepLength(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, idealFootstepLength);
+   }
+
+   public void bidirectionalBindReturnBestEffortPlan(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, returnBestEffortPlan);
    }
 
    public void bidirectionalBindMaxStepReach(Property<? extends Number> property)
