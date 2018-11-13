@@ -44,8 +44,8 @@ public class GUICaptureStreamer
    private final CaptureRunner captureRunner = new CaptureRunner();
    private final Dimension size = new Dimension();
 
-   private final Domain domain = DomainFactory.getDomain(PubSubImplementation.FAST_RTPS);
-   private final Participant participant;
+   private Domain domain = DomainFactory.getDomain(PubSubImplementation.FAST_RTPS);
+   private Participant participant;
    private Publisher publisher;
    private final String topicName;
    
@@ -141,5 +141,13 @@ public class GUICaptureStreamer
          }
       }
 
+   }
+
+   public void destroy()
+   {
+      domain.removeParticipant(participant);
+      domain = null;
+      participant = null;
+      scheduler.shutdownNow();
    }
 }

@@ -1,9 +1,13 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.filters.BodyCollisionRegionFilter;
+import us.ihmc.footstepPlanning.filters.SteppableRegionFilter;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
+import us.ihmc.robotics.geometry.PlanarRegion;
 
 public interface FootstepPlannerParameters
 {
@@ -14,6 +18,14 @@ public interface FootstepPlannerParameters
    default boolean checkForBodyBoxCollisions()
    {
       return false;
+   }
+
+   /**
+    * Sets whether or not to perform the defined heuristic search policies.
+    */
+   default boolean performHeuristicSearchPolicies()
+   {
+      return true;
    }
 
    /**
@@ -332,11 +344,12 @@ public interface FootstepPlannerParameters
    /**
     * Some node checkers will check if a bounding box that describes the body of the robot will move
     * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
-    * collisions, this defines the box height.
+    * collisions, this defines the box height. Note that this box will go from {@code getBodyBoxBaseZ}
+    * to {@code getBodyBoxBaseHeight + getBodyBoxHeight}
     */
    default double getBodyBoxHeight()
    {
-      return 1.0;
+      return 1.5;
    }
 
    /**
@@ -362,11 +375,31 @@ public interface FootstepPlannerParameters
    /**
     * Some node checkers will check if a bounding box that describes the body of the robot will move
     * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
-    * collisions, this defines the height of the center of the box.
+    * collisions, this defines the x-offset of a bounding box relative to the average frame between sequential footsteps.
     */
-   default double getBodyBoxCenterHeight()
+   default double getBodyBoxBaseX()
    {
-      return 1.5;
+      return 0.0;
+   }
+
+   /**
+    * Some node checkers will check if a bounding box that describes the body of the robot will move
+    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+    * collisions, this defines the y-offset of a bounding box relative to the average frame between sequential footsteps.
+    */
+   default double getBodyBoxBaseY()
+   {
+      return 0.0;
+   }
+
+   /**
+    * Some node checkers will check if a bounding box that describes the body of the robot will move
+    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
+    * collisions, this defines the z-offset of a bounding box relative to the average frame between sequential footsteps.
+    */
+   default double getBodyBoxBaseZ()
+   {
+      return 0.25;
    }
 
    /**
@@ -392,5 +425,39 @@ public interface FootstepPlannerParameters
    default FootstepPlannerCostParameters getCostParameters()
    {
       return new DefaultFootstepPlannerCostParameters();
+   }
+
+   default SteppableRegionFilter getSteppableRegionFilter()
+   {
+      return new SteppableRegionFilter()
+      {
+         private Vector3D vertical = new Vector3D(0.0, 0.0, 1.0);
+
+         @Override
+         public boolean isPlanarRegionSteppable(PlanarRegion query)
+         {
+            double angle = query.getNormal().angle(vertical);
+
+            if (angle > getMinimumSurfaceInclineRadians() + 1e-5)
+               return false;
+
+            return true;
+         }
+      };
+   }
+
+   default BodyCollisionRegionFilter getBodyCollisionRegionFilter()
+   {
+      return new BodyCollisionRegionFilter()
+      {
+         @Override
+         public boolean isPlanarRegionCollidable(PlanarRegion query, double groundHeight, double minHeight, double maxHeight)
+         {
+            if (query.getBoundingBox3dInWorld().getMaxZ() < minHeight + groundHeight)
+               return false;
+
+            return maxHeight + groundHeight > query.getBoundingBox3dInWorld().getMinZ();
+         }
+      };
    }
 }

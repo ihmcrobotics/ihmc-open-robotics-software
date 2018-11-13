@@ -29,6 +29,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -74,6 +76,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    private FootstepPlanningToolboxModule toolboxModule;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
+   private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
 
    private RealtimeRos2Node ros2Node;
 
@@ -91,7 +94,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    public static final int CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS = 6;
    public static final double CINDER_BLOCK_HEIGHT_VARIATION = 0.0;
    public static final double CINDER_BLOCK_FIELD_PLATFORM_LENGTH = 0.6;
-   protected static final double BOLLARD_DISTANCE = 0.65;
+   protected static final double BOLLARD_DISTANCE = 0.85;
 
    public static final double STEPPING_STONE_PATH_RADIUS = 3.5;
 
@@ -116,7 +119,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       flatGround = generator.getPlanarRegionsList();
 
       networkModuleParameters = new DRCNetworkModuleParameters();
-      networkModuleParameters.enableFootstepPlanningToolbox(false);
+      networkModuleParameters.enableFootstepPlanningToolbox(true);
       networkModuleParameters.enableLocalControllerCommunicator(true);
       networkModuleParameters.enableNetworkProcessor(true);
 
@@ -124,6 +127,9 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       toolboxModule = new FootstepPlanningToolboxModule(getRobotModel(), null, true, PubSubImplementation.INTRAPROCESS);
       footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class,
                                                                    FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
+      footstepPlannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerParametersPacket.class,
+                                                                     FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
+
       toolboxStatePublisher = ROS2Tools
             .createPublisher(ros2Node, ToolboxStateMessage.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
 
@@ -258,6 +264,14 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       CollisionCheckerScript collisionChecker = getCollisionChecker(500);
       drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
       drcSimulationTestHelper.getSimulationConstructionSet().addScript(collisionChecker);
+
+      FootstepPlannerParameters parameters = getRobotModel().getFootstepPlannerParameters();
+      FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
+      RemoteUIMessageConverter.copyFootstepPlannerParametersToPacket(parametersPacket, parameters);
+      parametersPacket.setCheckForBodyBoxCollisions(true);
+      parametersPacket.setReturnBestEffortPlan(false);
+      footstepPlannerParametersPublisher.publish(parametersPacket);
+
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, bollardPlanarRegions, goalPose);
    }
 
@@ -266,6 +280,10 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       try
       {
          runEndToEndTest(plannerType, planarRegionsList, goalPose);
+         if (simulationTestingParameters.getKeepSCSUp())
+         {
+            ThreadTools.sleepForever();
+         }
       }
       catch (Exception e)
       {

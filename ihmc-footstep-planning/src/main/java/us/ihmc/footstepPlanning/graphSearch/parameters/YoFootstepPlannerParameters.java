@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerCostParametersPacket;
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -12,6 +13,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoBoolean checkForBodyBoxCollisions = new YoBoolean("checkForBodyBoxCollisions", registry);
+   private final YoBoolean performHeuristicSearchPolicies = new YoBoolean("performHeuristicSearchPolicies", registry);
    private final YoDouble maximumStepReach = new YoDouble("maximumStepReach", registry);
    private final YoDouble minimumFootholdPercent = new YoDouble("minimumFootholdPercent", registry);
    private final YoDouble idealFootstepLength = new YoDouble("idealFootstepLength", registry);
@@ -37,7 +39,9 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoDouble bodyBoxHeight = new YoDouble("bodyBoxHeight", registry);
    private final YoDouble bodyBoxWidth = new YoDouble("bodyBoxWidth", registry);
    private final YoDouble bodyBoxDepth = new YoDouble("bodyBoxDepth", registry);
-   private final YoDouble bodyBoxCenterHeight = new YoDouble("bodyBoxCenterHeight", registry);
+   private final YoDouble bodyBoxBaseX = new YoDouble("bodyBoxBaseX", registry);
+   private final YoDouble bodyBoxBaseY = new YoDouble("bodyBoxBaseY", registry);
+   private final YoDouble bodyBoxBaseZ = new YoDouble("bodyBoxBaseZ", registry);
    private final YoBoolean returnBestEffortPlan = new YoBoolean("returnBestEffortPlan", registry);
    private final YoInteger minimumStepForBestEffortPlan = new YoInteger("minimumStepForBestEffortPlan", registry);
    private final YoDouble minXClearanceFromStance = new YoDouble("minXClearanceFromStance", registry);
@@ -56,6 +60,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void set(FootstepPlannerParameters defaults)
    {
       setCheckForBodyBoxCollisions(defaults.checkForBodyBoxCollisions());
+      setPerformHeuristicSearchPolicies(defaults.performHeuristicSearchPolicies());
       maximumStepReach.set(defaults.getMaximumStepReach());
       minimumFootholdPercent.set(defaults.getMinimumFootholdPercent());
       idealFootstepLength.set(defaults.getIdealFootstepLength());
@@ -81,7 +86,9 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       bodyBoxDepth.set(defaults.getBodyBoxDepth());
       bodyBoxHeight.set(defaults.getBodyBoxHeight());
       bodyBoxWidth.set(defaults.getBodyBoxWidth());
-      bodyBoxCenterHeight.set(defaults.getBodyBoxCenterHeight());
+      bodyBoxBaseX.set(defaults.getBodyBoxBaseX());
+      bodyBoxBaseY.set(defaults.getBodyBoxBaseY());
+      bodyBoxBaseZ.set(defaults.getBodyBoxBaseZ());
       returnBestEffortPlan.set(defaults.getReturnBestEffortPlan());
       minimumStepForBestEffortPlan.set(defaults.getMinimumStepsForBestEffortPlan());
       minXClearanceFromStance.set(defaults.getMinXClearanceFromStance());
@@ -94,6 +101,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public boolean checkForBodyBoxCollisions()
    {
       return checkForBodyBoxCollisions.getBooleanValue();
+   }
+
+   @Override
+   public boolean performHeuristicSearchPolicies()
+   {
+      return performHeuristicSearchPolicies.getBooleanValue();
    }
 
    @Override
@@ -247,9 +260,21 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    }
 
    @Override
-   public double getBodyBoxCenterHeight()
+   public double getBodyBoxBaseX()
    {
-      return bodyBoxCenterHeight.getDoubleValue();
+      return bodyBoxBaseX.getDoubleValue();
+   }
+
+   @Override
+   public double getBodyBoxBaseY()
+   {
+      return bodyBoxBaseY.getDoubleValue();
+   }
+
+   @Override
+   public double getBodyBoxBaseZ()
+   {
+      return bodyBoxBaseZ.getDoubleValue();
    }
 
    @Override
@@ -285,6 +310,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void set(FootstepPlannerParametersPacket parametersPacket)
    {
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
+      setPerformHeuristicSearchPolicies(parametersPacket.getPerformHeuristicSearchPolicies());
       if (parametersPacket.getIdealFootstepWidth() != -1.0)
          setIdealFootstepWidth(parametersPacket.getIdealFootstepWidth());
       if (parametersPacket.getIdealFootstepLength() != -1.0)
@@ -333,11 +359,15 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       if (parametersPacket.getBodyBoxHeight() != -1.0)
          setBodyBoxHeight(parametersPacket.getBodyBoxHeight());
       if (parametersPacket.getBodyBoxDepth() != -1.0)
-         setBodyBoxDepth(parametersPacket.getBodyBoxDepth());
+         setBodyBoxDepth(parametersPacket.getBodyBoxDepth());         
       if (parametersPacket.getBodyBoxWidth() != -1.0)
          setBodyBoxWidth(parametersPacket.getBodyBoxWidth());
-      if (parametersPacket.getBodyBoxCenterHeight() != -1.0)
-         setBodyBoxCenterHeight(parametersPacket.getBodyBoxCenterHeight());
+      if (parametersPacket.getBodyBoxBaseX() != -1.0)
+         setBodyBoxBaseX(parametersPacket.getBodyBoxBaseX());
+      if (parametersPacket.getBodyBoxBaseY() != -1.0)
+         setBodyBoxBaseY(parametersPacket.getBodyBoxBaseY());
+      if (parametersPacket.getBodyBoxBaseZ() != -1.0)
+         setBodyBoxBaseZ(parametersPacket.getBodyBoxBaseZ());
       if (parametersPacket.getMinXClearanceFromStance() != -1.0)
          setMinXClearanceFromStance(parametersPacket.getMinXClearanceFromStance());
       if (parametersPacket.getMinYClearanceFromStance() != -1.0)
@@ -349,6 +379,11 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void setCheckForBodyBoxCollisions(boolean checkForBodyBoxCollisions)
    {
       this.checkForBodyBoxCollisions.set(checkForBodyBoxCollisions);
+   }
+
+   public void setPerformHeuristicSearchPolicies(boolean performHeuristicSearchPolicies)
+   {
+      this.performHeuristicSearchPolicies.set(performHeuristicSearchPolicies);
    }
 
    public void setIdealFootstepWidth(double idealFootstepWidth)
@@ -486,9 +521,19 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       this.bodyBoxWidth.set(bodyBoxWidth);
    }
 
-   public void setBodyBoxCenterHeight(double bodyBoxCenterHeight)
+   public void setBodyBoxBaseX(double bodyBoxBaseZ)
    {
-      this.bodyBoxCenterHeight.set(bodyBoxCenterHeight);
+      this.bodyBoxBaseX.set(bodyBoxBaseZ);
+   }
+
+   public void setBodyBoxBaseY(double bodyBoxBaseZ)
+   {
+      this.bodyBoxBaseY.set(bodyBoxBaseZ);
+   }
+
+   public void setBodyBoxBaseZ(double bodyBoxBaseZ)
+   {
+      this.bodyBoxBaseZ.set(bodyBoxBaseZ);
    }
 
    public void setMinXClearanceFromStance(double minXClearanceFromStance)

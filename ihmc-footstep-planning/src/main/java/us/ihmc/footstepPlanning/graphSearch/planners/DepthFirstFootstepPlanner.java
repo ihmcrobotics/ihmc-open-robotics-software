@@ -24,7 +24,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
@@ -66,7 +66,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    private final SideDependentList<FootstepNode> goalNodes = new SideDependentList<>();
    private FootstepNode bestGoalNode;
 
-   private BipedalFootstepPlannerListener listener;
+   private final List<BipedalFootstepPlannerListener> listeners = new ArrayList<>();
    private final YoInteger numberOfNodesExpanded = new YoInteger("numberOfNodesExpanded", registry);
    private final YoLong planningStartTime = new YoLong("planningStartTime", registry);
 
@@ -81,7 +81,8 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
       this.stepCostCalculator = stepCostCalculator;
       nodeExpansion = new ParameterBasedNodeExpansion(parameters);
 
-      DistanceAndYawBasedHeuristics costToGoHeuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getDepthFirstHeuristicsWeight(), parameters);
+      DistanceAndYawBasedHeuristics costToGoHeuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getDepthFirstHeuristicsWeight(),
+                                                                                           parameters);
       this.nodeComparator = (node1, node2) -> {
          double cost1 = costToGoHeuristics.compute(node1, goalNodes.get(node1.getRobotSide()));
          double cost2 = costToGoHeuristics.compute(node2, goalNodes.get(node2.getRobotSide()));
@@ -94,9 +95,9 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
       timeout.set(Double.POSITIVE_INFINITY);
    }
 
-   public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
+   public void addBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
    {
-      this.listener = listener;
+      listeners.add(listener);
    }
 
    public void setMaximumNumberOfNodesToExpand(int maximumNumberOfNodesToExpand)
@@ -190,8 +191,6 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    {
       checker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
-      if (listener != null)
-         listener.planarRegionsListSet(planarRegionsList);
    }
 
    @Override
@@ -228,7 +227,6 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
       stack.clear();
       stack.add(startNode);
       footstepGraph.initialize(startNode);
-      notifiyListenersStartNodeWasAdded(startNode);
 
       numberOfNodesExpanded.set(0);
       planningStartTime.set(System.nanoTime());
@@ -250,8 +248,6 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
             nodeToExpand = stack.pollFirst();
          else
             nodeToExpand = stack.pollLast();
-
-         notifyListenerNodeIsBeingExpanded(nodeToExpand);
 
          if (goalNodes.get(nodeToExpand.getRobotSide()).equals(nodeToExpand))
          {
@@ -294,7 +290,6 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
 
       if (bestGoalNode == null)
       {
-         notifyListenerSolutionWasNotFound();
          planningDuration.set(-1.0);
          return FootstepPlanningResult.NO_PATH_EXISTS;
       }
@@ -326,53 +321,24 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
 
    private void notifyListenerSolutionWasFound(FootstepNode endNode)
    {
-      if (listener != null)
+      FootstepPlan plan = new FootstepPlan();
+      List<FootstepNode> path = footstepGraph.getPathFromStart(bestGoalNode);
+      path.add(goalNodes.get(bestGoalNode.getRobotSide().getOppositeSide()));
+
+      for (int i = 1; i < path.size(); i++)
       {
-         FootstepPlan plan = new FootstepPlan();
-         List<FootstepNode> path = footstepGraph.getPathFromStart(bestGoalNode);
-         path.add(goalNodes.get(bestGoalNode.getRobotSide().getOppositeSide()));
+         RobotSide robotSide = path.get(i).getRobotSide();
 
-         for (int i = 1; i < path.size(); i++)
-         {
-            RobotSide robotSide = path.get(i).getRobotSide();
+         RigidBodyTransform footstepPose = new RigidBodyTransform();
+         footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());
+         footstepPose.setTranslationX(path.get(i).getX());
+         footstepPose.setTranslationY(path.get(i).getY());
 
-            RigidBodyTransform footstepPose = new RigidBodyTransform();
-            footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());
-            footstepPose.setTranslationX(path.get(i).getX());
-            footstepPose.setTranslationY(path.get(i).getY());
+         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i)).getSnapTransform();
+         if (!snapTransform.containsNaN())
+            snapTransform.transform(footstepPose);
 
-            RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i)).getSnapTransform();
-            if (!snapTransform.containsNaN())
-               snapTransform.transform(footstepPose);
-
-            plan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
-         }
-
-         listener.solutionWasFound(plan);
-      }
-   }
-
-   private void notifyListenerSolutionWasNotFound()
-   {
-      if (listener != null)
-      {
-         listener.solutionWasNotFound();
-      }
-   }
-
-   private void notifyListenerNodeIsBeingExpanded(FootstepNode nodeToExpand)
-   {
-      if (listener != null)
-      {
-         listener.nodeIsBeingExpanded(nodeToExpand);
-      }
-   }
-
-   private void notifiyListenersStartNodeWasAdded(FootstepNode startNode)
-   {
-      if (listener != null)
-      {
-         listener.startNodeWasAdded(startNode);
+         plan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
       }
    }
 }

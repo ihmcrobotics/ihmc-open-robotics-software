@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.PlanarRegionBaseOfCliffAvoider;
@@ -38,8 +39,9 @@ public class NodeCheckerRenderer extends AnimationTimer
 
    private static final ConvexPolygon2D defaultFootPolygon = PlannerTools.createDefaultFootPolygon();
    private final SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(defaultFootPolygon, defaultFootPolygon);
-   private final SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
-   private final FootstepNodeChecker checker = new PlanarRegionBaseOfCliffAvoider(new DefaultFootstepPlanningParameters(), snapper, footPolygons);
+   private final FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
+   private final SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
+   private final FootstepNodeChecker checker = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
 
    private final MeshView meshView = new MeshView();
    private final JavaFXMultiColorMeshBuilder meshBuilder;

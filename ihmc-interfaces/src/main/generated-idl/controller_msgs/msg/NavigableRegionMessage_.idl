@@ -20,7 +20,7 @@ module controller_msgs
         controller_msgs::msg::dds::PlanarRegionMessage home_region;
         controller_msgs::msg::dds::VisibilityClusterMessage home_region_cluster;
         controller_msgs::msg::dds::VisibilityMapMessage visibility_map_in_world;
-        sequence<controller_msgs::msg::dds::VisibilityClusterMessage> obstacle_clusters;
+        sequence<controller_msgs::msg::dds::VisibilityClusterMessage, 25> obstacle_clusters;
       };
     };
   };
