@@ -41,6 +41,12 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    private final YoDouble comPositionSetpointY;
    private final YoDouble desiredHeightInWorld;
 
+   private final YoDouble timeToPrepareForStanding;
+   private final YoDouble minimumTimeDoneWithStandPrep;
+
+   private final YoDouble toWalkingTransitionDuration;
+   private final YoDouble exitWalkingTransitionDuration;
+
    private final Quaternion bodyOrientation = new Quaternion();
 
    @SuppressWarnings("unchecked")
@@ -75,6 +81,11 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       comPositionSetpointX = (YoDouble) scs.getVariable("comPositionSetpointX");
       comPositionSetpointY = (YoDouble) scs.getVariable("comPositionSetpointY");
       desiredHeightInWorld = (YoDouble) scs.getVariable("desiredHeightInWorld");
+
+      timeToPrepareForStanding = (YoDouble) scs.getVariable("timeToPrepareForStanding");
+      minimumTimeDoneWithStandPrep = (YoDouble) scs.getVariable("minimumTimeDoneWithStandPrep");
+      toWalkingTransitionDuration = (YoDouble) scs.getVariable("toWalkingTransitionDuration");
+      exitWalkingTransitionDuration = (YoDouble) scs.getVariable("exitWalkingTransitionDuration");
    }
 
    public YoEnum<HighLevelControllerName> getUserTrigger()
@@ -186,5 +197,30 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    public YoDouble getHeightInWorldSetpoint()
    {
       return desiredHeightInWorld;
+   }
+
+   public YoDouble getTimeToPrepareForStanding()
+   {
+      return timeToPrepareForStanding;
+   }
+
+   public YoDouble getMinimumTimeDoneWithStandPrep()
+   {
+      return minimumTimeDoneWithStandPrep;
+   }
+
+   public double getTimeInStandPrep()
+   {
+      return timeToPrepareForStanding.getDoubleValue() + minimumTimeDoneWithStandPrep.getDoubleValue();
+   }
+
+   public double getToWaklkingTransitionDuration()
+   {
+      return toWalkingTransitionDuration.getDoubleValue();
+   }
+
+   public double getExitWalkingTransitionDuration()
+   {
+      return exitWalkingTransitionDuration.getDoubleValue();
    }
 }
