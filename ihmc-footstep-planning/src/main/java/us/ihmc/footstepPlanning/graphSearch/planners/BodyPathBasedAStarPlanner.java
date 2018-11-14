@@ -5,14 +5,11 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.BodyPathHeuristics;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
@@ -23,15 +20,11 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class BodyPathBasedAStarPlanner implements FootstepPlanner
 {
@@ -40,18 +33,18 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    private static final boolean debug = false;
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
-   private final BodyPathPlanner bodyPath;
+   private final BodyPathPlanner bodyPathPlanner;
    private final FootstepPlanner footstepPlanner;
 
    private final BodyPathHeuristics heuristics;
    private final YoDouble planningHorizonLength = new YoDouble("planningHorizonLength", registry);
 
-   public BodyPathBasedAStarPlanner(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons, DoubleProvider heuristicWeight,
-                                    YoVariableRegistry parentRegistry)
+   public BodyPathBasedAStarPlanner(WaypointDefinedBodyPathPlanner bodyPathPlanner, FootstepPlannerParameters parameters,
+                                    SideDependentList<ConvexPolygon2D> footPolygons, DoubleProvider heuristicWeight, YoVariableRegistry parentRegistry)
    {
-      bodyPath = new WaypointDefinedBodyPathPlanner();
+      this.bodyPathPlanner = bodyPathPlanner;
 
-      heuristics = new BodyPathHeuristics(heuristicWeight, parameters, bodyPath);
+      heuristics = new BodyPathHeuristics(heuristicWeight, parameters, this.bodyPathPlanner);
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, parameters);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
@@ -95,7 +88,6 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    @Override
    public void setTimeout(double timeout)
    {
-      // assumes very fast body path planner
       footstepPlanner.setTimeout(timeout);
    }
 
@@ -121,9 +113,9 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    public FootstepPlanningResult plan()
    {
       Pose2D goalPose2d = new Pose2D();
-      double pathLength = bodyPath.computePathLength(0.0);
+      double pathLength = bodyPathPlanner.computePathLength(0.0);
       double alpha = MathTools.clamp(planningHorizonLength.getDoubleValue() / pathLength, 0.0, 1.0);
-      bodyPath.getPointAlongPath(alpha, goalPose2d);
+      bodyPathPlanner.getPointAlongPath(alpha, goalPose2d);
       heuristics.setGoalAlpha(alpha);
 
       FramePose3D footstepPlannerGoal = new FramePose3D();
@@ -136,6 +128,12 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
       footstepPlanner.setGoal(goal);
 
       return footstepPlanner.plan();
+   }
+
+   @Override
+   public void cancelPlanning()
+   {
+      footstepPlanner.cancelPlanning();;
    }
 
    @Override
