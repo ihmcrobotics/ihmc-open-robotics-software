@@ -368,7 +368,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          pathPlanningStagesInProgress.put(planner, plannerGoal);
 
          if (debug)
-            PrintTools.info("Just started up planning objective " + globalStepSequenceIndex.getIntegerValue() + " on stage " + planner.getStageId());
+            PrintTools.info("Just started up planning path objective " + globalStepSequenceIndex.getIntegerValue() + " on stage " + planner.getStageId());
       }
    }
 
@@ -412,7 +412,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          stepPlanningStagesInProgress.put(planner, plannerGoal);
 
          if (debug)
-            PrintTools.info("Just started up planning objective " + globalStepSequenceIndex.getIntegerValue() + " on stage " + planner.getStageId());
+            PrintTools.info("Just started up planning step objective " + globalStepSequenceIndex.getIntegerValue() + " on stage " + planner.getStageId());
       }
    }
 
@@ -482,8 +482,26 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    public void processPlanningStatisticsRequest()
    {
       EnumMap<StatisticsType, PlannerStatistics<?>> mapToPopulate = new EnumMap<>(StatisticsType.class);
-      for (ImmutablePair<Integer, PlannerStatistics<?>> pair : completedStepPlanStatistics.iterable())
-         concatenateStatistics(mapToPopulate, pair.getLeft(), pair.getRight());
+
+      Iterable<ImmutablePair<Integer, PlannerStatistics<?>>> pathIterable = completedPathPlanStatistics.iterable();
+      if (pathIterable != null)
+      {
+         for (ImmutablePair<Integer, PlannerStatistics<?>> pair : pathIterable)
+         {
+            if (pair != null)
+               concatenateStatistics(mapToPopulate, pair.getLeft(), pair.getRight());
+         }
+      }
+
+      Iterable<ImmutablePair<Integer, PlannerStatistics<?>>> stepIterable = completedStepPlanStatistics.iterable();
+      if (stepIterable != null)
+      {
+         for (ImmutablePair<Integer, PlannerStatistics<?>> pair : stepIterable)
+         {
+            if (pair != null)
+               concatenateStatistics(mapToPopulate, pair.getLeft(), pair.getRight());
+         }
+      }
 
       ListOfStatistics statistics = convertToListOfStatistics(mapToPopulate);
       sendPlannerStatistics(statistics);
@@ -616,6 +634,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       if (!isDonePlanningPath.getBooleanValue())
       {
+         assignGoalsToAvailablePathPlanners();
+
          FootstepPlanningResult pathStatus = getWorstResult(completedPathResults.getCopyForReading());
          if (!pathStatus.validForExecution())
          {
@@ -913,6 +933,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private void concatenateStatistics(EnumMap<StatisticsType, PlannerStatistics<?>> mapToPopulate, int segmentId, PlannerStatistics<?> plannerStatistics)
    {
+      if (plannerStatistics == null)
+         return;
+
       switch (plannerStatistics.getStatisticsType())
       {
       case LIST:
@@ -997,6 +1020,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void sleep()
    {
+//      processPlanningStatisticsRequest();
+
       if (debug)
          PrintTools.debug(this, "Going to sleep");
 
