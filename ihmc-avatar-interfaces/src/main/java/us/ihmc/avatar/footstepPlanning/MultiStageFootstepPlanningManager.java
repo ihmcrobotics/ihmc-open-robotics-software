@@ -608,7 +608,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       }
 
       updateInternal();
-      
+
       checkPlannersForFailures();
    }
 
@@ -705,53 +705,61 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private void checkPlannersForFailures()
    {
-      for (PathPlanningStage stage : pathPlanningTasks.iterator())
+      Iterable<PathPlanningStage> pathIterable = pathPlanningTasks.iterator();
+      if (pathIterable != null)
       {
-         ScheduledFuture<?> task = pathPlanningTasks.getCopyForReading().get(stage);
-
-         if (task.isDone())
+         for (PathPlanningStage stage :pathIterable)
          {
-            try
-            {
-               task.get();
-            }
-            catch (ExecutionException exception)
-            {
-               exception.getCause().printStackTrace();
-               PrintTools.info(exception.getMessage());
-               exception.printStackTrace();
-            }
-            catch (InterruptedException ex)
-            {
-               ex.getCause().printStackTrace();
-            }
+            ScheduledFuture<?> task = pathPlanningTasks.getCopyForReading().get(stage);
 
-            throw new RuntimeException("Something killed path planning stage " + stage.getStageId() + " before it could complete.");
+            if (task.isDone())
+            {
+               try
+               {
+                  task.get();
+               }
+               catch (ExecutionException exception)
+               {
+                  exception.getCause().printStackTrace();
+                  PrintTools.info(exception.getMessage());
+                  exception.printStackTrace();
+               }
+               catch (InterruptedException ex)
+               {
+                  ex.getCause().printStackTrace();
+               }
+
+               throw new RuntimeException("Something killed path planning stage " + stage.getStageId() + " before it could complete.");
+            }
          }
       }
 
-      for (FootstepPlanningStage stage : stepPlanningTasks.iterator())
+      Iterable<FootstepPlanningStage> stepIterable = stepPlanningTasks.iterator();
+      if (stepIterable != null)
       {
-         ScheduledFuture<?> task = stepPlanningTasks.getCopyForReading().get(stage);
-
-         if (task.isDone())
+         for (FootstepPlanningStage stage : stepPlanningTasks.iterator())
          {
-            try
-            {
-               task.get();
-            }
-            catch (ExecutionException exception)
-            {
-               exception.getCause().printStackTrace();
-               PrintTools.info(exception.getMessage());
-               exception.printStackTrace();
-            }
-            catch (InterruptedException ex)
-            {
-               ex.getCause().printStackTrace();
-            }
+            ScheduledFuture<?> task = stepPlanningTasks.getCopyForReading().get(stage);
 
-            throw new RuntimeException("Something killed step planning stage " + stage.getStageId() + " before it could complete.");
+            if (task.isDone())
+            {
+               try
+               {
+                  task.get();
+               }
+               catch (ExecutionException exception)
+               {
+                  exception.getCause().printStackTrace();
+                  PrintTools.info(exception.getMessage());
+                  exception.printStackTrace();
+               }
+               catch (InterruptedException ex)
+               {
+                  ex.getCause().printStackTrace();
+               }
+
+               throw new RuntimeException("Something killed step planning stage " + stage.getStageId() + " before it could complete.");
+            }
          }
       }
    }
