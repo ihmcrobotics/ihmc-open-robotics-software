@@ -33,13 +33,13 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 
 public abstract class FootstepPlannerDataSetTest
 {
-   private static final double bambooTimeScaling = 4.0;
+   protected static final double bambooTimeScaling = 4.0;
 
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = true;
    // For enabling helpful prints.
-   private static boolean DEBUG = false;
-   private static boolean VERBOSE = false;
+   protected static boolean DEBUG = true;
+   protected static boolean VERBOSE = true;
 
    private FootstepPlannerUI ui = null;
    private Messager messager = null;
