@@ -19,10 +19,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -50,19 +51,19 @@ public class ReachabilityMapSolver
    private final KinematicsToolboxController kinematicsToolboxController;
    private final CommandInputManager commandInputManager = new CommandInputManager(KinematicsToolboxModule.supportedCommands());
    private final StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
-   private final RigidBody endEffector;
-   private final OneDoFJoint[] robotArmJoints;
+   private final RigidBodyBasics endEffector;
+   private final OneDoFJointBasics[] robotArmJoints;
    private final RigidBodyTransform controlFramePoseInEndEffector = new RigidBodyTransform();
    private final SelectionMatrix3D angularSelection = new SelectionMatrix3D(null, true, true, true);
    private final RobotConfigurationData defaultArmConfiguration;
 
-   public ReachabilityMapSolver(OneDoFJoint[] robotArmJoints, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public ReachabilityMapSolver(OneDoFJointBasics[] robotArmJoints, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.robotArmJoints = robotArmJoints;
       endEffector = robotArmJoints[robotArmJoints.length - 1].getSuccessor();
       kinematicsToolboxController = new KinematicsToolboxController(commandInputManager, statusOutputManager, null, robotArmJoints,
                                                                     Collections.singleton(endEffector), yoGraphicsListRegistry, registry);
-      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(ScrewTools.getRootBody(endEffector)));
+      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(MultiBodySystemTools.getRootBody(endEffector)));
 
       defaultArmConfiguration = RobotConfigurationDataFactory.create(robotArmJoints, new ForceSensorDefinition[0], new IMUDefinition[0]);
       RobotConfigurationDataFactory.packJointState(defaultArmConfiguration, robotArmJoints);
@@ -123,7 +124,7 @@ public class ReachabilityMapSolver
       boolean success = false;
       while (!success && tryNumber++ < numberOfTrials)
       {
-         ScrewTestTools.setRandomPositionsWithinJointLimits(robotArmJoints, random);
+         MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, robotArmJoints);
          success = solveOnce(maximumNumberOfIterations);
       }
       return success;
@@ -187,7 +188,7 @@ public class ReachabilityMapSolver
       return isSolutionGood;
    }
 
-   public OneDoFJoint[] getRobotArmJoints()
+   public OneDoFJointBasics[] getRobotArmJoints()
    {
       return robotArmJoints;
    }

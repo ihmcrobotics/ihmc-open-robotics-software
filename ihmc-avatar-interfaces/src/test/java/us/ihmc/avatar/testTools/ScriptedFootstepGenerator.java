@@ -13,10 +13,10 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
  * This is using footstep poses for the ankle (only used in some old unit tests). Use footstep poses at the sole frame instead.
@@ -33,7 +33,7 @@ public class ScriptedFootstepGenerator
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
+         RigidBodyBasics foot = bipedFeet.get(robotSide).getRigidBody();
          ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
          RigidBodyTransform ankleToSole = new RigidBodyTransform();
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
@@ -99,7 +99,7 @@ public class ScriptedFootstepGenerator
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody footBody = fullRobotModel.getFoot(robotSide);
+         RigidBodyBasics footBody = fullRobotModel.getFoot(robotSide);
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
          double left = footWidth / 2.0;
          double right = -footWidth / 2.0;

@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
@@ -26,7 +26,7 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
    private final DenseMatrix64F desiredVelocity = new DenseMatrix64F(6, 0);
    private final DenseMatrix64F desiredAcceleration = new DenseMatrix64F(6, 0);
 
-   public YoRootJointDesiredConfigurationData(FloatingInverseDynamicsJoint rootJoint, YoVariableRegistry parentRegistry)
+   public YoRootJointDesiredConfigurationData(FloatingJointBasics rootJoint, YoVariableRegistry parentRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry("RootJointDesiredConfigurationData");
       parentRegistry.addChild(registry);
@@ -124,10 +124,10 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
    }
 
    @Override
-   public void setDesiredAccelerationFromJoint(FloatingInverseDynamicsJoint sixDoFJoint)
+   public void setDesiredAccelerationFromJoint(FloatingJointBasics sixDoFJoint)
    {
       desiredAcceleration.reshape(6, 1);
-      sixDoFJoint.getDesiredAccelerationMatrix(desiredAcceleration, 0);
+      sixDoFJoint.getJointAcceleration(0, desiredAcceleration);
       setDesiredAcceleration(desiredAcceleration);
    }
 

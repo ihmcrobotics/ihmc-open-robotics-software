@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
@@ -52,10 +52,10 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       blendedOrientationTrajectory.blendInitialConstraint(initialPose.getOrientation(), initialTime, blendDuration);
    }
 
-   public void blendInitialConstraint(FramePose3DReadOnly initialPose, Twist initialTwist, double initialTime, double blendDuration)
+   public void blendInitialConstraint(FramePose3DReadOnly initialPose, TwistReadOnly initialTwist, double initialTime, double blendDuration)
    {
-      initialTwist.getLinearPart(tempVelocity);
-      initialTwist.getAngularPart(tempAngularVelocity);
+      tempVelocity.setIncludingFrame(initialTwist.getLinearPart());
+      tempAngularVelocity.setIncludingFrame(initialTwist.getAngularPart());
       blendedPositionTrajectory.blendInitialConstraint(initialPose.getPosition(), tempVelocity, initialTime, blendDuration);
       blendedOrientationTrajectory.blendInitialConstraint(initialPose.getOrientation(), tempAngularVelocity, initialTime, blendDuration);
    }
@@ -66,10 +66,10 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       blendedOrientationTrajectory.blendFinalConstraint(finalPose.getOrientation(), finalTime, blendDuration);
    }
 
-   public void blendFinalConstraint(FramePose3DReadOnly finalPose, Twist finalTwist, double finalTime, double blendDuration)
+   public void blendFinalConstraint(FramePose3DReadOnly finalPose, TwistReadOnly finalTwist, double finalTime, double blendDuration)
    {
-      finalTwist.getLinearPart(tempVelocity);
-      finalTwist.getAngularPart(tempAngularVelocity);
+      tempVelocity.setIncludingFrame(finalTwist.getLinearPart());
+      tempAngularVelocity.setIncludingFrame(finalTwist.getAngularPart());
       blendedPositionTrajectory.blendFinalConstraint(finalPose.getPosition(), tempVelocity, finalTime, blendDuration);
       blendedOrientationTrajectory.blendFinalConstraint(finalPose.getOrientation(), tempAngularVelocity, finalTime, blendDuration);
    }

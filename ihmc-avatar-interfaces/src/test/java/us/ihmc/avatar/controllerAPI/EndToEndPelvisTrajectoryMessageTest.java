@@ -53,6 +53,8 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
@@ -63,8 +65,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -113,7 +113,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       double trajectoryTime = 1.0;
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
       FramePose3D desiredRandomPelvisPose = getRandomPelvisPose(random, pelvis);
       Point3D desiredPosition = new Point3D();
@@ -202,7 +202,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       double trajectoryTime = 1.0;
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
       FramePose3D desiredRandomPelvisPose = getRandomPelvisPose(random, pelvis);
       Point3D desiredPosition = new Point3D();
@@ -320,7 +320,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double timePerWaypoint = 0.1;
       int numberOfTrajectoryPoints = 100;
       double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       referenceFrames.updateFrames();
 
@@ -443,7 +443,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       return getRobotModel().getWalkingControllerParameters().usePelvisHeightControllerOnly();
    }
 
-   private SimpleSE3TrajectoryPoint findPelvisHeightTrajectoryPoint(RigidBody rigidBody, String bodyName, int trajectoryPointIndex,
+   private SimpleSE3TrajectoryPoint findPelvisHeightTrajectoryPoint(RigidBodyBasics rigidBody, String bodyName, int trajectoryPointIndex,
                                                                     SimulationConstructionSet scs)
    {
       String suffix = "AtWaypoint" + trajectoryPointIndex;
@@ -486,7 +486,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double timePerWaypoint = 0.1;
       int numberOfTrajectoryPoints = 100;
       double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       referenceFrames.updateFrames();
 
@@ -616,7 +616,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double timePerWaypoint = 0.1;
       int numberOfTrajectoryPoints = 100;
       double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       referenceFrames.updateFrames();
 
@@ -825,7 +825,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       String pelvisName = fullRobotModel.getPelvis().getName();
 
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
       FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -928,7 +928,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double timePerWaypoint = 0.1;
       int numberOfTrajectoryPoints = 15;
       double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
       FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -1065,7 +1065,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       double trajectoryTime = 5.0;
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
       FramePose3D desiredRandomPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
       desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
@@ -1149,7 +1149,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       YoDouble offsetHeight = (YoDouble) scs.getVariable(namespace, "offsetHeightAboveGround");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       MovingReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
 
       FramePoint3D pelvisPosition = new FramePoint3D(pelvisFrame);
@@ -1254,7 +1254,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       return numberOfCommands;
    }
 
-   public static int findControllerNumberOfWaypointsForHeight(SimulationConstructionSet scs, RigidBody rigidBody)
+   public static int findControllerNumberOfWaypointsForHeight(SimulationConstructionSet scs, RigidBodyBasics rigidBody)
    {
       //      String pelvisPrefix = "pelvisHeight";
       //      String offsetHeightTrajectoryName = pelvisPrefix + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
@@ -1266,7 +1266,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       return numberOfWaypoints;
    }
 
-   public static int findControllerNumberOfWaypointsInQueueForHeight(SimulationConstructionSet scs, RigidBody rigidBody)
+   public static int findControllerNumberOfWaypointsInQueueForHeight(SimulationConstructionSet scs, RigidBodyBasics rigidBody)
    {
       String bodyName = rigidBody.getName();
       String offsetHeightTrajectoryName = bodyName + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
@@ -1416,7 +1416,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   protected FramePose3D getRandomPelvisPose(Random random, RigidBody pelvis)
+   protected FramePose3D getRandomPelvisPose(Random random, RigidBodyBasics pelvis)
    {
       FramePose3D desiredRandomPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
       desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));

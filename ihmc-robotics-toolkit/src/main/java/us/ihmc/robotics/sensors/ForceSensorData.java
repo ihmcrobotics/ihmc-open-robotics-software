@@ -5,16 +5,17 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Wrench;
 
 public class ForceSensorData implements ForceSensorDataReadOnly
 {
    private final DenseMatrix64F wrench = new DenseMatrix64F(Wrench.SIZE, 1);
 
    private final ReferenceFrame measurementFrame;
-   private final RigidBody measurementLink;
+   private final RigidBodyBasics measurementLink;
 
    public ForceSensorData(ForceSensorDefinition forceSensorDefinition)
    {
@@ -41,11 +42,11 @@ public class ForceSensorData implements ForceSensorDataReadOnly
       }
    }
 
-   public void setWrench(Wrench newWrench)
+   public void setWrench(WrenchReadOnly newWrench)
    {
-      measurementFrame.checkReferenceFrameMatch(newWrench.getExpressedInFrame());
+      measurementFrame.checkReferenceFrameMatch(newWrench.getReferenceFrame());
       measurementFrame.checkReferenceFrameMatch(newWrench.getBodyFrame());
-      newWrench.getMatrix(wrench);
+      newWrench.get(wrench);
    }
 
    @Override
@@ -55,7 +56,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly
    }
 
    @Override
-   public RigidBody getMeasurementLink()
+   public RigidBodyBasics getMeasurementLink()
    {
       return measurementLink;
    }
@@ -69,8 +70,8 @@ public class ForceSensorData implements ForceSensorDataReadOnly
    @Override
    public void getWrench(Wrench wrenchToPack)
    {
-      wrenchToPack.changeBodyFrameAttachedToSameBody(measurementFrame);
-      wrenchToPack.set(measurementFrame, wrench);
+      wrenchToPack.setBodyFrame(measurementFrame);
+      wrenchToPack.setIncludingFrame(measurementFrame, wrench);
    }
 
    @Override

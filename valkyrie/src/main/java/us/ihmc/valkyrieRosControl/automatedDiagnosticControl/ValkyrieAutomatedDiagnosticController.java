@@ -21,12 +21,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
@@ -173,7 +173,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
                                                                                                             forceTorqueSensorHandles, robotModel.getJointMap(),
                                                                                                             sensorInformation);
 
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       ContactSensorHolder contactSensorHolder = new ContactSensorHolder(Arrays.asList(fullRobotModel.getContactSensorDefinitions()));
@@ -276,8 +276,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       ForceSensorDataHolder forceSensorDataHolderToUpdate = new ForceSensorDataHolder(Arrays.asList(forceSensorDefinitions));
       CenterOfMassDataHolder centerOfMassDataHolderToUpdate = new CenterOfMassDataHolder();
 
-      Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
-      Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
+      Map<RigidBodyBasics, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBodyBasics, FootSwitchInterface>();
+      Map<RigidBodyBasics, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBodyBasics, ContactablePlaneBody>();
 
       DoubleProvider contactThresholdForce = new DoubleParameter("ContactThresholdForce", registry, stateEstimatorParameters.getContactThresholdForce());
       DoubleProvider copThresholdFraction = new DoubleParameter("CoPThresholdFraction", registry, stateEstimatorParameters.getFootSwitchCoPThresholdFraction());
@@ -285,7 +285,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody contactablePlaneBody = bipedFeet.get(robotSide);
-         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+         RigidBodyBasics rigidBody = contactablePlaneBody.getRigidBody();
          bipedFeetMap.put(rigidBody, contactablePlaneBody);
 
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);

@@ -5,7 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 
 public interface RootJointDesiredConfigurationDataBasics extends RootJointDesiredConfigurationDataReadOnly
 {
@@ -15,7 +15,7 @@ public interface RootJointDesiredConfigurationDataBasics extends RootJointDesire
 
    void completeWith(RootJointDesiredConfigurationDataReadOnly other);
 
-   void setDesiredAccelerationFromJoint(FloatingInverseDynamicsJoint sixDoFJoint);
+   void setDesiredAccelerationFromJoint(FloatingJointBasics sixDoFJoint);
 
    void setDesiredConfiguration(FrameQuaternionReadOnly orientation, FramePoint3DReadOnly position);
 

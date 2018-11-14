@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -16,7 +16,7 @@ public class HandUserControlModeState extends HandControlState
 {
    public static final double TIME_WITH_NO_MESSAGE_BEFORE_ABORT = 0.25;
 
-   private final OneDoFJoint[] userControlledJoints;
+   private final OneDoFJointBasics[] userControlledJoints;
    private final YoDouble[] userDesiredJointAccelerations;
    private final YoDouble timeOfLastUserMesage;
    private final YoDouble timeSinceLastUserMesage;
@@ -24,7 +24,7 @@ public class HandUserControlModeState extends HandControlState
    private final YoDouble yoTime;
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
-   public HandUserControlModeState(String namePrefix, OneDoFJoint[] userControlledJoints, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public HandUserControlModeState(String namePrefix, OneDoFJointBasics[] userControlledJoints, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       super(HandControlMode.USER_CONTROL_MODE);
 

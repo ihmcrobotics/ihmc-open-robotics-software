@@ -1,39 +1,39 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
-import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class ControllerCommandValidationTools
 {
-   public static boolean checkArmTrajectoryCommand(OneDoFJoint[] joints, ArmTrajectoryCommand command)
+   public static boolean checkArmTrajectoryCommand(OneDoFJointBasics[] joints, ArmTrajectoryCommand command)
    {
       return checkOneDoFJointTrajectoryCommandList(joints, command.getJointspaceTrajectory().getTrajectoryPointLists());
    }
 
-   public static boolean checkNeckTrajectoryCommand(OneDoFJoint[] joints, NeckTrajectoryCommand command)
+   public static boolean checkNeckTrajectoryCommand(OneDoFJointBasics[] joints, NeckTrajectoryCommand command)
    {
       return checkOneDoFJointTrajectoryCommandList(joints, command.getJointspaceTrajectory().getTrajectoryPointLists());
    }
 
-   public static boolean checkSpineTrajectoryCommand(OneDoFJoint[] joints, SpineTrajectoryCommand command)
+   public static boolean checkSpineTrajectoryCommand(OneDoFJointBasics[] joints, SpineTrajectoryCommand command)
    {
       return checkOneDoFJointTrajectoryCommandList(joints, command.getJointspaceTrajectory().getTrajectoryPointLists());
    }
 
-   public static boolean checkArmDesiredAccelerationsCommand(OneDoFJoint[] joints, ArmDesiredAccelerationsCommand command)
+   public static boolean checkArmDesiredAccelerationsCommand(OneDoFJointBasics[] joints, ArmDesiredAccelerationsCommand command)
    {
       return command.getDesiredAccelerations().getNumberOfJoints() == joints.length;
    }
 
-   public static boolean checkOneDoFJointTrajectoryCommandList(OneDoFJoint[] joints, RecyclingArrayList<OneDoFJointTrajectoryCommand> trajectoryPointLists)
+   public static boolean checkOneDoFJointTrajectoryCommandList(OneDoFJointBasics[] joints, RecyclingArrayList<OneDoFJointTrajectoryCommand> trajectoryPointLists)
    {
       if (trajectoryPointLists.size() != joints.length)
       {
@@ -54,7 +54,7 @@ public class ControllerCommandValidationTools
       return true;
    }
 
-   public static boolean checkJointspaceTrajectoryPointList(OneDoFJoint joint, SimpleTrajectoryPoint1DList trajectoryPointList)
+   public static boolean checkJointspaceTrajectoryPointList(OneDoFJointBasics joint, SimpleTrajectoryPoint1DList trajectoryPointList)
    {
       for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
       {

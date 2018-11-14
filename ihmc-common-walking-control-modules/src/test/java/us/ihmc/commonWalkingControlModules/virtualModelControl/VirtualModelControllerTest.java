@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.RobotLegs;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -18,20 +19,18 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class VirtualModelControllerTest
@@ -52,15 +51,15 @@ public class VirtualModelControllerTest
       double gravity = -9.81;
 
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
 
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench wrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench wrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
-      InverseDynamicsJoint[] controlledJoints = ScrewTools.createJointPath(pelvis, foot);
+      JointBasics[] controlledJoints = MultiBodySystemTools.createJointPath(pelvis, foot);
       GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, pelvis.getBodyFixedFrame());
       jacobian.compute();
 
@@ -103,15 +102,15 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame and no selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       submitAndCheckVMC(pelvis, foot, centerOfMassFrame, desiredWrench, null);
    }
@@ -127,16 +126,16 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       submitAndCheckVMC(pelvis, foot, centerOfMassFrame, desiredWrench, CommonOps.identity(Wrench.SIZE, Wrench.SIZE));
    }
@@ -152,16 +151,16 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only force
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -183,16 +182,16 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -214,15 +213,15 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
@@ -242,15 +241,15 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
@@ -270,15 +269,15 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
@@ -298,15 +297,15 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
@@ -326,15 +325,15 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
@@ -354,15 +353,15 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
@@ -382,15 +381,15 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(2, 6);
@@ -411,15 +410,15 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -441,15 +440,15 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -471,15 +470,15 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), pelvis.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), pelvis.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -501,15 +500,15 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(pelvis.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(pelvis.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -528,15 +527,15 @@ public class VirtualModelControllerTest
 
       
       RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(pelvis.getBodyFixedFrame(), pelvis.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(pelvis.getBodyFixedFrame(), pelvis.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -558,19 +557,19 @@ public class VirtualModelControllerTest
 
       
       VirtualModelControllerTestHelper.RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
-      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
-      RigidBody foot = endEffector.getParentJoint().getSuccessor();
-      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = robotLeg.getFoot(RobotSide.LEFT);
+      RigidBodyBasics foot = endEffector.getParentJoint().getSuccessor();
+      RigidBodyBasics pelvis = robotLeg.getRootJoint().getSuccessor();
       ReferenceFrame centerOfMassFrame = robotLeg.getReferenceFrames().getCenterOfMassFrame();
 
       // send in the correct frame with identity selection matrix
       FrameVector3D desiredForce = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
 
-      InverseDynamicsJoint[] controlledJoints = ScrewTools.createJointPath(pelvis, endEffector);
+      JointBasics[] controlledJoints = MultiBodySystemTools.createJointPath(pelvis, endEffector);
       GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, pelvis.getBodyFixedFrame());
       jacobian.compute();
 
@@ -585,7 +584,7 @@ public class VirtualModelControllerTest
 
       VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
       virtualWrenchCommand.set(pelvis, endEffector);
-      virtualWrenchCommand.setWrench(desiredWrench.getExpressedInFrame(), desiredWrench);
+      virtualWrenchCommand.setWrench(desiredWrench.getReferenceFrame(), desiredWrench);
 
       virtualModelController.submitControlledBodyVirtualWrench(virtualWrenchCommand);
 
@@ -616,8 +615,8 @@ public class VirtualModelControllerTest
       VirtualModelControllerTestHelper.RobotArm robotArm = VirtualModelControllerTestHelper.createRobotArm();
       SCSRobotFromInverseDynamicsRobotModel scsRobotArm = robotArm.getSCSRobotArm();
 
-      List<RigidBody> endEffectors = new ArrayList<>();
-      RigidBody hand = robotArm.getHand();
+      List<RigidBodyBasics> endEffectors = new ArrayList<>();
+      RigidBodyBasics hand = robotArm.getHand();
       endEffectors.add(hand);
 
       double forceX = random.nextDouble() * 10.0;
@@ -655,8 +654,8 @@ public class VirtualModelControllerTest
       VirtualModelControllerTestHelper.PlanarRobotArm robotArm = VirtualModelControllerTestHelper.createPlanarArm();
       SCSRobotFromInverseDynamicsRobotModel scsRobotArm = robotArm.getSCSRobotArm();
 
-      List<RigidBody> endEffectors = new ArrayList<>();
-      RigidBody hand = robotArm.getHand();
+      List<RigidBodyBasics> endEffectors = new ArrayList<>();
+      RigidBodyBasics hand = robotArm.getHand();
       endEffectors.add(hand);
 
       double forceX = random.nextDouble() * 10.0;
@@ -780,13 +779,13 @@ public class VirtualModelControllerTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   private void submitAndCheckVMC(RigidBody base, RigidBody endEffector, ReferenceFrame centerOfMassFrame, Wrench desiredWrench, DenseMatrix64F selectionMatrix)
+   private void submitAndCheckVMC(RigidBodyBasics base, RigidBodyBasics endEffector, ReferenceFrame centerOfMassFrame, Wrench desiredWrench, DenseMatrix64F selectionMatrix)
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
 
       simulationTestingParameters.setKeepSCSUp(false);
 
-      OneDoFJoint[] controlledJoints = ScrewTools.createOneDoFJointPath(base, endEffector);
+      OneDoFJointBasics[] controlledJoints = MultiBodySystemTools.createOneDoFJointPath(base, endEffector);
       GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, base.getBodyFixedFrame());
       jacobian.compute();
 

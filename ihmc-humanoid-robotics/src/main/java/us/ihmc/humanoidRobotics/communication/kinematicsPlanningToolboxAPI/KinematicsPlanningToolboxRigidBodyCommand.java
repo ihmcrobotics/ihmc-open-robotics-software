@@ -11,8 +11,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -20,9 +19,9 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class KinematicsPlanningToolboxRigidBodyCommand implements Command<KinematicsPlanningToolboxRigidBodyCommand, KinematicsPlanningToolboxRigidBodyMessage>
 {
    /** This is the unique hash code of the end-effector to be solved for. */
-   private long endEffectorNameBasedHashCode;
+   private int endEffectorHashCode;
    /** This is the end-effector to be solved for. */
-   private RigidBody endEffector;
+   private RigidBodyBasics endEffector;
 
    private final TDoubleArrayList waypointTimes = new TDoubleArrayList();
    private final RecyclingArrayList<Pose3D> waypoints = new RecyclingArrayList<>(Pose3D.class);
@@ -36,7 +35,7 @@ public class KinematicsPlanningToolboxRigidBodyCommand implements Command<Kinema
    @Override
    public void set(KinematicsPlanningToolboxRigidBodyCommand other)
    {
-      endEffectorNameBasedHashCode = other.endEffectorNameBasedHashCode;
+      endEffectorHashCode = other.endEffectorHashCode;
       endEffector = other.endEffector;
 
       for (int i = 0; i < other.waypoints.size(); i++)
@@ -56,14 +55,14 @@ public class KinematicsPlanningToolboxRigidBodyCommand implements Command<Kinema
       }
    }
 
-   public void set(KinematicsPlanningToolboxRigidBodyMessage message, Map<Long, RigidBody> rigidBodyNamedBasedHashMap,
+   public void set(KinematicsPlanningToolboxRigidBodyMessage message, Map<Integer, RigidBodyBasics> rigidBodyHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
-      endEffectorNameBasedHashCode = message.getEndEffectorNameBasedHashCode();
-      if (rigidBodyNamedBasedHashMap == null)
+      endEffectorHashCode = message.getEndEffectorHashCode();
+      if (rigidBodyHashMap == null)
          endEffector = null;
       else
-         endEffector = rigidBodyNamedBasedHashMap.get(endEffectorNameBasedHashCode);
+         endEffector = rigidBodyHashMap.get(endEffectorHashCode);
 
       for (int i = 0; i < message.getKeyFramePoses().size(); i++)
       {
@@ -85,11 +84,11 @@ public class KinematicsPlanningToolboxRigidBodyCommand implements Command<Kinema
 
       if (referenceFrameResolver != null)
       {
-         ReferenceFrame angularSelectionFrame = referenceFrameResolver.getReferenceFrameFromNameBaseHashCode(angularSelection.getSelectionFrameId());
-         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrameFromNameBaseHashCode(linearSelection.getSelectionFrameId());
+         ReferenceFrame angularSelectionFrame = referenceFrameResolver.getReferenceFrameFromHashCode(angularSelection.getSelectionFrameId());
+         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrameFromHashCode(linearSelection.getSelectionFrameId());
          selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
-         ReferenceFrame angularWeightFrame = referenceFrameResolver.getReferenceFrameFromNameBaseHashCode(angularWeight.getWeightFrameId());
-         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrameFromNameBaseHashCode(linearWeight.getWeightFrameId());
+         ReferenceFrame angularWeightFrame = referenceFrameResolver.getReferenceFrameFromHashCode(angularWeight.getWeightFrameId());
+         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrameFromHashCode(linearWeight.getWeightFrameId());
          weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
       }
 
@@ -106,7 +105,7 @@ public class KinematicsPlanningToolboxRigidBodyCommand implements Command<Kinema
    @Override
    public void clear()
    {
-      endEffectorNameBasedHashCode = NameBasedHashCodeTools.NULL_HASHCODE;
+      endEffectorHashCode = 0;
       endEffector = null;
       waypoints.clear();
       waypointTimes.clear();

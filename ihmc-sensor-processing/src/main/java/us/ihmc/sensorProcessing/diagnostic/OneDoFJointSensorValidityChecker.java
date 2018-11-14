@@ -1,10 +1,10 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OneDoFJointSensorValidityChecker implements DiagnosticUpdatable
 {
@@ -13,12 +13,12 @@ public class OneDoFJointSensorValidityChecker implements DiagnosticUpdatable
    private final DoubleYoVariableValidityChecker velocityChecker;
    private final DoubleYoVariableValidityChecker tauChecker;
 
-   private final OneDoFJoint joint;
+   private final OneDoFJointBasics joint;
    private final JointDesiredOutputReadOnly output;
    
    private final boolean hasYoVariables;
 
-   public OneDoFJointSensorValidityChecker(OneDoFJoint jointToCheck, JointDesiredOutputReadOnly outputDataToCheck, YoDouble position, YoDouble velocity, YoDouble tau,
+   public OneDoFJointSensorValidityChecker(OneDoFJointBasics jointToCheck, JointDesiredOutputReadOnly outputDataToCheck, YoDouble position, YoDouble velocity, YoDouble tau,
          YoVariableRegistry parentRegistry)
    {
       hasYoVariables = true;
@@ -35,7 +35,7 @@ public class OneDoFJointSensorValidityChecker implements DiagnosticUpdatable
       tauChecker = new DoubleYoVariableValidityChecker(tau, registry);
    }
 
-   public OneDoFJointSensorValidityChecker(OneDoFJoint jointToCheck, JointDesiredOutput outputDataToCheck, YoVariableRegistry parentRegistry)
+   public OneDoFJointSensorValidityChecker(OneDoFJointBasics jointToCheck, JointDesiredOutput outputDataToCheck, YoVariableRegistry parentRegistry)
    {
       hasYoVariables = false;
       this.joint = jointToCheck;

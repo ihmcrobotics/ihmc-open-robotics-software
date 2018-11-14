@@ -42,7 +42,7 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
-        long long end_effector_name_based_hash_code;
+        long end_effector_hash_code;
         geometry_msgs::msg::dds::Point manifold_origin_position;
         geometry_msgs::msg::dds::Quaternion manifold_origin_orientation;
         sequence<octet> manifold_configuration_space_names;

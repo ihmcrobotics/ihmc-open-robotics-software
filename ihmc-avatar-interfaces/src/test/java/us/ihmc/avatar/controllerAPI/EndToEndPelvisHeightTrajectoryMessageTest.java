@@ -25,10 +25,10 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -69,7 +69,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       double trajectoryTime = 1.0;
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
       FramePoint3D desiredRandomPelvisPosition = getRandomPelvisPosition(random, pelvis);
       Point3D desiredPosition = new Point3D(desiredRandomPelvisPosition);
@@ -120,7 +120,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
-      RigidBody pelvis = drcSimulationTestHelper.getControllerFullRobotModel().getPelvis();
+      RigidBodyBasics pelvis = drcSimulationTestHelper.getControllerFullRobotModel().getPelvis();
       MovingReferenceFrame pelvisBodyFrame = pelvis.getBodyFixedFrame();
       FramePoint3D expectedPosition = new FramePoint3D(pelvisBodyFrame);
       expectedPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -141,7 +141,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       EuclidCoreTestTools.assertTuple3DEquals(expectedPosition, actualPosition, 2.0e-3);
    }
 
-   protected FramePoint3D getRandomPelvisPosition(Random random, RigidBody pelvis)
+   protected FramePoint3D getRandomPelvisPosition(Random random, RigidBodyBasics pelvis)
    {
       FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getBodyFixedFrame());
       desiredRandomPelvisPosition.set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
@@ -168,7 +168,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       double trajectoryTime = 1.0;
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
       FramePoint3D desiredRandomPelvisPosition = getRandomPelvisPosition(random, pelvis);
       Point3D desiredPosition = new Point3D(desiredRandomPelvisPosition);
@@ -210,7 +210,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       YoDouble offsetHeight = (YoDouble) scs.getVariable(namespace, "offsetHeightAboveGround");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       MovingReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
 
       FramePoint3D pelvisPosition = new FramePoint3D(pelvisFrame);

@@ -17,8 +17,9 @@ import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class ReachingManifoldToolsTest
@@ -30,7 +31,7 @@ public class ReachingManifoldToolsTest
    private final static double errorThreshold = 0.001;
 
    private final RobotSide robotSide = RobotSide.RIGHT;
-   private final RigidBody dummyHand = new RigidBody("dummyHand", new RigidBodyTransform(), ReferenceFrame.getWorldFrame());
+   private final RigidBodyBasics dummyHand = new RigidBody("dummyHand", new RigidBodyTransform(), ReferenceFrame.getWorldFrame());
 
    private final RigidBodyTransform shapeTransform = new RigidBodyTransform();
    private final Sphere3D sphere = new Sphere3D(3.0, 3.0, 3.0, 1.0);

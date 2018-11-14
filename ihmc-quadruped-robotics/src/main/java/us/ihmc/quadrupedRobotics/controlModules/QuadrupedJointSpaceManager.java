@@ -5,8 +5,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -18,7 +18,7 @@ public class QuadrupedJointSpaceManager
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final OneDoFJoint[] controlledJoints;
+   private final OneDoFJointBasics[] controlledJoints;
 
    private final VirtualModelControlCommandList commandList = new VirtualModelControlCommandList();
    private final JointLimitEnforcementCommand jointLimitEnforcementCommand = new JointLimitEnforcementCommand();
@@ -44,7 +44,7 @@ public class QuadrupedJointSpaceManager
       jointDampingCommand.clear();
       jointLimitEnforcementCommand.clear();
 
-      for (OneDoFJoint joint : controlledJoints)
+      for (OneDoFJointBasics joint : controlledJoints)
       {
          jointDampingCommand.addJoint(joint, -jointViscousDamping.getDoubleValue() * joint.getQd());
          jointLimitEnforcementCommand.addJoint(joint, jointPositionLimitStiffness.getDoubleValue(), jointPositionLimitDamping.getDoubleValue());

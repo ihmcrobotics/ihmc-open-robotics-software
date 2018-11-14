@@ -9,17 +9,16 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class ReachingManifoldCommand
       implements Command<ReachingManifoldCommand, ReachingManifoldMessage>, WholeBodyTrajectoryToolboxAPI<ReachingManifoldMessage>
 {
-   private long rigidBodyNameBasedashCode;
-   private RigidBody rigidBody;
+   private int rigidBodyHashCode;
+   private RigidBodyBasics rigidBody;
 
    private Point3D manifoldOriginPosition;
    private Quaternion manifoldOriginOrientation;
@@ -33,12 +32,12 @@ public class ReachingManifoldCommand
 
    }
 
-   public ReachingManifoldCommand(RigidBody rigidBody, Point3D manifoldOriginPosition, Quaternion manifoldOriginOrientation,
+   public ReachingManifoldCommand(RigidBodyBasics rigidBody, Point3D manifoldOriginPosition, Quaternion manifoldOriginOrientation,
                                   ConfigurationSpaceName... configurationSpaces)
    {
       clear();
       this.rigidBody = rigidBody;
-      this.rigidBodyNameBasedashCode = rigidBody.getNameBasedHashCode();
+      this.rigidBodyHashCode = rigidBody.hashCode();
       this.manifoldOriginPosition.set(manifoldOriginPosition);
       this.manifoldOriginOrientation.set(manifoldOriginOrientation);
       for (int i = 0; i < configurationSpaces.length; i++)
@@ -52,7 +51,7 @@ public class ReachingManifoldCommand
    {
       clear();
 
-      rigidBodyNameBasedashCode = other.rigidBodyNameBasedashCode;
+      rigidBodyHashCode = other.rigidBodyHashCode;
       rigidBody = other.rigidBody;
 
       this.manifoldOriginPosition.set(other.manifoldOriginPosition);
@@ -73,15 +72,15 @@ public class ReachingManifoldCommand
    }
 
    @Override
-   public void set(ReachingManifoldMessage message, Map<Long, RigidBody> rigidBodyNamedBasedHashMap, ReferenceFrameHashCodeResolver referenceFrameResolver)
+   public void set(ReachingManifoldMessage message, Map<Integer, RigidBodyBasics> rigidBodyHashMap, ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       clear();
 
-      rigidBodyNameBasedashCode = message.getEndEffectorNameBasedHashCode();
-      if (rigidBodyNamedBasedHashMap == null)
+      rigidBodyHashCode = message.getEndEffectorHashCode();
+      if (rigidBodyHashMap == null)
          rigidBody = null;
       else
-         rigidBody = rigidBodyNamedBasedHashMap.get(rigidBodyNameBasedashCode);
+         rigidBody = rigidBodyHashMap.get(rigidBodyHashCode);
 
       this.manifoldOriginPosition.set(message.getManifoldOriginPosition());
       this.manifoldOriginOrientation.set(message.getManifoldOriginOrientation());
@@ -97,7 +96,7 @@ public class ReachingManifoldCommand
    @Override
    public void clear()
    {
-      rigidBodyNameBasedashCode = NameBasedHashCodeTools.NULL_HASHCODE;
+      rigidBodyHashCode = 0;
       rigidBody = null;
       manifoldOriginPosition = new Point3D();
       manifoldOriginOrientation = new Quaternion();
@@ -118,7 +117,7 @@ public class ReachingManifoldCommand
       return !manifoldOriginPosition.containsNaN() && !manifoldOriginOrientation.containsNaN();
    }
 
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }

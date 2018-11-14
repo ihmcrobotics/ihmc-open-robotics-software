@@ -22,9 +22,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -62,7 +62,7 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
       humanoidReferenceFrames.updateFrames();
 
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
-      RigidBody chest = fullRobotModel.getChest();
+      RigidBodyBasics chest = fullRobotModel.getChest();
 
       double trajectoryTime = 1.0;
       FrameQuaternion lookStraightAhead = new FrameQuaternion(humanoidReferenceFrames.getPelvisZUpFrame(), new Quaternion());

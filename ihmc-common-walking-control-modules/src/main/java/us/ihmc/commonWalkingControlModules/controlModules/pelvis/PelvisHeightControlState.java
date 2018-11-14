@@ -23,16 +23,16 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeight
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandConversionTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.AbstractPDController;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricPID3DGains;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -53,7 +53,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    /** handles the trajectory and the queuing**/
    private final RigidBodyPositionController positionController;
 
-   private final RigidBody pelvis;
+   private final RigidBodyBasics pelvis;
    private final MovingReferenceFrame pelvisFrame;
    private final ReferenceFrame baseFrame;
 
@@ -96,7 +96,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    public PelvisHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      RigidBody elevator = fullRobotModel.getElevator();
+      RigidBodyBasics elevator = fullRobotModel.getElevator();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
 
       pelvis = fullRobotModel.getPelvis();
@@ -370,7 +370,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       controlPosition.changeFrame(pelvis.getBodyFixedFrame());
       yoControlFrame.setOffsetToParentToTranslationOnly(controlPosition);
       yoControlFrame.getTwistRelativeToOther(baseFrame, twist);
-      twist.getLinearPart(currentLinearVelocity);
+      currentLinearVelocity.setIncludingFrame(twist.getLinearPart());
 
       currentLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       controlPosition.changeFrame(ReferenceFrame.getWorldFrame());

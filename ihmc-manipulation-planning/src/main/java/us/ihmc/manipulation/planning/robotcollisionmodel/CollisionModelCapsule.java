@@ -6,14 +6,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory;
 
 public class CollisionModelCapsule extends AbstractCollisionModel
 {
-   public OneDoFJoint currentJoint;
-   private OneDoFJoint nextJoint;
+   public OneDoFJointBasics currentJoint;
+   private OneDoFJointBasics nextJoint;
 
    private double height;
    private double radius;
@@ -22,7 +22,7 @@ public class CollisionModelCapsule extends AbstractCollisionModel
    private Point3D currentLocation = new Point3D();
    private Point3D nextLocation = new Point3D();
 
-   public CollisionModelCapsule(SimpleCollisionShapeFactory shapeFactory, OneDoFJoint currentJoint, OneDoFJoint nextJoint, double radius)
+   public CollisionModelCapsule(SimpleCollisionShapeFactory shapeFactory, OneDoFJointBasics currentJoint, OneDoFJointBasics nextJoint, double radius)
    {
       this.currentJoint = currentJoint;
       this.nextJoint = nextJoint;

@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -23,14 +22,14 @@ import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
@@ -55,7 +54,7 @@ public class HexapodSimulationController implements RobotController
 
    private final SDFPerfectSimulatedSensorReader sensorReader;
    private final PerfectSimulatedOutputWriter outputWriter;
-   private final SegmentDependentList<RobotSextant, RigidBody> footRigidBodies = new SegmentDependentList<>(RobotSextant.class);
+   private final SegmentDependentList<RobotSextant, RigidBodyBasics> footRigidBodies = new SegmentDependentList<>(RobotSextant.class);
    private final SegmentDependentList<RobotSextant, SimulatedPlaneContactStateUpdater> contactStateUpdaters = new SegmentDependentList<>(RobotSextant.class);
 
    private final FullRobotModel fullRobotModel;
@@ -87,7 +86,7 @@ public class HexapodSimulationController implements RobotController
       WholeBodyControlCoreToolbox toolbox = makeControllerToolbox();
       this.controllerCore = new WholeBodyControllerCore(toolbox, feedbackControlCommandList, lowLevelControllerCoreOutput, registry);
 
-      for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
          YoGraphicReferenceFrame frame = new YoGraphicReferenceFrame(joint.getFrameBeforeJoint(), registry, true, 0.1);
          referenceFrameGraphics.add(frame);
@@ -102,11 +101,11 @@ public class HexapodSimulationController implements RobotController
       RhinoBeetleJointNameMapAndContactDefinition jointMap = new RhinoBeetleJointNameMapAndContactDefinition();
       for (RobotSextant robotSextant : RobotSextant.values)
       {
-         RigidBody endEffector = fullRobotModel.getEndEffector(robotSextant);
+         RigidBodyBasics endEffector = fullRobotModel.getEndEffector(robotSextant);
          footRigidBodies.set(robotSextant, endEffector);
 
          String jointNameBeforeFoot = jointMap.getJointNameBeforeFoot(robotSextant);
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointNameBeforeFoot);
+         OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointNameBeforeFoot);
          ReferenceFrame soleFrame = referenceFrames.getFootFrame(robotSextant);
          for (GroundContactPoint groundContactPoint : groundContactPoints)
          {
@@ -137,12 +136,12 @@ public class HexapodSimulationController implements RobotController
 
       //Rigid Bodies
       List<ContactablePlaneBody> footContactableBodies = new ArrayList<>();
-      RigidBody[] controlledBodies = new RigidBody[7];
+      RigidBodyBasics[] controlledBodies = new RigidBodyBasics[7];
 
       int i = 0;
       for (RobotSextant robotSextant : RobotSextant.values)
       {
-         RigidBody endEffector = fullRobotModel.getEndEffector(robotSextant);
+         RigidBodyBasics endEffector = fullRobotModel.getEndEffector(robotSextant);
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSextant);
          ;
          ListOfPointsContactablePlaneBody footContactableBody = new ListOfPointsContactablePlaneBody(endEffector, footFrame, contactPointsInSoleFrame);
@@ -153,12 +152,12 @@ public class HexapodSimulationController implements RobotController
       controlledBodies[i] = fullRobotModel.getRootBody();
 
       //Joints to Control
-      InverseDynamicsJoint[] controlledJoints = ScrewTools.computeSubtreeJoints(fullRobotModel.getElevator());
+      JointBasics[] controlledJoints = MultiBodySystemTools.collectSubtreeJoints(fullRobotModel.getElevator());
 
       ControllerCoreOptimizationSettings momentumOptimizationSettings = getMomentumOptimizationSettings();
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
 
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerDt, -gravity, rootJoint, controlledJoints, centerOfMassFrame,
                                                                             momentumOptimizationSettings, yoGraphicsListRegistry, registry);

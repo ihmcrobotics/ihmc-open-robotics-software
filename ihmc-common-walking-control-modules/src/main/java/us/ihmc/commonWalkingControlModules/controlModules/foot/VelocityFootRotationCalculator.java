@@ -14,6 +14,7 @@ import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d.IntersectionResult;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
@@ -21,7 +22,6 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -202,7 +202,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       footPolygonInWorldFrame.changeFrameAndProjectToXYPlane(worldFrame);
 
       rotatingBody.getRigidBody().getBodyFixedFrame().getTwistOfFrame(bodyTwist);
-      bodyTwist.getAngularPart(angularVelocity);
+      angularVelocity.setIncludingFrame(bodyTwist.getAngularPart());
 
       angularVelocity.changeFrame(soleFrame);
       angularVelocity.setZ(0.0);

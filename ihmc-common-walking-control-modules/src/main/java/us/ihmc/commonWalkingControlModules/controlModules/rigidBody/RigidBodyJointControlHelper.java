@@ -11,11 +11,11 @@ import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -49,10 +49,10 @@ public class RigidBodyJointControlHelper
    private final SimpleTrajectoryPoint1D lastPointAdded = new SimpleTrajectoryPoint1D();
    private final JointspaceFeedbackControlCommand feedbackControlCommand = new JointspaceFeedbackControlCommand();
 
-   private final OneDoFJoint[] joints;
+   private final OneDoFJointBasics[] joints;
    private final int numberOfJoints;
 
-   public RigidBodyJointControlHelper(String bodyName, OneDoFJoint[] jointsToControl, YoVariableRegistry parentRegistry)
+   public RigidBodyJointControlHelper(String bodyName, OneDoFJointBasics[] jointsToControl, YoVariableRegistry parentRegistry)
    {
       warningPrefix = shortName + " for " + bodyName + ": ";
       registry = new YoVariableRegistry(bodyName + shortName);
@@ -68,7 +68,7 @@ public class RigidBodyJointControlHelper
 
       for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
       {
-         OneDoFJoint joint = jointsToControl[jointIdx];
+         OneDoFJointBasics joint = jointsToControl[jointIdx];
          String jointName = joint.getName();
          jointTrajectoryGenerators.add(new MultipleWaypointsTrajectoryGenerator(jointName, RigidBodyJointspaceControlState.maxPointsInGenerator, registry));
 
@@ -95,7 +95,7 @@ public class RigidBodyJointControlHelper
       defaultWeights.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         OneDoFJoint joint = joints[jointIdx];
+         OneDoFJointBasics joint = joints[jointIdx];
          if (weights.containsKey(joint.getName()))
          {
             defaultWeights.add(weights.get(joint.getName()));
@@ -127,7 +127,7 @@ public class RigidBodyJointControlHelper
       this.gains.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         OneDoFJoint joint = joints[jointIdx];
+         OneDoFJointBasics joint = joints[jointIdx];
          if (gains.containsKey(joint.getName()))
          {
             this.gains.add(gains.get(joint.getName()));
@@ -192,7 +192,7 @@ public class RigidBodyJointControlHelper
          double desiredVelocity = generator.getVelocity();
          double feedForwardAcceleration = generator.getAcceleration();
 
-         OneDoFJoint joint = joints[jointIdx];
+         OneDoFJointBasics joint = joints[jointIdx];
          PIDGainsReadOnly gain = gains.get(jointIdx);
          double weight = weights.get(jointIdx).getValue();
          currentWeights.get(jointIdx).set(weight);
@@ -470,7 +470,7 @@ public class RigidBodyJointControlHelper
    {
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         OneDoFJoint joint = joints[jointIdx];
+         OneDoFJointBasics joint = joints[jointIdx];
          queueInitialPoint(joint.getQ(), jointIdx);
       }
    }

@@ -6,11 +6,11 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.BacklashProcessingYoVariable;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -33,10 +33,10 @@ public class IMUBasedJointStateEstimator
    private final DoubleProvider positionBreakFrequency;
    private final GeometricJacobian jacobian;
    private final SensorOutputMapReadOnly sensorMap;
-   private final Map<OneDoFJoint, BacklashProcessingYoVariable> jointVelocities = new LinkedHashMap<>();
-   private final Map<OneDoFJoint, YoDouble> jointPositions = new LinkedHashMap<>();
-   private final Map<OneDoFJoint, YoDouble> jointPositionsFromIMUOnly = new LinkedHashMap<>();
-   private final OneDoFJoint[] joints;
+   private final Map<OneDoFJointBasics, BacklashProcessingYoVariable> jointVelocities = new LinkedHashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointPositions = new LinkedHashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointPositionsFromIMUOnly = new LinkedHashMap<>();
+   private final OneDoFJointBasics[] joints;
 
    private final double estimatorDT;
 
@@ -45,7 +45,7 @@ public class IMUBasedJointStateEstimator
    {
       this.sensorMap = sensorMap;
       jacobian = new GeometricJacobian(pelvisIMU.getMeasurementLink(), chestIMU.getMeasurementLink(), chestIMU.getMeasurementLink().getBodyFixedFrame());
-      joints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      joints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
       this.velocityEstimator = new IMUBasedJointVelocityEstimator(jacobian, pelvisIMU, chestIMU, registry);
 
       String namePrefix = "imuBasedJointVelocityEstimator";
@@ -55,7 +55,7 @@ public class IMUBasedJointStateEstimator
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
 
       DoubleProvider slopTime = new DoubleParameter(namePrefix + "SlopTime", registry, stateEstimatorParameters.getIMUJointVelocityEstimationBacklashSlopTime());
-      for (OneDoFJoint joint : joints)
+      for (OneDoFJointBasics joint : joints)
       {
          jointVelocities.put(joint, new BacklashProcessingYoVariable("qd_" + joint.getName() + "_FusedWithIMU", "", estimatorDT, slopTime, registry));
 
@@ -73,7 +73,7 @@ public class IMUBasedJointStateEstimator
 
       for (int i = 0; i < joints.length; i++)
       {
-         OneDoFJoint joint = joints[i];
+         OneDoFJointBasics joint = joints[i];
 
          double qd_sensorMap = sensorMap.getJointVelocityProcessedOutput(joint);
          double qd_IMU = velocityEstimator.getEstimatedJointVelocity(i);
@@ -90,7 +90,7 @@ public class IMUBasedJointStateEstimator
       }
    }
 
-   public double getEstimatedJointVelocitiy(OneDoFJoint joint)
+   public double getEstimatedJointVelocitiy(OneDoFJointBasics joint)
    {
       BacklashProcessingYoVariable estimatedJointVelocity = jointVelocities.get(joint);
       if (estimatedJointVelocity != null)
@@ -99,7 +99,7 @@ public class IMUBasedJointStateEstimator
          return Double.NaN;
    }
 
-   public double getEstimatedJointPosition(OneDoFJoint joint)
+   public double getEstimatedJointPosition(OneDoFJointBasics joint)
    {
       YoDouble estimatedJointPosition = jointPositions.get(joint);
       if (estimatedJointPosition != null)

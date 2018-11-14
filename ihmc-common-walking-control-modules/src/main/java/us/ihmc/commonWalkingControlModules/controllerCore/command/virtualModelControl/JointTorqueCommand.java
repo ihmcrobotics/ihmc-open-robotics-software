@@ -1,18 +1,19 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
 import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * {@link JointTorqueCommand} is a command meant to be submitted to the
@@ -42,7 +43,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     */
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
    /** The list of joints for which desired torques are assigned. */
-   private final List<InverseDynamicsJoint> joints = new ArrayList<>(initialCapacity);
+   private final List<JointBasics> joints = new ArrayList<>(initialCapacity);
    /**
     * The list of the desired torques for each joint. The list follows the same ordering as
     * the {@link #joints} list. Each {@link DenseMatrix64F} in this list, is a N-by-1 vector where N
@@ -96,7 +97,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     * @param joint the joint to be controlled.
     * @param desiredTorque the joint torque to be achieved in the next control tick.
     */
-   public void addJoint(OneDoFJoint joint, double desiredTorque)
+   public void addJoint(OneDoFJointBasics joint, double desiredTorque)
    {
       joints.add(joint);
       jointNames.add(joint.getName());
@@ -118,7 +119,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     *           {@code joint.getDegreesOfFreedom()}. Not modified.
     * @throws RuntimeException if the {@code desiredTorque} is not a N-by-1 vector.
     */
-   public void addJoint(InverseDynamicsJoint joint, DenseMatrix64F desiredTorque)
+   public void addJoint(JointBasics joint, DenseMatrix64F desiredTorque)
    {
       checkConsistency(joint, desiredTorque);
       joints.add(joint);
@@ -172,19 +173,19 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     *           refer to. Not modified.
     * @throws RuntimeException if the given map does not have all this command's joints.
     */
-   public void retrieveJointsFromName(Map<String, ? extends InverseDynamicsJoint> nameToJointMap)
+   public void retrieveJointsFromName(Map<String, ? extends JointBasics> nameToJointMap)
    {
       for (int i = 0; i < getNumberOfJoints(); i++)
       {
          String jointName = jointNames.get(i);
-         InverseDynamicsJoint newJointReference = nameToJointMap.get(jointName);
+         JointBasics newJointReference = nameToJointMap.get(jointName);
          if (newJointReference == null)
             throw new RuntimeException("The given map is missing the joint: " + jointName);
          joints.set(i, newJointReference);
       }
    }
 
-   private void checkConsistency(InverseDynamicsJoint joint, DenseMatrix64F desiredTorque)
+   private void checkConsistency(JointBasics joint, DenseMatrix64F desiredTorque)
    {
       MathTools.checkEquals(joint.getDegreesOfFreedom(), desiredTorque.getNumRows());
    }
@@ -204,7 +205,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     * 
     * @return the list of joints to be controlled.
     */
-   public List<InverseDynamicsJoint> getJoints()
+   public List<JointBasics> getJoints()
    {
       return joints;
    }
@@ -215,7 +216,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     * @param jointIndex the index of the joint &in; [0, {@code getNumberOfJoints()}[.
     * @return one of the joints to be controlled.
     */
-   public InverseDynamicsJoint getJoint(int jointIndex)
+   public JointBasics getJoint(int jointIndex)
    {
       return joints.get(jointIndex);
    }

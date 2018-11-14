@@ -5,21 +5,21 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 
 public class MomentumModuleSolution
 {
-   private InverseDynamicsJoint[] jointsToOptimizeFor;
+   private JointBasics[] jointsToOptimizeFor;
    private DenseMatrix64F jointAccelerations;
    private DenseMatrix64F rhoSolution;
-   private SpatialForceVector centroidalMomentumRateSolution;
-   private Map<RigidBody, Wrench> externalWrenchSolution;
-   private List<RigidBody> rigidBodiesWithExternalWrench;
+   private SpatialForceReadOnly centroidalMomentumRateSolution;
+   private Map<RigidBodyBasics, Wrench> externalWrenchSolution;
+   private List<RigidBodyBasics> rigidBodiesWithExternalWrench;
 
-   public void setJointsToOptimizeFor(InverseDynamicsJoint[] jointsToOptimizeFor)
+   public void setJointsToOptimizeFor(JointBasics[] jointsToOptimizeFor)
    {
       this.jointsToOptimizeFor = jointsToOptimizeFor;
    }
@@ -33,37 +33,37 @@ public class MomentumModuleSolution
       this.rhoSolution = rhoSolution;
    }
 
-   public void setCentroidalMomentumRateSolution(SpatialForceVector centroidalMomentumRateSolution)
+   public void setCentroidalMomentumRateSolution(SpatialForceReadOnly centroidalMomentumRateSolution)
    {
       this.centroidalMomentumRateSolution = centroidalMomentumRateSolution;
    }
 
-   public void setExternalWrenchSolution(Map<RigidBody, Wrench> externalWrenchSolution)
+   public void setExternalWrenchSolution(Map<RigidBodyBasics, Wrench> externalWrenchSolution)
    {
       this.externalWrenchSolution = externalWrenchSolution;
    }
 
-   public void setRigidBodiesWithExternalWrench(List<RigidBody> rigidBodiesWithExternalWrench)
+   public void setRigidBodiesWithExternalWrench(List<RigidBodyBasics> rigidBodiesWithExternalWrench)
    {
       this.rigidBodiesWithExternalWrench = rigidBodiesWithExternalWrench;
    }
 
-   public SpatialForceVector getCentroidalMomentumRateSolution()
+   public SpatialForceReadOnly getCentroidalMomentumRateSolution()
    {
       return centroidalMomentumRateSolution;
    }
 
-   public Map<RigidBody, Wrench> getExternalWrenchSolution()
+   public Map<RigidBodyBasics, Wrench> getExternalWrenchSolution()
    {
       return externalWrenchSolution;
    }
 
-   public List<RigidBody> getRigidBodiesWithExternalWrench()
+   public List<RigidBodyBasics> getRigidBodiesWithExternalWrench()
    {
       return rigidBodiesWithExternalWrench;
    }
 
-   public InverseDynamicsJoint[] getJointsToOptimizeFor()
+   public JointBasics[] getJointsToOptimizeFor()
    {
       return jointsToOptimizeFor;
    }

@@ -23,12 +23,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -54,7 +54,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
 
    private final FramePose3D bodyFixedControlledPose = new FramePose3D();
-   private final SpatialAccelerationVector bodyAcceleration;
+   private final SpatialAcceleration bodyAcceleration;
 
    // TODO: allow multiple contact points
    private final FramePoint3D previousContactPoint = new FramePoint3D();
@@ -90,7 +90,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private Vector3DReadOnly taskspaceAngularWeight;
    private Vector3DReadOnly taskspaceLinearWeight;
 
-   public RigidBodyLoadBearingControlState(RigidBody bodyToControl, ContactablePlaneBody contactableBody, RigidBody elevator, YoDouble yoTime,
+   public RigidBodyLoadBearingControlState(RigidBodyBasics bodyToControl, ContactablePlaneBody contactableBody, RigidBodyBasics elevator, YoDouble yoTime,
          RigidBodyJointControlHelper jointControlHelper, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.LOADBEARING, bodyToControl.getName(), yoTime, parentRegistry);
@@ -101,7 +101,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
       bodyFrame.getTransformToDesiredFrame(bodyToJointTransform, bodyToControl.getParentJoint().getFrameAfterJoint());
 
-      bodyAcceleration = new SpatialAccelerationVector(contactFrame, elevatorFrame, contactFrame);
+      bodyAcceleration = new SpatialAcceleration(contactFrame, elevatorFrame, contactFrame);
       spatialAccelerationCommand.set(elevator, bodyToControl);
       spatialFeedbackControlCommand.set(elevator, bodyToControl);
 
@@ -183,7 +183,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
       // assemble zero acceleration command
       bodyAcceleration.setToZero(contactFrame, elevatorFrame, contactFrame);
-      bodyAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFrame);
+      bodyAcceleration.setBodyFrame(bodyFrame);
       spatialAccelerationCommand.setSpatialAcceleration(contactFrame, bodyAcceleration);
       spatialAccelerationCommand.setSelectionMatrix(accelerationSelectionMatrix);
 

@@ -5,14 +5,21 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
  * This class provides a simple tool to compute the Jacobian matrix of a kinematic chain composed of
- * {@link InverseDynamicsJoint}s.
+ * {@link JointBasics}s.
  * <p>
  * To use this tool, one can create an object by using the constructor
- * {@link #GeometricJacobian(RigidBody, RigidBody, ReferenceFrame)}. The Jacobian computed will
+ * {@link #GeometricJacobian(RigidBodyBasics, RigidBodyBasics, ReferenceFrame)}. The Jacobian computed will
  * include all the joints from {@code ancestor} to {@code descendant} and will be expressed in
  * {@code jacobianFrame}. Then the method {@link #compute()} is to be called every time the joint
  * configuration has changed and Jacobian matrix is to be updated. Finally several options are
@@ -29,15 +36,15 @@ import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
  * </ul>
  * </p>
  */
-public class GeometricJacobian implements NameBasedHashCodeHolder
+public class GeometricJacobian
 {
    /** Array of the joints to be considered by this Jacobian. */
-   private final InverseDynamicsJoint[] joints;
+   private final JointBasics[] joints;
    /**
     * Array of ALL the joints from the base to the end effector of this Jacobian. This is useful in
     * {@link ConvectiveTermCalculator} when the list of joints of the Jacobian is not continuous.
     */
-   private final InverseDynamicsJoint[] jointPathFromBaseToEndEffector;
+   private final JointBasics[] jointPathFromBaseToEndEffector;
    private final DenseMatrix64F jacobian;
    private ReferenceFrame jacobianFrame;
 
@@ -45,7 +52,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Twist.SIZE, 1);
 
    private final boolean allowChangeFrame;
-   private final long nameBasedHashCode;
+   private final int hashCode;
 
    /**
     * Creates the Jacobian for the kinematic chain described by the given joints. These joints have
@@ -57,7 +64,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     *           to the base frame will be expressed.
     * @throws RuntimeException if the joint ordering is incorrect.
     */
-   public GeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
+   public GeometricJacobian(JointBasics[] joints, ReferenceFrame jacobianFrame)
    {
       this(joints, jacobianFrame, true);
    }
@@ -74,17 +81,17 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     *           available or not.
     * @throws RuntimeException if the joint ordering is incorrect.
     */
-   public GeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame, boolean allowChangeFrame)
+   public GeometricJacobian(JointBasics[] joints, ReferenceFrame jacobianFrame, boolean allowChangeFrame)
    {
       checkJointOrder(joints);
-      this.joints = new InverseDynamicsJoint[joints.length];
+      this.joints = new JointBasics[joints.length];
       System.arraycopy(joints, 0, this.joints, 0, joints.length);
       this.jacobianFrame = jacobianFrame;
-      this.jacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, ScrewTools.computeDegreesOfFreedom(joints));
-      this.jointPathFromBaseToEndEffector = ScrewTools.createJointPath(getBase(), getEndEffector());
+      this.jacobian = new DenseMatrix64F(SpatialVector.SIZE, MultiBodySystemTools.computeDegreesOfFreedom(joints));
+      this.jointPathFromBaseToEndEffector = MultiBodySystemTools.createJointPath(getBase(), getEndEffector());
       this.allowChangeFrame = allowChangeFrame;
 
-      nameBasedHashCode = ScrewTools.computeGeometricJacobianNameBasedHashCode(joints, jacobianFrame, allowChangeFrame);
+      hashCode = ScrewTools.computeGeometricJacobianHashCode(joints, jacobianFrame, allowChangeFrame);
    }
 
    /**
@@ -101,9 +108,9 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     *           to the base frame will be expressed.
     * @throws RuntimeException if the joint ordering is incorrect.
     */
-   public GeometricJacobian(InverseDynamicsJoint joint, ReferenceFrame jacobianFrame)
+   public GeometricJacobian(JointBasics joint, ReferenceFrame jacobianFrame)
    {
-      this(new InverseDynamicsJoint[] {joint}, jacobianFrame, true);
+      this(new JointBasics[] {joint}, jacobianFrame, true);
    }
 
    /**
@@ -116,9 +123,9 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     *           to the base frame will be expressed.
     * @throws RuntimeException if the joint ordering is incorrect.
     */
-   public GeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
+   public GeometricJacobian(RigidBodyBasics ancestor, RigidBodyBasics descendant, ReferenceFrame jacobianFrame)
    {
-      this(ScrewTools.createJointPath(ancestor, descendant), jacobianFrame, true);
+      this(MultiBodySystemTools.createJointPath(ancestor, descendant), jacobianFrame, true);
    }
 
    /**
@@ -135,13 +142,13 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
       int column = 0;
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
-         InverseDynamicsJoint joint = joints[jointIndex];
+         JointBasics joint = joints[jointIndex];
 
          for (int dofIndex = 0; dofIndex < joint.getDegreesOfFreedom(); dofIndex++)
          {
-            joint.getUnitTwist(dofIndex, tempTwist);
+            tempTwist.setIncludingFrame(joint.getUnitTwists().get(dofIndex));
             tempTwist.changeFrame(jacobianFrame);
-            tempTwist.getMatrix(jacobian, 0, column++);
+            tempTwist.get(0, column++, jacobian);
          }
       }
    }
@@ -178,7 +185,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    public void getTwist(DenseMatrix64F jointVelocities, Twist twistToPack)
    {
       CommonOps.mult(jacobian, jointVelocities, tempMatrix);
-      twistToPack.set(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, tempMatrix, 0);
+      twistToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, 0, tempMatrix);
    }
 
    /**
@@ -192,7 +199,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     *            {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
     *            {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
     */
-   public DenseMatrix64F computeJointTorques(Wrench wrench)
+   public DenseMatrix64F computeJointTorques(WrenchReadOnly wrench)
    {
       DenseMatrix64F jointTorques = new DenseMatrix64F(1, jacobian.getNumCols());
       computeJointTorques(wrench, jointTorques);
@@ -209,13 +216,13 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     *            {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
     *            {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
     */
-   public void computeJointTorques(Wrench wrench, DenseMatrix64F jointTorquesToPack)
+   public void computeJointTorques(WrenchReadOnly wrench, DenseMatrix64F jointTorquesToPack)
    {
       // reference frame check
-      wrench.getExpressedInFrame().checkReferenceFrameMatch(this.jacobianFrame);
+      wrench.getReferenceFrame().checkReferenceFrameMatch(this.jacobianFrame);
       // FIXME add the following reference frame check
       //      wrench.getBodyFrame().checkReferenceFrameMatch(getEndEffectorFrame());
-      wrench.getMatrix(tempMatrix);
+      wrench.get(tempMatrix);
       jointTorquesToPack.reshape(1, jacobian.getNumCols());
       CommonOps.multTransA(tempMatrix, jacobian, jointTorquesToPack);
       CommonOps.transpose(jointTorquesToPack);
@@ -269,7 +276,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    }
 
    /** @return an {@code Array} containing the joints considered by this Jacobian. */
-   public InverseDynamicsJoint[] getJointsInOrder()
+   public JointBasics[] getJointsInOrder()
    {
       return joints;
    }
@@ -278,7 +285,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     * @return a {@code Array} of joints describing a continuous path from the base to the end
     *         effector of this Jacobian.
     */
-   public InverseDynamicsJoint[] getJointPathFromBaseToEndEffector()
+   public JointBasics[] getJointPathFromBaseToEndEffector()
    {
       return jointPathFromBaseToEndEffector;
    }
@@ -289,7 +296,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     * 
     * @return the base of this Jacobian.
     */
-   public RigidBody getBase()
+   public RigidBodyBasics getBase()
    {
       return joints[0].getPredecessor();
    }
@@ -300,7 +307,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     * 
     * @return the end-effector of this jacobian.
     */
-   public RigidBody getEndEffector()
+   public RigidBodyBasics getEndEffector()
    {
       return joints[joints.length - 1].getSuccessor();
    }
@@ -327,13 +334,13 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
       return getEndEffector().getBodyFixedFrame();
    }
 
-   private static void checkJointOrder(InverseDynamicsJoint[] joints)
+   private static void checkJointOrder(JointBasics[] joints)
    {
       for (int i = 1; i < joints.length; i++)
       {
-         InverseDynamicsJoint joint = joints[i];
-         InverseDynamicsJoint previousJoint = joints[i - 1];
-         if (ScrewTools.isAncestor(previousJoint.getPredecessor(), joint.getPredecessor()))
+         JointBasics joint = joints[i];
+         JointBasics previousJoint = joints[i - 1];
+         if (MultiBodySystemTools.isAncestor(previousJoint.getPredecessor(), joint.getPredecessor()))
             throw new RuntimeException("joints must be in order from ancestor to descendant");
       }
    }
@@ -351,7 +358,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
       StringBuilder builder = new StringBuilder();
       builder.append("Jacobian. jacobianFrame = " + jacobianFrame + ". Joints:\n");
 
-      for (InverseDynamicsJoint joint : joints)
+      for (JointBasics joint : joints)
       {
          builder.append(joint.getClass().getSimpleName() + " " + joint.getName() + "\n");
       }
@@ -367,9 +374,8 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
       return "Jacobian, end effector = " + getEndEffector() + ", base = " + getBase() + ", expressed in " + getJacobianFrame();
    }
 
-   @Override
-   public long getNameBasedHashCode()
+   public int hashCode()
    {
-      return nameBasedHashCode;
+      return hashCode;
    }
 }

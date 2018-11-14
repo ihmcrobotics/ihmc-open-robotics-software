@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -79,27 +78,11 @@ public abstract class SingleSupportState extends WalkingState
    {
       balanceManager.clearICPPlan();
       footSwitches.get(swingSide).reset();
-      integrateAnkleAccelerationsOnSwingLeg(swingSide);
    }
 
    @Override
    public void onExit()
    {
       balanceManager.resetPushRecovery();
-      resetLoadedLegIntegrators(swingSide);
-   }
-
-   private void integrateAnkleAccelerationsOnSwingLeg(RobotSide swingSide)
-   {
-      fullRobotModel.getLegJoint(swingSide, LegJointName.ANKLE_PITCH).setIntegrateDesiredAccelerations(true);
-      fullRobotModel.getLegJoint(swingSide, LegJointName.ANKLE_ROLL).setIntegrateDesiredAccelerations(true);
-      fullRobotModel.getLegJoint(swingSide.getOppositeSide(), LegJointName.ANKLE_PITCH).setIntegrateDesiredAccelerations(false);
-      fullRobotModel.getLegJoint(swingSide.getOppositeSide(), LegJointName.ANKLE_ROLL).setIntegrateDesiredAccelerations(false);
-   }
-
-   private void resetLoadedLegIntegrators(RobotSide robotSide)
-   {
-      for (LegJointName jointName : fullRobotModel.getRobotSpecificJointNames().getLegJointNames())
-         fullRobotModel.getLegJoint(robotSide, jointName).resetDesiredAccelerationIntegrator();
    }
 }

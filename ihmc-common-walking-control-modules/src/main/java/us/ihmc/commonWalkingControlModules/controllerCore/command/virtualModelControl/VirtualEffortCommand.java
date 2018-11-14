@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelC
 
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public interface VirtualEffortCommand<T extends VirtualEffortCommand> extends VirtualModelControlCommand<T>
 {
@@ -48,7 +48,7 @@ public interface VirtualEffortCommand<T extends VirtualEffortCommand> extends Vi
     * @return the rigid-body located right before the first joint to be used for controlling the
     *         end-effector.
     */
-   RigidBody getBase();
+   RigidBodyBasics getBase();
 
    /**
     * Gets the name of the base rigid-body.
@@ -66,7 +66,7 @@ public interface VirtualEffortCommand<T extends VirtualEffortCommand> extends Vi
     *
     * @return the rigid-body to be controlled.
     */
-   RigidBody getEndEffector();
+   RigidBodyBasics getEndEffector();
 
    /**
     * Gets the name of the end-effector rigid-body.

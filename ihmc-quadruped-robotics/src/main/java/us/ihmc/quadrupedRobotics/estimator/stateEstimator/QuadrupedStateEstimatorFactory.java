@@ -6,11 +6,11 @@ import java.util.Map;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -40,21 +40,21 @@ public class QuadrupedStateEstimatorFactory
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
-      RigidBody elevator = fullRobotModel.get().getElevator();
-      FloatingInverseDynamicsJoint rootInverseDynamicsJoint = fullRobotModel.get().getRootJoint();
-      RigidBody estimationLink = fullRobotModel.get().getRootBody();
+      RigidBodyBasics elevator = fullRobotModel.get().getElevator();
+      FloatingJointBasics rootInverseDynamicsJoint = fullRobotModel.get().getRootJoint();
+      RigidBodyBasics estimationLink = fullRobotModel.get().getRootBody();
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
 
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
       robotMotionStatusFromController.setCurrentRobotMotionStatus(RobotMotionStatus.IN_MOTION);
       CenterOfPressureDataHolder centerOfPressureDataHolder = null;
 
-      Map<RigidBody, ContactablePlaneBody> feetMap = new HashMap<RigidBody, ContactablePlaneBody>();
-      Map<RigidBody, FootSwitchInterface> footSwitchMap = new HashMap<RigidBody, FootSwitchInterface>();
+      Map<RigidBodyBasics, ContactablePlaneBody> feetMap = new HashMap<RigidBodyBasics, ContactablePlaneBody>();
+      Map<RigidBodyBasics, FootSwitchInterface> footSwitchMap = new HashMap<RigidBodyBasics, FootSwitchInterface>();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          ContactablePlaneBody contactablePlaneBody = footContactableBodies.get().get(quadrant);
-         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+         RigidBodyBasics rigidBody = contactablePlaneBody.getRigidBody();
          feetMap.put(rigidBody, contactablePlaneBody);
          FootSwitchInterface footSwitch = footSwitches.get().get(quadrant);
          footSwitchMap.put(rigidBody, footSwitch);

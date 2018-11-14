@@ -15,10 +15,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
 /**
@@ -82,14 +82,14 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 
 
    @Override
-   public Footstep generateFootstepWithoutHeightMap(FramePose2D desiredSolePosition, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateFootstepWithoutHeightMap(FramePose2D desiredSolePosition, RigidBodyBasics foot, ReferenceFrame soleFrame, RobotSide robotSide,
            double height, Vector3D planeNormal)
    {
       return convexHullFootstepSnapper.generateFootstepWithoutHeightMap(desiredSolePosition, foot, soleFrame, robotSide, height, planeNormal);
    }
 
    @Override
-   public Footstep generateSnappedFootstep(double soleX, double soleY, double yaw, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateSnappedFootstep(double soleX, double soleY, double yaw, RigidBodyBasics foot, ReferenceFrame soleFrame, RobotSide robotSide,
            HeightMapWithPoints heightMap)
            throws InsufficientDataException
    {
@@ -99,7 +99,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
    }
 
    @Override
-   public Footstep generateFootstepUsingHeightMap(FramePose2D desiredSolePosition, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateFootstepUsingHeightMap(FramePose2D desiredSolePosition, RigidBodyBasics foot, ReferenceFrame soleFrame, RobotSide robotSide,
            HeightMapWithPoints heightMap)
            throws InsufficientDataException
    {

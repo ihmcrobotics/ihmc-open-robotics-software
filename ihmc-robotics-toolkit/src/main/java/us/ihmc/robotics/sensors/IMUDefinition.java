@@ -2,16 +2,16 @@ package us.ihmc.robotics.sensors;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class IMUDefinition
 {
    private final String name;
-   private final RigidBody rigidBody;
+   private final RigidBodyBasics rigidBody;
    private final RigidBodyTransform transformFromIMUToJoint;
    private final ReferenceFrame imuFrame;
 
-   public IMUDefinition(String name, RigidBody rigidBody, RigidBodyTransform transformFromIMUToJoint)
+   public IMUDefinition(String name, RigidBodyBasics rigidBody, RigidBodyTransform transformFromIMUToJoint)
    {
       this.name = name;
       this.rigidBody = rigidBody;
@@ -26,7 +26,7 @@ public class IMUDefinition
       return name;
    }
 
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }

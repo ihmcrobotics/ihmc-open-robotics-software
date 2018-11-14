@@ -17,13 +17,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.geometry.PlaneFitter;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
 /**
@@ -41,7 +41,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
    private double maskBuffer = 0.0;
 
    @Override
-   public Footstep generateSnappedFootstep(double soleX, double soleY, double yaw, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateSnappedFootstep(double soleX, double soleY, double yaw, RigidBodyBasics foot, ReferenceFrame soleFrame, RobotSide robotSide,
            HeightMapWithPoints heightMap)
            throws InsufficientDataException
    {
@@ -137,7 +137,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
    }
 
    @Override
-   public Footstep generateFootstepUsingHeightMap(FramePose2D footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateFootstepUsingHeightMap(FramePose2D footPose2d, RigidBodyBasics foot, ReferenceFrame soleFrame, RobotSide robotSide,
            HeightMapWithPoints heightMap)
            throws InsufficientDataException
    {
@@ -207,7 +207,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
    }
 
    @Override
-   public Footstep generateFootstepWithoutHeightMap(FramePose2D footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide, double height,
+   public Footstep generateFootstepWithoutHeightMap(FramePose2D footPose2d, RigidBodyBasics foot, ReferenceFrame soleFrame, RobotSide robotSide, double height,
            Vector3D planeNormal)
    {
       double yaw = footPose2d.getYaw();

@@ -2,10 +2,10 @@ package us.ihmc.avatar;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -33,7 +33,7 @@ public class SimulatedLowLevelOutputWriter implements JointDesiredOutputWriter
 
       for (int i = 0; i < lowLevelDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
       {
-         OneDoFJoint revoluteJoint = lowLevelDataHolder.getOneDoFJoint(i);
+         OneDoFJointBasics revoluteJoint = lowLevelDataHolder.getOneDoFJoint(i);
          JointDesiredOutputReadOnly data = lowLevelDataHolder.getJointDesiredOutput(i);
 
          String name = revoluteJoint.getName();
