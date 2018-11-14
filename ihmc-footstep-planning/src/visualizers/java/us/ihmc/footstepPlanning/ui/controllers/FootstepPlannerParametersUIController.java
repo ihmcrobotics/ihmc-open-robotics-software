@@ -1,17 +1,19 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.shape.Rectangle;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
 import us.ihmc.footstepPlanning.ui.components.SettableFootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+
+import javax.swing.event.ChangeListener;
 
 public class FootstepPlannerParametersUIController
 {
@@ -48,6 +50,19 @@ public class FootstepPlannerParametersUIController
    @FXML
    private Spinner<Double> minFootholdPercent;
 
+   @FXML
+   private Rectangle stepShape;
+   @FXML
+   private Rectangle stanceFootShape;
+   @FXML
+   private Rectangle swingFootShape;
+
+   private static final double footWidth = 0.15;
+   private static final double footLength = 0.25;
+   private static final double leftFootOriginX = 30;
+   private static final double leftFootOriginY = 100;
+
+   private static final double metersToPixel = 200;
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -75,6 +90,13 @@ public class FootstepPlannerParametersUIController
       maxStepYaw.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
       minStepYaw.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.1));
       minFootholdPercent.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
+
+      maxStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      minStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      maxStepWidth.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      minStepWidth.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      maxStepYaw.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      minStepYaw.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
    }
 
    public void bindControls()
@@ -96,13 +118,48 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionalBindMinStepYaw(minStepYaw.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinFootholdPercent(minFootholdPercent.getValueFactory().valueProperty());
 
-
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, plannerTimeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
 
+      // these dimensions work best for valkyrie
+      stanceFootShape.setHeight(footLength * metersToPixel);
+      stanceFootShape.setWidth(footWidth * metersToPixel);
+      stanceFootShape.setLayoutX(leftFootOriginX);
+      stanceFootShape.setLayoutY(leftFootOriginY);
+
+      swingFootShape.setHeight(footLength * metersToPixel);
+      swingFootShape.setWidth(footWidth * metersToPixel);
+      swingFootShape.setLayoutY(leftFootOriginY);
+
+      updateStepShape();
+   }
+
+   private void updateStepShape()
+   {
+      double worstYaw = maxStepYaw.getValue() > Math.abs(minStepYaw.getValue()) ? maxStepYaw.getValue() : minStepYaw.getValue();
+      setStepShape(maxStepLength.getValue(), minStepLength.getValue(), maxStepWidth.getValue(), minStepWidth.getValue(), worstYaw);
+   }
+
+   private void setStepShape(double maxLength, double minLength, double maxWidth, double minWidth, double yaw)
+   {
+      double footCenterX = leftFootOriginX + 0.5 * footWidth * metersToPixel;
+      double footCenterY = leftFootOriginY + 0.5 * footLength * metersToPixel;
+
+      double width = maxWidth - minWidth;
+      double height = maxLength - minLength;
+      double xCenterInPanel = footCenterX + metersToPixel * minWidth;
+      double yCenterInPanel = footCenterY - metersToPixel * maxLength;
+
+      stepShape.setLayoutX(xCenterInPanel);
+      stepShape.setWidth(metersToPixel * width);
+      stepShape.setLayoutY(yCenterInPanel);
+      stepShape.setHeight(metersToPixel * height);
+
+      swingFootShape.setLayoutX(xCenterInPanel - 0.5 * footWidth * metersToPixel);
+      swingFootShape.setRotate(Math.toDegrees(yaw));
    }
 
    private final PropertyToMessageTypeConverter<Double, Double> doubleToDoubleConverter = new PropertyToMessageTypeConverter<Double, Double>()
