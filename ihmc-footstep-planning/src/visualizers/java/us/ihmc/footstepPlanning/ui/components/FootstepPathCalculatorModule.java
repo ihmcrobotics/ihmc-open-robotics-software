@@ -306,7 +306,7 @@ public class FootstepPathCalculatorModule
       case A_STAR:
          return createAStarPlanner(contactPointsInSoleFrame, registry);
       case SIMPLE_BODY_PATH:
-         return new SplinePathWithAStarPlanner(parameters.get(), contactPointsInSoleFrame, registry);
+         return new SplinePathWithAStarPlanner(parameters.get(), contactPointsInSoleFrame, registry, null);
       case VIS_GRAPH_WITH_A_STAR:
          return new VisibilityGraphWithAStarPlanner(parameters.get(), visibilityGraphsParameters.get(), contactPointsInSoleFrame, null, registry);
       default:
