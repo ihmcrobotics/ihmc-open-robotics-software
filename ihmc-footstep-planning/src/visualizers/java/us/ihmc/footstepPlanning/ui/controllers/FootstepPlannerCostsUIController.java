@@ -26,9 +26,9 @@ public class FootstepPlannerCostsUIController
    private final FootstepPlannerParametersProperty property = new FootstepPlannerParametersProperty(this, "footstepPlannerCostParametersProperty");
 
    @FXML
-   private ToggleButton useQuadraticHeightCost;
+   private CheckBox useQuadraticHeightCost;
    @FXML
-   private ToggleButton useQuadraticDistanceCost;
+   private CheckBox useQuadraticDistanceCost;
 
    @FXML
    private Spinner<Double> costPerStep;

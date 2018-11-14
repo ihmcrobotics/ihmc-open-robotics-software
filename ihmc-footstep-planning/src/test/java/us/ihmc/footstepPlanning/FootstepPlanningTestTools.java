@@ -82,6 +82,22 @@ public class FootstepPlanningTestTools
             return minStepYaw;
          }
 
+         private final double maxStepReachWhenSteppingUp = RandomNumbers.nextDouble(random, 0.0, 0.5);
+
+         @Override
+         public double getMaximumStepReachWhenSteppingUp()
+         {
+            return maxStepReachWhenSteppingUp;
+         }
+
+         private final double maxStepZWhenSteppingUp = RandomNumbers.nextDouble(random, 0.0, 0.5);
+
+         @Override
+         public double getMaximumStepZWhenSteppingUp()
+         {
+            return maxStepZWhenSteppingUp;
+         }
+
          private final double maxStepXForwardAndDown = RandomNumbers.nextDouble(random, 0.0, 0.5);
 
          @Override
@@ -437,7 +453,7 @@ public class FootstepPlanningTestTools
       assertEquals(parameters.getPitchWeight(), other.getPitchWeight(), epsilon);
    }
 
-   public static void assertParametersEqual(FootstepPlannerParameters parameters, SettableFootstepPlannerParameters other)
+   public static void assertParametersEqual(FootstepPlannerParameters parameters, FootstepPlannerParameters other)
    {
       assertEquals(parameters.checkForBodyBoxCollisions(), other.checkForBodyBoxCollisions());
       assertEquals(parameters.performHeuristicSearchPolicies(), other.performHeuristicSearchPolicies());
@@ -449,6 +465,8 @@ public class FootstepPlanningTestTools
       assertEquals(parameters.getMinimumStepWidth(), other.getMinimumStepWidth(), epsilon);
       assertEquals(parameters.getMinimumStepLength(), other.getMinimumStepLength(), epsilon);
       assertEquals(parameters.getMinimumStepYaw(), other.getMinimumStepYaw(), epsilon);
+      assertEquals(parameters.getMaximumStepReachWhenSteppingUp(), other.getMaximumStepReachWhenSteppingUp(), epsilon);
+      assertEquals(parameters.getMaximumStepZWhenSteppingUp(), other.getMaximumStepZWhenSteppingUp(), epsilon);
       assertEquals(parameters.getMaximumStepXWhenForwardAndDown(), other.getMaximumStepXWhenForwardAndDown(), epsilon);
       assertEquals(parameters.getMaximumStepZWhenForwardAndDown(), other.getMaximumStepZWhenForwardAndDown(), epsilon);
       assertEquals(parameters.getMaximumStepZ(), other.getMaximumStepZ(), epsilon);

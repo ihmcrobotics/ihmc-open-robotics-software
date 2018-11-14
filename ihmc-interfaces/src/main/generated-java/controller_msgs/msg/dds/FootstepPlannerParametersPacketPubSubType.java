@@ -72,6 +72,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -132,6 +136,12 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -260,6 +270,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getMinimumStepYaw());
 
+      cdr.write_type_6(data.getMaximumStepReachWhenSteppingUp());
+
+      cdr.write_type_6(data.getMaximumStepZWhenSteppingUp());
+
       cdr.write_type_6(data.getMaximumStepXWhenForwardAndDown());
 
       cdr.write_type_6(data.getMaximumStepZWhenForwardAndDown());
@@ -335,6 +349,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setMinimumStepYaw(cdr.read_type_6());
       	
+      data.setMaximumStepReachWhenSteppingUp(cdr.read_type_6());
+      	
+      data.setMaximumStepZWhenSteppingUp(cdr.read_type_6());
+      	
       data.setMaximumStepXWhenForwardAndDown(cdr.read_type_6());
       	
       data.setMaximumStepZWhenForwardAndDown(cdr.read_type_6());
@@ -401,6 +419,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("minimum_step_width", data.getMinimumStepWidth());
       ser.write_type_6("minimum_step_length", data.getMinimumStepLength());
       ser.write_type_6("minimum_step_yaw", data.getMinimumStepYaw());
+      ser.write_type_6("maximum_step_reach_when_stepping_up", data.getMaximumStepReachWhenSteppingUp());
+      ser.write_type_6("maximum_step_z_when_stepping_up", data.getMaximumStepZWhenSteppingUp());
       ser.write_type_6("maximum_step_x_when_forward_and_down", data.getMaximumStepXWhenForwardAndDown());
       ser.write_type_6("maximum_step_z_when_forward_and_down", data.getMaximumStepZWhenForwardAndDown());
       ser.write_type_6("maximum_step_z", data.getMaximumStepZ());
@@ -443,6 +463,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setMinimumStepWidth(ser.read_type_6("minimum_step_width"));
       data.setMinimumStepLength(ser.read_type_6("minimum_step_length"));
       data.setMinimumStepYaw(ser.read_type_6("minimum_step_yaw"));
+      data.setMaximumStepReachWhenSteppingUp(ser.read_type_6("maximum_step_reach_when_stepping_up"));
+      data.setMaximumStepZWhenSteppingUp(ser.read_type_6("maximum_step_z_when_stepping_up"));
       data.setMaximumStepXWhenForwardAndDown(ser.read_type_6("maximum_step_x_when_forward_and_down"));
       data.setMaximumStepZWhenForwardAndDown(ser.read_type_6("maximum_step_z_when_forward_and_down"));
       data.setMaximumStepZ(ser.read_type_6("maximum_step_z"));

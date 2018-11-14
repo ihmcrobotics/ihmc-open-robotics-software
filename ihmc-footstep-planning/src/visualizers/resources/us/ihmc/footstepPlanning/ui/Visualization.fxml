@@ -21,30 +21,30 @@
             </rowConstraints>
             <children>
                 <Button mnemonicParsing="false" onAction="#requestStatistics" text="Request Statistics" GridPane.rowIndex="1"/>
-                <ToggleButton fx:id="showBodyPathToggleButton" mnemonicParsing="false" selected="true" text="Show body path" GridPane.rowIndex="2"/>
+                <CheckBox fx:id="showBodyPathToggleButton" mnemonicParsing="false" selected="true" text="Show body path" GridPane.rowIndex="2"/>
 
-                <ToggleButton fx:id="showPlanarRegionsToggleButton" mnemonicParsing="false" selected="true" text="Show planar regions" GridPane.columnIndex="2"
+                <CheckBox fx:id="showPlanarRegionsToggleButton" mnemonicParsing="false" selected="true" text="Show planar regions" GridPane.columnIndex="2"
                               GridPane.rowIndex="1"/>
-                <ToggleButton fx:id="showClusterNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show navigable extrusions"
+                <CheckBox fx:id="showClusterNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show navigable extrusions"
                               GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-                <ToggleButton fx:id="showClusterNonNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show non-navigable extrusions"
+                <CheckBox fx:id="showClusterNonNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show non-navigable extrusions"
                               GridPane.columnIndex="2" GridPane.rowIndex="3"/>
-                <ToggleButton fx:id="showClusterRawPointsToggleButton" mnemonicParsing="false" text="Show cluster raw points" GridPane.columnIndex="2"
+                <CheckBox fx:id="showClusterRawPointsToggleButton" mnemonicParsing="false" text="Show cluster raw points" GridPane.columnIndex="2"
                               GridPane.rowIndex="4"/>
 
-                <ToggleButton fx:id="showGoalMapToggleButton" mnemonicParsing="false" text="Show goal map" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
-                <ToggleButton fx:id="showStartMapToggleButton" mnemonicParsing="false" text="Show start map" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+                <CheckBox fx:id="showGoalMapToggleButton" mnemonicParsing="false" text="Show goal map" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                <CheckBox fx:id="showStartMapToggleButton" mnemonicParsing="false" text="Show start map" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
 
-                <ToggleButton fx:id="showInterRegionMapToggleButton" mnemonicParsing="false" text="Show inter-region map" GridPane.columnIndex="3"
+                <CheckBox fx:id="showInterRegionMapToggleButton" mnemonicParsing="false" text="Show inter-region map" GridPane.columnIndex="3"
                               GridPane.rowIndex="3"/>
-                <ToggleButton fx:id="showInnerRegionMapsToggleButton" mnemonicParsing="false" text="Show inner-region maps" GridPane.columnIndex="3"
+                <CheckBox fx:id="showInnerRegionMapsToggleButton" mnemonicParsing="false" text="Show inner-region maps" GridPane.columnIndex="3"
                               GridPane.rowIndex="4"/>
 
-                <ToggleButton fx:id="showOccupancyMap" mnemonicParsing="false" selected="true" text="Show occupancy map" GridPane.columnIndex="4"
+                <CheckBox fx:id="showOccupancyMap" mnemonicParsing="false" selected="true" text="Show occupancy map" GridPane.columnIndex="4"
                               GridPane.rowIndex="1"/>
-                <ToggleButton fx:id="showSolution" mnemonicParsing="false" selected="true" text="Show solution" GridPane.columnIndex="4"
+                <CheckBox fx:id="showSolution" mnemonicParsing="false" selected="true" text="Show solution" GridPane.columnIndex="4"
                               GridPane.rowIndex="2"/>
-                <ToggleButton fx:id="showIntermediateSolution" mnemonicParsing="false" selected="true" text="Show intermediate plans" GridPane.columnIndex="4"
+                <CheckBox fx:id="showIntermediateSolution" mnemonicParsing="false" selected="true" text="Show intermediate plans" GridPane.columnIndex="4"
                               GridPane.rowIndex="3"/>
             </children>
         </GridPane>

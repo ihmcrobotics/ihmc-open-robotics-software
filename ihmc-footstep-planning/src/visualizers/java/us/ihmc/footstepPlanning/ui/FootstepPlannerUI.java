@@ -51,10 +51,6 @@ public class FootstepPlannerUI
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
    @FXML
-   private StatusTabController statusTabController;
-   @FXML
-   private StartGoalTabController startGoalTabController;
-   @FXML
    private FootstepNodeCheckingUIController footstepNodeCheckingUIController;
    @FXML
    private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
@@ -66,6 +62,8 @@ public class FootstepPlannerUI
    private FootstepPlannerCostsUIController footstepPlannerCostsUIController;
    @FXML
    private FootstepPlannerDataExporterAnchorPaneController dataExporterAnchorPaneController;
+   @FXML
+   private MainTabController mainTabController;
 
    @FXML
    private VisualizationController visibilityGraphsUIController;
@@ -95,12 +93,10 @@ public class FootstepPlannerUI
 
       footstepPlannerCostsUIController.setPlannerParameters(plannerParameters);
       footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
-
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
 
+      mainTabController.attachMessager(messager);
       footstepPlannerMenuUIController.attachMessager(messager);
-      statusTabController.attachMessager(messager);
-      startGoalTabController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
       bodyCollisionCheckingUIController.attachMessager(messager);
@@ -111,8 +107,7 @@ public class FootstepPlannerUI
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
-      statusTabController.bindControls();
-      startGoalTabController.bindControls();
+      mainTabController.bindControls();
       footstepPlannerParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
       bodyCollisionCheckingUIController.bindControls();
