@@ -71,7 +71,7 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
       sequenceId = new YoInteger(prefix + "PlanningSequenceId", registry);
 
       plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new SplinePathPlanner(parameters, registry));
-      plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphPathPlanner(parameters, visibilityGraphsParameters, registry));
+      plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphPathPlanner(prefix, parameters, visibilityGraphsParameters, registry));
 
       initialize.set(true);
    }

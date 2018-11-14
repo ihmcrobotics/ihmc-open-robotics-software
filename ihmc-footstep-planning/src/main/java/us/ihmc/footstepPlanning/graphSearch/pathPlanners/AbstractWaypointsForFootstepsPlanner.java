@@ -37,9 +37,14 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
 
    public AbstractWaypointsForFootstepsPlanner(FootstepPlannerParameters parameters, YoVariableRegistry registry)
    {
+      this("", parameters, registry);
+   }
+
+   public AbstractWaypointsForFootstepsPlanner(String prefix, FootstepPlannerParameters parameters, YoVariableRegistry registry)
+   {
       this.parameters = parameters;
 
-      yoResult = new YoEnum<>("pathPlanningResult", registry, FootstepPlanningResult.class);
+      yoResult = new YoEnum<>(prefix + "PathPlanningResult", registry, FootstepPlanningResult.class);
    }
 
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)

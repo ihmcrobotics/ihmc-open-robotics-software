@@ -10,21 +10,16 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class VisibilityGraphWithAStarPlanner extends BodyPathAndFootstepPlannerWrapper
 {
-   public VisibilityGraphWithAStarPlanner(FootstepPlannerParameters parameters, VisibilityGraphsParameters visibilityGraphsParameters,
-                                          SideDependentList<ConvexPolygon2D> footPolygons, YoGraphicsListRegistry graphicsListRegistry,
-                                          YoVariableRegistry parentRegistry)
-   {
-      this("", parameters, visibilityGraphsParameters, footPolygons, graphicsListRegistry, parentRegistry);
-   }
+   private static final String prefix = "VisGraph";
 
-   public VisibilityGraphWithAStarPlanner(String prefix, FootstepPlannerParameters parameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   public VisibilityGraphWithAStarPlanner(FootstepPlannerParameters parameters, VisibilityGraphsParameters visibilityGraphsParameters,
                                           SideDependentList<ConvexPolygon2D> footPolygons, YoGraphicsListRegistry graphicsListRegistry,
                                           YoVariableRegistry parentRegistry)
    {
       super(prefix, parameters, parentRegistry, graphicsListRegistry);
 
       waypointPathPlanner = new VisibilityGraphPathPlanner(parameters, visibilityGraphsParameters, parentRegistry);
-      footstepPlanner = new BodyPathBasedAStarPlanner(bodyPathPlanner, parameters, footPolygons, parameters.getCostParameters().getAStarHeuristicsWeight(),
-                                                      registry);
+      footstepPlanner = new BodyPathBasedAStarPlanner(prefix, bodyPathPlanner, parameters, footPolygons,
+                                                      parameters.getCostParameters().getAStarHeuristicsWeight(), registry);
    }
 }

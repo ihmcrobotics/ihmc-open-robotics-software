@@ -21,6 +21,15 @@ class ConcurrentList<T> extends ConcurrentCopier<List<T>>
          return readCopy.isEmpty();
    }
 
+   public int size()
+   {
+      List<T> currentList = getCopyForReading();
+      if (currentList == null)
+         return 0;
+      else
+         return currentList.size();
+   }
+
    public void clear()
    {
       List<T> updatedList = getCopyForWriting();

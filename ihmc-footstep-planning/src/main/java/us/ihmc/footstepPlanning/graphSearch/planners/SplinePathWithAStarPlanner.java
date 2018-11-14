@@ -15,13 +15,15 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class SplinePathWithAStarPlanner extends BodyPathAndFootstepPlannerWrapper
 {
+   private static final String prefix = "splineBased";
+
    public SplinePathWithAStarPlanner(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry parentRegistry,
                                      YoGraphicsListRegistry graphicsListRegistry)
    {
-      super("splineBased", parameters, parentRegistry, graphicsListRegistry);
+      super(prefix, parameters, parentRegistry, graphicsListRegistry);
 
       waypointPathPlanner = new SplinePathPlanner(parameters, registry);
-      footstepPlanner = new BodyPathBasedAStarPlanner(bodyPathPlanner, parameters, footPolygons,
+      footstepPlanner = new BodyPathBasedAStarPlanner(prefix, bodyPathPlanner, parameters, footPolygons,
                                                       parameters.getCostParameters().getBodyPathBasedHeuristicsWeight(), registry);
    }
 }
