@@ -10,8 +10,11 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -22,6 +25,8 @@ import java.util.List;
 public class VisibilityGraphPathPlanner extends WaypointsForFootstepsPlanner
 {
    private final NavigableRegionsManager navigableRegionsManager;
+
+   private final VisibilityGraphStatistics visibilityGraphStatistics = new VisibilityGraphStatistics();
 
    public VisibilityGraphPathPlanner(FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
                                      YoVariableRegistry parentRegistry)
@@ -85,6 +90,13 @@ public class VisibilityGraphPathPlanner extends WaypointsForFootstepsPlanner
       return yoResult.getEnumValue();
    }
 
+   public VisibilityGraphStatistics getPlannerStatistics()
+   {
+      packVisibilityGraphStatistics(visibilityGraphStatistics);
+      return visibilityGraphStatistics;
+   }
+
+
    // TODO hack to add start and goal planar regions
    private void addPlanarRegionAtZeroHeight(double xLocation, double yLocation)
    {
@@ -98,4 +110,18 @@ public class VisibilityGraphPathPlanner extends WaypointsForFootstepsPlanner
       PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(), new Vector3D(xLocation, yLocation, 0.0)), polygon);
       planarRegionsList.addPlanarRegion(planarRegion);
    }
+
+   private void packVisibilityGraphStatistics(VisibilityGraphStatistics statistics)
+   {
+      VisibilityMapHolder startMap = navigableRegionsManager.getStartMap();
+      VisibilityMapHolder goalMap = navigableRegionsManager.getGoalMap();
+      VisibilityMapHolder interRegionsMap = navigableRegionsManager.getInterRegionConnections();
+      List<NavigableRegion> navigableRegions = navigableRegionsManager.getNavigableRegions();
+
+      statistics.setStartVisibilityMapInWorld(startMap.getMapId(), startMap.getVisibilityMapInWorld());
+      statistics.setGoalVisibilityMapInWorld(goalMap.getMapId(), goalMap.getVisibilityMapInWorld());
+      statistics.setInterRegionsVisibilityMapInWorld(interRegionsMap.getMapId(), interRegionsMap.getVisibilityMapInWorld());
+      statistics.addNavigableRegions(navigableRegions);
+   }
+
 }
