@@ -107,7 +107,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
             * it's very close to saturating its torque limits.
             */
-   public double maximum_step_z_when_stepping_up_;
+   public double maximum_step_z_when_stepping_up_ = -1.0;
    /**
             * Maximum step length when stepping forward and down.
             * 
@@ -119,7 +119,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
             * it's very close to hitting it's ankle pitch joint limit.
             */
-   public double maximum_step_x_when_forward_and_down_ = -10.0;
+   public double maximum_step_x_when_forward_and_down_ = -1.0;
    /**
             * Maximum step height when stepping forward and down.
             * 
@@ -131,7 +131,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
             * it's very close to hitting it's ankle pitch joint limit.
             */
-   public double maximum_step_z_when_forward_and_down_ = -10.0;
+   public double maximum_step_z_when_forward_and_down_ = -1.0;
    /**
             * Maximum vertical distance between consecutive footsteps
             * 
