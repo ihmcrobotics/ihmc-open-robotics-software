@@ -9,16 +9,16 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface FootstepPlanner
 {
-   default void setFootstepPlannerObjective(FootstepPlannerObjective info)
+   default void setFootstepPlannerObjective(FootstepPlannerObjective objective)
    {
-      if (info.hasInitialStanceFootPose())
-         setInitialStanceFoot(info.getInitialStanceFootPose(), info.getInitialStanceFootSide());
-      if (info.hasHorizonLength())
-         setPlanningHorizonLength(info.getHorizonLength());
-      if (info.hasTimeout())
-         setTimeout(info.getTimeout());
-      if (info.hasGoal())
-         setGoal(info.getGoal());
+      if (objective.hasInitialStanceFootPose())
+         setInitialStanceFoot(objective.getInitialStanceFootPose(), objective.getInitialStanceFootSide());
+      if (objective.hasHorizonLength())
+         setPlanningHorizonLength(objective.getHorizonLength());
+      if (objective.hasTimeout())
+         setTimeout(objective.getTimeout());
+      if (objective.hasGoal())
+         setGoal(objective.getGoal());
    }
 
    default void requestInitialize()

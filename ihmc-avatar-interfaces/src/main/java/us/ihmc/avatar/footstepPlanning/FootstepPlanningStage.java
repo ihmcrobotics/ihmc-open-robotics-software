@@ -102,13 +102,15 @@ public class FootstepPlanningStage implements BodyPathAndFootstepPlanner
       this.tickDurationMs = tickDurationMs;
       this.activePlannerEnum = activePlanner;
 
+      String prefix = stageId + "_Step_";
+
       plannerGoalRecommendationHolder = new PlannerGoalRecommendationHolder(stageId);
 
-      registry = new YoVariableRegistry(stageId + getClass().getSimpleName());
+      registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
-      stageTime = new YoDouble(stageId + "_StageTime", registry);
-      initialize = new YoBoolean(stageId + "_Initialize" + registry.getName(), registry);
-      sequenceId = new YoInteger(stageId + "_PlanningSequenceId", registry);
+      stageTime = new YoDouble(prefix + "StageTime", registry);
+      initialize = new YoBoolean(prefix + "Initialize", registry);
+      sequenceId = new YoInteger(prefix + "PlanningSequenceId", registry);
 
       SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame;
       if (contactPointParameters == null)
@@ -121,7 +123,7 @@ public class FootstepPlanningStage implements BodyPathAndFootstepPlanner
       plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame, plannerListener));
       plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new SplinePathWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, registry, null));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
-                     new VisibilityGraphWithAStarPlanner(stageId + "", footstepPlanningParameters, visibilityGraphsParameters, contactPointsInSoleFrame,
+                     new VisibilityGraphWithAStarPlanner(prefix + "", footstepPlanningParameters, visibilityGraphsParameters, contactPointsInSoleFrame,
                                                          graphicsListRegistry, registry));
 
       initialize.set(true);

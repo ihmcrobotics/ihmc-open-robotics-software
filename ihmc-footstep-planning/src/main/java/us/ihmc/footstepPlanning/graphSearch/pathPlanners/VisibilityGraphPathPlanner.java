@@ -98,6 +98,8 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
 
    public void cancelPlanning(){}
 
+   public void setTimeout(double timeout){}
+
    // TODO hack to add start and goal planar regions
    private void addPlanarRegionAtZeroHeight(double xLocation, double yLocation)
    {

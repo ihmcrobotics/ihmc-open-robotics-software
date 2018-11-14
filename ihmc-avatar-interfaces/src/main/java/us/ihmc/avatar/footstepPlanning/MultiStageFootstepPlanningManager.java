@@ -10,14 +10,12 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.RosBasedPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -308,20 +306,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    @Override
    public void pathPlanningIsComplete(FootstepPlanningResult pathPlanningResult, PathPlanningStage stageFinished)
    {
-      /*
-      completedPathResults.add(pathPlanningResult);
-
-      BodyPathPlan bodyPathPlan = stageFinished.getPathPlan();
-
-      if (pathPlanningResult != null && pathPlanningResult.validForExecution() && bodyPathPlan != null)
-         completedPathPlans.add(stageFinished.getPlanSequenceId(), bodyPathPlan);
-
-      FootstepPlannerObjective objective = pathPlanningStagesInProgress.remove(stageFinished);
-
-      if (debug)
-         PrintTools.info("Stage " + stageFinished.getStageId() + " just finished planning its path.");
-         */
-      // TODO
    }
 
    @Override
@@ -514,7 +498,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       // step planner hasn't failed, so update the step planner status and send out the new plan if finished
       boolean noMoreStepsToPlan = stepPlanningStagesInProgress.isEmpty() && planningObjectivePool.isEmpty();
       boolean stepPlanningStatusChanged = isDonePlanningSteps.getBooleanValue() != noMoreStepsToPlan;
-      if (noMorePathsToPlan && stepPlanningStatusChanged) // step planning just finished.
+      if (noMoreStepsToPlan && stepPlanningStatusChanged) // step planning just finished.
       {
          sendMessageToUI("Result of step planning: " + planId.getIntegerValue() + ", " + stepStatus.toString());
          concatenateFootstepPlans();
@@ -769,176 +753,5 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       if (debug)
          PrintTools.debug(this, "Destroyed");
-   }
-
-   class ConcurrentList<T> extends ConcurrentCopier<List<T>>
-   {
-      public ConcurrentList()
-      {
-         super(ArrayList::new);
-      }
-
-      public boolean isEmpty()
-      {
-         List<T> readCopy = this.getCopyForReading();
-         if (readCopy == null)
-            return true;
-         else
-            return readCopy.isEmpty();
-      }
-
-      public void clear()
-      {
-         List<T> updatedList = getCopyForWriting();
-         updatedList.clear();
-         commit();
-      }
-
-      public void add(T objectToAdd)
-      {
-         List<T> existingList = getCopyForReading();
-         List<T> updatedList = getCopyForWriting();
-         updatedList.clear();
-         if (existingList != null)
-            updatedList.addAll(existingList);
-         updatedList.add(objectToAdd);
-
-         this.commit();
-      }
-
-      public T remove(int indexToRemove)
-      {
-         List<T> existingList = getCopyForReading();
-         List<T> updatedList = getCopyForWriting();
-         updatedList.clear();
-         if (existingList != null)
-            updatedList.addAll(existingList);
-         T objectToReturn = updatedList.remove(indexToRemove);
-
-         this.commit();
-
-         return objectToReturn;
-      }
-
-      public Iterable<T> iterable()
-      {
-         return getCopyForReading();
-      }
-   }
-
-   private class ConcurrentPairList<L, R> extends ConcurrentCopier<PairList<L, R>>
-   {
-      public ConcurrentPairList()
-      {
-         super(PairList::new);
-      }
-
-      public boolean isEmpty()
-      {
-         PairList<L, R> readCopy = getCopyForReading();
-         if (readCopy == null)
-            return true;
-         else
-            return readCopy.isEmpty();
-      }
-
-      public void clear()
-      {
-         PairList<L, R> updatedList = getCopyForWriting();
-         updatedList.clear();
-
-         commit();
-      }
-
-      public void add(L leftObjectToAdd, R rightObjectToAdd)
-      {
-         PairList<L, R> existingList = getCopyForReading();
-         PairList<L, R> updatedList = getCopyForWriting();
-         updatedList.clear();
-         if (existingList != null)
-            updatedList.addAll(existingList);
-         updatedList.add(new ImmutablePair<>(leftObjectToAdd, rightObjectToAdd));
-
-         this.commit();
-      }
-
-      public ImmutablePair<L, R> remove(int indexToRemove)
-      {
-         PairList<L, R> existingList = getCopyForReading();
-         PairList<L, R> updatedList = getCopyForWriting();
-         updatedList.clear();
-         if (existingList != null)
-            updatedList.addAll(existingList);
-         ImmutablePair<L, R> objectToReturn = updatedList.remove(indexToRemove);
-
-         this.commit();
-
-         return objectToReturn;
-      }
-
-      public Iterable<ImmutablePair<L, R>> iterable()
-      {
-         return getCopyForReading();
-      }
-   }
-
-   class ConcurrentMap<K, V> extends ConcurrentCopier<HashMap<K, V>>
-   {
-      public ConcurrentMap()
-      {
-         super(HashMap::new);
-      }
-
-      public boolean isEmpty()
-      {
-         Map<K, V> existingMap = getCopyForReading();
-
-         if (existingMap != null)
-            return getCopyForReading().isEmpty();
-         else
-            return true;
-      }
-
-      public Iterable<K> iterator()
-      {
-         Map<K, V> existingMap = getCopyForReading();
-         if (existingMap != null)
-            return existingMap.keySet();
-         else
-            return null;
-      }
-
-      public void clear()
-      {
-         Map<K, V> updatedMap = getCopyForWriting();
-         updatedMap.clear();
-         commit();
-      }
-
-      public void put(K key, V value)
-      {
-         Map<K, V> existingMap = getCopyForReading();
-         Map<K, V> updatedMap = getCopyForWriting();
-         updatedMap.clear();
-         if (existingMap != null)
-            updatedMap.putAll(existingMap);
-         updatedMap.put(key, value);
-
-         commit();
-      }
-
-      public V remove(K key)
-      {
-         Map<K, V> existingMap = getCopyForReading();
-         Map<K, V> updatedMap = getCopyForWriting();
-         updatedMap.clear();
-         if (existingMap != null)
-            updatedMap.putAll(existingMap);
-         V objectToReturn = updatedMap.remove(key);
-
-         commit();
-
-         return objectToReturn;
-      }
    }
 }

@@ -1,7 +1,5 @@
 package us.ihmc.avatar.footstepPlanning;
 
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningManager.ConcurrentList;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningManager.ConcurrentMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
