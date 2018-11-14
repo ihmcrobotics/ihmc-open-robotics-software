@@ -3,8 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -16,9 +15,9 @@ public class HoldPositionControllerState extends HighLevelControllerState
    private final JointDesiredOutputListReadOnly highLevelControllerOutput;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   private final PairList<OneDoFJoint, YoDouble> jointSetpoints = new PairList<>();
+   private final PairList<OneDoFJointBasics, YoDouble> jointSetpoints = new PairList<>();
 
-   public HoldPositionControllerState(HighLevelControllerName stateEnum, OneDoFJoint[] controlledJoints,
+   public HoldPositionControllerState(HighLevelControllerName stateEnum, OneDoFJointBasics[] controlledJoints,
                                       HighLevelControllerParameters highLevelControllerParameters, JointDesiredOutputListReadOnly highLevelControllerOutput)
    {
       super(stateEnum, highLevelControllerParameters, controlledJoints);
@@ -26,7 +25,7 @@ public class HoldPositionControllerState extends HighLevelControllerState
       this.highLevelControllerOutput = highLevelControllerOutput;
       String nameSuffix = "_" + stateEnum.name();
 
-      for (OneDoFJoint controlledJoint : controlledJoints)
+      for (OneDoFJointBasics controlledJoint : controlledJoints)
       {
          String jointName = controlledJoint.getName();
 
@@ -44,7 +43,7 @@ public class HoldPositionControllerState extends HighLevelControllerState
    {
       for (int jointIndex = 0; jointIndex < jointSetpoints.size(); jointIndex++)
       {
-         OneDoFJoint joint = jointSetpoints.get(jointIndex).getLeft();
+         OneDoFJointBasics joint = jointSetpoints.get(jointIndex).getLeft();
          YoDouble setpoint = jointSetpoints.get(jointIndex).getRight();
          JointDesiredOutputReadOnly lowLevelJointData = highLevelControllerOutput.getJointDesiredOutput(joint);
          if (lowLevelJointData != null && lowLevelJointData.hasDesiredPosition())
@@ -59,7 +58,7 @@ public class HoldPositionControllerState extends HighLevelControllerState
    {
       for (int jointIndex = 0; jointIndex < jointSetpoints.size(); jointIndex++)
       {
-         OneDoFJoint joint = jointSetpoints.get(jointIndex).getLeft();
+         OneDoFJointBasics joint = jointSetpoints.get(jointIndex).getLeft();
          YoDouble desiredPosition = jointSetpoints.get(jointIndex).getRight();
 
          JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);

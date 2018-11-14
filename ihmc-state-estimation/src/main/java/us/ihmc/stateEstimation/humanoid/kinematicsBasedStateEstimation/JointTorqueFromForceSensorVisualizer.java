@@ -7,26 +7,27 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
 
 public class JointTorqueFromForceSensorVisualizer
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final List<RigidBody> allRigidBodies;
-   private final Map<RigidBody, FootSwitchInterface> footSwitches;
-   private final Map<RigidBody, GeometricJacobian> jacobians;
-   private final Map<OneDoFJoint, YoDouble> jointTorques;
+   private final List<RigidBodyBasics> allRigidBodies;
+   private final Map<RigidBodyBasics, FootSwitchInterface> footSwitches;
+   private final Map<RigidBodyBasics, GeometricJacobian> jacobians;
+   private final Map<OneDoFJointBasics, YoDouble> jointTorques;
 
-   public JointTorqueFromForceSensorVisualizer(Map<RigidBody, FootSwitchInterface> footSwitches, YoVariableRegistry parentRegistry)
+   public JointTorqueFromForceSensorVisualizer(Map<RigidBodyBasics, FootSwitchInterface> footSwitches, YoVariableRegistry parentRegistry)
    {
       this.footSwitches = footSwitches;
 
@@ -34,15 +35,15 @@ public class JointTorqueFromForceSensorVisualizer
       jacobians = new HashMap<>();
       jointTorques = new HashMap<>();
 
-      for (RigidBody rigidBody : allRigidBodies)
+      for (RigidBodyBasics rigidBody : allRigidBodies)
       {
-         RigidBody rootBody = ScrewTools.getRootBody(rigidBody);
-         OneDoFJoint[] oneDoFJoints = ScrewTools.createOneDoFJointPath(rootBody, rigidBody);
+         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
+         OneDoFJointBasics[] oneDoFJoints = MultiBodySystemTools.createOneDoFJointPath(rootBody, rigidBody);
 
          GeometricJacobian jacobian = new GeometricJacobian(oneDoFJoints, rigidBody.getBodyFixedFrame());
          jacobians.put(rigidBody, jacobian);
 
-         for (OneDoFJoint joint : oneDoFJoints)
+         for (OneDoFJointBasics joint : oneDoFJoints)
          {
             if (!jointTorques.containsKey(joint))
             {
@@ -62,7 +63,7 @@ public class JointTorqueFromForceSensorVisualizer
    {
       for (int i = 0; i < allRigidBodies.size(); i++)
       {
-         RigidBody rigidBody = allRigidBodies.get(i);
+         RigidBodyBasics rigidBody = allRigidBodies.get(i);
          FootSwitchInterface footSwitch = footSwitches.get(rigidBody);
          GeometricJacobian jacobian = jacobians.get(rigidBody);
 
@@ -73,11 +74,11 @@ public class JointTorqueFromForceSensorVisualizer
          jacobian.compute();
          jacobian.computeJointTorques(wrench, jointTorquesMatrix);
 
-         InverseDynamicsJoint[] joints = jacobian.getJointsInOrder();
+         JointBasics[] joints = jacobian.getJointsInOrder();
 
          for (int j = 0; j < joints.length; j++)
          {
-            OneDoFJoint joint = (OneDoFJoint) joints[j];
+            OneDoFJointBasics joint = (OneDoFJointBasics) joints[j];
             jointTorques.get(joint).set(jointTorquesMatrix.get(j, 0));
          }
       }

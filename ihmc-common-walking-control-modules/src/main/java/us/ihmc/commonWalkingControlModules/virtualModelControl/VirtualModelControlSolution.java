@@ -1,41 +1,44 @@
 package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.screwTheory.*;
-
 import java.util.List;
 import java.util.Map;
+
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 
 public class VirtualModelControlSolution
 {
    private DenseMatrix64F jointTorques;
 
-   private SpatialForceVector centroidalMomentumRateSolution;
-   private Map<RigidBody, Wrench> externalWrenchSolution;
-   private List<RigidBody> rigidBodiesWithExternalWrench;
+   private SpatialForceReadOnly centroidalMomentumRateSolution;
+   private Map<RigidBodyBasics, Wrench> externalWrenchSolution;
+   private List<RigidBodyBasics> rigidBodiesWithExternalWrench;
 
-   public void setCentroidalMomentumRateSolution(SpatialForceVector centroidalMomentumRateSolution)
+   public void setCentroidalMomentumRateSolution(SpatialForceReadOnly centroidalMomentumRateSolution)
    {
       this.centroidalMomentumRateSolution = centroidalMomentumRateSolution;
    }
 
-   public void setExternalWrenchSolution(List<RigidBody> rigidBodiesWithExternalWrench, Map<RigidBody, Wrench> externalWrenchSolution)
+   public void setExternalWrenchSolution(List<RigidBodyBasics> rigidBodiesWithExternalWrench, Map<RigidBodyBasics, Wrench> externalWrenchSolution)
    {
       this.rigidBodiesWithExternalWrench = rigidBodiesWithExternalWrench;
       this.externalWrenchSolution = externalWrenchSolution;
    }
 
-   public List<RigidBody> getRigidBodiesWithExternalWrench()
+   public List<RigidBodyBasics> getRigidBodiesWithExternalWrench()
    {
       return rigidBodiesWithExternalWrench;
    }
 
-   public Map<RigidBody, Wrench> getExternalWrenchSolution()
+   public Map<RigidBodyBasics, Wrench> getExternalWrenchSolution()
    {
       return externalWrenchSolution;
    }
 
-   public SpatialForceVector getCentroidalMomentumRateSolution()
+   public SpatialForceReadOnly getCentroidalMomentumRateSolution()
    {
       return centroidalMomentumRateSolution;
    }

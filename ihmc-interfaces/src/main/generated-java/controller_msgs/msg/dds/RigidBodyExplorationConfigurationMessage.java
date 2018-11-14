@@ -23,7 +23,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-   public long rigid_body_name_based_hash_code_;
+   public int rigid_body_hash_code_;
    public us.ihmc.idl.IDLSequence.Byte  configuration_space_names_to_explore_;
    public us.ihmc.idl.IDLSequence.Double  exploration_range_upper_limits_;
    public us.ihmc.idl.IDLSequence.Double  exploration_range_lower_limits_;
@@ -48,7 +48,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
    {
       sequence_id_ = other.sequence_id_;
 
-      rigid_body_name_based_hash_code_ = other.rigid_body_name_based_hash_code_;
+      rigid_body_hash_code_ = other.rigid_body_hash_code_;
 
       configuration_space_names_to_explore_.set(other.configuration_space_names_to_explore_);
       exploration_range_upper_limits_.set(other.exploration_range_upper_limits_);
@@ -70,13 +70,13 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
       return sequence_id_;
    }
 
-   public void setRigidBodyNameBasedHashCode(long rigid_body_name_based_hash_code)
+   public void setRigidBodyHashCode(int rigid_body_hash_code)
    {
-      rigid_body_name_based_hash_code_ = rigid_body_name_based_hash_code;
+      rigid_body_hash_code_ = rigid_body_hash_code;
    }
-   public long getRigidBodyNameBasedHashCode()
+   public int getRigidBodyHashCode()
    {
-      return rigid_body_name_based_hash_code_;
+      return rigid_body_hash_code_;
    }
 
 
@@ -117,7 +117,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.rigid_body_name_based_hash_code_, other.rigid_body_name_based_hash_code_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.rigid_body_hash_code_, other.rigid_body_hash_code_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.configuration_space_names_to_explore_, other.configuration_space_names_to_explore_, epsilon)) return false;
 
@@ -140,7 +140,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.rigid_body_name_based_hash_code_ != otherMyClass.rigid_body_name_based_hash_code_) return false;
+      if(this.rigid_body_hash_code_ != otherMyClass.rigid_body_hash_code_) return false;
 
       if (!this.configuration_space_names_to_explore_.equals(otherMyClass.configuration_space_names_to_explore_)) return false;
       if (!this.exploration_range_upper_limits_.equals(otherMyClass.exploration_range_upper_limits_)) return false;
@@ -157,8 +157,8 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
       builder.append("RigidBodyExplorationConfigurationMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("rigid_body_name_based_hash_code=");
-      builder.append(this.rigid_body_name_based_hash_code_);      builder.append(", ");
+      builder.append("rigid_body_hash_code=");
+      builder.append(this.rigid_body_hash_code_);      builder.append(", ");
       builder.append("configuration_space_names_to_explore=");
       builder.append(this.configuration_space_names_to_explore_);      builder.append(", ");
       builder.append("exploration_range_upper_limits=");

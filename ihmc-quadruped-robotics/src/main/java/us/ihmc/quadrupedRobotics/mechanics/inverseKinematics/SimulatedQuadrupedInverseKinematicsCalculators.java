@@ -1,15 +1,15 @@
 package us.ihmc.quadrupedRobotics.mechanics.inverseKinematics;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SimulatedQuadrupedInverseKinematicsCalculators extends QuadrupedInverseKinematicsCalculators
 {
@@ -23,7 +23,7 @@ public class SimulatedQuadrupedInverseKinematicsCalculators extends QuadrupedInv
 
    public void updateSimulationBasedOnFullRobotModel(FloatingRootJointRobot sdfRobot)
    {
-      for (OneDoFJoint joint : oneDoFJoints)
+      for (OneDoFJointBasics joint : oneDoFJoints)
       {
          OneDegreeOfFreedomJoint simulatedJoint = (OneDegreeOfFreedomJoint) sdfRobot.getJoint(joint.getName());
          simulatedJoint.setQ(jointDesiredOutputList.getJointDesiredOutput(joint).getDesiredPosition());

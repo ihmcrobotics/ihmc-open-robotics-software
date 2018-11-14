@@ -1,30 +1,31 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 
 public class FullInverseDynamicsStructure
 {
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
-   private final RigidBody estimationLink;
-   private final RigidBody elevator;
-   private final FloatingInverseDynamicsJoint rootJoint;
+   private final RigidBodyBasics estimationLink;
+   private final RigidBodyBasics elevator;
+   private final FloatingJointBasics rootJoint;
 
    // TODO: What's a good name for this?
-   public FullInverseDynamicsStructure(RigidBody elevator, RigidBody estimationLink, FloatingInverseDynamicsJoint rootInverseDynamicsJoint)
+   public FullInverseDynamicsStructure(RigidBodyBasics elevator, RigidBodyBasics estimationLink, FloatingJointBasics rootInverseDynamicsJoint)
    {
       this.elevator = elevator;
       this.rootJoint = rootInverseDynamicsJoint;
 
-      spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, 0.0, false);
+      spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, ReferenceFrame.getWorldFrame());
+      spatialAccelerationCalculator.setGravitionalAcceleration(-0.0);
 
       this.estimationLink = estimationLink;
    }
 
-   public FloatingInverseDynamicsJoint getRootJoint()
+   public FloatingJointBasics getRootJoint()
    {
       return rootJoint;
    }
@@ -34,7 +35,7 @@ public class FullInverseDynamicsStructure
       return spatialAccelerationCalculator;
    }
 
-   public RigidBody getEstimationLink()
+   public RigidBodyBasics getEstimationLink()
    {
       return estimationLink;
    }
@@ -44,21 +45,21 @@ public class FullInverseDynamicsStructure
       return estimationLink.getParentJoint().getFrameAfterJoint();
    }
 
-   public RigidBody getElevator()
+   public RigidBodyBasics getElevator()
    {
       return elevator;
    }
 
    public void updateInternalState()
    {
-      spatialAccelerationCalculator.compute();
+      spatialAccelerationCalculator.reset();
    }
 
    public static FullInverseDynamicsStructure createInverseDynamicStructure(FullRobotModel fullRobotModel)
    {
-      RigidBody elevator = fullRobotModel.getElevator();
-      FloatingInverseDynamicsJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
-      RigidBody estimationLink = fullRobotModel.getRootBody();
+      RigidBodyBasics elevator = fullRobotModel.getElevator();
+      FloatingJointBasics rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
+      RigidBodyBasics estimationLink = fullRobotModel.getRootBody();
 
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
 

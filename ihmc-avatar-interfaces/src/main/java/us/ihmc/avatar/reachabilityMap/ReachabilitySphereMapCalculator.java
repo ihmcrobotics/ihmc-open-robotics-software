@@ -16,8 +16,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -46,7 +46,7 @@ public class ReachabilitySphereMapCalculator
    private final YoGraphicPosition currentEvaluationPosition = new YoGraphicPosition("currentEvaluationPosition", "", registry, 0.0125,
                                                                                      YoAppearance.DeepPink());
 
-   public ReachabilitySphereMapCalculator(OneDoFJoint[] robotArmJoints, SimulationConstructionSet scs)
+   public ReachabilitySphereMapCalculator(OneDoFJointBasics[] robotArmJoints, SimulationConstructionSet scs)
    {
       this.scs = scs;
       solver = new ReachabilityMapSolver(robotArmJoints, null, registry);

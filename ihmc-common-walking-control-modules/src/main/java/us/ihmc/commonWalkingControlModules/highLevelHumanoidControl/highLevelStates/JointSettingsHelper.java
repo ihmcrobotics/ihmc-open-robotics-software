@@ -13,9 +13,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -40,20 +39,20 @@ public class JointSettingsHelper
    private final JointLoadStatusProvider jointLoadStatusProvider;
 
 
-   public JointSettingsHelper(HighLevelControllerParameters parameters, OneDoFJoint[] joints, HighLevelControllerState jointLoadStatusProvider,
+   public JointSettingsHelper(HighLevelControllerParameters parameters, OneDoFJointBasics[] joints, HighLevelControllerState jointLoadStatusProvider,
                               HighLevelControllerName stateEnum, YoVariableRegistry parentRegistry)
    {
       this(JointSettingConfiguration.extract(parameters, stateEnum), joints, jointLoadStatusProvider,
            CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, stateEnum.toString()), parentRegistry);
    }
 
-   public JointSettingsHelper(JointSettingConfiguration configuration, List<OneDoFJoint> joints, JointLoadStatusProvider jointLoadStatusProvider,
+   public JointSettingsHelper(JointSettingConfiguration configuration, List<OneDoFJointBasics> joints, JointLoadStatusProvider jointLoadStatusProvider,
                               String stateName, YoVariableRegistry parentRegistry)
    {
-      this(configuration, joints.toArray(new OneDoFJoint[joints.size()]), jointLoadStatusProvider, stateName, parentRegistry);
+      this(configuration, joints.toArray(new OneDoFJointBasics[joints.size()]), jointLoadStatusProvider, stateName, parentRegistry);
    }
 
-   public JointSettingsHelper(JointSettingConfiguration configuration, OneDoFJoint[] joints, JointLoadStatusProvider jointLoadStatusProvider, String stateName,
+   public JointSettingsHelper(JointSettingConfiguration configuration, OneDoFJointBasics[] joints, JointLoadStatusProvider jointLoadStatusProvider, String stateName,
                               YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(stateName + "JointSettings");
@@ -89,7 +88,7 @@ public class JointSettingsHelper
       List<String> jointsWithoutBehaviors = new ArrayList<>();
       for (int jointIdx = 0; jointIdx < joints.length; jointIdx++)
       {
-         OneDoFJoint joint = joints[jointIdx];
+         OneDoFJointBasics joint = joints[jointIdx];
          String jointName = joint.getName();
          jointNames[jointIdx] = jointName;
          jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(joint);

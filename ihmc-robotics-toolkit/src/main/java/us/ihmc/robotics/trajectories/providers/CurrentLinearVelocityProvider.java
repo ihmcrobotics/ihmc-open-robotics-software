@@ -1,8 +1,8 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
 
 public class CurrentLinearVelocityProvider implements VectorProvider
 {
@@ -17,6 +17,6 @@ public class CurrentLinearVelocityProvider implements VectorProvider
    public void get(FrameVector3D frameVectorToPack)
    {
       referenceFrame.getTwistOfFrame(twist);
-      twist.getLinearPart(frameVectorToPack);
+      frameVectorToPack.setIncludingFrame(twist.getLinearPart());
    }
 }

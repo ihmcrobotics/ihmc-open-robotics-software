@@ -35,13 +35,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
@@ -57,7 +57,7 @@ public class MomentumRecoveryControlModuleTest
 
    private MomentumRecoveryControlModule momentumRecoveryControlModule;
 
-   private SideDependentList<RigidBody> feet = new SideDependentList<>();
+   private SideDependentList<RigidBodyBasics> feet = new SideDependentList<>();
    private SideDependentList<SixDoFJoint> footJoints = new SideDependentList<>();
    private SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
    private SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
@@ -432,13 +432,13 @@ public class MomentumRecoveryControlModuleTest
 
    private void setupTest(SideDependentList<Vector3D> footPositions)
    {
-      RigidBody elevator = new RigidBody("elevator", worldFrame);
+      RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String prefix = robotSide.getLowerCaseName();
          SixDoFJoint footJoint = new SixDoFJoint(prefix + "FootJoint", elevator);
-         RigidBody foot = ScrewTools.addRigidBody(prefix + "Foot", footJoint, new Matrix3D(), 1.0, new Vector3D());
+         RigidBodyBasics foot = new RigidBody(prefix + "Foot", footJoint, new Matrix3D(), 1.0, new Vector3D());
          ReferenceFrame ankleFrame = foot.getBodyFixedFrame();
          ReferenceFrame soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(prefix + "Sole", ankleFrame, new RigidBodyTransform());
 
@@ -455,7 +455,7 @@ public class MomentumRecoveryControlModuleTest
          footPolygon.update();
          defaultFootPolygons.put(robotSide, footPolygon);
 
-         footJoint.setPosition(footPositions.get(robotSide));
+         footJoint.setJointPosition(footPositions.get(robotSide));
       }
       elevator.updateFramesRecursively();
 

@@ -21,10 +21,11 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -53,14 +54,12 @@ public class RigidBodyControlManager
    private final double[] initialJointPositions;
    private final FramePose3D homePose;
 
-   private final OneDoFJoint[] jointsToControl;
-
-   private final YoBoolean allJointsEnabled;
+   private final OneDoFJointBasics[] jointsToControl;
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final YoBoolean stateSwitched;
 
-   public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
+   public RigidBodyControlManager(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, TObjectDoubleHashMap<String> homeConfiguration,
                                   Pose3D homePose, Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
                                   Vector3DReadOnly taskspaceAngularWeight, Vector3DReadOnly taskspaceLinearWeight, PID3DGainsReadOnly taskspaceOrientationGains,
                                   PID3DGainsReadOnly taskspacePositionGains, ContactablePlaneBody contactableBody, RigidBodyControlMode defaultControlMode,
@@ -73,7 +72,7 @@ public class RigidBodyControlManager
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
       stateSwitched = new YoBoolean(namePrefix + "StateSwitched", registry);
 
-      jointsToControl = ScrewTools.createOneDoFJointPath(baseBody, bodyToControl);
+      jointsToControl = MultiBodySystemTools.createOneDoFJointPath(baseBody, bodyToControl);
 
       initialJointPositions = new double[jointsToControl.length];
 
@@ -134,9 +133,6 @@ public class RigidBodyControlManager
       this.defaultControlMode = new EnumParameter<>(namePrefix + "DefaultControlMode", description, registry, RigidBodyControlMode.class, false,
                                                     defaultControlMode);
       this.defaultControlMode.addParameterChangedListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
-
-      allJointsEnabled = new YoBoolean(namePrefix + "AllJointsEnabled", registry);
-      allJointsEnabled.set(true);
 
       stateMachine = setupStateMachine(namePrefix, yoTime);
       parentRegistry.addChild(registry);
@@ -201,8 +197,6 @@ public class RigidBodyControlManager
 
    public void compute()
    {
-      checkForDisabledJoints();
-
       if (stateMachine.getCurrentState().abortState())
          hold();
 
@@ -446,8 +440,9 @@ public class RigidBodyControlManager
 
    public void resetJointIntegrators()
    {
-      for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
-         jointsToControl[jointIdx].resetIntegrator();
+      // FIXME
+//      for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
+//         jointsToControl[jointIdx].resetIntegrator();
    }
 
    private void computeDesiredJointPositions(double[] desiredJointPositionsToPack)
@@ -473,31 +468,6 @@ public class RigidBodyControlManager
    public RigidBodyControlMode getActiveControlMode()
    {
       return stateMachine.getCurrentStateKey();
-   }
-
-   private void checkForDisabledJoints()
-   {
-      boolean isAtLeastOneJointDisabled = checkIfAtLeastOneJointIsDisabled();
-
-      if (isAtLeastOneJointDisabled && allJointsEnabled.getBooleanValue())
-      {
-         holdInJointspace();
-         allJointsEnabled.set(false);
-      }
-      else if (!isAtLeastOneJointDisabled)
-      {
-         allJointsEnabled.set(true);
-      }
-   }
-
-   private boolean checkIfAtLeastOneJointIsDisabled()
-   {
-      for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
-      {
-         if (!jointsToControl[jointIdx].isEnabled())
-            return true;
-      }
-      return false;
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
@@ -532,7 +502,7 @@ public class RigidBodyControlManager
       return ret;
    }
 
-   public OneDoFJoint[] getControlledJoints()
+   public OneDoFJointBasics[] getControlledJoints()
    {
       return jointsToControl;
    }

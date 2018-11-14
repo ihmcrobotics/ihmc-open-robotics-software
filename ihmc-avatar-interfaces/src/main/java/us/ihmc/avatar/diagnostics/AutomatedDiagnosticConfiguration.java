@@ -3,13 +3,13 @@ package us.ihmc.avatar.diagnostics;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
@@ -48,7 +48,7 @@ public class AutomatedDiagnosticConfiguration
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            OneDoFJoint legJoint = fullRobotModel.getLegJoint(robotSide, legJointName);
+            OneDoFJointBasics legJoint = fullRobotModel.getLegJoint(robotSide, legJointName);
             if (!jointsToIgnore.contains(legJoint.getName()))
             {
                OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(legJoint, toolbox);
@@ -73,7 +73,7 @@ public class AutomatedDiagnosticConfiguration
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            OneDoFJoint armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
+            OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
             if (!jointsToIgnore.contains(armJoint.getName()))
             {
                OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(armJoint, toolbox);
@@ -94,7 +94,7 @@ public class AutomatedDiagnosticConfiguration
 
       for (SpineJointName spineJointName : robotSpecificJointNames.getSpineJointNames())
       {
-         OneDoFJoint spineJoint = fullRobotModel.getSpineJoint(spineJointName);
+         OneDoFJointBasics spineJoint = fullRobotModel.getSpineJoint(spineJointName);
          if (!jointsToIgnore.contains(spineJoint.getName()))
          {
             OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(spineJoint, toolbox);

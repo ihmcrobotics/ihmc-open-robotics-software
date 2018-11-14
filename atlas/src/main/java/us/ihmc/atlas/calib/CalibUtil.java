@@ -13,9 +13,8 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class CalibUtil
 {
@@ -44,21 +43,21 @@ public class CalibUtil
       }
    }
 
-   public static ArrayList<String> toStringArrayList(ArrayList<OneDoFJoint> joints)
+   public static ArrayList<String> toStringArrayList(ArrayList<OneDoFJointBasics> joints)
    {
       ArrayList<String> jointNames = new ArrayList<>();
-      for (OneDoFJoint joint : joints)
+      for (OneDoFJointBasics joint : joints)
          jointNames.add(joint.getName());
       return jointNames;
    }
 
    public static void setRobotModelFromData(FullRobotModel fullRobotModel, Map<String, Double> qmap)
    {
-      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] joints = fullRobotModel.getOneDoFJoints();
 
       for (int i = 0; i < joints.length; i++)
       {
-         OneDoFJoint joint = joints[i];
+         OneDoFJointBasics joint = joints[i];
          if (qmap.containsKey(joint.getName()))
          {
             joint.setQ(qmap.get(joint.getName()));
@@ -72,11 +71,11 @@ public class CalibUtil
 
    public static void setRobotModelFromData(FullRobotModel fullRobotModel, Map<String, Double> qmap, Map<String, Double> qbias)
    {
-      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
+      OneDoFJointBasics[] joints = fullRobotModel.getOneDoFJoints();
 
       for (int i = 0; i < joints.length; i++)
       {
-         OneDoFJoint joint = joints[i];
+         OneDoFJointBasics joint = joints[i];
          if (qmap.containsKey(joint.getName()))
          {
             double bias = 0;

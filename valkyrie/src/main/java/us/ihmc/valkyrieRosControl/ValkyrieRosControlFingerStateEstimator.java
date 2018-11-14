@@ -44,9 +44,9 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
@@ -75,7 +75,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
    private final SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> sideDependentBiases = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
    private final SideDependentList<EnumMap<ValkyrieHandJointName, DoubleProvider>> sideDependentMotorBasedFingerJointPositions = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
    private final SideDependentList<EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder>> sideDependentFingerMotorHandles = SideDependentList.createListOfEnumMaps(ValkyrieFingerMotorName.class);
-   private final SideDependentList<EnumMap<ValkyrieHandJointName, OneDoFJoint>> sideDependentFingerJoints = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
+   private final SideDependentList<EnumMap<ValkyrieHandJointName, OneDoFJointBasics>> sideDependentFingerJoints = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
 
    private final YoBoolean forceMotorBasedPositionSwitch;
    private final YoEnum<RobotSide> doZeroFingerCalibrationNow;
@@ -94,7 +94,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
    {
       this.timestampProvider = timestampProvider;
       this.sensorProcessingConfiguration = sensorProcessingConfiguration;
-      List<OneDoFJoint> allJoints = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
+      List<OneDoFJointBasics> allJoints = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
 
       forceMotorBasedPositionSwitch = new YoBoolean("forceMotorBasedPositionSwitch", registry);
       doZeroFingerCalibrationNow = new YoEnum<>("doZeroFingerCalibrationNow", registry, RobotSide.class, true);
@@ -111,7 +111,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
          EnumMap<ValkyrieHandJointName, YoDouble> scales = sideDependentScales.get(robotSide);
          EnumMap<ValkyrieHandJointName, YoDouble> biases = sideDependentBiases.get(robotSide);
          EnumMap<ValkyrieHandJointName, YoBoolean> encoderDeadMap = sideDependentEncoderDeadMap.get(robotSide);
-         EnumMap<ValkyrieHandJointName, OneDoFJoint> fingerJoints = sideDependentFingerJoints.get(robotSide);
+         EnumMap<ValkyrieHandJointName, OneDoFJointBasics> fingerJoints = sideDependentFingerJoints.get(robotSide);
 
          for (ValkyrieHandJointName fingerJoint : ValkyrieHandJointName.values)
          {
@@ -358,7 +358,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
       {
          EnumMap<ValkyrieHandJointName, YoBoolean> encoderDeadMap = sideDependentEncoderDeadMap.get(robotSide);
          EnumMap<ValkyrieHandJointName, Mean> fingerPositionMeans = sideDependentFingerPositionMeans.get(robotSide);
-         EnumMap<ValkyrieHandJointName, OneDoFJoint> fingerJoints = sideDependentFingerJoints.get(robotSide);
+         EnumMap<ValkyrieHandJointName, OneDoFJointBasics> fingerJoints = sideDependentFingerJoints.get(robotSide);
 
          for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
          {

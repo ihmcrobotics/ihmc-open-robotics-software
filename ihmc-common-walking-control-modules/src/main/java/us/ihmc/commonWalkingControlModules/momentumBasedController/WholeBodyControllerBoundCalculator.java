@@ -13,14 +13,13 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.kinematics.JointLimitData;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class WholeBodyControllerBoundCalculator
 {
@@ -29,19 +28,19 @@ public class WholeBodyControllerBoundCalculator
    private final DenseMatrix64F jointsRangeOfMotion;
    private final DenseMatrix64F jointLowerLimits;
    private final DenseMatrix64F jointUpperLimits;
-   private final HashMap<OneDoFJoint, JointLimitEnforcement> jointLimitTypes = new HashMap<>();
-   private final HashMap<OneDoFJoint, JointLimitParameters> jointLimitParameters = new HashMap<>();
-   private final HashMap<OneDoFJoint, JointLimitData> jointLimitData = new HashMap<>();
+   private final HashMap<OneDoFJointBasics, JointLimitEnforcement> jointLimitTypes = new HashMap<>();
+   private final HashMap<OneDoFJointBasics, JointLimitParameters> jointLimitParameters = new HashMap<>();
+   private final HashMap<OneDoFJointBasics, JointLimitData> jointLimitData = new HashMap<>();
 
-   private final HashMap<OneDoFJoint, YoDouble> filterAlphas = new HashMap<>();
-   private final HashMap<OneDoFJoint, YoDouble> velocityGains = new HashMap<>();
-   private final HashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredLowerLimits = new HashMap<>();
-   private final HashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredUpperLimits = new HashMap<>();
+   private final HashMap<OneDoFJointBasics, YoDouble> filterAlphas = new HashMap<>();
+   private final HashMap<OneDoFJointBasics, YoDouble> velocityGains = new HashMap<>();
+   private final HashMap<OneDoFJointBasics, AlphaFilteredYoVariable> filteredLowerLimits = new HashMap<>();
+   private final HashMap<OneDoFJointBasics, AlphaFilteredYoVariable> filteredUpperLimits = new HashMap<>();
 
    private final YoBoolean areJointVelocityLimitsConsidered = new YoBoolean("areJointVelocityLimitsConsidered", registry);
 
    private final JointIndexHandler jointIndexHandler;
-   private final OneDoFJoint[] oneDoFJoints;
+   private final OneDoFJointBasics[] oneDoFJoints;
 
    private final double controlDT;
 
@@ -61,7 +60,7 @@ public class WholeBodyControllerBoundCalculator
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
          double jointLimitLower = joint.getJointLimitLower();
          double jointLimitUpper = joint.getJointLimitUpper();
@@ -91,7 +90,7 @@ public class WholeBodyControllerBoundCalculator
    {
       for (int commandJointIndex = 0; commandJointIndex < command.getNumberOfJoints(); commandJointIndex++)
       {
-         OneDoFJoint joint = command.getJoint(commandJointIndex);
+         OneDoFJointBasics joint = command.getJoint(commandJointIndex);
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
          double originalJointLimitLower = joint.getJointLimitLower();
          double originalJointLimitUpper = joint.getJointLimitUpper();
@@ -105,7 +104,7 @@ public class WholeBodyControllerBoundCalculator
    {
       for (int idx = 0; idx < command.getNumberOfJoints(); idx++)
       {
-         OneDoFJoint joint = command.getJoint(idx);
+         OneDoFJointBasics joint = command.getJoint(idx);
          jointLimitTypes.put(joint, command.getJointLimitReductionFactor(idx));
          JointLimitParameters params = command.getJointLimitParameters(idx);
          if (params != null)
@@ -121,7 +120,7 @@ public class WholeBodyControllerBoundCalculator
    {
       for (int idx = 0; idx < command.getNumberOfJoints(); idx++)
       {
-         OneDoFJoint joint = command.getJoint(idx);
+         OneDoFJointBasics joint = command.getJoint(idx);
          JointLimitData data = command.getJointLimitData(idx);
          if (data != null)
             jointLimitData.put(joint, data);
@@ -135,7 +134,7 @@ public class WholeBodyControllerBoundCalculator
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
 
          switch (jointLimitTypes.get(joint))
          {
@@ -150,7 +149,7 @@ public class WholeBodyControllerBoundCalculator
       }
    }
 
-   private void computeVelocityLimitDefault(OneDoFJoint joint, DenseMatrix64F qDotMinToPack, DenseMatrix64F qDotMaxToPack)
+   private void computeVelocityLimitDefault(OneDoFJointBasics joint, DenseMatrix64F qDotMinToPack, DenseMatrix64F qDotMaxToPack)
    {
       int index = jointIndexHandler.getOneDoFJointIndex(joint);
 
@@ -195,7 +194,7 @@ public class WholeBodyControllerBoundCalculator
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
 
          switch (jointLimitTypes.get(joint))
          {
@@ -213,7 +212,7 @@ public class WholeBodyControllerBoundCalculator
       }
    }
 
-   private void computeAccelerationLimitDefault(OneDoFJoint joint, double absoluteMaximumJointAcceleration, DenseMatrix64F qDDotMinToPack,
+   private void computeAccelerationLimitDefault(OneDoFJointBasics joint, double absoluteMaximumJointAcceleration, DenseMatrix64F qDDotMinToPack,
                                                 DenseMatrix64F qDDotMaxToPack)
    {
       int index = jointIndexHandler.getOneDoFJointIndex(joint);
@@ -257,7 +256,7 @@ public class WholeBodyControllerBoundCalculator
       }
    }
 
-   private void computeAccelerationLimitRestrictive(OneDoFJoint joint, double absoluteMaximumJointAcceleration, DenseMatrix64F qDDotMinToPack,
+   private void computeAccelerationLimitRestrictive(OneDoFJointBasics joint, double absoluteMaximumJointAcceleration, DenseMatrix64F qDDotMinToPack,
                                                     DenseMatrix64F qDDotMaxToPack)
    {
       int index = jointIndexHandler.getOneDoFJointIndex(joint);
@@ -317,7 +316,7 @@ public class WholeBodyControllerBoundCalculator
 
    public void enforceJointTorqueLimits(LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList)
    {
-      for (OneDoFJoint joint : oneDoFJoints)
+      for (OneDoFJointBasics joint : oneDoFJoints)
       {
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
 
@@ -329,7 +328,7 @@ public class WholeBodyControllerBoundCalculator
       }
    }
 
-   private void enforceJointTorqueLimit(OneDoFJoint joint, JointDesiredOutputBasics jointDesiredOutput, JointLimitData jointLimitData)
+   private void enforceJointTorqueLimit(OneDoFJointBasics joint, JointDesiredOutputBasics jointDesiredOutput, JointLimitData jointLimitData)
    {
       double torque;
       if (!jointDesiredOutput.hasDesiredTorque())

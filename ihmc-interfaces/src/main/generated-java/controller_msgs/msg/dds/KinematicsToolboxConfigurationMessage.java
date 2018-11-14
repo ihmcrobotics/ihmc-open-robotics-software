@@ -26,9 +26,9 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    public us.ihmc.euclid.tuple4D.Quaternion privileged_root_joint_orientation_;
    /**
             * This array is used to identify to which joint each angle in privileged_joint_angles belongs to.
-            * See AbstractInverseDynamicsJoint.getNameBaseHashCode() for the computation of a joint hash code.
+            * See Joint.hashCode() for the computation of a joint hash code.
             */
-   public us.ihmc.idl.IDLSequence.Long  privileged_joint_name_based_hash_codes_;
+   public us.ihmc.idl.IDLSequence.Integer  privileged_joint_hash_codes_;
    /**
             * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
             */
@@ -38,7 +38,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    {
       privileged_root_joint_position_ = new us.ihmc.euclid.tuple3D.Point3D();
       privileged_root_joint_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      privileged_joint_name_based_hash_codes_ = new us.ihmc.idl.IDLSequence.Long (100, "type_11");
+      privileged_joint_hash_codes_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
 
       privileged_joint_angles_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
 
@@ -56,7 +56,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.privileged_root_joint_position_, privileged_root_joint_position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.privileged_root_joint_orientation_, privileged_root_joint_orientation_);
-      privileged_joint_name_based_hash_codes_.set(other.privileged_joint_name_based_hash_codes_);
+      privileged_joint_hash_codes_.set(other.privileged_joint_hash_codes_);
       privileged_joint_angles_.set(other.privileged_joint_angles_);
    }
 
@@ -96,11 +96,11 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
    /**
             * This array is used to identify to which joint each angle in privileged_joint_angles belongs to.
-            * See AbstractInverseDynamicsJoint.getNameBaseHashCode() for the computation of a joint hash code.
+            * See Joint.hashCode() for the computation of a joint hash code.
             */
-   public us.ihmc.idl.IDLSequence.Long  getPrivilegedJointNameBasedHashCodes()
+   public us.ihmc.idl.IDLSequence.Integer  getPrivilegedJointHashCodes()
    {
-      return privileged_joint_name_based_hash_codes_;
+      return privileged_joint_hash_codes_;
    }
 
 
@@ -134,7 +134,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
       if (!this.privileged_root_joint_position_.epsilonEquals(other.privileged_root_joint_position_, epsilon)) return false;
       if (!this.privileged_root_joint_orientation_.epsilonEquals(other.privileged_root_joint_orientation_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.privileged_joint_name_based_hash_codes_, other.privileged_joint_name_based_hash_codes_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.privileged_joint_hash_codes_, other.privileged_joint_hash_codes_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.privileged_joint_angles_, other.privileged_joint_angles_, epsilon)) return false;
 
@@ -155,7 +155,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
       if (!this.privileged_root_joint_position_.equals(otherMyClass.privileged_root_joint_position_)) return false;
       if (!this.privileged_root_joint_orientation_.equals(otherMyClass.privileged_root_joint_orientation_)) return false;
-      if (!this.privileged_joint_name_based_hash_codes_.equals(otherMyClass.privileged_joint_name_based_hash_codes_)) return false;
+      if (!this.privileged_joint_hash_codes_.equals(otherMyClass.privileged_joint_hash_codes_)) return false;
       if (!this.privileged_joint_angles_.equals(otherMyClass.privileged_joint_angles_)) return false;
 
       return true;
@@ -173,8 +173,8 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       builder.append(this.privileged_root_joint_position_);      builder.append(", ");
       builder.append("privileged_root_joint_orientation=");
       builder.append(this.privileged_root_joint_orientation_);      builder.append(", ");
-      builder.append("privileged_joint_name_based_hash_codes=");
-      builder.append(this.privileged_joint_name_based_hash_codes_);      builder.append(", ");
+      builder.append("privileged_joint_hash_codes=");
+      builder.append(this.privileged_joint_hash_codes_);      builder.append(", ");
       builder.append("privileged_joint_angles=");
       builder.append(this.privileged_joint_angles_);
       builder.append("}");

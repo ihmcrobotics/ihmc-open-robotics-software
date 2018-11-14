@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import com.google.common.base.CaseFormat;
+
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -23,19 +23,19 @@ public class StandPrepControllerState extends HighLevelControllerState
 
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   private final PairList<OneDoFJoint, TrajectoryData> jointsData = new PairList<>();
+   private final PairList<OneDoFJointBasics, TrajectoryData> jointsData = new PairList<>();
 
    private final YoDouble timeToPrepareForStanding = new YoDouble("timeToPrepareForStanding", registry);
    private final YoDouble minimumTimeDoneWithStandPrep = new YoDouble("minimumTimeDoneWithStandPrep", registry);
    private final JointDesiredOutputListReadOnly highLevelControlOutput;
 
-   public StandPrepControllerState(OneDoFJoint[] controlledJoints, HighLevelControllerParameters highLevelControllerParameters,
+   public StandPrepControllerState(OneDoFJointBasics[] controlledJoints, HighLevelControllerParameters highLevelControllerParameters,
                                    JointDesiredOutputListReadOnly highLevelControlOutput)
    {
       this(controlledJoints, highLevelControllerParameters, highLevelControlOutput, MINIMUM_TIME_DONE_WITH_STAND_PREP);
    }
 
-   public StandPrepControllerState(OneDoFJoint[] controlledJoints, HighLevelControllerParameters highLevelControllerParameters,
+   public StandPrepControllerState(OneDoFJointBasics[] controlledJoints, HighLevelControllerParameters highLevelControllerParameters,
                                    JointDesiredOutputListReadOnly highLevelControlOutput, double minimumTimeDoneWithStandPrep)
    {
       super(controllerState, highLevelControllerParameters, controlledJoints);
@@ -47,7 +47,7 @@ public class StandPrepControllerState extends HighLevelControllerState
       WholeBodySetpointParameters standPrepParameters = highLevelControllerParameters.getStandPrepParameters();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
-      for (OneDoFJoint controlledJoint : controlledJoints)
+      for (OneDoFJointBasics controlledJoint : controlledJoints)
       {
          String jointName = controlledJoint.getName();
          String namePrefix = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, jointName);
@@ -67,7 +67,7 @@ public class StandPrepControllerState extends HighLevelControllerState
    {
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
-         OneDoFJoint joint = jointsData.get(jointIndex).getLeft();
+         OneDoFJointBasics joint = jointsData.get(jointIndex).getLeft();
          TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
          DoubleProvider standPrepFinal = trajectoryData.getFinalJointConfiguration();
          YoPolynomial trajectory = trajectoryData.getJointTrajectory();
@@ -94,7 +94,7 @@ public class StandPrepControllerState extends HighLevelControllerState
 
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
-         OneDoFJoint joint = jointsData.get(jointIndex).getLeft();
+         OneDoFJointBasics joint = jointsData.get(jointIndex).getLeft();
          TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
 
          YoPolynomial trajectory = trajectoryData.getJointTrajectory();

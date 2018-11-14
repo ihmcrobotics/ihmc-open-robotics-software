@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.simulationconstructionset.IMUMount;
@@ -53,7 +53,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       for (WrenchCalculatorInterface groundContactPointBasedWrenchCalculator : groundContactPointBasedWrenchCalculators)
       {
          Joint forceTorqueSensorJoint = groundContactPointBasedWrenchCalculator.getJoint();
-         OneDoFJoint sensorParentJoint;
+         OneDoFJointBasics sensorParentJoint;
          if (forceTorqueSensorJoint instanceof OneDegreeOfFreedomJoint)
             sensorParentJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint((OneDegreeOfFreedomJoint) forceTorqueSensorJoint);
          else
@@ -85,7 +85,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
 
       for (IMUMount imuMount : imuMounts)
       {
-         RigidBody rigidBody = scsToInverseDynamicsJointMap.getRigidBody(imuMount.getParentJoint());
+         RigidBodyBasics rigidBody = scsToInverseDynamicsJointMap.getRigidBody(imuMount.getParentJoint());
          RigidBodyTransform transformFromMountToJoint = new RigidBodyTransform();
          imuMount.getTransformFromMountToJoint(transformFromMountToJoint);
          IMUDefinition imuDefinition = new IMUDefinition(imuMount.getName(), rigidBody, transformFromMountToJoint);
@@ -102,7 +102,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
-         OneDoFJoint oneDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(oneDegreeOfFreedomJoint);
+         OneDoFJointBasics oneDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(oneDegreeOfFreedomJoint);
 
          stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
       }

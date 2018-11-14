@@ -10,14 +10,14 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class HumanoidDiagnosticsWhenHangingAnalyzer
 {
@@ -37,9 +37,9 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
    private final ArrayList<YoVariable<?>> corruptorVariablesToOptimize= new ArrayList<YoVariable<?>>();
    private final ArrayList<YoVariable<YoDouble>>torqueScoresToOptimize= new ArrayList<YoVariable<YoDouble>>();
 
-   private final ArrayList<OneDoFJoint> oneDoFJoints = new ArrayList<OneDoFJoint>();
-   private final LinkedHashMap<OneDoFJoint, YoDouble> jointsToJointAngles = new LinkedHashMap<OneDoFJoint, YoDouble>();
-   private final LinkedHashMap<OneDoFJoint, YoDouble> jointsToTorqueScore = new LinkedHashMap<OneDoFJoint, YoDouble>();
+   private final ArrayList<OneDoFJointBasics> oneDoFJoints = new ArrayList<OneDoFJointBasics>();
+   private final LinkedHashMap<OneDoFJointBasics, YoDouble> jointsToJointAngles = new LinkedHashMap<OneDoFJointBasics, YoDouble>();
+   private final LinkedHashMap<OneDoFJointBasics, YoDouble> jointsToTorqueScore = new LinkedHashMap<OneDoFJointBasics, YoDouble>();
    private final YoDouble totalTorqueScore;
 
    private boolean stopOptimization;
@@ -73,7 +73,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
       simulationConstructionSet.addYoVariableRegistry(registry);
 
       torqueScoreVariables = new ArrayList<YoDouble>();
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          String jointAngleVariableName = "q_" + oneDoFJoint.getName();
          YoDouble jointAngleYoDouble = (YoDouble) simulationConstructionSet.getVariable(jointAngleVariableName);
@@ -132,7 +132,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
    
    public void copyMeasuredTorqueToAppliedTorque()
    {
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          String measuredTorqueName = "raw_tau_" + oneDoFJoint.getName();
          YoDouble measuredTorque = (YoDouble) simulationConstructionSet.getVariable(measuredTorqueName);
@@ -167,10 +167,10 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
       simulationConstructionSet.gotoOutPointNow();
 
       double[] previousCorruptorVariableValues = new double[corruptorVariablesToOptimize.size()];
-      LinkedHashMap<OneDoFJoint, Double> previousTorqueScoreValues = new LinkedHashMap<OneDoFJoint, Double>();
+      LinkedHashMap<OneDoFJointBasics, Double> previousTorqueScoreValues = new LinkedHashMap<OneDoFJointBasics, Double>();
       
       double[] currentCorruptorVariableValues = new double[corruptorVariablesToOptimize.size()];
-      LinkedHashMap<OneDoFJoint, Double> currentTorqueScoreValues = new LinkedHashMap<OneDoFJoint, Double>();
+      LinkedHashMap<OneDoFJointBasics, Double> currentTorqueScoreValues = new LinkedHashMap<OneDoFJointBasics, Double>();
 
       getCurrentCorruptorValues(corruptorVariablesToOptimize, previousCorruptorVariableValues);
       resetTorqueScoreValuesToZero(previousTorqueScoreValues);
@@ -302,12 +302,12 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
    }
 
 
-   private void setCurrentToPreviousValues(LinkedHashMap<OneDoFJoint, Double> currentValues,
-         LinkedHashMap<OneDoFJoint, Double> previousValues)
+   private void setCurrentToPreviousValues(LinkedHashMap<OneDoFJointBasics, Double> currentValues,
+         LinkedHashMap<OneDoFJointBasics, Double> previousValues)
    {
       currentValues.clear();
       
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          currentValues.put(oneDoFJoint, previousValues.get(oneDoFJoint));
       }
@@ -368,11 +368,11 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
       }
    } 
    
-   private void resetTorqueScoreValuesToZero(LinkedHashMap<OneDoFJoint, Double> torqueScoreValues)
+   private void resetTorqueScoreValuesToZero(LinkedHashMap<OneDoFJointBasics, Double> torqueScoreValues)
    {
       torqueScoreValues.clear();
 
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          torqueScoreValues.put(oneDoFJoint, 0.0);
       }
@@ -391,7 +391,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
    
    public void computeTorqueOffsetsBasedOnAverages()
    {
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          YoDouble appliedTorque = controller.getAppliedTorqueYoVariable(oneDoFJoint);
          YoDouble estimatedTorque = controller.getEstimatedTorqueYoVariable(oneDoFJoint);
@@ -419,7 +419,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
       {
          private final double[] corruptorVariableValues = new double[corruptorVariables.size()];
          private final double[] torqueOffsetValues = new double[torqueOffsetVariables.size()];
-         private final LinkedHashMap<OneDoFJoint, Double> torqueScoreValues = new LinkedHashMap<OneDoFJoint, Double>();
+         private final LinkedHashMap<OneDoFJointBasics, Double> torqueScoreValues = new LinkedHashMap<OneDoFJointBasics, Double>();
          
          @Override
          public void initializeProcessing()
@@ -436,7 +436,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
 
             totalTorqueScore.set(0.0);
 
-            for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+            for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
             {
                YoDouble jointAngleYoVariable = jointsToJointAngles.get(oneDoFJoint);
                oneDoFJoint.setQ(jointAngleYoVariable.getDoubleValue());
@@ -460,14 +460,14 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
             transform.setTranslation(new Vector3D(q_x.getDoubleValue(), q_y.getDoubleValue(), q_z.getDoubleValue()));
             transform.setRotation(new Quaternion(q_qx.getDoubleValue(), q_qy.getDoubleValue(), q_qz.getDoubleValue(), q_qs.getDoubleValue()));
 
-            fullRobotModel.getRootJoint().setPositionAndRotation(transform);
+            fullRobotModel.getRootJoint().setJointConfiguration(transform);
             fullRobotModel.updateFrames();
 
             controller.updateDiagnosticsWhenHangingHelpers();
             controller.addOffsetTorquesToAppliedTorques();
 
 
-            for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+            for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
             {
                YoDouble torqueScoreYoVariable = jointsToTorqueScore.get(oneDoFJoint);
                Double torqueScoreValue = torqueScoreValues.get(oneDoFJoint);

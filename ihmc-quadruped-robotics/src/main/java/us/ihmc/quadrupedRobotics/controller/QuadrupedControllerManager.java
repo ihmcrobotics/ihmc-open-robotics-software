@@ -242,7 +242,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       if (controllerToolbox.getFallDetector().detect())
       {
          trigger.fireEvent(QuadrupedControllerRequestedEvent.REQUEST_FALL);
-         walkingControllerFailureStatusMessage.falling_direction_.set(runtimeEnvironment.getFullRobotModel().getRootJoint().getLinearVelocityForReading());
+         walkingControllerFailureStatusMessage.falling_direction_.set(runtimeEnvironment.getFullRobotModel().getRootJoint().getJointTwist().getLinearPart());
          statusMessageOutputManager.reportStatusMessage(walkingControllerFailureStatusMessage);
       }
    }

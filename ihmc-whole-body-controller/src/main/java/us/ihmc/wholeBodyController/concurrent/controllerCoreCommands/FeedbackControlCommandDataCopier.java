@@ -10,8 +10,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class FeedbackControlCommandDataCopier
 {
@@ -29,34 +29,34 @@ public class FeedbackControlCommandDataCopier
       clear();
    }
 
-   public void retrieveRigidBodiesFromName(Map<String, RigidBody> nameToRigidBodyMap)
+   public void retrieveRigidBodiesFromName(Map<String, RigidBodyBasics> nameToRigidBodyMap)
    {
       for (int i = 0; i < orientationFeedbackControlCommands.size(); i++)
       {
          SpatialAccelerationCommand command = orientationFeedbackControlCommands.get(i).getSpatialAccelerationCommand();
-         RigidBody base = nameToRigidBodyMap.get(command.getBaseName());
-         RigidBody endEffector = nameToRigidBodyMap.get(command.getEndEffectorName());
+         RigidBodyBasics base = nameToRigidBodyMap.get(command.getBaseName());
+         RigidBodyBasics endEffector = nameToRigidBodyMap.get(command.getEndEffectorName());
          command.set(base, endEffector);
       }
 
       for (int i = 0; i < pointFeedbackControlCommands.size(); i++)
       {
          SpatialAccelerationCommand command = pointFeedbackControlCommands.get(i).getSpatialAccelerationCommand();
-         RigidBody base = nameToRigidBodyMap.get(command.getBaseName());
-         RigidBody endEffector = nameToRigidBodyMap.get(command.getEndEffectorName());
+         RigidBodyBasics base = nameToRigidBodyMap.get(command.getBaseName());
+         RigidBodyBasics endEffector = nameToRigidBodyMap.get(command.getEndEffectorName());
          command.set(base, endEffector);
       }
 
       for (int i = 0; i < spatialFeedbackControlCommands.size(); i++)
       {
          SpatialAccelerationCommand command = spatialFeedbackControlCommands.get(i).getSpatialAccelerationCommand();
-         RigidBody base = nameToRigidBodyMap.get(command.getBaseName());
-         RigidBody endEffector = nameToRigidBodyMap.get(command.getEndEffectorName());
+         RigidBodyBasics base = nameToRigidBodyMap.get(command.getBaseName());
+         RigidBodyBasics endEffector = nameToRigidBodyMap.get(command.getEndEffectorName());
          command.set(base, endEffector);
       }
    }
 
-   public void retrieveJointsFromName(Map<String, OneDoFJoint> nameToJointMap)
+   public void retrieveJointsFromName(Map<String, OneDoFJointBasics> nameToJointMap)
    {
       for (int i = 0; i < jointspaceFeedbackControlCommands.size(); i++)
       {

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 
 import us.ihmc.avatar.handControl.FingerJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 
 public class SandiaHandModel
@@ -92,7 +92,7 @@ public class SandiaHandModel
    private final ArrayList<FingerJoint> allJoints = new ArrayList<FingerJoint>();
 
    private final ForceSensorDataReadOnly wristForceSensor;
-   private final OneDoFJoint wristJoint;
+   private final OneDoFJointBasics wristJoint;
    private final RobotSide robotSide;
 
    public SandiaHandModel(FullRobotModel fullRobotModel, ForceSensorDataReadOnly forceSensorDataForController, RobotSide robotSide)
@@ -111,7 +111,7 @@ public class SandiaHandModel
    private FingerJoint addFingerJoint(String name,  FullRobotModel fullRobotModel)
    {
       FingerJoint fingerJoint = new FingerJoint(name);
-      OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(name);
+      OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(name);
       allJoints.add(fingerJoint);
       return fingerJoint;
    }
@@ -135,7 +135,7 @@ public class SandiaHandModel
       return robotSide;
    }
 
-   public OneDoFJoint getWristJoint()
+   public OneDoFJointBasics getWristJoint()
    {
       return wristJoint;
    }

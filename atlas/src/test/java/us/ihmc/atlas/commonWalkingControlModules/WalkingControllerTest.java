@@ -42,8 +42,8 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -61,18 +61,19 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -147,7 +148,7 @@ public class WalkingControllerTest
    private FullHumanoidRobotModel fullRobotModel;
    private HumanoidReferenceFrames referenceFrames;
    private PerfectSimulatedOutputWriter writer;
-   private OneDoFJoint[] oneDoFJoints;
+   private OneDoFJointBasics[] oneDoFJoints;
 
    private WalkingHighLevelHumanoidController walkingController;
    private WholeBodyControllerCore controllerCore;
@@ -198,7 +199,7 @@ public class WalkingControllerTest
          }
          else
          {
-            Tuple3DReadOnly rootPosition = fullRobotModel.getRootJoint().getTranslationForReading();
+            Tuple3DReadOnly rootPosition = fullRobotModel.getRootJoint().getJointPose().getPosition();
             Point3D min = new Point3D(-0.1, -0.1, 0.5);
             Point3D max = new Point3D(0.1, 0.1, 1.0);
             Vector3D drift = new Vector3D(maxDriftRate, maxDriftRate, maxDriftRate);
@@ -258,14 +259,14 @@ public class WalkingControllerTest
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
-         OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(chest, hand);
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+         OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
          ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
 
          for (int jointIdx = 0; jointIdx < joints.length; jointIdx++)
          {
-            OneDoFJoint joint = joints[jointIdx];
+            OneDoFJointBasics joint = joints[jointIdx];
             double angle1 = MathTools.clamp(Math.toRadians(45.0), joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
             double angle2 = MathTools.clamp(0.0, joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
             OneDoFJointTrajectoryMessage jointTrajectoryMessage = message.getJointspaceTrajectory().getJointTrajectoryMessages().add();
@@ -327,7 +328,7 @@ public class WalkingControllerTest
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
          JointDesiredOutputReadOnly jointDesireds = controllerOutput.getJointDesiredOutput(joint);
 
          if (jointDesireds.hasDesiredAcceleration())
@@ -349,9 +350,9 @@ public class WalkingControllerTest
       desiredAngularAcceleration.set(desiredAcceleration.get(0), desiredAcceleration.get(1), desiredAcceleration.get(2));
       desiredLinearAcceleration.set(desiredAcceleration.get(3), desiredAcceleration.get(4), desiredAcceleration.get(5));
 
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
-      rootJoint.getTranslation(position);
-      rootJoint.getLinearVelocity(linearVelocity);
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
+      position.set(rootJoint.getJointPose().getPosition());
+      linearVelocity.set(rootJoint.getJointTwist().getLinearPart());
 
       newPosition.set(desiredLinearAcceleration);
       newPosition.scale(0.5 * controlDT);
@@ -370,8 +371,8 @@ public class WalkingControllerTest
 
       newPosition.addZ(-zCorrection);
 
-      rootJoint.setRotation(newOrientation);
-      rootJoint.setPosition(newPosition);
+      rootJoint.setJointOrientation(newOrientation);
+      rootJoint.setJointPosition(newPosition);
       rootJoint.updateFramesRecursively();
       frameLinearVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), newLinearVelocity);
       frameAngularVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), newAngularVelocity);
@@ -379,8 +380,8 @@ public class WalkingControllerTest
       frameAngularVelocity.scale(velocityDecay);
       frameLinearVelocity.changeFrame(rootJoint.getFrameAfterJoint());
       frameAngularVelocity.changeFrame(rootJoint.getFrameAfterJoint());
-      rootJointTwist.set(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(), frameLinearVelocity,
-                         frameAngularVelocity);
+      rootJointTwist.setIncludingFrame(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(), frameAngularVelocity,
+                         frameLinearVelocity);
       rootJoint.setJointTwist(rootJointTwist);
    }
 
@@ -411,10 +412,10 @@ public class WalkingControllerTest
 
    private void createControllerCore()
    {
-      InverseDynamicsJoint[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
-      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+      JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
+      JointBasics[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
 
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
@@ -550,7 +551,7 @@ public class WalkingControllerTest
 
       writer = new PerfectSimulatedOutputWriter(robot, fullRobotModel);
 
-      for (OneDoFJoint revoluteJoint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics revoluteJoint : fullRobotModel.getOneDoFJoints())
       {
          String name = revoluteJoint.getName();
          OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(name);
@@ -560,10 +561,10 @@ public class WalkingControllerTest
       }
 
       FloatingJoint floatingJoint = robot.getRootJoint();
-      FloatingInverseDynamicsJoint sixDoFJoint = fullRobotModel.getRootJoint();
+      FloatingJointBasics sixDoFJoint = fullRobotModel.getRootJoint();
       RigidBodyTransform transform = new RigidBodyTransform();
       floatingJoint.getTransformToWorld(transform);
-      sixDoFJoint.setPositionAndRotation(transform);
+      sixDoFJoint.setJointConfiguration(transform);
 
       fullRobotModel.updateFrames();
       referenceFrames.updateFrames();

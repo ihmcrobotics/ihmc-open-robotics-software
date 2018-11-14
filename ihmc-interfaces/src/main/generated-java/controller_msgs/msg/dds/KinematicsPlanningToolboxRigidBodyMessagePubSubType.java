@@ -42,7 +42,7 @@ public class KinematicsPlanningToolboxRigidBodyMessagePubSubType implements us.i
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -81,7 +81,7 @@ public class KinematicsPlanningToolboxRigidBodyMessagePubSubType implements us.i
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -121,7 +121,7 @@ public class KinematicsPlanningToolboxRigidBodyMessagePubSubType implements us.i
    {
       cdr.write_type_4(data.getSequenceId());
 
-      cdr.write_type_11(data.getEndEffectorNameBasedHashCode());
+      cdr.write_type_2(data.getEndEffectorHashCode());
 
       if(data.getKeyFrameTimes().size() <= 100)
       cdr.write_type_e(data.getKeyFrameTimes());else
@@ -151,7 +151,7 @@ public class KinematicsPlanningToolboxRigidBodyMessagePubSubType implements us.i
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      data.setEndEffectorNameBasedHashCode(cdr.read_type_11());
+      data.setEndEffectorHashCode(cdr.read_type_2());
       	
       cdr.read_type_e(data.getKeyFrameTimes());	
       cdr.read_type_e(data.getKeyFramePoses());	
@@ -170,7 +170,7 @@ public class KinematicsPlanningToolboxRigidBodyMessagePubSubType implements us.i
    public final void serialize(controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_11("end_effector_name_based_hash_code", data.getEndEffectorNameBasedHashCode());
+      ser.write_type_2("end_effector_hash_code", data.getEndEffectorHashCode());
       ser.write_type_e("key_frame_times", data.getKeyFrameTimes());
       ser.write_type_e("key_frame_poses", data.getKeyFramePoses());
       ser.write_type_a("angular_selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getAngularSelectionMatrix());
@@ -193,7 +193,7 @@ public class KinematicsPlanningToolboxRigidBodyMessagePubSubType implements us.i
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      data.setEndEffectorNameBasedHashCode(ser.read_type_11("end_effector_name_based_hash_code"));
+      data.setEndEffectorHashCode(ser.read_type_2("end_effector_hash_code"));
       ser.read_type_e("key_frame_times", data.getKeyFrameTimes());
       ser.read_type_e("key_frame_poses", data.getKeyFramePoses());
       ser.read_type_a("angular_selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getAngularSelectionMatrix());

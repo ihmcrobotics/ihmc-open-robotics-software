@@ -1,7 +1,7 @@
 # This message is part of the IHMC whole-body inverse kinematics module.
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
-int64 end_effector_name_based_hash_code
+int32 end_effector_hash_code
 
 # This is the list of desired times for each key frames. 
 float64[] key_frame_times

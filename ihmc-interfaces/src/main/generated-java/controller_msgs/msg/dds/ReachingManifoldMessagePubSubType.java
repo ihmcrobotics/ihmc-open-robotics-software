@@ -42,7 +42,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -70,7 +70,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getManifoldOriginPosition(), current_alignment);
@@ -97,7 +97,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       cdr.write_type_4(data.getSequenceId());
 
-      cdr.write_type_11(data.getEndEffectorNameBasedHashCode());
+      cdr.write_type_2(data.getEndEffectorHashCode());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getManifoldOriginPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getManifoldOriginOrientation(), cdr);
@@ -119,7 +119,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      data.setEndEffectorNameBasedHashCode(cdr.read_type_11());
+      data.setEndEffectorHashCode(cdr.read_type_2());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getManifoldOriginPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getManifoldOriginOrientation(), cdr);	
@@ -133,7 +133,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    public final void serialize(controller_msgs.msg.dds.ReachingManifoldMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_11("end_effector_name_based_hash_code", data.getEndEffectorNameBasedHashCode());
+      ser.write_type_2("end_effector_hash_code", data.getEndEffectorHashCode());
       ser.write_type_a("manifold_origin_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getManifoldOriginPosition());
 
       ser.write_type_a("manifold_origin_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getManifoldOriginOrientation());
@@ -147,7 +147,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ReachingManifoldMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      data.setEndEffectorNameBasedHashCode(ser.read_type_11("end_effector_name_based_hash_code"));
+      data.setEndEffectorHashCode(ser.read_type_2("end_effector_hash_code"));
       ser.read_type_a("manifold_origin_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getManifoldOriginPosition());
 
       ser.read_type_a("manifold_origin_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getManifoldOriginOrientation());

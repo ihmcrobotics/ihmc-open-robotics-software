@@ -9,6 +9,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
@@ -17,11 +25,7 @@ import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class KinematicsToolboxControllerTestRobots
 {
@@ -111,21 +115,20 @@ public class KinematicsToolboxControllerTestRobots
       }
    }
 
-   public static Pair<FloatingInverseDynamicsJoint, OneDoFJoint[]> createInverseDynamicsRobot(RobotDescription robotDescription)
+   public static Pair<FloatingJointBasics, OneDoFJointBasics[]> createInverseDynamicsRobot(RobotDescription robotDescription)
    {
-      RigidBody predecessor;
+      RigidBodyBasics predecessor;
 
-      RigidBody rootBody = new RigidBody("rootBody", ReferenceFrame.getWorldFrame());
-      FloatingInverseDynamicsJoint rootJoint;
+      RigidBodyBasics rootBody = new RigidBody("rootBody", ReferenceFrame.getWorldFrame());
+      FloatingJointBasics rootJoint;
 
-      if (robotDescription.getRootJoints().get(0) instanceof FloatingInverseDynamicsJoint)
+      if (robotDescription.getRootJoints().get(0) instanceof FloatingJointBasics)
       {
          FloatingJointDescription rootJointDescription = (FloatingJointDescription) robotDescription.getRootJoints().get(0);
          rootJoint = new SixDoFJoint(rootJointDescription.getName(), rootBody);
 
          LinkDescription linkDescription = rootJointDescription.getLink();
-         predecessor = ScrewTools.addRigidBody(rootJointDescription.getName(), rootJoint, linkDescription.getMomentOfInertiaCopy(), linkDescription.getMass(),
-                                               linkDescription.getCenterOfMassOffset());
+         predecessor = new RigidBody(rootJointDescription.getName(), rootJoint, linkDescription.getMomentOfInertiaCopy(), linkDescription.getMass(), linkDescription.getCenterOfMassOffset());
 
          for (JointDescription jointDescription : rootJointDescription.getChildrenJoints())
          {
@@ -139,12 +142,12 @@ public class KinematicsToolboxControllerTestRobots
          addJointsRecursively((OneDoFJointDescription) robotDescription.getRootJoints().get(0), predecessor);
       }
 
-      return new ImmutablePair<>(rootJoint, ScrewTools.filterJoints(ScrewTools.computeSubtreeJoints(predecessor), OneDoFJoint.class));
+      return new ImmutablePair<>(rootJoint, MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(predecessor), OneDoFJointBasics.class));
    }
 
    
 
-   protected static void addJointsRecursively(OneDoFJointDescription joint, RigidBody parentBody)
+   protected static void addJointsRecursively(OneDoFJointDescription joint, RigidBodyBasics parentBody)
    {
       Vector3D jointAxis = new Vector3D();
       joint.getJointAxis(jointAxis);
@@ -152,15 +155,15 @@ public class KinematicsToolboxControllerTestRobots
       Vector3D offset = new Vector3D();
       joint.getOffsetFromParentJoint(offset);
 
-      OneDoFJoint inverseDynamicsJoint;
+      OneDoFJointBasics inverseDynamicsJoint;
 
       if (joint instanceof PinJointDescription)
       {
-         inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, offset, jointAxis);
+         inverseDynamicsJoint = new RevoluteJoint(joint.getName(), parentBody, offset, jointAxis);
       }
       else if (joint instanceof SliderJointDescription)
       {
-         inverseDynamicsJoint = ScrewTools.addPrismaticJoint(joint.getName(), parentBody, offset, jointAxis);
+         inverseDynamicsJoint = new PrismaticJoint(joint.getName(), parentBody, offset, jointAxis);
       }
       else
       {
@@ -180,7 +183,7 @@ public class KinematicsToolboxControllerTestRobots
       Vector3D comOffset = new Vector3D(childLink.getCenterOfMassOffset());
       Matrix3D inertia = childLink.getMomentOfInertiaCopy();
 
-      RigidBody rigidBody = ScrewTools.addRigidBody(childLink.getName(), inverseDynamicsJoint, inertia, mass, comOffset);
+      RigidBodyBasics rigidBody = new RigidBody(childLink.getName(), inverseDynamicsJoint, inertia, mass, comOffset);
 
       for (JointDescription sdfJoint : joint.getChildrenJoints())
       {

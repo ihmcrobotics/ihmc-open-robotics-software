@@ -17,7 +17,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.imu.FusedIMUSensor;
@@ -77,9 +77,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
                                            SensorOutputMapReadOnly sensorOutputMapReadOnly, CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
                                            String[] imuSensorsToUseInStateEstimator, double gravitationalAcceleration,
-                                           Map<RigidBody, FootSwitchInterface> footSwitches,
+                                           Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
                                            CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
-                                           RobotMotionStatusHolder robotMotionStatusFromController, Map<RigidBody, ? extends ContactablePlaneBody> feet,
+                                           RobotMotionStatusHolder robotMotionStatusFromController, Map<RigidBodyBasics, ? extends ContactablePlaneBody> feet,
                                            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
@@ -175,7 +175,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       if (ENABLE_ESTIMATED_WRENCH_VISUALIZER)
       {
          List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
-         for (RigidBody rigidBody : feet.keySet())
+         for (RigidBodyBasics rigidBody : feet.keySet())
          {
             ContactablePlaneBody contactableBody = feet.get(rigidBody);
             contactablePlaneBodies.add(contactableBody);
@@ -260,7 +260,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          }
          pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
 
-         List<RigidBody> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
+         List<RigidBodyBasics> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
          imuBiasStateEstimator.compute(trustedFeet);
          break;
       }

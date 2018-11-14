@@ -1,6 +1,6 @@
 package us.ihmc.robotics.sensors;
 
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public interface ContactSensor
 {
@@ -8,7 +8,7 @@ public interface ContactSensor
    
    public void setIsInContact(boolean isInContact);
    
-   public RigidBody getRigidBody();
+   public RigidBodyBasics getRigidBody();
    
    public String getSensorName();
    

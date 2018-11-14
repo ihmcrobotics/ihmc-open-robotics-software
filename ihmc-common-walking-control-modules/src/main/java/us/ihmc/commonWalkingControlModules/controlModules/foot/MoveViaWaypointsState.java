@@ -14,8 +14,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -49,7 +49,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       this.touchdownVelocity = touchdownVelocity;
       this.touchdownAcceleration = touchdownAcceleration;
 
-      RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
+      RigidBodyBasics foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
       String namePrefix = foot.getName() + "MoveViaWaypoints";
 
       isPerformingTouchdown = new YoBoolean(namePrefix + "IsPerformingTouchdown", registry);

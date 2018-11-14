@@ -21,15 +21,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -38,15 +32,21 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
+import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class DRCRobotMidiSliderBoardPositionManipulation
 {
@@ -221,8 +221,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          }
       });
       
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody chest = fullRobotModel.getChest();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics chest = fullRobotModel.getChest();
       
       double lambdaLeastSquares = 0.0009;
       double tolerance = 1e-8;
@@ -233,8 +233,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-         RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          
          GeometricJacobian legJacobian = new GeometricJacobian(pelvis, foot, foot.getBodyFixedFrame());
          GeometricJacobian armJacobian = new GeometricJacobian(chest, hand, hand.getBodyFixedFrame());
@@ -300,7 +300,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    {
       for (NeckJointName jointName : NeckJointName.values)
       {
-         OneDoFJoint neckJoint = fullRobotModel.getNeckJoint(jointName);
+         OneDoFJointBasics neckJoint = fullRobotModel.getNeckJoint(jointName);
          if (neckJoint == null)
             continue;
 
@@ -310,7 +310,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       for (SpineJointName jointName : SpineJointName.values)
       {
-         OneDoFJoint spineJoint = fullRobotModel.getSpineJoint(jointName);
+         OneDoFJointBasics spineJoint = fullRobotModel.getSpineJoint(jointName);
          if (spineJoint == null)
             continue;
 
@@ -322,7 +322,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       {
          for (LegJointName jointName : LegJointName.values)
          {
-            OneDoFJoint legJoint = fullRobotModel.getLegJoint(robotSide, jointName);
+            OneDoFJointBasics legJoint = fullRobotModel.getLegJoint(robotSide, jointName);
             if (legJoint == null)
                continue;
             
@@ -332,7 +332,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
          for (ArmJointName jointName : ArmJointName.values())
          {
-            OneDoFJoint armJoint = fullRobotModel.getArmJoint(robotSide, jointName);
+            OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, jointName);
             if (armJoint == null)
                continue;
             
@@ -515,7 +515,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          for (LegJointName legJointName : legJointNames.get(robotSide))
          {
             OneDegreeOfFreedomJoint legSCSJoint = legSCSJoints.get(robotSide).get(legJointName);
-            OneDoFJoint legIDJoint = fullRobotModel.getLegJoint(robotSide, legJointName);
+            OneDoFJointBasics legIDJoint = fullRobotModel.getLegJoint(robotSide, legJointName);
             sliderBoard.setSlider(sliderChannel++, legSCSJoint.getQYoVariable(), legIDJoint.getJointLimitLower(), legIDJoint.getJointLimitUpper());
          }
          break;
@@ -559,7 +559,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          for (ArmJointName armJointName : armJointNames.get(robotSide))
          {
             OneDegreeOfFreedomJoint armSCSJoint = armSCSJoints.get(robotSide).get(armJointName);
-            OneDoFJoint armIDJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
+            OneDoFJointBasics armIDJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
             sliderBoard.setSlider(sliderChannel++, armSCSJoint.getQYoVariable(), armIDJoint.getJointLimitLower(), armIDJoint.getJointLimitUpper());
          }
 
@@ -630,14 +630,14 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       for (SpineJointName spineJointName : spineJointNames)
       {
          OneDegreeOfFreedomJoint spineSCSJoint = spineSCSJoints.get(spineJointName);
-         OneDoFJoint spineIDJoint = fullRobotModel.getSpineJoint(spineJointName);
+         OneDoFJointBasics spineIDJoint = fullRobotModel.getSpineJoint(spineJointName);
          sliderBoard.setSlider(sliderChannel++, spineSCSJoint.getQYoVariable(), spineIDJoint.getJointLimitLower(), spineIDJoint.getJointLimitUpper());
       }
 
       for (NeckJointName neckJointName : neckJointNames)
       {
          OneDegreeOfFreedomJoint neckSCSJoint = neckSCSJoints.get(neckJointName);
-         OneDoFJoint neckIDJoint = fullRobotModel.getNeckJoint(neckJointName);
+         OneDoFJointBasics neckIDJoint = fullRobotModel.getNeckJoint(neckJointName);
          sliderBoard.setSlider(sliderChannel++, neckSCSJoint.getQYoVariable(), neckIDJoint.getJointLimitLower(), neckIDJoint.getJointLimitUpper());
       }
    }

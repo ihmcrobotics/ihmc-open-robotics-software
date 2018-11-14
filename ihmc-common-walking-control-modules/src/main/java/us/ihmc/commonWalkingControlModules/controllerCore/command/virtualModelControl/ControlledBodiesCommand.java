@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class ControlledBodiesCommand implements VirtualModelControlCommand<ControlledBodiesCommand>
 {
-   private List<RigidBody> controlledBodies = new ArrayList<>();
-   private List<RigidBody> basesForControl = new ArrayList<>();
-   private List<OneDoFJoint[]> jointsToUse = new ArrayList<>();
+   private List<RigidBodyBasics> controlledBodies = new ArrayList<>();
+   private List<RigidBodyBasics> basesForControl = new ArrayList<>();
+   private List<OneDoFJointBasics[]> jointsToUse = new ArrayList<>();
 
    public ControlledBodiesCommand()
    {
@@ -32,22 +32,22 @@ public class ControlledBodiesCommand implements VirtualModelControlCommand<Contr
       }
    }
 
-   public void addBodyToControl(RigidBody controlledBody)
+   public void addBodyToControl(RigidBodyBasics controlledBody)
    {
       addBodyToControl(controlledBody, null, null);
    }
 
-   public void addBodyToControl(RigidBody controlledBody, RigidBody baseForControl)
+   public void addBodyToControl(RigidBodyBasics controlledBody, RigidBodyBasics baseForControl)
    {
       addBodyToControl(controlledBody, baseForControl, null);
    }
 
-   public void addBodyToControl(RigidBody controlledBody, OneDoFJoint[] jointsToUse)
+   public void addBodyToControl(RigidBodyBasics controlledBody, OneDoFJointBasics[] jointsToUse)
    {
       addBodyToControl(controlledBody, null, jointsToUse);
    }
 
-   public void addBodyToControl(RigidBody controlledBody, RigidBody baseForControl, OneDoFJoint[] jointsToUse)
+   public void addBodyToControl(RigidBodyBasics controlledBody, RigidBodyBasics baseForControl, OneDoFJointBasics[] jointsToUse)
    {
       controlledBodies.add(controlledBody);
       basesForControl.add(baseForControl);
@@ -59,32 +59,32 @@ public class ControlledBodiesCommand implements VirtualModelControlCommand<Contr
       return controlledBodies.size();
    }
 
-   public RigidBody getControlledBody(int i)
+   public RigidBodyBasics getControlledBody(int i)
    {
       return controlledBodies.get(i);
    }
 
-   public RigidBody getBaseForControl(int i)
+   public RigidBodyBasics getBaseForControl(int i)
    {
       return basesForControl.get(i);
    }
 
-   public OneDoFJoint[] getJointsToUse(int i)
+   public OneDoFJointBasics[] getJointsToUse(int i)
    {
       return jointsToUse.get(i);
    }
 
-   public List<RigidBody> getAllControlledBodies()
+   public List<RigidBodyBasics> getAllControlledBodies()
    {
       return controlledBodies;
    }
 
-   public List<RigidBody> getAllBasesForControl()
+   public List<RigidBodyBasics> getAllBasesForControl()
    {
       return basesForControl;
    }
 
-   public List<OneDoFJoint[]> getAllJointsToUse()
+   public List<OneDoFJointBasics[]> getAllJointsToUse()
    {
       return jointsToUse;
    }

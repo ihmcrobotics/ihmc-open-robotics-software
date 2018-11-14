@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -18,7 +18,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
 
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand;
 
-   private final OneDoFJoint[] jointsToControl;
+   private final OneDoFJointBasics[] jointsToControl;
    private final int numberOfJoints;
 
    private final YoDouble[] userDesiredJointAccelerations;
@@ -27,7 +27,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    private final YoBoolean abortUserControlMode;
    private final YoBoolean hasWeights;
 
-   public RigidBodyUserControlState(String bodyName, OneDoFJoint[] jointsToControl, YoDouble yoTime, YoVariableRegistry parentRegistry)
+   public RigidBodyUserControlState(String bodyName, OneDoFJointBasics[] jointsToControl, YoDouble yoTime, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.USER, bodyName, yoTime, parentRegistry);
       String prefix = bodyName + "UserMode";
@@ -96,7 +96,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       hasWeights.set(true);
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         OneDoFJoint joint = jointsToControl[jointIdx];
+         OneDoFJointBasics joint = jointsToControl[jointIdx];
          if (weights.containsKey(joint.getName()))
             this.weights[jointIdx] = weights.get(joint.getName());
          else

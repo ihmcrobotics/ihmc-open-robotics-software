@@ -3,8 +3,8 @@ package us.ihmc.robotics.trajectories.providers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
 
 public class CurrentRigidBodyStateProvider
 {
@@ -24,7 +24,7 @@ public class CurrentRigidBodyStateProvider
    public void getLinearVelocity(FrameVector3D linearVelocityToPack)
    {
       frameOfInterest.getTwistOfFrame(twist);
-      twist.getLinearPart(linearVelocityToPack);
+      linearVelocityToPack.setIncludingFrame(twist.getLinearPart());
    }
    
    public void getOrientation(FrameQuaternion orientationToPack)
@@ -35,6 +35,6 @@ public class CurrentRigidBodyStateProvider
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       frameOfInterest.getTwistOfFrame(twist);
-      twist.getAngularPart(angularVelocityToPack);
+      angularVelocityToPack.setIncludingFrame(twist.getAngularPart());
    }
 }

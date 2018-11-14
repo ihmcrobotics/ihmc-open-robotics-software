@@ -1,10 +1,10 @@
 package us.ihmc.wholeBodyController;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public interface DRCOutputProcessor
 {
