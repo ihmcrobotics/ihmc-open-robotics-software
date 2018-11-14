@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class FootstepPlanningToolboxController extends ToolboxController
 {
    private final YoEnum<FootstepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry, FootstepPlannerType.class);
-   private final EnumMap<FootstepPlannerType, FootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
+   private final EnumMap<FootstepPlannerType, BodyPathAndFootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
 
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlannerParametersPacket> latestFootstepPlannerParametersReference = new AtomicReference<>(null);
@@ -102,7 +102,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame));
       plannerMap
-            .put(FootstepPlannerType.SIMPLE_BODY_PATH, new SplinePathWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, parentRegistry));
+            .put(FootstepPlannerType.SIMPLE_BODY_PATH, new SplinePathWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, parentRegistry, null));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
                      new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, this.visibilityGraphsParameters, contactPointsInSoleFrame,
                                                          graphicsListRegistry, parentRegistry));
@@ -185,7 +185,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
          return;
       }
 
-      FootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
+      BodyPathAndFootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
 
       if (planarRegionsList.isPresent())
       {

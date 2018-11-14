@@ -109,6 +109,7 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
       this.planningHorizonLength.set(planningHorizonLength);
    }
 
+   @Override
    public double getPlanningHorizonLength()
    {
       return planningHorizonLength.getDoubleValue();

@@ -75,7 +75,7 @@ public class FootstepPathCalculatorModule
 
    private final Messager messager;
 
-   private FootstepPlanner planner;
+   private BodyPathAndFootstepPlanner planner;
 
    public FootstepPathCalculatorModule(Messager messager)
    {
@@ -292,7 +292,7 @@ public class FootstepPathCalculatorModule
       messager.submitMessage(InterRegionVisibilityMap, interRegionVisibilityMap);
    }
 
-   private FootstepPlanner createPlanner()
+   private BodyPathAndFootstepPlanner createPlanner()
    {
       SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame = PlannerTools.createDefaultFootPolygons();
       YoVariableRegistry registry = new YoVariableRegistry("visualizerRegistry");
@@ -314,7 +314,7 @@ public class FootstepPathCalculatorModule
       }
    }
 
-   private FootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry registry)
+   private BodyPathAndFootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry registry)
    {
       FootstepPlannerParameters parameters = this.parameters.get();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
@@ -347,7 +347,7 @@ public class FootstepPathCalculatorModule
                                                               registry);
    }
 
-   private FootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, YoVariableRegistry registry)
+   private BodyPathAndFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, YoVariableRegistry registry)
    {
       FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, parameters.get());
       SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, parameters.get());

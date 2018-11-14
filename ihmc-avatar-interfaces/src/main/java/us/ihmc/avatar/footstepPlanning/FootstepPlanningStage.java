@@ -49,7 +49,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class FootstepPlanningStage implements FootstepPlanner
+public class FootstepPlanningStage implements BodyPathAndFootstepPlanner
 {
    private static final boolean debug = false;
 
@@ -61,7 +61,7 @@ public class FootstepPlanningStage implements FootstepPlanner
    private final AtomicReference<BodyPathPlan> pathPlan = new AtomicReference<>();
    private final AtomicReference<FootstepPlan> stepPlan = new AtomicReference<>();
 
-   private final EnumMap<FootstepPlannerType, FootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
+   private final EnumMap<FootstepPlannerType, BodyPathAndFootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
    private final EnumProvider<FootstepPlannerType> activePlannerEnum;
    private final IntegerProvider planId;
 
@@ -119,7 +119,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       plannerMap.put(FootstepPlannerType.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame, plannerListener));
-      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new SplinePathWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, registry));
+      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new SplinePathWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, registry, null));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
                      new VisibilityGraphWithAStarPlanner(stageId + "", footstepPlanningParameters, visibilityGraphsParameters, contactPointsInSoleFrame,
                                                          graphicsListRegistry, registry));
@@ -192,7 +192,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       return footstepPlanner;
    }
 
-   private FootstepPlanner getPlanner()
+   private BodyPathAndFootstepPlanner getPlanner()
    {
       return plannerMap.get(activePlannerEnum.getValue());
    }

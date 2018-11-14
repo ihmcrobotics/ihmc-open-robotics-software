@@ -7,7 +7,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class PlanThenSnapPlanner implements FootstepPlanner
+public class PlanThenSnapPlanner implements BodyPathAndFootstepPlanner
 {
    private final FootstepPlanner internalPlanner;
    private final SideDependentList<ConvexPolygon2D> footPolygons;

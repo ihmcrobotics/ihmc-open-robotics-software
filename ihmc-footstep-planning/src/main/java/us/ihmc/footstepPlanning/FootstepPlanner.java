@@ -72,19 +72,6 @@ public interface FootstepPlanner
    void setPlanarRegions(PlanarRegionsList planarRegionsList);
 
    /**
-    * This plans the body path, if available.
-    */
-   default FootstepPlanningResult planPath()
-   {
-      return FootstepPlanningResult.OPTIMAL_SOLUTION;
-   }
-
-   default BodyPathPlan getPathPlan()
-   {
-      return null;
-   }
-
-   /**
     * Plan a sequence of footsteps given initial and goal conditions. The poses describe
     * the location and orientation of the sole frame in world.
     * @return FootstepPlanningResult   Whether or not the plan succeeded.
@@ -97,6 +84,11 @@ public interface FootstepPlanner
    FootstepPlan getPlan();
 
    void setPlanningHorizonLength(double planningHorizon);
+
+   default double getPlanningHorizonLength()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
 
    double getPlanningDuration();
 
