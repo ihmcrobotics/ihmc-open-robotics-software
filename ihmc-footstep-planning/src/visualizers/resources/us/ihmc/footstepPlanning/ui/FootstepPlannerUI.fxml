@@ -22,24 +22,6 @@
                     </content>
                 </Tab>
 
-                <Tab text="Status">
-                    <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                        <children>
-                            <fx:include fx:id="statusTab" source="StatusTab.fxml" />
-                        </children>
-                    </content>
-                </Tab>
-
-                <Tab text="Start/Goal">
-                    <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                        <children>
-                            <fx:include fx:id="startGoalTab" source="StartGoalTab.fxml" />
-                        </children>
-                    </content>
-                </Tab>
-
                 <Tab text="Footstep Parameters">
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
