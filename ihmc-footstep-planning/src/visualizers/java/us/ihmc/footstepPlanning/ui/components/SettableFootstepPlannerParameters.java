@@ -25,6 +25,8 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minXClearanceFromStance;
    private double minYClearanceFromStance;
 
+   private double maximumStepReachWhenSteppingUp;
+   private double maximumStepZWhenSteppingUp;
    private double maximumStepXWhenForwardAndDown;
    private double maximumStepZWhenForwardAndDown;
    private double maximumZPenetrationOnValleyRegions;
@@ -76,6 +78,8 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.minXClearanceFromStance = footstepPlannerParameters.getMinXClearanceFromStance();
       this.minYClearanceFromStance = footstepPlannerParameters.getMinYClearanceFromStance();
 
+      this.maximumStepReachWhenSteppingUp = footstepPlannerParameters.getMaximumStepReachWhenSteppingUp();
+      this.maximumStepZWhenSteppingUp = footstepPlannerParameters.getMaximumStepZWhenSteppingUp();
       this.maximumStepXWhenForwardAndDown = footstepPlannerParameters.getMaximumStepXWhenForwardAndDown();
       this.maximumStepZWhenForwardAndDown = footstepPlannerParameters.getMaximumStepZWhenForwardAndDown();
       this.maximumZPenetrationOnValleyRegions = footstepPlannerParameters.getMaximumZPenetrationOnValleyRegions();
@@ -176,6 +180,16 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public void setMinimumSurfaceInclineRadians(double minSurfaceIncline)
    {
       this.minSurfaceIncline = minSurfaceIncline;
+   }
+
+   public void setMaximumStepReachWhenSteppingUp(double maximumStepReachWhenSteppingUp)
+   {
+      this.maximumStepReachWhenSteppingUp = maximumStepReachWhenSteppingUp;
+   }
+
+   public void setMaximumStepZWhenSteppingUp(double maximumStepZWhenSteppingUp)
+   {
+      this.maximumStepZWhenSteppingUp = maximumStepZWhenSteppingUp;
    }
 
    public void setMaximumStepXWhenForwardAndDown(double maximumStepXWhenForwardAndDown)
@@ -420,6 +434,18 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getMaximumStepWidth()
    {
       return maxStepWidth;
+   }
+
+   @Override
+   public double getMaximumStepReachWhenSteppingUp()
+   {
+      return maximumStepReachWhenSteppingUp;
+   }
+
+   @Override
+   public double getMaximumStepZWhenSteppingUp()
+   {
+      return maximumStepZWhenSteppingUp;
    }
 
    @Override

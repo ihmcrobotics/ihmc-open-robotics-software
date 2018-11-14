@@ -27,41 +27,44 @@ module controller_msgs
       const octet STEP_TOO_FAR =
       2;
 
-      const octet STEP_NOT_WIDE_ENOUGH =
+      const octet STEP_TOO_FAR_AND_HIGH =
       3;
 
-      const octet STEP_IN_PLACE =
+      const octet STEP_NOT_WIDE_ENOUGH =
       4;
 
-      const octet NOT_ENOUGH_AREA =
+      const octet STEP_IN_PLACE =
       5;
 
-      const octet COULD_NOT_SNAP =
+      const octet NOT_ENOUGH_AREA =
       6;
 
-      const octet COULD_NOT_WIGGLE_INSIDE =
+      const octet COULD_NOT_SNAP =
       7;
 
-      const octet SURFACE_NORMAL_TOO_STEEP_TO_SNAP =
+      const octet COULD_NOT_WIGGLE_INSIDE =
       8;
 
-      const octet TOO_MUCH_PENETRATION_AFTER_WIGGLE =
+      const octet SURFACE_NORMAL_TOO_STEEP_TO_SNAP =
       9;
 
-      const octet STEP_NOT_LONG_ENOUGH =
+      const octet TOO_MUCH_PENETRATION_AFTER_WIGGLE =
       10;
 
-      const octet STEP_TOO_WIDE =
+      const octet STEP_NOT_LONG_ENOUGH =
       11;
 
-      const octet OBSTACLE_BLOCKING_BODY =
+      const octet STEP_TOO_WIDE =
       12;
 
-      const octet OBSTACLE_HITTING_BODY =
+      const octet OBSTACLE_BLOCKING_BODY =
       13;
 
-      const octet AT_CLIFF_BOTTOM =
+      const octet OBSTACLE_HITTING_BODY =
       14;
+
+      const octet AT_CLIFF_BOTTOM =
+      15;
 
 
       /**

@@ -330,6 +330,8 @@ public class RemoteUIMessageConverter
       packet.setMinimumStepWidth(parameters.getMinimumStepWidth());
       packet.setMinimumStepLength(parameters.getMinimumStepLength());
       packet.setMinimumStepYaw(parameters.getMinimumStepYaw());
+      packet.setMaximumStepReachWhenSteppingUp(parameters.getMaximumStepReachWhenSteppingUp());
+      packet.setMaximumStepZWhenSteppingUp(parameters.getMaximumStepZWhenSteppingUp());
       packet.setMaximumStepXWhenForwardAndDown(parameters.getMaximumStepXWhenForwardAndDown());
       packet.setMaximumStepZWhenForwardAndDown(parameters.getMaximumStepZWhenForwardAndDown());
       packet.setMaximumStepZ(parameters.getMaximumStepZ());

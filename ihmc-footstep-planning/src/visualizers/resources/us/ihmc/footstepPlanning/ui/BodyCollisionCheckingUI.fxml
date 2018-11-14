@@ -21,7 +21,7 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
             </rowConstraints>
             <children>
-                <ToggleButton fx:id="enableBodyCollisionChecking" mnemonicParsing="false" text="Check for Collisions"
+                <CheckBox fx:id="enableBodyCollisionChecking" mnemonicParsing="false" text="Check for Collisions"
                               GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
                 <Label text="Body Box Width" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="2"/>

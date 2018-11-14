@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -12,29 +13,29 @@ public class VisualizationController
    private static final boolean verbose = false;
 
    @FXML
-   private ToggleButton showBodyPathToggleButton;
+   private CheckBox showBodyPathToggleButton;
    @FXML
-   private ToggleButton showInnerRegionMapsToggleButton;
+   private CheckBox showInnerRegionMapsToggleButton;
    @FXML
-   private ToggleButton showInterRegionMapToggleButton;
+   private CheckBox showInterRegionMapToggleButton;
    @FXML
-   private ToggleButton showStartMapToggleButton;
+   private CheckBox showStartMapToggleButton;
    @FXML
-   private ToggleButton showGoalMapToggleButton;
+   private CheckBox showGoalMapToggleButton;
    @FXML
-   private ToggleButton showPlanarRegionsToggleButton;
+   private CheckBox showPlanarRegionsToggleButton;
    @FXML
-   private ToggleButton showClusterRawPointsToggleButton;
+   private CheckBox showClusterRawPointsToggleButton;
    @FXML
-   private ToggleButton showClusterNavigableExtrusionsToggleButton;
+   private CheckBox showClusterNavigableExtrusionsToggleButton;
    @FXML
-   private ToggleButton showClusterNonNavigableExtrusionsToggleButton;
+   private CheckBox showClusterNonNavigableExtrusionsToggleButton;
    @FXML
-   private ToggleButton showOccupancyMap;
+   private CheckBox showOccupancyMap;
    @FXML
-   private ToggleButton showSolution;
+   private CheckBox showSolution;
    @FXML
-   private ToggleButton showIntermediateSolution;
+   private CheckBox showIntermediateSolution;
    @FXML
    public void requestStatistics()
    {
