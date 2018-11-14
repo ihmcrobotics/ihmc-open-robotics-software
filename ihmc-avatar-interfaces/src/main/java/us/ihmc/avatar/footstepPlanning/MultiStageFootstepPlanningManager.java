@@ -306,6 +306,25 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    }
 
    @Override
+   public void pathPlanningIsComplete(FootstepPlanningResult pathPlanningResult, PathPlanningStage stageFinished)
+   {
+      /*
+      completedPathResults.add(pathPlanningResult);
+
+      BodyPathPlan bodyPathPlan = stageFinished.getPathPlan();
+
+      if (pathPlanningResult != null && pathPlanningResult.validForExecution() && bodyPathPlan != null)
+         completedPathPlans.add(stageFinished.getPlanSequenceId(), bodyPathPlan);
+
+      FootstepPlannerObjective objective = pathPlanningStagesInProgress.remove(stageFinished);
+
+      if (debug)
+         PrintTools.info("Stage " + stageFinished.getStageId() + " just finished planning its path.");
+         */
+      // TODO
+   }
+
+   @Override
    public void stepPlanningIsComplete(FootstepPlanningResult stepPlanningResult, FootstepPlanningStage stageFinished)
    {
       completedStepResults.add(stepPlanningResult);
