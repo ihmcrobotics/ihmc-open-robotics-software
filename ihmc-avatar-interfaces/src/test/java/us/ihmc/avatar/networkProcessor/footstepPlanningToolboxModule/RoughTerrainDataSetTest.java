@@ -586,7 +586,10 @@ public abstract class RoughTerrainDataSetTest
       FootstepPlannerParameters parameters = getRobotModel().getFootstepPlannerParameters();
 
       if (messager != null)
+      {
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, testData.getPlanarRegionsList());
+      }
 
       RemoteUIMessageConverter.copyFootstepPlannerParametersToPacket(parametersPacket, parameters);
 

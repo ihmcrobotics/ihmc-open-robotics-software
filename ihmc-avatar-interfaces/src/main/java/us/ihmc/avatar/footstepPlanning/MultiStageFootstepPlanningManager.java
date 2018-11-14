@@ -165,7 +165,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       for (int i = 0; i < initialNumberOfPathStages; i++)
       {
          PathPlanningStage pathPlanningStage = createNewPathPlanningStage();
-         pathPlanningStage.addCompletionCallback(this);
          registry.addChild(pathPlanningStage.getYoVariableRegistry());
          allPathPlanningStages.add(pathPlanningStage);
          pathPlanningStagePool.add(pathPlanningStage);
@@ -178,8 +177,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       for (int i = 0; i < Math.min(initialNumberOfStepStages, absoluteMaxNumberOfStepStages); i++)
       {
          FootstepPlanningStage stepPlanningStage = createNewStepPlanningStage();
-         stepPlanningStage.addCompletionCallback(this);
-         stepPlanningStage.setPlannerGoalRecommendationHandler(goalRecommendationHandler);
          registry.addChild(stepPlanningStage.getYoVariableRegistry());
          allStepPlanningStages.add(stepPlanningStage);
          stepPlanningStagePool.add(stepPlanningStage);
@@ -206,17 +203,16 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private PathPlanningStage createNewPathPlanningStage()
    {
-      PathPlanningStage pathPlanningStage = new PathPlanningStage(allPathPlanningStages.size(), footstepPlanningParameters,
-                                                                  visibilityGraphsParameters, activePlanner);
+      PathPlanningStage pathPlanningStage = new PathPlanningStage(allPathPlanningStages.size(), footstepPlanningParameters, visibilityGraphsParameters,
+                                                                  activePlanner);
       pathPlanningStage.addCompletionCallback(this);
       return pathPlanningStage;
    }
 
    private FootstepPlanningStage createNewStepPlanningStage()
    {
-      FootstepPlanningStage footstepPlanningStage = new FootstepPlanningStage(allStepPlanningStages.size(), contactPointParameters,
-                                                                              footstepPlanningParameters, bodyPathPlanner, activePlanner, plannerListener,
-                                                                              planId, tickDurationMs);
+      FootstepPlanningStage footstepPlanningStage = new FootstepPlanningStage(allStepPlanningStages.size(), contactPointParameters, footstepPlanningParameters,
+                                                                              bodyPathPlanner, activePlanner, plannerListener, planId, tickDurationMs);
       footstepPlanningStage.addCompletionCallback(this);
       footstepPlanningStage.setPlannerGoalRecommendationHandler(goalRecommendationHandler);
       return footstepPlanningStage;
@@ -427,12 +423,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    }
 
    @Override
-   public void pathPlanningIsComplete(FootstepPlanningResult pathPlanningResult, FootstepPlanningStage stageFinished)
-   {
-
-   }
-
-   @Override
    public void pathPlanningIsComplete(FootstepPlanningResult pathPlanningResult, PathPlanningStage stageFinished)
    {
       completedPathResults.add(pathPlanningResult);
@@ -459,7 +449,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       {
          int sequence = stageFinished.getPlanSequenceId();
          FootstepPlan plan = stageFinished.getPlan();
-         completedStepPlans.add(sequence, plan);
+         if (plan != null)
+            completedStepPlans.add(sequence, plan);
       }
 
       completedStepPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
@@ -708,7 +699,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       Iterable<PathPlanningStage> pathIterable = pathPlanningTasks.iterator();
       if (pathIterable != null)
       {
-         for (PathPlanningStage stage :pathIterable)
+         for (PathPlanningStage stage : pathIterable)
          {
             ScheduledFuture<?> task = pathPlanningTasks.getCopyForReading().get(stage);
 
