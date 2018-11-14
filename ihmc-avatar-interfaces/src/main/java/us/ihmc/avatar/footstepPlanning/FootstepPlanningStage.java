@@ -6,7 +6,6 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -15,7 +14,6 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.RosBasedPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.StagePlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.listeners.HeuristicSearchAndActionPolicyDefinitions;
@@ -24,7 +22,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedAStarPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
@@ -124,7 +122,8 @@ public class FootstepPlanningStage implements FootstepPlanner
       plannerMap.put(FootstepPlannerType.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame, plannerListener));
-      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedFootstepPlanner(footstepPlanningParameters, contactPointsInSoleFrame, registry));
+      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame,
+                                                                                         footstepPlannerParameters.getCostParameters().getBodyPathBasedHeuristicsWeight(), registry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
                      new VisibilityGraphWithAStarPlanner(stageId + "", footstepPlanningParameters, visibilityGraphsParameters, contactPointsInSoleFrame,
                                                          graphicsListRegistry, registry));
