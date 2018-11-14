@@ -30,6 +30,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -93,7 +95,7 @@ public class SimpleOcclusionTests
       Path path = Paths.get(getClass().getClassLoader().getResource("PlanarRegions_20171114_090937").getPath());
       PlanarRegionsList regions = PlanarRegionFileTools.importPlanarRegionData(path.toFile());
 
-      runTest(startPose, goalPose, regions, parameters, 2.0);
+      runTest(startPose, goalPose, regions, parameters, new DefaultVisibilityGraphParameters(), 2.0);
    }
 
    private class BestEffortPlannerParameters extends DefaultFootstepPlanningParameters
@@ -124,15 +126,16 @@ public class SimpleOcclusionTests
 
    private void runTest(FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, double maxAllowedSolveTime)
    {
-      runTest(startPose, goalPose, regions, getParameters(), maxAllowedSolveTime);
+      runTest(startPose, goalPose, regions, getParameters(), getVisibilityGraphsParameters(), maxAllowedSolveTime);
    }
 
-   private void runTest(FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, FootstepPlannerParameters parameters, double maxAllowedSolveTime)
+   private void runTest(FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, FootstepPlannerParameters parameters,
+                        VisibilityGraphsParameters visibilityGraphsParameters, double maxAllowedSolveTime)
    {
       YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      FootstepPlanner planner = getPlanner(parameters, graphicsListRegistry, registry);
+      FootstepPlanner planner = getPlanner(parameters, visibilityGraphsParameters, graphicsListRegistry, registry);
       FootstepPlannerGoal goal = createPlannerGoal(goalPose);
 
       FramePose3D stancePose = new FramePose3D();
@@ -581,15 +584,21 @@ public class SimpleOcclusionTests
       return ret;
    }
 
-   private FootstepPlanner getPlanner(FootstepPlannerParameters parameters, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
+   private FootstepPlanner getPlanner(FootstepPlannerParameters parameters, VisibilityGraphsParameters visibilityGraphsParameters,
+                                      YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
       SideDependentList<ConvexPolygon2D> footPloygons = PlannerTools.createDefaultFootPolygons();
-      return new VisibilityGraphWithAStarPlanner(parameters, footPloygons, graphicsListRegistry, registry);
+      return new VisibilityGraphWithAStarPlanner(parameters, visibilityGraphsParameters, footPloygons, graphicsListRegistry, registry);
    }
 
    private FootstepPlannerParameters getParameters()
    {
       return new DefaultFootstepPlanningParameters();
+   }
+
+   private VisibilityGraphsParameters getVisibilityGraphsParameters()
+   {
+      return new DefaultVisibilityGraphParameters();
    }
 
    private PlanarRegionsList createSimpleOcclusionField(FramePose3D startPoseToPack, FramePose3D goalPoseToPack)

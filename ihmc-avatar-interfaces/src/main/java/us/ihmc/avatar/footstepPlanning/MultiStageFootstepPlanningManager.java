@@ -25,6 +25,8 @@ import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.statistics.StatisticsType;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
+import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
@@ -44,7 +46,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
    private static final boolean debug = true;
-   
+
    private static final int absoluteMaxNumberOfStages = 4;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -52,7 +54,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final YoEnum<FootstepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry, FootstepPlannerType.class);
 
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<>(null);
-   private final AtomicReference<FootstepPlannerParametersPacket> latestParametersReference = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlannerParametersPacket> latestFootstepPlannerParametersReference = new AtomicReference<>(null);
+   private final AtomicReference<VisibilityGraphsParametersPacket> latestVisibilityGraphsParametersReference = new AtomicReference<>(null);
 
    private final AtomicReference<BodyPathPlan> bodyPathPlan = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlan> footstepPlan = new AtomicReference<>(null);
@@ -92,6 +95,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private long tickDurationMs;
 
    private final YoFootstepPlannerParameters footstepPlanningParameters;
+   private final YoVisibilityGraphParameters visibilityGraphsParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
@@ -103,8 +107,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final MultiStagePlannerListener plannerListener;
 
    public MultiStageFootstepPlanningManager(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
-                                            StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry,
-                                            YoGraphicsListRegistry graphicsListRegistry, long tickDurationMs)
+                                            VisibilityGraphsParameters visibilityGraphsParameters, StatusMessageOutputManager statusOutputManager,
+                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickDurationMs)
    {
       this.contactPointParameters = contactPointParameters;
       this.statusOutputManager = statusOutputManager;
@@ -118,7 +122,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(getClass().getSimpleName());
       executorService = Executors.newScheduledThreadPool(numberOfCores, threadFactory);
 
-      footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
+      this.footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
+      this.visibilityGraphsParameters = new YoVisibilityGraphParameters(visibilityGraphsParameters, registry);
 
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
 
@@ -131,7 +136,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       for (int i = 0; i < Math.min(numberOfCores, absoluteMaxNumberOfStages); i++)
       {
-         FootstepPlanningStage planningStage = new FootstepPlanningStage(i, contactPointParameters, footstepPlannerParameters, activePlanner, plannerListener, planId,
+         FootstepPlanningStage planningStage = new FootstepPlanningStage(i, contactPointParameters, footstepPlannerParameters, visibilityGraphsParameters, activePlanner, plannerListener, planId,
                                                                          graphicsListRegistry, tickDurationMs);
          planningStage.addCompletionCallback(this);
          planningStage.setPlannerGoalRecommendationHandler(goalRecommendationHandler);
@@ -161,7 +166,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private FootstepPlanningStage createNewFootstepPlanningStage()
    {
       FootstepPlanningStage stage = new FootstepPlanningStage(allPlanningStages.getCopyForReading().size(), contactPointParameters, footstepPlanningParameters,
-                                                              activePlanner, null, planId, null, tickDurationMs);
+                                                              visibilityGraphsParameters, activePlanner, null, planId, null, tickDurationMs);
       stage.addCompletionCallback(this);
       stage.setPlannerGoalRecommendationHandler(goalRecommendationHandler);
       return stage;
@@ -375,9 +380,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       planId.set(request.getPlannerRequestId());
       FootstepPlannerType requestedPlannerType = FootstepPlannerType.fromByte(request.getRequestedFootstepPlannerType());
 
-      FootstepPlannerParametersPacket parameters = latestParametersReference.getAndSet(null);
-      if (parameters != null)
-         footstepPlanningParameters.set(parameters);
+      FootstepPlannerParametersPacket footstepPlannerParameters = latestFootstepPlannerParametersReference.getAndSet(null);
+      if (footstepPlannerParameters != null)
+         footstepPlanningParameters.set(footstepPlannerParameters);
+
+      VisibilityGraphsParametersPacket visibilityGraphsParameters = latestVisibilityGraphsParametersReference.getAndSet(null);
+      if (visibilityGraphsParameters != null)
+         this.visibilityGraphsParameters.set(visibilityGraphsParameters);
 
       if (debug)
       {
@@ -506,13 +515,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone &= !goalRecommendationHandler.hasNewFootstepPlannerObjectives();
       isDone &= isDonePlanningPath.getBooleanValue();
       isDone &= isDonePlanningSteps.getBooleanValue();
-      
+
       if (isDone)
          plannerListener.plannerFinished(null);
-      
+
       this.isDone.set(isDone);
-      
-      
+
+
    }
 
    private static FootstepPlanningResult getWorstResult(List<FootstepPlanningResult> results)
@@ -616,12 +625,17 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone.set(false);
       isDonePlanningSteps.set(false);
       isDonePlanningPath.set(false);
-      latestRequestReference.set(request);     
+      latestRequestReference.set(request);
    }
 
-   public void processPlannerParameters(FootstepPlannerParametersPacket parameters)
+   public void processFootstepPlannerParameters(FootstepPlannerParametersPacket parameters)
    {
-      latestParametersReference.set(parameters);
+      latestFootstepPlannerParametersReference.set(parameters);
+   }
+
+   public void processVisibilityGraphsParameters(VisibilityGraphsParametersPacket parameters)
+   {
+      latestVisibilityGraphsParametersReference.set(parameters);
    }
 
    public void processPlanningStatisticsRequest()
@@ -813,7 +827,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       {
          PairList<L, R> updatedList = getCopyForWriting();
          updatedList.clear();
-         
+
          commit();
       }
 
@@ -859,7 +873,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       public boolean isEmpty()
       {
          Map<K, V> existingMap = getCopyForReading();
-         
+
          if (existingMap != null)
             return getCopyForReading().isEmpty();
          else

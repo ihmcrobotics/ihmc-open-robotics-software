@@ -22,6 +22,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
@@ -54,6 +55,7 @@ public class RemoteUIMessageConverter
    private final String robotName;
 
    private final AtomicReference<FootstepPlannerParameters> plannerParametersReference;
+   private final AtomicReference<VisibilityGraphsParameters> visibilityGraphParametersReference;
    private final AtomicReference<Point3D> plannerStartPositionReference;
    private final AtomicReference<Quaternion> plannerStartOrientationReference;
    private final AtomicReference<Point3D> plannerGoalPositionReference;
@@ -70,6 +72,7 @@ public class RemoteUIMessageConverter
 
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
+   private IHMCRealtimeROS2Publisher<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
    private IHMCRealtimeROS2Publisher<PlanningStatisticsRequestMessage> plannerStatisticsRequestPublisher;
 
@@ -95,7 +98,8 @@ public class RemoteUIMessageConverter
       this.robotName = robotName;
       this.ros2Node = ros2Node;
 
-      plannerParametersReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerParametersTopic);
+      plannerParametersReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerParametersTopic, null);
+      visibilityGraphParametersReference = messager.createInput(FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic, null);
       plannerStartPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic);
       plannerStartOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion());
       plannerGoalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic);
@@ -152,8 +156,10 @@ public class RemoteUIMessageConverter
       // publishers
       plannerParametersPublisher = ROS2Tools
             .createPublisher(ros2Node, FootstepPlannerParametersPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
-      toolboxStatePublisher = ROS2Tools
-            .createPublisher(ros2Node, ToolboxStateMessage.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
+      visibilityGraphsParametersPublisher = ROS2Tools
+            .createPublisher(ros2Node, VisibilityGraphsParametersPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
+      toolboxStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class,
+                                                        FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
       footstepPlanningRequestPublisher = ROS2Tools
             .createPublisher(ros2Node, FootstepPlanningRequestPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
       plannerStatisticsRequestPublisher = ROS2Tools
@@ -274,11 +280,23 @@ public class RemoteUIMessageConverter
    {
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 
-      FootstepPlannerParametersPacket packet = new FootstepPlannerParametersPacket();
-      FootstepPlannerParameters parameters = plannerParametersReference.get();
+      if (verbose)
+         PrintTools.info("Told the toolbox to wake up.");
+      
+      FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
+      FootstepPlannerParameters footstepPlannerParameters = plannerParametersReference.get();
 
-      copyFootstepPlannerParametersToPacket(packet, parameters);
-      plannerParametersPublisher.publish(packet);
+      copyFootstepPlannerParametersToPacket(plannerParametersPacket, footstepPlannerParameters);
+      plannerParametersPublisher.publish(plannerParametersPacket);
+
+      VisibilityGraphsParametersPacket visibilityGraphsParametersPacket = new VisibilityGraphsParametersPacket();
+      VisibilityGraphsParameters visibilityGraphsParameters = visibilityGraphParametersReference.get();
+
+      copyVisibilityGraphsParametersToPacket(visibilityGraphsParametersPacket, visibilityGraphsParameters);
+      visibilityGraphsParametersPublisher.publish(visibilityGraphsParametersPacket);
+      
+      if (verbose)
+         PrintTools.info("Sent out some parameters");
 
       submitFootstepPlanningRequestPacket();
    }
@@ -355,6 +373,26 @@ public class RemoteUIMessageConverter
       packet.getCostParameters().setForwardWeight(costParameters.getForwardWeight());
       packet.getCostParameters().setLateralWeight(costParameters.getLateralWeight());
       packet.getCostParameters().setCostPerStep(costParameters.getCostPerStep());
+   }
+
+   public static void copyVisibilityGraphsParametersToPacket(VisibilityGraphsParametersPacket packet, VisibilityGraphsParameters parameters)
+   {
+      if (parameters == null)
+      {
+         return;
+      }
+
+      packet.setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
+      packet.setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
+      packet.setExtrusionDistance(parameters.getExtrusionDistance());
+      packet.setExtrusionDistanceIfNotTooHighToStep(parameters.getExtrusionDistanceIfNotTooHighToStep());
+      packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());
+      packet.setClusterResolution(parameters.getClusterResolution());
+      packet.setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());
+      packet.setPlanarRegionMinArea(parameters.getPlanarRegionMinArea());
+      packet.setPlanarRegionMinSize(parameters.getPlanarRegionMinSize());
+      packet.setRegionOrthogonalAngle(parameters.getRegionOrthogonalAngle());
+      packet.setSearchHostRegionEpsilon(parameters.getSearchHostRegionEpsilon());
    }
 
    private void submitFootstepPlanningRequestPacket()
