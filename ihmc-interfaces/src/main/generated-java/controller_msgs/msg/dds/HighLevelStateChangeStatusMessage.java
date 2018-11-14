@@ -22,6 +22,7 @@ public class HighLevelStateChangeStatusMessage extends Packet<HighLevelStateChan
    public static final byte EXIT_WALKING = (byte) 6;
    public static final byte DIAGNOSTICS = (byte) 7;
    public static final byte CALIBRATION = (byte) 8;
+   public static final byte CUSTOM1 = (byte) 9;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
