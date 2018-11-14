@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Text?>
 
 <AnchorPane prefHeight="400.0" prefWidth="1260.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerParametersUIController">
     <children>
@@ -20,6 +21,7 @@
                    <Rectangle fx:id="clearanceBox" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="75.0" layoutX="5.0" layoutY="73.0" stroke="BLACK" strokeType="INSIDE" width="50.0" />
                    <Rectangle fx:id="stanceFootShape" arcHeight="5.0" arcWidth="5.0" fill="#657175" height="50.0" layoutX="15.0" layoutY="85.0" stroke="BLACK" strokeType="INSIDE" width="30.0" />
                    <Rectangle fx:id="swingFootShape" arcHeight="5.0" arcWidth="5.0" fill="#aec0c6" height="50.0" layoutX="125.0" layoutY="85.0" rotate="-31.0" stroke="BLACK" strokeType="INSIDE" width="30.0" />
+                  <Text layoutX="24.0" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Step Reachability Area" textAlignment="CENTER" textOrigin="CENTER" wrappingWidth="202.00001126527786" />
                </children>
             </AnchorPane>
           <AnchorPane>
@@ -37,10 +39,10 @@
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="90.0" prefWidth="110.0" />
                         </columnConstraints>
                         <rowConstraints>
-                            <RowConstraints maxHeight="54.0" minHeight="10.0" prefHeight="53.0" vgrow="SOMETIMES" />
-                            <RowConstraints maxHeight="45.0" minHeight="10.0" prefHeight="43.0" vgrow="SOMETIMES" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
                         </rowConstraints>
                         <children>
                             <ToggleButton fx:id="returnBestEffortPlan" mnemonicParsing="false" prefWidth="250.0" text="Return Best Effort Plan" />
