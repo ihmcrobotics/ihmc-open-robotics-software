@@ -21,7 +21,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpa
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedAStarPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
@@ -309,7 +309,8 @@ public class FootstepPathCalculatorModule
       case A_STAR:
          return createAStarPlanner(contactPointsInSoleFrame, registry);
       case SIMPLE_BODY_PATH:
-         return new BodyPathBasedFootstepPlanner(parameters.get(), contactPointsInSoleFrame, registry);
+         return new BodyPathBasedAStarPlanner(parameters.get(), contactPointsInSoleFrame, parameters.get().getCostParameters().getBodyPathBasedHeuristicsWeight(),
+                                              registry);
       case VIS_GRAPH_WITH_A_STAR:
          return new VisibilityGraphWithAStarPlanner(parameters.get(), visibilityGraphsParameters.get(), contactPointsInSoleFrame, null, registry);
       default:
