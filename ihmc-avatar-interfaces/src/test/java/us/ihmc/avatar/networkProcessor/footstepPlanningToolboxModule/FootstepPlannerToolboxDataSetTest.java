@@ -91,13 +91,6 @@ import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
 
 public abstract class FootstepPlannerToolboxDataSetTest extends FootstepPlannerDataSetTest
 {
-   protected static final double bambooTimeScaling = 4.0;
-
-   // Whether to start the UI or not.
-   protected static boolean VISUALIZE = false;
-   // For enabling helpful prints.
-   protected static boolean DEBUG = false;
-   private static boolean VERBOSE = false;
 
    protected FootstepPlannerUI ui = null;
    protected Messager messager = null;
