@@ -1,12 +1,7 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
@@ -25,13 +20,9 @@ public class FootstepPlannerParametersUIController
    private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
 
    @FXML
-   private ToggleButton returnBestEffortPlan;
+   private CheckBox returnBestEffortPlan;
    @FXML
-   private ToggleButton performHeuristicSearchPolicies;
-   @FXML
-   private Spinner<Double> plannerTimeout;
-   @FXML
-   private Spinner<Double> horizonLength;
+   private CheckBox performHeuristicSearchPolicies;
 
    @FXML
    private Spinner<Double> maxStepLength;
@@ -88,8 +79,6 @@ public class FootstepPlannerParametersUIController
 
    public void setupControls()
    {
-      plannerTimeout.setValueFactory(createTimeoutValueFactory());
-      horizonLength.setValueFactory(createHorizonValueFactory());
       maxStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.05));
       maxStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
       minStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
@@ -139,10 +128,6 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionalBindMinXClearanceFromStance(minXClearance.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinYClearanceFromStance(minYClearance.getValueFactory().valueProperty());
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, plannerTimeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
-
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
-
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
 
       // these dimensions work best for valkyrie
@@ -191,21 +176,6 @@ public class FootstepPlannerParametersUIController
       clearanceBox.setHeight(metersToPixel * (minXClearance.getValue() * 2.0));
    }
 
-   private final PropertyToMessageTypeConverter<Double, Double> doubleToDoubleConverter = new PropertyToMessageTypeConverter<Double, Double>()
-   {
-      @Override
-      public Double convert(Double propertyValue)
-      {
-         return propertyValue;
-      }
-
-      @Override
-      public Double interpret(Double newValue)
-      {
-         return newValue;
-      }
-   };
-
    private PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters> createConverter()
    {
       return new PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters>()
@@ -223,23 +193,4 @@ public class FootstepPlannerParametersUIController
          }
       };
    }
-
-   private SpinnerValueFactory.DoubleSpinnerValueFactory createTimeoutValueFactory()
-   {
-      double min = 0.0;
-      double max = 500.0;
-      double amountToStepBy = 5;
-      return new DoubleSpinnerValueFactory(min, max, 15.0, amountToStepBy);
-   }
-
-   private SpinnerValueFactory.DoubleSpinnerValueFactory createHorizonValueFactory()
-   {
-      double min = 0.0;
-      double max = 1000.0;
-      double amountToStepBy = 0.25;
-      return new DoubleSpinnerValueFactory(min, max, 0.0, amountToStepBy);
-   }
-
-
-
 }
