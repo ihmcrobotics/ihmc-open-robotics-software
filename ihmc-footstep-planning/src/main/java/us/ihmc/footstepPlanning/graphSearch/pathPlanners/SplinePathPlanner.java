@@ -8,7 +8,7 @@ import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class SplinePathPlanner extends WaypointsForFootstepsPlanner
+public class SplinePathPlanner extends AbstractWaypointsForFootstepsPlanner
 {
    private static final int numberOfPoints = 5;
 
@@ -50,4 +50,6 @@ public class SplinePathPlanner extends WaypointsForFootstepsPlanner
    {
       return null;
    }
+
+   public void cancelPlanning(){}
 }

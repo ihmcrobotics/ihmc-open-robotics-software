@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VisibilityGraphPathPlanner extends WaypointsForFootstepsPlanner
+public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPlanner
 {
    private final NavigableRegionsManager navigableRegionsManager;
 
@@ -96,6 +96,7 @@ public class VisibilityGraphPathPlanner extends WaypointsForFootstepsPlanner
       return visibilityGraphStatistics;
    }
 
+   public void cancelPlanning(){}
 
    // TODO hack to add start and goal planar regions
    private void addPlanarRegionAtZeroHeight(double xLocation, double yLocation)

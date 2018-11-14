@@ -234,21 +234,25 @@ public class FootstepPlanningStage implements BodyPathAndFootstepPlanner
       this.sequenceId.set(sequenceId);
    }
 
+   @Override
    public double getPlanningDuration()
    {
       return getPlanner().getPlanningDuration();
    }
 
+   @Override
    public PlannerStatistics<?> getPlannerStatistics()
    {
       return getPlanner().getPlannerStatistics();
    }
 
+   @Override
    public BodyPathPlan getPathPlan()
    {
       return pathPlan.getAndSet(null);
    }
 
+   @Override
    public FootstepPlan getPlan()
    {
       return stepPlan.getAndSet(null);
