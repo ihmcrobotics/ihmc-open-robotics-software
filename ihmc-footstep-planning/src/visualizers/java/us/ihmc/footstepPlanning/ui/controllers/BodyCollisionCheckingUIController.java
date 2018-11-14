@@ -1,10 +1,7 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Slider;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
@@ -18,7 +15,7 @@ public class BodyCollisionCheckingUIController
    private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty(this, "bodyCollisionParametersProperty");
 
    @FXML
-   private ToggleButton enableBodyCollisionChecking;
+   private CheckBox enableBodyCollisionChecking;
 
    @FXML
    private Spinner<Double> bodyWidth;

@@ -11,6 +11,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Text?>
 
+<?import javafx.scene.control.CheckBox?>
 <AnchorPane prefHeight="400.0" prefWidth="1260.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerParametersUIController">
     <children>
       <SplitPane dividerPositions="0.04006541291905151" layoutY="7.0" prefHeight="407.0" prefWidth="1508.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -29,8 +30,6 @@
                     <GridPane>
                         <columnConstraints>
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="240.0" minWidth="235.0" prefWidth="240.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="110.0" prefWidth="110.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="90.0" prefWidth="110.0" />
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="105.0" prefWidth="110.0" />
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="90.0" prefWidth="110.0" />
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="130.0" prefWidth="130.0" />
@@ -45,43 +44,37 @@
                             <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
                         </rowConstraints>
                         <children>
-                            <ToggleButton fx:id="returnBestEffortPlan" mnemonicParsing="false" prefWidth="250.0" text="Return Best Effort Plan" />
+                            <CheckBox fx:id="returnBestEffortPlan" mnemonicParsing="false" prefWidth="250.0" text="Return Best Effort Plan" />
             
-                            <ToggleButton fx:id="performHeuristicSearchPolicies" mnemonicParsing="false" prefWidth="250.0" text="Perform Heuristic Search Actions" GridPane.rowIndex="1" />
+                            <CheckBox fx:id="performHeuristicSearchPolicies" mnemonicParsing="false" prefWidth="250.0" text="Perform Heuristic Search Actions" GridPane.rowIndex="1" />
             
-                            <Label text="Planner Timeout" GridPane.columnIndex="1" GridPane.halignment="RIGHT" />
-                            <Label text="Planner Horizon" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                            <Label text="Max step length" GridPane.columnIndex="1" GridPane.halignment="RIGHT" />
+                            <Label text="Max step width" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                            <Label text="Min step width" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
             
-                            <Label text="Max step length" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
-                            <Label text="Max step width" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                            <Label text="Min step width" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                            <Label text="Min step length" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                            <Label text="Min step z" GridPane.columnIndex="5" GridPane.halignment="RIGHT" />
+                            <Label text="Max surface incline" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
             
-                            <Label text="Min step length" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                            <Label text="Min step z" GridPane.columnIndex="7" GridPane.halignment="RIGHT" />
-                            <Label text="Max surface incline" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                            <Label text="Max step yaw" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
+                            <Label text="Min step yaw" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                            <Label text="Min foothold percent" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
             
-                            <Label text="Max step yaw" GridPane.columnIndex="5" GridPane.halignment="RIGHT" />
-                            <Label text="Min step yaw" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                            <Label text="Min foothold percent" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                            <Spinner fx:id="maxStepLength" editable="true" GridPane.columnIndex="2" />
+                            <Spinner fx:id="maxStepWidth" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                            <Spinner fx:id="minStepWidth" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3" />
             
-                            <Spinner fx:id="plannerTimeout" editable="true" GridPane.columnIndex="2" />
-                            <Spinner fx:id="horizonLength" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                            <Spinner fx:id="minStepLength" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                            <Spinner fx:id="maxStepZ" editable="true" GridPane.columnIndex="6" />
+                            <Spinner fx:id="minSurfaceIncline" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="3" />
             
-                            <Spinner fx:id="maxStepLength" editable="true" GridPane.columnIndex="4" />
-                            <Spinner fx:id="maxStepWidth" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                            <Spinner fx:id="minStepWidth" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="3" />
-            
-                            <Spinner fx:id="minStepLength" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                            <Spinner fx:id="maxStepZ" editable="true" GridPane.columnIndex="8" />
-                            <Spinner fx:id="minSurfaceIncline" editable="true" GridPane.columnIndex="8" GridPane.rowIndex="3" />
-            
-                            <Spinner fx:id="maxStepYaw" editable="true" GridPane.columnIndex="6" />
-                            <Spinner fx:id="minStepYaw" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="1" />
-                            <Spinner fx:id="minFootholdPercent" editable="true" GridPane.columnIndex="8" GridPane.rowIndex="2" />
-                        <Spinner fx:id="minXClearance" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="2" />
-                        <Spinner fx:id="minYClearance" editable="true" layoutX="820.0" layoutY="72.0" GridPane.columnIndex="6" GridPane.rowIndex="3" />
-                        <Label layoutX="734.0" layoutY="77.0" text="Min X Clearance" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                        <Label layoutX="714.0" layoutY="113.0" text="Min Y Clearance" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                            <Spinner fx:id="maxStepYaw" editable="true" GridPane.columnIndex="4" />
+                            <Spinner fx:id="minStepYaw" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                            <Spinner fx:id="minFootholdPercent" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="2" />
+                        <Spinner fx:id="minXClearance" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                        <Spinner fx:id="minYClearance" editable="true" layoutX="820.0" layoutY="72.0" GridPane.columnIndex="4" GridPane.rowIndex="3" />
+                        <Label layoutX="734.0" layoutY="77.0" text="Min X Clearance" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                        <Label layoutX="714.0" layoutY="113.0" text="Min Y Clearance" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
                         </children>
                     </GridPane>
                </children>
