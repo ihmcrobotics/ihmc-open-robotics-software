@@ -52,4 +52,6 @@ public class SplinePathPlanner extends AbstractWaypointsForFootstepsPlanner
    }
 
    public void cancelPlanning(){}
+
+   public void setTimeout(double timeout){}
 }

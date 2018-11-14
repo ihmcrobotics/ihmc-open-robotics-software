@@ -164,6 +164,8 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
          double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
          timeSpentBeforeFootstepPlanner.set(seconds);
          timeSpentInFootstepPlanner.set(0.0);
+         yoResult.set(pathResult);
+         return yoResult.getEnumValue();
       }
 
       List<Point3D> waypoints = waypointPathPlanner.getWaypoints();

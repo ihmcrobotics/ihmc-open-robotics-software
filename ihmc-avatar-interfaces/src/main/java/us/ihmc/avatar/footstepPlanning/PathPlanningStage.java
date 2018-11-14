@@ -21,6 +21,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.EnumProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -35,6 +36,7 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
 
    private FootstepPlanningResult pathPlanResult = null;
 
+   private final YoInteger sequenceId;
    private final YoBoolean initialize;
 
    private final EnumMap<FootstepPlannerType, WaypointsForFootstepsPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
@@ -49,16 +51,22 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
 
    private final List<PlannerCompletionCallback> completionCallbackList = new ArrayList<>();
 
+   private final int stageId;
+
    private Runnable stageRunnable;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
 
-   public PathPlanningStage(FootstepPlannerParameters parameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   public PathPlanningStage(int stageId, FootstepPlannerParameters parameters, VisibilityGraphsParameters visibilityGraphsParameters,
                             EnumProvider<FootstepPlannerType> activePlanner)
    {
+      this.stageId = stageId;
       this.activePlannerEnum = activePlanner;
 
-      initialize = new YoBoolean("pathPlan_Initialize" + registry.getName(), registry);
+      String prefix = stageId + "_Path_";
+
+      initialize = new YoBoolean(prefix + "Initialize" + registry.getName(), registry);
+      sequenceId = new YoInteger(prefix + "PlanningSequenceId", registry);
 
       plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new SplinePathPlanner(parameters, registry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphPathPlanner(parameters, visibilityGraphsParameters, registry));
@@ -75,6 +83,22 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
    {
       return plannerMap.get(activePlannerEnum.getValue());
    }
+
+   public int getStageId()
+   {
+      return stageId;
+   }
+
+   public int getPlanSequenceId()
+   {
+      return sequenceId.getIntegerValue();
+   }
+
+   public void setPlanSequenceId(int sequenceId)
+   {
+      this.sequenceId.set(sequenceId);
+   }
+
 
    public void addCompletionCallback(PlannerCompletionCallback completionCallback)
    {
@@ -204,6 +228,11 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
       };
 
       return stageRunnable;
+   }
+
+   public void destroyStageRunnable()
+   {
+      stageRunnable = null;
    }
 
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher)
