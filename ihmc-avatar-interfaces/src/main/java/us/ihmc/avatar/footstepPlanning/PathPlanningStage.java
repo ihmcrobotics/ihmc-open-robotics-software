@@ -1,5 +1,6 @@
 package us.ihmc.avatar.footstepPlanning;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -48,6 +49,7 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
    private final AtomicReference<FootstepPlannerGoal> goal = new AtomicReference<>();
    private final AtomicReference<FramePose3D> stanceFootPose = new AtomicReference<>();
    private final AtomicReference<RobotSide> stanceFootSide = new AtomicReference<>();
+   private final AtomicDouble timeout = new AtomicDouble();
 
    private final List<PlannerCompletionCallback> completionCallbackList = new ArrayList<>();
 
@@ -125,6 +127,12 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
    }
 
    @Override
+   public void setTimeout(double timeout)
+   {
+      this.timeout.set(timeout);
+   }
+
+   @Override
    public void computeBestEffortPlan(double horizonLength)
    {
       getPlanner().computeBestEffortPlan(horizonLength);
@@ -172,6 +180,7 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
       getPlanner().setInitialStanceFoot(stanceFootPose.get(), stanceFootSide.get());
       getPlanner().setGoal(goal.get());
       getPlanner().setPlanarRegionsList(planarRegionsList.get());
+      getPlanner().setTimeout(timeout.get());
 
       return true;
    }

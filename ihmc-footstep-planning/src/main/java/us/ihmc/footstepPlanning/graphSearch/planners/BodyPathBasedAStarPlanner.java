@@ -39,7 +39,7 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    private final BodyPathHeuristics heuristics;
    private final YoDouble planningHorizonLength = new YoDouble("planningHorizonLength", registry);
 
-   public BodyPathBasedAStarPlanner(WaypointDefinedBodyPathPlanner bodyPathPlanner, FootstepPlannerParameters parameters,
+   public BodyPathBasedAStarPlanner(BodyPathPlanner bodyPathPlanner, FootstepPlannerParameters parameters,
                                     SideDependentList<ConvexPolygon2D> footPolygons, DoubleProvider heuristicWeight, YoVariableRegistry parentRegistry)
    {
       this.bodyPathPlanner = bodyPathPlanner;
