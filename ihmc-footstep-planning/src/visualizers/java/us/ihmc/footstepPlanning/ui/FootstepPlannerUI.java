@@ -16,6 +16,8 @@ import us.ihmc.footstepPlanning.ui.viewers.*;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 
@@ -57,6 +59,8 @@ public class FootstepPlannerUI
    @FXML
    private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
    @FXML
+   private VisibilityGraphsParametersUIController visibilityGraphsParametersUIController;
+   @FXML
    private BodyCollisionCheckingUIController bodyCollisionCheckingUIController;
    @FXML
    private FootstepPlannerCostsUIController footstepPlannerCostsUIController;
@@ -66,18 +70,19 @@ public class FootstepPlannerUI
    @FXML
    private VisualizationController visibilityGraphsUIController;
 
-   public FootstepPlannerUI(Stage primaryStage, FootstepPlannerParameters plannerParameters) throws Exception
+   public FootstepPlannerUI(Stage primaryStage, FootstepPlannerParameters plannerParameters, VisibilityGraphsParameters visibilityGraphsParameters) throws Exception
    {
-      this(primaryStage, new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API), plannerParameters);
+      this(primaryStage, new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API), plannerParameters, visibilityGraphsParameters);
       messager.startMessager();
    }
 
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
    {
-      this(primaryStage, messager, new DefaultFootstepPlanningParameters());
+      this(primaryStage, messager, new DefaultFootstepPlanningParameters(), new DefaultVisibilityGraphParameters());
    }
 
-   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters) throws Exception
+   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters,
+                            VisibilityGraphsParameters visibilityGraphsParameters) throws Exception
    {
       this.primaryStage = primaryStage;
       this.messager = messager;
@@ -91,10 +96,13 @@ public class FootstepPlannerUI
       footstepPlannerCostsUIController.setPlannerParameters(plannerParameters);
       footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
 
+      visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
+
       footstepPlannerMenuUIController.attachMessager(messager);
       statusTabController.attachMessager(messager);
       startGoalTabController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
+      visibilityGraphsParametersUIController.attachMessager(messager);
       bodyCollisionCheckingUIController.attachMessager(messager);
       footstepPlannerCostsUIController.attachMessager(messager);
       footstepNodeCheckingUIController.attachMessager(messager);
@@ -106,6 +114,7 @@ public class FootstepPlannerUI
       statusTabController.bindControls();
       startGoalTabController.bindControls();
       footstepPlannerParametersUIController.bindControls();
+      visibilityGraphsParametersUIController.bindControls();
       bodyCollisionCheckingUIController.bindControls();
       footstepPlannerCostsUIController.bindControls();
       footstepNodeCheckingUIController.bindControls();
@@ -191,8 +200,9 @@ public class FootstepPlannerUI
       return new FootstepPlannerUI(primaryStage, messager);
    }
 
-   public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters) throws Exception
+   public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters,
+                                                    VisibilityGraphsParameters visibilityGraphsParameters) throws Exception
    {
-      return new FootstepPlannerUI(primaryStage, messager, plannerParameters);
+      return new FootstepPlannerUI(primaryStage, messager, plannerParameters, visibilityGraphsParameters);
    }
 }

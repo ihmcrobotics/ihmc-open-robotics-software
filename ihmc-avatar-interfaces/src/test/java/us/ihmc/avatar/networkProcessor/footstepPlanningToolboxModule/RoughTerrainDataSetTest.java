@@ -57,6 +57,9 @@ import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
+import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.LogSettings;
@@ -854,6 +857,12 @@ public abstract class RoughTerrainDataSetTest
                return checkForBodyBoxCollision;
             }
          };
+      }
+
+      @Override
+      public VisibilityGraphsParameters getVisibilityGraphsParameters()
+      {
+         return new DefaultVisibilityGraphParameters();
       }
    }
 
