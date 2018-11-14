@@ -27,7 +27,6 @@ public class SplinePathWithAStarPlanner implements BodyPathAndFootstepPlanner
    private final YoBoolean hasPath = new YoBoolean("hasPath", registry);
    private final YoDouble timeSpentBeforeFootstepPlanner = new YoDouble("timeSpentBeforeFootstepPlanner", registry);
    private final YoDouble timeSpentInFootstepPlanner = new YoDouble("timeSpentInFootstepPlanner", registry);
-   private final YoDouble planningHorizonLength = new YoDouble("planningHorizonLength", registry);
    private final YoEnum<FootstepPlanningResult> yoResult = new YoEnum<>("planningResult", registry, FootstepPlanningResult.class);
 
    private final WaypointsForFootstepsPlanner pathPlanner;
@@ -40,9 +39,7 @@ public class SplinePathWithAStarPlanner implements BodyPathAndFootstepPlanner
       pathPlanner = new SplinePathPlanner(parameters, registry);
       bodyPath = new WaypointDefinedBodyPathPlanner();
 
-      footstepPlanner = new BodyPathBasedAStarPlanner(parameters, footPolygons, parameters.getCostParameters().getBodyPathBasedHeuristicsWeight(), registry);
-
-      planningHorizonLength.set(1.0);
+      footstepPlanner = new BodyPathBasedAStarPlanner(bodyPath, parameters, footPolygons, parameters.getCostParameters().getBodyPathBasedHeuristicsWeight(), registry);
 
       parentRegistry.addChild(registry);
    }
@@ -93,8 +90,7 @@ public class SplinePathWithAStarPlanner implements BodyPathAndFootstepPlanner
    @Override
    public void setPlanningHorizonLength(double planningHorizonLength)
    {
-      this.planningHorizonLength.set(planningHorizonLength);
-
+      footstepPlanner.setPlanningHorizonLength(planningHorizonLength);
       hasPath.set(false);
    }
 

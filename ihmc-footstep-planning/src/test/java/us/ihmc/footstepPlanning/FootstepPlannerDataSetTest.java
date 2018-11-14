@@ -171,6 +171,7 @@ public abstract class FootstepPlannerDataSetTest
          Assert.fail("Did not find any datasets to test.");
 
       int numberOfFailingTests = 0;
+      int numbberOfTestedSets = 0;
       for (int i = 0; i < allDatasets.size(); i++)
       {
          FootstepPlannerUnitTestDataset dataset = allDatasets.get(i);
@@ -184,6 +185,7 @@ public abstract class FootstepPlannerDataSetTest
             continue;
          }
 
+         numbberOfTestedSets++;
          resetAllAtomics();
          String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
@@ -198,7 +200,7 @@ public abstract class FootstepPlannerDataSetTest
          ThreadTools.sleep(500); // Apparently need to give some time for the prints to appear in the right order.
       }
 
-      String message = "Number of failing datasets: " + numberOfFailingTests + " out of " + allDatasets.size();
+      String message = "Number of failing datasets: " + numberOfFailingTests + " out of " + numbberOfTestedSets;
       if (VISUALIZE)
       {
          LogTools.info(message);

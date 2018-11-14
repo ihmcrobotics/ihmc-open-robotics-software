@@ -67,7 +67,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    private final ArrayList<StartAndGoalListener> startAndGoalListeners = new ArrayList<>();
 
-   private final YoDouble timeout;
+   private final YoDouble timeout = new YoDouble("footstepPlannerTimeout", registry);
    private final YoDouble planningTime = new YoDouble("PlanningTime", registry);
    private final YoLong numberOfExpandedNodes = new YoLong("NumberOfExpandedNodes", registry);
    private final YoDouble percentRejectedNodes = new YoDouble("PercentRejectedNodes", registry);
@@ -96,8 +96,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
       this.listener = listener;
       this.snapper = snapper;
       this.graph = new FootstepGraph();
-
-      this.timeout = new YoDouble("timeout", registry);
       timeout.set(Double.POSITIVE_INFINITY);
       this.initialize.set(true);
 

@@ -38,7 +38,7 @@ public abstract class WaypointsForFootstepsPlanner
    {
       this.parameters = parameters;
 
-      yoResult = new YoEnum<>("planningResult", registry, FootstepPlanningResult.class);
+      yoResult = new YoEnum<>("pathPlanningResult", registry, FootstepPlanningResult.class);
    }
 
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
