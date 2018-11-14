@@ -3,6 +3,8 @@ package us.ihmc.footstepPlanning.graphSearch.pathPlanners;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.pathPlanning.statistics.PlannerStatistics;
+import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -42,5 +44,10 @@ public class SplinePathPlanner extends WaypointsForFootstepsPlanner
 
       yoResult.set(FootstepPlanningResult.OPTIMAL_SOLUTION);
       return yoResult.getEnumValue();
+   }
+
+   public PlannerStatistics<?> getPlannerStatistics()
+   {
+      return null;
    }
 }

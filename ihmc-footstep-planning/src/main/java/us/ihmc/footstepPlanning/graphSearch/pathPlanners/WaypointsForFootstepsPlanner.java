@@ -4,12 +4,14 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
+import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -74,10 +76,22 @@ public abstract class WaypointsForFootstepsPlanner
       this.planarRegionsList = planarRegionsList;
    }
 
-   public List<? extends Point3DReadOnly> getWaypoints()
+   public void computeBestEffortPlan(double horizonLength)
+   {
+      Vector2D goalDirection = new Vector2D(bodyGoalPose.getPosition());
+      goalDirection.sub(bodyStartPose.getX(), bodyStartPose.getY());
+      goalDirection.scale(horizonLength / goalDirection.length());
+      Point3D waypoint = new Point3D(bodyStartPose.getPosition());
+      waypoint.add(goalDirection.getX(), goalDirection.getY(), 0.0);
+      waypoints.add(waypoint);
+   }
+
+   public List<Point3D> getWaypoints()
    {
       return waypoints;
    }
 
    public abstract FootstepPlanningResult planWaypoints();
+
+   public abstract PlannerStatistics<?> getPlannerStatistics();
 }
