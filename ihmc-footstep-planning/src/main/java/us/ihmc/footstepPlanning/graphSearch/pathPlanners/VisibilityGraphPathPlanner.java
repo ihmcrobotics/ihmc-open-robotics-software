@@ -31,7 +31,14 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
    public VisibilityGraphPathPlanner(FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
                                      YoVariableRegistry parentRegistry)
    {
-      super(footstepPlannerParameters, parentRegistry);
+      this("", footstepPlannerParameters, visibilityGraphsParameters, parentRegistry);
+   }
+
+
+   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+                                     YoVariableRegistry parentRegistry)
+   {
+      super(prefix, footstepPlannerParameters, parentRegistry);
 
       this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters);
    }
@@ -96,9 +103,13 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
       return visibilityGraphStatistics;
    }
 
-   public void cancelPlanning(){}
+   public void cancelPlanning()
+   {
+   }
 
-   public void setTimeout(double timeout){}
+   public void setTimeout(double timeout)
+   {
+   }
 
    // TODO hack to add start and goal planar regions
    private void addPlanarRegionAtZeroHeight(double xLocation, double yLocation)
@@ -126,5 +137,4 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
       statistics.setInterRegionsVisibilityMapInWorld(interRegionsMap.getMapId(), interRegionsMap.getVisibilityMapInWorld());
       statistics.addNavigableRegions(navigableRegions);
    }
-
 }

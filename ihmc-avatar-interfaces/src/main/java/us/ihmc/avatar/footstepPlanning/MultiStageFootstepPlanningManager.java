@@ -206,7 +206,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private PathPlanningStage createNewPathPlanningStage()
    {
-      PathPlanningStage pathPlanningStage = new PathPlanningStage(allPathPlanningStages.getCopyForReading().size(), footstepPlanningParameters,
+      PathPlanningStage pathPlanningStage = new PathPlanningStage(allPathPlanningStages.size(), footstepPlanningParameters,
                                                                   visibilityGraphsParameters, activePlanner);
       pathPlanningStage.addCompletionCallback(this);
       return pathPlanningStage;
@@ -214,7 +214,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private FootstepPlanningStage createNewStepPlanningStage()
    {
-      FootstepPlanningStage footstepPlanningStage = new FootstepPlanningStage(allStepPlanningStages.getCopyForReading().size(), contactPointParameters,
+      FootstepPlanningStage footstepPlanningStage = new FootstepPlanningStage(allStepPlanningStages.size(), contactPointParameters,
                                                                               footstepPlanningParameters, bodyPathPlanner, activePlanner, plannerListener,
                                                                               planId, tickDurationMs);
       footstepPlanningStage.addCompletionCallback(this);
@@ -608,6 +608,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       }
 
       updateInternal();
+      
       checkPlannersForFailures();
    }
 

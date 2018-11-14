@@ -114,12 +114,12 @@ public class FootstepPlanningStage implements FootstepPlanner
 
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame, plannerListener));
-      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedAStarPlanner(bodyPathPlanner, footstepPlannerParameters, contactPointsInSoleFrame,
+      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedAStarPlanner("simple_", bodyPathPlanner, footstepPlannerParameters, contactPointsInSoleFrame,
                                                                                          footstepPlannerParameters.getCostParameters()
                                                                                                                   .getBodyPathBasedHeuristicsWeight(),
                                                                                          registry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
-                     new BodyPathBasedAStarPlanner(bodyPathPlanner, footstepPlannerParameters, contactPointsInSoleFrame,
+                     new BodyPathBasedAStarPlanner("visGraph_", bodyPathPlanner, footstepPlannerParameters, contactPointsInSoleFrame,
                                                    footstepPlannerParameters.getCostParameters().getAStarHeuristicsWeight(), registry));
 
       initialize.set(true);

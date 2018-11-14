@@ -28,8 +28,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BodyPathBasedAStarPlanner implements FootstepPlanner
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
    private static final boolean debug = false;
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
@@ -37,12 +35,15 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    private final FootstepPlanner footstepPlanner;
 
    private final BodyPathHeuristics heuristics;
-   private final YoDouble planningHorizonLength = new YoDouble("planningHorizonLength", registry);
+   private final YoDouble planningHorizonLength;
 
-   public BodyPathBasedAStarPlanner(BodyPathPlanner bodyPathPlanner, FootstepPlannerParameters parameters,
+   public BodyPathBasedAStarPlanner(String prefix, BodyPathPlanner bodyPathPlanner, FootstepPlannerParameters parameters,
                                     SideDependentList<ConvexPolygon2D> footPolygons, DoubleProvider heuristicWeight, YoVariableRegistry parentRegistry)
    {
       this.bodyPathPlanner = bodyPathPlanner;
+
+      YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+
 
       heuristics = new BodyPathHeuristics(heuristicWeight, parameters, this.bodyPathPlanner);
 
@@ -59,6 +60,7 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
+      planningHorizonLength = new YoDouble("planningHorizonLength", registry);
       planningHorizonLength.set(1.0);
 
       footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, registry);
@@ -139,7 +141,7 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    @Override
    public void cancelPlanning()
    {
-      footstepPlanner.cancelPlanning();;
+      footstepPlanner.cancelPlanning();
    }
 
    @Override
