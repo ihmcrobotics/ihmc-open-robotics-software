@@ -37,7 +37,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.*;
 
-public class AStarFootstepPlanner implements FootstepPlanner
+public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 {
    private static final boolean debug = false;
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;

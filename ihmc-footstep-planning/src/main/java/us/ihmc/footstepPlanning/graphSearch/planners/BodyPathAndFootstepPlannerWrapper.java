@@ -48,7 +48,7 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
 
    protected final WaypointDefinedBodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
    protected WaypointsForFootstepsPlanner waypointPathPlanner;
-   protected BodyPathBasedAStarPlanner footstepPlanner;
+   protected FootstepPlanner footstepPlanner;
 
    private PlanarRegionsList planarRegionsList;
 
