@@ -219,7 +219,7 @@ public abstract class FootstepPlannerDataSetTest
       return findPlanAndAssertGoodResult(dataset);
    }
 
-   private void packPlanningRequest(FootstepPlannerUnitTestDataset dataset, Messager messager)
+   protected void packPlanningRequest(FootstepPlannerUnitTestDataset dataset, Messager messager)
    {
       messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, dataset.getStart());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, dataset.getGoal());
@@ -242,7 +242,9 @@ public abstract class FootstepPlannerDataSetTest
          LogTools.info("Sending out planning request packet.");
    }
 
-   private String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plan, Point3D goal)
+
+
+   protected String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plan, Point3D goal)
    {
       String errorMessage = "";
 
