@@ -93,6 +93,15 @@ public class GenericQuadrupedHighLevelControllerParameters implements HighLevelC
    }
 
    @Override
+   public List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorsUnderLoad(HighLevelControllerName state)
+   {
+      if (state == HighLevelControllerName.WALKING)
+         return walkingJointBehavior;
+      else
+         return nonWalkingJointBehavior;
+   }
+
+   @Override
    public List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParameters(HighLevelControllerName state)
    {
       switch (state)
