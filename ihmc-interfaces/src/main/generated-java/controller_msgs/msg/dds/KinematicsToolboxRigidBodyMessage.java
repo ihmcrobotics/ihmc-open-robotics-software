@@ -20,7 +20,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    /**
             * The is the unique hash code of the end-effector to be solved for.
             * It is used on the solver side to retrieve the desired end-effector to be controlled.
-            * See RigidBody.hashCode() for the computation of a rigid-body hash code.
+            * See RigidBody.getNameBasedHashCode() for the computation of a rigid-body hash code.
             */
    public int end_effector_hash_code_;
    /**
@@ -129,7 +129,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    /**
             * The is the unique hash code of the end-effector to be solved for.
             * It is used on the solver side to retrieve the desired end-effector to be controlled.
-            * See RigidBody.hashCode() for the computation of a rigid-body hash code.
+            * See RigidBody.getNameBasedHashCode() for the computation of a rigid-body hash code.
             */
    public void setEndEffectorHashCode(int end_effector_hash_code)
    {
@@ -138,7 +138,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    /**
             * The is the unique hash code of the end-effector to be solved for.
             * It is used on the solver side to retrieve the desired end-effector to be controlled.
-            * See RigidBody.hashCode() for the computation of a rigid-body hash code.
+            * See RigidBody.getNameBasedHashCode() for the computation of a rigid-body hash code.
             */
    public int getEndEffectorHashCode()
    {

@@ -9,6 +9,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFromDescription;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
+import us.ihmc.robotics.partNames.QuadrupedJointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 
 import javax.xml.bind.JAXBException;
@@ -75,6 +76,12 @@ public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
       FullQuadrupedRobotModel sdfFullRobotMdoel = new FullQuadrupedRobotModelFromDescription(robotDescription, jointMapAndContactInfo, sensorLinksToTrack);
 
       return sdfFullRobotMdoel;
+   }
+
+   @Override
+   public QuadrupedJointNameMap getJointMap()
+   {
+      return jointMapAndContactInfo;
    }
 
    @Override

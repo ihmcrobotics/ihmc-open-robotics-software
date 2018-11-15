@@ -86,6 +86,10 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
             desiredState.setPosition(jointSetpoints.getDesiredPosition());
          if (jointSetpoints.hasDesiredTorque())
             desiredState.setEffort(jointSetpoints.getDesiredTorque());
+         if(jointSetpoints.hasStiffness())
+            quadrupedActuators.get(controllerJoint).setKp(jointSetpoints.getStiffness());
+         if(jointSetpoints.hasDamping())
+            quadrupedActuators.get(controllerJoint).setKd(jointSetpoints.getDamping());
 
          // Apply velocity scaling
          if (desiredState.isVelocityValid() && jointSetpoints.hasVelocityScaling())

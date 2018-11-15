@@ -10,6 +10,7 @@ byte WALKING = 5
 byte EXIT_WALKING = 6
 byte DIAGNOSTICS = 7
 byte CALIBRATION = 8
+byte CUSTOM1 = 9
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id

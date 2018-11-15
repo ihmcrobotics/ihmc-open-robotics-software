@@ -11,6 +11,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -130,5 +131,10 @@ public class QuadrupedFallDetector
 
       yoDcmDistanceOutsideSupportPolygon.set(distance);
       return distance > dcmOutsideSupportThreshold.getValue();
+   }
+
+   public BooleanProvider getIsFallDetected()
+   {
+      return isFallDetected;
    }
 }
