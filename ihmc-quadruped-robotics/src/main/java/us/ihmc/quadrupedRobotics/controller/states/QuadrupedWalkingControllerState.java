@@ -20,6 +20,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
@@ -40,6 +43,8 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EventState;
@@ -55,6 +60,9 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedWalkingControllerState extends HighLevelControllerState implements QuadrupedStepTransitionCallback
@@ -80,6 +88,8 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
    private final GroundPlaneEstimator upcomingGroundPlaneEstimator;
    private final QuadrantDependentList<YoFramePoint3D> groundPlanePositions;
    private final QuadrantDependentList<YoFramePoint3D> upcomingGroundPlanePositions;
+
+   private final QuadrantDependentList<Set<String>> legJointNames = new QuadrantDependentList<>();
 
    private final YoBoolean onLiftOffTriggered = new YoBoolean("onLiftOffTriggered", registry);
    private final YoBoolean onTouchDownTriggered = new YoBoolean("onTouchDownTriggered", registry);
@@ -128,6 +138,16 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       jointSpaceManager = controlManagerFactory.getOrCreateJointSpaceManager();
 
       FullQuadrupedRobotModel fullRobotModel = runtimeEnvironment.getFullRobotModel();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotQuadrant);
+         OneDoFJointBasics[] legJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(fullRobotModel.getBody(), foot), OneDoFJointBasics.class);
+         Set<String> jointNames = new HashSet<>();
+         Arrays.asList(legJoints).stream().forEach(legJoint -> jointNames.add(legJoint.getName()));
+         legJointNames.put(robotQuadrant, jointNames);
+      }
+
+
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(runtimeEnvironment.getControlDT(), runtimeEnvironment.getGravity(),
                                                                                        fullRobotModel.getRootJoint(),
                                                                                        fullRobotModel.getControllableOneDoFJoints(),
@@ -469,5 +489,18 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return controllerCore.getOutputForLowLevelController();
+   }
+
+   @Override
+   public boolean isJointLoadBearing(String jointName)
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         boolean legLoaded = feetManager.getContactState(robotQuadrant).isLoadingBearing();
+         if (legLoaded && legJointNames.get(robotQuadrant).contains(jointName))
+            return true;
+      }
+
+      return false;
    }
 }
