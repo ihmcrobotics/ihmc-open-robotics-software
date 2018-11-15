@@ -1,8 +1,6 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -15,10 +13,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
@@ -48,6 +48,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -72,11 +73,12 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.HeavyBallOnTableEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -1056,6 +1058,49 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          assertArrayEquals(zeroVelocities, controllerDesiredJointVelocities, 1.0e-10);
       }
    }
+
+   @Test
+   public void testWrenchTrajectoryMessage() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModelWithHandContacts(), new HeavyBallOnTableEnvironment());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      assertTrue(success);
+
+      EuclideanTrajectoryPointCalculator calculator = new EuclideanTrajectoryPointCalculator();
+      calculator.appendTrajectoryPoint(1.0, new Point3D(0.25, 0.0, 1.05));
+      calculator.appendTrajectoryPoint(2.0, new Point3D(0.6, 0.0, 1.05));
+      calculator.appendTrajectoryPoint(2.5, new Point3D(0.6, 0.0, 1.25));
+      calculator.appendTrajectoryPoint(3.5, new Point3D(0.25, 0.0, 1.05));
+      calculator.computeTrajectoryPointVelocities(true);
+      RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = calculator.getTrajectoryPoints();
+      SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
+      for (FrameEuclideanTrajectoryPoint trajectoryPoint : trajectoryPoints)
+      {
+         
+         double time = trajectoryPoint.getTime();
+         Point3DReadOnly position = trajectoryPoint.getPositionCopy();
+         Vector3DReadOnly linearVelocity = trajectoryPoint.getLinearVelocityCopy();
+         se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, position, new Quaternion(), linearVelocity, new Vector3D()));
+      }
+      se3TrajectoryMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(new SelectionMatrix3D(null, false, false, false)));
+
+      HandTrajectoryMessage rightHandTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.RIGHT, se3TrajectoryMessage);
+      drcSimulationTestHelper.publishToController(rightHandTrajectoryMessage);
+
+      
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.5);
+      assertTrue(success);
+   }
+
+   public abstract DRCRobotModel getRobotModelWithHandContacts();
 
    public static Point3D findControllerDesiredPosition(String bodyName, SimulationConstructionSet scs)
    {
