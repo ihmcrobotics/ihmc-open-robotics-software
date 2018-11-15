@@ -113,7 +113,7 @@ public class GenericQuadrupedHighLevelControllerParameters implements HighLevelC
       case STAND_READY:
       case STAND_TRANSITION_STATE:
       case EXIT_WALKING:
-      case CALIBRATION:
+      case FREEZE_STATE:
       case CUSTOM1:
          return getJointAccelerationIntegrationParametersForHangingAround();
       default:
