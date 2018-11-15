@@ -45,6 +45,8 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
 
    public FootstepPlanningResult planWaypoints()
    {
+      waypoints.clear();
+
       if (planarRegionsList == null)
       {
          waypoints.add(new Point3D(bodyStartPose.getPosition()));
