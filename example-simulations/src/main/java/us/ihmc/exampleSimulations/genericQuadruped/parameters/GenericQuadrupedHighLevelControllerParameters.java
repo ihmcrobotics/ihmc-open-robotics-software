@@ -2,9 +2,11 @@ package us.ihmc.exampleSimulations.genericQuadruped.parameters;
 
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
-import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedJointNameMapAndContactDefinition;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.QuadrupedJointNameMap;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -38,7 +40,7 @@ public class GenericQuadrupedHighLevelControllerParameters implements HighLevelC
    @Override
    public HighLevelControllerName getDefaultInitialControllerState()
    {
-      return HighLevelControllerName.WALKING;
+      return HighLevelControllerName.FREEZE_STATE;
    }
 
    @Override
@@ -90,6 +92,35 @@ public class GenericQuadrupedHighLevelControllerParameters implements HighLevelC
       }
    }
 
+   @Override
+   public List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorsUnderLoad(HighLevelControllerName state)
+   {
+      if (state == HighLevelControllerName.WALKING)
+         return walkingJointBehavior;
+      else
+         return nonWalkingJointBehavior;
+   }
+
+   @Override
+   public List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParameters(HighLevelControllerName state)
+   {
+      switch (state)
+      {
+      case WALKING:
+         return getJointAccelerationIntegrationParametersForWalking();
+      case DO_NOTHING_BEHAVIOR:
+      case STAND_PREP_STATE:
+      case STAND_READY:
+      case STAND_TRANSITION_STATE:
+      case EXIT_WALKING:
+      case FREEZE_STATE:
+      case CUSTOM1:
+         return getJointAccelerationIntegrationParametersForHangingAround();
+      default:
+         throw new RuntimeException("Implement a desired joint behavior for the high level state " + state);
+      }
+   }
+
    private void setUpWalkingJointBehavior()
    {
       configureSymmetricBehavior(walkingJointBehavior, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 0.0, 0.0);
@@ -119,5 +150,29 @@ public class GenericQuadrupedHighLevelControllerParameters implements HighLevelC
          jointNames.add(jointMap.getLegJointName(quadrant, legJointName));
       }
       return jointNames;
+   }
+
+   private List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForWalking()
+   {
+      List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> ret = new ArrayList<>();
+
+      for (LegJointName legJointName : new LegJointName[] {LegJointName.HIP_PITCH, LegJointName.HIP_ROLL, LegJointName.KNEE_PITCH})
+      { // Hip joints
+         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
+         parameters.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9992, 0.004));
+         parameters.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.85, 0.004));
+         List<String> jointNames = new ArrayList<>();
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+            jointNames.add(jointMap.getLegJointName(robotQuadrant, legJointName));
+         ret.add(new GroupParameter<>(legJointName.getCamelCaseName(), parameters, jointNames));
+      }
+
+      return ret;
+   }
+
+   private List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForHangingAround()
+   {
+      // Possible ass a single parameter that is shared between all joints here.
+      return null;
    }
 }
