@@ -400,7 +400,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
 
       JointAccelerationIntegrationCommand accelerationIntegrationCommand = getAccelerationIntegrationCommand();
       if (!deactivateAccelerationIntegrationInWBC)
-         controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationCommand);
+         controllerCoreCommand.addVirtualModelControlCommand(accelerationIntegrationCommand);
       controllerCoreCommand.completeLowLevelJointData(stateSpecificJointSettings);
 
       controllerCoreTimer.startMeasurement();
