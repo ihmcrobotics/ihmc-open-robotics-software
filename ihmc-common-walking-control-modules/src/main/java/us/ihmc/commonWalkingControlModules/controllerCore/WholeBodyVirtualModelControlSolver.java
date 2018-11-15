@@ -35,6 +35,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -57,14 +58,14 @@ public class WholeBodyVirtualModelControlSolver
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final WrenchVisualizer wrenchVisualizer;
+
    private final JointAccelerationIntegrationCalculator jointAccelerationIntegrationCalculator;
+   private final ForwardDynamicsCalculator forwardDynamicsCalculator;
 
 
    private final FloatingJointBasics rootJoint;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
-
-   private final ReferenceFrame centerOfMassFrame;
 
    private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", worldFrame);
 
@@ -100,7 +101,6 @@ public class WholeBodyVirtualModelControlSolver
    {
       rootJoint = toolbox.getRootJoint();
       optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, registry);
-      centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
       jointIndexHandler = toolbox.getJointIndexHandler();
       OneDoFJointBasics[] controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
@@ -123,6 +123,7 @@ public class WholeBodyVirtualModelControlSolver
       wrenchVisualizer = toolbox.getWrenchVisualizer();
 
       jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(toolbox.getControlDT(), registry);
+      forwardDynamicsCalculator = new ForwardDynamicsCalculator(toolbox.getRootBody());
 
       yoResidualRootJointForce = toolbox.getYoResidualRootJointForce();
       yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
@@ -190,11 +191,8 @@ public class WholeBodyVirtualModelControlSolver
          externalWrenchSolution.get(rigidBody).negate();
       }
 
-
-      // thing to get joint accelerations
-      DenseMatrix64F jointAccelerationsSolution = new DenseMatrix64F(jointTorquesSolution);
-
-
+      forwardDynamicsCalculator.compute(jointTorquesSolution);
+      DenseMatrix64F jointAccelerationsSolution = forwardDynamicsCalculator.getJointAccelerationMatrix();
 
       updateLowLevelData(jointTorquesSolution, jointAccelerationsSolution);
 
@@ -224,11 +222,11 @@ public class WholeBodyVirtualModelControlSolver
 
          for (int jointIndex : jointIndices)
          {
-
             lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorquesSolution.get(jointIndex));
             lowLevelOneDoFJointDesiredDataHolder.setDesiredJointAcceleration(joint, jointAccelerationsSolution.get(jointIndex));
          }
       }
+
 
       jointAccelerationIntegrationCalculator.computeAndUpdateDataHolder(lowLevelOneDoFJointDesiredDataHolder);
 
