@@ -39,7 +39,7 @@ public class MessagerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
       String prefix = "unitTestDataSets/test/";
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214730_CinderBlockField");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171026_131304_PlanarRegion_Ramp_2Story_UnitTest");
       ThreadTools.sleepForever();
       test.tearDown();
 
