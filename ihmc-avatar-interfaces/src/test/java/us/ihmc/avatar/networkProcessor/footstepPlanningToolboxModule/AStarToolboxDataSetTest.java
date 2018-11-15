@@ -16,7 +16,7 @@ import java.util.List;
 
 import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.MANUAL)
 public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
 {
    @Override

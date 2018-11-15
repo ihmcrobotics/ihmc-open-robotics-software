@@ -9,7 +9,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pubsub.DomainFactory;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.MANUAL)
 public class VisGraphWihAStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
 {
    @Override
