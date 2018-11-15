@@ -1,10 +1,13 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.JointSettingConfiguration;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -24,11 +27,12 @@ public class QuadrupedJointSpaceManager
    private final JointLimitEnforcementCommand jointLimitEnforcementCommand = new JointLimitEnforcementCommand();
    private final JointTorqueCommand jointDampingCommand = new JointTorqueCommand();
 
+
    private final YoDouble jointViscousDamping = new YoDouble("jointViscousDamping", registry);
    private final YoDouble jointPositionLimitDamping = new YoDouble("jointPositionLimitDamping", registry);
    private final YoDouble jointPositionLimitStiffness = new YoDouble("jointPositionLimitStiffness", registry);
 
-   public QuadrupedJointSpaceManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public QuadrupedJointSpaceManager(QuadrupedControllerToolbox controllerToolbox, HighLevelControllerParameters parameters, YoVariableRegistry parentRegistry)
    {
       controlledJoints = controllerToolbox.getFullRobotModel().getControllableOneDoFJoints();
 
