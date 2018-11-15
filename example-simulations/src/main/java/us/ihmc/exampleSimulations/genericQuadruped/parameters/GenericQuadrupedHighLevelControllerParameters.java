@@ -85,7 +85,6 @@ public class GenericQuadrupedHighLevelControllerParameters implements HighLevelC
       switch(state)
       {
       case WALKING:
-      case STAND_TRANSITION_STATE:
          return walkingJointBehavior;
       default:
          return nonWalkingJointBehavior;
