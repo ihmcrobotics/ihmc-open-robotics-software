@@ -24,6 +24,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -46,6 +47,9 @@ public class BodyPathMeshViewer extends AnimationTimer
 
    private final AtomicReference<Pair<Mesh, Material>> bodyPathMeshToRender = new AtomicReference<>(null);
    private final AtomicReference<Boolean> show;
+   private final AtomicBoolean reset = new AtomicBoolean(false);
+
+
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
 
    public BodyPathMeshViewer(Messager messager)
@@ -60,6 +64,9 @@ public class BodyPathMeshViewer extends AnimationTimer
 
       show = messager.createInput(FootstepPlannerMessagerAPI.ShowBodyPath, true);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.BodyPathDataTopic, this::processBodyPathOnThread);
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
+
 
       root.getChildren().addAll(bodyPathMeshView);
    }
@@ -76,8 +83,15 @@ public class BodyPathMeshViewer extends AnimationTimer
          root.getChildren().clear();
       }
 
-      Pair<Mesh, Material> newMesh = bodyPathMeshToRender.get();
+      if (reset.getAndSet(false))
+      {
+         bodyPathMeshView.setMesh(null);
+         bodyPathMeshView.setMaterial(null);
+         bodyPathMeshToRender.set(null);
+         return;
+      }
 
+      Pair<Mesh, Material> newMesh = bodyPathMeshToRender.getAndSet(null);
       if (newMesh != null)
       {
          if (VERBOSE)
