@@ -1,32 +1,14 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
-import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.bollards;
-import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.corridor;
-import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.getTestData;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.junit.After;
-import org.junit.Before;
-
 import com.jme3.math.Transform;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
@@ -44,6 +26,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -58,8 +41,8 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProper
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments;
-import us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.PlannerTestData;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
@@ -69,6 +52,7 @@ import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -76,19 +60,12 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.RobotSpecificJointNames;
-import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -106,37 +83,41 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
-public abstract class RoughTerrainDataSetTest
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+
+public abstract class FootstepPlannerToolboxDataSetTest
 {
-   protected static final double bambooTimeScaling = 4.0;
+   private static final double bambooTimeScaling = 4.0;
 
    // Whether to start the UI or not.
-   protected static boolean VISUALIZE = false;
+   public static boolean VISUALIZE = true;
    // For enabling helpful prints.
-   protected static boolean DEBUG = false;
+   private static boolean DEBUG = true;
+   private static boolean VERBOSE = true;
 
-   private boolean checkForBodyBoxCollision = true;
-   private double bodyBoxDepth = 0.3;
-   private double bodyBoxWidth = 0.7;
-   private double bodyBoxOffsetX = 0.0;
-
-   protected FootstepPlannerUI ui = null;
-   protected Messager messager = null;
+   private FootstepPlannerUI ui = null;
+   private Messager messager = null;
 
    private final AtomicReference<FootstepPlan> plannerPlanReference = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlanningResult> plannerResultReference = new AtomicReference<>(null);
-   protected final AtomicReference<Boolean> plannerReceivedPlan = new AtomicReference<>(false);
-   protected final AtomicReference<Boolean> plannerReceivedResult = new AtomicReference<>(false);
+   private final AtomicReference<Boolean> plannerReceivedPlan = new AtomicReference<>(false);
+   private final AtomicReference<Boolean> plannerReceivedResult = new AtomicReference<>(false);
 
-   protected AtomicReference<FootstepPlan> uiFootstepPlanReference;
-   protected AtomicReference<FootstepPlanningResult> uiPlanningResultReference;
-   protected final AtomicReference<Boolean> uiReceivedPlan = new AtomicReference<>(false);
-   protected final AtomicReference<Boolean> uiReceivedResult = new AtomicReference<>(false);
+   private AtomicReference<FootstepPlan> uiFootstepPlanReference;
+   private AtomicReference<FootstepPlanningResult> uiPlanningResultReference;
+   private final AtomicReference<Boolean> uiReceivedPlan = new AtomicReference<>(false);
+   private final AtomicReference<Boolean> uiReceivedResult = new AtomicReference<>(false);
 
-   protected final AtomicReference<FootstepPlan> expectedPlan = new AtomicReference<>(null);
-   protected final AtomicReference<FootstepPlan> actualPlan = new AtomicReference<>(null);
-   protected final AtomicReference<FootstepPlanningResult> expectedResult = new AtomicReference<>(null);
-   protected final AtomicReference<FootstepPlanningResult> actualResult = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlan> expectedPlan = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlan> actualPlan = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlanningResult> expectedResult = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlanningResult> actualResult = new AtomicReference<>(null);
 
    private static final String robotName = "testBot";
    private MultiStageFootstepPlanningModule toolboxModule;
@@ -148,7 +129,7 @@ public abstract class RoughTerrainDataSetTest
 
    private RemoteUIMessageConverter messageConverter = null;
 
-   protected DomainFactory.PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
+   public PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
 
    public abstract FootstepPlannerType getPlannerType();
 
@@ -205,24 +186,13 @@ public abstract class RoughTerrainDataSetTest
          ThreadTools.sleep(10);
    }
 
-   public void setCheckForBodyBoxCollision(boolean checkForBodyBoxCollision)
+   @Test(timeout = 500000)
+   @ContinuousIntegrationTest(estimatedDuration = 13.0)
+   public void testDatasetsWithoutOcclusion()
    {
-      this.checkForBodyBoxCollision = checkForBodyBoxCollision;
-   }
-
-   public void setBodyBoxDepth(double bodyBoxDepth)
-   {
-      this.bodyBoxDepth = bodyBoxDepth;
-   }
-
-   public void setBodyBoxWidth(double bodyBoxWidth)
-   {
-      this.bodyBoxWidth = bodyBoxWidth;
-   }
-
-   public void setBodyBoxOffsetX(double bodyBoxOffsetX)
-   {
-      this.bodyBoxOffsetX = bodyBoxOffsetX;
+      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools
+            .loadAllFootstepPlannerDatasetsWithoutOcclusions(FootstepPlannerDataExporter.class);
+      runAssertionsOnAllDatasets(this::runAssertions, allDatasets);
    }
 
 
@@ -300,28 +270,103 @@ public abstract class RoughTerrainDataSetTest
       return new TestRobotModel();
    }
 
-   public void testDownCorridor()
+   public void runAssertionsOnDataset(DatasetTestRunner datasetTestRunner, String datasetName)
    {
-      runAssertions(getTestData(corridor));
+      FootstepPlannerUnitTestDataset dataset = FootstepPlannerIOTools.loadDataset(FootstepPlannerDataExporter.class, datasetName);
+
+      resetAllAtomics();
+      String errorMessages = datasetTestRunner.testDataset(dataset);
+      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
    }
 
-   public void testBetweenTwoBollards()
+
+   public void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner, List<FootstepPlannerUnitTestDataset> allDatasets)
    {
-      setCheckForBodyBoxCollision(true);
-      setBodyBoxDepth(0.45);
-      setBodyBoxWidth(0.9);
-      setBodyBoxOffsetX(0.1);
-      runAssertions(getTestData(bollards));
+      if (VERBOSE || DEBUG)
+         LogTools.info("Unit test files found: " + allDatasets.size());
+
+      if (allDatasets.isEmpty())
+         Assert.fail("Did not find any datasets to test.");
+
+      int numberOfFailingTests = 0;
+      int numbberOfTestedSets = 0;
+      for (int i = 0; i < allDatasets.size(); i++)
+      {
+         FootstepPlannerUnitTestDataset dataset = allDatasets.get(i);
+         if (DEBUG || VERBOSE)
+            LogTools.info("Testing file: " + dataset.getDatasetName());
+
+         if(!dataset.getTypes().contains(getPlannerType()))
+         {
+            if(DEBUG || VERBOSE)
+               LogTools.info(dataset.getDatasetName() + " does not contain planner type " + getPlannerType() + ", skipping");
+            continue;
+         }
+
+         numbberOfTestedSets++;
+         resetAllAtomics();
+         String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
+         if (!errorMessagesForCurrentFile.isEmpty())
+            numberOfFailingTests++;
+
+         if (DEBUG || VERBOSE)
+         {
+            String result = errorMessagesForCurrentFile.isEmpty() ? "passed" : "failed";
+            LogTools.info(dataset.getDatasetName() + " " + result);
+         }
+
+         ThreadTools.sleep(500); // Apparently need to give some time for the prints to appear in the right order.
+      }
+
+      String message = "Number of failing datasets: " + numberOfFailingTests + " out of " + numbberOfTestedSets;
+      if (VISUALIZE)
+      {
+         LogTools.info(message);
+         ThreadTools.sleepForever();
+      }
+      else
+      {
+         Assert.assertEquals(message, numberOfFailingTests, 0);
+      }
    }
 
-   public String runAssertions(PlannerTestData dataset)
+   public String runAssertions(FootstepPlannerUnitTestDataset dataset)
    {
-      submitDataSet(dataset);
+      resetAllAtomics();
+      ThreadTools.sleep(1000);
+
+      packPlanningRequest(dataset, messager);
+
+      resetAllAtomics();
+      ThreadTools.sleep(1000);
 
       return findPlanAndAssertGoodResult(dataset);
    }
 
-   protected void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus packet)
+   private void packPlanningRequest(FootstepPlannerUnitTestDataset dataset, Messager messager)
+   {
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, dataset.getStart());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, dataset.getGoal());
+      messager.submitMessage(PlannerTypeTopic, getPlannerType());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
+
+      double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeMultiplier * dataset.getTimeout(getPlannerType()));
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
+
+      if (dataset.hasGoalOrientation())
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, dataset.getGoalOrientation());
+      if (dataset.hasStartOrientation())
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, dataset.getStartOrientation());
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
+
+      if (DEBUG)
+         LogTools.info("Sending out planning request packet.");
+   }
+
+   private void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus packet)
    {
       if (DEBUG)
          PrintTools.info("Processed an output from a remote planner.");
@@ -353,7 +398,7 @@ public abstract class RoughTerrainDataSetTest
       return footstepPlan;
    }
 
-   protected String assertPlansAreValid(String datasetName, FootstepPlanningResult expectedResult, FootstepPlanningResult actualResult,
+   private String assertPlansAreValid(String datasetName, FootstepPlanningResult expectedResult, FootstepPlanningResult actualResult,
                                         FootstepPlan expectedPlan, FootstepPlan actualPlan, Point3D goal)
    {
       String errorMessage = "";
@@ -372,21 +417,27 @@ public abstract class RoughTerrainDataSetTest
       return errorMessage;
    }
 
-   protected String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plan, Point3D goal)
+
+
+   private String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plan, Point3D goal)
    {
       String errorMessage = "";
 
-      errorMessage += assertTrue(datasetName, "Planning result for " + datasetName + " is invalid, result was " + result, result.validForExecution());
-
-      if (result.validForExecution())
+      if(!result.validForExecution())
       {
-         errorMessage += assertTrue(datasetName,
-                                    datasetName + " did not reach goal. Made it to " + PlannerTools.getEndPosition(plan) + ", trying to get to " + goal,
-                                    PlannerTools.isGoalNextToLastStep(goal, plan));
+         errorMessage = "Planning result for " + datasetName + " is invalid, result was " + result;
       }
+      else if(!PlannerTools.isGoalNextToLastStep(goal, plan))
+      {
+         errorMessage = datasetName + " did not reach goal. Made it to " + PlannerTools.getEndPosition(plan) + ", trying to get to " + goal;
+      }
+
+      if((VISUALIZE || DEBUG) && !errorMessage.isEmpty())
+         LogTools.error(errorMessage);
 
       return errorMessage;
    }
+
 
    private String assertTrue(String datasetName, String message, boolean condition)
    {
@@ -444,7 +495,7 @@ public abstract class RoughTerrainDataSetTest
       return errorMessage;
    }
 
-   protected void createUI(Messager messager)
+   private void createUI(Messager messager)
    {
       ApplicationRunner.runApplication(new Application()
       {
@@ -476,9 +527,9 @@ public abstract class RoughTerrainDataSetTest
       }
    }
 
-   protected double totalTimeTaken;
+   private double totalTimeTaken;
 
-   protected String waitForResult(ConditionChecker conditionChecker, double maxTimeToWait, String prefix)
+   private String waitForResult(ConditionChecker conditionChecker, double maxTimeToWait, String prefix)
    {
       String errorMessage = "";
       long waitTime = 10;
@@ -499,7 +550,7 @@ public abstract class RoughTerrainDataSetTest
       return errorMessage;
    }
 
-   protected String validateResult(ConditionChecker conditionChecker, FootstepPlanningResult result, String prefix)
+   private String validateResult(ConditionChecker conditionChecker, FootstepPlanningResult result, String prefix)
    {
       String errorMessage = "";
 
@@ -511,7 +562,7 @@ public abstract class RoughTerrainDataSetTest
       return errorMessage;
    }
 
-   protected String waitForPlan(ConditionChecker conditionChecker, double maxTimeToWait, String prefix)
+   private String waitForPlan(ConditionChecker conditionChecker, double maxTimeToWait, String prefix)
    {
       String errorMessage = "";
 
@@ -534,7 +585,7 @@ public abstract class RoughTerrainDataSetTest
       return errorMessage;
    }
 
-   protected void queryUIResults()
+   private void queryUIResults()
    {
       if (uiReceivedPlan.get() && uiFootstepPlanReference.get() != null && actualPlan.get() == null)
       {
@@ -553,7 +604,7 @@ public abstract class RoughTerrainDataSetTest
       }
    }
 
-   protected void queryPlannerResults()
+   private void queryPlannerResults()
    {
       if (plannerReceivedPlan.get() && plannerPlanReference.get() != null && expectedPlan.get() == null)
       {
@@ -572,7 +623,7 @@ public abstract class RoughTerrainDataSetTest
       }
    }
 
-   public void submitDataSet(PlannerTestEnvironments.PlannerTestData testData)
+   public void submitDataSet(FootstepPlannerUnitTestDataset testData)
    {
       for (int i = 0; i < 100; i++)
          ThreadTools.sleep(10);
@@ -600,8 +651,10 @@ public abstract class RoughTerrainDataSetTest
       byte plannerType = getPlannerType().toByte();
       PlanarRegionsListMessage planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(testData.getPlanarRegionsList());
 
-      packet.getStanceFootPositionInWorld().set(testData.getStartPosition());
-      packet.getGoalPositionInWorld().set(testData.getGoalPosition());
+      packet.getStanceFootOrientationInWorld().set(testData.getStartOrientation());
+      packet.getStanceFootPositionInWorld().set(testData.getStart());
+      packet.getGoalPositionInWorld().set(testData.getGoal());
+      packet.getGoalOrientationInWorld().set(testData.getGoalOrientation());
       packet.setRequestedFootstepPlannerType(plannerType);
       packet.getPlanarRegionsListMessage().set(planarRegions);
 
@@ -620,7 +673,7 @@ public abstract class RoughTerrainDataSetTest
       footstepPlanningRequestPublisher.publish(packet);
    }
 
-   public String findPlanAndAssertGoodResult(PlannerTestData dataset)
+   public String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset)
    {
       totalTimeTaken = 0;
       double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
@@ -666,7 +719,7 @@ public abstract class RoughTerrainDataSetTest
       plannerReceivedPlan.set(false);
       plannerReceivedResult.set(false);
 
-      errorMessage += assertPlansAreValid(datasetName, expectedResult, actualResult, expectedPlan, actualPlan, dataset.getGoalPosition());
+      errorMessage += assertPlansAreValid(datasetName, expectedResult, actualResult, expectedPlan, actualPlan, dataset.getGoal());
 
       for (int i = 0; i < 100; i++)
          ThreadTools.sleep(10);
@@ -674,12 +727,12 @@ public abstract class RoughTerrainDataSetTest
       return errorMessage;
    }
 
-   protected static interface DatasetTestRunner
+   public static interface DatasetTestRunner
    {
       String testDataset(FootstepPlannerUnitTestDataset dataset);
    }
 
-   protected static interface ConditionChecker
+   private static interface ConditionChecker
    {
       boolean checkCondition();
    }
@@ -842,33 +895,7 @@ public abstract class RoughTerrainDataSetTest
       @Override
       public FootstepPlannerParameters getFootstepPlannerParameters()
       {
-         return new DefaultFootstepPlanningParameters()
-
-         {
-            @Override
-            public double getBodyBoxBaseX()
-            {
-               return bodyBoxOffsetX;
-            }
-
-            @Override
-            public double getBodyBoxDepth()
-            {
-               return bodyBoxDepth;
-            }
-
-            @Override
-            public double getBodyBoxWidth()
-            {
-               return bodyBoxWidth;
-            }
-
-            @Override
-            public boolean checkForBodyBoxCollisions()
-            {
-               return checkForBodyBoxCollision;
-            }
-         };
+         return new DefaultFootstepPlanningParameters();
       }
 
       @Override

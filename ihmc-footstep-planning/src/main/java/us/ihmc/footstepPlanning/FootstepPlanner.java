@@ -9,16 +9,16 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface FootstepPlanner
 {
-   default void setFootstepPlannerObjective(FootstepPlannerObjective info)
+   default void setFootstepPlannerObjective(FootstepPlannerObjective objective)
    {
-      if (info.hasInitialStanceFootPose())
-         setInitialStanceFoot(info.getInitialStanceFootPose(), info.getInitialStanceFootSide());
-      if (info.hasHorizonLength())
-         setPlanningHorizonLength(info.getHorizonLength());
-      if (info.hasTimeout())
-         setTimeout(info.getTimeout());
-      if (info.hasGoal())
-         setGoal(info.getGoal());
+      if (objective.hasInitialStanceFootPose())
+         setInitialStanceFoot(objective.getInitialStanceFootPose(), objective.getInitialStanceFootSide());
+      if (objective.hasHorizonLength())
+         setPlanningHorizonLength(objective.getHorizonLength());
+      if (objective.hasTimeout())
+         setTimeout(objective.getTimeout());
+      if (objective.hasGoal())
+         setGoal(objective.getGoal());
    }
 
    default void requestInitialize()
@@ -72,19 +72,6 @@ public interface FootstepPlanner
    void setPlanarRegions(PlanarRegionsList planarRegionsList);
 
    /**
-    * This plans the body path, if available.
-    */
-   default FootstepPlanningResult planPath()
-   {
-      return FootstepPlanningResult.OPTIMAL_SOLUTION;
-   }
-
-   default BodyPathPlan getPathPlan()
-   {
-      return null;
-   }
-
-   /**
     * Plan a sequence of footsteps given initial and goal conditions. The poses describe
     * the location and orientation of the sole frame in world.
     * @return FootstepPlanningResult   Whether or not the plan succeeded.
@@ -97,6 +84,11 @@ public interface FootstepPlanner
    FootstepPlan getPlan();
 
    void setPlanningHorizonLength(double planningHorizon);
+
+   default double getPlanningHorizonLength()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
 
    double getPlanningDuration();
 

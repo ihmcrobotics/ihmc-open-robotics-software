@@ -35,9 +35,9 @@ public class MessagerSimpleBodyPathDataSetTest extends FootstepPlannerDataSetTes
    public static void main(String[] args) throws Exception
    {
       MessagerSimpleBodyPathDataSetTest test = new MessagerSimpleBodyPathDataSetTest();
-      String prefix = "unitTestData/testable/";
+      String prefix = "unitTestDataSets/test/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204953_FlatGroundWithWall");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_204917_FlatGround");
       test.tearDown();
 
    }
