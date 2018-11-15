@@ -75,16 +75,9 @@ public class StateChangeSmootherComponent implements OutputProcessorComponent
       double currentTime = controlTimestamp.getDoubleValue();
       double deltaTime = Math.max(currentTime - timeAtHighLevelControllerStateChange.getDoubleValue(), 0.0);
 
-      if (deltaTime < slopTimeParameter.getValue())
-      {
-         double breakFrequencyInHz = slopBreakFrequencyParameter.getValue() * (deltaTime / slopTimeParameter.getValue());
-         double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequencyInHz, controlDT);
-         alphaJointTorqueForStateChanges.set(alpha);
-      }
-      else
-      {
-         alphaJointTorqueForStateChanges.set(0.0);
-      }
+      double breakFrequencyInHz = slopBreakFrequencyParameter.getValue() * (deltaTime / slopTimeParameter.getValue());
+      double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequencyInHz, controlDT);
+      alphaJointTorqueForStateChanges.set(alpha);
 
       for (int i = 0; i < jointTorquesSmoothedAtStateChange.size(); i++)
       {

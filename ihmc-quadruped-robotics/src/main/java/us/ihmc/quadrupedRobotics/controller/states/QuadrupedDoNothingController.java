@@ -4,11 +4,10 @@ import java.util.ArrayList;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
-import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -19,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 /**
  * A controller that does nothing, but signifies that the robot is ready to transition to stand prep
  */
-public class QuadrupedDoNothingController implements QuadrupedController
+public class QuadrupedDoNothingController implements State
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -76,12 +75,6 @@ public class QuadrupedDoNothingController implements QuadrupedController
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
          jointDesiredOutput.setDesiredTorque(desiredDoNothingTorques.get(i).getDoubleValue());
       }
-   }
-
-   @Override
-   public ControllerEvent fireEvent(double timeInState)
-   {
-      return null;
    }
 
    @Override

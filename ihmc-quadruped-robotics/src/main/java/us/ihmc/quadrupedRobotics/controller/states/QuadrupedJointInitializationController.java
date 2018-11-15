@@ -5,11 +5,11 @@ import java.util.BitSet;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
+import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 /**
  * This controller sets desired joint angles to their actual values when the joint comes online.
  */
-public class QuadrupedJointInitializationController implements QuadrupedController
+public class QuadrupedJointInitializationController implements State
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -83,9 +83,9 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
    }
 
    @Override
-   public ControllerEvent fireEvent(double timeInState)
+   public boolean isDone(double timeInState)
    {
-      return allJointsInitialized() ? ControllerEvent.DONE : null;
+      return allJointsInitialized();
    }
 
    @Override
