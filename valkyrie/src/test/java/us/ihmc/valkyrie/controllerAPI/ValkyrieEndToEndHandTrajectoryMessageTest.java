@@ -6,10 +6,13 @@ import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
 import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajectoryMessageTest
 {
@@ -79,10 +82,32 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       super.testStopAllTrajectory();
    }
 
+   @Test
+   @Override
+   public void testWrenchTrajectoryMessage() throws Exception
+   {
+      super.testWrenchTrajectoryMessage();
+   }
+
    @Override
    public DRCRobotModel getRobotModel()
    {
       return robotModel;
+   }
+
+   @Override
+   public DRCRobotModel getRobotModelWithHandContacts()
+   {
+      return new ValkyrieRobotModel(RobotTarget.SCS, false)
+      {
+         @Override
+         public RobotContactPointParameters<RobotSide> getContactPointParameters()
+         {
+            ValkyrieContactPointParameters contactPointParameters = new ValkyrieContactPointParameters(getJointMap(), null);
+            contactPointParameters.createAdditionalHandContactPoints();
+            return contactPointParameters;
+         }
+      };
    }
 
    @Override

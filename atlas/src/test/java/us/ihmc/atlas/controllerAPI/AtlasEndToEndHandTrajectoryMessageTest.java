@@ -172,6 +172,12 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
    }
 
    @Override
+   public DRCRobotModel getRobotModelWithHandContacts()
+   {
+      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, false);
+   }
+
+   @Override
    public String getSimpleRobotName()
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
