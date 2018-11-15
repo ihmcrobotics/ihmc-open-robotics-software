@@ -3,7 +3,7 @@ uint32 sequence_id
 
 # The is the unique hash code of the end-effector to be solved for.
 # It is used on the solver side to retrieve the desired end-effector to be controlled.
-# See RigidBody.getNameBasedHashCode() for the computation of a rigid-body hash code.
+# See RigidBody.hashCode() for the computation of a rigid-body hash code.
 int32 end_effector_hash_code
 
 # This is the desired position of the control frame's origin.
