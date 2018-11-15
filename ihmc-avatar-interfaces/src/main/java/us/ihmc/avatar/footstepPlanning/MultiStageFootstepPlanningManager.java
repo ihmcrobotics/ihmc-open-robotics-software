@@ -847,8 +847,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          }
       }
 
-      bodyPathPlanner.setWaypoints(waypointPlan.get());
-      bodyPathPlanner.compute();
+      List<Point3D> waypoints = waypointPlan.getAndSet(null);
+      bodyPathPlanner.setWaypoints(waypoints);
+      waypoints.clear();
 
       bodyPathPlan.set(bodyPathPlanner.compute());
       return true;
