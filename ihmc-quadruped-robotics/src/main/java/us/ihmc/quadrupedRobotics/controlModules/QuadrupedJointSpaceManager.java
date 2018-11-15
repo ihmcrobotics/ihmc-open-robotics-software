@@ -32,7 +32,7 @@ public class QuadrupedJointSpaceManager
    private final YoDouble jointPositionLimitDamping = new YoDouble("jointPositionLimitDamping", registry);
    private final YoDouble jointPositionLimitStiffness = new YoDouble("jointPositionLimitStiffness", registry);
 
-   public QuadrupedJointSpaceManager(QuadrupedControllerToolbox controllerToolbox, HighLevelControllerParameters parameters, YoVariableRegistry parentRegistry)
+   public QuadrupedJointSpaceManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       controlledJoints = controllerToolbox.getFullRobotModel().getControllableOneDoFJoints();
 
