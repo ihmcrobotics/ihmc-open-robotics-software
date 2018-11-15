@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -101,6 +102,11 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
    private final YoInteger stepIndex = new YoInteger("currentStepIndex", registry);
    private final QuadrupedGroundPlaneMessage groundPlaneMessage = new QuadrupedGroundPlaneMessage();
 
+   private final boolean deactivateAccelerationIntegrationInWBC;
+
+   private boolean requestIntegratorReset = false;
+   private final YoBoolean yoRequestingIntegratorReset = new YoBoolean("RequestingIntegratorReset", registry);
+
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
    private final WholeBodyControllerCore controllerCore;
@@ -132,6 +138,8 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       FeedbackControlCommandList feedbackTemplate = controlManagerFactory.createFeedbackControlTemplate();
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackTemplate, runtimeEnvironment.getJointDesiredOutputList(), registry);
       controllerCoreOutput = controllerCore.getControllerCoreOutput();
+
+      deactivateAccelerationIntegrationInWBC = runtimeEnvironment.getHighLevelControllerParameters().deactivateAccelerationIntegrationInTheWBC();
 
       // Initialize input providers.
       stepMessageHandler = new QuadrupedStepMessageHandler(runtimeEnvironment.getRobotTimestamp(), registry);
@@ -289,10 +297,17 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       groundPlaneEstimator.compute();
       upcomingGroundPlaneEstimator.compute();
 
-      controllerCore.initialize();
       feetManager.registerStepTransitionCallback(this);
 
       stateMachine.resetToInitialState();
+
+      initialize();
+   }
+
+   public void initialize()
+   {
+      controllerCore.initialize();
+      requestIntegratorReset = true;
    }
 
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
@@ -349,6 +364,24 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       handleChangeInContactState();
 
       submitControllerCoreCommands();
+
+      JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();
+
+      if (requestIntegratorReset)
+      {
+         stateSpecificJointSettings.requestIntegratorReset();
+         requestIntegratorReset = false;
+         yoRequestingIntegratorReset.set(true);
+      }
+      else
+      {
+         yoRequestingIntegratorReset.set(false);
+      }
+
+      JointAccelerationIntegrationCommand accelerationIntegrationCommand = getAccelerationIntegrationCommand();
+      if (!deactivateAccelerationIntegrationInWBC)
+         controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationCommand);
+      controllerCoreCommand.completeLowLevelJointData(stateSpecificJointSettings);
 
       controllerCoreTimer.startMeasurement();
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
