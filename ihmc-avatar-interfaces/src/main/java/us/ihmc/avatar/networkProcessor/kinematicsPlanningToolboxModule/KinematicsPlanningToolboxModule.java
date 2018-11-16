@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -49,6 +50,10 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> {
          if (kinematicsPlanningToolboxController != null)
             kinematicsPlanningToolboxController.updateRobotConfigurationData(s.takeNextData());
+      });
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s -> {
+         if (kinematicsPlanningToolboxController != null)
+            kinematicsPlanningToolboxController.updateCapturabilityBasedStatus(s.takeNextData());
       });
    }
 
