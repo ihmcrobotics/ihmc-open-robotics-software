@@ -130,7 +130,7 @@ public class KinematicsToolboxHelper
     * @param rootJoint the floating joint to update. Modified.
     * @param oneDoFJoints the one degree-of-freedom joints to update. Modified.
     */
-   static void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingInverseDynamicsJoint desiredRootJoint,
+   public static void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingInverseDynamicsJoint desiredRootJoint,
                                                        OneDoFJoint[] oneDoFJoints)
    {
       TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
