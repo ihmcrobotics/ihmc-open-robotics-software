@@ -9,12 +9,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.StraightLineOverheadPath;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class TranslationFootstepGenerator extends AbstractFootstepGenerator
 {
@@ -29,14 +29,14 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
    private boolean isRightwardPath;
    private boolean isForwardPath;
 
-   public TranslationFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePoint2D endPoint, TranslationalPathParameters translationalPathType)
+   public TranslationFootstepGenerator(SideDependentList<RigidBodyBasics> feet, SideDependentList<ReferenceFrame> soleFrames, FramePoint2D endPoint, TranslationalPathParameters translationalPathType)
    {
       super(feet, soleFrames);
       setPathParameters(translationalPathType);
       this.endPoint = endPoint;
    }
 
-   public TranslationFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePoint2D endPoint,
+   public TranslationFootstepGenerator(SideDependentList<RigidBodyBasics> feet, SideDependentList<ReferenceFrame> soleFrames, FramePoint2D endPoint,
          TranslationalPathParameters translationalPathType, RobotSide startStanceSide)
    {
       super(feet, soleFrames, startStanceSide);

@@ -93,18 +93,18 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       FrameInformation frameInformation = message.getFrameInformation();
       long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
       long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(dataFrameId);
+      this.trajectoryFrame = resolver.getReferenceFrameFromHashCode(trajectoryFrameId);
+      ReferenceFrame dataFrame = resolver.getReferenceFrameFromHashCode(dataFrameId);
 
       clear(dataFrame);
       setFromMessage(message);
 
-      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularSelectionMatrix().getSelectionFrameId());
-      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearSelectionMatrix().getSelectionFrameId());
+      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getAngularSelectionMatrix().getSelectionFrameId());
+      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getLinearSelectionMatrix().getSelectionFrameId());
       selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
 
-      ReferenceFrame angularWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularWeightMatrix().getWeightFrameId());
-      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearWeightMatrix().getWeightFrameId());
+      ReferenceFrame angularWeightFrame = resolver.getReferenceFrameFromHashCode(message.getAngularWeightMatrix().getWeightFrameId());
+      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromHashCode(message.getLinearWeightMatrix().getWeightFrameId());
       weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
    }
 

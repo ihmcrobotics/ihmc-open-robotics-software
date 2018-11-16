@@ -24,10 +24,10 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsPlanningToolboxOutputConverter;
 import us.ihmc.idl.IDLSequence.Double;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.ros2.Ros2Node;
 
@@ -111,7 +111,7 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
       keyFrameTimes.addAll(times);
    }
 
-   public void setEndEffectorKeyFrames(RigidBody endEffector, Pose3DReadOnly desiredPose)
+   public void setEndEffectorKeyFrames(RigidBodyBasics endEffector, Pose3DReadOnly desiredPose)
    {
       if (keyFrameTimes.size() == 0)
          throw new RuntimeException("key frame times should be set ahead.");
@@ -134,7 +134,7 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
       rigidBodyMessages.add(endEffectorMessage);
    }
 
-   public void setEndEffectorKeyFrames(RigidBody endEffector, List<Pose3DReadOnly> desiredPoses)
+   public void setEndEffectorKeyFrames(RigidBodyBasics endEffector, List<Pose3DReadOnly> desiredPoses)
    {
       if (keyFrameTimes.size() != desiredPoses.size())
          throw new RuntimeException("Inconsistent list lengths: = " + keyFrameTimes.size() + ", desiredPoses.size() = ");
@@ -147,13 +147,13 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
 
    public void setEndEffectorKeyFrames(RobotSide robotSide, Pose3DReadOnly desiredPose)
    {
-      RigidBody endEffector = fullRobotModel.getHand(robotSide);
+      RigidBodyBasics endEffector = fullRobotModel.getHand(robotSide);
       setEndEffectorKeyFrames(endEffector, desiredPose);
    }
 
    public void setEndEffectorKeyFrames(RobotSide robotSide, List<Pose3DReadOnly> desiredPoses)
    {
-      RigidBody endEffector = fullRobotModel.getHand(robotSide);
+      RigidBodyBasics endEffector = fullRobotModel.getHand(robotSide);
       setEndEffectorKeyFrames(endEffector, desiredPoses);
    }
 

@@ -2,10 +2,10 @@ package us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI;
 
 import java.util.Map;
 
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public interface WholeBodyTrajectoryToolboxAPI<M>
 {
-   void set(M message, Map<Long, RigidBody> rigidBodyNamedBasedHashMap, ReferenceFrameHashCodeResolver referenceFrameResolver);
+   void set(M message, Map<Integer, RigidBodyBasics> rigidBodyNamedBasedHashMap, ReferenceFrameHashCodeResolver referenceFrameResolver);
 }

@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**
@@ -30,7 +30,7 @@ public class ContactWrenchCommand implements InverseDynamicsCommand<ContactWrenc
    /**
     * The body which exerts the wrench on the environment.
     */
-   private RigidBody rigidBody;
+   private RigidBodyBasics rigidBody;
 
    /**
     * The wrench used in this command needs to have its body frame match the body frame of the
@@ -59,7 +59,7 @@ public class ContactWrenchCommand implements InverseDynamicsCommand<ContactWrenc
       setConstraintType(constraintType);
    }
 
-   public void setRigidBody(RigidBody rigidBody)
+   public void setRigidBody(RigidBodyBasics rigidBody)
    {
       this.rigidBody = rigidBody;
    }
@@ -74,7 +74,7 @@ public class ContactWrenchCommand implements InverseDynamicsCommand<ContactWrenc
       return constraintType;
    }
 
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }
@@ -99,7 +99,7 @@ public class ContactWrenchCommand implements InverseDynamicsCommand<ContactWrenc
    {
       this.constraintType = other.constraintType;
       this.rigidBody = other.rigidBody;
-      this.wrench.set(other.wrench);
+      this.wrench.setIncludingFrame(other.wrench);
       this.weightMatrix.set(other.weightMatrix);
       this.selectionMatrix.set(other.selectionMatrix);
    }

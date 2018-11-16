@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoJointDesiredOutput;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -43,7 +43,7 @@ public class ValkyrieTorqueHysteresisCompensator
 
       for (YoEffortJointHandleHolder jointHandle : yoEffortJointHandleHolders)
       {
-         OneDoFJoint joint = jointHandle.getOneDoFJoint();
+         OneDoFJointBasics joint = jointHandle.getOneDoFJoint();
          String jointName = joint.getName();
          if (!shouldProcessJoint(jointName))
             continue;

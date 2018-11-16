@@ -7,11 +7,10 @@ import com.esotericsoftware.minlog.Log;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -76,7 +75,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
    }
 
    @Override
-   public void build(FloatingInverseDynamicsJoint rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
+   public void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
          ContactSensorHolder contactSensorHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap,
          JointDesiredOutputList estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {
@@ -90,11 +89,11 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
 
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
-      for (InverseDynamicsJoint joint : ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()))
+      for (JointBasics joint : rootJoint.subtreeIterable())
       {
-         if (joint instanceof OneDoFJoint)
+         if (joint instanceof OneDoFJointBasics)
          {
-            OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
+            OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) joint;
             stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
             if (effortJointHandles.containsKey(joint.getName()))
             {

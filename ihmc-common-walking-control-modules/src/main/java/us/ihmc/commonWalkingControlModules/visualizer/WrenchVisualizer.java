@@ -14,11 +14,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Wrench;
 
 /**
  * @author twan
@@ -30,16 +31,16 @@ public class WrenchVisualizer
    private static final double TORQUE_VECTOR_SCALE = 0.0015;
 
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final Map<RigidBody, YoFrameVector3D> forces = new LinkedHashMap<RigidBody, YoFrameVector3D>();
-   private final Map<RigidBody, YoFrameVector3D> torques = new LinkedHashMap<RigidBody, YoFrameVector3D>();
-   private final Map<RigidBody, YoFramePoint3D> pointsOfApplication = new LinkedHashMap<RigidBody, YoFramePoint3D>();
-   private final Map<RigidBody, YoGraphicVector> forceVisualizers = new LinkedHashMap<RigidBody, YoGraphicVector>();
-   private final Map<RigidBody, YoGraphicVector> torqueVisualizers = new LinkedHashMap<RigidBody, YoGraphicVector>();
+   private final Map<RigidBodyBasics, YoFrameVector3D> forces = new LinkedHashMap<RigidBodyBasics, YoFrameVector3D>();
+   private final Map<RigidBodyBasics, YoFrameVector3D> torques = new LinkedHashMap<RigidBodyBasics, YoFrameVector3D>();
+   private final Map<RigidBodyBasics, YoFramePoint3D> pointsOfApplication = new LinkedHashMap<RigidBodyBasics, YoFramePoint3D>();
+   private final Map<RigidBodyBasics, YoGraphicVector> forceVisualizers = new LinkedHashMap<RigidBodyBasics, YoGraphicVector>();
+   private final Map<RigidBodyBasics, YoGraphicVector> torqueVisualizers = new LinkedHashMap<RigidBodyBasics, YoGraphicVector>();
 
    private final Wrench tempWrench = new Wrench();
    private final FrameVector3D tempVector = new FrameVector3D();
    private final FramePoint3D tempPoint = new FramePoint3D();
-   private final ArrayList<RigidBody> rigidBodies = new ArrayList<RigidBody>();
+   private final ArrayList<RigidBodyBasics> rigidBodies = new ArrayList<RigidBodyBasics>();
    
    public static WrenchVisualizer createWrenchVisualizerWithContactableBodies(String name, List<? extends ContactableBody> contactableBodies, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
@@ -47,19 +48,19 @@ public class WrenchVisualizer
       return new WrenchVisualizer(name, extractRigidBodyList(contactableBodies), vizScaling, yoGraphicsListRegistry, parentRegistry);
    }
 
-   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public WrenchVisualizer(String name, List<RigidBodyBasics> rigidBodies, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
       this(name, rigidBodies, vizScaling, yoGraphicsListRegistry, parentRegistry, YoAppearance.OrangeRed(), YoAppearance.CornflowerBlue());
    }
 
-   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public WrenchVisualizer(String name, List<RigidBodyBasics> rigidBodies, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry, AppearanceDefinition forceAppearance, AppearanceDefinition torqueAppearance)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
 
       this.rigidBodies.addAll(rigidBodies);
-      for (RigidBody rigidBody : rigidBodies)
+      for (RigidBodyBasics rigidBody : rigidBodies)
       {
          String prefix = name + rigidBody.getName();
          YoFrameVector3D force = new YoFrameVector3D(prefix + "Force", ReferenceFrame.getWorldFrame(), registry);
@@ -87,26 +88,26 @@ public class WrenchVisualizer
       parentRegistry.addChild(registry);
    }
 
-   public void visualize(Map<RigidBody, Wrench> wrenches)
+   public void visualize(Map<RigidBodyBasics, ? extends WrenchReadOnly> wrenches)
    {
       for (int i = 0; i < rigidBodies.size(); i++)
       {
-         RigidBody rigidBody = rigidBodies.get(i);
-         Wrench wrench;
+         RigidBodyBasics rigidBody = rigidBodies.get(i);
+         WrenchReadOnly wrench;
          if ((wrench = wrenches.get(rigidBody)) != null)
          {
-            tempWrench.set(wrench);
+            tempWrench.setIncludingFrame(wrench);
             tempWrench.changeFrame(tempWrench.getBodyFrame());
 
             YoFrameVector3D force = forces.get(rigidBody);
-            tempVector.setToZero(tempWrench.getExpressedInFrame());
-            tempWrench.getLinearPart(tempVector);
+            tempVector.setToZero(tempWrench.getReferenceFrame());
+            tempVector.set(tempWrench.getLinearPart());
             tempVector.changeFrame(ReferenceFrame.getWorldFrame());
             force.set(tempVector);
 
             YoFrameVector3D torque = torques.get(rigidBody);
-            tempVector.setToZero(tempWrench.getExpressedInFrame());
-            tempWrench.getAngularPart(tempVector);
+            tempVector.setToZero(tempWrench.getReferenceFrame());
+            tempVector.set(tempWrench.getAngularPart());
             tempVector.changeFrame(ReferenceFrame.getWorldFrame());
             torque.set(tempVector);
 
@@ -124,9 +125,9 @@ public class WrenchVisualizer
       }
    }
 
-   private static List<RigidBody> extractRigidBodyList(List<? extends ContactableBody> contactableBodies)
+   private static List<RigidBodyBasics> extractRigidBodyList(List<? extends ContactableBody> contactableBodies)
    {
-      List<RigidBody> ret = new ArrayList<>(contactableBodies.size());
+      List<RigidBodyBasics> ret = new ArrayList<>(contactableBodies.size());
       for (int i = 0; i < contactableBodies.size(); i++)
          ret.add(contactableBodies.get(i).getRigidBody());
       return ret;

@@ -18,11 +18,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
  *
@@ -77,11 +77,11 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
 
    public static List<String> getOrderedArmJointsNames(FullRobotModel fullRobotModel, boolean isLeft)
    {
-      final OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
+      final OneDoFJointBasics[] joints = fullRobotModel.getOneDoFJoints();
 
       String filter = isLeft ? "l_arm" : "r_arm";
 
-      ArrayList<OneDoFJoint> armJoints = new ArrayList<OneDoFJoint>();
+      ArrayList<OneDoFJointBasics> armJoints = new ArrayList<OneDoFJointBasics>();
       for (int i = 0; i < joints.length; i++)
       {
          if (joints[i].getName().contains(filter))

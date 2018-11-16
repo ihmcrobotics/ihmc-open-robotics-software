@@ -15,11 +15,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
@@ -28,7 +28,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
  * {@link WholeBodyControllerCore} via the {@link ControllerCoreCommand}.
  * <p>
  * The objective of a {@link PointFeedbackControlCommand} is to notify the feedback controller
- * dedicated to control the end-effector provided in {@link #set(RigidBody, RigidBody)} that it is
+ * dedicated to control the end-effector provided in {@link #set(RigidBodyBasics, RigidBodyBasics)} that it is
  * requested to run during the next control tick.
  * </p>
  * <p>
@@ -112,7 +112,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     *           end-effector.
     * @param endEffector the rigid-body to be controlled.
     */
-   public void set(RigidBody base, RigidBody endEffector)
+   public void set(RigidBodyBasics base, RigidBodyBasics endEffector)
    {
       spatialAccelerationCommand.set(base, endEffector);
       resetBodyFixedPoint();
@@ -137,7 +137,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     *
     * @param primaryBase
     */
-   public void setPrimaryBase(RigidBody primaryBase)
+   public void setPrimaryBase(RigidBodyBasics primaryBase)
    {
       spatialAccelerationCommand.setPrimaryBase(primaryBase);
    }
@@ -401,12 +401,12 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       return feedForwardLinearActionInWorld;
    }
 
-   public RigidBody getBase()
+   public RigidBodyBasics getBase()
    {
       return spatialAccelerationCommand.getBase();
    }
 
-   public RigidBody getEndEffector()
+   public RigidBodyBasics getEndEffector()
    {
       return spatialAccelerationCommand.getEndEffector();
    }

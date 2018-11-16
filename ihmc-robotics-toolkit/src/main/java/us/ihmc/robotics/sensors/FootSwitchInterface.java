@@ -2,7 +2,7 @@ package us.ihmc.robotics.sensors;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.mecano.spatial.Wrench;
 
 // TODO Nuke that interface
 public interface FootSwitchInterface

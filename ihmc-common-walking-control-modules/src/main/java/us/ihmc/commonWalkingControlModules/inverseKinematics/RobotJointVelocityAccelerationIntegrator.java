@@ -2,15 +2,15 @@ package us.ihmc.commonWalkingControlModules.inverseKinematics;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class RobotJointVelocityAccelerationIntegrator
 {
@@ -63,20 +63,20 @@ public class RobotJointVelocityAccelerationIntegrator
    private final Vector3D translationIntegrated = new Vector3D();
    private final Vector3D translation = new Vector3D();
 
-   public void integrateJointVelocities(InverseDynamicsJoint[] joints, DenseMatrix64F jointVelocitiesToIntegrate)
+   public void integrateJointVelocities(JointBasics[] joints, DenseMatrix64F jointVelocitiesToIntegrate)
    {
       int jointConfigurationStartIndex = 0;
       int jointStartIndex = 0;
 
-      int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(joints);
+      int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(joints);
       jointConfigurations.reshape(numberOfDoFs + 1, 1);
       jointVelocities.reshape(numberOfDoFs, 1);
 
       for (int i = 0; i < joints.length; i++)
       {
-         if (joints[i] instanceof OneDoFJoint)
+         if (joints[i] instanceof OneDoFJointBasics)
          {
-            OneDoFJoint joint = (OneDoFJoint) joints[i];
+            OneDoFJointBasics joint = (OneDoFJointBasics) joints[i];
 
             double qDot = MathTools.clamp(jointVelocitiesToIntegrate.get(jointStartIndex, 0), maximumOneDoFJointVelocity);
 
@@ -93,8 +93,8 @@ public class RobotJointVelocityAccelerationIntegrator
          else if (joints[i] instanceof SixDoFJoint)
          {
             SixDoFJoint joint = (SixDoFJoint) joints[i];
-            joint.getRotation(previousOrientation);
-            joint.getTranslation(previousTranslation);
+            previousOrientation.set(joint.getJointPose().getOrientation());
+            previousTranslation.set(joint.getJointPose().getPosition());
 
             MatrixTools.extractTuple3dFromEJMLVector(angularVelocity, jointVelocitiesToIntegrate, jointStartIndex);
             double angularVelocityMagnitude = angularVelocity.length();
@@ -132,19 +132,19 @@ public class RobotJointVelocityAccelerationIntegrator
    private final Vector3D angularAccelerationIntegrated = new Vector3D();
    private final Vector3D linearAccelerationIntegrated = new Vector3D();
 
-   public void integrateJointAccelerations(InverseDynamicsJoint[] joints, DenseMatrix64F jointAccelerationsToIntegrate)
+   public void integrateJointAccelerations(JointBasics[] joints, DenseMatrix64F jointAccelerationsToIntegrate)
    {
       int jointStartIndex = 0;
 
-      int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(joints);
+      int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(joints);
       jointVelocities.reshape(numberOfDoFs, 1);
       jointAccelerations.reshape(numberOfDoFs, 1);
 
       for (int i = 0; i < joints.length; i++)
       {
-         if (joints[i] instanceof OneDoFJoint)
+         if (joints[i] instanceof OneDoFJointBasics)
          {
-            OneDoFJoint joint = (OneDoFJoint) joints[i];
+            OneDoFJointBasics joint = (OneDoFJointBasics) joints[i];
 
             double qDDot = MathTools.clamp(jointAccelerationsToIntegrate.get(jointStartIndex, 0), maximumOneDoFJointAcceleration);
 
@@ -160,10 +160,10 @@ public class RobotJointVelocityAccelerationIntegrator
          else if (joints[i] instanceof SixDoFJoint)
          {
             SixDoFJoint joint = (SixDoFJoint) joints[i];
-            joint.getRotation(previousOrientation);
-            joint.getTranslation(previousTranslation);
-            joint.getLinearVelocity(previousLinearVelocity);
-            joint.getAngularVelocity(previousAngularVelocity);
+            previousOrientation.set(joint.getJointPose().getOrientation());
+            previousTranslation.set(joint.getJointPose().getPosition());
+            previousLinearVelocity.set(joint.getJointTwist().getLinearPart());
+            previousAngularVelocity.set(joint.getJointTwist().getAngularPart());
 
             MatrixTools.extractTuple3dFromEJMLVector(angularAcceleration, jointAccelerationsToIntegrate, jointStartIndex);
             double angularAccelerationMagnitude = angularAcceleration.length();

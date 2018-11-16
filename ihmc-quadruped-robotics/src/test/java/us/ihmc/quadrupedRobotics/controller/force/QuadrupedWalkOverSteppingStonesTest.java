@@ -1,26 +1,22 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import java.io.IOException;
-import java.util.List;
-
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
-import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
-import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
-import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
-import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -29,6 +25,10 @@ import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOriented
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMultiRobotTestInterface
 {

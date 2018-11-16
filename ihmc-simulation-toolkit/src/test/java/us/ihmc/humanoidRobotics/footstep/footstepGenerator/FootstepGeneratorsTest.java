@@ -29,10 +29,10 @@ import us.ihmc.humanoidRobotics.footstep.FootstepValidityMetric;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnapper;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationToolkit.visualizers.FootstepVisualizer;
 import us.ihmc.tools.MemoryTools;
 
@@ -58,7 +58,7 @@ public class FootstepGeneratorsTest
       contactableFeet.set(RobotSide.RIGHT, rightContactableFoot);
    }
 
-   SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>(leftContactableFoot.getRigidBody(), rightContactableFoot.getRigidBody());
+   SideDependentList<RigidBodyBasics> feet = new SideDependentList<RigidBodyBasics>(leftContactableFoot.getRigidBody(), rightContactableFoot.getRigidBody());
    SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>(leftContactableFoot.getSoleFrame(), rightContactableFoot.getSoleFrame());
 
    double stepLength = 0.5;

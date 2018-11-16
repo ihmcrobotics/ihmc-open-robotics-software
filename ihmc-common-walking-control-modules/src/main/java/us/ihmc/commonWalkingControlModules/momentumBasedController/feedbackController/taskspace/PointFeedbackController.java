@@ -27,14 +27,14 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -101,20 +101,20 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final Matrix3D tempGainMatrix = new Matrix3D();
    private final YoSE3OffsetFrame controlFrame;
 
-   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
+   private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
-   private RigidBody base;
+   private RigidBodyBasics base;
    private ReferenceFrame controlBaseFrame;
    private ReferenceFrame linearGainsFrame;
 
-   private final RigidBody rootBody;
-   private final RigidBody endEffector;
+   private final RigidBodyBasics rootBody;
+   private final RigidBodyBasics endEffector;
 
    private final double dt;
    private final boolean isRootBody;
    private final boolean computeIntegralTerm;
 
-   public PointFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
+   public PointFeedbackController(RigidBodyBasics endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
                                   YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
@@ -135,7 +135,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
          rootBody = null;
       }
 
-      spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
+      rigidBodyAccelerationProvider = toolbox.getRigidBodyAccelerationProvider();
 
       String endEffectorName = endEffector.getName();
       registry = new YoVariableRegistry(endEffectorName + "PointFBController");
@@ -378,14 +378,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
       yoDesiredLinearForce.setMatchingFrame(desiredLinearForce);
    }
 
-   private final SpatialAccelerationVector achievedSpatialAccelerationVector = new SpatialAccelerationVector();
+   private final SpatialAcceleration achievedSpatialAccelerationVector = new SpatialAcceleration();
 
    @Override
    public void computeAchievedAcceleration()
    {
-      spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector, achievedSpatialAccelerationVector);
-      achievedSpatialAccelerationVector.changeFrameNoRelativeMotion(controlFrame);
-      achievedSpatialAccelerationVector.getLinearPart(achievedLinearAcceleration);
+      achievedSpatialAccelerationVector.setIncludingFrame(rigidBodyAccelerationProvider.getRelativeAcceleration(base, endEffector));
+      achievedSpatialAccelerationVector.changeFrame(controlFrame);
+      achievedLinearAcceleration.setIncludingFrame(achievedSpatialAccelerationVector.getLinearPart());
       subtractCoriolisAcceleration(achievedLinearAcceleration);
       yoAchievedLinearAcceleration.setMatchingFrame(achievedLinearAcceleration);
    }
@@ -443,7 +443,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private void computeDerivativeTerm(FrameVector3D feedbackTermToPack)
    {
       controlFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
-      currentTwist.getLinearPart(currentLinearVelocity);
+      currentLinearVelocity.setIncludingFrame(currentTwist.getLinearPart());
       currentLinearVelocity.changeFrame(worldFrame);
       yoCurrentLinearVelocity.set(currentLinearVelocity);
 
@@ -544,8 +544,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private void addCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
    {
       controlFrame.getTwistOfFrame(currentTwist);
-      currentTwist.getAngularPart(currentAngularVelocity);
-      currentTwist.getLinearPart(currentLinearVelocity);
+      currentAngularVelocity.setIncludingFrame(currentTwist.getAngularPart());
+      currentLinearVelocity.setIncludingFrame(currentTwist.getLinearPart());
 
       biasLinearAcceleration.setToZero(controlFrame);
       biasLinearAcceleration.cross(currentLinearVelocity, currentAngularVelocity);
@@ -571,8 +571,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private void subtractCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
    {
       controlFrame.getTwistOfFrame(currentTwist);
-      currentTwist.getAngularPart(currentAngularVelocity);
-      currentTwist.getLinearPart(currentLinearVelocity);
+      currentAngularVelocity.setIncludingFrame(currentTwist.getAngularPart());
+      currentLinearVelocity.setIncludingFrame(currentTwist.getLinearPart());
 
       biasLinearAcceleration.setToZero(controlFrame);
       biasLinearAcceleration.cross(currentLinearVelocity, currentAngularVelocity);

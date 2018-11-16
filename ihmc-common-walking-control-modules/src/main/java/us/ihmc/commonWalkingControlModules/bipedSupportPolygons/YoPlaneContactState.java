@@ -13,8 +13,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -24,7 +24,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 {
    private static final double THRESHOLD = 1e-7;
    protected final YoVariableRegistry registry;
-   private final RigidBody rigidBody;
+   private final RigidBodyBasics rigidBody;
    private final ReferenceFrame planeFrame;
    private final YoBoolean inContact;
    private final YoDouble coefficientOfFriction;
@@ -38,13 +38,13 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
    private final YoBoolean hasContactStateChanged;
 
-   public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
+   public YoPlaneContactState(String namePrefix, RigidBodyBasics rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
          double coefficientOfFriction, YoVariableRegistry parentRegistry)
    {
       this(namePrefix, rigidBody, planeFrame, contactFramePoints, coefficientOfFriction, Double.NaN, parentRegistry);
    }
 
-   public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
+   public YoPlaneContactState(String namePrefix, RigidBodyBasics rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
          double coefficientOfFriction, double defaultRhoWeight, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -532,7 +532,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    }
 
    @Override
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }

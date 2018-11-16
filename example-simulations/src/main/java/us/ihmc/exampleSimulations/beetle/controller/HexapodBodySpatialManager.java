@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.parameters.HexapodControllerParameters;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -16,7 +17,6 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
  * Controls the linear Velocity of the body in body z up frame
@@ -26,10 +26,10 @@ public class HexapodBodySpatialManager
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   private final RigidBody[] controlledBodies = new RigidBody[1];
+   private final RigidBodyBasics[] controlledBodies = new RigidBodyBasics[1];
    private final SpatialFeedbackControlCommand spatialFeedbackCommand = new SpatialFeedbackControlCommand();
    private final double controllerDt;
-   private final RigidBody body;
+   private final RigidBodyBasics body;
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
@@ -64,7 +64,7 @@ public class HexapodBodySpatialManager
       double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, controllerDt);
       filteredBodyHeight = new AlphaFilteredYoVariable("filteredDesiredBodyHeight", registry, alpha, desiredBodyHeight);
 
-      RigidBody elevator = fullRobotModel.getElevator();
+      RigidBodyBasics elevator = fullRobotModel.getElevator();
       spatialFeedbackCommand.set(elevator, body);
 
       parentRegistry.addChild(registry);
@@ -149,7 +149,7 @@ public class HexapodBodySpatialManager
       return spatialFeedbackCommand;
    }
 
-   public RigidBody[] getRigidBodiesToControl()
+   public RigidBodyBasics[] getRigidBodiesToControl()
    {
       return controlledBodies;
    }

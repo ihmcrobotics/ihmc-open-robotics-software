@@ -16,8 +16,9 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -69,7 +70,7 @@ public class ReachingManifoldVisualizingTest
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("voidrobot"), parameters);
 
       // hand frame
-      RigidBody hand = new RigidBody("hand", new RigidBodyTransform(), worldFrame);
+      RigidBodyBasics hand = new RigidBody("hand", new RigidBodyTransform(), worldFrame);
 
       // create manifold message
       List<ReachingManifoldMessage> reachingManifolds = null;

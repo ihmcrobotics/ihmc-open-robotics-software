@@ -1,31 +1,31 @@
 package us.ihmc.robotModels;
 
+import java.util.List;
+
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.kinematics.JointLimit;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
-import us.ihmc.robotics.kinematics.JointLimit;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-
-import java.util.List;
 
 public interface FullQuadrupedRobotModel extends FullLeggedRobotModel<RobotQuadrant>
 {
-   /** Use {@link #getJointLimitData(OneDoFJoint joint)}*/
+   /** Use {@link #getJointLimitData(OneDoFJointBasics joint)}*/
    @Deprecated
    JointLimit getJointLimit(QuadrupedJointName jointName);
 
-   JointLimitData getJointLimitData(OneDoFJoint joint);
+   JointLimitData getJointLimitData(OneDoFJointBasics joint);
 
-   QuadrupedJointName getNameForOneDoFJoint(OneDoFJoint oneDoFJoint);
+   QuadrupedJointName getNameForOneDoFJoint(OneDoFJointBasics oneDoFJoint);
 
-   List<OneDoFJoint> getLegJointsList(RobotQuadrant robotQuadrant);
+   List<OneDoFJointBasics> getLegJointsList(RobotQuadrant robotQuadrant);
 
    /**
-    * Returns the {@link RigidBody} describing the body of this robot.
+    * Returns the {@link RigidBodyBasics} describing the body of this robot.
     * In the current framework (on the day: 3/1/2014), the body is the the first successor of the root joint.
     */
-   RigidBody getBody();
+   RigidBodyBasics getBody();
 
    default RobotQuadrant[] getRobotSegments()
    {

@@ -4,6 +4,9 @@ import java.util.EnumMap;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -11,14 +14,11 @@ import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
 import us.ihmc.robotics.screwTheory.MovingMidFrameZUpFrame;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.tools.containers.ContainerTools;
@@ -144,7 +144,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
       midFeetUnderPelvisWalkDirectionFrame = new MovingWalkingReferenceFrame("walkingFrame", pelvisFrame, midFootZUpGroundFrame);
 
-      RigidBody elevator = fullRobotModel.getElevator();
+      RigidBodyBasics elevator = fullRobotModel.getElevator();
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
 
       // set default CommonHumanoidReferenceFrameIds for certain frames used commonly for control
@@ -154,7 +154,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.CENTER_OF_MASS_FRAME, getCenterOfMassFrame());
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.LEFT_SOLE_FRAME, getSoleFrame(RobotSide.LEFT));
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.RIGHT_SOLE_FRAME, getSoleFrame(RobotSide.RIGHT));
-      RigidBody chest = fullRobotModel.getChest();
+      RigidBodyBasics chest = fullRobotModel.getChest();
       if (chest != null)
       {
          addDefaultIDToReferenceFrame(CommonReferenceFrameIds.CHEST_FRAME, chest.getBodyFixedFrame());

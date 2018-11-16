@@ -13,18 +13,18 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
 {
-   private final RigidBody rigidBody;
+   private final RigidBodyBasics rigidBody;
    private final ReferenceFrame soleFrame;
    private final List<Point2D> contactPoints = new ArrayList<Point2D>();
    private final List<FramePoint2D> frameContactPoints = new ArrayList<FramePoint2D>();
    private final int totalNumberOfContactPoints;
 
-   public ListOfPointsContactablePlaneBody(RigidBody rigidBody, ReferenceFrame soleFrame, List<Point2D> contactPointsInSoleFrame)
+   public ListOfPointsContactablePlaneBody(RigidBodyBasics rigidBody, ReferenceFrame soleFrame, List<Point2D> contactPointsInSoleFrame)
    {
       this.rigidBody = rigidBody;
       this.soleFrame = soleFrame;
@@ -41,7 +41,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    }
 
    @Override
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }

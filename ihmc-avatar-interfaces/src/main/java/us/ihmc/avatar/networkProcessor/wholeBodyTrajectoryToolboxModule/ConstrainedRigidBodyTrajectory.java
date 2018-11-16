@@ -18,14 +18,14 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Rigi
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.manipulation.planning.exploringSpatial.SpatialData;
 import us.ihmc.manipulation.planning.exploringSpatial.SpatialNode;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class ConstrainedRigidBodyTrajectory
 {
    private static final boolean VERBOSE = false;
 
-   private final RigidBody rigidBody;
+   private final RigidBodyBasics rigidBody;
 
    private final TDoubleArrayList waypointTimes = new TDoubleArrayList();
    private final ArrayList<Pose3D> waypoints = new ArrayList<Pose3D>();
@@ -52,7 +52,7 @@ public class ConstrainedRigidBodyTrajectory
    private static double DEFAULT_WEIGHT = 20.0;
 
    // For given trajectory and appending exploration transform.
-   public ConstrainedRigidBodyTrajectory(RigidBody rigidBody, WaypointBasedTrajectoryCommand trajectoryCommand,
+   public ConstrainedRigidBodyTrajectory(RigidBodyBasics rigidBody, WaypointBasedTrajectoryCommand trajectoryCommand,
                                          RigidBodyExplorationConfigurationCommand explorationCommand)
    {
       this.rigidBody = rigidBody;
@@ -112,7 +112,7 @@ public class ConstrainedRigidBodyTrajectory
       return hasTrajectoryCommand;
    }
 
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }
@@ -264,7 +264,7 @@ public class ConstrainedRigidBodyTrajectory
       spatialData.appendSpatial(getRigidBody().getName(), configurationNames, configurationData, randomPose);
    }
 
-   public void holdConfiguration(RigidBody rigidBody)
+   public void holdConfiguration(RigidBodyBasics rigidBody)
    {
       if (hasTrajectoryCommand)
       {

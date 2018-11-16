@@ -14,22 +14,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.RequestLidarScanMessage;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.log.LogTools;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.RealtimeRos2Node;
 
 public class LidarScanLogReader
 {
    private static final boolean DEBUG = true;
-
-   private static final NetClassList netClassList = new IHMCCommunicationKryoNetClassList();
 
    private DataInputStream logDataInputStream = null;
 
@@ -37,7 +33,8 @@ public class LidarScanLogReader
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(threadName));
    private ScheduledFuture<?> currentLoggingTask = null;
 
-   private PacketCommunicator packetCommunicator = null;
+   private RealtimeRos2Node ros2Node;
+   private IHMCRealtimeROS2Publisher<LidarScanMessage> lidarScanPublisher;
    private PacketConsumer<LidarScanMessage> lidarScanConsumer = null;
 
    private final AtomicBoolean loggingEnabled = new AtomicBoolean(false);
@@ -54,15 +51,15 @@ public class LidarScanLogReader
 
    public void startServer(NetworkPorts portToOpen) throws IOException
    {
-      if (packetCommunicator != null)
+      if (ros2Node != null)
       {
-         PrintTools.error(this, "There is already a log server running.");
+         LogTools.error("There is already a log server running.");
       }
       else
       {
-         packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(portToOpen, netClassList);
-         packetCommunicator.connect();
-         packetCommunicator.attachListener(RequestLidarScanMessage.class, message -> receivedLidarScanRequest.set(true));
+         ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "lidar_log");
+         lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
+         ros2Node.spin();
       }
 
       if (currentLoggingTask == null)
@@ -71,15 +68,15 @@ public class LidarScanLogReader
 
    public void stopServer()
    {
-      if (packetCommunicator == null)
+      if (ros2Node == null)
       {
-         PrintTools.error(this, "The server has already been stopped.");
+         LogTools.error("The server has already been stopped.");
       }
       else
       {
-         packetCommunicator.closeConnection();
-         packetCommunicator.disconnect();
-         packetCommunicator = null;
+         lidarScanPublisher = null;
+         ros2Node.destroy();
+         ros2Node = null;
       }
 
       if (currentLoggingTask != null)
@@ -135,15 +132,15 @@ public class LidarScanLogReader
    {
       if (loggingEnabled.get())
       {
-         PrintTools.error(this, "Already reading log.");
+         LogTools.error("Already reading log.");
          return;
       }
 
       currentLogFileReference.set(logFile);
 
-      if (packetCommunicator == null)
+      if (ros2Node == null)
       {
-         PrintTools.error(this, "No server running");
+         LogTools.error("No server running");
       }
 
       try
@@ -151,7 +148,7 @@ public class LidarScanLogReader
          FileInputStream fileInputStream = new FileInputStream(logFile);
          logDataInputStream = new DataInputStream(fileInputStream);
          loggingEnabled.set(true);
-         PrintTools.info(this, "Reading lidar log: " + logFile.getPath());
+         LogTools.info("Reading lidar log: " + logFile.getPath());
       }
       catch (FileNotFoundException e)
       {
@@ -193,8 +190,8 @@ public class LidarScanLogReader
          LidarScanMessage lidarScanMessage = readMessage();
          lidarScanConsumer.receivedPacket(lidarScanMessage);
 
-         if (packetCommunicator != null && lidarScanMessage != null)
-            packetCommunicator.send(lidarScanMessage);
+         if (lidarScanPublisher != null && lidarScanMessage != null)
+            lidarScanPublisher.publish(lidarScanMessage);
       }
       catch (Exception e)
       {
@@ -253,7 +250,7 @@ public class LidarScanLogReader
          {
             logDataInputStream.close();
             logDataInputStream = null;
-            PrintTools.info(this, "Finish loading.");
+            LogTools.info("Finish loading.");
             loggingEnabled.set(false);
          }
       }

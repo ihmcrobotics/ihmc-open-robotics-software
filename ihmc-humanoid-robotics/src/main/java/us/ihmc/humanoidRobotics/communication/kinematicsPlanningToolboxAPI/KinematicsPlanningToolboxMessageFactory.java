@@ -9,7 +9,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class KinematicsPlanningToolboxMessageFactory
 {
@@ -25,7 +25,7 @@ public class KinematicsPlanningToolboxMessageFactory
       }
    }
 
-   public static KinematicsPlanningToolboxRigidBodyMessage holdRigidBodyCurrentPose(RigidBody rigidBody, TDoubleArrayList keyFrameTimes)
+   public static KinematicsPlanningToolboxRigidBodyMessage holdRigidBodyCurrentPose(RigidBodyBasics rigidBody, TDoubleArrayList keyFrameTimes)
    {
       List<Pose3DReadOnly> currentPoses = new ArrayList<Pose3DReadOnly>();
       for (int i = 0; i < keyFrameTimes.size(); i++)

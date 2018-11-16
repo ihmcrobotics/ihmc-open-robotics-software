@@ -14,9 +14,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -120,25 +120,25 @@ public class KinematicToolboxDiagnosticEnvironment
          }
 
          @Override
-         public double getJointVelocityRawOutput(OneDoFJoint oneDoFJoint)
+         public double getJointVelocityRawOutput(OneDoFJointBasics oneDoFJoint)
          {
             return 0;
          }
 
          @Override
-         public double getJointTauRawOutput(OneDoFJoint oneDoFJoint)
+         public double getJointTauRawOutput(OneDoFJointBasics oneDoFJoint)
          {
             return 0;
          }
 
          @Override
-         public double getJointPositionRawOutput(OneDoFJoint oneDoFJoint)
+         public double getJointPositionRawOutput(OneDoFJointBasics oneDoFJoint)
          {
             return 0;
          }
 
          @Override
-         public double getJointAccelerationRawOutput(OneDoFJoint oneDoFJoint)
+         public double getJointAccelerationRawOutput(OneDoFJointBasics oneDoFJoint)
          {
             return 0;
          }
@@ -190,31 +190,31 @@ public class KinematicToolboxDiagnosticEnvironment
          }
 
          @Override
-         public boolean isJointEnabled(OneDoFJoint oneDoFJoint)
+         public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
          {
             return false;
          }
 
          @Override
-         public double getJointVelocityProcessedOutput(OneDoFJoint oneDoFJoint)
+         public double getJointVelocityProcessedOutput(OneDoFJointBasics oneDoFJoint)
          {
             return 0;
          }
 
          @Override
-         public double getJointTauProcessedOutput(OneDoFJoint oneDoFJoint)
+         public double getJointTauProcessedOutput(OneDoFJointBasics oneDoFJoint)
          {
             return 0;
          }
 
          @Override
-         public double getJointPositionProcessedOutput(OneDoFJoint oneDoFJoint)
+         public double getJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint)
          {
             return 0;
          }
 
          @Override
-         public double getJointAccelerationProcessedOutput(OneDoFJoint oneDoFJoint)
+         public double getJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint)
          {
             return 0;
          }

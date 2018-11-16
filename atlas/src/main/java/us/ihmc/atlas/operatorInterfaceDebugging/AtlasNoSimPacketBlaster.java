@@ -25,11 +25,11 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
@@ -42,7 +42,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
    private Random random = new Random();
    private AtlasRobotModel atlasRobotModel;
    private boolean includeFingerJoints;
-   private OneDoFJoint[] jointList;
+   private OneDoFJointBasics[] jointList;
    private FullHumanoidRobotModel fullRobotModel;
    private int numberOfJoints;
    private double[] jointLowerLimits;
@@ -107,7 +107,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
    @Override
    public void run()
    {
-      OneDoFJoint[] joints = Arrays.copyOf(jointList, jointList.length);
+      OneDoFJointBasics[] joints = Arrays.copyOf(jointList, jointList.length);
 
       RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, imuDefinitions);
 

@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 /**
  * A command that can be used to send center of pressure objectives or constraints to the controller core.
@@ -34,7 +34,7 @@ public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfP
     * The rigid body that this command if meant for. If set to {@code null} the command will be used for
     * the over all robot CoP.
     */
-   private RigidBody contactingRigidBody;
+   private RigidBodyBasics contactingRigidBody;
 
    /**
     * The command weight. Does not need to be expressed in the same frame as the desired CoP but
@@ -73,7 +73,7 @@ public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfP
       return constraintType;
    }
 
-   public void setContactingRigidBody(RigidBody contactingRigidBody)
+   public void setContactingRigidBody(RigidBodyBasics contactingRigidBody)
    {
       this.contactingRigidBody = contactingRigidBody;
    }
@@ -98,7 +98,7 @@ public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfP
       return weight;
    }
 
-   public RigidBody getContactingRigidBody()
+   public RigidBodyBasics getContactingRigidBody()
    {
       return contactingRigidBody;
    }

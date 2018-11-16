@@ -4,9 +4,8 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.tools.lists.PairList;
@@ -18,14 +17,14 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
    private final YoDouble standTransitionRatioCurrentValue;
    private final YoPolynomial transitionRatioTrajectory;
 
-   private final PairList<OneDoFJoint, JointControlBlender> jointCommandBlenders = new PairList<>();
+   private final PairList<OneDoFJointBasics, JointControlBlender> jointCommandBlenders = new PairList<>();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final HighLevelControllerState initialControllerState;
    private final HighLevelControllerState finalControllerState;
 
    public SmoothTransitionControllerState(String namePrefix, HighLevelControllerName controllerState, HighLevelControllerState initialControllerState,
-                                          HighLevelControllerState finalControllerState, OneDoFJoint[] controlledJoints,
+                                          HighLevelControllerState finalControllerState, OneDoFJointBasics[] controlledJoints,
                                           HighLevelControllerParameters highLevelControllerParameters)
    {
       super(namePrefix, controllerState, highLevelControllerParameters, controlledJoints);
@@ -40,7 +39,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
 
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
-      for (OneDoFJoint controlledJoint : controlledJoints)
+      for (OneDoFJointBasics controlledJoint : controlledJoints)
       {
          JointControlBlender jointControlBlender = new JointControlBlender("_StandTransition", controlledJoint, registry);
          jointCommandBlenders.add(controlledJoint, jointControlBlender);
@@ -71,7 +70,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
 
       for (int jointIndex = 0; jointIndex < jointCommandBlenders.size(); jointIndex++)
       {
-         OneDoFJoint joint = jointCommandBlenders.get(jointIndex).getLeft();
+         OneDoFJointBasics joint = jointCommandBlenders.get(jointIndex).getLeft();
          JointControlBlender jointControlBlender = jointCommandBlenders.get(jointIndex).getRight();
          JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          lowLevelJointData.clear();

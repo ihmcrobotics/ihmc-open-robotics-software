@@ -6,14 +6,14 @@ import java.util.Map;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -32,32 +32,32 @@ public interface FullRobotModel
    /**
     * Returns the root joint of this robot. It is a six degrees of freedom joint.
     */
-   FloatingInverseDynamicsJoint getRootJoint();
+   FloatingJointBasics getRootJoint();
 
    /**
     * Returns the elevator of this robot.
-    * The elevator is a virtual {@link RigidBody} that has no size nor mass, and is fixed in world (it does not move at all).
+    * The elevator is a virtual {@link RigidBodyBasics} that has no size nor mass, and is fixed in world (it does not move at all).
     * It is the only predecessor of the root joint.
     * It only has an acceleration that is equal to the opposite of the gravity.
     * It is mainly to easily propagates the effect of gravity to all the robot's joints.
     * @return
     */
-   RigidBody getElevator();
+   RigidBodyBasics getElevator();
 
    /**
-    * Return the {@link OneDoFJoint} describing the the corresponding spine joint.
+    * Return the {@link OneDoFJointBasics} describing the the corresponding spine joint.
     * @param spineJointName Refers to the joint's name.
     */
-   OneDoFJoint getSpineJoint(SpineJointName spineJointName);
+   OneDoFJointBasics getSpineJoint(SpineJointName spineJointName);
 
-   RigidBody getEndEffector(Enum<?> segmentEnum);
+   RigidBodyBasics getEndEffector(Enum<?> segmentEnum);
 
    /**
-    * Return the {@link OneDoFJoint} describing the the corresponding leg joint.
+    * Return the {@link OneDoFJointBasics} describing the the corresponding leg joint.
     * @param robotSide Refers to which leg the joint belongs to (assuming there is only one left and one right leg).
     * @param neckJointName Refers to the joint's name.
     */
-   OneDoFJoint getNeckJoint(NeckJointName neckJointName);
+   OneDoFJointBasics getNeckJoint(NeckJointName neckJointName);
 
    
    /**
@@ -83,7 +83,7 @@ public interface FullRobotModel
     * @param lidarName TODO
     * @return TODO
     */
-   InverseDynamicsJoint getLidarJoint(String lidarName);
+   JointBasics getLidarJoint(String lidarName);
 
    ReferenceFrame getLidarBaseFrame(String name);
 
@@ -92,35 +92,35 @@ public interface FullRobotModel
    ReferenceFrame getCameraFrame(String name);
 
    /**
-    * Returns the {@link RigidBody} describing the root link of this robot.
+    * Returns the {@link RigidBodyBasics} describing the root link of this robot.
     * In the current framework (on the day: 2/28/2018), the root link is the the first successor of the root joint.
     */
-   RigidBody getRootBody();
+   RigidBodyBasics getRootBody();
 
    /**
-    * Returns the {@link RigidBody} describing the head of this robot.
+    * Returns the {@link RigidBodyBasics} describing the head of this robot.
     * It is located right after the neck joints.
     */
-   RigidBody getHead();
+   RigidBodyBasics getHead();
 
    ReferenceFrame getHeadBaseFrame();
 
    /** Returns all the one DoF joints that this robot has. */
-   OneDoFJoint[] getOneDoFJoints();
+   OneDoFJointBasics[] getOneDoFJoints();
 
-   Map<String, OneDoFJoint> getOneDoFJointsAsMap();
+   Map<String, OneDoFJointBasics> getOneDoFJointsAsMap();
 
-   void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack);
+   void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack);
 
    /** Returns all one DoF joints, excluding joints that do not exist in the controller. */
-   OneDoFJoint[] getControllableOneDoFJoints();
+   OneDoFJointBasics[] getControllableOneDoFJoints();
 
    /**
     *  Gets all the one DoF joints that this robot has.
     *
     *  @param oneDoFJointsToPack {@code List<OneDoFJoint>} that will be packed will all the one DoF joints.
     */
-   void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack);
+   void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack);
 
    /**
     * Gets the one DoF joint with the given name.
@@ -128,14 +128,14 @@ public interface FullRobotModel
     * @param name Name of the OneDoFJoint to return.
     * @return
     */
-   OneDoFJoint getOneDoFJointByName(String name);
+   OneDoFJointBasics getOneDoFJointByName(String name);
 
    /**
     *  Gets all one DoF joints, excluding joints that do not exist in the controller.
     *
     *  @param oneDoFJointsToPack {@code List<OneDoFJoint>} that will be packed will the controllable one DoF joints.
     */
-   void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack);
+   void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack);
 
    /**
     * Returns all the IMUDefinitions corresponding to each IMU attached to this robot.

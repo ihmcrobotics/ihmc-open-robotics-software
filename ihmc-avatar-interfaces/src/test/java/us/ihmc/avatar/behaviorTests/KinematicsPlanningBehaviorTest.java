@@ -32,12 +32,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.KinematicsPlanningBehavior;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.environments.BombSquadObstacleCourse;
+import us.ihmc.simulationConstructionSetTools.util.environments.ValkyrieEODObstacleCourseEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -95,7 +95,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      BombSquadObstacleCourse envrionment = new BombSquadObstacleCourse();
+      ValkyrieEODObstacleCourseEnvironment envrionment = new ValkyrieEODObstacleCourseEnvironment();
       doorLocation = envrionment.getDoorLocation();
 
       DRCStartingLocation startingLocation = new DRCStartingLocation()
@@ -164,7 +164,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      BombSquadObstacleCourse envrionment = new BombSquadObstacleCourse();
+      ValkyrieEODObstacleCourseEnvironment envrionment = new ValkyrieEODObstacleCourseEnvironment();
       doorLocation = envrionment.getDoorLocation();
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
@@ -233,7 +233,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       int numberOfKeyFrames = 10;
       RobotSide robotSide = RobotSide.LEFT;
 
-      RigidBody endEffector = drcBehaviorTestHelper.getSDFFullRobotModel().getHand(robotSide);
+      RigidBodyBasics endEffector = drcBehaviorTestHelper.getSDFFullRobotModel().getHand(robotSide);
 
       FramePose3D initialPose = new FramePose3D(endEffector.getBodyFixedFrame());
       FramePose3D desiredPose = new FramePose3D(endEffector.getBodyFixedFrame(), new Point3D(0.1, 0.1, 0.6), new AxisAngle(1.0, 0.0, 0.0, 0.5 * Math.PI));

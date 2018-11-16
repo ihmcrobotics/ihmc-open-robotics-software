@@ -1,15 +1,15 @@
 package us.ihmc.robotics.sensors;
 
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class RigidBodyContactSensor implements ContactSensor
 {
    private final String sensorName;
-   private final RigidBody rigidBody;
+   private final RigidBodyBasics rigidBody;
    private final ContactSensorType type;
    private boolean isInContact;
    
-   public RigidBodyContactSensor(String sensorName, RigidBody rigidBody, ContactSensorType type)
+   public RigidBodyContactSensor(String sensorName, RigidBodyBasics rigidBody, ContactSensorType type)
    {
       this.sensorName = sensorName;
       this.rigidBody = rigidBody;
@@ -30,7 +30,7 @@ public class RigidBodyContactSensor implements ContactSensor
    }
 
    @Override
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }

@@ -42,6 +42,8 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
+import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
@@ -612,6 +614,12 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public FootstepPlannerParameters getFootstepPlannerParameters()
    {
       return new ValkyrieFootstepPlannerParameters();
+   }
+
+   @Override
+   public VisibilityGraphsParameters getVisibilityGraphsParameters()
+   {
+      return new DefaultVisibilityGraphParameters();
    }
 
    @Override

@@ -13,9 +13,9 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
             </rowConstraints>
             <children>
-                <ToggleButton fx:id="useQuadraticDistanceCost" mnemonicParsing="false" text="Use quadratic distance"
+                <CheckBox fx:id="useQuadraticDistanceCost" mnemonicParsing="false" text="Use quadratic distance"
                               GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="250.0"/>
-                <ToggleButton fx:id="useQuadraticHeightCost" mnemonicParsing="false" text="Use quadratic height"
+                <CheckBox fx:id="useQuadraticHeightCost" mnemonicParsing="false" text="Use quadratic height"
                               GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="250.0"/>
 
                 <Label text="Cost per step" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="2"/>

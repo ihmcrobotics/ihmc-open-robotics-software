@@ -14,8 +14,8 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.fingers.ValkyrieFingerController;
@@ -117,10 +117,10 @@ public class ValkyrieRosControlLowLevelController
 
    private void writeTorqueOffsets()
    {
-      List<OneDoFJoint> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
+      List<OneDoFJointBasics> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
-         OneDoFJoint joint = oneDoFJoints.get(i);
+         OneDoFJointBasics joint = oneDoFJoints.get(i);
          if (jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(joint))
          {
             subtractTorqueOffset(joint, jointTorqueOffsetEstimator.getEstimatedJointTorqueOffset(joint));
@@ -129,7 +129,7 @@ public class ValkyrieRosControlLowLevelController
       }
    }
 
-   public void subtractTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffset)
+   public void subtractTorqueOffset(OneDoFJointBasics oneDoFJoint, double torqueOffset)
    {
       ValkyrieRosControlEffortJointControlCommandCalculator jointCommandCalculator = effortJointToControlCommandCalculatorMap.get(oneDoFJoint.getName());
       if (jointCommandCalculator != null)

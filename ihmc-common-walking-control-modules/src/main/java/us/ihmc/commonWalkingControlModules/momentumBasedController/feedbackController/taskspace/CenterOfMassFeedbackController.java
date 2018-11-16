@@ -1,7 +1,15 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.*;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.LINEAR_ACCELERATION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.LINEAR_VELOCITY;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.POSITION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ACHIEVED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.CURRENT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.DESIRED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR_INTEGRATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDFORWARD;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -10,16 +18,16 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.CentroidalMomentumHandler;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -76,7 +84,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private final Matrix3D tempGainMatrix = new Matrix3D();
 
    private ReferenceFrame centerOfMassFrame;
-   private CentroidalMomentumHandler centroidalMomentumHandler;
+   private CentroidalMomentumRateCalculator centroidalMomentumHandler;
 
    private final double dt;
    private final double totalRobotMass;
@@ -86,7 +94,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
                                          YoVariableRegistry parentRegistry)
    {
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
-      centroidalMomentumHandler = toolbox.getCentroidalMomentumHandler();
+      centroidalMomentumHandler = toolbox.getCentroidalMomentumRateCalculator();
       totalRobotMass = toolbox.getTotalRobotMass();
       FeedbackControllerSettings settings = toolbox.getFeedbackControllerSettings();
       if (settings != null)
@@ -285,8 +293,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    @Override
    public void computeAchievedAcceleration()
    {
-      SpatialForceVector achievedMomentumRate = centroidalMomentumHandler.getCentroidalMomentumRate();
-      achievedMomentumRate.getLinearPartIncludingFrame(achievedLinearAcceleration);
+      SpatialForceReadOnly achievedMomentumRate = centroidalMomentumHandler.getMomentumRate();
+      achievedLinearAcceleration.setIncludingFrame(achievedMomentumRate.getLinearPart());
       achievedLinearAcceleration.changeFrame(worldFrame);
       achievedLinearAcceleration.scale(1.0 / totalRobotMass);
       yoAchievedLinearAcceleration.set(achievedLinearAcceleration);
@@ -338,7 +346,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
     */
    private void computeDerivativeTerm(FrameVector3D feedbackTermToPack)
    {
-      centroidalMomentumHandler.getCenterOfMassVelocity(currentLinearVelocity);
+      currentLinearVelocity.setIncludingFrame(centroidalMomentumHandler.getCenterOfMassVelocity());
       currentLinearVelocity.changeFrame(worldFrame);
       yoCurrentLinearVelocity.set(currentLinearVelocity);
 

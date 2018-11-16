@@ -6,8 +6,8 @@ import java.nio.LongBuffer;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotDataLogger.JointType;
-import us.ihmc.robotics.screwTheory.Twist;
 
 public class SixDoFState extends JointState
 {
@@ -36,7 +36,7 @@ public class SixDoFState extends JointState
       array[5] = translation.getY();
       array[6] = translation.getZ();
 
-      twist.getArray(array, 7);
+      twist.get(7, array);
    }
 
    public void update(DoubleBuffer buffer)
@@ -124,11 +124,11 @@ public class SixDoFState extends JointState
 
    public void getTwistAngularPart(Vector3D tempVector)
    {
-      twist.getAngularPart(tempVector);
+      tempVector.set(twist.getAngularPart());
    }
    
    public void getTwistLinearPart(Vector3D tempVector)
    {
-      twist.getLinearPart(tempVector);
+      tempVector.set(twist.getLinearPart());
    }
 }

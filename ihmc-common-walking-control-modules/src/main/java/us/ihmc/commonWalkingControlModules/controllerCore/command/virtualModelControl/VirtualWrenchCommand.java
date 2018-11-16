@@ -1,16 +1,25 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 /**
  * {@link VirtualWrenchCommand} is a command meant to be submitted to the
@@ -58,9 +67,9 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * The base is the rigid-body located right before the first joint to be used for controlling the
     * end-effector.
     */
-   private RigidBody base;
+   private RigidBodyBasics base;
    /** The end-effector is the rigid-body to be controlled. */
-   private RigidBody endEffector;
+   private RigidBodyBasics endEffector;
 
    private String baseName;
    private String endEffectorName;
@@ -119,7 +128,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     *           end-effector.
     * @param endEffector the rigid-body to be controlled.
     */
-   public void set(RigidBody base, RigidBody endEffector)
+   public void set(RigidBodyBasics base, RigidBodyBasics endEffector)
    {
       this.base = base;
       this.endEffector = endEffector;
@@ -180,15 +189,15 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     *            {@code baseFrame = base.getBodyFixedFrame()},
     *            {@code expressedInFrame = controlFrame}.
     */
-   public void setWrench(ReferenceFrame controlFrame, Wrench desiredWrench)
+   public void setWrench(ReferenceFrame controlFrame, WrenchReadOnly desiredWrench)
    {
       desiredWrench.getBodyFrame().checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
-      desiredWrench.getExpressedInFrame().checkReferenceFrameMatch(controlFrame);
+      desiredWrench.getReferenceFrame().checkReferenceFrameMatch(controlFrame);
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
-      desiredWrench.getAngularPart(desiredAngularTorque);
-      desiredWrench.getLinearPart(desiredLinearForce);
+      desiredAngularTorque.set(desiredWrench.getAngularPart());
+      desiredLinearForce.set(desiredWrench.getLinearPart());
    }
 
    /**
@@ -399,8 +408,8 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
    {
       getControlFrame(controlFrameToPack);
       desiredWrenchToPack.setToZero(endEffector.getBodyFixedFrame(), controlFrameToPack);
-      desiredWrenchToPack.setLinearPart(desiredLinearForce);
-      desiredWrenchToPack.setAngularPart(desiredAngularTorque);
+      desiredWrenchToPack.getLinearPart().set(desiredLinearForce);
+      desiredWrenchToPack.getAngularPart().set(desiredAngularTorque);
    }
 
    /**
@@ -507,7 +516,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * @return the rigid-body located right before the first joint to be used for controlling the
     *         end-effector.
     */
-   public RigidBody getBase()
+   public RigidBodyBasics getBase()
    {
       return base;
    }
@@ -531,7 +540,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * 
     * @return the rigid-body to be controlled.
     */
-   public RigidBody getEndEffector()
+   public RigidBodyBasics getEndEffector()
    {
       return endEffector;
    }

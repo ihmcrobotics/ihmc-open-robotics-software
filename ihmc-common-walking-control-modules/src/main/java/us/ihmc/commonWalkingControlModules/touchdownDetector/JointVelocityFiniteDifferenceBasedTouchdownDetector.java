@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements TouchdownDetector
 {
-   private final OneDoFJoint joint;
+   private final OneDoFJointBasics joint;
    private final AlphaFilteredYoVariable velocityFiniteDifferenceFiltered;
    private final YoDouble footInSwingThreshold, touchdownThreshold, finiteDifferenceAlphaFilter;
    private final GlitchFilteredYoBoolean footInSwingFiltered;
@@ -18,7 +18,7 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
    private double previousVelocity;
    private boolean initialized = false;
 
-   public JointVelocityFiniteDifferenceBasedTouchdownDetector(OneDoFJoint joint, YoBoolean controllerSetFootSwitch, YoVariableRegistry registry)
+   public JointVelocityFiniteDifferenceBasedTouchdownDetector(OneDoFJointBasics joint, YoBoolean controllerSetFootSwitch, YoVariableRegistry registry)
    {
       this.joint = joint;
       this.controllerSetFootSwitch = controllerSetFootSwitch;

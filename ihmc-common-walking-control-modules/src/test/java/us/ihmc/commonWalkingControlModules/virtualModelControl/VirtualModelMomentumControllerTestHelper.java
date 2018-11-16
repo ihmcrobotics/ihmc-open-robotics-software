@@ -16,13 +16,14 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.math.frames.YoWrench;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -35,7 +36,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class VirtualModelMomentumControllerTestHelper
 {
    static void createVirtualModelMomentumControlTest(SCSRobotFromInverseDynamicsRobotModel robotModel, FullRobotModel controllerModel, ReferenceFrame centerOfMassFrame,
-         List<RigidBody> endEffectors, List<Vector3D> desiredForces, List<Vector3D> desiredTorques, List<ExternalForcePoint> externalForcePoints, SelectionMatrix6D selectionMatrix, SimulationTestingParameters simulationTestingParameters) throws Exception
+         List<RigidBodyBasics> endEffectors, List<Vector3D> desiredForces, List<Vector3D> desiredTorques, List<ExternalForcePoint> externalForcePoints, SelectionMatrix6D selectionMatrix, SimulationTestingParameters simulationTestingParameters) throws Exception
    {
       double simulationDuration = 20.0;
 
@@ -44,12 +45,12 @@ public class VirtualModelMomentumControllerTestHelper
 
       VirtualModelMomentumController virtualModelController = new VirtualModelMomentumController(new JointIndexHandler(controllerModel.getOneDoFJoints()));
 
-      List<YoWrench> desiredWrenches = new ArrayList<>();
+      List<YoFixedFrameWrench> desiredWrenches = new ArrayList<>();
       List<VirtualModelControllerTestHelper.ForcePointController> forcePointControllers = new ArrayList<>();
 
       for (int i = 0; i < endEffectors.size(); i++)
       {
-         RigidBody endEffector = endEffectors.get(i);
+         RigidBodyBasics endEffector = endEffectors.get(i);
          ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
 
          FramePose3D desiredEndEffectorPose = new FramePose3D(endEffectorFrame);
@@ -63,10 +64,10 @@ public class VirtualModelMomentumControllerTestHelper
          FrameVector3D torqueFrameVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), desiredTorque);
          forceFrameVector.changeFrame(endEffectorFrame);
          torqueFrameVector.changeFrame(endEffectorFrame);
-         desiredWrench.set(forceFrameVector, torqueFrameVector);
+         desiredWrench.set(torqueFrameVector, forceFrameVector);
          desiredWrench.changeFrame(ReferenceFrame.getWorldFrame());
 
-         YoWrench yoDesiredWrench = new YoWrench("desiredWrench" + i, endEffectorFrame, ReferenceFrame.getWorldFrame(), registry);
+         YoFixedFrameWrench yoDesiredWrench = new YoFixedFrameWrench("desiredWrench" + i, endEffectorFrame, ReferenceFrame.getWorldFrame(), registry);
          yoDesiredWrench.set(desiredWrench);
 
          desiredWrenches.add(yoDesiredWrench);
@@ -159,12 +160,12 @@ public class VirtualModelMomentumControllerTestHelper
       return VirtualModelControllerTestHelper.createPlanarArm();
    }
 
-   static void compareWrenches(Wrench wrench1, Wrench wrench2)
+   static void compareWrenches(WrenchReadOnly wrench1, Wrench wrench2)
    {
       VirtualModelControllerTestHelper.compareWrenches(wrench1, wrench2);
    }
 
-   static void compareWrenches(Wrench wrench1, Wrench wrench2, SelectionMatrix6D selectionMatrix)
+   static void compareWrenches(WrenchReadOnly wrench1, Wrench wrench2, SelectionMatrix6D selectionMatrix)
    {
       VirtualModelControllerTestHelper.compareWrenches(wrench1, wrench2, selectionMatrix);
    }
@@ -174,25 +175,25 @@ public class VirtualModelMomentumControllerTestHelper
    {
       private final YoVariableRegistry registry = new YoVariableRegistry("controller");
 
-      private final Map<InverseDynamicsJoint, YoDouble> yoJointTorques = new HashMap<>();
+      private final Map<JointBasics, YoDouble> yoJointTorques = new HashMap<>();
 
       private final SCSRobotFromInverseDynamicsRobotModel scsRobot;
       private final FullRobotModel controllerModel;
-      private final OneDoFJoint[] controlledJoints;
+      private final OneDoFJointBasics[] controlledJoints;
 
       private final VirtualModelMomentumController virtualModelController;
 
       private Wrench desiredWrench = new Wrench();
 
       private List<VirtualModelControllerTestHelper.ForcePointController> forcePointControllers = new ArrayList<>();
-      private List<YoWrench> yoDesiredWrenches = new ArrayList<>();
-      private List<RigidBody> endEffectors = new ArrayList<>();
+      private List<YoFixedFrameWrench> yoDesiredWrenches = new ArrayList<>();
+      private List<RigidBodyBasics> endEffectors = new ArrayList<>();
       private final SelectionMatrix6D selectionMatrix;
 
-      DummyArmMomentumController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJoint[] controlledJoints,
+      DummyArmMomentumController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJointBasics[] controlledJoints,
                                         List<VirtualModelControllerTestHelper.ForcePointController> forcePointControllers,
-                                        VirtualModelMomentumController virtualModelController, List<RigidBody> endEffectors,
-                                        List<YoWrench> yoDesiredWrenches, SelectionMatrix6D selectionMatrix)
+                                        VirtualModelMomentumController virtualModelController, List<RigidBodyBasics> endEffectors,
+                                        List<YoFixedFrameWrench> yoDesiredWrenches, SelectionMatrix6D selectionMatrix)
       {
          this.scsRobot = scsRobot;
          this.controllerModel = controllerModel;
@@ -203,7 +204,7 @@ public class VirtualModelMomentumControllerTestHelper
          this.selectionMatrix = selectionMatrix;
          this.yoDesiredWrenches = yoDesiredWrenches;
 
-         for (InverseDynamicsJoint joint : controlledJoints)
+         for (JointBasics joint : controlledJoints)
             yoJointTorques.put(joint, new YoDouble(joint.getName() + "solutionTorque", registry));
 
          for (VirtualModelControllerTestHelper.ForcePointController forcePointController : forcePointControllers)
@@ -235,7 +236,7 @@ public class VirtualModelMomentumControllerTestHelper
          virtualModelController.reset();
          for (int i = 0; i < endEffectors.size(); i++)
          {
-            desiredWrench = yoDesiredWrenches.get(i).getWrench();
+            desiredWrench.setIncludingFrame(yoDesiredWrenches.get(i));
             virtualModelController.addExternalWrench(controllerModel.getRootBody(), endEffectors.get(i), desiredWrench, selectionMatrix);
          }
          virtualModelController.populateTorqueSolution(virtualModelControlSolution);
@@ -243,7 +244,7 @@ public class VirtualModelMomentumControllerTestHelper
          DenseMatrix64F jointTorques = virtualModelControlSolution.getJointTorques();
          for (int i = 0; i < controlledJoints.length; i++)
          {
-            OneDoFJoint joint = controlledJoints[i];
+            OneDoFJointBasics joint = controlledJoints[i];
             double tau = jointTorques.get(i, 0);
             yoJointTorques.get(joint).set(tau);
             joint.setTau(tau);

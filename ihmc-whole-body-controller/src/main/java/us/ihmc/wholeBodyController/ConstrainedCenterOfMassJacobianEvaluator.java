@@ -2,7 +2,7 @@ package us.ihmc.wholeBodyController;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
@@ -14,18 +14,19 @@ import com.google.common.primitives.Doubles;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.ColumnSpaceProjector;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ConstrainedCenterOfMassJacobianCalculator;
 import us.ihmc.robotics.screwTheory.ConstrainedCentroidalMomentumMatrixCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.Momentum;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -56,12 +57,12 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
    private final YoDouble constrainedCMMConditionNumber = new YoDouble("constrCMMCondition", registry);
    private final YoDouble constrainedCMMSigmaMin = new YoDouble("constrCMMSigmaMin", registry);
 
-   private final InverseDynamicsJoint[] allJoints;
+   private final JointBasics[] allJoints;
    private final DenseMatrix64F v;
    private final DenseMatrix64F vActuated;
    private final DenseMatrix64F tempCoMVelocityMatrix = new DenseMatrix64F(3, 1);
    private final Vector3D tempCoMVelocity = new Vector3D();
-   private final Collection<InverseDynamicsJoint> actuatedJoints;
+   private final List<JointBasics> actuatedJoints;
    private final ColumnSpaceProjector projector;
 
    private final YoFrameVector3D centroidalLinearMomentum;
@@ -75,7 +76,7 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
    {
       constrainedCenterOfMassJacobianCalculator = new ConstrainedCenterOfMassJacobianCalculator(fullRobotModel.getRootJoint());
 
-      momentumSelectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE / 2, SpatialMotionVector.SIZE);
+      momentumSelectionMatrix = new DenseMatrix64F(SpatialVector.SIZE / 2, SpatialVector.SIZE);
       momentumSelectionMatrix.set(0, 3, 1.0);
       momentumSelectionMatrix.set(1, 4, 1.0);
       momentumSelectionMatrix.set(2, 5, 1.0);
@@ -89,41 +90,41 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-         DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
+         DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialVector.SIZE, SpatialVector.SIZE);
          CommonOps.setIdentity(selectionMatrix);
          constrainedCenterOfMassJacobianCalculator.addConstraint(foot, selectionMatrix);
          constrainedCentroidalMomentumMatrixCalculator.addConstraint(foot, selectionMatrix);
       }
 
-      allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-      v = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(allJoints), 1);
+      allJoints = MultiBodySystemTools.collectSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
+      v = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(allJoints), 1);
 
-      DenseMatrix64F orientationSelectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE / 2, SpatialMotionVector.SIZE);
+      DenseMatrix64F orientationSelectionMatrix = new DenseMatrix64F(SpatialVector.SIZE / 2, SpatialVector.SIZE);
       orientationSelectionMatrix.set(0, 0, 1.0);
       orientationSelectionMatrix.set(1, 1, 1.0);
       orientationSelectionMatrix.set(2, 2, 1.0);
       constrainedCenterOfMassJacobianCalculator.addConstraint(fullRobotModel.getPelvis(), orientationSelectionMatrix);
       constrainedCentroidalMomentumMatrixCalculator.addConstraint(fullRobotModel.getPelvis(), orientationSelectionMatrix);
 
-      actuatedJoints = new ArrayList<InverseDynamicsJoint>();
+      actuatedJoints = new ArrayList<JointBasics>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         InverseDynamicsJoint[] jointPath = ScrewTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getFoot(robotSide));
+         JointBasics[] jointPath = MultiBodySystemTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getFoot(robotSide));
          actuatedJoints.addAll(Arrays.asList(jointPath));
       }
 
 //    actuatedJoints.addAll(Arrays.asList(allJoints));
       actuatedJoints.remove(fullRobotModel.getRootJoint());
 
-      for (InverseDynamicsJoint actuatedJoint : actuatedJoints)
+      for (JointBasics actuatedJoint : actuatedJoints)
       {
          constrainedCenterOfMassJacobianCalculator.addActuatedJoint(actuatedJoint);
          constrainedCentroidalMomentumMatrixCalculator.addActuatedJoint(actuatedJoint);
       }
 
-      int nActuatedDoFs = ScrewTools.computeDegreesOfFreedom(actuatedJoints);
+      int nActuatedDoFs = MultiBodySystemTools.computeDegreesOfFreedom(actuatedJoints);
       vActuated = new DenseMatrix64F(nActuatedDoFs, 1);
 
       DampedLeastSquaresSolver columnSpaceProjectorSolver = new DampedLeastSquaresSolver(momentumSelectionMatrix.getNumRows());
@@ -153,12 +154,12 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
       this.constrainedComJacobianConditionNumber.set(NormOps.conditionP2(constrainedCenterOfMassJacobian));
       this.constrainedComJacobianSigmaMin.set(computeSmallestSingularValue(constrainedCenterOfMassJacobian));
 
-      ScrewTools.getJointVelocitiesMatrix(allJoints, v);
+      MultiBodySystemTools.extractJointsState(allJoints, JointStateType.VELOCITY, v);
       CommonOps.mult(centerOfMassJacobian, v, tempCoMVelocityMatrix);
       tempCoMVelocity.set(tempCoMVelocityMatrix);
       comVelocity.set(tempCoMVelocity);
 
-      ScrewTools.getJointVelocitiesMatrix(actuatedJoints, vActuated);
+      MultiBodySystemTools.extractJointsState(actuatedJoints, JointStateType.VELOCITY, vActuated);
 
 //    CommonOps.mult(constrainedCenterOfMassJacobian, vActuated, tempCoMVelocityMatrix);
 //    MatrixTools.denseMatrixToVector3d(tempCoMVelocityMatrix, tempCoMVelocity, 0, 0);
@@ -175,10 +176,12 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
 
       projector.setA(constrainedCentroidalMomentumMatrix);
       DenseMatrix64F centroidalMomentumPlusDenseMatrix = new DenseMatrix64F(momentumSelectionMatrix.getNumRows(), 1);
-      Momentum centroidalMomentum = new Momentum(centerOfMassFrame, centroidalLinearMomentum,
-                                       centroidalAngularMomentum);
+      Momentum centroidalMomentum = new Momentum(centerOfMassFrame, centroidalAngularMomentum,
+                                       centroidalLinearMomentum);
       DenseMatrix64F centroidalMomentumSelection = new DenseMatrix64F(momentumSelectionMatrix.getNumRows(), 1);
-      CommonOps.mult(momentumSelectionMatrix, centroidalMomentum.toDenseMatrix(), centroidalMomentumSelection);
+      DenseMatrix64F centroidalMomentumMatrix2 = new DenseMatrix64F(6, 1);
+      centroidalMomentum.get(centroidalMomentumMatrix2);
+      CommonOps.mult(momentumSelectionMatrix, centroidalMomentumMatrix2, centroidalMomentumSelection);
       projector.project(centroidalMomentumSelection, centroidalMomentumPlusDenseMatrix);
 
 
