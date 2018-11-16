@@ -44,4 +44,11 @@ public class ValkyrieKinematicsPlanningToolboxControllerTest extends AvatarKinem
    {
       super.testReachToAPoint();
    }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 30000)
+   public void testDifferentDistanceBetweenKeyFrames() throws Exception, UnreasonableAccelerationException
+   {
+      super.testDifferentDistanceBetweenKeyFrames();
+   }
 }
