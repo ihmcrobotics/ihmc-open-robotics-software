@@ -44,7 +44,12 @@ public abstract class RigidBodyControlState implements State
       warningPrefix = getClass().getSimpleName() + " for " + bodyName + ": ";
       registry = new YoVariableRegistry(createRegistryName(bodyName, controlMode));
 
-      String prefix = bodyName + StringUtils.capitalize(controlMode.toString().toLowerCase());
+      String prefix;
+      if (controlMode != null)
+         prefix = bodyName + StringUtils.capitalize(controlMode.toString().toLowerCase());
+      else
+         prefix = bodyName;
+
       lastCommandId = new YoLong(prefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
@@ -169,7 +174,11 @@ public abstract class RigidBodyControlState implements State
 
    public static String createRegistryName(String bodyName, RigidBodyControlMode stateEnum)
    {
-      String prefix = bodyName + StringUtils.capitalize(stateEnum.toString().toLowerCase());
+      String prefix;
+      if (stateEnum != null)
+         prefix = bodyName + StringUtils.capitalize(stateEnum.toString().toLowerCase());
+      else
+         prefix = bodyName;
       return prefix + "ControlModule";
    }
 
