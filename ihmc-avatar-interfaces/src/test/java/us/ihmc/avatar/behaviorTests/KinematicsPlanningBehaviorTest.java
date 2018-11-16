@@ -11,8 +11,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
@@ -23,17 +25,19 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.KinematicsPlanningBehavior;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.BombSquadObstacleCourse;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -44,6 +48,8 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
    private boolean isKinematicsPlanningToolboxVisualizerEnabled = false;
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private KinematicsPlanningToolboxModule kinematicsPlanningToolboxModule;
+
+   private Point2D doorLocation;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -80,11 +86,76 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      CommonAvatarEnvironmentInterface envrionment = new FlatGroundEnvironment();
-
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
-
       setupKinematicsPlanningToolboxModule();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 46.9)
+   @Test(timeout = 230000)
+   public void testReachToDoorKnob() throws SimulationExceededMaximumTimeException, IOException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      BombSquadObstacleCourse envrionment = new BombSquadObstacleCourse();
+      doorLocation = envrionment.getDoorLocation();
+
+      DRCStartingLocation startingLocation = new DRCStartingLocation()
+      {
+         @Override
+         public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
+         {
+            return new OffsetAndYawRobotInitialSetup(new Vector3D(doorLocation.getX() - 0.2, doorLocation.getY() - 0.7, 0.0), Math.PI / 2);
+         }
+      };
+
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), startingLocation, simulationTestingParameters, getRobotModel());
+
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.5);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      KinematicsPlanningBehavior behavior = new KinematicsPlanningBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node(),
+                                                                           getRobotModel(), sdfFullRobotModel);
+
+      double trajectoryTime = 5.0;
+      int numberOfKeyFrames = 10;
+      RobotSide robotSide = RobotSide.RIGHT;
+
+      List<Pose3DReadOnly> desiredPoses = new ArrayList<>();
+      FramePose3D desiredFramePose = new FramePose3D();
+      desiredFramePose.setPosition(envrionment.getDoorKnobGraspingPoint());
+      desiredFramePose.appendYawRotation(Math.PI);
+      desiredFramePose.appendPitchRotation(0.5 * Math.PI);
+      desiredFramePose.appendYawRotation(-0.2 * Math.PI);
+
+      Pose3D desiredPose = new Pose3D(desiredFramePose);
+
+      FramePose3D initialPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame().getTransformToWorldFrame());
+      for (int i = 0; i < numberOfKeyFrames; i++)
+      {
+         Pose3D pose = new Pose3D(initialPose);
+         double alpha = (i + 1) / (double) (numberOfKeyFrames);
+         pose.interpolate(desiredPose, alpha);
+         desiredPoses.add(pose);
+         drcBehaviorTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(pose));
+      }
+
+      behavior.setKeyFrameTimes(trajectoryTime, numberOfKeyFrames);
+      behavior.setEndEffectorKeyFrames(robotSide, desiredPoses);
+
+      drcBehaviorTestHelper.updateRobotModel();
+
+      drcBehaviorTestHelper.dispatchBehavior(behavior);
+
+      while (!behavior.isDone())
+      {
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
+      }
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 46.9)
@@ -92,6 +163,11 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
    public void testReachToAPoint() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      BombSquadObstacleCourse envrionment = new BombSquadObstacleCourse();
+      doorLocation = envrionment.getDoorLocation();
+
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.5);
       assertTrue(success);
@@ -207,6 +283,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       Graphics3DObject object = new Graphics3DObject();
       object.transform(new RigidBodyTransform(pose.getOrientation(), pose.getPosition()));
       object.addSphere(0.01);
+      object.addCylinder(0.1, 0.005, YoAppearance.Blue());
 
       return object;
    }

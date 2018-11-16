@@ -18,14 +18,17 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxCenterOfMassCommand;
@@ -33,9 +36,13 @@ import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.Kinem
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -43,6 +50,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class KinematicsPlanningToolboxController extends ToolboxController
 {
+   private final boolean DEBUG = true;
+   
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
    private final AtomicReference<CapturabilityBasedStatus> latestCapturabilityBasedStatusReference = new AtomicReference<>(null);
 
@@ -72,6 +81,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    private final YoDouble totalComputationTime;
 
    private final SolutionQualityConvergenceDetector solutionQualityConvergenceDetector;
+
+   private final Map<Long, RigidBody> rigidBodyNamedBasedHashMap = new HashMap<>();
 
    public KinematicsPlanningToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel, CommandInputManager commandInputManager,
                                               StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -108,6 +119,11 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       SolutionQualityConvergenceSettings optimizationSettings = new KinematicsPlanningToolboxOptimizationSettings();
       solutionQualityConvergenceDetector = new SolutionQualityConvergenceDetector(optimizationSettings, parentRegistry);
+
+      RigidBody rootBody = ScrewTools.getRootBody(fullRobotModel.getElevator());
+      RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
+      for (RigidBody rigidBody : allRigidBodies)
+         rigidBodyNamedBasedHashMap.put(rigidBody.getNameBasedHashCode(), rigidBody);
    }
 
    @Override
@@ -144,7 +160,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       if (!updateInitialRobotConfigurationToIKController())
          return false;
-      
+
       if (!updateToolboxConfiguration())
          return false;
 
@@ -163,7 +179,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       solutionQualityConvergenceDetector.initialize();
       submitKeyFrameMessages();
 
-      System.out.println("Initializing is done");
+      if(DEBUG)
+         System.out.println("Initializing is done");
       return true;
    }
 
@@ -177,6 +194,10 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       ikCenterOfMassMessages.clear();
       keyFrameTimes.clear();
 
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(getDesiredFullRobotModel());
+      referenceFrames.updateFrames();
+      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
+
       for (int i = 0; i < rigidBodyCommands.size(); i++)
       {
          KinematicsPlanningToolboxRigidBodyCommand command = rigidBodyCommands.get(i);
@@ -188,8 +209,12 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          for (int j = 0; j < command.getNumberOfWayPoints(); j++)
          {
             Pose3D wayPoint = command.getWayPoint(j);
-            KinematicsToolboxRigidBodyMessage rigidBodyMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(endEffector, wayPoint.getPosition(),
-                                                                                                                      wayPoint.getOrientation());
+
+            FramePose3D wayPointFramePose = new FramePose3D(midFeetZUpFrame, wayPoint);
+
+            KinematicsToolboxRigidBodyMessage rigidBodyMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(endEffector,
+                                                                                                                      wayPointFramePose.getPosition(),
+                                                                                                                      wayPointFramePose.getOrientation());
             rigidBodyMessage.getControlFramePositionInEndEffector().set(command.getControlFramePose().getPosition());
             rigidBodyMessage.getControlFrameOrientationInEndEffector().set(command.getControlFramePose().getOrientation());
             rigidBodyMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(command.getSelectionMatrix().getLinearPart()));
@@ -229,6 +254,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       {
          for (int i = 0; i < getNumberOfKeyFrames(); i++)
          {
+            getDesiredFullRobotModel().updateFrames();
             KinematicsToolboxCenterOfMassMessage comMessage = KinematicsToolboxMessageFactory.holdCenterOfMassCurrentPosition(getDesiredFullRobotModel().getRootBody(),
                                                                                                                               true, true, false);
 
@@ -249,16 +275,26 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       return true;
    }
 
+   private FramePoint3D computeCenterOfMass3D(FullHumanoidRobotModel fullHumanoidRobotModel)
+   {
+      CenterOfMassCalculator calculator = new CenterOfMassCalculator(fullHumanoidRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
+      calculator.compute();
+      return calculator.getCenterOfMass();
+   }
+
    @Override
    public void updateInternal() throws Exception
    {
       if (solutionQualityConvergenceDetector.isSolved())
       {
-         PrintTools.info("solved " + solutionQualityConvergenceDetector.isValid());
+         if(DEBUG)
+            System.out.println("solved " + solutionQualityConvergenceDetector.isValid() + " " + solutionQualityConvergenceDetector.getNumberOfIteration());
          if (!appendRobotConfigurationOnToolboxSolution() || indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
          {
             isDone.set(true);
             solution.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
+            if(DEBUG)
+               System.out.println("total computation time is "+solutionQualityConvergenceDetector.getComputationTime());
             reportMessage(solution);
          }
          else
@@ -289,8 +325,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       {
          solution.setSolutionQuality(solution.getSolutionQuality() + ikController.getSolution().getSolutionQuality());
          solution.getRobotConfigurations().add().set(new KinematicsToolboxOutputStatus(ikController.getSolution()));
-         
-         PrintTools.info(""+solution.getRobotConfigurations().get(0).getDesiredJointAngles().get(15));
 
          return true;
       }
@@ -308,8 +342,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          List<KinematicsToolboxRigidBodyMessage> rigidBodyMessages = ikRigidBodyMessageMap.get(ikRigidBodies.get(i));
          ikCommandInputManager.submitMessage(rigidBodyMessages.get(indexOfCurrentKeyFrame.getIntegerValue()));
       }
-
-      PrintTools.info("indexOfCurrentKeyFrame.getIntegerValue() " + indexOfCurrentKeyFrame.getIntegerValue());
 
       if (ikCenterOfMassMessages.get(indexOfCurrentKeyFrame.getIntegerValue()) != null)
          ikCommandInputManager.submitMessage(ikCenterOfMassMessages.get(indexOfCurrentKeyFrame.getIntegerValue()));
@@ -330,7 +362,20 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          return false;
       }
 
+      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(currentRobotConfiguration, getDesiredFullRobotModel().getRootJoint(),
+                                                                      FullRobotModelUtils.getAllJointsExcludingHands(getDesiredFullRobotModel()));
+
       ikController.updateRobotConfigurationData(currentRobotConfiguration);
+
+      CapturabilityBasedStatus capturabilityBasedStatus = latestCapturabilityBasedStatusReference.get();
+
+      if (capturabilityBasedStatus == null)
+      {
+         LogTools.warn("capturabilityBasedStatus should be set up.");
+         return false;
+      }
+
+      ikController.updateCapturabilityBasedStatus(capturabilityBasedStatus);
       return true;
    }
 
