@@ -137,4 +137,9 @@ public class SolutionQualityConvergenceDetector
    {
       return isSolved.getBooleanValue();
    }
+   
+   public int getNumberOfIteration()
+   {
+      return numberOfIterations.getIntegerValue();
+   }
 }
