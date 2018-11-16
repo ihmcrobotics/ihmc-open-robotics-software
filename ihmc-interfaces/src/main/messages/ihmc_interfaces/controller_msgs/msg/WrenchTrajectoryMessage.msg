@@ -7,10 +7,6 @@ uint32 sequence_id
 
 # List of trajectory points (in taskpsace) to go through while executing the trajectory.
 WrenchTrajectoryPointMessage[<=50] wrench_trajectory_points
-# The selection matrix for each axis of the angular part of this trajectory.
-SelectionMatrix3DMessage angular_selection_matrix
-# The selection matrix for each axis of the linear part of this trajectory.
-SelectionMatrix3DMessage linear_selection_matrix
 # Frame information for this message.
 FrameInformation frame_information
 # Flag that tells the controller whether the use of a custom control frame is requested.

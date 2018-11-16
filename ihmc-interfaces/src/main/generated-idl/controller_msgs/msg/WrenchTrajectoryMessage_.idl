@@ -3,7 +3,6 @@
 
 #include "controller_msgs/msg/./FrameInformation_.idl"
 #include "controller_msgs/msg/./QueueableMessage_.idl"
-#include "controller_msgs/msg/./SelectionMatrix3DMessage_.idl"
 #include "controller_msgs/msg/./WrenchTrajectoryPointMessage_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 module controller_msgs
@@ -29,14 +28,6 @@ module controller_msgs
          * List of trajectory points (in taskpsace) to go through while executing the trajectory.
          */
         sequence<controller_msgs::msg::dds::WrenchTrajectoryPointMessage, 50> wrench_trajectory_points;
-        /**
-         * The selection matrix for each axis of the angular part of this trajectory.
-         */
-        controller_msgs::msg::dds::SelectionMatrix3DMessage angular_selection_matrix;
-        /**
-         * The selection matrix for each axis of the linear part of this trajectory.
-         */
-        controller_msgs::msg::dds::SelectionMatrix3DMessage linear_selection_matrix;
         /**
          * Frame information for this message.
          */

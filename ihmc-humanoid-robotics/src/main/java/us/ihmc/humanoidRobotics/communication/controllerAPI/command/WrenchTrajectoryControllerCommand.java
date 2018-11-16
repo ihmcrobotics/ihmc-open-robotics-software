@@ -18,7 +18,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTrajectoryControllerCommand, WrenchTrajectoryMessage>
@@ -27,7 +26,6 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
    private ReferenceFrame dataFrame;
    private final TDoubleArrayList trajectoryPointTimes = new TDoubleArrayList();
    private final RecyclingArrayList<SpatialVector> trajectoryPointList = new RecyclingArrayList<>(16, SpatialVector.class);
-   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private ReferenceFrame trajectoryFrame;
 
    private boolean useCustomControlFrame = false;
@@ -67,7 +65,6 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
       trajectoryPointTimes.reset();
       trajectoryPointList.clear();
       clearQueuableCommandVariables();
-      selectionMatrix.resetSelection();
    }
 
    public void clear(ReferenceFrame referenceFrame)
@@ -75,7 +72,6 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
       trajectoryPointTimes.reset();
       trajectoryPointList.clear();
       clearQueuableCommandVariables();
-      selectionMatrix.resetSelection();
    }
 
    @Override
@@ -102,10 +98,6 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
 
       clear(dataFrame);
       setFromMessage(message);
-
-      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getAngularSelectionMatrix().getSelectionFrameId());
-      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getLinearSelectionMatrix().getSelectionFrameId());
-      selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
    }
 
    @Override
@@ -122,11 +114,6 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
          trajectoryPointList.add().setIncludingFrame(dataFrame, trajectoryPointMessage.getWrench().getTorque(), trajectoryPointMessage.getWrench().getForce());
       }
       setQueueableCommandVariables(message.getQueueingProperties());
-      selectionMatrix.resetSelection();
-      selectionMatrix.setAngularAxisSelection(message.getAngularSelectionMatrix().getXSelected(), message.getAngularSelectionMatrix().getYSelected(),
-                                              message.getAngularSelectionMatrix().getZSelected());
-      selectionMatrix.setLinearAxisSelection(message.getLinearSelectionMatrix().getXSelected(), message.getLinearSelectionMatrix().getYSelected(),
-                                             message.getLinearSelectionMatrix().getZSelected());
       useCustomControlFrame = message.getUseCustomControlFrame();
       message.getControlFramePose().get(controlFramePoseInBodyFrame);
    }
@@ -147,18 +134,7 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
    public void setPropertiesOnly(WrenchTrajectoryControllerCommand other)
    {
       setQueueableCommandVariables(other);
-      selectionMatrix.set(other.getSelectionMatrix());
       trajectoryFrame = other.getTrajectoryFrame();
-   }
-
-   public SelectionMatrix6D getSelectionMatrix()
-   {
-      return selectionMatrix;
-   }
-
-   public void setSelectionMatrix(SelectionMatrix6D selectionMatrix)
-   {
-      this.selectionMatrix.set(selectionMatrix);
    }
 
    public TDoubleArrayList getTrajectoryPointTimes()
