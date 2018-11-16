@@ -30,6 +30,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class KinematicsPlanningBehavior extends AbstractBehavior
 {
@@ -51,6 +52,8 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<KinematicsPlanningToolboxRigidBodyMessage> rigidBodyMessagePublisher;
    private final IHMCROS2Publisher<KinematicsPlanningToolboxCenterOfMassMessage> comMessagePublisher;
    private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
+   
+   private double trajectoryTime = 0.0;
 
    public KinematicsPlanningBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                      FullHumanoidRobotModel fullRobotModel)
@@ -156,6 +159,11 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
       RigidBodyBasics endEffector = fullRobotModel.getHand(robotSide);
       setEndEffectorKeyFrames(endEffector, desiredPoses);
    }
+   
+   public double getTrajectoryTime()
+   {
+      return trajectoryTime;
+   }
 
    @Override
    public void doControl()
@@ -172,6 +180,8 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
          if (solution.getSolutionQuality() < 0)
             throw new RuntimeException("a key frame can not be accepted.");
 
+         trajectoryTime = keyFrameTimes.get(keyFrameTimes.size() - 1);
+         
          WholeBodyTrajectoryMessage message = new WholeBodyTrajectoryMessage();
          message.setDestination(PacketDestination.CONTROLLER.ordinal());
          outputConverter.setMessageToCreate(message);
