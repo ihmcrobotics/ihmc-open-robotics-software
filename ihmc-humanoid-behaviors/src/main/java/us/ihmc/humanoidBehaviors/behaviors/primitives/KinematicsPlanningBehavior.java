@@ -9,7 +9,6 @@ import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
@@ -161,10 +160,8 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-
       if (toolboxOutputQueue.isNewPacketAvailable())
       {
-         PrintTools.info("received");
          KinematicsPlanningToolboxOutputStatus solution = toolboxOutputQueue.poll();
 
          Double keyFrameTimes = solution.getKeyFrameTimes();
@@ -182,7 +179,6 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
          wholeBodyTrajectoryPublisher.publish(message);
          deactivateKinematicsToolboxModule();
       }
-
    }
 
    @Override
@@ -206,8 +202,7 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
          rigidBodyMessagePublisher.publish(message);
       }
 
-      PrintTools.info("keyFrameTimes.size() " + keyFrameTimes.size());
-
+      // TODO : COM should consider current root body location.
       List<Point3DReadOnly> desiredCOMPoints = new ArrayList<Point3DReadOnly>();
       for (int i = 0; i < keyFrameTimes.size(); i++)
          desiredCOMPoints.add(new Point3D());
@@ -218,7 +213,7 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
       selectionMatrix.selectZAxis(false);
       comMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
       comMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(defaultCOMWeight));
-      comMessagePublisher.publish(comMessage);
+      //comMessagePublisher.publish(comMessage);
 
       System.out.println("published");
    }
