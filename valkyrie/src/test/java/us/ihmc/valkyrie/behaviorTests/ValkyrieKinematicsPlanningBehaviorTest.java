@@ -31,14 +31,6 @@ public class ValkyrieKinematicsPlanningBehaviorTest extends KinematicsPlanningBe
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 150000)
-   public void testReachToAPoint() throws SimulationExceededMaximumTimeException, IOException
-   {
-      super.testReachToAPoint();
-   }
-   
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 150000)
    public void testReachToDoorKnob() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testReachToDoorKnob();
