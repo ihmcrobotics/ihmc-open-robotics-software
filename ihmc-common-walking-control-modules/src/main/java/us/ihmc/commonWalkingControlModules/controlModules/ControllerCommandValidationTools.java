@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 
@@ -37,7 +37,7 @@ public class ControllerCommandValidationTools
    {
       if (trajectoryPointLists.size() != joints.length)
       {
-         PrintTools.warn("Incorrect joint length. Expected "+joints.length+" got "+trajectoryPointLists.size());
+         LogTools.warn("Incorrect joint length. Expected "+joints.length+" got "+trajectoryPointLists.size());
          return false;
       }
 
@@ -46,7 +46,7 @@ public class ControllerCommandValidationTools
          if (!ControllerCommandValidationTools.checkJointspaceTrajectoryPointList(joints[jointIndex], trajectoryPointLists.get(jointIndex)))
          {
 
-            PrintTools.warn("Invalid joint trajectory ( "+jointIndex+" - "+joints[jointIndex].getName()+")");
+            LogTools.warn("Invalid joint trajectory ( "+jointIndex+" - "+joints[jointIndex].getName()+")");
             return false;
          }
       }
@@ -63,7 +63,7 @@ public class ControllerCommandValidationTools
          double jointLimitUpper = joint.getJointLimitUpper();
          if (!MathTools.intervalContains(waypointPosition, jointLimitLower, jointLimitUpper))
          {
-            PrintTools.warn("Joint out of bounds: "+joint.getName()+" (" +jointLimitLower+", "+jointLimitUpper+ ") = "+waypointPosition+" (t="+i+")");
+            LogTools.warn("Joint out of bounds: "+joint.getName()+" (" +jointLimitLower+", "+jointLimitUpper+ ") = "+waypointPosition+" (t="+i+")");
             return false;
          }
       }
