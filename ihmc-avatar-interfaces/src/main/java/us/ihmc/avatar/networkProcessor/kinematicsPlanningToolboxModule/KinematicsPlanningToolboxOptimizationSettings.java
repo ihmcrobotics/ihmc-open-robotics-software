@@ -7,4 +7,10 @@ public class KinematicsPlanningToolboxOptimizationSettings implements SolutionQu
    {
       return 0.00005;
    }
+   
+   @Override
+   public int getDefaultTerminalIteration()
+   {
+      return 100;
+   }
 }
