@@ -22,14 +22,6 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
             */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.WrenchTrajectoryPointMessage>  wrench_trajectory_points_;
    /**
-            * The selection matrix for each axis of the angular part of this trajectory.
-            */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage angular_selection_matrix_;
-   /**
-            * The selection matrix for each axis of the linear part of this trajectory.
-            */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage linear_selection_matrix_;
-   /**
             * Frame information for this message.
             */
    public controller_msgs.msg.dds.FrameInformation frame_information_;
@@ -50,8 +42,6 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
    public WrenchTrajectoryMessage()
    {
       wrench_trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.WrenchTrajectoryPointMessage> (50, new controller_msgs.msg.dds.WrenchTrajectoryPointMessagePubSubType());
-      angular_selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
-      linear_selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
       frame_information_ = new controller_msgs.msg.dds.FrameInformation();
       control_frame_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
@@ -69,8 +59,6 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
       sequence_id_ = other.sequence_id_;
 
       wrench_trajectory_points_.set(other.wrench_trajectory_points_);
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.angular_selection_matrix_, angular_selection_matrix_);
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.linear_selection_matrix_, linear_selection_matrix_);
       controller_msgs.msg.dds.FrameInformationPubSubType.staticCopy(other.frame_information_, frame_information_);
       use_custom_control_frame_ = other.use_custom_control_frame_;
 
@@ -100,24 +88,6 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.WrenchTrajectoryPointMessage>  getWrenchTrajectoryPoints()
    {
       return wrench_trajectory_points_;
-   }
-
-
-   /**
-            * The selection matrix for each axis of the angular part of this trajectory.
-            */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage getAngularSelectionMatrix()
-   {
-      return angular_selection_matrix_;
-   }
-
-
-   /**
-            * The selection matrix for each axis of the linear part of this trajectory.
-            */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage getLinearSelectionMatrix()
-   {
-      return linear_selection_matrix_;
    }
 
 
@@ -190,8 +160,6 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
          {  if (!this.wrench_trajectory_points_.get(i).epsilonEquals(other.wrench_trajectory_points_.get(i), epsilon)) return false; }
       }
 
-      if (!this.angular_selection_matrix_.epsilonEquals(other.angular_selection_matrix_, epsilon)) return false;
-      if (!this.linear_selection_matrix_.epsilonEquals(other.linear_selection_matrix_, epsilon)) return false;
       if (!this.frame_information_.epsilonEquals(other.frame_information_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_custom_control_frame_, other.use_custom_control_frame_, epsilon)) return false;
 
@@ -213,8 +181,6 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if (!this.wrench_trajectory_points_.equals(otherMyClass.wrench_trajectory_points_)) return false;
-      if (!this.angular_selection_matrix_.equals(otherMyClass.angular_selection_matrix_)) return false;
-      if (!this.linear_selection_matrix_.equals(otherMyClass.linear_selection_matrix_)) return false;
       if (!this.frame_information_.equals(otherMyClass.frame_information_)) return false;
       if(this.use_custom_control_frame_ != otherMyClass.use_custom_control_frame_) return false;
 
@@ -234,10 +200,6 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("wrench_trajectory_points=");
       builder.append(this.wrench_trajectory_points_);      builder.append(", ");
-      builder.append("angular_selection_matrix=");
-      builder.append(this.angular_selection_matrix_);      builder.append(", ");
-      builder.append("linear_selection_matrix=");
-      builder.append(this.linear_selection_matrix_);      builder.append(", ");
       builder.append("frame_information=");
       builder.append(this.frame_information_);      builder.append(", ");
       builder.append("use_custom_control_frame=");

@@ -45,10 +45,6 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.WrenchTrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
       current_alignment += controller_msgs.msg.dds.FrameInformationPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -78,10 +74,6 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       {
           current_alignment += controller_msgs.msg.dds.WrenchTrajectoryPointMessagePubSubType.getCdrSerializedSize(data.getWrenchTrajectoryPoints().get(i0), current_alignment);}
 
-      current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getCdrSerializedSize(data.getAngularSelectionMatrix(), current_alignment);
-
-      current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getCdrSerializedSize(data.getLinearSelectionMatrix(), current_alignment);
-
       current_alignment += controller_msgs.msg.dds.FrameInformationPubSubType.getCdrSerializedSize(data.getFrameInformation(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -103,8 +95,6 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       cdr.write_type_e(data.getWrenchTrajectoryPoints());else
           throw new RuntimeException("wrench_trajectory_points field exceeds the maximum length");
 
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getAngularSelectionMatrix(), cdr);
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getLinearSelectionMatrix(), cdr);
       controller_msgs.msg.dds.FrameInformationPubSubType.write(data.getFrameInformation(), cdr);
       cdr.write_type_7(data.getUseCustomControlFrame());
 
@@ -117,8 +107,6 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       data.setSequenceId(cdr.read_type_4());
       	
       cdr.read_type_e(data.getWrenchTrajectoryPoints());	
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getAngularSelectionMatrix(), cdr);	
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getLinearSelectionMatrix(), cdr);	
       controller_msgs.msg.dds.FrameInformationPubSubType.read(data.getFrameInformation(), cdr);	
       data.setUseCustomControlFrame(cdr.read_type_7());
       	
@@ -132,10 +120,6 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_e("wrench_trajectory_points", data.getWrenchTrajectoryPoints());
-      ser.write_type_a("angular_selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getAngularSelectionMatrix());
-
-      ser.write_type_a("linear_selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getLinearSelectionMatrix());
-
       ser.write_type_a("frame_information", new controller_msgs.msg.dds.FrameInformationPubSubType(), data.getFrameInformation());
 
       ser.write_type_7("use_custom_control_frame", data.getUseCustomControlFrame());
@@ -150,10 +134,6 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_e("wrench_trajectory_points", data.getWrenchTrajectoryPoints());
-      ser.read_type_a("angular_selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getAngularSelectionMatrix());
-
-      ser.read_type_a("linear_selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getLinearSelectionMatrix());
-
       ser.read_type_a("frame_information", new controller_msgs.msg.dds.FrameInformationPubSubType(), data.getFrameInformation());
 
       data.setUseCustomControlFrame(ser.read_type_7("use_custom_control_frame"));
