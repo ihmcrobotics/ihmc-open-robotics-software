@@ -8,15 +8,15 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.PrismaticJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
@@ -29,7 +29,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 {
    private final SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = new SCSToInverseDynamicsJointMap();
 
-   private final RigidBody elevator;
+   private final RigidBodyBasics elevator;
 
    /**
     * Using the given SCS robot, generates an equivalent robot model using the
@@ -60,14 +60,14 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          Vector3D comOffset = new Vector3D();
          link.getComOffset(comOffset);
 
-         RigidBody parentIDBody = getParentIDBody(polledJoint, elevator);
+         RigidBodyBasics parentIDBody = getParentIDBody(polledJoint, elevator);
 
          if (polledJoint instanceof FloatingJoint)
          {
             FloatingJoint currentJoint = (FloatingJoint) polledJoint;
 
-            FloatingInverseDynamicsJoint currentIDJoint = new SixDoFJoint(currentJoint.getName(), elevator);
-            ScrewTools.addRigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
+            FloatingJointBasics currentIDJoint = new SixDoFJoint(currentJoint.getName(), elevator);
+            new RigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
             scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);
          }
@@ -81,11 +81,11 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             Vector3D jointOffset = new Vector3D();
             currentJoint.getOffset(jointOffset);
 
-            RevoluteJoint currentIDJoint = ScrewTools.addRevoluteJoint(currentJoint.getName(), parentIDBody, jointOffset, jointAxis);
+            RevoluteJoint currentIDJoint = new RevoluteJoint(currentJoint.getName(), parentIDBody, jointOffset, jointAxis);
             currentIDJoint.setJointLimitLower(currentJoint.getJointLowerLimit());
             currentIDJoint.setJointLimitUpper(currentJoint.getJointUpperLimit());
 
-            ScrewTools.addRigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
+            new RigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
             scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);
          }
@@ -99,11 +99,11 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             Vector3D jointOffset = new Vector3D();
             currentJoint.getOffset(jointOffset);
 
-            PrismaticJoint currentIDJoint = ScrewTools.addPrismaticJoint(currentJoint.getName(), parentIDBody, jointOffset, jointAxis);
+            PrismaticJoint currentIDJoint = new PrismaticJoint(currentJoint.getName(), parentIDBody, jointOffset, jointAxis);
             currentIDJoint.setJointLimitLower(currentJoint.getJointLowerLimit());
             currentIDJoint.setJointLimitUpper(currentJoint.getJointUpperLimit());
 
-            ScrewTools.addRigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
+            new RigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
             scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);
          }
@@ -133,12 +133,12 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
     * 
     * @return the elevator.
     */
-   public RigidBody getElevator()
+   public RigidBodyBasics getElevator()
    {
       return elevator;
    }
 
-   private RigidBody getParentIDBody(Joint polledJoint, RigidBody elevator)
+   private RigidBodyBasics getParentIDBody(Joint polledJoint, RigidBodyBasics elevator)
    {
       Joint parentJoint = polledJoint.getParentJoint();
 
@@ -148,7 +148,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
       return scsToInverseDynamicsJointMap.getRigidBody(parentJoint);
    }
 
-   private final SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector();
+   private final SpatialAcceleration spatialAccelerationVector = new SpatialAcceleration();
 
    private final FrameVector3D linearVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
    private final FrameVector3D angularVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
@@ -172,7 +172,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
       {
          if (updateRootJoints || (pinJoint.getParentJoint() != null))
          {
-            OneDoFJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(pinJoint);
+            OneDoFJointBasics revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(pinJoint);
 
             double jointPosition = pinJoint.getQYoVariable().getDoubleValue();
             double jointVelocity = pinJoint.getQDYoVariable().getDoubleValue();
@@ -186,10 +186,10 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          Collection<? extends FloatingJoint> floatingJoints = scsToInverseDynamicsJointMap.getFloatingJoints();
          for (FloatingJoint floatingJoint : floatingJoints)
          {
-            FloatingInverseDynamicsJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint);
+            FloatingJointBasics sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint);
 
             floatingJoint.getTransformToWorld(positionAndRotation);
-            sixDoFJoint.setPositionAndRotation(positionAndRotation);
+            sixDoFJoint.setJointConfiguration(positionAndRotation);
          }
       }
 
@@ -201,7 +201,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          Collection<? extends FloatingJoint> floatingJoints = scsToInverseDynamicsJointMap.getFloatingJoints();
          for (FloatingJoint floatingJoint : floatingJoints)
          {
-            FloatingInverseDynamicsJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint);
+            FloatingJointBasics sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint);
             //                     referenceFrames.updateFrames();
 
             ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
@@ -212,7 +212,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 
             floatingJoint.getAngularVelocity(angularVelocity, pelvisFrame);
 
-            Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity, angularVelocity);
+            Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, angularVelocity, linearVelocity);
             sixDoFJoint.setJointTwist(bodyTwist);
             sixDoFJoint.updateFramesRecursively();
          }
@@ -229,16 +229,11 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
     *           not.
     * @param updateAccelerations whether the joint accelerations should be copied over to the SCS
     *           robot or not.
-    * @param useDesiredAcceleration whether to extract the desired or measured joint accelerations.
-    *           Unused when {@code updateAccelerations == false}.
     * @param updateTorques whether the joint forces/torques should be copied over to the SCS robot
     *           or not.
-    * @param useDesiredTorque whether to extract the desired or measured joint forces/torques.
-    *           Unused when {@code updateTorques == false}.
     */
    public void updateRobotFromInverseDynamicsRobotModel(boolean updateRootJoints, boolean updatePositions, boolean updateVelocities,
-                                                        boolean updateAccelerations, boolean useDesiredAcceleration, boolean updateTorques,
-                                                        boolean useDesiredTorque)
+                                                        boolean updateAccelerations, boolean updateTorques)
    {
 
       Collection<OneDegreeOfFreedomJoint> pinJoints = scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints();
@@ -246,7 +241,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
       {
          if (updateRootJoints || (pinJoint.getParentJoint() != null))
          {
-            OneDoFJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(pinJoint);
+            OneDoFJointBasics revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(pinJoint);
 
             double jointPosition;
             double jointVelocity;
@@ -261,10 +256,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 
             if (updateAccelerations)
             {
-               if (useDesiredAcceleration)
-                  jointAcceleration = revoluteJoint.getQddDesired();
-               else
-                  jointAcceleration = revoluteJoint.getQdd();
+               jointAcceleration = revoluteJoint.getQdd();
                pinJoint.setQdd(jointAcceleration);
             }
 
@@ -276,10 +268,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 
             if (updateTorques)
             {
-               if (useDesiredTorque)
-                  jointTorque = revoluteJoint.getTau();
-               else
-                  jointTorque = revoluteJoint.getTauMeasured();
+               jointTorque = revoluteJoint.getTau();
                pinJoint.setTau(jointTorque);
             }
 
@@ -291,11 +280,11 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          Collection<? extends FloatingJoint> floatingJoints = scsToInverseDynamicsJointMap.getFloatingJoints(); //floatingToSixDofToJointMap.keySet();
          for (FloatingJoint floatingJoint : floatingJoints)
          {
-            FloatingInverseDynamicsJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint); //floatingToSixDofToJointMap.get(floatingJoint);
+            FloatingJointBasics sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint); //floatingToSixDofToJointMap.get(floatingJoint);
             RigidBodyTransform rotationAndTranslation = new RigidBodyTransform();
             if (updatePositions)
             {
-               sixDoFJoint.getJointTransform3D(rotationAndTranslation);
+               sixDoFJoint.getJointConfiguration(rotationAndTranslation);
                floatingJoint.setRotationAndTranslation(rotationAndTranslation);
             }
 
@@ -303,22 +292,19 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 
             if (updateVelocities)
             {
-               linearVelocity.setIncludingFrame(pelvisFrame, sixDoFJoint.getLinearVelocityForReading());
+               linearVelocity.setIncludingFrame(pelvisFrame, sixDoFJoint.getJointTwist().getLinearPart());
                linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
                floatingJoint.setVelocity(linearVelocity);
-               floatingJoint.setAngularVelocityInBody(sixDoFJoint.getAngularVelocityForReading());
+               floatingJoint.setAngularVelocityInBody(sixDoFJoint.getJointTwist().getAngularPart());
             }
 
             if (updateAccelerations)
             {
-               if (useDesiredAcceleration)
-                  sixDoFJoint.getDesiredJointAcceleration(spatialAccelerationVector);
-               else
-                  sixDoFJoint.getJointAcceleration(spatialAccelerationVector);
-               spatialAccelerationVector.getLinearPart(originAcceleration);
+               spatialAccelerationVector.setIncludingFrame(sixDoFJoint.getJointAcceleration());
+               originAcceleration.setIncludingFrame(spatialAccelerationVector.getLinearPart());
                originAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
                floatingJoint.setAcceleration(originAcceleration);
-               spatialAccelerationVector.getAngularPart(angularAcceleration);
+               angularAcceleration.setIncludingFrame(spatialAccelerationVector.getAngularPart());
                floatingJoint.setAngularAccelerationInBody(angularAcceleration);
             }
          }

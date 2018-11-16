@@ -16,7 +16,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-   public long end_effector_name_based_hash_code_;
+   public int end_effector_hash_code_;
    public us.ihmc.idl.IDLSequence.Double  waypoint_times_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  waypoints_;
    public controller_msgs.msg.dds.SelectionMatrix3DMessage angular_selection_matrix_;
@@ -47,7 +47,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
    {
       sequence_id_ = other.sequence_id_;
 
-      end_effector_name_based_hash_code_ = other.end_effector_name_based_hash_code_;
+      end_effector_hash_code_ = other.end_effector_hash_code_;
 
       waypoint_times_.set(other.waypoint_times_);
       waypoints_.set(other.waypoints_);
@@ -74,13 +74,13 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       return sequence_id_;
    }
 
-   public void setEndEffectorNameBasedHashCode(long end_effector_name_based_hash_code)
+   public void setEndEffectorHashCode(int end_effector_hash_code)
    {
-      end_effector_name_based_hash_code_ = end_effector_name_based_hash_code;
+      end_effector_hash_code_ = end_effector_hash_code;
    }
-   public long getEndEffectorNameBasedHashCode()
+   public int getEndEffectorHashCode()
    {
-      return end_effector_name_based_hash_code_;
+      return end_effector_hash_code_;
    }
 
 
@@ -148,7 +148,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_effector_name_based_hash_code_, other.end_effector_name_based_hash_code_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_effector_hash_code_, other.end_effector_hash_code_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.waypoint_times_, other.waypoint_times_, epsilon)) return false;
 
@@ -180,7 +180,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.end_effector_name_based_hash_code_ != otherMyClass.end_effector_name_based_hash_code_) return false;
+      if(this.end_effector_hash_code_ != otherMyClass.end_effector_hash_code_) return false;
 
       if (!this.waypoint_times_.equals(otherMyClass.waypoint_times_)) return false;
       if (!this.waypoints_.equals(otherMyClass.waypoints_)) return false;
@@ -202,8 +202,8 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       builder.append("WaypointBasedTrajectoryMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("end_effector_name_based_hash_code=");
-      builder.append(this.end_effector_name_based_hash_code_);      builder.append(", ");
+      builder.append("end_effector_hash_code=");
+      builder.append(this.end_effector_hash_code_);      builder.append(", ");
       builder.append("waypoint_times=");
       builder.append(this.waypoint_times_);      builder.append(", ");
       builder.append("waypoints=");

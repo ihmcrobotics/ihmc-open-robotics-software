@@ -11,11 +11,12 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -29,7 +30,7 @@ public class UnloadedAnkleControlModule
    private final JointDesiredOutputList jointDesiredOutputList;
    private final JointspaceAccelerationCommand accelerationCommand = new JointspaceAccelerationCommand();
 
-   private final RigidBody foot;
+   private final RigidBodyBasics foot;
    private final MovingReferenceFrame shinFrame;
 
    private final BooleanParameter useAnkleIKModule;
@@ -54,9 +55,9 @@ public class UnloadedAnkleControlModule
 
       useAnkleIKModule = new BooleanParameter("UseAnkleIKModule" + robotSide.getPascalCaseName(), registry, false);
       foot = fullRobotModel.getFoot(robotSide);
-      RigidBody shin = ScrewTools.goUpBodyChain(foot, ankleIKSolver.getNumberOfJoints());
+      RigidBodyBasics shin = ScrewTools.goUpBodyChain(foot, ankleIKSolver.getNumberOfJoints());
       shinFrame = shin.getParentJoint().getFrameAfterJoint();
-      OneDoFJoint[] ankleJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(shin, foot), OneDoFJoint.class);
+      OneDoFJointBasics[] ankleJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(shin, foot), OneDoFJointBasics.class);
       jointDesiredOutputList = new JointDesiredOutputList(ankleJoints);
       parentRegistry.addChild(registry);
    }
@@ -74,7 +75,7 @@ public class UnloadedAnkleControlModule
       }
 
       SpatialFeedbackControlCommand feedbackControlCommand = currentState.getFeedbackControlCommand();
-      if (feedbackControlCommand.getEndEffector().getNameBasedHashCode() != foot.getNameBasedHashCode())
+      if (feedbackControlCommand.getEndEffector().hashCode() != foot.hashCode())
       {
          throw new RuntimeException("Something got messed up. Expecting a command for " + foot.getName());
       }
@@ -93,7 +94,7 @@ public class UnloadedAnkleControlModule
       desiredOrientation.changeFrame(shinFrame);
       desiredAngularVelocity.changeFrame(shinFrame);
 
-      shinFrame.getTwistOfFrame().getAngularPart(shinAngularVelocity);
+      shinAngularVelocity.setIncludingFrame(shinFrame.getTwistOfFrame().getAngularPart());
       shinAngularVelocity.checkReferenceFrameMatch(desiredAngularVelocity);
       footAngularVelocityInShin.setToZero(shinFrame);
       footAngularVelocityInShin.sub(desiredAngularVelocity, shinAngularVelocity);

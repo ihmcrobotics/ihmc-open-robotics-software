@@ -33,13 +33,13 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 
 public abstract class FootstepPlannerDataSetTest
 {
-   private static final double bambooTimeScaling = 4.0;
+   protected static final double bambooTimeScaling = 4.0;
 
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = true;
    // For enabling helpful prints.
-   private static boolean DEBUG = false;
-   private static boolean VERBOSE = false;
+   protected static boolean DEBUG = true;
+   protected static boolean VERBOSE = true;
 
    private FootstepPlannerUI ui = null;
    private Messager messager = null;
@@ -171,6 +171,7 @@ public abstract class FootstepPlannerDataSetTest
          Assert.fail("Did not find any datasets to test.");
 
       int numberOfFailingTests = 0;
+      int numbberOfTestedSets = 0;
       for (int i = 0; i < allDatasets.size(); i++)
       {
          FootstepPlannerUnitTestDataset dataset = allDatasets.get(i);
@@ -184,6 +185,7 @@ public abstract class FootstepPlannerDataSetTest
             continue;
          }
 
+         numbberOfTestedSets++;
          resetAllAtomics();
          String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
@@ -198,7 +200,7 @@ public abstract class FootstepPlannerDataSetTest
          ThreadTools.sleep(500); // Apparently need to give some time for the prints to appear in the right order.
       }
 
-      String message = "Number of failing datasets: " + numberOfFailingTests + " out of " + allDatasets.size();
+      String message = "Number of failing datasets: " + numberOfFailingTests + " out of " + numbberOfTestedSets;
       if (VISUALIZE)
       {
          LogTools.info(message);
@@ -217,7 +219,7 @@ public abstract class FootstepPlannerDataSetTest
       return findPlanAndAssertGoodResult(dataset);
    }
 
-   private void packPlanningRequest(FootstepPlannerUnitTestDataset dataset, Messager messager)
+   protected void packPlanningRequest(FootstepPlannerUnitTestDataset dataset, Messager messager)
    {
       messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, dataset.getStart());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, dataset.getGoal());
@@ -240,7 +242,9 @@ public abstract class FootstepPlannerDataSetTest
          LogTools.info("Sending out planning request packet.");
    }
 
-   private String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plan, Point3D goal)
+
+
+   protected String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plan, Point3D goal)
    {
       String errorMessage = "";
 

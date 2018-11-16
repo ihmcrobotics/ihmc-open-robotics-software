@@ -18,25 +18,27 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class WholeBodyTrajectoryToolboxHelper
 {
-   public static double kinematicsChainLimitScore(RigidBody start, RigidBody end)
+   public static double kinematicsChainLimitScore(RigidBodyBasics start, RigidBodyBasics end)
    {
-      return jointsLimitScore(ScrewTools.createOneDoFJointPath(start, end));
+      return jointsLimitScore(MultiBodySystemTools.createOneDoFJointPath(start, end));
    }
 
-   public static double jointsLimitScore(Collection<OneDoFJoint> jointsToScore)
+   public static double jointsLimitScore(Collection<OneDoFJointBasics> jointsToScore)
    {
       return jointsToScore.stream().mapToDouble(j -> jointLimitScore(j)).sum();
    }
 
-   public static double jointsLimitScore(OneDoFJoint... jointsToScore)
+   public static double jointsLimitScore(OneDoFJointBasics... jointsToScore)
    {
       return Arrays.stream(jointsToScore).mapToDouble(j -> jointLimitScore(j)).sum();
    }
@@ -55,7 +57,7 @@ public class WholeBodyTrajectoryToolboxHelper
     * See equation 24, 26. Joint limit score is stated on the head of natural exponential.
     * 
     */
-   public static double jointLimitScore(OneDoFJoint jointToScore)
+   public static double jointLimitScore(OneDoFJointReadOnly jointToScore)
    {
       double q = jointToScore.getQ();
       double upperLimit = jointToScore.getJointLimitUpper();

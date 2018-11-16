@@ -39,10 +39,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -188,7 +188,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       snapGhostToFullRobotModel(initialFullRobotModel);
 
       RobotSide robotSide = RobotSide.LEFT;
-      RigidBody endEffector = initialFullRobotModel.getHand(robotSide);
+      RigidBodyBasics endEffector = initialFullRobotModel.getHand(robotSide);
       double trajectoryTime = 5.0;
       int numberOfKeyFrames = 10;
       FramePose3D initialPose = new FramePose3D(endEffector.getBodyFixedFrame());
@@ -252,7 +252,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       snapGhostToFullRobotModel(initialFullRobotModel);
 
       RobotSide robotSide = RobotSide.LEFT;
-      RigidBody endEffector = initialFullRobotModel.getHand(robotSide);
+      RigidBodyBasics endEffector = initialFullRobotModel.getHand(robotSide);
       double trajectoryTime = 5.0;
 
       Pose3D desiredPose = new Pose3D();

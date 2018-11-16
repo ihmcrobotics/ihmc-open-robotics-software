@@ -8,18 +8,19 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.robotics.screwTheory.Twist;
 
 /**
  * @author twan
@@ -29,8 +30,8 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
 {
    private final GeometricJacobian jacobian;
    private final LinearSolver<DenseMatrix64F> solver;
-   private final OneDoFJoint[] oneDoFJoints;
-   private final OneDoFJoint[] oneDoFJointsSeed;
+   private final OneDoFJointBasics[] oneDoFJoints;
+   private final OneDoFJointBasics[] oneDoFJointsSeed;
 
    private final double tolerance;
    private final int maxIterations;
@@ -49,7 +50,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
    private final Vector3D axis = new Vector3D();
    private final Vector3D errorTranslationVector = new Vector3D();
 
-   private final DenseMatrix64F error = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+   private final DenseMatrix64F error = new DenseMatrix64F(SpatialVector.SIZE, 1);
    private final DenseMatrix64F correction;
    private final DenseMatrix64F current;
    private final DenseMatrix64F best;
@@ -64,14 +65,14 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
       if (jacobian.getJacobianFrame() != jacobian.getEndEffectorFrame())
          throw new RuntimeException("jacobian.getJacobianFrame() != jacobian.getEndEffectorFrame()");
       this.jacobian = jacobian;
-      this.solver = LinearSolverFactory.leastSquares(SpatialMotionVector.SIZE, jacobian.getNumberOfColumns()); // new DampedLeastSquaresSolver(jacobian.getNumberOfColumns());
+      this.solver = LinearSolverFactory.leastSquares(SpatialVector.SIZE, jacobian.getNumberOfColumns()); // new DampedLeastSquaresSolver(jacobian.getNumberOfColumns());
 
-      this.oneDoFJoints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      this.oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
       oneDoFJointsSeed = oneDoFJoints.clone();
 
       if (oneDoFJoints.length != jacobian.getJointsInOrder().length)
          throw new RuntimeException("Can currently only handle OneDoFJoints");
-      int nDoF = ScrewTools.computeDegreesOfFreedom(oneDoFJoints);
+      int nDoF = MultiBodySystemTools.computeDegreesOfFreedom(oneDoFJoints);
       correction = new DenseMatrix64F(nDoF, 1);
       current = new DenseMatrix64F(nDoF, 1);
       best = new DenseMatrix64F(nDoF, 1);
@@ -187,11 +188,9 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
    private boolean exponentialCoordinatesOK()
    {
       Twist twist = new Twist(jacobian.getEndEffectorFrame(), jacobian.getBaseFrame(), jacobian.getJacobianFrame(), error);
-      RotationMatrix rotationCheck = new RotationMatrix();
-      rotationCheck.setIdentity();
-      Vector3D positionCheck = new Vector3D();
-      ScrewTestTools.integrate(rotationCheck, positionCheck, 1.0, twist);
-      RigidBodyTransform transformCheck = new RigidBodyTransform(rotationCheck, positionCheck);
+      Pose3D poseCheck = new Pose3D();
+      new MultiBodySystemStateIntegrator(1.0).integrate(twist, poseCheck);
+      RigidBodyTransform transformCheck = new RigidBodyTransform(poseCheck.getOrientation(), poseCheck.getPosition());
 
       return transformCheck.epsilonEquals(errorTransform, 1e-5);
    }
@@ -227,7 +226,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint oneDoFJoint;
+         OneDoFJointBasics oneDoFJoint;
          if (useSeed)
          {
             oneDoFJoint = oneDoFJointsSeed[i];

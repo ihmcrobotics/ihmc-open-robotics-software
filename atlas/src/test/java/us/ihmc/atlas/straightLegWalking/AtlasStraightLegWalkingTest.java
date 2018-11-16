@@ -102,6 +102,12 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
+      public double getSimulateDT()
+      { // TODO See if straight leg walking can work better with the default simulation DT.
+         return getEstimatorDT() / 3.0;
+      }
+
+      @Override
       public WalkingControllerParameters getWalkingControllerParameters()
       {
          return new TestWalkingControllerParameters(getJointMap(), getContactPointParameters());

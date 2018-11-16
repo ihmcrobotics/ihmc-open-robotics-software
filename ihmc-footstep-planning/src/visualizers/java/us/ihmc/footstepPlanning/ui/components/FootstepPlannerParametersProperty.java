@@ -21,6 +21,8 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField minFootholdPercent = new DoubleField(SettableFootstepPlannerParameters::getMinimumFootholdPercent, SettableFootstepPlannerParameters::setMinimumFootholdPercent);
    private DoubleField minSurfaceIncline = new DoubleField(SettableFootstepPlannerParameters::getMinimumSurfaceInclineRadians, SettableFootstepPlannerParameters::setMinimumSurfaceInclineRadians);
    private DoubleField maxStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepWidth, SettableFootstepPlannerParameters::setMaximumStepWidth);
+   private DoubleField minXClearanceFromStance = new DoubleField(SettableFootstepPlannerParameters::getMinXClearanceFromStance, SettableFootstepPlannerParameters::setMinXClearanceFromStance);
+   private DoubleField minYClearanceFromStance = new DoubleField(SettableFootstepPlannerParameters::getMinYClearanceFromStance, SettableFootstepPlannerParameters::setMinYClearanceFromStance);
 
    private BooleanField returnBestEffortPlan = new BooleanField(SettableFootstepPlannerParameters::getReturnBestEffortPlan, SettableFootstepPlannerParameters::setReturnBestEffortPlan);
    private BooleanField useQuadraticDistanceCost = new BooleanField(SettableFootstepPlannerParameters::useQuadraticDistanceCost, SettableFootstepPlannerParameters::setUseQuadraticDistanceCost);
@@ -127,6 +129,17 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    {
       bindFieldBidirectionalToNumberProperty(property, maxStepWidth);
    }
+
+   public void bidirectionalBindMinXClearanceFromStance(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, minXClearanceFromStance);
+   }
+
+   public void bidirectionalBindMinYClearanceFromStance(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, minYClearanceFromStance);
+   }
+
 
    public void bidirectionalBindCheckBodyBoxCollisions(Property<Boolean> property)
    {

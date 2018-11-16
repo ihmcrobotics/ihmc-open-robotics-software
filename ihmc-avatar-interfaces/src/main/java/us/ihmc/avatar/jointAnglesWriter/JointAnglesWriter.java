@@ -7,11 +7,10 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 
@@ -20,15 +19,15 @@ import us.ihmc.simulationconstructionset.Robot;
  */
 public class JointAnglesWriter
 {
-   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>> oneDoFJointPairList = new ArrayList<>();
-   private final ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint> rootJointPair;
+   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> oneDoFJointPairList = new ArrayList<>();
+   private final ImmutablePair<FloatingJoint, FloatingJointBasics> rootJointPair;
 
    public JointAnglesWriter(Robot robot, FullRobotModel fullRobotModel)
    {
       this(robot, fullRobotModel.getRootJoint(), fullRobotModel.getOneDoFJoints());
    }
 
-   public JointAnglesWriter(Robot robot, FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] oneDoFJoints)
+   public JointAnglesWriter(Robot robot, FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints)
    {
       oneDoFJointPairList.clear();
       Map<String, OneDegreeOfFreedomJoint> scsJointMap = new HashMap<>();
@@ -36,14 +35,14 @@ public class JointAnglesWriter
       robot.getAllOneDegreeOfFreedomJoints(scsOnDoFJointList);
       scsOnDoFJointList.forEach(joint -> scsJointMap.put(joint.getName(), joint));
 
-      for (OneDoFJoint joint : oneDoFJoints)
+      for (OneDoFJointBasics joint : oneDoFJoints)
       {
          String name = joint.getName();
          OneDegreeOfFreedomJoint oneDoFJoint = scsJointMap.get(name);
          if (oneDoFJoint == null)
             throw new RuntimeException("Could not find the SCS joint with the name: " + name);
 
-         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, joint);
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>(oneDoFJoint, joint);
          this.oneDoFJointPairList.add(jointPair);
       }
 
@@ -54,11 +53,11 @@ public class JointAnglesWriter
          scsRootJoint = null;
 
       if (scsRootJoint == null && rootJoint != null)
-         throw new RuntimeException("A " + FloatingInverseDynamicsJoint.class.getSimpleName() + " was provided but there is no "
+         throw new RuntimeException("A " + FloatingJointBasics.class.getSimpleName() + " was provided but there is no "
                + FloatingJoint.class.getSimpleName());
       if (rootJoint == null && scsRootJoint != null)
          throw new RuntimeException("A " + FloatingJoint.class.getSimpleName() + " was provided but there is no "
-               + FloatingInverseDynamicsJoint.class.getSimpleName());
+               + FloatingJointBasics.class.getSimpleName());
 
       if (rootJoint != null)
          rootJointPair = new ImmutablePair<>(scsRootJoint, rootJoint);
@@ -68,10 +67,10 @@ public class JointAnglesWriter
 
    public void updateRobotConfigurationBasedOnFullRobotModel()
    {
-      for (ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : oneDoFJointPairList)
+      for (ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair : oneDoFJointPairList)
       {
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
-         OneDoFJoint revoluteJoint = jointPair.getRight();
+         OneDoFJointBasics revoluteJoint = jointPair.getRight();
 
          pinJoint.setQ(revoluteJoint.getQ());
          pinJoint.setQd(revoluteJoint.getQd());
@@ -81,9 +80,10 @@ public class JointAnglesWriter
       if (rootJointPair != null)
       {
          FloatingJoint floatingJoint = rootJointPair.getLeft();
-         FloatingInverseDynamicsJoint sixDoFJoint = rootJointPair.getRight();
+         FloatingJointBasics sixDoFJoint = rootJointPair.getRight();
 
-         RigidBodyTransform transform = sixDoFJoint.getJointTransform3D();
+         RigidBodyTransform transform = new RigidBodyTransform();
+         sixDoFJoint.getJointConfiguration(transform);
          floatingJoint.setRotationAndTranslation(transform);
       }
    }

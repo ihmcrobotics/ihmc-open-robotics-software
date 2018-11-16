@@ -19,11 +19,8 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
-import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
 
 public class QuadrupedControllerAPIDefinition
@@ -38,9 +35,9 @@ public class QuadrupedControllerAPIDefinition
       quadrupedCommands.add(QuadrupedTimedStepListCommand.class);
       quadrupedCommands.add(SoleTrajectoryCommand.class);
       quadrupedCommands.add(QuadrupedRequestedSteppingStateCommand.class);
-      quadrupedCommands.add(QuadrupedRequestedControllerStateCommand.class);
       quadrupedCommands.add(QuadrupedBodyOrientationCommand.class);
       quadrupedCommands.add(QuadrupedBodyHeightCommand.class);
+      quadrupedCommands.add(HighLevelControllerStateCommand.class);
 //      quadrupedCommands.add(StopAllTrajectoryCommand.class); // TODO
 //      quadrupedCommands.add(FootLoadBearingCommand.class); // TODO
 //      quadrupedCommands.add(GoHomeCommand.class); // todo
@@ -55,7 +52,7 @@ public class QuadrupedControllerAPIDefinition
 
       List<Class<? extends Settable<?>>> quadrupedStatusMessages = new ArrayList<>();
       quadrupedStatusMessages.add(QuadrupedSteppingStateChangeMessage.class);
-      quadrupedStatusMessages.add(QuadrupedControllerStateChangeMessage.class);
+      quadrupedStatusMessages.add(HighLevelStateChangeStatusMessage.class);
       quadrupedStatusMessages.add(QuadrupedFootstepStatusMessage.class);
       quadrupedStatusMessages.add(QuadrupedGroundPlaneMessage.class);
       quadrupedStatusMessages.add(WalkingControllerFailureStatusMessage.class);
@@ -118,7 +115,6 @@ public class QuadrupedControllerAPIDefinition
       //      extractors.put(GoHomeMessage.class, m -> ((GoHomeMessage) m).getSequenceId());
       //      extractors.put(FootLoadBearingMessage.class, m -> ((FootLoadBearingMessage) m).getSequenceId());
       extractors.put(QuadrupedRequestedSteppingStateMessage.class, m -> ((QuadrupedRequestedSteppingStateMessage) m).getSequenceId());
-      extractors.put(QuadrupedRequestedControllerStateMessage.class, m -> ((QuadrupedRequestedControllerStateMessage) m).getSequenceId());
       //      extractors.put(AbortWalkingMessage.class, m -> ((AbortWalkingMessage) m).getSequenceId());
       //      extractors.put(PauseWalkingMessage.class, m -> ((PauseWalkingMessage) m).getSequenceId());
       //      extractors.put(ChestHybridJointspaceTaskspaceTrajectoryMessage.class, m -> ((ChestHybridJointspaceTaskspaceTrajectoryMessage) m).getSequenceId());

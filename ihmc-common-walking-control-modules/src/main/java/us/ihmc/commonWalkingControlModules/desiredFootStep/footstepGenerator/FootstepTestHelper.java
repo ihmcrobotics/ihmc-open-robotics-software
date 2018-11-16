@@ -13,9 +13,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class FootstepTestHelper
 {
@@ -67,7 +67,7 @@ public class FootstepTestHelper
 
    public Footstep createFootstep(RobotSide robotSide, FramePose3D footstepPose)
    {
-      RigidBody foot = contactableFeet.get(robotSide).getRigidBody();
+      RigidBodyBasics foot = contactableFeet.get(robotSide).getRigidBody();
       Footstep ret = new Footstep(robotSide, footstepPose);
       ret.setPredictedContactPoints(contactableFeet.get(robotSide).getContactPoints2d());
 
@@ -87,7 +87,7 @@ public class FootstepTestHelper
    public Footstep convertToFootstep(FootstepDataMessage footstepDataMessage)
    {
       RobotSide robotSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
-      RigidBody foot = contactableFeet.get(robotSide).getRigidBody();
+      RigidBodyBasics foot = contactableFeet.get(robotSide).getRigidBody();
       FramePose3D solePose = new FramePose3D(worldFrame, footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
       Footstep footstep = new Footstep(robotSide, solePose);
       if (footstepDataMessage.getPredictedContactPoints2d() != null && !footstepDataMessage.getPredictedContactPoints2d().isEmpty())

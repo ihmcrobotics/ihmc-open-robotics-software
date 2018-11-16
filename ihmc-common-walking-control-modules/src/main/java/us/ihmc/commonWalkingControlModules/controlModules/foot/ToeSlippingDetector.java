@@ -4,11 +4,11 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeSlippingDetectorPar
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -35,10 +35,10 @@ public class ToeSlippingDetector
    private final YoBoolean isToeSlipping;
 
    private final double dt;
-   private final RigidBody foot;
+   private final RigidBodyBasics foot;
    private final FootSwitchInterface footSwitch;
 
-   public ToeSlippingDetector(String namePrefix, double controlDT, RigidBody foot, FootSwitchInterface footSwitch,
+   public ToeSlippingDetector(String namePrefix, double controlDT, RigidBodyBasics foot, FootSwitchInterface footSwitch,
                               YoVariableRegistry parentRegistry)
    {
       dt = controlDT;
@@ -109,10 +109,10 @@ public class ToeSlippingDetector
    public void update()
    {
       footSwitch.computeAndPackFootWrench(footWrench);
-      toeForceFiltered.update(footWrench.getLinearPartMagnitude());
+      toeForceFiltered.update(footWrench.getLinearPart().length());
 
       foot.getBodyFixedFrame().getTwistOfFrame(footTwist);
-      footTwist.getLinearVelocityOfPointFixedInBodyFrame(toeLinearVelocity, toeContactPointPosition);
+      footTwist.getLinearVelocityAt(toeContactPointPosition, toeLinearVelocity);
       toeLinearVelocity.changeFrame(worldFrame);
       toeLinearVelocityFiltered.update(toeLinearVelocity);
 

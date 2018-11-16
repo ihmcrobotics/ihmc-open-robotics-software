@@ -11,9 +11,9 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
@@ -24,10 +24,10 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
    private final Object lock = new Object();
    private final ArrayList<GraphicsUpdatable> graphicsToUpdate = new ArrayList<GraphicsUpdatable>();
    private final AtomicLong simTime = new AtomicLong(-1);
-   protected final FloatingInverseDynamicsJoint rootJoint;
+   protected final FloatingJointBasics rootJoint;
    private boolean frameshaveBeenSetUp = false;
    private final ForceSensorDataHolder forceSensorDataHolder;
-   private final OneDoFJoint[] allJoints;
+   private final OneDoFJointBasics[] allJoints;
    private final int jointNameHash;
 
    public RobotDataReceiver(FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolder)
@@ -35,7 +35,7 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
       this(fullRobotModel, fullRobotModel.getOneDoFJoints(), forceSensorDataHolder);
    }
    
-   protected RobotDataReceiver(FullRobotModel fullRobotModel, OneDoFJoint[] allJoints, ForceSensorDataHolder forceSensorDataHolder)
+   protected RobotDataReceiver(FullRobotModel fullRobotModel, OneDoFJointBasics[] allJoints, ForceSensorDataHolder forceSensorDataHolder)
    {
       this.allJoints = allJoints; 
       jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
@@ -83,9 +83,9 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
          }
 
          Vector3D translation = robotConfigurationData.getRootTranslation();
-         rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
+         rootJoint.getJointPose().setPosition(translation.getX(), translation.getY(), translation.getZ());
          Quaternion orientation = robotConfigurationData.getRootOrientation();
-         rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
+         rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          rootJoint.getPredecessor().updateFramesRecursively();
          
          updateFrames();

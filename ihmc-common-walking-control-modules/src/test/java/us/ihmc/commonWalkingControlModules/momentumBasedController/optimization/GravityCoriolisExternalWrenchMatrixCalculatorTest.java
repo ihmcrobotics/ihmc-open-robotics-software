@@ -19,15 +19,16 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelTestTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -71,37 +72,37 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
 
       gravityZ = 9.81;
 
-      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
-      InverseDynamicsJoint[] allJoints = jointIndexHandler.getIndexedJoints();
+      JointBasics[] allJoints = jointIndexHandler.getIndexedJoints();
 
-      HashMap<InverseDynamicsJoint, DenseMatrix64F> noAccelCoriolisMatrices = new HashMap<>();
-      HashMap<InverseDynamicsJoint, DenseMatrix64F> coriolisMatrices = new HashMap<>();
+      HashMap<JointBasics, DenseMatrix64F> noAccelCoriolisMatrices = new HashMap<>();
+      HashMap<JointBasics, DenseMatrix64F> coriolisMatrices = new HashMap<>();
 
       for (int i = 0; i < iters; i++)
       {
-         ScrewTestTools.setRandomPositions(joints, random);
-         ScrewTestTools.setRandomVelocities(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
 
          update();
 
          for (int j = 0; j < allJoints.length; j++)
          {
-            InverseDynamicsJoint joint = allJoints[j];
+            JointBasics joint = allJoints[j];
 
             DenseMatrix64F noAccelCoriolisMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
             coriolisMatrixCalculator.getJointCoriolisMatrix(joint, noAccelCoriolisMatrix);
             noAccelCoriolisMatrices.put(joint, noAccelCoriolisMatrix);
          }
 
-         ScrewTestTools.setRandomAccelerations(joints, random);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, joints);
 
          coriolisMatrixCalculator.reset();
          update();
 
          for (int j = 0; j < allJoints.length; j++)
          {
-            InverseDynamicsJoint joint = allJoints[j];
+            JointBasics joint = allJoints[j];
 
             DenseMatrix64F coriolisMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
             coriolisMatrixCalculator.getJointCoriolisMatrix(joint, coriolisMatrix);
@@ -110,7 +111,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
 
          for (int j = 0; j < allJoints.length; j++)
          {
-            InverseDynamicsJoint joint = allJoints[j];
+            JointBasics joint = allJoints[j];
             JUnitTools.assertMatrixEquals(noAccelCoriolisMatrices.get(joint), coriolisMatrices.get(joint), tolerance);
          }
       }
@@ -140,13 +141,13 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
       ArrayList<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody footBody = fullHumanoidRobotModel.getFoot(robotSide);
+         RigidBodyBasics footBody = fullHumanoidRobotModel.getFoot(robotSide);
          ReferenceFrame soleFrame = fullHumanoidRobotModel.getSoleFrame(robotSide);
          contactablePlaneBodies.add(ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(footBody, soleFrame));
       }
 
-      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullHumanoidRobotModel, new InverseDynamicsJoint[0]);
-      FloatingInverseDynamicsJoint rootJoint = fullHumanoidRobotModel.getRootJoint();
+      JointBasics[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullHumanoidRobotModel, new JointBasics[0]);
+      FloatingJointBasics rootJoint = fullHumanoidRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame, momentumOptimizationSettings,
                                                 yoGraphicsListRegistry, registry);

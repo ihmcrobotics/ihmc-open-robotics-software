@@ -7,13 +7,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class JointLimitEnforcementMethodCommand implements InverseKinematicsCommand<JointLimitEnforcementMethodCommand>, InverseDynamicsCommand<JointLimitEnforcementMethodCommand>
 {
    private final int initialCapacity = 40;
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
-   private final List<OneDoFJoint> joints = new ArrayList<>(initialCapacity);
+   private final List<OneDoFJointBasics> joints = new ArrayList<>(initialCapacity);
    private final List<JointLimitEnforcement> methods = new ArrayList<>(initialCapacity);
    private final List<JointLimitParameters> parameters = new ArrayList<>(initialCapacity);
 
@@ -25,7 +25,7 @@ public class JointLimitEnforcementMethodCommand implements InverseKinematicsComm
       parameters.clear();
    }
 
-   public void addLimitEnforcementMethod(OneDoFJoint joint, JointLimitEnforcement method, JointLimitParameters limitParameters)
+   public void addLimitEnforcementMethod(OneDoFJointBasics joint, JointLimitEnforcement method, JointLimitParameters limitParameters)
    {
       jointNames.add(joint.getName());
       joints.add(joint);
@@ -48,7 +48,7 @@ public class JointLimitEnforcementMethodCommand implements InverseKinematicsComm
       return joints.size();
    }
 
-   public OneDoFJoint getJoint(int jointIndex)
+   public OneDoFJointBasics getJoint(int jointIndex)
    {
       return joints.get(jointIndex);
    }

@@ -4,11 +4,11 @@ import java.util.LinkedHashMap;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class PosePlaybackExampleSequence
 {
@@ -41,9 +41,9 @@ public class PosePlaybackExampleSequence
 
       for (int i = 0; i < elbowAngles.length; i++)
       {
-         LinkedHashMap<OneDoFJoint, Double> pose = new LinkedHashMap<>();
+         LinkedHashMap<OneDoFJointBasics, Double> pose = new LinkedHashMap<>();
 
-         OneDoFJoint leftElbowPitch = fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_PITCH);
+         OneDoFJointBasics leftElbowPitch = fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_PITCH);
          pose.put(leftElbowPitch, elbowAngles[i]);
 
          PlaybackPose posePlaybackRobotPose = new PlaybackPose(pose, poseDelay, trajectoryTime);
@@ -115,10 +115,10 @@ public class PosePlaybackExampleSequence
 
    public static PlaybackPose createRandomPosePlaybackRobotPose(Random random, FullRobotModel fullRobotModel, double poseDelay, double trajectoryTime)
    {
-      LinkedHashMap<OneDoFJoint, Double> pose = new LinkedHashMap<>();
+      LinkedHashMap<OneDoFJointBasics, Double> pose = new LinkedHashMap<>();
 
-      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
-      for (OneDoFJoint joint : oneDoFJoints)
+      OneDoFJointBasics[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+      for (OneDoFJointBasics joint : oneDoFJoints)
       {
          double jointLimitLower = joint.getJointLimitLower();
          double jointLimitUpper = joint.getJointLimitUpper();

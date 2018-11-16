@@ -2,10 +2,9 @@ package us.ihmc.wholeBodyController;
 
 import java.util.HashMap;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -25,7 +24,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
    private final YoBoolean resetTorqueOffsets = new YoBoolean("resetTorqueOffsets", registry);
 
    private PairList<JointDesiredOutputBasics, YoDouble> torqueOffsetList;
-   private HashMap<OneDoFJoint, YoDouble> torqueOffsetMap;
+   private HashMap<OneDoFJointBasics, YoDouble> torqueOffsetMap;
 
    private final double updateDT;
 
@@ -117,7 +116,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
    }
 
    @Override
-   public void subtractTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffset)
+   public void subtractTorqueOffset(OneDoFJointBasics oneDoFJoint, double torqueOffset)
    {
       YoDouble torqueOffsetVariable = torqueOffsetMap.get(oneDoFJoint);
       torqueOffsetVariable.sub(torqueOffset);

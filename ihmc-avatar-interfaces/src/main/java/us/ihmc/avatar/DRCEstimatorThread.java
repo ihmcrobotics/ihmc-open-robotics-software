@@ -22,12 +22,12 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorData;
@@ -119,7 +119,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.robotVisualizer = robotVisualizer;
       estimatorFullRobotModel = threadDataSynchronizer.getEstimatorFullRobotModel();
-      FloatingInverseDynamicsJoint rootJoint = estimatorFullRobotModel.getRootJoint();
+      FloatingJointBasics rootJoint = estimatorFullRobotModel.getRootJoint();
       rootFrame = rootJoint.getFrameAfterJoint();
 
       forceSensorDataHolderForEstimator = threadDataSynchronizer.getEstimatorForceSensorDataHolder();
@@ -220,7 +220,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          for (ForceSensorDefinition forceSensorDefinition : forceSensorDataHolderForEstimator.getForceSensorDefinitions())
          {
             String sensorName = forceSensorDefinition.getSensorName();
-            RigidBody sensorLink = forceSensorDefinition.getRigidBody();
+            RigidBodyBasics sensorLink = forceSensorDefinition.getRigidBody();
             ForceSensorData forceSensorData = forceSensorDataHolderForEstimator.get(forceSensorDefinition);
             ForceSensorToJointTorqueProjector footSensorToJointTorqueProjector = new ForceSensorToJointTorqueProjector(sensorName, forceSensorData, sensorLink);
             estimatorController.addRobotController(footSensorToJointTorqueProjector);

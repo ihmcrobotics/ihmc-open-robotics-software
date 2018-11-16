@@ -2,30 +2,29 @@ package us.ihmc.quadrupedRobotics.mechanics.inverseKinematics;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
-import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInverseKinematicsCalculator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame rootJointFrame, bodyFrame;
-   protected final OneDoFJoint[] oneDoFJoints;
+   protected final OneDoFJointBasics[] oneDoFJoints;
    private final QuadrantDependentList<QuadrantHolder> quadrantHolders = new QuadrantDependentList<QuadrantHolder>();
    private final double[] jointAnglesToPack = new double[3];
 
@@ -107,7 +106,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
       private final QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator closedFormInverseKinematicsCalculator;
 
       private final FullRobotModel fullRobotModel;
-      private final OneDoFJoint[] jointsToControl;
+      private final OneDoFJointBasics[] jointsToControl;
       private TranslationReferenceFrame desiredFrame;
 
       private final QuadrupedReferenceFrames referenceFrames;
@@ -118,8 +117,8 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
          this.referenceFrames = referenceFrames;
 
          this.fullRobotModel = fullRobotModel;
-         InverseDynamicsJoint[] joints = ScrewTools.createJointPath(fullRobotModel.getRootJoint().getSuccessor(), fullRobotModel.getFoot(robotQuadrant));
-         jointsToControl = ScrewTools.filterJoints(joints, OneDoFJoint.class);
+         JointBasics[] joints = MultiBodySystemTools.createJointPath(fullRobotModel.getRootJoint().getSuccessor(), fullRobotModel.getFoot(robotQuadrant));
+         jointsToControl = MultiBodySystemTools.filterJoints(joints, OneDoFJointBasics.class);
 
          closedFormInverseKinematicsCalculator = QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator.createFromLegAttachmentFrame(robotQuadrant,
                                                                                                                                         modelFactory,

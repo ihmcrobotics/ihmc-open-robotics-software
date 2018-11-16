@@ -19,10 +19,11 @@ import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.Sphe
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class ReachabilityMapFileLoader
@@ -32,22 +33,22 @@ public class ReachabilityMapFileLoader
    private HSSFWorkbook workBookToLoad;
    private final Voxel3DGrid loadedGrid;
 
-   public ReachabilityMapFileLoader(String robotName, RigidBody rootBody)
+   public ReachabilityMapFileLoader(String robotName, RigidBodyBasics rootBody)
    {
       this(robotName, rootBody, null);
    }
 
-   public ReachabilityMapFileLoader(String robotName, RigidBody rootBody, HumanoidReferenceFrames referenceFrames)
+   public ReachabilityMapFileLoader(String robotName, RigidBodyBasics rootBody, HumanoidReferenceFrames referenceFrames)
    {
       this(selectionFileDialog(), robotName, rootBody, referenceFrames);
    }
 
-   public ReachabilityMapFileLoader(File fileToLoad, String robotName, RigidBody rootBody)
+   public ReachabilityMapFileLoader(File fileToLoad, String robotName, RigidBodyBasics rootBody)
    {
       this(selectionFileDialog(), robotName, rootBody, null);
    }
 
-   public ReachabilityMapFileLoader(File fileToLoad, String robotName, RigidBody rootBody, HumanoidReferenceFrames referenceFrames)
+   public ReachabilityMapFileLoader(File fileToLoad, String robotName, RigidBodyBasics rootBody, HumanoidReferenceFrames referenceFrames)
    {
       try
       {
@@ -92,7 +93,7 @@ public class ReachabilityMapFileLoader
       }
    }
 
-   private void checkRobotMatchesData(String robotName, RigidBody rootBody, HSSFSheet descriptionSheet)
+   private void checkRobotMatchesData(String robotName, RigidBodyBasics rootBody, HSSFSheet descriptionSheet)
    {
       String robotNameInWorkbook = descriptionSheet.getRow(0).getCell(1).getStringCellValue();
 
@@ -113,8 +114,8 @@ public class ReachabilityMapFileLoader
          currentCell = currentRow.getCell(currentIndexValue++);
       }
 
-      InverseDynamicsJoint[] joints = ScrewTools.findJointsWithNames(ScrewTools.computeSubtreeJoints(rootBody), jointNames.toArray(new String[0]));
-      OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
+      JointBasics[] joints = ScrewTools.findJointsWithNames(MultiBodySystemTools.collectSubtreeJoints(rootBody), jointNames.toArray(new String[0]));
+      OneDoFJointBasics[] oneDoFJoints = MultiBodySystemTools.filterJoints(joints, OneDoFJointBasics.class);
 
       if (oneDoFJoints.length != jointNames.size())
       {
@@ -122,7 +123,7 @@ public class ReachabilityMapFileLoader
       }
    }
 
-   private ReferenceFrame createGridReferenceFrame(RigidBody rootBody, HumanoidReferenceFrames referenceFrames, HSSFSheet descriptionSheet)
+   private ReferenceFrame createGridReferenceFrame(RigidBodyBasics rootBody, HumanoidReferenceFrames referenceFrames, HSSFSheet descriptionSheet)
    {
       String gridFrameName = descriptionSheet.getRow(6).getCell(2).getStringCellValue();
       String parentFrameName = descriptionSheet.getRow(7).getCell(2).getStringCellValue();
@@ -192,21 +193,19 @@ public class ReachabilityMapFileLoader
       return loadedGrid;
    }
 
-   private ReferenceFrame searchParentFrameInCommonRobotFrames(String parentFrameName, HumanoidReferenceFrames referenceFrames, RigidBody rootBody)
+   private ReferenceFrame searchParentFrameInCommonRobotFrames(String parentFrameName, HumanoidReferenceFrames referenceFrames, RigidBodyBasics rootBody)
    {
       if (parentFrameName.equals(worldFrame.getName()))
          return worldFrame;
-      
-      InverseDynamicsJoint[] allInverseDynamicsJoints = ScrewTools.computeSubtreeJoints(rootBody);
 
       if (parentFrameName.equals(rootBody.getBodyFixedFrame().getName()))
          return rootBody.getBodyFixedFrame();
 
-      for (InverseDynamicsJoint joint : allInverseDynamicsJoints)
+      for (JointBasics joint : rootBody.childrenSubtreeIterable())
       {
          ReferenceFrame frameAfterJoint = joint.getFrameAfterJoint();
          ReferenceFrame frameBeforeJoint = joint.getFrameBeforeJoint();
-         RigidBody successor = joint.getSuccessor();
+         RigidBodyBasics successor = joint.getSuccessor();
 
          if (parentFrameName.equals(frameAfterJoint.getName()))
             return frameAfterJoint;

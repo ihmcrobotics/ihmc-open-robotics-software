@@ -6,7 +6,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -15,7 +15,7 @@ public class SphereRobot
 {
    private static final double radius = 0.1;
 
-   public static RobotTools.SCSRobotFromInverseDynamicsRobotModel createSphereRobot(String name, Vector3D initialPosition, RigidBody elevator,
+   public static RobotTools.SCSRobotFromInverseDynamicsRobotModel createSphereRobot(String name, Vector3D initialPosition, RigidBodyBasics elevator,
          YoGraphicsListRegistry yoGraphicsListRegistry, double gravity)
    {
       RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot = new RobotTools.SCSRobotFromInverseDynamicsRobotModel(name, elevator.getChildrenJoints().get(0));

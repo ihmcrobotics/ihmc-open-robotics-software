@@ -7,11 +7,11 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public interface PlaneContactState
 {
-   public abstract RigidBody getRigidBody();
+   public abstract RigidBodyBasics getRigidBody();
 
    public abstract ReferenceFrame getFrameAfterParentJoint();
 

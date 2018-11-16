@@ -20,8 +20,18 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.testing.JUnitTools;
 
 public class MomentumCalculatorTest
@@ -40,11 +50,11 @@ public class MomentumCalculatorTest
    {
       Random random = new Random(1766L);
 
-      RigidBody elevator = new RigidBody("elevator", world);
+      RigidBodyBasics elevator = new RigidBody("elevator", world);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random);
       jointAxis.normalize();
-      PrismaticJoint joint = ScrewTools.addPrismaticJoint("joint", elevator, new Vector3D(), jointAxis);
-      RigidBody body = ScrewTools.addRigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
+      PrismaticJoint joint = new PrismaticJoint("joint", elevator, new Vector3D(), jointAxis);
+      RigidBodyBasics body = new RigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
 
       joint.setQ(random.nextDouble());
       joint.setQd(random.nextDouble());
@@ -52,8 +62,8 @@ public class MomentumCalculatorTest
       Momentum momentum = computeMomentum(elevator, world);
 
       momentum.changeFrame(world);
-      FrameVector3D linearMomentum = new FrameVector3D(momentum.getExpressedInFrame(), momentum.getLinearPartCopy());
-      FrameVector3D angularMomentum = new FrameVector3D(momentum.getExpressedInFrame(), momentum.getAngularPartCopy());
+      FrameVector3D linearMomentum = new FrameVector3D(momentum.getReferenceFrame(), new Vector3D(momentum.getLinearPart()));
+      FrameVector3D angularMomentum = new FrameVector3D(momentum.getReferenceFrame(), new Vector3D(momentum.getAngularPart()));
 
       FrameVector3D linearMomentumCheck = new FrameVector3D(joint.getFrameBeforeJoint(), jointAxis);
       linearMomentumCheck.scale(body.getInertia().getMass() * joint.getQd());
@@ -71,13 +81,13 @@ public class MomentumCalculatorTest
    {
       Random random = new Random(1766L);
 
-      RigidBody elevator = new RigidBody("elevator", world);
+      RigidBodyBasics elevator = new RigidBody("elevator", world);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random);
       jointAxis.normalize();
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setIdentity();
-      RevoluteJoint joint = ScrewTools.addRevoluteJoint("joint", elevator, transformToParent, jointAxis);
-      RigidBody body = ScrewTools.addRigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
+      RevoluteJoint joint = new RevoluteJoint("joint", elevator, transformToParent, jointAxis);
+      RigidBodyBasics body = new RigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
 
       joint.setQ(random.nextDouble());
       joint.setQd(random.nextDouble());
@@ -85,15 +95,15 @@ public class MomentumCalculatorTest
       Momentum momentum = computeMomentum(elevator, world);
 
       momentum.changeFrame(world);
-      FrameVector3D linearMomentum = new FrameVector3D(momentum.getExpressedInFrame(), momentum.getLinearPartCopy());
-      FrameVector3D angularMomentum = new FrameVector3D(momentum.getExpressedInFrame(), momentum.getAngularPartCopy());
+      FrameVector3D linearMomentum = new FrameVector3D(momentum.getReferenceFrame(), new Vector3D(momentum.getLinearPart()));
+      FrameVector3D angularMomentum = new FrameVector3D(momentum.getReferenceFrame(), new Vector3D(momentum.getAngularPart()));
 
       FrameVector3D linearMomentumCheck = new FrameVector3D(world);
-      Matrix3D inertia = body.getInertia().getMassMomentOfInertiaPartCopy();
+      Matrix3D inertia = new Matrix3D(body.getInertia().getMomentOfInertia());
       Vector3D angularMomentumCheckVector = new Vector3D(jointAxis);
       angularMomentumCheckVector.scale(joint.getQd());
       inertia.transform(angularMomentumCheckVector);
-      FrameVector3D angularMomentumCheck = new FrameVector3D(body.getInertia().getExpressedInFrame(), angularMomentumCheckVector);
+      FrameVector3D angularMomentumCheck = new FrameVector3D(body.getInertia().getReferenceFrame(), angularMomentumCheckVector);
       angularMomentumCheck.changeFrame(world);
 
       double epsilon = 1e-9;
@@ -109,7 +119,7 @@ public class MomentumCalculatorTest
       Random random = new Random(17679L);
 
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>();
-      RigidBody elevator = new RigidBody("elevator", world);
+      RigidBodyBasics elevator = new RigidBody("elevator", world);
       int nJoints = 10;
       Vector3D[] jointAxes = new Vector3D[nJoints];
       for (int i = 0; i < nJoints; i++)
@@ -119,8 +129,8 @@ public class MomentumCalculatorTest
          jointAxes[i] = jointAxis;
       }
 
-      ScrewTestTools.createRandomChainRobot("randomChain", joints, elevator, jointAxes, random);
-      InverseDynamicsJoint[] jointsArray = new RevoluteJoint[joints.size()];
+      joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "randomChain", elevator, jointAxes));
+      JointBasics[] jointsArray = new RevoluteJoint[joints.size()];
       joints.toArray(jointsArray);
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("comFrame", world, elevator);
 
@@ -132,24 +142,24 @@ public class MomentumCalculatorTest
 
       Momentum momentum = computeMomentum(elevator, centerOfMassFrame);
       DenseMatrix64F momentumMatrix = new DenseMatrix64F(Momentum.SIZE, 1);
-      momentum.getMatrix(momentumMatrix);
+      momentum.get(momentumMatrix);
 
-      CentroidalMomentumMatrix centroidalMomentumMatrix = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
-      centroidalMomentumMatrix.compute();
-      DenseMatrix64F centroidalMomentumMatrixMatrix = centroidalMomentumMatrix.getMatrix();
-      DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
-      ScrewTools.getJointVelocitiesMatrix(jointsArray, jointVelocitiesMatrix);
+      CentroidalMomentumCalculator centroidalMomentumMatrix = new CentroidalMomentumCalculator(elevator, centerOfMassFrame);
+      centroidalMomentumMatrix.reset();
+      DenseMatrix64F centroidalMomentumMatrixMatrix = centroidalMomentumMatrix.getCentroidalMomentumMatrix();
+      DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
+      MultiBodySystemTools.extractJointsState(jointsArray, JointStateType.VELOCITY, jointVelocitiesMatrix);
       DenseMatrix64F momentumFromCentroidalMomentumMatrix = new DenseMatrix64F(Momentum.SIZE, 1);
       CommonOps.mult(centroidalMomentumMatrixMatrix, jointVelocitiesMatrix, momentumFromCentroidalMomentumMatrix);
 
       double epsilon = 1e-9;
-      assertEquals(momentum.getExpressedInFrame(), centerOfMassFrame);
+      assertEquals(momentum.getReferenceFrame(), centerOfMassFrame);
       JUnitTools.assertMatrixEquals(momentumFromCentroidalMomentumMatrix, momentumMatrix, epsilon);
       double norm = NormOps.normP2(momentumMatrix);
       assertTrue(norm > epsilon);
    }
 
-   private Momentum computeMomentum(RigidBody elevator, ReferenceFrame frame)
+   private Momentum computeMomentum(RigidBodyBasics elevator, ReferenceFrame frame)
    {
       elevator.updateFramesRecursively();
       MomentumCalculator momentumCalculator = new MomentumCalculator(elevator);

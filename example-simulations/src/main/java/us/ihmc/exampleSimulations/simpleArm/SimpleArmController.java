@@ -3,11 +3,11 @@ package us.ihmc.exampleSimulations.simpleArm;
 
 import java.util.Random;
 
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Random controller to test state estimation.
@@ -28,8 +28,11 @@ public class SimpleArmController extends SimpleRobotController
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
-   public SimpleArmController(SimpleRobotInputOutputMap robot, RigidBody endEffectorBody, YoDouble time)
+   private RigidBodyBasics endEffectorBody;
+
+   public SimpleArmController(SimpleRobotInputOutputMap robot, RigidBodyBasics endEffectorBody, YoDouble time)
    {
+      this.endEffectorBody = endEffectorBody;
       this.time = time;
       this.robot = robot;
 
@@ -37,7 +40,8 @@ public class SimpleArmController extends SimpleRobotController
       decay.set(0.05);
       frequency.set(0.5);
 
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(endEffectorBody, SimpleArmRobot.gravity);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(endEffectorBody);
+      inverseDynamicsCalculator.setGravitionalAcceleration(-SimpleArmRobot.gravity);
    }
 
    @Override
@@ -52,6 +56,7 @@ public class SimpleArmController extends SimpleRobotController
       double randomTorque = magnitude.getDoubleValue() * Math.sin(angle) + offset.getDoubleValue();
 
       inverseDynamicsCalculator.compute();
+      endEffectorBody.childrenSubtreeIterable().forEach(inverseDynamicsCalculator::writeComputedJointWrench);
 
       robot.addYawTorque(randomTorque);
       robot.addPitch1Torque(randomTorque);

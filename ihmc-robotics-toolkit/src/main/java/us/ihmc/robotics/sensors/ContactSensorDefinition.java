@@ -1,14 +1,14 @@
 package us.ihmc.robotics.sensors;
 
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class ContactSensorDefinition
 {
-   private final RigidBody contactingRigidBody;
+   private final RigidBodyBasics contactingRigidBody;
    private final String contactSensorName;
    private final ContactSensorType type;
    
-   public ContactSensorDefinition(String contactSensorName, RigidBody rigidBody, ContactSensorType type)
+   public ContactSensorDefinition(String contactSensorName, RigidBodyBasics rigidBody, ContactSensorType type)
    {
       this.contactSensorName = contactSensorName;
       this.contactingRigidBody = rigidBody;
@@ -20,7 +20,7 @@ public class ContactSensorDefinition
       return contactSensorName;
    }
    
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return contactingRigidBody;
    }

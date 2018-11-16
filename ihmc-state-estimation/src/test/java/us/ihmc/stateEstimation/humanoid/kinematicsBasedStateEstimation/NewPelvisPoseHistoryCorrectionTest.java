@@ -23,19 +23,20 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.FAST})
 public class NewPelvisPoseHistoryCorrectionTest
@@ -102,7 +103,7 @@ public class NewPelvisPoseHistoryCorrectionTest
             transformToParent.set(pelvisTransformInWorldFrame);
          }
       };
-      RigidBody rigidBody = new RigidBody("pelvis", pelvisReferenceFrame);
+      RigidBodyBasics rigidBody = new RigidBody("pelvis", pelvisReferenceFrame);
       sixDofPelvisJoint = new SixDoFJoint("pelvis", rigidBody);
    }
 
@@ -276,7 +277,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          pelvisTransformInWorldFrame.set(pelvisTimeStampedTransform3D.getTransform3D());
          pelvisReferenceFrame.update();
 
-         sixDofPelvisJoint.setPositionAndRotation(pelvisTimeStampedTransform3D.getTransform3D());
+         sixDofPelvisJoint.setJointConfiguration(pelvisTimeStampedTransform3D.getTransform3D());
          sixDofPelvisJoint.updateFramesRecursively();
          pelvisBeforeCorrection_Translation.set(pelvisTimeStampedTransform3D.getTransform3D());
          pelvisBeforeCorrection_Translation.setRotationToZero();
@@ -284,7 +285,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          pelvisBeforeCorrection_Rotation.setTranslationToZero();
 
          pelvisCorrector.doControl(timeStamp);
-         pelvisAfterCorrection.set(sixDofPelvisJoint.getJointTransform3D());
+         sixDofPelvisJoint.getJointConfiguration(pelvisAfterCorrection);
 
          correctedPelvisverify.set(pelvisAfterCorrection);
          correctedPelvisToVerifyTheTest.set(correctedPelvisverify);
@@ -344,12 +345,12 @@ public class NewPelvisPoseHistoryCorrectionTest
          pelvisTransformInWorldFrame.set(pelvisTimeStampedTransform3D.getTransform3D());
          pelvisReferenceFrame.update();
 
-         sixDofPelvisJoint.setPositionAndRotation(pelvisTimeStampedTransform3D.getTransform3D());
+         sixDofPelvisJoint.setJointConfiguration(pelvisTimeStampedTransform3D.getTransform3D());
          sixDofPelvisJoint.updateFramesRecursively();
          pelvisBeforeCorrection.set(pelvisTimeStampedTransform3D.getTransform3D());
 
          pelvisCorrector.doControl(timeStamp);
-         pelvisAfterCorrection.set(sixDofPelvisJoint.getJointTransform3D());
+         sixDofPelvisJoint.getJointConfiguration(pelvisAfterCorrection);
          if(checkPacketHasBeenSentNextLoopIteration)
          {
             assertTrue(angleErrorTooBigDetectedAndPacketSent);

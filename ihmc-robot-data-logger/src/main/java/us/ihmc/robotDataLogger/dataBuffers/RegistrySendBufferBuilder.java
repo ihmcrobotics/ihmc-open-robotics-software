@@ -4,20 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointHolderFactory;
 import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class RegistrySendBufferBuilder implements us.ihmc.concurrent.Builder<RegistrySendBuffer>
 {
    private final YoVariableRegistry registry;
-   private final RigidBody rootBody;
+   private final RigidBodyBasics rootBody;
 
    private final List<YoVariable<?>> variables = new ArrayList<>();
    private final List<JointHolder> jointHolders = new ArrayList<>();
@@ -28,7 +27,7 @@ public class RegistrySendBufferBuilder implements us.ihmc.concurrent.Builder<Reg
 
    private int registryID = -1;
 
-   public RegistrySendBufferBuilder(YoVariableRegistry registry, RigidBody rootBody, YoGraphicsListRegistry graphics)
+   public RegistrySendBufferBuilder(YoVariableRegistry registry, RigidBodyBasics rootBody, YoGraphicsListRegistry graphics)
    {
       this.registry = registry;
       this.rootBody = rootBody;
@@ -53,8 +52,7 @@ public class RegistrySendBufferBuilder implements us.ihmc.concurrent.Builder<Reg
 
       if (rootBody != null)
       {
-         InverseDynamicsJoint[] joints = ScrewTools.computeSubtreeJoints(rootBody);
-         for (InverseDynamicsJoint joint : joints)
+         for (JointBasics joint : rootBody.childrenSubtreeIterable())
          {
             JointHolder jointHolder = JointHolderFactory.getJointHolder(joint);
             jointHolders.add(jointHolder);

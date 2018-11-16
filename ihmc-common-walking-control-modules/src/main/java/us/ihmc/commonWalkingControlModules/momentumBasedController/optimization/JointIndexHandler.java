@@ -7,41 +7,43 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class JointIndexHandler
 {
    private final TIntArrayList indicesIntoCompactBlock = new TIntArrayList();
-   private final LinkedHashMap<InverseDynamicsJoint, int[]> columnsForJoints = new LinkedHashMap<InverseDynamicsJoint, int[]>();
+   private final LinkedHashMap<JointReadOnly, int[]> columnsForJoints = new LinkedHashMap<>();
 
    private final int numberOfDoFs;
-   private final InverseDynamicsJoint[] indexedJoints;
-   private final OneDoFJoint[] indexedOneDoFJoints;
+   private final JointBasics[] indexedJoints;
+   private final OneDoFJointBasics[] indexedOneDoFJoints;
 
-   public JointIndexHandler(InverseDynamicsJoint[] jointsToIndex)
+   public JointIndexHandler(JointBasics[] jointsToIndex)
    {
       indexedJoints = jointsToIndex;
-      indexedOneDoFJoints = ScrewTools.filterJoints(indexedJoints, OneDoFJoint.class);
+      indexedOneDoFJoints = MultiBodySystemTools.filterJoints(indexedJoints, OneDoFJointBasics.class);
 
-      numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToIndex);
+      numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToIndex);
       populateColumnIndices();
    }
 
-   public JointIndexHandler(List<? extends InverseDynamicsJoint> jointsToIndex)
+   public JointIndexHandler(List<? extends JointBasics> jointsToIndex)
    {
-      indexedJoints = new InverseDynamicsJoint[jointsToIndex.size()];
+      indexedJoints = new JointBasics[jointsToIndex.size()];
       jointsToIndex.toArray(indexedJoints);
-      indexedOneDoFJoints = ScrewTools.filterJoints(indexedJoints, OneDoFJoint.class);
+      indexedOneDoFJoints = MultiBodySystemTools.filterJoints(indexedJoints, OneDoFJointBasics.class);
 
-      numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToIndex);
+      numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToIndex);
       populateColumnIndices();
    }
 
    private void populateColumnIndices()
    {
-      for (InverseDynamicsJoint joint : indexedJoints)
+      for (JointBasics joint : indexedJoints)
       {
          TIntArrayList listToPackIndices = new TIntArrayList();
          ScrewTools.computeIndexForJoint(indexedJoints, listToPackIndices, joint);
@@ -51,11 +53,11 @@ public class JointIndexHandler
       }
    }
 
-   public boolean compactBlockToFullBlock(InverseDynamicsJoint[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
+   public boolean compactBlockToFullBlock(JointReadOnly[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
    {
       fullMatrix.zero();
 
-      for (InverseDynamicsJoint joint : joints)
+      for (JointReadOnly joint : joints)
       {
          indicesIntoCompactBlock.reset();
          ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
@@ -75,13 +77,13 @@ public class JointIndexHandler
       return true;
    }
 
-   public boolean compactBlockToFullBlock(List<? extends InverseDynamicsJoint> joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
+   public boolean compactBlockToFullBlock(List<? extends JointReadOnly> joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
    {
       fullMatrix.zero();
 
       for (int index = 0; index < joints.size(); index++)
       {
-         InverseDynamicsJoint joint = joints.get(index);
+         JointReadOnly joint = joints.get(index);
          indicesIntoCompactBlock.reset();
          ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
          int[] indicesIntoFullBlock = columnsForJoints.get(joint);
@@ -100,14 +102,14 @@ public class JointIndexHandler
       return true;
    }
 
-   public void compactBlockToFullBlockIgnoreUnindexedJoints(List<? extends InverseDynamicsJoint> joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
+   public void compactBlockToFullBlockIgnoreUnindexedJoints(List<? extends JointReadOnly> joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
    {
       fullMatrix.reshape(compactMatrix.getNumRows(), fullMatrix.getNumCols());
       fullMatrix.zero();
 
       for (int index = 0; index < joints.size(); index++)
       {
-         InverseDynamicsJoint joint = joints.get(index);
+         JointReadOnly joint = joints.get(index);
          indicesIntoCompactBlock.reset();
          ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
          int[] indicesIntoFullBlock = columnsForJoints.get(joint);
@@ -124,14 +126,14 @@ public class JointIndexHandler
       }
    }
 
-   public void compactBlockToFullBlockIgnoreUnindexedJoints(InverseDynamicsJoint[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
+   public void compactBlockToFullBlockIgnoreUnindexedJoints(JointBasics[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
    {
       fullMatrix.reshape(compactMatrix.getNumRows(), fullMatrix.getNumCols());
       fullMatrix.zero();
 
       for (int index = 0; index < joints.length; index++)
       {
-         InverseDynamicsJoint joint = joints[index];
+         JointBasics joint = joints[index];
          indicesIntoCompactBlock.reset();
          ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
          int[] indicesIntoFullBlock = columnsForJoints.get(joint);
@@ -148,22 +150,22 @@ public class JointIndexHandler
       }
    }
 
-   public InverseDynamicsJoint[] getIndexedJoints()
+   public JointBasics[] getIndexedJoints()
    {
       return indexedJoints;
    }
 
-   public OneDoFJoint[] getIndexedOneDoFJoints()
+   public OneDoFJointBasics[] getIndexedOneDoFJoints()
    {
       return indexedOneDoFJoints;
    }
 
-   public boolean isJointIndexed(InverseDynamicsJoint joint)
+   public boolean isJointIndexed(JointBasics joint)
    {
       return columnsForJoints.containsKey(joint);
    }
 
-   public boolean areJointsIndexed(InverseDynamicsJoint[] joints)
+   public boolean areJointsIndexed(JointBasics[] joints)
    {
       for (int i = 0; i < joints.length; i++)
       {
@@ -173,7 +175,7 @@ public class JointIndexHandler
       return true;
    }
 
-   public int getOneDoFJointIndex(OneDoFJoint joint)
+   public int getOneDoFJointIndex(OneDoFJointBasics joint)
    {
       int[] jointIndices = columnsForJoints.get(joint);
       if (jointIndices == null)
@@ -182,7 +184,7 @@ public class JointIndexHandler
          return jointIndices[0];
    }
 
-   public int[] getJointIndices(InverseDynamicsJoint joint)
+   public int[] getJointIndices(JointReadOnly joint)
    {
       return columnsForJoints.get(joint);
    }

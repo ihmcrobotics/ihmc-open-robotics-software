@@ -14,11 +14,11 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ContactSensor;
@@ -160,8 +160,8 @@ public class KinematicsBasedStateEstimatorFactory
       double gravityMagnitude = Math.abs(gravity);
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityMagnitude;
 
-      Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
-      Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
+      Map<RigidBodyBasics, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBodyBasics, FootSwitchInterface>();
+      Map<RigidBodyBasics, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBodyBasics, ContactablePlaneBody>();
 
       DRCRobotSensorInformation sensorInformation = sensorInformationField.get();
       ForceSensorDataHolder estimatorForceSensorDataHolderToUpdate = estimatorForceSensorDataHolderToUpdateField.get();
@@ -179,7 +179,7 @@ public class KinematicsBasedStateEstimatorFactory
          ForceSensorDataReadOnly footForceSensorForEstimator = estimatorForceSensorDataHolderToUpdate.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
-         RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
+         RigidBodyBasics foot = bipedFeet.get(robotSide).getRigidBody();
          bipedFeetMap.put(foot, bipedFeet.get(robotSide));
 
          switch (stateEstimatorParameters.getFootSwitchType())
@@ -240,9 +240,9 @@ public class KinematicsBasedStateEstimatorFactory
 
    private FullInverseDynamicsStructure createFullInverseDynamicsStructure(FullHumanoidRobotModel fullRobotModel)
    {
-      RigidBody elevator = fullRobotModel.getElevator();
-      FloatingInverseDynamicsJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
-      RigidBody estimationLink = fullRobotModel.getPelvis();
+      RigidBodyBasics elevator = fullRobotModel.getElevator();
+      FloatingJointBasics rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
+      RigidBodyBasics estimationLink = fullRobotModel.getPelvis();
 
       return new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
    }

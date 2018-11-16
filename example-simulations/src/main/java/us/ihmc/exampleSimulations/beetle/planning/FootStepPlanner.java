@@ -17,14 +17,14 @@ import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
@@ -49,7 +49,7 @@ public class FootStepPlanner
    private final YoFrameVector3D footScalarFromNominalToBody;
    private final YoFrameVector3D feetOffsetFromBody;
 
-   private final RigidBody pelvis;
+   private final RigidBodyBasics pelvis;
    private final Twist twistToPack = new Twist();
    private FrameVector3D angularVelocity = new FrameVector3D();
    private Vector3D perpindicularToCenterOfMassVelocity = new Vector3D();
@@ -73,7 +73,7 @@ public class FootStepPlanner
       swingTimeScalar.set(1.1);
 
       bodyZUpFrame = hexapodReferenceFrames.getBodyZUpFrame();
-      centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
+      centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), fullRobotModel.getElevator().getBodyFixedFrame());
       centerOfMassFrameWithOrientation = referenceFrames.getCenterOfMassFrameWithBodyZUpOrientation();
 
       bodyFrameProjectedInFuture = new PoseReferenceFrame("bodyProjectedInFuture", bodyZUpFrame);
@@ -223,10 +223,10 @@ public class FootStepPlanner
    {
       pelvis.getBodyFixedFrame().getTwistOfFrame(twistToPack);
       twistToPack.changeFrame(ReferenceFrame.getWorldFrame());
-      twistToPack.getAngularPart(angularVelocity);
+      angularVelocity.setIncludingFrame(twistToPack.getAngularPart());
 
-      centerOfMassJacobian.compute();
-      centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
+      centerOfMassJacobian.reset();
+      centerOfMassVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
       centerOfMassVelocity.changeFrame(ReferenceFrame.getWorldFrame());
 
       getDesiredFootPosition(robotSextant, centerOfMassVelocity, angularVelocity, swingTime, framePointToPack);

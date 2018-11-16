@@ -18,12 +18,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -97,7 +97,7 @@ public class SupportState extends AbstractFootControlState
    private final YoDouble timeBeforeExploring;
 
    // For straight legs with privileged configuration
-   private final RigidBody pelvis;
+   private final RigidBodyBasics pelvis;
 
    // Toe contact point loading time
    private final boolean rampUpAllowableToeLoadAfterContact;
@@ -298,7 +298,7 @@ public class SupportState extends AbstractFootControlState
       // assemble acceleration command
       ReferenceFrame bodyFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
       footAcceleration.setToZero(bodyFixedFrame, rootBody.getBodyFixedFrame(), controlFrame);
-      footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
+      footAcceleration.setBodyFrame(bodyFixedFrame);
       spatialAccelerationCommand.setSpatialAcceleration(controlFrame, footAcceleration);
       spatialAccelerationCommand.setWeights(angularWeight, linearWeight);
 

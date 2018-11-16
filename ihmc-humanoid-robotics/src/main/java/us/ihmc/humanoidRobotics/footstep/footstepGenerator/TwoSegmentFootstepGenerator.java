@@ -8,21 +8,21 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class TwoSegmentFootstepGenerator implements FootstepGenerator
 {
    private AbstractSimpleParametersFootstepGenerator footstepGenerator;
    private AbstractSimpleParametersFootstepGenerator footstepGenerator2;
-   private final SideDependentList<RigidBody> feet;
+   private final SideDependentList<RigidBodyBasics> feet;
    private final SideDependentList<ReferenceFrame> soleFrames;
    private SideDependentList<Footstep> midStanceFeet = new SideDependentList<Footstep>();
    private boolean secondSegmentManuallySpecifiesStart = false;
 
-   public TwoSegmentFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePose2D midPose, FramePose2D finalPose, PathTypeStepParameters pathType,
+   public TwoSegmentFootstepGenerator(SideDependentList<RigidBodyBasics> feet, SideDependentList<ReferenceFrame> soleFrames, FramePose2D midPose, FramePose2D finalPose, PathTypeStepParameters pathType,
                                       PathTypeStepParameters pathType2)
    {
       this.feet = feet;
@@ -33,7 +33,7 @@ public class TwoSegmentFootstepGenerator implements FootstepGenerator
 
    // TurnStraightTurn used despite the ring being set to auto-align before this to ensure that the orientation is reached even for
    // small displacement paths that could otherwise end early before fully aligning with the direction of the path in TurningThenStraightFootstepGenerator.
-   public TwoSegmentFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePose2D midPose, FramePoint2D finalPoint, PathTypeStepParameters pathType,
+   public TwoSegmentFootstepGenerator(SideDependentList<RigidBodyBasics> feet, SideDependentList<ReferenceFrame> soleFrames, FramePose2D midPose, FramePoint2D finalPoint, PathTypeStepParameters pathType,
                                       PathTypeStepParameters pathType2)
    {
       this.feet = feet;
@@ -42,7 +42,7 @@ public class TwoSegmentFootstepGenerator implements FootstepGenerator
       footstepGenerator2 = new TurningThenStraightFootstepGenerator(feet, soleFrames, finalPoint, pathType2);
    }
 
-   public TwoSegmentFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePose2D midPose, FramePoint2D finalPoint, PathTypeStepParameters pathType,
+   public TwoSegmentFootstepGenerator(SideDependentList<RigidBodyBasics> feet, SideDependentList<ReferenceFrame> soleFrames, FramePose2D midPose, FramePoint2D finalPoint, PathTypeStepParameters pathType,
                                       PathTypeStepParameters pathType2, RobotSide stanceStart)
    {
       this.feet = feet;
@@ -51,7 +51,7 @@ public class TwoSegmentFootstepGenerator implements FootstepGenerator
       footstepGenerator2 = new TurningThenStraightFootstepGenerator(feet, soleFrames, finalPoint, pathType2);
    }
 
-   public TwoSegmentFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePose2D midPose, FramePoint2D finalPoint, PathTypeStepParameters pathType,
+   public TwoSegmentFootstepGenerator(SideDependentList<RigidBodyBasics> feet, SideDependentList<ReferenceFrame> soleFrames, FramePose2D midPose, FramePoint2D finalPoint, PathTypeStepParameters pathType,
                                       PathTypeStepParameters pathType2, RobotSide stanceStart, RobotSide midStanceStart)
    {
       this.feet = feet;

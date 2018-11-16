@@ -17,12 +17,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.Ros2Node;
@@ -118,7 +118,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
          }
       }
 
-      OneDoFJoint[] joints = fullRobotModel.getControllableOneDoFJoints();
+      OneDoFJointBasics[] joints = fullRobotModel.getControllableOneDoFJoints();
       for (int i = 0; i < joints.length; i++)
       {
          nameList.add(joints[i].getName());

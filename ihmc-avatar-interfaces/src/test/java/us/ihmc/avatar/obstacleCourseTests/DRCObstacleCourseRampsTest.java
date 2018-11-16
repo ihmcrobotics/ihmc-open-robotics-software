@@ -4,18 +4,20 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListCorruptor;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -23,7 +25,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterface
 {
@@ -100,7 +101,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       double stepDuration = walkingControllerParameters.getDefaultTransferTime() + walkingControllerParameters.getDefaultSwingTime();
       double totalDuration = footstepDataList.getFootstepDataList().size() * stepDuration;
       totalDuration += walkingControllerParameters.getDefaultFinalTransferTime() - walkingControllerParameters.getDefaultTransferTime() + walkingControllerParameters.getDefaultInitialTransferTime();
-      totalDuration += 0.5;
+      totalDuration += 3.0;
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(totalDuration);
 
@@ -368,19 +369,23 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
    private FootstepDataListMessage createFootstepsForWalkingDownRampMediumSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
+      Quaternion quaternion = new Quaternion(Math.PI, 0.205, 0.0);
+      double[] quatArray = new double[4];
+      quaternion.get(quatArray);
+
       double[][][] footstepLocationsAndOrientations = new double[][][]
-            {{{6.954747596485718, 0.11524925726571199, 0.7119679417361913}, {-0.004756259680920303, -1.677100279548098E-5, 0.9999824722629655, 0.003526028846796884}},
-            {{6.570706490915851, -0.09613984168168907, 0.7111802069405166}, {-0.027270597709182255, -6.794653657152437E-4, 0.9996217167026284, 0.003503758537748503}},
-            {{6.174537167241603, 0.10663518963448074, 0.6342597541404246}, {-0.14073889731487735, -4.131199692770531E-4, 0.9900409537060528, 0.003361859499252677}},
-            {{5.804220529757834, -0.09056467012091034, 0.5718294010093754}, {-0.08100673557592118, 5.176508612160084E-4, 0.9967071562119236, 0.0035334947090369267}},
-            {{5.419026368647578, 0.11198079913421716, 0.4697549077307898}, {-0.12855198732280726, -3.5547712115239664E-4, 0.9916969061305156, 0.0033921324467669225}},
-            {{5.04723426554032, -0.08504675124055729, 0.39067108046147253}, {-0.07791096128552895, 0.0015702359675104768, 0.996952524232402, 0.0036167523018496104}},
-            {{4.671487880420936, 0.11995026935199998, 0.3352839308619279}, {-0.06841841814321405, 0.015447288875779376, 0.9975266893276052, 0.004561294144847291}},
-            {{4.288674875687302, -0.07995257295142243, 0.2710370124710936}, {-0.08426182615512512, 7.579942593184682E-5, 0.9964375163946988, 0.0034949719047255292}},
-            {{3.911931009786938, 0.1258873396387373, 0.15974401557183804}, {-0.08078431565658183, 0.01892061868156026, 0.9965393339623263, 0.00502597239624625}},
-            {{3.5409933792461827, -0.07371958963330688, 0.08965431506314861}, {-0.0255348909645515, 0.005579759512198356, 0.999651639718129, 0.0036653561996753147}},
-            {{3.170499491279822, 0.12801175184184635, 0.0825363135740276}, {0.015249734772657272, 1.605057623917769E-4, 0.9998774982301046, 0.0035225502652209764}},
-            {{3.1682135358725176, -0.07185742849219595, 0.0836276175220112}, {0.010034721188456488, 8.911915700751356E-4, 0.9999430696742437, 0.0035167540013307935}},
+            {{{6.955, 0.12, 0.722}, {0.0, 0.0, 1.0, 0.0}},
+            {{6.571, -0.08, 0.722}, {0.0, 0.0, 1.0, 0.0}},
+            {{6.175,  0.12, 0.644}, quatArray},
+            {{5.804, -0.08, 0.581}, quatArray},
+            {{5.419,  0.12, 0.490}, quatArray},
+            {{5.047, -0.08, 0.410}, quatArray},
+            {{4.671,  0.12, 0.345}, quatArray},
+            {{4.289, -0.08, 0.261}, quatArray},
+            {{3.912,  0.12, 0.170}, quatArray},
+            {{3.541, -0.08, 0.100}, {0.0, 0.0, 1.0, 0.0}},
+            {{3.170,  0.12, 0.090}, {0.0, 0.0, 1.0, 0.0}},
+            {{3.168, -0.08, 0.090}, {0.0, 0.0, 1.0, 0.0}},
             };
       RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
 

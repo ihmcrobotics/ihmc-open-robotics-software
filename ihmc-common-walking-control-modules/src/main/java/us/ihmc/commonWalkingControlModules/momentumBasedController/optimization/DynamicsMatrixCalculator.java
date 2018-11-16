@@ -7,11 +7,22 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.screwTheory.FloatingBaseRigidBodyDynamicsCalculator;
+import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 
 public class DynamicsMatrixCalculator
 {
-   private final CompositeRigidBodyMassMatrixHandler massMatrixHandler;
+   private final CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
    private final GravityCoriolisExternalWrenchMatrixCalculator coriolisMatrixCalculator;
    private final ContactWrenchMatrixCalculator contactWrenchMatrixCalculator;
 
@@ -33,7 +44,6 @@ public class DynamicsMatrixCalculator
 
    private final DenseMatrix64F torqueMinimizationObjective;
 
-   private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final int bodyDoFs;
 
    public DynamicsMatrixCalculator(WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
@@ -41,16 +51,15 @@ public class DynamicsMatrixCalculator
       this(new ArrayList<>(), toolbox, wrenchMatrixCalculator);
    }
 
-   public DynamicsMatrixCalculator(ArrayList<InverseDynamicsJoint> jointsToIgnore, WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
+   public DynamicsMatrixCalculator(ArrayList<JointBasics> jointsToIgnore, WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
    {
-      FloatingInverseDynamicsJoint rootJoint = toolbox.getRootJoint();
-      RigidBody rootBody = toolbox.getRootBody();
+      FloatingJointBasics rootJoint = toolbox.getRootJoint();
+      RigidBodyBasics rootBody = toolbox.getRootBody();
       int rhoSize = wrenchMatrixCalculator.getRhoSize();
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
-      jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
 
-      massMatrixHandler = new CompositeRigidBodyMassMatrixHandler(rootBody, jointsToIgnore);
+      massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody, jointsToIgnore));
       coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(rootBody, jointsToIgnore, toolbox.getGravityZ());
       contactWrenchMatrixCalculator = new ContactWrenchMatrixCalculator(rootBody, toolbox.getContactablePlaneBodies(), wrenchMatrixCalculator, jointIndexHandler);
 
@@ -85,7 +94,7 @@ public class DynamicsMatrixCalculator
 
    public void compute()
    {
-      massMatrixHandler.compute();
+      massMatrixCalculator.reset();
       coriolisMatrixCalculator.compute();
 
       computeMatrices();
@@ -100,14 +109,14 @@ public class DynamicsMatrixCalculator
     * @param rigidBody body to which the wrench is applied.
     * @param externalWrench external wrench acting on body.
     */
-   public void setExternalWrench(RigidBody rigidBody, Wrench externalWrench)
+   public void setExternalWrench(RigidBodyBasics rigidBody, WrenchReadOnly externalWrench)
    {
       coriolisMatrixCalculator.setExternalWrench(rigidBody, externalWrench);
    }
 
    private void computeMatrices()
    {
-      DenseMatrix64F massMatrix = massMatrixHandler.getMassMatrix(jointsToOptimizeFor);
+      DenseMatrix64F massMatrix = massMatrixCalculator.getMassMatrix();
       helper.extractFloatingBaseMassMatrix(massMatrix, floatingBaseMassMatrix);
       helper.extractBodyMassMatrix(massMatrix, bodyMassMatrix);
 
@@ -190,7 +199,7 @@ public class DynamicsMatrixCalculator
    private final DenseMatrix64F localFloatingCoriolisMatrix = new DenseMatrix64F(large, large);
    private final DenseMatrix64F localFloatingContactJacobian = new DenseMatrix64F(large, large);
 
-   private final DenseMatrix64F tmpMatrix = new DenseMatrix64F(SpatialForceVector.SIZE);
+   private final DenseMatrix64F tmpMatrix = new DenseMatrix64F(SpatialForce.SIZE);
 
    private final FloatingBaseRigidBodyDynamicsCalculator rbdCalculator = new FloatingBaseRigidBodyDynamicsCalculator();
 
@@ -353,18 +362,18 @@ public class DynamicsMatrixCalculator
             localBodyMassMatrix, localBodyCoriolisMatrix, localBodyContactJacobian, qddot, tau, rho);
    }
 
-   public void extractTorqueMatrix(InverseDynamicsJoint[] joints, DenseMatrix64F torqueMatrixToPack)
+   public void extractTorqueMatrix(JointBasics[] joints, DenseMatrix64F torqueMatrixToPack)
    {
-      OneDoFJoint[] filteredJoints = ScrewTools.extractRevoluteJoints(joints);
-      int bodyDoFs = ScrewTools.computeDegreesOfFreedom(filteredJoints);
+      OneDoFJointBasics[] filteredJoints = MultiBodySystemTools.filterJoints(joints, RevoluteJoint.class);
+      int bodyDoFs = MultiBodySystemTools.computeDegreesOfFreedom(filteredJoints);
 
       int startIndex = 0;
       for (int i = 0; i < bodyDoFs; i++)
       {
-         InverseDynamicsJoint joint = filteredJoints[i];
+         JointBasics joint = filteredJoints[i];
          int jointDoF = joint.getDegreesOfFreedom();
          tmpMatrix.reshape(jointDoF, 1);
-         joint.getTauMatrix(tmpMatrix);
+         joint.getJointTau(0, tmpMatrix);
 
          for (int dof = 0; dof < jointDoF; dof++)
             torqueMatrixToPack.set(startIndex + dof, 0, tmpMatrix.get(dof, 0));
