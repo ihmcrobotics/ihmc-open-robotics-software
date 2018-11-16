@@ -6,6 +6,7 @@ import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
@@ -15,7 +16,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class BombSquadObstacleCourse implements CommonAvatarEnvironmentInterface
+public class ValkyrieEODObstacleCourseEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject3D;
 
@@ -49,8 +50,9 @@ public class BombSquadObstacleCourse implements CommonAvatarEnvironmentInterface
    private static final double dummyDoorThickness = 0.05;
    private static final double dummyDoorKnobLength = 0.15;
    private static final double dummyDoorKnobDiameter = 0.04;
+   private RigidBodyTransform knob = new RigidBodyTransform();
 
-   public BombSquadObstacleCourse()
+   public ValkyrieEODObstacleCourseEnvironment()
    {
       combinedTerrainObject3D = new CombinedTerrainObject3D("MarchDemoObstacleCourse");
 
@@ -156,7 +158,6 @@ public class BombSquadObstacleCourse implements CommonAvatarEnvironmentInterface
       combinedTerrainObject.addBox(doorLocation.getX(), doorLocation.getY() - dummyDoorThickness, doorLocation.getX() + dummyDoorWidth, doorLocation.getY(),
                                    dummyDoorHeightOffset, dummyDoorHeightOffset + dummyDoorHeight, YoAppearance.DarkGray());
 
-      RigidBodyTransform knob = new RigidBodyTransform();
       knob.appendTranslation(doorLocation.getX(), doorLocation.getY(), dummyDoorHeightOffset + dummyDoorHeight / 2);
       knob.appendTranslation(dummyDoorKnobLength / 2 + dummyDoorKnobDiameter, -dummyDoorThickness - dummyDoorKnobDiameter, 0);
 
@@ -191,6 +192,16 @@ public class BombSquadObstacleCourse implements CommonAvatarEnvironmentInterface
       combinedTerrainObject.addCylinder(rearWheel, vesselCartLength - offset, vesselCartWheelRadius, YoAppearance.DarkGray());
 
       return combinedTerrainObject;
+   }
+
+   public Point2D getDoorLocation()
+   {
+      return doorLocation;
+   }
+
+   public Vector3DReadOnly getDoorKnobGraspingPoint()
+   {
+      return knob.getTranslationVector();
    }
 
    @Override
