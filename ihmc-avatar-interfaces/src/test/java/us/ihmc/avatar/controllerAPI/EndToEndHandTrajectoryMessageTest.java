@@ -16,6 +16,7 @@ import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
+import controller_msgs.msg.dds.WrenchTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -1076,7 +1077,9 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       EuclideanTrajectoryPointCalculator calculator = new EuclideanTrajectoryPointCalculator();
       calculator.appendTrajectoryPoint(1.0, new Point3D(0.25, 0.0, 1.05));
-      calculator.appendTrajectoryPoint(2.0, new Point3D(0.6, 0.0, 1.05));
+      calculator.appendTrajectoryPoint(1.5, new Point3D(0.4, 0.0, 0.95));
+      calculator.appendTrajectoryPoint(1.75, new Point3D(0.5, 0.0, 0.85));
+      calculator.appendTrajectoryPoint(2.0, new Point3D(0.6, 0.0, 0.95));
       calculator.appendTrajectoryPoint(2.5, new Point3D(0.6, 0.0, 1.25));
       calculator.appendTrajectoryPoint(3.5, new Point3D(0.25, 0.0, 1.05));
       calculator.computeTrajectoryPointVelocities(true);
@@ -1084,7 +1087,6 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
       for (FrameEuclideanTrajectoryPoint trajectoryPoint : trajectoryPoints)
       {
-         
          double time = trajectoryPoint.getTime();
          Point3DReadOnly position = trajectoryPoint.getPositionCopy();
          Vector3DReadOnly linearVelocity = trajectoryPoint.getLinearVelocityCopy();
@@ -1092,7 +1094,17 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       }
       se3TrajectoryMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(new SelectionMatrix3D(null, false, false, false)));
 
+      WrenchTrajectoryMessage wrenchTrajectoryMessage = new WrenchTrajectoryMessage();
+      wrenchTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame().hashCode());
+      wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1.8, null, null));
+      wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1.9, null, new Vector3D(-300.0, 0.0, -150.0)));
+      wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(2.6, null, new Vector3D(-300.0, 0.0, -150.0)));
+      wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(2.7, null, null));
+      wrenchTrajectoryMessage.setUseCustomControlFrame(true);
+      wrenchTrajectoryMessage.getControlFramePose().setPosition(-0.15, -0.11, 0.0);
+
       HandTrajectoryMessage rightHandTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.RIGHT, se3TrajectoryMessage);
+      rightHandTrajectoryMessage.getWrenchTrajectory().set(wrenchTrajectoryMessage);
       drcSimulationTestHelper.publishToController(rightHandTrajectoryMessage);
 
       
@@ -1262,7 +1274,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
+//      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
