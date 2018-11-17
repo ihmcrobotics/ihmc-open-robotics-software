@@ -239,7 +239,7 @@ public class LinearSpatialVectorTrajectoryGenerator
                return multipleFramesHelper.getCurrentReferenceFrame();
             }
          };
-         linearPart = new YoFrameVector3D(namePrefix + "Angular", null, registry)
+         linearPart = new YoFrameVector3D(namePrefix + "Linear", null, registry)
          {
             @Override
             public ReferenceFrame getReferenceFrame()
@@ -375,6 +375,29 @@ public class LinearSpatialVectorTrajectoryGenerator
       default void set(SpatialWaypointBasics other)
       {
          set(other.getTime(), other);
+      }
+
+      default void setIncludingFrame(ReferenceFrame expressedInFrame, double time, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
+      {
+         setTime(time);
+         SpatialVectorBasics.super.setIncludingFrame(expressedInFrame, angularPart, linearPart);
+      }
+
+      default void setIncludingFrame(double time, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
+      {
+         setTime(time);
+         SpatialVectorBasics.super.setIncludingFrame(angularPart, linearPart);
+      }
+
+      default void setIncludingFrame(double time, SpatialVectorReadOnly spatialVector)
+      {
+         setTime(time);
+         SpatialVectorBasics.super.setIncludingFrame(spatialVector);
+      }
+
+      default void setIncludingFrame(SpatialWaypointBasics other)
+      {
+         setIncludingFrame(other.getTime(), other);
       }
    }
 }
