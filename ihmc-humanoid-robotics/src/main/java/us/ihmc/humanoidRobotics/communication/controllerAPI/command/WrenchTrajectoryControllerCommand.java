@@ -23,7 +23,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTrajectoryControllerCommand, WrenchTrajectoryMessage>
       implements FrameBasedCommand<WrenchTrajectoryMessage>
 {
-   private ReferenceFrame dataFrame;
+   private ReferenceFrame dataFrame = ReferenceFrame.getWorldFrame();
    private final TDoubleArrayList trajectoryPointTimes = new TDoubleArrayList();
    private final RecyclingArrayList<SpatialVector> trajectoryPointList = new RecyclingArrayList<>(16, SpatialVector.class);
    private ReferenceFrame trajectoryFrame;
@@ -67,8 +67,9 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
       clearQueuableCommandVariables();
    }
 
-   public void clear(ReferenceFrame referenceFrame)
+   public void clear(ReferenceFrame dataFrame)
    {
+      this.dataFrame = dataFrame;
       trajectoryPointTimes.reset();
       trajectoryPointList.clear();
       clearQueuableCommandVariables();
@@ -78,9 +79,13 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
    public void set(WrenchTrajectoryControllerCommand other)
    {
       dataFrame = other.getDataFrame();
+      trajectoryPointTimes.reset();
       trajectoryPointList.clear();
       for (int i = 0; i < other.getNumberOfTrajectoryPoints(); i++)
+      {
+         trajectoryPointTimes.add(other.getTrajectoryPointTime(i));
          trajectoryPointList.add().setIncludingFrame(other.trajectoryPointList.get(i));
+      }
       setPropertiesOnly(other);
       trajectoryFrame = other.getTrajectoryFrame();
       useCustomControlFrame = other.useCustomControlFrame();

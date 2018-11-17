@@ -101,7 +101,7 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
       {
          spatialVector.setIncludingFrame(trajectoryGenerator.getCurrentValue());
          spatialVector.changeFrame(activeControlFrame);
-         wrenchToPack.setIncludingFrame(activeControlFrame, spatialVector);
+         wrenchToPack.setIncludingFrame(bodyFrame, spatialVector);
          wrenchToPack.changeFrame(bodyFrame);
       }
    }
@@ -126,9 +126,12 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
       if (trajectoryGenerator.isDone() || trajectoryGenerator.getLastWaypointTime() <= timeInTrajectory)
          done = fillAndReinitializeTrajectories();
 
-      trajectoryGenerator.compute(timeInTrajectory);
-      getDesiredWrench(desiredWrench);
-      externalWrenchCommand.set(bodyToControl, desiredWrench);
+      if (!done)
+      {
+         trajectoryGenerator.compute(timeInTrajectory);
+         getDesiredWrench(desiredWrench);
+         externalWrenchCommand.set(bodyToControl, desiredWrench);
+      }
 
       trajectoryDone.set(done);
       numberOfPointsInQueue.set(getNumberOfPointsInQueue());
@@ -243,7 +246,7 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
          return false;
       }
 
-      pointQueue.addLast().setIncludingFrame(trajectoryPoint);
+      pointQueue.addLast().setIncludingFrame(time, trajectoryPoint);
       return true;
    }
 
@@ -300,6 +303,9 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return externalWrenchCommand;
+      if (trajectoryDone.getValue())
+         return null;
+      else
+         return externalWrenchCommand;
    }
 }
