@@ -44,7 +44,7 @@ public class HeavyBallOnTableEnvironment implements CommonAvatarEnvironmentInter
       terrain.addBox(xStart + edgeThick, yEnd - edgeThick, xEnd - edgeThick, yEnd, 0.8 + edgeHeight, YoAppearance.Brown());
 
       double ballRadius = 0.25;
-      double ballMass = 10.0;
+      double ballMass = 50.0;
       ContactableSphereRobot ballRobot = new ContactableSphereRobot("DatBall", ballRadius, ballMass, YoAppearance.BlackMetalMaterial());
       Point3D[] contactPointsOffset = SpiralBasedAlgorithm.generatePointsOnSphere(ballRadius, 500);
       for (int i = 0; i < contactPointsOffset.length; i++)

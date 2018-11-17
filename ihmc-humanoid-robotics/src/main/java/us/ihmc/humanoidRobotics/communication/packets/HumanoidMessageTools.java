@@ -102,6 +102,7 @@ import controller_msgs.msg.dds.WallPosePacket;
 import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -1666,6 +1667,17 @@ public class HumanoidMessageTools
       message.getOrientation().set(orientation);
       message.getLinearVelocity().set(linearVelocity);
       message.getAngularVelocity().set(angularVelocity);
+      return message;
+   }
+
+   public static WrenchTrajectoryPointMessage createWrenchTrajectoryPointMessage(double time, Vector3DReadOnly torque, Vector3DReadOnly force)
+   {
+      WrenchTrajectoryPointMessage message = new WrenchTrajectoryPointMessage();
+      message.setTime(time);
+      if (torque != null)
+         message.getWrench().getTorque().set(torque);
+      if (force != null)
+         message.getWrench().getForce().set(force);
       return message;
    }
 

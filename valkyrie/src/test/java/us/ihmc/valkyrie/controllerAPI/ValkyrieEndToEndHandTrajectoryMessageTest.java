@@ -107,6 +107,12 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
             contactPointParameters.createAdditionalHandContactPoints();
             return contactPointParameters;
          }
+
+         @Override
+         public double getSimulateDT()
+         {
+            return super.getSimulateDT() / 3.0;
+         }
       };
    }
 
