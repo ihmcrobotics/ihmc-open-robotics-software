@@ -48,7 +48,7 @@ testDependencies {
 
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.24.0"
-   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.6"
+   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.7"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: "source"
 }
