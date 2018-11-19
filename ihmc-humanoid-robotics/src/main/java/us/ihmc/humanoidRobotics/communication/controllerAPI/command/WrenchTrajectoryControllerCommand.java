@@ -51,7 +51,7 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
       for (int i = 0; i < randomNumberOfPoints; i++)
       {
          trajectoryPointTimes.add(EuclidCoreRandomTools.nextDouble(random, previousTime, previousTime + 1.0));
-         trajectoryPointList.add(MecanoRandomTools.nextSpatialVector(random, dataFrame));
+         trajectoryPointList.add().set(MecanoRandomTools.nextSpatialVector(random, dataFrame));
       }
 
       trajectoryFrame = EuclidFrameRandomTools.nextReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame());
