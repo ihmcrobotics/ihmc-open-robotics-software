@@ -130,6 +130,7 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
       {
          trajectoryGenerator.compute(timeInTrajectory);
          getDesiredWrench(desiredWrench);
+         desiredWrench.negate(); // Changing from desired wrench to external wrench to compensate for.
          externalWrenchCommand.set(bodyToControl, desiredWrench);
       }
 

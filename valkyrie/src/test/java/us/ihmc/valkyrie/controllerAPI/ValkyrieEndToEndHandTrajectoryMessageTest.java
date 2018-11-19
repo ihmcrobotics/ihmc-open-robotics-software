@@ -144,9 +144,9 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       wrenchTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame().hashCode());
       wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1.8, null, null));
       wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add()
-                             .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1.9, null, new Vector3D(-150.0, 0.0, -75.0)));
+                             .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1.9, null, new Vector3D(150.0, 0.0, 75.0)));
       wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add()
-                             .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(2.2, null, new Vector3D(-150.0, 0.0, -75.0)));
+                             .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(2.2, null, new Vector3D(150.0, 0.0, 75.0)));
       wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(2.7, null, null));
       wrenchTrajectoryMessage.setUseCustomControlFrame(true);
       wrenchTrajectoryMessage.getControlFramePose().setPosition(-0.15, -0.11, 0.0);
