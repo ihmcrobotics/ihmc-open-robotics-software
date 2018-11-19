@@ -124,7 +124,9 @@ if (ihmc.isBuildRoot())
       def directory = "valkyrie"
 
       doLast {
-         def dest = new File(System.properties["user.home"], directory)
+         def home = new File(System.properties["user.home"])
+         def dest = new File(home, directory)
+         def configurationDir = new File(home, ".ihmc/Configurations")
          def lib = new File(dest, "lib")
          lib.deleteDir();
          lib.mkdirs();
@@ -144,6 +146,13 @@ if (ihmc.isBuildRoot())
             from jar.archivePath
             into dest
             rename { fileName -> "ValkyrieController.jar" }
+         }
+
+         delete configurationDir
+         mkdir configurationDir
+         copy {
+             from file("saved-configurations/defaultREAModuleConfiguration.txt")
+             into configurationDir
          }
       }
    }
