@@ -29,7 +29,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
             */
    public controller_msgs.msg.dds.SE3TrajectoryMessage se3_trajectory_;
    /**
-            * The trajectory information for the force/moment to compensate for.
+            * The trajectory information for the force/moment to be achieved by the end-effector.
             */
    public controller_msgs.msg.dds.WrenchTrajectoryMessage wrench_trajectory_;
 
@@ -96,7 +96,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
 
 
    /**
-            * The trajectory information for the force/moment to compensate for.
+            * The trajectory information for the force/moment to be achieved by the end-effector.
             */
    public controller_msgs.msg.dds.WrenchTrajectoryMessage getWrenchTrajectory()
    {

@@ -38,7 +38,7 @@ module controller_msgs
         boolean use_custom_control_frame;
         /**
          * Pose of custom control frame expressed in the end-effector frame.
-         * This is the frame attached to the rigid body that the taskspace trajectory is defined for.
+         * This is the frame attached to the rigid body that the wrench trajectory is defined for.
          */
         geometry_msgs::msg::dds::Pose control_frame_pose;
         /**
