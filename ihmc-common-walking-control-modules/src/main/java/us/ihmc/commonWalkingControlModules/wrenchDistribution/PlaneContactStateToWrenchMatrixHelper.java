@@ -313,8 +313,14 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       if (useOldCoPObjectiveFormulation)
       {
-         desiredCoP.get(copRegularizationObjective);
-         previousCoP.get(copRateRegularizationObjective);
+         if (desiredCoP.containsNaN())
+            copRegularizationObjective.zero();
+         else
+            desiredCoP.get(copRegularizationObjective);
+         if (previousCoP.containsNaN())
+            copRateRegularizationObjective.zero();
+         else
+            previousCoP.get(copRateRegularizationObjective);
       }
       else
       {
