@@ -1067,7 +1067,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModelWithHandContacts(), new HeavyBallOnTableEnvironment());
+      HeavyBallOnTableEnvironment testEnvironment = new HeavyBallOnTableEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModelWithHandContacts(), testEnvironment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
@@ -1097,8 +1098,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       WrenchTrajectoryMessage wrenchTrajectoryMessage = new WrenchTrajectoryMessage();
       wrenchTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame().hashCode());
       wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1.8, null, null));
-      wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1.9, null, new Vector3D(-300.0, 0.0, -150.0)));
-      wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(2.6, null, new Vector3D(-300.0, 0.0, -150.0)));
+      wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1.9, null, new Vector3D(-150.0, 0.0, -75.0)));
+      wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(2.2, null, new Vector3D(-150.0, 0.0, -75.0)));
       wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(2.7, null, null));
       wrenchTrajectoryMessage.setUseCustomControlFrame(true);
       wrenchTrajectoryMessage.getControlFramePose().setPosition(-0.15, -0.11, 0.0);
@@ -1108,8 +1109,11 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       drcSimulationTestHelper.publishToController(rightHandTrajectoryMessage);
 
       
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.5);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
       assertTrue(success);
+
+      double ballHeight = testEnvironment.getBallRobot().getFloatingJoint().getQz().getValue();
+      assertEquals(testEnvironment.getBallRadius(), ballHeight, 0.01);
    }
 
    public abstract DRCRobotModel getRobotModelWithHandContacts();
@@ -1274,7 +1278,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    @After
    public void destroySimulationAndRecycleMemory()
    {
-//      if (simulationTestingParameters.getKeepSCSUp())
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
