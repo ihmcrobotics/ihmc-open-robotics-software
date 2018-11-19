@@ -51,7 +51,7 @@ public abstract class WalkingState implements State
 
    public boolean isStateSafeToConsumeManipulationCommands()
    {
-      return true;
+      return false;
    }
 
    public WalkingStateEnum getStateEnum()
