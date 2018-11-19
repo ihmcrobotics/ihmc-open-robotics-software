@@ -179,7 +179,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 30000)
-   public void testRaiseUpHand() throws Exception, UnreasonableAccelerationException
+   public void testLinearInterpolatedTrajectory() throws Exception, UnreasonableAccelerationException
    {
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       snapGhostToFullRobotModel(initialFullRobotModel);
