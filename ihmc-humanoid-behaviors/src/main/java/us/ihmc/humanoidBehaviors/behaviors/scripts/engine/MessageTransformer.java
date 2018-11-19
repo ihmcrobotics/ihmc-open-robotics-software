@@ -9,6 +9,8 @@ import controller_msgs.msg.dds.EuclideanTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryMessage;
+import controller_msgs.msg.dds.WrenchTrajectoryMessage;
+import geometry_msgs.msg.dds.Wrench;
 import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -151,6 +153,25 @@ public final class MessageTransformer
          public void transform(EuclideanTrajectoryMessage object, RigidBodyTransform rigidBodyTransformToApply)
          {
             MessageTransformer.transform(object.getTaskspaceTrajectoryPoints(), rigidBodyTransformToApply);
+         }
+      });
+
+      customTransformers.put(WrenchTrajectoryMessage.class, new CustomTransformer<WrenchTrajectoryMessage>()
+      {
+         @Override
+         public void transform(WrenchTrajectoryMessage object, RigidBodyTransform rigidBodyTransformToApply)
+         {
+            MessageTransformer.transform(object.getWrenchTrajectoryPoints(), rigidBodyTransformToApply);
+         }
+      });
+
+      customTransformers.put(Wrench.class, new CustomTransformer<Wrench>()
+      {
+         @Override
+         public void transform(Wrench object, RigidBodyTransform rigidBodyTransformToApply)
+         {
+            object.getForce().applyTransform(rigidBodyTransformToApply);
+            object.getTorque().applyTransform(rigidBodyTransformToApply);
          }
       });
 
