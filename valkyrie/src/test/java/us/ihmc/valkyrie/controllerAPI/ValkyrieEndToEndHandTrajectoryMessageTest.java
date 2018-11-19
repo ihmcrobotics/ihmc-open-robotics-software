@@ -111,7 +111,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
          @Override
          public double getSimulateDT()
          {
-            return super.getSimulateDT() / 3.0;
+            return super.getSimulateDT();
          }
       };
    }

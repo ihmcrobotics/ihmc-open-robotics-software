@@ -173,7 +173,7 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
 
    public boolean handleWrenchTrajectoryCommand(WrenchTrajectoryControllerCommand command)
    {
-      if (!handleCommandInternal(command))
+      if (!handleCommandInternal(command) || command.getNumberOfTrajectoryPoints() == 0)
       {
          clear();
          return false;

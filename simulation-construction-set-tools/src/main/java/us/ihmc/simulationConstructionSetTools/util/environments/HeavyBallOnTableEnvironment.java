@@ -21,6 +21,10 @@ public class HeavyBallOnTableEnvironment implements CommonAvatarEnvironmentInter
    private final ArrayList<Robot> environmentRobots = new ArrayList<>();
    private final ContactController contactController = new ContactController("HeavyBall");
 
+   private final double ballRadius = 0.25;
+   private final double ballMass = 25.0;
+   private final ContactableSphereRobot ballRobot;
+
    public HeavyBallOnTableEnvironment()
    {
       terrain = DefaultCommonAvatarEnvironment.setUpGround("Ground");
@@ -43,9 +47,7 @@ public class HeavyBallOnTableEnvironment implements CommonAvatarEnvironmentInter
       terrain.addBox(xStart + edgeThick, yStart, xEnd - edgeThick, yStart + edgeThick, 0.8 + edgeHeight, YoAppearance.Brown());
       terrain.addBox(xStart + edgeThick, yEnd - edgeThick, xEnd - edgeThick, yEnd, 0.8 + edgeHeight, YoAppearance.Brown());
 
-      double ballRadius = 0.25;
-      double ballMass = 50.0;
-      ContactableSphereRobot ballRobot = new ContactableSphereRobot("DatBall", ballRadius, ballMass, YoAppearance.BlackMetalMaterial());
+      ballRobot = new ContactableSphereRobot("DatBall", ballRadius, ballMass, YoAppearance.BlackMetalMaterial());
       Point3D[] contactPointsOffset = SpiralBasedAlgorithm.generatePointsOnSphere(ballRadius, 500);
       for (int i = 0; i < contactPointsOffset.length; i++)
       {
@@ -64,6 +66,16 @@ public class HeavyBallOnTableEnvironment implements CommonAvatarEnvironmentInter
       contactController.setContactParameters(1500.0, 50.0, 0.9, 0.8);
 
       environmentRobots.add(ballRobot);
+   }
+
+   public ContactableSphereRobot getBallRobot()
+   {
+      return ballRobot;
+   }
+
+   public double getBallRadius()
+   {
+      return ballRadius;
    }
 
    public void addEnvironmentRobot(Robot robot)
