@@ -31,7 +31,7 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
    public boolean use_custom_control_frame_;
    /**
             * Pose of custom control frame expressed in the end-effector frame.
-            * This is the frame attached to the rigid body that the taskspace trajectory is defined for.
+            * This is the frame attached to the rigid body that the wrench trajectory is defined for.
             */
    public us.ihmc.euclid.geometry.Pose3D control_frame_pose_;
    /**
@@ -117,7 +117,7 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
 
    /**
             * Pose of custom control frame expressed in the end-effector frame.
-            * This is the frame attached to the rigid body that the taskspace trajectory is defined for.
+            * This is the frame attached to the rigid body that the wrench trajectory is defined for.
             */
    public us.ihmc.euclid.geometry.Pose3D getControlFramePose()
    {
