@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -30,7 +31,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class KinematicsPlanningBehavior extends AbstractBehavior
 {
@@ -52,7 +52,7 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<KinematicsPlanningToolboxRigidBodyMessage> rigidBodyMessagePublisher;
    private final IHMCROS2Publisher<KinematicsPlanningToolboxCenterOfMassMessage> comMessagePublisher;
    private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
-   
+
    private double trajectoryTime = 0.0;
 
    public KinematicsPlanningBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
@@ -84,8 +84,6 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
    {
       if (keyFrameTimes.size() != 0)
          keyFrameTimes.clear();
-      else
-         ;
 
       for (int i = 0; i < numberOfKeyFrames; i++)
       {
@@ -98,8 +96,6 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
    {
       if (keyFrameTimes.size() != 0)
          keyFrameTimes.clear();
-      else
-         ;
 
       keyFrameTimes.addAll(times);
    }
@@ -108,8 +104,6 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
    {
       if (keyFrameTimes.size() != 0)
          keyFrameTimes.clear();
-      else
-         ;
 
       keyFrameTimes.addAll(times);
    }
@@ -159,7 +153,7 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
       RigidBodyBasics endEffector = fullRobotModel.getHand(robotSide);
       setEndEffectorKeyFrames(endEffector, desiredPoses);
    }
-   
+
    public double getTrajectoryTime()
    {
       return trajectoryTime;
@@ -181,7 +175,7 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
             throw new RuntimeException("a key frame can not be accepted.");
 
          trajectoryTime = keyFrameTimes.get(keyFrameTimes.size() - 1);
-         
+
          WholeBodyTrajectoryMessage message = new WholeBodyTrajectoryMessage();
          message.setDestination(PacketDestination.CONTROLLER.ordinal());
          outputConverter.setMessageToCreate(message);
@@ -212,10 +206,11 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
          rigidBodyMessagePublisher.publish(message);
       }
 
-      // TODO : COM should consider current root body location.
+      Vector3DReadOnly translationVector = fullRobotModel.getRootBody().getBodyFixedFrame().getTransformToWorldFrame().getTranslationVector();
+
       List<Point3DReadOnly> desiredCOMPoints = new ArrayList<Point3DReadOnly>();
       for (int i = 0; i < keyFrameTimes.size(); i++)
-         desiredCOMPoints.add(new Point3D());
+         desiredCOMPoints.add(new Point3D(translationVector));
 
       KinematicsPlanningToolboxCenterOfMassMessage comMessage = HumanoidMessageTools.createKinematicsPlanningToolboxCenterOfMassMessage(keyFrameTimes,
                                                                                                                                         desiredCOMPoints);
@@ -223,7 +218,7 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
       selectionMatrix.selectZAxis(false);
       comMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
       comMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(defaultCOMWeight));
-      //comMessagePublisher.publish(comMessage);
+      comMessagePublisher.publish(comMessage);
 
       System.out.println("published");
    }
