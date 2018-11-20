@@ -221,14 +221,18 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          ikRigidBodyMessageMap.put(endEffector, rigidBodyMessages);
 
          if (i == 0) // save key frame times for the first rigid body message.
+         {
             for (int j = 0; j < command.getNumberOfWayPoints(); j++)
                keyFrameTimes.add(command.getWayPointTime(j));
-
+         }
          else if (!checkKeyFrameTimes(command))
+         {
             new Exception(command.getClass().getSimpleName() + " must have same key frame times with the first KinematicsPlanningToolboxRigidBodyMessage.");
+         }
       }
 
       if (centerOfMassCommand.get() != null)
+
       {
          if (!checkKeyFrameTimes(centerOfMassCommand.get()))
             new Exception(centerOfMassCommand.get().getClass().getSimpleName()
@@ -356,9 +360,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(currentRobotConfiguration, getDesiredFullRobotModel().getRootJoint(),
                                                                       FullRobotModelUtils.getAllJointsExcludingHands(getDesiredFullRobotModel()));
-      
-//      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(currentRobotConfiguration, getDesiredFullRobotModel().getRootJoint(),
-//                                                                      getDesiredFullRobotModel().getOneDoFJoints());
+
+      //      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(currentRobotConfiguration, getDesiredFullRobotModel().getRootJoint(),
+      //                                                                      getDesiredFullRobotModel().getOneDoFJoints());
 
       ikController.updateRobotConfigurationData(currentRobotConfiguration);
 
