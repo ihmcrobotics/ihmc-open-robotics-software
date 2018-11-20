@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.FootstepNodeDataListMessage;
 import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
-import us.ihmc.javaFXToolkit.messager.Messager;
+import us.ihmc.messager.Messager;
 
 public class MessagerBasedPlannerListener extends MessageBasedPlannerListener
 {

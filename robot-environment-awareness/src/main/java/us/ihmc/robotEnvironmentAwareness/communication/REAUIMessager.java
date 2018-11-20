@@ -5,14 +5,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import us.ihmc.javaFXToolkit.messager.Message;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
-import us.ihmc.javaFXToolkit.messager.Messager;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
-import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
-import us.ihmc.javaFXToolkit.messager.TopicListener;
+import us.ihmc.messager.Message;
+import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.MessagerStateListener;
+import us.ihmc.messager.SharedMemoryMessager;
+import us.ihmc.messager.TopicListener;
 
 public class REAUIMessager
 {
