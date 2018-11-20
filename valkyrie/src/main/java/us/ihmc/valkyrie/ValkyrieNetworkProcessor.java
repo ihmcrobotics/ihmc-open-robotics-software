@@ -19,13 +19,18 @@ public class ValkyrieNetworkProcessor
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
       DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
+      boolean startREA = false;
       
       networkModuleParams.enableControllerCommunicator(true);
       networkModuleParams.enableLocalControllerCommunicator(false);
       networkModuleParams.enableUiModule(true);
       networkModuleParams.enableBehaviorModule(true);
       networkModuleParams.enableBehaviorVisualizer(true);
-      networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
+      String is_gazebo = System.getenv("IS_GAZEBO");
+      if (is_gazebo != null && is_gazebo.equals("true")) {
+          startREA = true;
+      }
+      networkModuleParams.enableRobotEnvironmentAwerenessModule(startREA);
       networkModuleParams.enableKinematicsToolbox(true);
       networkModuleParams.enableFootstepPlanningToolbox(true);
       networkModuleParams.enableFootstepPlanningToolboxVisualizer(true);
