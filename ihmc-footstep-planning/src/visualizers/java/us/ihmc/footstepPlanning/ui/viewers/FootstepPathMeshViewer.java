@@ -1,5 +1,15 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.NodeDataTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowFootstepPlanTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowNodeDataTopic;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.FootstepNodeDataListMessage;
 import controller_msgs.msg.dds.FootstepNodeDataMessage;
 import javafx.animation.AnimationTimer;
@@ -22,18 +32,11 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
-import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public class FootstepPathMeshViewer extends AnimationTimer
 {

@@ -1,6 +1,13 @@
 package us.ihmc.footstepPlanning.ui;
 
-import controller_msgs.msg.dds.*;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -17,16 +24,12 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.javaFXToolkit.messager.Messager;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
+import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
-
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class RemotePlannerMessageConverter
 {

@@ -1,21 +1,21 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.AbortPlanningTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
+
+import java.util.concurrent.atomic.AtomicReference;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.TopicListener;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
-
-import java.util.concurrent.atomic.AtomicReference;
+import us.ihmc.messager.TopicListener;
 
 public class StatusTabController
 {

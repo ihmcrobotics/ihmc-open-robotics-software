@@ -1,8 +1,5 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.viewers;
 
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NavigableRegionVisibilityMap;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowNavigableRegionVisibilityMaps;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,15 +16,14 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.javaFXToolkit.messager.Messager;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 
 public class NavigableRegionViewer extends AnimationTimer
 {
