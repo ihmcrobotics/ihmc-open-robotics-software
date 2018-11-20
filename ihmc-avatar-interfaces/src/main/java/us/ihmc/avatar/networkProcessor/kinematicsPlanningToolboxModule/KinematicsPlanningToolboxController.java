@@ -180,7 +180,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    private boolean updateToolboxConfiguration()
    {
       if (rigidBodyCommands.size() == 0)
-         new Exception(this.getClass().getSimpleName() + " needs at least one KinematicsPlanningToolboxRigidBodyMessage.");
+         throw new RuntimeException(this.getClass().getSimpleName() + " needs at least one KinematicsPlanningToolboxRigidBodyMessage.");
 
       ikRigidBodies.clear();
       ikRigidBodyMessageMap.clear();
@@ -227,7 +227,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          }
          else if (!checkKeyFrameTimes(command))
          {
-            new Exception(command.getClass().getSimpleName() + " must have same key frame times with the first KinematicsPlanningToolboxRigidBodyMessage.");
+            throw new RuntimeException(command.getClass().getSimpleName() + " must have same key frame times with the first KinematicsPlanningToolboxRigidBodyMessage.");
          }
       }
 
@@ -235,7 +235,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       {
          if (!checkKeyFrameTimes(centerOfMassCommand.get()))
-            new Exception(centerOfMassCommand.get().getClass().getSimpleName()
+            throw new RuntimeException(centerOfMassCommand.get().getClass().getSimpleName()
                   + " must have same key frame times with KinematicsPlanningToolboxRigidBodyMessage.");
 
          for (int i = 0; i < centerOfMassCommand.get().getNumberOfWayPoints(); i++)
@@ -279,7 +279,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    }
 
    @Override
-   public void updateInternal() throws Exception
+   public void updateInternal() throws RuntimeException
    {
       if (solutionQualityConvergenceDetector.isSolved())
       {
