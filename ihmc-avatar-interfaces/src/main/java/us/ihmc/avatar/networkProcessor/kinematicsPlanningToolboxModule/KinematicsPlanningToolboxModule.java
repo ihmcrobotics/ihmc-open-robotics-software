@@ -89,10 +89,7 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
    {
-      List<Class<? extends Settable<?>>> status = new ArrayList<>();
-      status.add(KinematicsPlanningToolboxOutputStatus.class);
-      status.add(KinematicsToolboxOutputStatus.class);
-      return status;
+      return supportedStatus();
    }
 
    @Override
