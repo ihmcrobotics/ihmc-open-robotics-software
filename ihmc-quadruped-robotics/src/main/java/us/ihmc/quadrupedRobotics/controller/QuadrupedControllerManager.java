@@ -109,6 +109,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       }
       statusMessageOutputManager = new StatusMessageOutputManager(QuadrupedControllerAPIDefinition.getQuadrupedSupportedStatusMessages());
 
+
       controlManagerFactory.getOrCreateFeetManager();
       controlManagerFactory.getOrCreateBodyOrientationManager();
       controlManagerFactory.getOrCreateBalanceManager();
@@ -272,6 +273,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       factory.addTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.STAND_TRANSITION_STATE, createRequestedTransition(HighLevelControllerName.STAND_TRANSITION_STATE));
       factory.addTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
       factory.addTransition(HighLevelControllerName.STAND_READY, sitDownStateName, createRequestedTransition(sitDownStateName));
+      factory.addTransition(HighLevelControllerName.FREEZE_STATE, sitDownStateName, createRequestedTransition(sitDownStateName));
       factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.STAND_TRANSITION_STATE, createRequestedTransition(HighLevelControllerName.WALKING));
       factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
       factory.addTransition(HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
@@ -294,6 +296,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       // Set up standard operating transitions
       factory.addDoneTransition(HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.STAND_READY);
       factory.addDoneTransition(HighLevelControllerName.STAND_TRANSITION_STATE, HighLevelControllerName.WALKING);
+      factory.addDoneTransition(sitDownStateName, HighLevelControllerName.FREEZE_STATE);
 
       // Set up walking controller failure transition
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
