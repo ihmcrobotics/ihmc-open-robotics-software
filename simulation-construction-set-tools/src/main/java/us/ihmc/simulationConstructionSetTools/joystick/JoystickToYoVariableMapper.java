@@ -41,6 +41,24 @@ public class JoystickToYoVariableMapper
       }
    }
    
+   public void mapDoubleYoVariableToDPadComponent(Component component, String variableName, double minValue, double maxValue, double increment, boolean invert)
+   {
+      if (component != null)
+      {
+         YoDouble yoVariable = (YoDouble) yoVariableHolder.getVariable(variableName);
+         if (yoVariable != null)
+         {
+            DoubleYoVariableDPADJoystickEventListener joystickEventListener = new DoubleYoVariableDPADJoystickEventListener(yoVariable, component, minValue, maxValue, increment, invert);
+            eventListeners.add(joystickEventListener);
+            componentToEventListenerMap.put(component, joystickEventListener);
+         }
+         else
+         {
+            PrintTools.warn(this, "Variable " + variableName + " could not be found!");
+         }
+      }
+   }
+   
    public void mapBooleanYoVariableToComponent(Component component, String variableName, boolean toggle, boolean flip)
    {
       if (component != null)
