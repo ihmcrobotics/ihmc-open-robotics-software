@@ -481,7 +481,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       subtractCoriolisAcceleration(achievedLinearAcceleration);
 
       yoAchievedAcceleration.getAngularPart().setMatchingFrame(achievedAngularAcceleration);
-      yoAchievedAcceleration.getLinearPart().setMatchingFrame(achievedAngularAcceleration);
+      yoAchievedAcceleration.getLinearPart().setMatchingFrame(achievedLinearAcceleration);
    }
 
    /**
