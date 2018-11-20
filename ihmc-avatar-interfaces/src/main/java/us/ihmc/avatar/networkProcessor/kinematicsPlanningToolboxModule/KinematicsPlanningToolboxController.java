@@ -361,9 +361,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(currentRobotConfiguration, getDesiredFullRobotModel().getRootJoint(),
                                                                       FullRobotModelUtils.getAllJointsExcludingHands(getDesiredFullRobotModel()));
 
-      //      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(currentRobotConfiguration, getDesiredFullRobotModel().getRootJoint(),
-      //                                                                      getDesiredFullRobotModel().getOneDoFJoints());
-
       ikController.updateRobotConfigurationData(currentRobotConfiguration);
 
       CapturabilityBasedStatus capturabilityBasedStatus = latestCapturabilityBasedStatusReference.get();
