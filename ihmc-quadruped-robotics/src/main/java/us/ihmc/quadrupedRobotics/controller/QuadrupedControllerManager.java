@@ -210,6 +210,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       outputProcessor.update();
 
       copyJointDesiredsToJoints();
+
+      requestedControllerStateReference.set(null);
    }
 
    @Override
