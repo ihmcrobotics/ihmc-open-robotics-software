@@ -109,6 +109,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       }
       statusMessageOutputManager = new StatusMessageOutputManager(QuadrupedControllerAPIDefinition.getQuadrupedSupportedStatusMessages());
 
+
       controlManagerFactory.getOrCreateFeetManager();
       controlManagerFactory.getOrCreateBodyOrientationManager();
       controlManagerFactory.getOrCreateBalanceManager();
@@ -167,9 +168,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       {
       case DO_NOTHING_BEHAVIOR:
       case STAND_PREP_STATE:
-      case STAND_READY:
-      case STAND_TRANSITION_STATE:
       case FREEZE_STATE:
+      case CUSTOM1:
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(false);
@@ -180,18 +180,21 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_LEFT).setFootContactState(false);
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_RIGHT).setFootContactState(true);
          break;
+      case STAND_READY:
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(false);
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(true);
+         }
+         break;
+      case STAND_TRANSITION_STATE:
+      case WALKING:
       default:
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(true);
-            if (controllerToolbox.getContactState(robotQuadrant) == ContactState.IN_CONTACT)
-            {
-               runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(true);
-            }
-            else
-            {
-               runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(false);
-            }
+            boolean inContact = controllerToolbox.getContactState(robotQuadrant) == ContactState.IN_CONTACT;
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(inContact);
          }
          break;
       }
@@ -207,6 +210,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       outputProcessor.update();
 
       copyJointDesiredsToJoints();
+
+      requestedControllerStateReference.set(null);
    }
 
    @Override
@@ -272,6 +277,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       factory.addTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.STAND_TRANSITION_STATE, createRequestedTransition(HighLevelControllerName.STAND_TRANSITION_STATE));
       factory.addTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
       factory.addTransition(HighLevelControllerName.STAND_READY, sitDownStateName, createRequestedTransition(sitDownStateName));
+      factory.addTransition(HighLevelControllerName.FREEZE_STATE, sitDownStateName, createRequestedTransition(sitDownStateName));
       factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.STAND_TRANSITION_STATE, createRequestedTransition(HighLevelControllerName.WALKING));
       factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
       factory.addTransition(HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.FREEZE_STATE, createRequestedTransition(HighLevelControllerName.FREEZE_STATE));
@@ -294,12 +300,12 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       // Set up standard operating transitions
       factory.addDoneTransition(HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.STAND_READY);
       factory.addDoneTransition(HighLevelControllerName.STAND_TRANSITION_STATE, HighLevelControllerName.WALKING);
+      factory.addDoneTransition(sitDownStateName, HighLevelControllerName.FREEZE_STATE);
 
       // Set up walking controller failure transition
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       BooleanProvider isFallDetected = controllerToolbox.getFallDetector().getIsFallDetected();
       factory.addTransition(HighLevelControllerName.WALKING, fallbackControllerState, t -> isFallDetected.getValue());
-      factory.addTransition(HighLevelControllerName.FREEZE_STATE, fallbackControllerState, t -> isFallDetected.getValue());
       factory.addTransition(fallbackControllerState, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
 
 
