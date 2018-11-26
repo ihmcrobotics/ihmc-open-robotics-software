@@ -306,7 +306,6 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       BooleanProvider isFallDetected = controllerToolbox.getFallDetector().getIsFallDetected();
       factory.addTransition(HighLevelControllerName.WALKING, fallbackControllerState, t -> isFallDetected.getValue());
-      factory.addTransition(HighLevelControllerName.FREEZE_STATE, fallbackControllerState, t -> isFallDetected.getValue());
       factory.addTransition(fallbackControllerState, HighLevelControllerName.STAND_PREP_STATE, createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
 
 
