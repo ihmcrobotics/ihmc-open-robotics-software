@@ -1,10 +1,12 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Slider;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.shape.Rectangle;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
@@ -18,31 +20,52 @@ public class FootstepPlannerParametersUIController
    private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
 
    @FXML
-   private Spinner<Double> plannerTimeout;
+   private CheckBox returnBestEffortPlan;
    @FXML
-   private Spinner<Double> horizonLength;
+   private CheckBox performHeuristicSearchPolicies;
 
    @FXML
-   private Slider maxStepLength;
+   private Spinner<Double> maxStepLength;
    @FXML
-   private Slider minStepWidth;
+   private Spinner<Double> maxStepWidth;
    @FXML
-   private Slider maxStepYaw;
+   private Spinner<Double> minStepWidth;
 
    @FXML
-   private Slider minStepLength;
+   private Spinner<Double> minStepLength;
    @FXML
-   private Slider maxStepZ;
+   private Spinner<Double> maxStepZ;
    @FXML
-   private Slider minStepYaw;
+   private Spinner<Double> minSurfaceIncline;
 
    @FXML
-   private Slider minFootholdPercent;
+   private Spinner<Double> maxStepYaw;
    @FXML
-   private Slider minSurfaceIncline;
+   private Spinner<Double> minStepYaw;
    @FXML
-   private Slider maxStepWidth;
+   private Spinner<Double> minFootholdPercent;
 
+   @FXML
+   private Rectangle stepShape;
+   @FXML
+   private Rectangle stanceFootShape;
+   @FXML
+   private Rectangle swingFootShape;
+   @FXML
+   private Rectangle clearanceBox;
+
+   @FXML
+   private Spinner<Double> minXClearance;
+   @FXML
+   private Spinner<Double> minYClearance;
+
+
+   private static final double footWidth = 0.15;
+   private static final double footLength = 0.25;
+   private static final double leftFootOriginX = 30;
+   private static final double leftFootOriginY = 100;
+
+   private static final double metersToPixel = 200;
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -56,49 +79,102 @@ public class FootstepPlannerParametersUIController
 
    public void setupControls()
    {
-      plannerTimeout.setValueFactory(createTimeoutValueFactory());
-      horizonLength.setValueFactory(createHorizonValueFactory());
+      maxStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.05));
+      maxStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
+      minStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
+
+      minStepLength.setValueFactory(new DoubleSpinnerValueFactory(-0.6, 0.0, 0.0, 0.05));
+      maxStepZ.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
+      minSurfaceIncline.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
+
+
+      maxStepYaw.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
+      minStepYaw.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.1));
+      minFootholdPercent.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
+
+      minXClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
+      minYClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
+
+
+      maxStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      minStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      maxStepWidth.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      minStepWidth.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      maxStepYaw.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      minStepYaw.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      minXClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      minYClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
    }
 
    public void bindControls()
    {
       setupControls();
 
-//      parametersProperty.bidirectionalBindIdealFootstepWidth();
-//      parametersProperty.bidirectionalBindIdealFootstepLength();
-      parametersProperty.bidirectionalBindMaxStepReach(maxStepLength.valueProperty());
-      parametersProperty.bidirectionalBindMaxStepYaw(maxStepYaw.valueProperty());
-      parametersProperty.bidirectionalBindMinStepWidth(minStepWidth.valueProperty());
-      parametersProperty.bidirectionalBindMinStepLength(minStepLength.valueProperty());
-      parametersProperty.bidirectionalBindMinStepYaw(minStepYaw.valueProperty());
-      parametersProperty.bidirectionalBindMaxStepZ(maxStepZ.valueProperty());
-      parametersProperty.bidirectionalBindMinFootholdPercent(minFootholdPercent.valueProperty());
-      parametersProperty.bidirectionalBindMinSurfaceIncline(minSurfaceIncline.valueProperty());
-      parametersProperty.bidirectionalBindMaxStepWidth(maxStepWidth.valueProperty());
+      parametersProperty.bidirectionalBindReturnBestEffortPlan(returnBestEffortPlan.selectedProperty());
+      parametersProperty.bidirectionalBindPerformHeuristicSearchPolicies(performHeuristicSearchPolicies.selectedProperty());
 
+      parametersProperty.bidirectionalBindMaxStepReach(maxStepLength.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaxStepWidth(maxStepWidth.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinStepWidth(minStepWidth.getValueFactory().valueProperty());
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, plannerTimeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
+      parametersProperty.bidirectionalBindMinStepLength(minStepLength.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaxStepZ(maxStepZ.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinSurfaceIncline(minSurfaceIncline.getValueFactory().valueProperty());
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
+      parametersProperty.bidirectionalBindMaxStepYaw(maxStepYaw.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinStepYaw(minStepYaw.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinFootholdPercent(minFootholdPercent.getValueFactory().valueProperty());
+
+      parametersProperty.bidirectionalBindMinXClearanceFromStance(minXClearance.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinYClearanceFromStance(minYClearance.getValueFactory().valueProperty());
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
 
+      // these dimensions work best for valkyrie
+      stanceFootShape.setHeight(footLength * metersToPixel);
+      stanceFootShape.setWidth(footWidth * metersToPixel);
+      stanceFootShape.setLayoutX(leftFootOriginX);
+      stanceFootShape.setLayoutY(leftFootOriginY);
+
+      swingFootShape.setHeight(footLength * metersToPixel);
+      swingFootShape.setWidth(footWidth * metersToPixel);
+      swingFootShape.setLayoutY(leftFootOriginY);
+
+      updateStepShape();
    }
 
-   private final PropertyToMessageTypeConverter<Double, Double> doubleToDoubleConverter = new PropertyToMessageTypeConverter<Double, Double>()
+   private void updateStepShape()
    {
-      @Override
-      public Double convert(Double propertyValue)
-      {
-         return propertyValue;
-      }
+      double worstYaw = maxStepYaw.getValue() > Math.abs(minStepYaw.getValue()) ? maxStepYaw.getValue() : minStepYaw.getValue();
+      setStepShape(maxStepLength.getValue(), minStepLength.getValue(), maxStepWidth.getValue(), minStepWidth.getValue(), worstYaw);
+   }
 
-      @Override
-      public Double interpret(Double newValue)
-      {
-         return newValue;
-      }
-   };
+   private void setStepShape(double maxLength, double minLength, double maxWidth, double minWidth, double yaw)
+   {
+      double footCenterX = leftFootOriginX + 0.5 * footWidth * metersToPixel;
+      double footCenterY = leftFootOriginY + 0.5 * footLength * metersToPixel;
+
+      double furthestIn = Math.max(minWidth, minYClearance.getValue()) * metersToPixel;
+
+      double width = maxWidth - minWidth;
+      double height = maxLength - minLength;
+      double xCenterInPanel = footCenterX + metersToPixel * minWidth;
+      double yCenterInPanel = footCenterY - metersToPixel * maxLength;
+
+
+      stepShape.setLayoutX(xCenterInPanel);
+      stepShape.setWidth(metersToPixel * width);
+      stepShape.setLayoutY(yCenterInPanel);
+      stepShape.setHeight(metersToPixel * height);
+
+      swingFootShape.setLayoutX(footCenterX + furthestIn - 0.5 * footWidth * metersToPixel);
+      swingFootShape.setRotate(Math.toDegrees(yaw));
+
+      clearanceBox.setLayoutX(leftFootOriginX + (0.5 * footWidth - minYClearance.getValue()) * metersToPixel);
+      clearanceBox.setLayoutY(leftFootOriginY + (0.5 * footLength - minXClearance.getValue()) * metersToPixel);
+      clearanceBox.setWidth(metersToPixel * (minYClearance.getValue() * 2.0));
+      clearanceBox.setHeight(metersToPixel * (minXClearance.getValue() * 2.0));
+   }
 
    private PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters> createConverter()
    {
@@ -117,23 +193,4 @@ public class FootstepPlannerParametersUIController
          }
       };
    }
-
-   private SpinnerValueFactory.DoubleSpinnerValueFactory createTimeoutValueFactory()
-   {
-      double min = 0.0;
-      double max = 100.0;
-      double amountToStepBy = 5;
-      return new DoubleSpinnerValueFactory(min, max, 15.0, amountToStepBy);
-   }
-
-   private SpinnerValueFactory.DoubleSpinnerValueFactory createHorizonValueFactory()
-   {
-      double min = 0.0;
-      double max = 1000.0;
-      double amountToStepBy = 0.25;
-      return new DoubleSpinnerValueFactory(min, max, 0.0, amountToStepBy);
-   }
-
-
-
 }

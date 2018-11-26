@@ -1,9 +1,10 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 
 public class FourBarKinematicLoopTools
 {   

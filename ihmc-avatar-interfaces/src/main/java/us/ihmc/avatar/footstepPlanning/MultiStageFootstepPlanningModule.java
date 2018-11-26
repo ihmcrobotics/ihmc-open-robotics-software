@@ -15,6 +15,7 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
@@ -26,7 +27,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MultiStageFootstepPlanningModule
 {
@@ -53,6 +53,11 @@ public class MultiStageFootstepPlanningModule
    private final YoVariableServer yoVariableServer;
 
    private final MultiStageFootstepPlanningController footstepPlanningController;
+   
+   public MultiStageFootstepPlanningModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer)
+   {
+      this(drcRobotModel, modelProvider, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
+   }
 
    public MultiStageFootstepPlanningModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer,
                                            DomainFactory.PubSubImplementation pubSubImplementation)
@@ -75,7 +80,8 @@ public class MultiStageFootstepPlanningModule
       commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
 
       footstepPlanningController = new MultiStageFootstepPlanningController(drcRobotModel.getContactPointParameters(),
-                                                                            drcRobotModel.getFootstepPlannerParameters(), commandInputManager,
+                                                                            drcRobotModel.getFootstepPlannerParameters(),
+                                                                            drcRobotModel.getVisibilityGraphsParameters(), commandInputManager,
                                                                             statusOutputManager, executorService, registry, yoGraphicsListRegistry,
                                                                             DEFAULT_UPDATE_PERIOD_MILLISECONDS);
 
@@ -87,7 +93,10 @@ public class MultiStageFootstepPlanningModule
                                            s -> footstepPlanningController.processRequest(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlannerParametersPacket.class,
                                            FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
-                                           s -> footstepPlanningController.processPlannerParameters(s.takeNextData()));
+                                           s -> footstepPlanningController.processFootstepPlannerParameters(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, VisibilityGraphsParametersPacket.class,
+                                           FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
+                                           s -> footstepPlanningController.processVisibilityGraphsParameters(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanningStatisticsRequestMessage.class,
                                            FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
                                            s -> footstepPlanningController.processPlanningStatisticsRequest());
@@ -158,7 +167,7 @@ public class MultiStageFootstepPlanningModule
 
    public void destroy()
    {
-      footstepPlanningController.sleep();
+      footstepPlanningController.destroy();
 
       if (yoVariableServerScheduled != null)
       {

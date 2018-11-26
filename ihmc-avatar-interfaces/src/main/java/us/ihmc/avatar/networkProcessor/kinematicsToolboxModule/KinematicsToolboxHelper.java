@@ -8,7 +8,7 @@ import org.ejml.ops.NormOps;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
@@ -26,13 +26,12 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 
@@ -67,7 +66,7 @@ public class KinematicsToolboxHelper
     * @param gains the gains to use in the feedback controller. Not modified.
     * @return the feedback control command ready to be submitted to the controller core.
     */
-   static SpatialFeedbackControlCommand consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBody base, PIDSE3Gains gains)
+   static SpatialFeedbackControlCommand consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBodyBasics base, PIDSE3Gains gains)
    {
       SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
       feedbackControlCommand.set(base, command.getEndEffector());
@@ -88,26 +87,25 @@ public class KinematicsToolboxHelper
     * @param rootJoint the floating joint to update. Modified.
     * @param oneDoFJoints the one degree-of-freedom joints to update. Modified.
     */
-   static void setRobotStateFromControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput, FloatingInverseDynamicsJoint rootJoint,
-                                                     OneDoFJoint[] oneDoFJoints)
+   static void setRobotStateFromControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput, FloatingJointBasics rootJoint,
+                                                     OneDoFJointBasics[] oneDoFJoints)
    {
       RootJointDesiredConfigurationDataReadOnly outputForRootJoint = controllerCoreOutput.getRootJointDesiredConfigurationData();
 
       if (rootJoint != null)
       {
-         rootJoint.setConfiguration(outputForRootJoint.getDesiredConfiguration(), 0);
-         rootJoint.setVelocity(outputForRootJoint.getDesiredVelocity(), 0);
+         rootJoint.setJointConfiguration(0, outputForRootJoint.getDesiredConfiguration());
+         rootJoint.setJointVelocity(0, outputForRootJoint.getDesiredVelocity());
       }
 
       JointDesiredOutputListReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
-      for (OneDoFJoint joint : oneDoFJoints)
+      for (OneDoFJointBasics joint : oneDoFJoints)
       {
          if (output.hasDataForJoint(joint))
          {
             JointDesiredOutputReadOnly data = output.getJointDesiredOutput(joint); 
 
-            joint.setQ(data.getDesiredPosition()); // ?????
-            joint.setqDesired(data.getDesiredPosition());
+            joint.setQ(data.getDesiredPosition());
             joint.setQd(data.getDesiredVelocity());
          }
       }
@@ -130,8 +128,8 @@ public class KinematicsToolboxHelper
     * @param rootJoint the floating joint to update. Modified.
     * @param oneDoFJoints the one degree-of-freedom joints to update. Modified.
     */
-   static void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingInverseDynamicsJoint desiredRootJoint,
-                                                       OneDoFJoint[] oneDoFJoints)
+   static void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingJointBasics desiredRootJoint,
+                                                       OneDoFJointBasics[] oneDoFJoints)
    {
       TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
 
@@ -144,10 +142,10 @@ public class KinematicsToolboxHelper
       if (desiredRootJoint != null)
       {
          Vector3D translation = robotConfigurationData.getRootTranslation();
-         desiredRootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
+         desiredRootJoint.getJointPose().setPosition(translation.getX(), translation.getY(), translation.getZ());
          Quaternion orientation = robotConfigurationData.getRootOrientation();
-         desiredRootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
-         desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
+         desiredRootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
+         desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
          
          desiredRootJoint.getPredecessor().updateFramesRecursively();
       }
@@ -169,18 +167,18 @@ public class KinematicsToolboxHelper
     * @param oneDoFJoints the one degree-of-freedom joints to update. Modified.
     */
    static void setRobotStateFromPrivilegedConfigurationData(KinematicsToolboxConfigurationCommand commandWithPrivilegedConfiguration,
-                                                            FloatingInverseDynamicsJoint desiredRootJoint, Map<Long, OneDoFJoint> jointNameBasedHashCodeMap)
+                                                            FloatingJointBasics desiredRootJoint, Map<Integer, OneDoFJointBasics> jointHashCodeMap)
    {
       boolean hasPrivilegedJointAngles = commandWithPrivilegedConfiguration.hasPrivilegedJointAngles();
 
       if (hasPrivilegedJointAngles)
       {
-         TLongArrayList jointNameBasedHashCode = commandWithPrivilegedConfiguration.getJointNameBasedHashCodes();
+         TIntArrayList jointHashCodes = commandWithPrivilegedConfiguration.getJointHashCodes();
          TFloatArrayList privilegedJointAngles = commandWithPrivilegedConfiguration.getPrivilegedJointAngles();
 
          for (int i = 0; i < privilegedJointAngles.size(); i++)
          {
-            OneDoFJoint joint = jointNameBasedHashCodeMap.get(jointNameBasedHashCode.get(i));
+            OneDoFJointBasics joint = jointHashCodeMap.get(jointHashCodes.get(i));
             joint.setQ(privilegedJointAngles.get(i));
             joint.setQd(0.0);
          }
@@ -190,16 +188,16 @@ public class KinematicsToolboxHelper
 
       if (hasPrivilegedRooJointPosition)
       {
-         desiredRootJoint.setPosition(commandWithPrivilegedConfiguration.getPrivilegedRootJointPosition());
-         desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
+         desiredRootJoint.setJointPosition(commandWithPrivilegedConfiguration.getPrivilegedRootJointPosition());
+         desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
       }
 
       boolean hasPrivilegedRooJointOrientation = commandWithPrivilegedConfiguration.hasPrivilegedRootJointOrientation();
 
       if (hasPrivilegedRooJointOrientation)
       {
-         desiredRootJoint.setRotation(commandWithPrivilegedConfiguration.getPrivilegedRootJointOrientation());
-         desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
+         desiredRootJoint.setJointOrientation(commandWithPrivilegedConfiguration.getPrivilegedRootJointOrientation());
+         desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
       }
 
       desiredRootJoint.getPredecessor().updateFramesRecursively();
@@ -290,7 +288,7 @@ public class KinematicsToolboxHelper
    private static double calculateCommandQuality(SpatialFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
    {
       SpatialAccelerationCommand accelerationCommand = command.getSpatialAccelerationCommand();
-      RigidBody endEffector = accelerationCommand.getEndEffector();
+      RigidBodyBasics endEffector = accelerationCommand.getEndEffector();
 
       PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", worldFrame);
 

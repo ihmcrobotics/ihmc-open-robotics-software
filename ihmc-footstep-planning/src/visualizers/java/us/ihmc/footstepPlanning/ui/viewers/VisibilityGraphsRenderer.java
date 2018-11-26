@@ -1,22 +1,33 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GlobalResetTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalVisibilityMap;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.InterRegionVisibilityMap;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.NavigableRegionData;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowClusterNavigableExtrusions;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowClusterRawPoints;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowGoalVisibilityMap;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowInterRegionVisibilityMap;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowNavigableRegionVisibilityMaps;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowStartVisibilityMap;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartVisibilityMap;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
+
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.javaFXToolkit.messager.Messager;
+import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.ClusterMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VisibilityMapHolderViewer;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public class VisibilityGraphsRenderer
 {

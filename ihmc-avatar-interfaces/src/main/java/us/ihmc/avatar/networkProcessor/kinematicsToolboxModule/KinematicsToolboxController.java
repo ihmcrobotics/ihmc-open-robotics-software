@@ -39,14 +39,14 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -83,15 +83,15 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    /** Reference to the desired robot's root body. */
-   protected final RigidBody rootBody;
+   protected final RigidBodyBasics rootBody;
    /** Reference to the desired robot's floating joint. */
-   protected final FloatingInverseDynamicsJoint rootJoint;
+   protected final FloatingJointBasics rootJoint;
    /**
     * Array containing all the one degree-of-freedom joints of the desired robot except for the
     * finger joints that are not handled by this solver.
     */
-   private final OneDoFJoint[] oneDoFJoints;
-   private final Map<Long, OneDoFJoint> jointNameBasedHashCodeMap = new HashMap<>();
+   private final OneDoFJointBasics[] oneDoFJoints;
+   private final Map<Integer, OneDoFJointBasics> jointHashCodeMap = new HashMap<>();
 
    /**
     * Reference frame centered at the robot's center of mass. It is used to hold the initial center
@@ -178,13 +178,13 @@ public class KinematicsToolboxController extends ToolboxController
     * {@code SCSVisualizer}. They are only visible when the end-effector is being actively
     * controlled.
     */
-   private final Map<RigidBody, YoGraphicCoordinateSystem> desiredCoodinateSystems = new HashMap<>();
+   private final Map<RigidBodyBasics, YoGraphicCoordinateSystem> desiredCoodinateSystems = new HashMap<>();
    /**
     * Visualization of the current end-effector poses seen as coordinate systems in the
     * {@code SCSVisualizer}. They are only visible when the end-effector is being actively
     * controlled.
     */
-   private final Map<RigidBody, YoGraphicCoordinateSystem> currentCoodinateSystems = new HashMap<>();
+   private final Map<RigidBodyBasics, YoGraphicCoordinateSystem> currentCoodinateSystems = new HashMap<>();
 
    /**
     * Reference to the most recent robot configuration received from the controller. It is used for
@@ -206,14 +206,14 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoInteger numberOfActiveCommands = new YoInteger("numberOfActiveCommands", registry);
 
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                      FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] oneDoFJoints, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                      FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints, YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoVariableRegistry parentRegistry)
    {
       this(commandInputManager, statusOutputManager, rootJoint, oneDoFJoints, null, yoGraphicsListRegistry, parentRegistry);
    }
 
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                      FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] oneDoFJoints, Collection<RigidBody> controllableRigidBodies,
+                                      FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints, Collection<RigidBodyBasics> controllableRigidBodies,
                                       YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -223,11 +223,11 @@ public class KinematicsToolboxController extends ToolboxController
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       // This will find the root body without using rootJoint so it can be null.
-      rootBody = ScrewTools.getRootBody(oneDoFJoints[0].getPredecessor());
+      rootBody = MultiBodySystemTools.getRootBody(oneDoFJoints[0].getPredecessor());
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, rootBody);
 
-      Arrays.stream(oneDoFJoints).forEach(joint -> jointNameBasedHashCodeMap.put(joint.getNameBasedHashCode(), joint));
+      Arrays.stream(oneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
 
       controllerCore = createControllerCore(controllableRigidBodies);
       feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
@@ -250,12 +250,12 @@ public class KinematicsToolboxController extends ToolboxController
     * @param rigidBodies all the rigid bodies for which the desired and actual pose will be
     *           displayed using graphical coordinate systems.
     */
-   public void setupVisualization(RigidBody... rigidBodies)
+   public void setupVisualization(RigidBodyBasics... rigidBodies)
    {
       AppearanceDefinition desiredAppearance = YoAppearance.Red();
       AppearanceDefinition currentAppearance = YoAppearance.Blue();
 
-      for (RigidBody rigidBody : rigidBodies)
+      for (RigidBodyBasics rigidBody : rigidBodies)
       {
          YoGraphicCoordinateSystem desiredCoodinateSystem = createCoodinateSystem(rigidBody, Type.DESIRED, desiredAppearance);
          YoGraphicCoordinateSystem currentCoodinateSystem = createCoodinateSystem(rigidBody, Type.CURRENT, currentAppearance);
@@ -281,7 +281,7 @@ public class KinematicsToolboxController extends ToolboxController
     * @param appearanceDefinition the appearance of the coordinate system's arrows.
     * @return the graphic with a good name for the given end-effector.
     */
-   private YoGraphicCoordinateSystem createCoodinateSystem(RigidBody endEffector, Type type, AppearanceDefinition appearanceDefinition)
+   private YoGraphicCoordinateSystem createCoodinateSystem(RigidBodyBasics endEffector, Type type, AppearanceDefinition appearanceDefinition)
    {
       String namePrefix = endEffector.getName() + type.getName();
       return new YoGraphicCoordinateSystem(namePrefix, "", registry, false, 0.2, appearanceDefinition);
@@ -295,13 +295,13 @@ public class KinematicsToolboxController extends ToolboxController
     * @return the controller core that will run for the desired robot
     *         {@link #desiredFullRobotModel}.
     */
-   private WholeBodyControllerCore createControllerCore(Collection<RigidBody> controllableRigidBodies)
+   private WholeBodyControllerCore createControllerCore(Collection<RigidBodyBasics> controllableRigidBodies)
    {
       KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
-      InverseDynamicsJoint[] controlledJoints;
+      JointBasics[] controlledJoints;
       if (rootJoint != null)
       {
-         controlledJoints = new InverseDynamicsJoint[oneDoFJoints.length + 1];
+         controlledJoints = new JointBasics[oneDoFJoints.length + 1];
          controlledJoints[0] = rootJoint;
          System.arraycopy(oneDoFJoints, 0, controlledJoints, 1, oneDoFJoints.length);
       }
@@ -328,15 +328,15 @@ public class KinematicsToolboxController extends ToolboxController
     *           robot will be controllable.
     * @return the template for the controller core.
     */
-   private FeedbackControlCommandList createControllerCoreTemplate(Collection<RigidBody> controllableRigidBodies)
+   private FeedbackControlCommandList createControllerCoreTemplate(Collection<RigidBodyBasics> controllableRigidBodies)
    {
       FeedbackControlCommandList template = new FeedbackControlCommandList();
-      Collection<RigidBody> rigidBodies;
+      Collection<? extends RigidBodyBasics> rigidBodies;
 
       if (controllableRigidBodies != null)
          rigidBodies = controllableRigidBodies;
       else
-         rigidBodies = Arrays.asList(ScrewTools.computeSupportAndSubtreeSuccessors(rootBody));
+         rigidBodies = rootBody.subtreeList();
 
       rigidBodies.stream().map(this::createFeedbackControlCommand).forEach(template::addCommand);
       return template;
@@ -346,7 +346,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Convenience method for pure laziness. Should only be used for
     * {@link #createControllerCoreTemplate()}.
     */
-   private SpatialFeedbackControlCommand createFeedbackControlCommand(RigidBody endEffector)
+   private SpatialFeedbackControlCommand createFeedbackControlCommand(RigidBodyBasics endEffector)
    {
       SpatialFeedbackControlCommand command = new SpatialFeedbackControlCommand();
       command.set(rootBody, endEffector);
@@ -427,7 +427,7 @@ public class KinematicsToolboxController extends ToolboxController
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, oneDoFJoints);
       updateVisualization();
 
-      MessageTools.packDesiredJointState(inverseKinematicsSolution, rootJoint, oneDoFJoints, false);
+      MessageTools.packDesiredJointState(inverseKinematicsSolution, rootJoint, oneDoFJoints);
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
 
       if (tickCount++ == numberOfTicksToSendSolution)
@@ -465,7 +465,7 @@ public class KinematicsToolboxController extends ToolboxController
           * with the privileged configuration and the initial center of mass position and foot
           * poses.
           */
-         KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint, jointNameBasedHashCodeMap);
+         KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint, jointHashCodeMap);
          if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRootJointPosition() || command.hasPrivilegedRootJointOrientation())
             robotConfigurationReinitialized();
          if (command.hasPrivilegedJointAngles())
@@ -517,7 +517,7 @@ public class KinematicsToolboxController extends ToolboxController
       FramePoint3D position = new FramePoint3D();
       FrameQuaternion orientation = new FrameQuaternion();
 
-      for (RigidBody endEffector : desiredCoodinateSystems.keySet())
+      for (RigidBodyBasics endEffector : desiredCoodinateSystems.keySet())
       {
          YoGraphicCoordinateSystem coordinateSystem = desiredCoodinateSystems.get(endEffector);
          hasData = feedbackControllerDataHolder.getPositionData(endEffector, position, Type.DESIRED);
@@ -533,7 +533,7 @@ public class KinematicsToolboxController extends ToolboxController
             coordinateSystem.setOrientation(orientation);
       }
 
-      for (RigidBody endEffector : currentCoodinateSystems.keySet())
+      for (RigidBodyBasics endEffector : currentCoodinateSystems.keySet())
       {
          YoGraphicCoordinateSystem coordinateSystem = currentCoodinateSystems.get(endEffector);
          hasData = feedbackControllerDataHolder.getPositionData(endEffector, position, Type.CURRENT);
@@ -569,7 +569,7 @@ public class KinematicsToolboxController extends ToolboxController
       latestRobotConfigurationDataReference.set(newConfigurationData);
    }
 
-   public boolean isUserControllingRigidBody(RigidBody rigidBody)
+   public boolean isUserControllingRigidBody(RigidBodyBasics rigidBody)
    {
       return isUserControllingRigidBody(rigidBody.getName());
    }
@@ -606,12 +606,12 @@ public class KinematicsToolboxController extends ToolboxController
       return false;
    }
 
-   public FloatingInverseDynamicsJoint getDesiredRootJoint()
+   public FloatingJointBasics getDesiredRootJoint()
    {
       return rootJoint;
    }
 
-   public OneDoFJoint[] getDesiredOneDoFJoint()
+   public OneDoFJointBasics[] getDesiredOneDoFJoint()
    {
       return oneDoFJoints;
    }

@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerCostParametersPacket;
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -12,6 +13,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoBoolean checkForBodyBoxCollisions = new YoBoolean("checkForBodyBoxCollisions", registry);
+   private final YoBoolean performHeuristicSearchPolicies = new YoBoolean("performHeuristicSearchPolicies", registry);
    private final YoDouble maximumStepReach = new YoDouble("maximumStepReach", registry);
    private final YoDouble minimumFootholdPercent = new YoDouble("minimumFootholdPercent", registry);
    private final YoDouble idealFootstepLength = new YoDouble("idealFootstepLength", registry);
@@ -22,6 +24,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoDouble minimumStepWidth = new YoDouble("minimumStepWidth", registry);
    private final YoDouble minimumStepLength = new YoDouble("minimumStepLength", registry);
    private final YoDouble minimumStepYaw = new YoDouble("minimumStepYaw", registry);
+   private final YoDouble maximumStepReachWhenSteppingUp= new YoDouble("maximumStepReachWhenSteppingUp", registry);
+   private final YoDouble maximumStepZWhenSteppingUp= new YoDouble("maximumStepZWhenSteppingUp", registry);
    private final YoDouble maximumStepXWhenForwardAndDown = new YoDouble("maximumStepXWhenForwardAndDown", registry);
    private final YoDouble maximumStepZWhenForwardAndDown = new YoDouble("maximumStepZWhenForwardAndDown", registry);
    private final YoDouble wiggleInsideDelta = new YoDouble("wiggleInsideDelta", registry);
@@ -58,6 +62,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void set(FootstepPlannerParameters defaults)
    {
       setCheckForBodyBoxCollisions(defaults.checkForBodyBoxCollisions());
+      setPerformHeuristicSearchPolicies(defaults.performHeuristicSearchPolicies());
       maximumStepReach.set(defaults.getMaximumStepReach());
       minimumFootholdPercent.set(defaults.getMinimumFootholdPercent());
       idealFootstepLength.set(defaults.getIdealFootstepLength());
@@ -68,6 +73,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       minimumStepWidth.set(defaults.getMinimumStepWidth());
       minimumStepLength.set(defaults.getMinimumStepLength());
       minimumStepYaw.set(defaults.getMinimumStepYaw());
+      maximumStepReachWhenSteppingUp.set(defaults.getMaximumStepReachWhenSteppingUp());
+      maximumStepZWhenSteppingUp.set(defaults.getMaximumStepZWhenSteppingUp());
       maximumStepXWhenForwardAndDown.set(defaults.getMaximumStepXWhenForwardAndDown());
       maximumStepZWhenForwardAndDown.set(defaults.getMaximumStepZWhenForwardAndDown());
       wiggleInsideDelta.set(defaults.getWiggleInsideDelta());
@@ -98,6 +105,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public boolean checkForBodyBoxCollisions()
    {
       return checkForBodyBoxCollisions.getBooleanValue();
+   }
+
+   @Override
+   public boolean performHeuristicSearchPolicies()
+   {
+      return performHeuristicSearchPolicies.getBooleanValue();
    }
 
    @Override
@@ -146,6 +159,18 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public double getMinimumStepYaw()
    {
       return minimumStepYaw.getDoubleValue();
+   }
+
+   @Override
+   public double getMaximumStepReachWhenSteppingUp()
+   {
+      return maximumStepReachWhenSteppingUp.getDoubleValue();
+   }
+
+   @Override
+   public double getMaximumStepZWhenSteppingUp()
+   {
+      return maximumStepZWhenSteppingUp.getDoubleValue();
    }
 
    @Override
@@ -301,6 +326,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void set(FootstepPlannerParametersPacket parametersPacket)
    {
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
+      setPerformHeuristicSearchPolicies(parametersPacket.getPerformHeuristicSearchPolicies());
       if (parametersPacket.getIdealFootstepWidth() != -1.0)
          setIdealFootstepWidth(parametersPacket.getIdealFootstepWidth());
       if (parametersPacket.getIdealFootstepLength() != -1.0)
@@ -317,6 +343,10 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
          setMinimumStepLength(parametersPacket.getMinimumStepLength());
       if (parametersPacket.getMinimumStepYaw() != -1.0)
          setMinimumStepYaw(parametersPacket.getMinimumStepYaw());
+      if (parametersPacket.getMaximumStepReachWhenSteppingUp() != -1.0)
+         setMaximumStepReachWhenSteppingUp(parametersPacket.getMaximumStepReachWhenSteppingUp());
+      if (parametersPacket.getMaximumStepZWhenSteppingUp() != -1.0)
+         setMaximumStepZWhenSteppingUp(parametersPacket.getMaximumStepZWhenSteppingUp());
       if (parametersPacket.getMaximumStepXWhenForwardAndDown() != -1.0)
          setMaximumStepXWhenForwardAndDown(parametersPacket.getMaximumStepXWhenForwardAndDown());
       if (parametersPacket.getMaximumStepZWhenForwardAndDown() != -1.0)
@@ -349,7 +379,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       if (parametersPacket.getBodyBoxHeight() != -1.0)
          setBodyBoxHeight(parametersPacket.getBodyBoxHeight());
       if (parametersPacket.getBodyBoxDepth() != -1.0)
-         setBodyBoxDepth(parametersPacket.getBodyBoxDepth());
+         setBodyBoxDepth(parametersPacket.getBodyBoxDepth());         
       if (parametersPacket.getBodyBoxWidth() != -1.0)
          setBodyBoxWidth(parametersPacket.getBodyBoxWidth());
       if (parametersPacket.getBodyBoxBaseX() != -1.0)
@@ -369,6 +399,11 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void setCheckForBodyBoxCollisions(boolean checkForBodyBoxCollisions)
    {
       this.checkForBodyBoxCollisions.set(checkForBodyBoxCollisions);
+   }
+
+   public void setPerformHeuristicSearchPolicies(boolean performHeuristicSearchPolicies)
+   {
+      this.performHeuristicSearchPolicies.set(performHeuristicSearchPolicies);
    }
 
    public void setIdealFootstepWidth(double idealFootstepWidth)
@@ -409,6 +444,16 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void setMinimumStepYaw(double minimumStepYaw)
    {
       this.minimumStepYaw.set(minimumStepYaw);
+   }
+
+   public void setMaximumStepReachWhenSteppingUp(double maximumStepReachWhenSteppingUp)
+   {
+      this.maximumStepReachWhenSteppingUp.set(maximumStepReachWhenSteppingUp);
+   }
+
+   public void setMaximumStepZWhenSteppingUp(double maximumStepZWhenSteppingUp)
+   {
+      this.maximumStepZWhenSteppingUp.set(maximumStepZWhenSteppingUp);
    }
 
    public void setMaximumStepXWhenForwardAndDown(double maximumStepXWhenForwardAndDown)

@@ -3,9 +3,9 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.TurnStraightTurnOverheadPath;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class TurnStraightTurnFootstepGenerator extends AbstractSimpleParametersFootstepGenerator
 {
@@ -13,14 +13,14 @@ public class TurnStraightTurnFootstepGenerator extends AbstractSimpleParametersF
    private FramePose2D endPose;
    private double pathOrientation;
 
-   public TurnStraightTurnFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePose2D endPose, PathTypeStepParameters pathType)
+   public TurnStraightTurnFootstepGenerator(SideDependentList<RigidBodyBasics> feet, SideDependentList<ReferenceFrame> soleFrames, FramePose2D endPose, PathTypeStepParameters pathType)
    {
       super(feet, soleFrames, pathType);
       this.endPose = endPose;
       this.pathOrientation = pathType.getAngle();
    }
 
-   public TurnStraightTurnFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePose2D endPose, PathTypeStepParameters pathType,
+   public TurnStraightTurnFootstepGenerator(SideDependentList<RigidBodyBasics> feet, SideDependentList<ReferenceFrame> soleFrames, FramePose2D endPose, PathTypeStepParameters pathType,
            RobotSide stanceStart)
    {
       super(feet, soleFrames, pathType, stanceStart);

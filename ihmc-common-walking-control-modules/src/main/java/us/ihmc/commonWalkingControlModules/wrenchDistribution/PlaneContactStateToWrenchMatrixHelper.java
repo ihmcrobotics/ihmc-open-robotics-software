@@ -19,11 +19,12 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -115,7 +116,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       basisVectorAngleIncrement = 2.0 * Math.PI / numberOfBasisVectorsPerContactPoint;
 
       rhoMatrix = new DenseMatrix64F(rhoSize, 1);
-      wrenchJacobianInCoMFrame = new DenseMatrix64F(SpatialForceVector.SIZE, rhoSize);
+      wrenchJacobianInCoMFrame = new DenseMatrix64F(SpatialForce.SIZE, rhoSize);
       copRegularizationJacobian = new DenseMatrix64F(2, rhoSize);
       copRegularizationObjective = new DenseMatrix64F(2, 1);
       copRegularizationObjective.zero();
@@ -137,7 +138,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       String namePrefix = bodyName + "WrenchMatrixHelper";
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
 
-      RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+      RigidBodyBasics rigidBody = contactablePlaneBody.getRigidBody();
       planeFrame = new PoseReferenceFrame(namePrefix + "ContactFrame", rigidBody.getBodyFixedFrame());
       planeFrame.setPoseAndUpdate(contactablePlaneBody.getSoleFrame().getTransformToDesiredFrame(rigidBody.getBodyFixedFrame()));
       yoPlaneContactState = new YoPlaneContactState(namePrefix, rigidBody, planeFrame, contactPoints2d, 0.0, registry);
@@ -312,8 +313,14 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       if (useOldCoPObjectiveFormulation)
       {
-         desiredCoP.get(copRegularizationObjective);
-         previousCoP.get(copRateRegularizationObjective);
+         if (desiredCoP.containsNaN())
+            copRegularizationObjective.zero();
+         else
+            desiredCoP.get(copRegularizationObjective);
+         if (previousCoP.containsNaN())
+            copRateRegularizationObjective.zero();
+         else
+            previousCoP.get(copRateRegularizationObjective);
       }
       else
       {
@@ -363,7 +370,7 @@ public class PlaneContactStateToWrenchMatrixHelper
             return;
          }
 
-         wrenchFromRho.getLinearPartIncludingFrame(forceFromRho);
+         forceFromRho.setIncludingFrame(wrenchFromRho.getLinearPart());
          forceFromRho.changeFrame(planeFrame);
 
          if (forceFromRho.getZ() < 1.0e-1)
@@ -418,7 +425,7 @@ public class PlaneContactStateToWrenchMatrixHelper
    }
 
    private final Wrench wrenchFromRho = new Wrench();
-   private final DenseMatrix64F totalWrenchMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
+   private final DenseMatrix64F totalWrenchMatrix = new DenseMatrix64F(SpatialForce.SIZE, 1);
 
    public void computeWrenchFromRho(int startIndex, DenseMatrix64F allRobotRho)
    {
@@ -428,7 +435,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       if (yoPlaneContactState.inContact())
       {
          CommonOps.mult(wrenchJacobianInPlaneFrame, rhoMatrix, totalWrenchMatrix);
-         wrenchFromRho.set(bodyFixedFrame, planeFrame, totalWrenchMatrix);
+         wrenchFromRho.setIncludingFrame(bodyFixedFrame, planeFrame, totalWrenchMatrix);
 
          previousCoP.setX(-wrenchFromRho.getAngularPartY() / wrenchFromRho.getLinearPartZ());
          previousCoP.setY(wrenchFromRho.getAngularPartX() / wrenchFromRho.getLinearPartZ());
@@ -440,12 +447,12 @@ public class PlaneContactStateToWrenchMatrixHelper
       }
    }
 
-   public Wrench getWrench()
+   public WrenchReadOnly getWrench()
    {
       return wrenchFromRho;
    }
 
-   private final SpatialForceVector unitSpatialForceVector = new SpatialForceVector();
+   private final SpatialForce unitSpatialForceVector = new SpatialForce();
 
    public void computeWrenchJacobianInFrame(ReferenceFrame frame, DenseMatrix64F matrixToPack)
    {
@@ -458,8 +465,8 @@ public class PlaneContactStateToWrenchMatrixHelper
             FrameVector3D basisVector = basisVectors[rhoIndex];
             basisVectorOrigin.changeFrame(frame);
             basisVector.changeFrame(frame);
-            unitSpatialForceVector.setIncludingFrame(basisVector, basisVectorOrigin);
-            unitSpatialForceVector.getMatrixColumn(matrixToPack, rhoIndex);
+            unitSpatialForceVector.setIncludingFrame(null, basisVector, basisVectorOrigin);
+            unitSpatialForceVector.get(0, rhoIndex, matrixToPack);
          }
          else
          {
@@ -491,7 +498,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       basisVectorToPack.normalize();
    }
 
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return yoPlaneContactState.getRigidBody();
    }

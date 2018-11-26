@@ -20,13 +20,14 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -34,6 +35,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class PelvisRotationalStateUpdaterTest
 {
@@ -60,7 +62,7 @@ public class PelvisRotationalStateUpdaterTest
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
 
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(randomFloatingChain.getRevoluteJoints());
       
       FullInverseDynamicsStructure inverseDynamicsStructure = createFullInverseDynamicsStructure(randomFloatingChain, joints);
@@ -88,7 +90,7 @@ public class PelvisRotationalStateUpdaterTest
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
 
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(randomFloatingChain.getRevoluteJoints());
       
       FullInverseDynamicsStructure inverseDynamicsStructure = createFullInverseDynamicsStructure(randomFloatingChain, joints);
@@ -117,7 +119,7 @@ public class PelvisRotationalStateUpdaterTest
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
 
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(randomFloatingChain.getRevoluteJoints());
       
       FullInverseDynamicsStructure inverseDynamicsStructure = createFullInverseDynamicsStructure(randomFloatingChain, joints);
@@ -134,57 +136,57 @@ public class PelvisRotationalStateUpdaterTest
       Twist twistExpected = new Twist();
       Quaternion rotationEstimated = new Quaternion();
       Twist twistEstimated = new Twist();
-      FloatingInverseDynamicsJoint rootJoint = inverseDynamicsStructure.getRootJoint();
+      FloatingJointBasics rootJoint = inverseDynamicsStructure.getRootJoint();
 
       setRandomRobotConfigurationAndUpdateSensors(joints, inverseDynamicsStructure, stateEstimatorSensorDefinitions, jointAndIMUSensorDataSource);
       
-      rootJoint.getRotation(rotationExpected);
-      rootJoint.getJointTwist(twistExpected);
+      rotationExpected.set(rootJoint.getJointPose().getOrientation());
+      twistExpected.setIncludingFrame(rootJoint.getJointTwist());
       
       // Reset the root joint state configuration so the test fails if the PelvisRotationalStateUpdater actually does not do anything.
-      rootJoint.setPositionAndRotation(new RigidBodyTransform());
-      rootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
+      rootJoint.setJointConfiguration(new RigidBodyTransform());
+      rootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
       
       // Need to initialize the sensor data source manually
       jointAndIMUSensorDataSource.initialize();
       pelvisRotationalStateUpdater.initialize();
 
-      rootJoint.getRotation(rotationEstimated);
-      rootJoint.getJointTwist(twistEstimated);
+      rotationEstimated.set(rootJoint.getJointPose().getOrientation());
+      twistEstimated.setIncludingFrame(rootJoint.getJointTwist());
       
       EuclidCoreTestTools.assertQuaternionGeometricallyEquals(rotationExpected, rotationEstimated, EPS);
-      EuclidCoreTestTools.assertTuple3DEquals(twistExpected.getAngularPartCopy(), twistEstimated.getAngularPartCopy(), EPS);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(twistExpected.getAngularPart()), new Vector3D(twistEstimated.getAngularPart()), EPS);
       
       for (int i = 0; i < 1000; i++)
       {
          setRandomRobotConfigurationAndUpdateSensors(joints, inverseDynamicsStructure, stateEstimatorSensorDefinitions, jointAndIMUSensorDataSource);
          
-         rootJoint.getRotation(rotationExpected);
-         rootJoint.getJointTwist(twistExpected);
+         rotationExpected.set(rootJoint.getJointPose().getOrientation());
+         twistExpected.setIncludingFrame(rootJoint.getJointTwist());
          
          // Reset the root joint state configuration so the test fails if the PelvisRotationalStateUpdater actually does not do anything.
-         rootJoint.setPositionAndRotation(new RigidBodyTransform());
-         rootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
+         rootJoint.setJointConfiguration(new RigidBodyTransform());
+         rootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
          
          // Need to run the sensor data source manually
          jointAndIMUSensorDataSource.startComputation(0, 0, -1);
          pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
 
-         rootJoint.getRotation(rotationEstimated);
-         rootJoint.getJointTwist(twistEstimated);
+         rotationEstimated.set(rootJoint.getJointPose().getOrientation());
+         twistEstimated.setIncludingFrame(rootJoint.getJointTwist());
          
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals(rotationExpected, rotationEstimated, EPS);
-         EuclidCoreTestTools.assertTuple3DEquals(twistExpected.getAngularPartCopy(), twistEstimated.getAngularPartCopy(), EPS);
+         EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(twistExpected.getAngularPart()), new Vector3D(twistEstimated.getAngularPart()), EPS);
       }
    }
 
    private void setRandomRobotConfigurationAndUpdateSensors(ArrayList<RevoluteJoint> joints, FullInverseDynamicsStructure inverseDynamicsStructure,
          StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessing jointAndIMUSensorDataSource)
    {
-      ScrewTestTools.setRandomPositionAndOrientation(inverseDynamicsStructure.getRootJoint(), random);
-      ScrewTestTools.setRandomVelocity(inverseDynamicsStructure.getRootJoint(), random);
-      ScrewTestTools.setRandomPositions(joints, random);
-      ScrewTestTools.setRandomVelocities(joints, random);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, inverseDynamicsStructure.getRootJoint());
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, inverseDynamicsStructure.getRootJoint());
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
       inverseDynamicsStructure.getElevator().updateFramesRecursively();
       inverseDynamicsStructure.updateInternalState();
       
@@ -202,13 +204,13 @@ public class PelvisRotationalStateUpdaterTest
       for (int i = 0; i < stateEstimatorSensorDefinitions.getIMUSensorDefinitions().size(); i++)
       {
          IMUDefinition imuDefinition = stateEstimatorSensorDefinitions.getIMUSensorDefinitions().get(i);
-         RigidBody measurementLink = imuDefinition.getRigidBody();
+         RigidBodyBasics measurementLink = imuDefinition.getRigidBody();
          Twist twistIMU = new Twist();
          measurementLink.getBodyFixedFrame().getTwistOfFrame(twistIMU);
          twistIMU.changeFrame(imuSensors.get(i).getMeasurementFrame());
-         twistIMU.changeBodyFrameNoRelativeTwist(imuSensors.get(i).getMeasurementFrame());
+         twistIMU.setBodyFrame(imuSensors.get(i).getMeasurementFrame());
          
-         Vector3D sensorValue = twistIMU.getAngularPartCopy();
+         Vector3D sensorValue = new Vector3D(twistIMU.getAngularPart());
          jointAndIMUSensorDataSource.setAngularVelocitySensorValue(imuDefinition, sensorValue);
       }
    }
@@ -254,19 +256,19 @@ public class PelvisRotationalStateUpdaterTest
    private IMUDefinition createRandomIMUDefinition(String suffix, ArrayList<RevoluteJoint> joints)
    {
       int indexOfIMUParentJoint = RandomNumbers.nextInt(random, 0, joints.size() - 1);
-      RigidBody rigidBody = joints.get(indexOfIMUParentJoint).getSuccessor();
+      RigidBodyBasics rigidBody = joints.get(indexOfIMUParentJoint).getSuccessor();
       RigidBodyTransform transformFromIMUToJoint = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       IMUDefinition imuDefinition = new IMUDefinition("IMU" + suffix, rigidBody, transformFromIMUToJoint);
       return imuDefinition;
    }
 
-   private static FullInverseDynamicsStructure createFullInverseDynamicsStructure(ScrewTestTools.RandomFloatingChain randomFloatingChain,
+   private static FullInverseDynamicsStructure createFullInverseDynamicsStructure(RandomFloatingRevoluteJointChain randomFloatingChain,
          ArrayList<RevoluteJoint> joints)
    {
       int indexOfEstimationParentJoint = RandomNumbers.nextInt(random, 0, joints.size() - 1);
-      RigidBody estimationLink = joints.get(indexOfEstimationParentJoint).getSuccessor();
+      RigidBodyBasics estimationLink = joints.get(indexOfEstimationParentJoint).getSuccessor();
       SixDoFJoint rootInverseDynamicsJoint = randomFloatingChain.getRootJoint();
-      RigidBody elevator = randomFloatingChain.getElevator();
+      RigidBodyBasics elevator = randomFloatingChain.getElevator();
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
       return inverseDynamicsStructure;
    }

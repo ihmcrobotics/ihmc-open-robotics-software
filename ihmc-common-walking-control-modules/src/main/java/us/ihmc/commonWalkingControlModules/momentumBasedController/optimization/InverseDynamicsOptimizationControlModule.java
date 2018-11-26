@@ -28,12 +28,13 @@ import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactive
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -58,17 +59,17 @@ public class InverseDynamicsOptimizationControlModule
    private final WholeBodyControllerBoundCalculator boundCalculator;
    private final ExternalWrenchHandler externalWrenchHandler;
 
-   private final InverseDynamicsJoint[] jointsToOptimizeFor;
+   private final JointBasics[] jointsToOptimizeFor;
    private final int numberOfDoFs;
    private final int rhoSize;
 
-   private final OneDoFJoint[] oneDoFJoints;
+   private final OneDoFJointBasics[] oneDoFJoints;
    private final DenseMatrix64F qDDotMinMatrix, qDDotMaxMatrix;
 
    private final JointIndexHandler jointIndexHandler;
    private final YoDouble absoluteMaximumJointAcceleration = new YoDouble("absoluteMaximumJointAcceleration", registry);
-   private final Map<OneDoFJoint, YoDouble> jointMaximumAccelerations = new HashMap<>();
-   private final Map<OneDoFJoint, YoDouble> jointMinimumAccelerations = new HashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointMaximumAccelerations = new HashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointMinimumAccelerations = new HashMap<>();
    private final YoDouble rhoMin = new YoDouble("ControllerCoreRhoMin", registry);
    private final MomentumModuleSolution momentumModuleSolution;
 
@@ -95,7 +96,7 @@ public class InverseDynamicsOptimizationControlModule
 
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
-      numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
+      numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       rhoSize = toolbox.getRhoSize();
 
       double gravityZ = toolbox.getGravityZ();
@@ -125,7 +126,7 @@ public class InverseDynamicsOptimizationControlModule
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
          jointMaximumAccelerations.put(joint, new YoDouble("qdd_max_qp_" + joint.getName(), registry));
          jointMinimumAccelerations.put(joint, new YoDouble("qdd_min_qp_" + joint.getName(), registry));
       }
@@ -210,12 +211,12 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F qDDotSolution = qpSolver.getJointAccelerations();
       DenseMatrix64F rhoSolution = qpSolver.getRhos();
 
-      Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
+      Map<RigidBodyBasics, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
-      SpatialForceVector centroidalMomentumRateSolution = motionQPInputCalculator.computeCentroidalMomentumRateFromSolution(qDDotSolution);
-      Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
-      List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
+      SpatialForceReadOnly centroidalMomentumRateSolution = motionQPInputCalculator.computeCentroidalMomentumRateFromSolution(qDDotSolution);
+      Map<RigidBodyBasics, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
+      List<RigidBodyBasics> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
 
       momentumModuleSolution.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
       momentumModuleSolution.setExternalWrenchSolution(externalWrenchSolution);
@@ -238,7 +239,7 @@ public class InverseDynamicsOptimizationControlModule
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJointBasics joint = oneDoFJoints[i];
 
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
          double qDDotMin = qDDotMinMatrix.get(jointIndex, 0);
@@ -355,8 +356,8 @@ public class InverseDynamicsOptimizationControlModule
 
    public void submitExternalWrenchCommand(ExternalWrenchCommand command)
    {
-      RigidBody rigidBody = command.getRigidBody();
-      Wrench wrench = command.getExternalWrench();
+      RigidBodyBasics rigidBody = command.getRigidBody();
+      WrenchReadOnly wrench = command.getExternalWrench();
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 

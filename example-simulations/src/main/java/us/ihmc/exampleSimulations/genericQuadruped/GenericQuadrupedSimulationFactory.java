@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.genericQuadruped;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.communication.net.NetClassList;
+import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedJointNameMapAndContactDefinition;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
@@ -58,7 +59,9 @@ public class GenericQuadrupedSimulationFactory
       QuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters(false, CONTROL_DT);
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new GenericQuadrupedPositionBasedCrawlControllerParameters();
-      GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
+      GenericQuadrupedHighLevelControllerParameters highLevelControllerParameters = new GenericQuadrupedHighLevelControllerParameters(
+            modelFactory.getJointMap());
+      GenericQuadrupedSitDownParameters sitDownParameters = new GenericQuadrupedSitDownParameters();
 
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
@@ -100,6 +103,8 @@ public class GenericQuadrupedSimulationFactory
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
       simulationFactory.setInitialOffset(new QuadrupedInitialOffsetAndYaw());
+      simulationFactory.setHighLevelControllerParameters(highLevelControllerParameters);
+      simulationFactory.setSitDownParameters(sitDownParameters);
 
       return simulationFactory.createSimulation();
    }

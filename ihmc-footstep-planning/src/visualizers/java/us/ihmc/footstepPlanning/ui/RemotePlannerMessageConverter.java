@@ -1,6 +1,13 @@
 package us.ihmc.footstepPlanning.ui;
 
-import controller_msgs.msg.dds.*;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -17,16 +24,12 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.javaFXToolkit.messager.Messager;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
+import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
-
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class RemotePlannerMessageConverter
 {
@@ -44,7 +47,7 @@ public class RemotePlannerMessageConverter
    private final AtomicReference<FootstepPlanningResult> resultReference;
    private final AtomicReference<FootstepPlan> footstepPlanReference;
    private final AtomicReference<Integer> plannerRequestIdReference;
-   private final AtomicReference<Integer> sequenceIdReference;
+   private final AtomicReference<Integer> receivedPlanIdReference;
    private final AtomicReference<Boolean> acceptNewPlanarRegionsReference;
 
    public static RemotePlannerMessageConverter createRemoteConverter(Messager messager, String robotName)
@@ -72,7 +75,7 @@ public class RemotePlannerMessageConverter
       resultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResultTopic);
       footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanTopic);
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, 0);
-      sequenceIdReference = messager.createInput(FootstepPlannerMessagerAPI.SequenceIdTopic, 0);
+      receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic, 0);
       acceptNewPlanarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, true);
 
       registerPubSubs(ros2Node);
@@ -127,7 +130,6 @@ public class RemotePlannerMessageConverter
       FootstepPlannerType plannerType = FootstepPlannerType.fromByte(packet.getRequestedFootstepPlannerType());
       RobotSide initialSupportSide = RobotSide.fromByte(packet.getInitialStanceRobotSide());
       int plannerRequestId = packet.getPlannerRequestId();
-      int sequenceId = (int) packet.getSequenceId();
 
       double timeout = packet.getTimeout();
       double horizonLength = packet.getHorizonLength();
@@ -145,7 +147,6 @@ public class RemotePlannerMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSideTopic, initialSupportSide);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
-      messager.submitMessage(FootstepPlannerMessagerAPI.SequenceIdTopic, sequenceId);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength);
 
@@ -192,8 +193,8 @@ public class RemotePlannerMessageConverter
       planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
       result.setFootstepPlanningResult(planningResult.toByte());
       result.getFootstepDataList().set(convertToFootstepDataListMessage(footstepPlan));
-      result.setSequenceId(sequenceIdReference.get());
       result.setPlanId(plannerRequestIdReference.get());
+      receivedPlanIdReference.set(plannerRequestIdReference.get());;
 
       outputStatusPublisher.publish(result);
    }
@@ -209,7 +210,6 @@ public class RemotePlannerMessageConverter
 
       planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
       result.setFootstepPlanningResult(planningResult.toByte());
-      result.setSequenceId(sequenceIdReference.get());
       result.setPlanId(plannerRequestIdReference.get());
 
       outputStatusPublisher.publish(result);

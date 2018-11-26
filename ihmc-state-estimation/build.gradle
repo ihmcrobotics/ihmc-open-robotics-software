@@ -21,10 +21,10 @@ mainDependencies {
    compile group: "org.ejml", name: "dense64", version: "0.30"
    compile group: "org.ejml", name: "core", version: "0.30"
 
-   compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
+   compile group: "us.ihmc", name: "euclid-core", version: "0.7.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.6"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.6"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.7"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
@@ -37,7 +37,7 @@ testDependencies {
 
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.24.0"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.6"
-   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.6"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.7"
+   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.7"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

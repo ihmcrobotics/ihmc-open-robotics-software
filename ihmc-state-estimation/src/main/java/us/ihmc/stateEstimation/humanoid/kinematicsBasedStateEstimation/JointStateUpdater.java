@@ -1,11 +1,11 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
+import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -24,9 +24,9 @@ public class JointStateUpdater
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
-   private final RigidBody rootBody;
+   private final RigidBodyBasics rootBody;
 
-   private OneDoFJoint[] oneDoFJoints;
+   private OneDoFJointBasics[] oneDoFJoints;
    private final SensorOutputMapReadOnly sensorMap;
    private final IMUBasedJointStateEstimator iMUBasedJointStateEstimator;
 
@@ -40,8 +40,8 @@ public class JointStateUpdater
 
       this.sensorMap = sensorOutputMapReadOnly;
 
-      InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
-      this.oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
+      JointBasics[] joints = MultiBodySystemTools.collectSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
+      this.oneDoFJoints = MultiBodySystemTools.filterJoints(joints, OneDoFJointBasics.class);
 
       if (stateEstimatorParameters == null)
       {
@@ -57,7 +57,7 @@ public class JointStateUpdater
       parentRegistry.addChild(registry);
    }
 
-   public void setJointsToUpdate(OneDoFJoint[] oneDoFJoints)
+   public void setJointsToUpdate(OneDoFJointBasics[] oneDoFJoints)
    {
       this.oneDoFJoints = oneDoFJoints;
    }
@@ -120,12 +120,11 @@ public class JointStateUpdater
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint oneDoFJoint = oneDoFJoints[i];
+         OneDoFJointBasics oneDoFJoint = oneDoFJoints[i];
 
          double positionSensorData = sensorMap.getJointPositionProcessedOutput(oneDoFJoint);
          double velocitySensorData = sensorMap.getJointVelocityProcessedOutput(oneDoFJoint);
          double torqueSensorData = sensorMap.getJointTauProcessedOutput(oneDoFJoint);
-         boolean jointEnabledIndicator = sensorMap.isJointEnabled(oneDoFJoint);
 
          if (enableIMUBasedJointVelocityEstimator.getValue() && iMUBasedJointStateEstimator != null)
          {
@@ -140,11 +139,10 @@ public class JointStateUpdater
 
          oneDoFJoint.setQ(positionSensorData);
          oneDoFJoint.setQd(velocitySensorData);
-         oneDoFJoint.setTauMeasured(torqueSensorData);
-         oneDoFJoint.setEnabled(jointEnabledIndicator);
+         oneDoFJoint.setTau(torqueSensorData);
       }
 
       rootBody.updateFramesRecursively();
-      spatialAccelerationCalculator.compute();
+      spatialAccelerationCalculator.reset();
    }
 }

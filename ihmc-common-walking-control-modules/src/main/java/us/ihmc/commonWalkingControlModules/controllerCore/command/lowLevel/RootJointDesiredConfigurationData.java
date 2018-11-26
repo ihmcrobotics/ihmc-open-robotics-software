@@ -6,7 +6,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 
 public class RootJointDesiredConfigurationData implements RootJointDesiredConfigurationDataReadOnly, RootJointDesiredConfigurationDataBasics
 {
@@ -51,10 +51,10 @@ public class RootJointDesiredConfigurationData implements RootJointDesiredConfig
    }
 
    @Override
-   public void setDesiredAccelerationFromJoint(FloatingInverseDynamicsJoint sixDoFJoint)
+   public void setDesiredAccelerationFromJoint(FloatingJointBasics sixDoFJoint)
    {
       desiredAcceleration.reshape(6, 1);
-      sixDoFJoint.getDesiredAccelerationMatrix(desiredAcceleration, 0);
+      sixDoFJoint.getJointAcceleration(0, desiredAcceleration);
    }
 
    @Override

@@ -154,11 +154,10 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketClass(QuadrupedXGaitSettingsPacket.class); // fixme make a message
       registerPacketField(QuadrupedXGaitSettingsReadOnly.class); // fixme make a message
 
-      registerPacketClass(QuadrupedRequestedControllerStateMessage.class);
       registerPacketClass(QuadrupedRequestedSteppingStateMessage.class);
 
       registerPacketClass(QuadrupedSteppingStateChangeMessage.class);
-      registerPacketClass(QuadrupedControllerStateChangeMessage.class);
+      registerPacketClass(HighLevelStateChangeStatusMessage.class);
 
       registerPacketField(String.class);
       registerPacketField(boolean.class);

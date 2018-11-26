@@ -1,13 +1,17 @@
 package us.ihmc.commonWalkingControlModules.visualizer;
 
-import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -15,19 +19,15 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableBody;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 public class EstimatedFromTorquesWrenchVisualizer
 {
@@ -35,19 +35,19 @@ public class EstimatedFromTorquesWrenchVisualizer
    private static final double TORQUE_VECTOR_SCALE = 0.0015;
 
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final Map<RigidBody, YoFrameVector3D> forces = new LinkedHashMap<>();
-   private final Map<RigidBody, YoFrameVector3D> torques = new LinkedHashMap<>();
-   private final Map<RigidBody, YoFramePoint3D> pointsOfApplication = new LinkedHashMap<>();
-   private final Map<RigidBody, YoGraphicVector> forceVisualizers = new LinkedHashMap<>();
-   private final Map<RigidBody, YoGraphicVector> torqueVisualizers = new LinkedHashMap<>();
-   private final Map<RigidBody, GeometricJacobian> jacobians = new LinkedHashMap<>();
-   private final Map<RigidBody, OneDoFJoint[]> jointLists = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoFrameVector3D> forces = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoFrameVector3D> torques = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoFramePoint3D> pointsOfApplication = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoGraphicVector> forceVisualizers = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoGraphicVector> torqueVisualizers = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, GeometricJacobian> jacobians = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, OneDoFJointBasics[]> jointLists = new LinkedHashMap<>();
 
    private final FrameVector3D tempVector = new FrameVector3D();
    private final FramePoint3D tempPoint = new FramePoint3D();
-   private final ArrayList<RigidBody> rigidBodies = new ArrayList<>();
+   private final ArrayList<RigidBodyBasics> rigidBodies = new ArrayList<>();
 
-   private final RigidBody rootBody;
+   private final RigidBodyBasics rootBody;
 
    private final DampedLeastSquaresSolver pseudoInverseSolver = new DampedLeastSquaresSolver(0, 0.005);
 
@@ -56,7 +56,7 @@ public class EstimatedFromTorquesWrenchVisualizer
    private final DenseMatrix64F jointTorquesVector = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F wrenchVector = new DenseMatrix64F(6, 1);
 
-   public static EstimatedFromTorquesWrenchVisualizer createWrenchVisualizerWithContactableBodies(String name, RigidBody rootBody,
+   public static EstimatedFromTorquesWrenchVisualizer createWrenchVisualizerWithContactableBodies(String name, RigidBodyBasics rootBody,
                                                                                                   List<? extends ContactablePlaneBody> contactableBodies,
                                                                                                   double vizScaling,
                                                                                                   YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -66,24 +66,24 @@ public class EstimatedFromTorquesWrenchVisualizer
                                                       parentRegistry);
    }
 
-   public EstimatedFromTorquesWrenchVisualizer(String name, GeometricJacobianHolder jacobianHolder, RigidBody rootBody, List<RigidBody> rigidBodies,
+   public EstimatedFromTorquesWrenchVisualizer(String name, GeometricJacobianHolder jacobianHolder, RigidBodyBasics rootBody, List<RigidBodyBasics> rigidBodies,
                                                double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this(name, jacobianHolder, rootBody, rigidBodies, vizScaling, yoGraphicsListRegistry, parentRegistry, YoAppearance.AliceBlue(),
            YoAppearance.YellowGreen());
    }
 
-   public EstimatedFromTorquesWrenchVisualizer(String name, GeometricJacobianHolder jacobianHolder, RigidBody rootBody, List<RigidBody> rigidBodies,
+   public EstimatedFromTorquesWrenchVisualizer(String name, GeometricJacobianHolder jacobianHolder, RigidBodyBasics rootBody, List<RigidBodyBasics> rigidBodies,
                                                double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry,
                                                AppearanceDefinition forceAppearance, AppearanceDefinition torqueAppearance)
    {
-      for (RigidBody rigidBody : rigidBodies)
+      for (RigidBodyBasics rigidBody : rigidBodies)
       {
-         OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(rootBody, rigidBody);
+         OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(rootBody, rigidBody);
          jointLists.put(rigidBody, joints);
          if (jacobianHolder != null)
          {
-            long jacobianId = jacobianHolder.getOrCreateGeometricJacobian(joints, rigidBody.getBodyFixedFrame());
+            int jacobianId = jacobianHolder.getOrCreateGeometricJacobian(joints, rigidBody.getBodyFixedFrame());
             jacobians.put(rigidBody, jacobianHolder.getJacobian(jacobianId));
          }
          else
@@ -94,9 +94,9 @@ public class EstimatedFromTorquesWrenchVisualizer
       }
       if (jacobianHolder != null)
       {
-         for (RigidBody rigidBody : rigidBodies)
+         for (RigidBodyBasics rigidBody : rigidBodies)
          {
-            long jacobianId = jacobianHolder.getOrCreateGeometricJacobian(rootBody, rigidBody, ReferenceFrame.getWorldFrame());
+            int jacobianId = jacobianHolder.getOrCreateGeometricJacobian(rootBody, rigidBody, ReferenceFrame.getWorldFrame());
             jacobians.put(rigidBody, jacobianHolder.getJacobian(jacobianId));
          }
       }
@@ -106,7 +106,7 @@ public class EstimatedFromTorquesWrenchVisualizer
       YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
 
       this.rigidBodies.addAll(rigidBodies);
-      for (RigidBody rigidBody : rigidBodies)
+      for (RigidBodyBasics rigidBody : rigidBodies)
       {
          String prefix = name + rigidBody.getName();
          YoFrameVector3D force = new YoFrameVector3D(prefix + "Force", ReferenceFrame.getWorldFrame(), registry);
@@ -138,7 +138,7 @@ public class EstimatedFromTorquesWrenchVisualizer
    {
       for (int i = 0; i < rigidBodies.size(); i++)
       {
-         RigidBody rigidBody = rigidBodies.get(i);
+         RigidBodyBasics rigidBody = rigidBodies.get(i);
 
          GeometricJacobian jacobian = jacobians.get(rigidBody);
          jacobian.compute();
@@ -150,9 +150,9 @@ public class EstimatedFromTorquesWrenchVisualizer
          pseudoInverseSolver.setA(jacobianMatrix);
          pseudoInverseSolver.invert(jacobianInverseMatrix);
 
-         OneDoFJoint[] joints = jointLists.get(rigidBody);
+         OneDoFJointBasics[] joints = jointLists.get(rigidBody);
          for (int jointIndex = 0; jointIndex < jointLists.get(rigidBody).length; jointIndex++)
-            jointChainTorquesVector.set(jointIndex, 0, joints[jointIndex].getTauMeasured());
+            jointChainTorquesVector.set(jointIndex, 0, joints[jointIndex].getTau());
 
          CommonOps.multTransA(jacobianInverseMatrix, jointChainTorquesVector, wrenchVector);
          CommonOps.scale(-1.0, wrenchVector);
@@ -173,9 +173,9 @@ public class EstimatedFromTorquesWrenchVisualizer
       }
    }
 
-   private static List<RigidBody> extractRigidBodyList(List<? extends ContactableBody> contactableBodies)
+   private static List<RigidBodyBasics> extractRigidBodyList(List<? extends ContactableBody> contactableBodies)
    {
-      List<RigidBody> ret = new ArrayList<>(contactableBodies.size());
+      List<RigidBodyBasics> ret = new ArrayList<>(contactableBodies.size());
       for (int i = 0; i < contactableBodies.size(); i++)
          ret.add(contactableBodies.get(i).getRigidBody());
       return ret;

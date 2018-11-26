@@ -8,15 +8,16 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullLeggedRobotModel;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -33,7 +34,7 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry;
    private final GeometricJacobian jacobian;
-   private final OneDoFJoint[] jointsFromRootToSole;
+   private final OneDoFJointBasics[] jointsFromRootToSole;
 
    private final DenseMatrix64F jacobianInverse;
    private final DenseMatrix64F footWrench = new DenseMatrix64F(6, 1);
@@ -64,12 +65,12 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
       this.contactThresholdForce = contactThresholdForce;
       this.isInContact = new GlitchFilteredYoBoolean(prefix + "IsInContact", registry, pastThreshold, filterWindowSize);
       
-      RigidBody body = robotModel.getRootBody();
-      RigidBody foot = robotModel.getFoot(robotSegment);
+      RigidBodyBasics body = robotModel.getRootBody();
+      RigidBodyBasics foot = robotModel.getFoot(robotSegment);
       soleFrame = robotModel.getSoleFrame(robotSegment);
       jacobian = new GeometricJacobian(body, foot, soleFrame);
       
-      jointsFromRootToSole = ScrewTools.createOneDoFJointPath(body, foot);
+      jointsFromRootToSole = MultiBodySystemTools.createOneDoFJointPath(body, foot);
       
       jointTorques = new DenseMatrix64F(jointsFromRootToSole.length, 1);
       jacobianInverse = new DenseMatrix64F(jointsFromRootToSole.length, 3);
@@ -84,8 +85,8 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
    {
       for(int i = 0; i < jointsFromRootToSole.length; i++)
       {
-         OneDoFJoint oneDoFJoint = jointsFromRootToSole[i];
-         jointTorques.set(i, 0, oneDoFJoint.getTauMeasured());
+         OneDoFJointBasics oneDoFJoint = jointsFromRootToSole[i];
+         jointTorques.set(i, 0, oneDoFJoint.getTau());
       }
       
       jacobian.compute();
@@ -94,10 +95,10 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
       solver.invert(jacobianInverse);
       
       CommonOps.multTransA(jacobianInverse, jointTorques, footWrench);
-      wrench.set(jacobian.getJacobianFrame(), footWrench);
+      wrench.setIncludingFrame(jacobian.getJacobianFrame(), footWrench);
       
       footForce.setToZero(jacobian.getJacobianFrame());
-      wrench.getLinearPart(footForce);
+      footForce.set(wrench.getLinearPart());
       footForce.changeFrame(ReferenceFrame.getWorldFrame());
       
       measuredZForce.set(footForce.getZ() * -1.0);
@@ -133,7 +134,7 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
    @Override
    public void computeAndPackFootWrench(Wrench footWrenchToPack)
    {
-      footWrenchToPack.set(wrench);
+      footWrenchToPack.setIncludingFrame(wrench);
    }
 
    @Override

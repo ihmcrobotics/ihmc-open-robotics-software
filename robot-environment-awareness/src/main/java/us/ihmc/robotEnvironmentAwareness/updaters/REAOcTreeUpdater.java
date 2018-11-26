@@ -15,7 +15,7 @@ import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.PointCloud;
 import us.ihmc.jOctoMap.pointCloud.Scan;
-import us.ihmc.javaFXToolkit.messager.Messager;
+import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;

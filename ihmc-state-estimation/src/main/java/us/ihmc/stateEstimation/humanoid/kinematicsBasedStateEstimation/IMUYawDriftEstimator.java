@@ -10,11 +10,11 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -36,25 +36,25 @@ public class IMUYawDriftEstimator implements YawDriftProvider
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final int numberOfFeet;
-   private final List<RigidBody> allFeet;
-   private final List<RigidBody> trustedFeet = new ArrayList<>();
-   private final Map<RigidBody, FootSwitchInterface> footSwitches;
-   private final Map<RigidBody, ReferenceFrame> footSoleFrames = new LinkedHashMap<>();
+   private final List<RigidBodyBasics> allFeet;
+   private final List<RigidBodyBasics> trustedFeet = new ArrayList<>();
+   private final Map<RigidBodyBasics, FootSwitchInterface> footSwitches;
+   private final Map<RigidBodyBasics, ReferenceFrame> footSoleFrames = new LinkedHashMap<>();
 
    private final YoInteger numberOfFeetTrusted = new YoInteger("numberOfFeetTrustedIMUDrift", registry);
 
-   private final Map<RigidBody, GlitchFilteredYoBoolean> areFeetTrusted = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, GlitchFilteredYoBoolean> areFeetTrusted = new LinkedHashMap<>();
    private final DoubleProvider delayBeforeTrustingFoot;
 
    private final YoFramePoint3D referenceAverageFootPosition = new YoFramePoint3D("referenceAverageFootPositionIMUDrift", worldFrame, registry);
-   private final Map<RigidBody, YoFramePoint3D> referenceFootPositions = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoFramePoint3D> referenceFootPositions = new LinkedHashMap<>();
    private final YoFramePoint3D currentAverageFootPosition = new YoFramePoint3D("currentAverageFootPositionIMUDrift", worldFrame, registry);
-   private final Map<RigidBody, YoFramePoint3D> currentFootPositions = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoFramePoint3D> currentFootPositions = new LinkedHashMap<>();
 
    private final DoubleProvider footLinearVelocityThreshold;
-   private final Map<RigidBody, YoDouble> currentFootLinearVelocities = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoDouble> currentFootLinearVelocities = new LinkedHashMap<>();
 
-   private final Map<RigidBody, YoDouble> estimatedYawDriftPerFoot = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoDouble> estimatedYawDriftPerFoot = new LinkedHashMap<>();
 
    private final YoDouble estimatedYawDrift = new YoDouble("estimatedRawYawDrift", registry);
    private final YoDouble estimatedYawDriftPrevious = new YoDouble("estimatedYawDriftPrevious", registry);
@@ -90,8 +90,8 @@ public class IMUYawDriftEstimator implements YawDriftProvider
 
    private final double estimatorDT;
 
-   public IMUYawDriftEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, Map<RigidBody, FootSwitchInterface> footSwitches,
-                               Map<RigidBody, ? extends ContactablePlaneBody> feet, RobotMotionStatusHolder robotMotionStatusFromController,
+   public IMUYawDriftEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
+                               Map<RigidBodyBasics, ? extends ContactablePlaneBody> feet, RobotMotionStatusHolder robotMotionStatusFromController,
                                StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
    {
       this.robotMotionStatusFromController = robotMotionStatusFromController;
@@ -114,7 +114,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
 
       for (int i = 0; i < numberOfFeet; i++)
       {
-         RigidBody foot = allFeet.get(i);
+         RigidBodyBasics foot = allFeet.get(i);
          String footNamePascalCase = FormattingTools.underscoredToCamelCase(foot.getName(), true);
 
          GlitchFilteredYoBoolean isFootTrusted = new GlitchFilteredYoBoolean("is" + footNamePascalCase + "TrustedIMUDrift", registry, 0);
@@ -126,7 +126,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
 
       for (int i = 0; i < numberOfFeet; i++)
       {
-         RigidBody foot = allFeet.get(i);
+         RigidBodyBasics foot = allFeet.get(i);
          String footNameCamelCase = FormattingTools.underscoredToCamelCase(foot.getName(), false);
          YoFramePoint3D referenceFootPosition = new YoFramePoint3D(footNameCamelCase + "IMUDriftReference", worldFrame, registry);
          referenceFootPositions.put(foot, referenceFootPosition);
@@ -135,7 +135,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
 
       for (int i = 0; i < numberOfFeet; i++)
       {
-         RigidBody foot = allFeet.get(i);
+         RigidBodyBasics foot = allFeet.get(i);
          String footNameCamelCase = FormattingTools.underscoredToCamelCase(foot.getName(), false);
          YoFramePoint3D currentFootPosition = new YoFramePoint3D(footNameCamelCase + "IMUDriftCurrentPosition", worldFrame, registry);
          currentFootPositions.put(foot, currentFootPosition);
@@ -144,7 +144,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
 
       for (int i = 0; i < numberOfFeet; i++)
       {
-         RigidBody foot = allFeet.get(i);
+         RigidBodyBasics foot = allFeet.get(i);
          String footNameCamelCase = FormattingTools.underscoredToCamelCase(foot.getName(), false);
          YoDouble currentFootLinearVelocity = new YoDouble(footNameCamelCase + "IMUDriftCurrentLinearVelocityMag", registry);
          currentFootLinearVelocities.put(foot, currentFootLinearVelocity);
@@ -153,7 +153,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
 
       for (int i = 0; i < numberOfFeet; i++)
       {
-         RigidBody foot = allFeet.get(i);
+         RigidBodyBasics foot = allFeet.get(i);
          String footNameCamelCase = FormattingTools.underscoredToCamelCase(foot.getName(), false);
          YoDouble estimatedYawDriftFoot = new YoDouble(footNameCamelCase + "EstimatedYawDrift", registry);
          estimatedYawDriftPerFoot.put(foot, estimatedYawDriftFoot);
@@ -180,9 +180,9 @@ public class IMUYawDriftEstimator implements YawDriftProvider
    {
       for (int i = 0; i < numberOfFeet; i++)
       {
-         RigidBody foot = allFeet.get(i);
+         RigidBodyBasics foot = allFeet.get(i);
          foot.getBodyFixedFrame().getTwistOfFrame(footTwist);
-         footTwist.getLinearPart(footLinearVelocity);
+         footLinearVelocity.setIncludingFrame(footTwist.getLinearPart());
          currentFootLinearVelocities.get(foot).set(footLinearVelocity.length());
       }
    }
@@ -201,7 +201,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
 
       for (int i = 0; i < numberOfFeet; i++)
       {
-         RigidBody foot = allFeet.get(i);
+         RigidBodyBasics foot = allFeet.get(i);
          GlitchFilteredYoBoolean isFootTrusted = areFeetTrusted.get(foot);
 
          boolean hasFootHitGround;
@@ -231,7 +231,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       {
          for (int i = 0; i < numberOfFeet; i++)
          {
-            RigidBody foot = allFeet.get(i);
+            RigidBodyBasics foot = allFeet.get(i);
             footPosition.setToZero(footSoleFrames.get(foot));
             referenceFootPositions.get(foot).setMatchingFrame(footPosition);
          }
@@ -239,7 +239,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
          referenceAverageFootPosition.setToZero();
          for (int i = 0; i < trustedFeet.size(); i++)
          {
-            RigidBody foot = trustedFeet.get(i);
+            RigidBodyBasics foot = trustedFeet.get(i);
             referenceAverageFootPosition.add(referenceFootPositions.get(foot));
          }
          referenceAverageFootPosition.scale(1.0 / trustedFeet.size());
@@ -269,7 +269,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       {
          for (int i = 0; i < numberOfFeet; i++)
          {
-            RigidBody foot = allFeet.get(i);
+            RigidBodyBasics foot = allFeet.get(i);
             footPosition.setToZero(footSoleFrames.get(foot));
             currentFootPositions.get(foot).setMatchingFrame(footPosition);
          }
@@ -277,7 +277,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
          currentAverageFootPosition.setToZero();
          for (int i = 0; i < numberOfFeet; i++)
          {
-            RigidBody foot = allFeet.get(i);
+            RigidBodyBasics foot = allFeet.get(i);
             currentAverageFootPosition.add(currentFootPositions.get(foot));
          }
          currentAverageFootPosition.scale(1.0 / numberOfFeet);
@@ -301,7 +301,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
 
       for (int i = 0; i < numberOfFeet; i++)
       {
-         RigidBody foot = allFeet.get(i);
+         RigidBodyBasics foot = allFeet.get(i);
          averagePosition.setIncludingFrame(referenceAverageFootPosition);
          footPosition.setIncludingFrame(referenceFootPositions.get(foot));
          referenceAverageToFootPosition.setToZero(worldFrame);

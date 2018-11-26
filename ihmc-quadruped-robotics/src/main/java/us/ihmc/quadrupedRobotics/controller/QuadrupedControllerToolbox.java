@@ -1,5 +1,10 @@
 package us.ihmc.quadrupedRobotics.controller;
 
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
+
+import java.awt.Color;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -8,8 +13,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
-import us.ihmc.quadrupedRobotics.controller.toolbox.*;
+import us.ihmc.quadrupedRobotics.controller.toolbox.DivergentComponentOfMotionEstimator;
+import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
+import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedFallDetector;
+import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedSoleForceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.YoGroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -19,19 +29,11 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.awt.*;
-import java.util.List;
-
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class QuadrupedControllerToolbox
 {
@@ -104,7 +106,7 @@ public class QuadrupedControllerToolbox
          upcomingGroundPlanePositions.set(robotQuadrant, new YoFramePoint3D(robotQuadrant.getCamelCaseName() + "UpcomingGroundPlanePosition", worldFrame, registry));
       }
 
-      comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
+      comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
       dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassFrame(), linearInvertedPendulumModel, registry, yoGraphicsListRegistry);
 
       fallDetector = new QuadrupedFallDetector(referenceFrames.getBodyFrame(), referenceFrames.getSoleFrames(), dcmPositionEstimator, registry);
@@ -118,7 +120,7 @@ public class QuadrupedControllerToolbox
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          ContactablePlaneBody contactableFoot = contactableFeet.get(robotQuadrant);
-         RigidBody rigidBody = contactableFoot.getRigidBody();
+         RigidBodyBasics rigidBody = contactableFoot.getRigidBody();
          YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getSoleFrame().getName(), rigidBody, contactableFoot.getSoleFrame(),
                                                                     contactableFoot.getContactPoints2d(), coefficientOfFriction, registry);
 
@@ -137,8 +139,8 @@ public class QuadrupedControllerToolbox
 
       if(centerOfMassDataHolder == null)
       {
-         comJacobian.compute();
-         comJacobian.getCenterOfMassVelocity(comVelocityEstimate);
+         comJacobian.reset();
+         comVelocityEstimate.setIncludingFrame(comJacobian.getCenterOfMassVelocity());
       }
       else
       {

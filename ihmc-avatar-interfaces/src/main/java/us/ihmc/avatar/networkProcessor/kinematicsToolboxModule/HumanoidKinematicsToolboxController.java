@@ -25,12 +25,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -152,9 +152,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       legJointLimitReductionFactors.put(LegJointName.ANKLE_ROLL, ankleReductionFactor);
    }
 
-   private static Collection<RigidBody> createListOfControllableRigidBodies(FullHumanoidRobotModel desiredFullRobotModel)
+   private static Collection<RigidBodyBasics> createListOfControllableRigidBodies(FullHumanoidRobotModel desiredFullRobotModel)
    {
-      List<RigidBody> listOfControllableRigidBodies = new ArrayList<>();
+      List<RigidBodyBasics> listOfControllableRigidBodies = new ArrayList<>();
 
       listOfControllableRigidBodies.add(desiredFullRobotModel.getChest());
       listOfControllableRigidBodies.add(desiredFullRobotModel.getPelvis());
@@ -227,7 +227,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody foot = desiredFullRobotModel.getFoot(robotSide);
+         RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
          initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
       }
    }
@@ -254,7 +254,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          if (!isFootInSupport.get(robotSide).getBooleanValue())
             continue;
 
-         RigidBody foot = desiredFullRobotModel.getFoot(robotSide);
+         RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
 
          // Do not hold the foot position if the user is already controlling it.
          if (isUserControllingRigidBody(foot))
@@ -318,7 +318,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          for (LegJointName legJointName : desiredFullRobotModel.getRobotSpecificJointNames().getLegJointNames())
          {
-            OneDoFJoint joint = desiredFullRobotModel.getLegJoint(robotSide, legJointName);
+            OneDoFJointBasics joint = desiredFullRobotModel.getLegJoint(robotSide, legJointName);
             double reductionFactor = legJointLimitReductionFactors.get(legJointName).getDoubleValue();
             jointLimitReductionCommand.addReductionFactor(joint, reductionFactor);
          }

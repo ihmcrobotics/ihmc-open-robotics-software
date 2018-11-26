@@ -33,10 +33,10 @@ mainDependencies {
    compile group: "org.jmonkeyengine", name: "jme3-core", version: "3.2.0-171208"
    compile "org.boofcv:geo:0.19"
 
-   compile group: "us.ihmc", name: "euclid", version: "0.9.3"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
+   compile group: "us.ihmc", name: "euclid", version: "0.10.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.6"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.6"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.7"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
@@ -48,7 +48,7 @@ testDependencies {
 
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.24.0"
-   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.6"
+   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.7"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: "source"
 }

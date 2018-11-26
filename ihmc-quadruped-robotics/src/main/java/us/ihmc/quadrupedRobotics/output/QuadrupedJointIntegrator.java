@@ -1,8 +1,7 @@
 package us.ihmc.quadrupedRobotics.output;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -12,7 +11,7 @@ public class QuadrupedJointIntegrator
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry;
 
-   private final OneDoFJoint controllerJoint;
+   private final OneDoFJointBasics controllerJoint;
    private final JointDesiredOutputBasics jointDesiredSetpoints;
 
    private final double controlDT;
@@ -20,7 +19,8 @@ public class QuadrupedJointIntegrator
    private final YoDouble integratedPosition;
    private boolean resetIntegrators;
 
-   public QuadrupedJointIntegrator(OneDoFJoint controllerJoint, JointDesiredOutputBasics jointDesiredSetpoints, double controlDT, YoVariableRegistry parentRegistry)
+   public QuadrupedJointIntegrator(OneDoFJointBasics controllerJoint, JointDesiredOutputBasics jointDesiredSetpoints, double controlDT,
+                                   YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
 
@@ -65,9 +65,8 @@ public class QuadrupedJointIntegrator
       if (!jointDesiredSetpoints.hasDesiredVelocity())
       {
          double kd = jointDesiredSetpoints.hasVelocityIntegrationBreakFrequency() ?
-               AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointDesiredSetpoints.getVelocityIntegrationBreakFrequency(), controlDT) :
-               1.0;
-         integratedVelocity.add(kd * (controllerJoint.getQd() - integratedVelocity.getDoubleValue()) + jointDesiredSetpoints.getDesiredAcceleration() * controlDT);
+               1.0 - AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointDesiredSetpoints.getVelocityIntegrationBreakFrequency(), controlDT) : 1.0;
+         integratedVelocity.sub(kd * integratedVelocity.getDoubleValue() + jointDesiredSetpoints.getDesiredAcceleration() * controlDT);
          jointDesiredSetpoints.setDesiredVelocity(integratedVelocity.getDoubleValue());
       }
       else
@@ -79,8 +78,7 @@ public class QuadrupedJointIntegrator
       if (!jointDesiredSetpoints.hasDesiredPosition())
       {
          double kp = jointDesiredSetpoints.hasPositionIntegrationBreakFrequency() ?
-               AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointDesiredSetpoints.getPositionIntegrationBreakFrequency(), controlDT) :
-               1.0;
+               1.0 - AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointDesiredSetpoints.getPositionIntegrationBreakFrequency(), controlDT) : 1.0;
          integratedPosition.add(kp * (controllerJoint.getQ() - integratedPosition.getDoubleValue()) + integratedVelocity.getDoubleValue() * controlDT);
          jointDesiredSetpoints.setDesiredPosition(integratedPosition.getDoubleValue());
       }

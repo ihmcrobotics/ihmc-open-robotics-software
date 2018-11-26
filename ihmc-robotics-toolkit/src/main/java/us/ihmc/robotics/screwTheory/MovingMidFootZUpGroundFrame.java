@@ -3,6 +3,9 @@ package us.ihmc.robotics.screwTheory;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
 public class MovingMidFootZUpGroundFrame extends MovingReferenceFrame
 {
@@ -45,18 +48,18 @@ public class MovingMidFootZUpGroundFrame extends MovingReferenceFrame
    @Override
    protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
    {
-      Twist twistOfFrameOne = frameOne.getTwistOfFrame();
-      Twist twistOfFrameTwo = frameTwo.getTwistOfFrame();
+      TwistReadOnly twistOfFrameOne = frameOne.getTwistOfFrame();
+      TwistReadOnly twistOfFrameTwo = frameTwo.getTwistOfFrame();
 
-      twistOfFrameOne.getLinearPart(linearVelocityOne);
-      twistOfFrameTwo.getLinearPart(linearVelocityTwo);
+      linearVelocityOne.setIncludingFrame(twistOfFrameOne.getLinearPart());
+      linearVelocityTwo.setIncludingFrame(twistOfFrameTwo.getLinearPart());
 
       linearVelocityOne.changeFrame(this);
       linearVelocityTwo.changeFrame(this);
       linearVelocity.setToZero(this);
       linearVelocity.interpolate(linearVelocityOne, linearVelocityTwo, 0.5);
       twistRelativeToParentToPack.setToZero(this, getParent(), this);
-      twistRelativeToParentToPack.setLinearPart(linearVelocity);
+      twistRelativeToParentToPack.getLinearPart().set(linearVelocity);
 
       if (poseOne.getZ() < poseTwo.getZ())
          twistRelativeToParentToPack.setLinearPartZ(linearVelocityOne.getZ());

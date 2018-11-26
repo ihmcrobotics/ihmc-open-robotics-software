@@ -1,19 +1,21 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.AbortPlanningTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
+
+import java.util.concurrent.atomic.AtomicReference;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.TopicListener;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+import us.ihmc.messager.TopicListener;
 
 public class StatusTabController
 {
@@ -24,7 +26,7 @@ public class StatusTabController
    @FXML
    private TextField requestID;
    @FXML
-   private TextField sequenceID;
+   private TextField receivedRequestId;
    @FXML
    private TextField timeTaken;
    @FXML
@@ -34,13 +36,26 @@ public class StatusTabController
    @FXML
    private ToggleButton acceptNewPlanarRegions;
 
+   private AtomicReference<Integer> currentPlannerRequestId;
+   
    @FXML
    public void computePath()
    {
       if (verbose)
          PrintTools.info(this, "Clicked compute path...");
 
+      int newRequestID = currentPlannerRequestId.get() + 1;
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, newRequestID);
       messager.submitMessage(ComputePathTopic, true);
+   }
+   
+   @FXML
+   public void abortPlanning()
+   {
+      if (verbose)
+         PrintTools.info(this, "Clicked abort planning...");
+      
+      messager.submitMessage(AbortPlanningTopic, true);;
    }
 
    private JavaFXMessager messager;
@@ -49,6 +64,7 @@ public class StatusTabController
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
+      currentPlannerRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, -1);
    }
 
    private void setupControls()
@@ -79,7 +95,7 @@ public class StatusTabController
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTypeTopic, plannerTypeComboBox.valueProperty(), true);
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, new TextViewerListener<>(requestID));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.SequenceIdTopic, new TextViewerListener<>(sequenceID));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic, new TextViewerListener<>(receivedRequestId));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, new TextViewerListener<>(timeTaken));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlanningResultTopic, new TextViewerListener<>(planningResult));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerStatusTopic, new TextViewerListener<>(plannerStatus));

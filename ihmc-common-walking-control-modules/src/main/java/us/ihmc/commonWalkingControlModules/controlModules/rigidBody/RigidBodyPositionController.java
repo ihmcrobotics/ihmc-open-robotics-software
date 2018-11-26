@@ -11,8 +11,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -31,7 +31,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    private final FrameQuaternion currentOrientation = new FrameQuaternion();
    private final RigidBodyPositionControlHelper positionHelper;
 
-   public RigidBodyPositionController(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
+   public RigidBodyPositionController(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, Collection<ReferenceFrame> trajectoryFrames,
                                       ReferenceFrame controlFrame, ReferenceFrame baseFrame, YoDouble yoTime, YoVariableRegistry parentRegistry,
                                       YoGraphicsListRegistry graphicsListRegistry)
    {

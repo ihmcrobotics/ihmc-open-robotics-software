@@ -13,17 +13,19 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.Momentum;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -40,7 +42,7 @@ public class CentroidalMomentumMatrixSCSTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      RigidBody elevator = new RigidBody("elevator", worldFrame);
+      RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
       double gravity = 0.0;
 
       int numberOfJoints = 3;
@@ -50,8 +52,8 @@ public class CentroidalMomentumMatrixSCSTest
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
       centerOfMassFrame.update();
-      CentroidalMomentumMatrix centroidalMomentumMatrix = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
-      centroidalMomentumMatrix.compute();
+      CentroidalMomentumCalculator centroidalMomentumMatrix = new CentroidalMomentumCalculator(elevator, centerOfMassFrame);
+      centroidalMomentumMatrix.reset();
 
       Momentum comMomentum = computeCoMMomentum(elevator, centerOfMassFrame, centroidalMomentumMatrix);
 
@@ -84,12 +86,12 @@ public class CentroidalMomentumMatrixSCSTest
       robot.addRootJoint(rootJoint);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      RigidBody elevator = new RigidBody("elevator", worldFrame);
+      RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator);
-      ScrewTools.addRigidBody("rigidBody", sixDoFJoint, momentOfInertia, mass, comOffset);
+      new RigidBody("rigidBody", sixDoFJoint, momentOfInertia, mass, comOffset);
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
-      CentroidalMomentumMatrix centroidalMomentumMatrix = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
+      CentroidalMomentumCalculator centroidalMomentumMatrix = new CentroidalMomentumCalculator(elevator, centerOfMassFrame);
 
       int nTests = 10;
       for (int i = 0; i < nTests; i++)
@@ -112,18 +114,18 @@ public class CentroidalMomentumMatrixSCSTest
          Vector3D angularMomentum = new Vector3D();
          robot.computeCOMMomentum(comPoint, linearMomentum, angularMomentum);
 
-         sixDoFJoint.setPosition(position);
-         sixDoFJoint.setRotation(rotation);
+         sixDoFJoint.setJointPosition(position);
+         sixDoFJoint.setJointOrientation(rotation);
          Twist jointTwist = new Twist();
-         sixDoFJoint.getJointTwist(jointTwist);
-         jointTwist.setAngularPart(angularVelocity);
-         jointTwist.setLinearPart(linearVelocityInBody);
+         jointTwist.setIncludingFrame(sixDoFJoint.getJointTwist());
+         jointTwist.getAngularPart().set(angularVelocity);
+         jointTwist.getLinearPart().set(linearVelocityInBody);
          sixDoFJoint.setJointTwist(jointTwist);
          elevator.updateFramesRecursively();
 
          centerOfMassFrame.update();
 
-         centroidalMomentumMatrix.compute();
+         centroidalMomentumMatrix.reset();
          Momentum comMomentum = computeCoMMomentum(elevator, centerOfMassFrame, centroidalMomentumMatrix);
 
          EuclidCoreTestTools.assertTuple3DEquals(linearMomentum, comMomentum.getLinearPart(), 1e-12);
@@ -131,14 +133,13 @@ public class CentroidalMomentumMatrixSCSTest
       }
    }
 
-   public static Momentum computeCoMMomentum(RigidBody elevator, ReferenceFrame centerOfMassFrame, CentroidalMomentumMatrix centroidalMomentumMatrix)
+   public static Momentum computeCoMMomentum(RigidBodyBasics elevator, ReferenceFrame centerOfMassFrame, CentroidalMomentumCalculator centroidalMomentumMatrix)
    {
-      DenseMatrix64F mat = centroidalMomentumMatrix.getMatrix();
-//      InverseDynamicsJoint[] jointList = ScrewTools.computeJointsInOrder(elevator); //deprecated method
-      InverseDynamicsJoint[] jointList = ScrewTools.computeSubtreeJoints(elevator);
+      DenseMatrix64F mat = centroidalMomentumMatrix.getCentroidalMomentumMatrix();
+      JointBasics[] jointList = MultiBodySystemTools.collectSubtreeJoints(elevator);
 
-      DenseMatrix64F jointVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointList), 1);
-      ScrewTools.getJointVelocitiesMatrix(jointList, jointVelocities);
+      DenseMatrix64F jointVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointList), 1);
+      MultiBodySystemTools.extractJointsState(jointList, JointStateType.VELOCITY, jointVelocities);
 
       DenseMatrix64F comMomentumMatrix = MatrixTools.mult(mat, jointVelocities);
 

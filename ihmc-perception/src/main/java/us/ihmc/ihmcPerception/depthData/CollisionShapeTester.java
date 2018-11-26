@@ -5,9 +5,9 @@ import java.util.List;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class CollisionShapeTester
 {
@@ -17,14 +17,14 @@ public class CollisionShapeTester
    {
       addJoint(collissionBoxProvider, fullRobotModel.getRootJoint());
 
-      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
-      for (OneDoFJoint joint : joints)
+      OneDoFJointBasics[] joints = fullRobotModel.getOneDoFJoints();
+      for (OneDoFJointBasics joint : joints)
       {
          addJoint(collissionBoxProvider, joint);
       }
    }
 
-   private void addJoint(CollisionBoxProvider collissionBoxProvider, InverseDynamicsJoint joint)
+   private void addJoint(CollisionBoxProvider collissionBoxProvider, JointBasics joint)
    {
       List<CollisionShape> collisionMesh = collissionBoxProvider.getCollisionMesh(joint.getName());
       if (collisionMesh != null)

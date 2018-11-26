@@ -1,5 +1,21 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPositionTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionTopic;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.RADIUS;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalOpaqueMaterial;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalTransparentMaterial;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.startOpaqueMaterial;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.startTransparentMaterial;
+
+import java.util.concurrent.atomic.AtomicReference;
+
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -9,14 +25,9 @@ import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
-
-import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.*;
+import us.ihmc.messager.Messager;
 
 public class StartGoalOrientationViewer extends AnimationTimer
 {

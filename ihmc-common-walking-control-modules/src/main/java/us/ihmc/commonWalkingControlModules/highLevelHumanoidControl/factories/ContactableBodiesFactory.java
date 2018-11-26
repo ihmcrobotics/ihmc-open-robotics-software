@@ -9,10 +9,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullLeggedRobotModel;
 import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.frames.CommonLeggedReferenceFrames;
 import us.ihmc.tools.factories.FactoryTools;
@@ -87,7 +87,7 @@ public class ContactableBodiesFactory<E extends Enum<E> & RobotSegment<E>>
 
       for (E segment : robotSegments)
       {
-         RigidBody foot = fullRobotModel.getFoot(segment);
+         RigidBodyBasics foot = fullRobotModel.getFoot(segment);
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(segment);
          List<Point2D> contactPointsInSoleFrame = feetContactPoints.get().get(segment);
 
@@ -116,7 +116,7 @@ public class ContactableBodiesFactory<E extends Enum<E> & RobotSegment<E>>
 
       for (E segment : robotSegments)
       {
-         RigidBody foot = fullRobotModel.getFoot(segment);
+         RigidBodyBasics foot = fullRobotModel.getFoot(segment);
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(segment);
          List<Point2D> contactPointsInSoleFrame = feetContactPoints.get().get(segment);
 
@@ -141,7 +141,7 @@ public class ContactableBodiesFactory<E extends Enum<E> & RobotSegment<E>>
          return contactablePlaneBodies;
 
       FullLeggedRobotModel<E> fullRobotModel = this.fullRobotModel.get();
-      RigidBody[] bodies = ScrewTools.computeSubtreeSuccessors(fullRobotModel.getElevator());
+      RigidBodyBasics[] bodies = fullRobotModel.getElevator().subtreeArray();
 
       for (int pointIdx = 0; pointIdx < additionalContactRigidBodyNames.get().size(); pointIdx++)
       {
@@ -149,14 +149,14 @@ public class ContactableBodiesFactory<E extends Enum<E> & RobotSegment<E>>
          String contactName = additionalContactNames.get().get(pointIdx);
          RigidBodyTransform contactFramePoseInJoint = additionalContactTransforms.get().get(pointIdx);
 
-         RigidBody[] rigidBodies = ScrewTools.findRigidBodiesWithNames(bodies, bodyName);
+         RigidBodyBasics[] rigidBodies = ScrewTools.findRigidBodiesWithNames(bodies, bodyName);
 
          if (rigidBodies.length == 0)
             throw new RuntimeException("Did not find body with name " + bodyName);
          if (rigidBodies.length > 1)
             throw new RuntimeException("Found multiple bodies with name " + bodyName);
 
-         RigidBody rigidBody = rigidBodies[0];
+         RigidBodyBasics rigidBody = rigidBodies[0];
          contactablePlaneBodies.add(new SimpleContactPointPlaneBody(contactName, rigidBody, contactFramePoseInJoint));
       }
 

@@ -20,18 +20,19 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
    public static final byte STEP_TOO_HIGH_OR_LOW = (byte) 0;
    public static final byte STEP_TOO_FORWARD_AND_DOWN = (byte) 1;
    public static final byte STEP_TOO_FAR = (byte) 2;
-   public static final byte STEP_NOT_WIDE_ENOUGH = (byte) 3;
-   public static final byte STEP_IN_PLACE = (byte) 4;
-   public static final byte NOT_ENOUGH_AREA = (byte) 5;
-   public static final byte COULD_NOT_SNAP = (byte) 6;
-   public static final byte COULD_NOT_WIGGLE_INSIDE = (byte) 7;
-   public static final byte SURFACE_NORMAL_TOO_STEEP_TO_SNAP = (byte) 8;
-   public static final byte TOO_MUCH_PENETRATION_AFTER_WIGGLE = (byte) 9;
-   public static final byte STEP_NOT_LONG_ENOUGH = (byte) 10;
-   public static final byte STEP_TOO_WIDE = (byte) 11;
-   public static final byte OBSTACLE_BLOCKING_BODY = (byte) 12;
-   public static final byte OBSTACLE_HITTING_BODY = (byte) 13;
-   public static final byte AT_CLIFF_BOTTOM = (byte) 14;
+   public static final byte STEP_TOO_FAR_AND_HIGH = (byte) 3;
+   public static final byte STEP_NOT_WIDE_ENOUGH = (byte) 4;
+   public static final byte STEP_IN_PLACE = (byte) 5;
+   public static final byte NOT_ENOUGH_AREA = (byte) 6;
+   public static final byte COULD_NOT_SNAP = (byte) 7;
+   public static final byte COULD_NOT_WIGGLE_INSIDE = (byte) 8;
+   public static final byte SURFACE_NORMAL_TOO_STEEP_TO_SNAP = (byte) 9;
+   public static final byte TOO_MUCH_PENETRATION_AFTER_WIGGLE = (byte) 10;
+   public static final byte STEP_NOT_LONG_ENOUGH = (byte) 11;
+   public static final byte STEP_TOO_WIDE = (byte) 12;
+   public static final byte OBSTACLE_BLOCKING_BODY = (byte) 13;
+   public static final byte OBSTACLE_HITTING_BODY = (byte) 14;
+   public static final byte AT_CLIFF_BOTTOM = (byte) 15;
    /**
             * Footstep node side
             */

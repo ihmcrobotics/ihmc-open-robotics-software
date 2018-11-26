@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.toolbox.DivergentComponentOfMotionEstimator;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -20,7 +21,6 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantC
 import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;

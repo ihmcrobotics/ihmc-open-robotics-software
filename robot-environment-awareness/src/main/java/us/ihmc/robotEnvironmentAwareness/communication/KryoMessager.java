@@ -14,12 +14,12 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.local.IntraprocessObjectCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.javaFXToolkit.messager.Message;
-import us.ihmc.javaFXToolkit.messager.Messager;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
-import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
-import us.ihmc.javaFXToolkit.messager.TopicListener;
+import us.ihmc.messager.Message;
+import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.MessagerStateListener;
+import us.ihmc.messager.TopicListener;
 
 public class KryoMessager implements Messager
 {

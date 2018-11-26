@@ -11,14 +11,14 @@ import org.ejml.data.DenseMatrix64F;
 import georegression.geometry.ConvertRotation3D_F64;
 import georegression.metric.UtilAngle;
 import georegression.struct.EulerType;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 /**
  * Solver for inverse kinematics which uses DDogleg and Twan's code for forward kinematics.
@@ -29,7 +29,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
 {
    private final ReferenceFrame baseFrame;
    private final ReferenceFrame endEffectorFrame;
-   private final OneDoFJoint[] oneDoFJoints;
+   private final OneDoFJointBasics[] oneDoFJoints;
    private final int maxIterations;
    private final Random random = new Random(1251253L);
 
@@ -87,7 +87,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
       this.orientationDiscount = orientationDiscount;
       this.solveOrientation = solveOrientation;
       
-      this.oneDoFJoints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      this.oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
       if (oneDoFJoints.length != jacobian.getJointsInOrder().length)
          throw new RuntimeException("Can currently only handle OneDoFJoints");
       
@@ -166,7 +166,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
             // randomize the parameters a bit
             for (int i = 0; i < initParam.length; i++)
             {
-               OneDoFJoint oneDoFJoint = oneDoFJoints[i];
+               OneDoFJointBasics oneDoFJoint = oneDoFJoints[i];
                if (Double.isInfinite(oneDoFJoint.getJointLimitUpper()))
                {
                   initParam[i] = random.nextDouble() * 2 * Math.PI - Math.PI;
@@ -224,7 +224,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
    {
       for (int i = 0; i < parameters.length; i++)
       {
-         OneDoFJoint oneDoFJoint = oneDoFJoints[i];
+         OneDoFJointBasics oneDoFJoint = oneDoFJoints[i];
 
          // apply constraints to the input parameters
          double newQ = UtilAngle.bound(parameters[i]);

@@ -16,10 +16,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -63,7 +63,7 @@ public class RigidBodyOrientationControlHelper
 
    private final String warningPrefix;
 
-   public RigidBodyOrientationControlHelper(String warningPrefix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
+   public RigidBodyOrientationControlHelper(String warningPrefix, RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator,
                                             Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
                                             BooleanProvider useBaseFrameForControl, BooleanProvider useWeightFromMessage, YoVariableRegistry registry)
    {

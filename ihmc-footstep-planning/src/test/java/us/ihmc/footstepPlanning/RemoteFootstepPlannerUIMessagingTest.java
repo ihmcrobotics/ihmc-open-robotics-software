@@ -1,11 +1,28 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.*;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertFalse;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.IntStream;
+
+import org.junit.After;
+import org.junit.Test;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepPlannerCostParametersPacket;
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.junit.After;
-import org.junit.Test;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -27,31 +44,21 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
+import us.ihmc.messager.SharedMemoryMessager;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.yoVariables.providers.DoubleProvider;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.IntStream;
-
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 public class RemoteFootstepPlannerUIMessagingTest
 {
@@ -68,6 +75,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
    private final AtomicReference<FootstepPlanningRequestPacket> planningRequestReference = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlannerParametersPacket> footstepPlannerParametersReference = new AtomicReference<>(null);
+   private final AtomicReference<VisibilityGraphsParametersPacket> visibilityGraphsParametersReference = new AtomicReference<>(null);
 
    @After
    public void tearDown() throws Exception
@@ -174,20 +182,20 @@ public class RemoteFootstepPlannerUIMessagingTest
 
    @ContinuousIntegrationTest(estimatedDuration = 4.5)
    @Test(timeout = 30000)
-   public void testSendingFootstepPlannerParametersPacketIntraprocess()
+   public void testSendingPlanObjectivePacketIntraprocess()
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       setup();
-      runPlannerParametersPacket();
+      runPlanObjectivePackets();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 2.3, categoriesOverride = IntegrationCategory.FLAKY)
    @Test(timeout = 30000)
-   public void testSendingFootstepPlannerParametersPacketFastRTPS()
+   public void testSendingPlanObjectivePacketFastRTPS()
    {
       pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
       setup();
-      runPlannerParametersPacket();
+      runPlanObjectivePackets();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 2.3)
@@ -227,7 +235,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          FootstepPlannerType planningType = FootstepPlannerType.generateRandomPlannerType(random);
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
-         int sequenceId = RandomNumbers.nextInt(random, 1, 100);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
          messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, goalPosition);
@@ -238,7 +245,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
          messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSideTopic, robotSide);
-         messager.submitMessage(FootstepPlannerMessagerAPI.SequenceIdTopic, sequenceId);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength);
 
@@ -266,7 +272,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          assertEquals("Planner types aren't equal.", planningType, FootstepPlannerType.fromByte(packet.getRequestedFootstepPlannerType()));
          assertEquals("Initial support sides aren't equal.", robotSide, RobotSide.fromByte(packet.getInitialStanceRobotSide()));
 
-         assertEquals("Sequence Ids aren't equal.", sequenceId, packet.getSequenceId(), epsilon);
          assertEquals("Planner Request Ids aren't equal.", plannerRequestId, packet.getPlannerRequestId(), epsilon);
          assertEquals("Planner horizon lengths aren't equal.", horizonLength, packet.getHorizonLength(), epsilon);
 
@@ -295,10 +300,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       AtomicReference<Double> timeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeoutTopic);
       AtomicReference<RobotSide> robotSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSideTopic);
 
-      AtomicReference<Integer> sequenceIdReference = messager.createInput(FootstepPlannerMessagerAPI.SequenceIdTopic);
       AtomicReference<Integer> plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
-
-      AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
 
       AtomicReference<Double> plannerHorizonLengthReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic);
 
@@ -336,8 +338,8 @@ public class RemoteFootstepPlannerUIMessagingTest
          long sleepDuration = 10;
          while (startPositionReference.get() == null || goalPositionReference.get() == null || timeoutReference.get() == null
                || planningTypeReference.get() == null || robotSideReference.get() == null || startOrientationReference.get() == null
-               || goalOrientationReference.get() == null || sequenceIdReference.get() == null || plannerRequestIdReference.get() == null
-               || plannerHorizonLengthReference.get() == null || planarRegionsListReference.get() == null)
+               || goalOrientationReference.get() == null || plannerRequestIdReference.get() == null
+               || plannerHorizonLengthReference.get() == null )
          {
             assertFalse("Timed out waiting on the results.", currentWaitTime > maxWaitTime);
 
@@ -352,27 +354,29 @@ public class RemoteFootstepPlannerUIMessagingTest
          assertEquals("Initial support sides aren't equal.", robotSide, robotSideReference.getAndSet(null));
          EuclidCoreTestTools.assertQuaternionEquals("Start orientations aren't equal.", startOrientation, startOrientationReference.getAndSet(null), epsilon);
          EuclidCoreTestTools.assertQuaternionEquals("Goal orientations aren't equal.", goalOrientation, goalOrientationReference.getAndSet(null), epsilon);
-         assertEquals("Sequence Ids aren't equal.", sequenceId, sequenceIdReference.getAndSet(null), epsilon);
          assertEquals("Planner Request Ids aren't equal.", plannerRequestId, plannerRequestIdReference.getAndSet(null), epsilon);
          assertEquals("Planner horizon lengths aren't equal.", horizonLength, plannerHorizonLengthReference.getAndSet(null), epsilon);
-         checkPlanarRegionListsAreEqual(planarRegionsList, planarRegionsListReference.getAndSet(null));
 
          for (int i = 0; i < 100; i++)
             ThreadTools.sleep(10);
       }
    }
 
-   private void runPlannerParametersPacket()
+   private void runPlanObjectivePackets()
    {
       Random random = new Random(1738L);
       ROS2Tools.createCallbackSubscription(localNode, FootstepPlannerParametersPacket.class,
                                            ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT),
                                            s -> processFootstepPlannerParametersPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(localNode, VisibilityGraphsParametersPacket.class,
+                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT),
+                                           s -> processVisibilityGraphsParametersPacket(s.takeNextData()));
       localNode.spin();
 
       for (int iter = 0; iter < iters; iter++)
       {
-         FootstepPlannerParameters randomParameters = createRandomParameters(random);
+         FootstepPlannerParameters randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
+         VisibilityGraphsParameters randomVisibilityGraphParameters = createRandomVisibilityGraphsParameters(random);
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10);
          Point3D startPosition = EuclidCoreRandomTools.nextPoint3D(random);
@@ -382,7 +386,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          FootstepPlannerType planningType = FootstepPlannerType.generateRandomPlannerType(random);
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
-         int sequenceId = RandomNumbers.nextInt(random, 1, 100);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
          messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, goalPosition);
@@ -393,11 +396,10 @@ public class RemoteFootstepPlannerUIMessagingTest
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
          messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSideTopic, robotSide);
-         messager.submitMessage(FootstepPlannerMessagerAPI.SequenceIdTopic, sequenceId);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength);
-
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, randomParameters);
+         messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic, randomVisibilityGraphParameters);
 
          messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
 
@@ -410,14 +412,18 @@ public class RemoteFootstepPlannerUIMessagingTest
             ThreadTools.sleep(10);
          }
 
-         FootstepPlannerParametersPacket packet = footstepPlannerParametersReference.getAndSet(null);
+         FootstepPlannerParametersPacket plannerPacket = footstepPlannerParametersReference.getAndSet(null);
+         VisibilityGraphsParametersPacket visibilityGraphsPacket = visibilityGraphsParametersReference.getAndSet(null);
 
-         checkFootstepPlannerParameters(randomParameters, packet);
+         checkFootstepPlannerParameters(randomParameters, plannerPacket);
+         checkVisibilityGraphsParameters(randomVisibilityGraphParameters, visibilityGraphsPacket);
 
          for (int i = 0; i < 100; i++)
             ThreadTools.sleep(10);
       }
    }
+
+
 
    private void runOutputStatusToUI()
    {
@@ -429,8 +435,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       localNode.spin();
       AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
       AtomicReference<FootstepPlan> footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanTopic);
-      AtomicReference<Integer> sequenceIdReference = messager.createInput(FootstepPlannerMessagerAPI.SequenceIdTopic);
-      AtomicReference<Integer> plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
+      AtomicReference<Integer> receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic);
       AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResultTopic);
       AtomicReference<Double> timeTakenReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic);
       AtomicReference<List<? extends Point3DReadOnly>> bodyPathReference = messager.createInput(FootstepPlannerMessagerAPI.BodyPathDataTopic);
@@ -478,10 +483,8 @@ public class RemoteFootstepPlannerUIMessagingTest
             ThreadTools.sleep(100);
          }
 
-         checkPlanarRegionListsAreEqual(planarRegionsList, planarRegionsListReference.getAndSet(null));
          checkFootstepPlansAreEqual(footstepDataListMessage, footstepPlanReference.getAndSet(null));
-         assertEquals("Planner Ids aren't equal.", planId, plannerRequestIdReference.getAndSet(null), epsilon);
-         assertEquals("Sequence Ids aren't equal.", sequenceId, sequenceIdReference.getAndSet(null), epsilon);
+         assertEquals("Planner Ids aren't equal.", planId, receivedPlanIdReference.getAndSet(null), epsilon);
          assertEquals("Planner results aren't equal.", result, plannerResultReference.getAndSet(null));
          assertEquals("Time taken results aren't equal.", timeTaken, timeTakenReference.getAndSet(null));
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Low level goal position results aren't equal.", lowLevelGoalPosition, lowLevelPositionGoalReference.getAndSet(null), epsilon);
@@ -505,6 +508,11 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void processFootstepPlannerParametersPacket(FootstepPlannerParametersPacket packet)
    {
       footstepPlannerParametersReference.set(packet);
+   }
+
+   private void processVisibilityGraphsParametersPacket(VisibilityGraphsParametersPacket packet)
+   {
+      visibilityGraphsParametersReference.set(packet);
    }
 
    private static PlanarRegionsList createRandomPlanarRegionList(Random random)
@@ -576,391 +584,99 @@ public class RemoteFootstepPlannerUIMessagingTest
       return next;
    }
 
-   private static FootstepPlannerParameters createRandomParameters(Random random)
+
+
+   private static VisibilityGraphsParameters createRandomVisibilityGraphsParameters(Random random)
    {
-      FootstepPlannerParameters parameters = new FootstepPlannerParameters()
+      VisibilityGraphsParameters parameters = new VisibilityGraphsParameters()
       {
-         private final double idealWidth = RandomNumbers.nextDouble(random, 0.01, 1.0);
+         private final double maxInterRegionConnectionLength = RandomNumbers.nextDouble(random, 0.01, 5.0);
 
          @Override
-         public double getIdealFootstepWidth()
+         public double getMaxInterRegionConnectionLength()
          {
-            return idealWidth;
+            return maxInterRegionConnectionLength;
          }
 
-         private final double idealLength = RandomNumbers.nextDouble(random, 0.01, 1.0);
+         private final double normalZThresholdForAccessibleRegions = RandomNumbers.nextDouble(random, 0.01, 2.0);
 
          @Override
-         public double getIdealFootstepLength()
+         public double getNormalZThresholdForAccessibleRegions()
          {
-            return idealLength;
+            return normalZThresholdForAccessibleRegions;
          }
 
-         private final double wiggleInsideDelta = RandomNumbers.nextDouble(random, 0.01, 1.0);
+         private final double extrusionDistance = RandomNumbers.nextDouble(random, 0.01, 1.0);
 
          @Override
-         public double getWiggleInsideDelta()
+         public double getExtrusionDistance()
          {
-            return wiggleInsideDelta;
+            return extrusionDistance;
          }
 
-         private final double maxReach = RandomNumbers.nextDouble(random, 0.01, 1.0);
+         private final double extrusionDistanceIfNotTooHighToStep = RandomNumbers.nextDouble(random, 0.01, 1.0);
 
          @Override
-         public double getMaximumStepReach()
+         public double getExtrusionDistanceIfNotTooHighToStep()
          {
-            return maxReach;
+            return extrusionDistanceIfNotTooHighToStep;
          }
 
-         private final double maxYaw = RandomNumbers.nextDouble(random, 0.01, Math.PI);
+         private final double tooHighToStepDistance = RandomNumbers.nextDouble(random, 0.01, 0.5);
 
          @Override
-         public double getMaximumStepYaw()
+         public double getTooHighToStepDistance()
          {
-            return maxYaw;
+            return tooHighToStepDistance;
          }
 
-         private final double minStepWidth = RandomNumbers.nextDouble(random, 0.0, 1.0);
+         private final double clusterResolution = RandomNumbers.nextDouble(random, 0.01, 1.0);
 
          @Override
-         public double getMinimumStepWidth()
+         public double getClusterResolution()
          {
-            return minStepWidth;
+            return clusterResolution;
          }
 
-         private final double minStepLength = RandomNumbers.nextDouble(random, 0.01, 1.0);
+         private final double explorationDistance = RandomNumbers.nextDouble(random, 1.0, 100.0);
 
          @Override
-         public double getMinimumStepLength()
+         public double getExplorationDistanceFromStartGoal()
          {
-            return minStepLength;
+            return explorationDistance;
          }
 
-         private final double minStepYaw = RandomNumbers.nextDouble(random, 0.0, Math.PI);
+         private final double planarRegionMinArea = RandomNumbers.nextDouble(random, 0.01, 0.5);
 
          @Override
-         public double getMinimumStepYaw()
+         public double getPlanarRegionMinArea()
          {
-            return minStepYaw;
+            return planarRegionMinArea;
          }
 
-         private final double maxStepXForwardAndDown = RandomNumbers.nextDouble(random, 0.0, 0.5);
+         private final int planarRegionMinSize = RandomNumbers.nextInt(random, 0, 100);
 
          @Override
-         public double getMaximumStepXWhenForwardAndDown()
+         public int getPlanarRegionMinSize()
          {
-            return maxStepXForwardAndDown;
+            return planarRegionMinSize;
          }
 
-         private final double maxStepZForwardAndDown = RandomNumbers.nextDouble(random, 0.0, 5.0);
+         private final double regionOrthogonalAngle = RandomNumbers.nextDouble(random, 0.0, Math.PI / 2.0);
 
          @Override
-         public double getMaximumStepZWhenForwardAndDown()
+         public double getRegionOrthogonalAngle()
          {
-            return maxStepZForwardAndDown;
+            return regionOrthogonalAngle;
          }
 
-         private final double maxStepZ = RandomNumbers.nextDouble(random, 0.01, 1.5);
+         private final double searchHostRegionEpsilon = RandomNumbers.nextDouble(random, 0.0, 0.5);
 
          @Override
-         public double getMaximumStepZ()
+         public double getSearchHostRegionEpsilon()
          {
-            return maxStepZ;
+            return searchHostRegionEpsilon;
          }
-
-         private final double minFootholdPercent = RandomNumbers.nextDouble(random, 0.0, 1.0);
-
-         @Override
-         public double getMinimumFootholdPercent()
-         {
-            return minFootholdPercent;
-         }
-
-         private final double minSurfaceIncline = RandomNumbers.nextDouble(random, 0.0, 2.0);
-
-         @Override
-         public double getMinimumSurfaceInclineRadians()
-         {
-            return minSurfaceIncline;
-         }
-
-         private final boolean wiggleInto = RandomNumbers.nextBoolean(random, 0.5);
-
-         @Override
-         public boolean getWiggleIntoConvexHullOfPlanarRegions()
-         {
-            return wiggleInto;
-         }
-
-         private final boolean rejectIfNoWiggle = RandomNumbers.nextBoolean(random, 0.5);
-
-         @Override
-         public boolean getRejectIfCannotFullyWiggleInside()
-         {
-            return rejectIfNoWiggle;
-         }
-
-         private final double maxXYWiggle = RandomNumbers.nextDouble(random, 0.1, 1.5);
-
-         @Override
-         public double getMaximumXYWiggleDistance()
-         {
-            return maxXYWiggle;
-         }
-
-         private final double maxYawWiggle = RandomNumbers.nextDouble(random, 0.1, Math.PI);
-
-         @Override
-         public double getMaximumYawWiggle()
-         {
-            return maxYawWiggle;
-         }
-
-         private final double maxZPenetration = RandomNumbers.nextDouble(random, 0.05, 0.4);
-
-         @Override
-         public double getMaximumZPenetrationOnValleyRegions()
-         {
-            return maxZPenetration;
-         }
-
-         private final double maxStepWidth = RandomNumbers.nextDouble(random, 0.1, 0.5);
-
-         @Override
-         public double getMaximumStepWidth()
-         {
-            return maxStepWidth;
-         }
-
-         private final double cliffHeightToAvoid = RandomNumbers.nextDouble(random, 0.01, 1.0);
-
-         @Override
-         public double getCliffHeightToAvoid()
-         {
-            return cliffHeightToAvoid;
-         }
-
-         private final double minDistanceFromCliff = RandomNumbers.nextDouble(random, 0.05, 1.0);
-
-         @Override
-         public double getMinimumDistanceFromCliffBottoms()
-         {
-            return minDistanceFromCliff;
-         }
-
-         private final boolean returnBestEffort = RandomNumbers.nextBoolean(random, 0.5);
-
-         @Override
-         public boolean getReturnBestEffortPlan()
-         {
-            return returnBestEffort;
-         }
-
-         private final int minSteps = RandomNumbers.nextInt(random, 1, 10);
-
-         @Override
-         public int getMinimumStepsForBestEffortPlan()
-         {
-            return minSteps;
-         }
-
-         private final double bodyBoxHeight = RandomNumbers.nextDouble(random, 0.1, 0.5);
-
-         @Override
-         public double getBodyBoxHeight()
-         {
-            return bodyBoxHeight;
-         }
-
-         private final double bodyGroundClearance = RandomNumbers.nextDouble(random, 0.1, 0.5);
-
-         @Override
-         public double getBodyGroundClearance()
-         {
-            return bodyGroundClearance;
-         }
-
-         private final double bodyBoxDepth = RandomNumbers.nextDouble(random, 0.1, 0.5);
-
-         @Override
-         public double getBodyBoxDepth()
-         {
-            return bodyBoxDepth;
-         }
-
-         private final double bodyBoxWidth = RandomNumbers.nextDouble(random, 0.1, 0.5);
-
-         @Override
-         public double getBodyBoxWidth()
-         {
-            return bodyBoxWidth;
-         }
-
-         private final double bodyBoxBaseX = RandomNumbers.nextDouble(random, 0.1, 0.5);
-
-         @Override
-         public double getBodyBoxBaseX()
-         {
-            return bodyBoxBaseX;
-         }
-
-         private final double bodyBoxBaseY = RandomNumbers.nextDouble(random, 0.1, 0.5);
-
-         @Override
-         public double getBodyBoxBaseY()
-         {
-            return bodyBoxBaseY;
-         }
-
-         private final double bodyBoxBaseZ = RandomNumbers.nextDouble(random, 0.1, 0.5);
-
-         @Override
-         public double getBodyBoxBaseZ()
-         {
-            return bodyBoxBaseZ;
-         }
-
-         private final boolean checkForBodyCollisions = random.nextBoolean();
-
-         @Override
-         public boolean checkForBodyBoxCollisions()
-         {
-            return checkForBodyCollisions;
-         }
-
-         private final double minXClearance = RandomNumbers.nextDouble(random, 0.01, 1.0);
-
-         @Override
-         public double getMinXClearanceFromStance()
-         {
-            return minXClearance;
-         }
-
-         private final double minYClearance = RandomNumbers.nextDouble(random, 0.01, 1.0);
-
-         @Override
-         public double getMinYClearanceFromStance()
-         {
-            return minYClearance;
-         }
-
-         @Override
-         public FootstepPlannerCostParameters getCostParameters()
-         {
-            return costParameters;
-         }
-
-         private final FootstepPlannerCostParameters costParameters = new FootstepPlannerCostParameters()
-         {
-            private final boolean useQuadraticDistanceCost = RandomNumbers.nextBoolean(random, 0.5);
-
-            @Override
-            public boolean useQuadraticDistanceCost()
-            {
-               return useQuadraticDistanceCost;
-            }
-
-            private final boolean useQuadraticHeightCost = RandomNumbers.nextBoolean(random, 0.5);
-
-            @Override
-            public boolean useQuadraticHeightCost()
-            {
-               return useQuadraticHeightCost;
-            }
-
-            private final double aStarHeuristicsWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
-            private final double visGraphWithAStarHeuristicsWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
-            private final double depthFirstHeuristicsWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
-            private final double bodyPathBasedHeuristicsWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
-
-            @Override
-            public DoubleProvider getAStarHeuristicsWeight()
-            {
-               return () -> aStarHeuristicsWeight;
-            }
-
-            @Override
-            public DoubleProvider getVisGraphWithAStarHeuristicsWeight()
-            {
-               return () -> visGraphWithAStarHeuristicsWeight;
-            }
-
-            @Override
-            public DoubleProvider getDepthFirstHeuristicsWeight()
-            {
-               return () -> depthFirstHeuristicsWeight;
-            }
-
-            @Override
-            public DoubleProvider getBodyPathBasedHeuristicsWeight()
-            {
-               return () -> bodyPathBasedHeuristicsWeight;
-            }
-
-            private final double yawWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
-
-            @Override
-            public double getYawWeight()
-            {
-               return yawWeight;
-            }
-
-            private final double forwardWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
-
-            @Override
-            public double getForwardWeight()
-            {
-               return forwardWeight;
-            }
-
-            private final double lateralWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
-
-            @Override
-            public double getLateralWeight()
-            {
-               return lateralWeight;
-            }
-
-            private final double costPerStep = RandomNumbers.nextDouble(random, 0.01, 10.0);
-
-            @Override
-            public double getCostPerStep()
-            {
-               return costPerStep;
-            }
-
-            private final double stepUpWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
-
-            @Override
-            public double getStepUpWeight()
-            {
-               return stepUpWeight;
-            }
-
-            private final double stepDownWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
-
-            @Override
-            public double getStepDownWeight()
-            {
-               return stepDownWeight;
-            }
-
-            private final double rollWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
-
-            @Override
-            public double getRollWeight()
-            {
-               return rollWeight;
-            }
-
-            private final double pitchWeight = RandomNumbers.nextDouble(random, 0.01, 10.0);
-
-            @Override
-            public double getPitchWeight()
-            {
-               return pitchWeight;
-            }
-         };
       };
 
       return parameters;
@@ -1045,6 +761,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    private static void checkFootstepPlannerParameters(FootstepPlannerParameters parameters, FootstepPlannerParametersPacket packet)
    {
       assertEquals("Check for body box collisions flags aren't equal.", parameters.checkForBodyBoxCollisions(), packet.getCheckForBodyBoxCollisions());
+      assertEquals(parameters.performHeuristicSearchPolicies(), packet.getPerformHeuristicSearchPolicies());
       assertEquals("Ideal footstep widths aren't equal.", parameters.getIdealFootstepWidth(), packet.getIdealFootstepWidth(), epsilon);
       assertEquals("Ideal footstep lengths aren't equal.", parameters.getIdealFootstepLength(), packet.getIdealFootstepLength(), epsilon);
       assertEquals("Wiggle inside deltas aren't equal.", parameters.getWiggleInsideDelta(), packet.getWiggleInsideDelta(), epsilon);
@@ -1053,6 +770,8 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Minimum step widths aren't equal.", parameters.getMinimumStepWidth(), packet.getMinimumStepWidth(), epsilon);
       assertEquals("Minimum step lengths aren't equal.", parameters.getMinimumStepLength(), packet.getMinimumStepLength(), epsilon);
       assertEquals("Minimum step yaws aren't equal.", parameters.getMinimumStepYaw(), packet.getMinimumStepYaw(), epsilon);
+      assertEquals(parameters.getMaximumStepReachWhenSteppingUp(), packet.getMaximumStepReachWhenSteppingUp(), epsilon);
+      assertEquals(parameters.getMaximumStepZWhenSteppingUp(), packet.getMaximumStepZWhenSteppingUp(), epsilon);
       assertEquals("Max X forward and down aren't equal", parameters.getMaximumStepXWhenForwardAndDown(), packet.getMaximumStepXWhenForwardAndDown(), epsilon);
       assertEquals("Max Z forward and down aren't equal", parameters.getMaximumStepZWhenForwardAndDown(), packet.getMaximumStepZWhenForwardAndDown(), epsilon);
 
@@ -1107,6 +826,21 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Step up weights aren't equal.", parameters.getStepUpWeight(), packet.getStepUpWeight(), epsilon);
       assertEquals("Step down weights aren't equal.", parameters.getStepDownWeight(), packet.getStepDownWeight(), epsilon);
       assertEquals("Cost per step isn't equal.", parameters.getCostPerStep(), packet.getCostPerStep(), epsilon);
+   }
+
+   private static void checkVisibilityGraphsParameters(VisibilityGraphsParameters parameters, VisibilityGraphsParametersPacket packet)
+   {
+      assertEquals(parameters.getMaxInterRegionConnectionLength(), packet.getMaxInterRegionConnectionLength(), epsilon);
+      assertEquals(parameters.getNormalZThresholdForAccessibleRegions(), packet.getNormalZThresholdForAccessibleRegions(), epsilon);
+      assertEquals(parameters.getExtrusionDistance(), packet.getExtrusionDistance(), epsilon);
+      assertEquals(parameters.getExtrusionDistanceIfNotTooHighToStep(), packet.getExtrusionDistanceIfNotTooHighToStep(), epsilon);
+      assertEquals(parameters.getTooHighToStepDistance(), packet.getTooHighToStepDistance(), epsilon);
+      assertEquals(parameters.getClusterResolution(), packet.getClusterResolution(), epsilon);
+      assertEquals(parameters.getExplorationDistanceFromStartGoal(), packet.getExplorationDistanceFromStartGoal(), epsilon);
+      assertEquals(parameters.getPlanarRegionMinArea(), packet.getPlanarRegionMinArea(), epsilon);
+      assertEquals(parameters.getPlanarRegionMinSize(), packet.getPlanarRegionMinSize());
+      assertEquals(parameters.getRegionOrthogonalAngle(), packet.getRegionOrthogonalAngle(), epsilon);
+      assertEquals(parameters.getSearchHostRegionEpsilon(), packet.getSearchHostRegionEpsilon(), epsilon);
    }
 }
 

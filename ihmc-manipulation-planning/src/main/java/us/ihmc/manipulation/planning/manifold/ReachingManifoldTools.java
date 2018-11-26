@@ -38,10 +38,10 @@ import us.ihmc.manipulation.planning.exploringSpatial.ExploringRigidBodyTools;
 import us.ihmc.manipulation.planning.exploringSpatial.TrajectoryLibraryForDRC;
 import us.ihmc.manipulation.planning.gradientDescent.GradientDescentModule;
 import us.ihmc.manipulation.planning.gradientDescent.SingleQueryFunction;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 /**
@@ -130,7 +130,7 @@ public class ReachingManifoldTools
                                                                                                    List<ReachingManifoldMessage> reachingManifoldMessages,
                                                                                                    double desiredTrajectoryTime)
    {
-      RigidBody hand = fullRobotModel.getHand(robotSide);
+      RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
       double extrapolateRatio = ReachingManifoldTools.extrapolateRatio;
       double trajectoryTimeBeforeExtrapolated = desiredTrajectoryTime;
       double trajectoryTime = trajectoryTimeBeforeExtrapolated * extrapolateRatio;
@@ -214,24 +214,24 @@ public class ReachingManifoldTools
                                                      orientationWeight);
    }
 
-   public static List<ReachingManifoldMessage> createSphereManifoldMessagesForValkyrie(RobotSide robotSide, RigidBody hand, Sphere3D sphere3D)
+   public static List<ReachingManifoldMessage> createSphereManifoldMessagesForValkyrie(RobotSide robotSide, RigidBodyBasics hand, Sphere3D sphere3D)
    {
       return createSphereManifoldMessagesForValkyrie(robotSide, hand, sphere3D.getPosition(), sphere3D.getRadius());
    }
 
-   public static List<ReachingManifoldMessage> createCylinderManifoldMessagesForValkyrie(RobotSide robotSide, RigidBody hand, Cylinder3D cylinder3D)
+   public static List<ReachingManifoldMessage> createCylinderManifoldMessagesForValkyrie(RobotSide robotSide, RigidBodyBasics hand, Cylinder3D cylinder3D)
    {
       return createCylinderManifoldMessagesForValkyrie(robotSide, hand, cylinder3D.getPosition(), cylinder3D.getOrientation(), cylinder3D.getRadius(),
                                                        cylinder3D.getHeight());
    }
 
-   public static List<ReachingManifoldMessage> createTorusManifoldMessagesForValkyrie(RobotSide robotSide, RigidBody hand, Torus3D torus3D)
+   public static List<ReachingManifoldMessage> createTorusManifoldMessagesForValkyrie(RobotSide robotSide, RigidBodyBasics hand, Torus3D torus3D)
    {
       return createTorusManifoldMessagesForValkyrie(robotSide, hand, torus3D.getPosition(), torus3D.getOrientation(), torus3D.getRadius(),
                                                     torus3D.getTubeRadius());
    }
 
-   public static List<ReachingManifoldMessage> createSphereManifoldMessagesForValkyrie(RobotSide robotSide, RigidBody hand,
+   public static List<ReachingManifoldMessage> createSphereManifoldMessagesForValkyrie(RobotSide robotSide, RigidBodyBasics hand,
                                                                                        Tuple3DReadOnly manifoldOriginPosition, double radius)
    {
       List<ReachingManifoldMessage> messages = new ArrayList<>();
@@ -249,7 +249,7 @@ public class ReachingManifoldTools
       return messages;
    }
 
-   public static List<ReachingManifoldMessage> createCylinderManifoldMessagesForValkyrie(RobotSide robotSide, RigidBody hand,
+   public static List<ReachingManifoldMessage> createCylinderManifoldMessagesForValkyrie(RobotSide robotSide, RigidBodyBasics hand,
                                                                                          Tuple3DReadOnly manifoldOriginPosition,
                                                                                          RotationMatrixReadOnly manifoldOriginOrientation, double radius,
                                                                                          double height)
@@ -303,7 +303,7 @@ public class ReachingManifoldTools
    /**
     * match z and y direction of Hand control frame with x and y direction of torus.
     */
-   public static List<ReachingManifoldMessage> createTorusManifoldMessagesForValkyrie(RobotSide robotSide, RigidBody hand,
+   public static List<ReachingManifoldMessage> createTorusManifoldMessagesForValkyrie(RobotSide robotSide, RigidBodyBasics hand,
                                                                                       Tuple3DReadOnly manifoldOriginPosition,
                                                                                       RotationMatrixReadOnly manifoldOriginOrientation, double radius,
                                                                                       double thickness)
@@ -328,7 +328,7 @@ public class ReachingManifoldTools
       return messages;
    }
 
-   public static ReachingManifoldMessage createGoalManifoldMessage(RigidBody hand, FunctionTrajectory handFunction, double trajectoryTime,
+   public static ReachingManifoldMessage createGoalManifoldMessage(RigidBodyBasics hand, FunctionTrajectory handFunction, double trajectoryTime,
                                                                    ConfigurationSpaceName[] manifoldSpaces)
    {
       ReachingManifoldMessage reachingManifoldMessage = HumanoidMessageTools.createReachingManifoldMessage(hand);
@@ -349,7 +349,7 @@ public class ReachingManifoldTools
       return reachingManifoldMessage;
    }
 
-   public static ReachingManifoldMessage createGoalManifoldMessage(RigidBody hand, FunctionTrajectory handFunction, double trajectoryTime,
+   public static ReachingManifoldMessage createGoalManifoldMessage(RigidBodyBasics hand, FunctionTrajectory handFunction, double trajectoryTime,
                                                                    ConfigurationSpaceName[] manifoldSpaces, double[] upperLimits, double[] lowerLimits)
    {
       ReachingManifoldMessage reachingManifoldMessage = HumanoidMessageTools.createReachingManifoldMessage(hand);

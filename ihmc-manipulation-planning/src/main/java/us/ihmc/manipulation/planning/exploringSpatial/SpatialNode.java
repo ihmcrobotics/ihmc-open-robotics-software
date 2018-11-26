@@ -3,7 +3,7 @@ package us.ihmc.manipulation.planning.exploringSpatial;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class SpatialNode
 {
@@ -241,7 +241,7 @@ public class SpatialNode
       return spatialData.getRigidBodySpatials().get(index);
    }
 
-   public Pose3D getSpatialData(RigidBody rigidBody)
+   public Pose3D getSpatialData(RigidBodyBasics rigidBody)
    {
       for (int i = 0; i < spatialData.getRigidBodyNames().size(); i++)
       {

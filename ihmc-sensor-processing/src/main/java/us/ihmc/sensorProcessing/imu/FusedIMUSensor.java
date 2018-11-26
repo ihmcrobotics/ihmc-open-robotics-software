@@ -12,10 +12,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -28,7 +28,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    private final String sensorName;
 
    private final ReferenceFrame fusedMeasurementFrame;
-   private final RigidBody measurementLink;
+   private final RigidBodyBasics measurementLink;
 
    private final IMUSensorReadOnly firstIMU;
    private final IMUSensorReadOnly secondIMU;
@@ -309,7 +309,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    }
 
    @Override
-   public RigidBody getMeasurementLink()
+   public RigidBodyBasics getMeasurementLink()
    {
       return measurementLink;
    }

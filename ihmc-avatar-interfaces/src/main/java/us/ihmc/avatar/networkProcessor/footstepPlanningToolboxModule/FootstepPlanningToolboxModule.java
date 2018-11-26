@@ -16,7 +16,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class FootstepPlanningToolboxModule extends ToolboxModule
@@ -24,20 +23,19 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    private final FootstepPlanningToolboxController footstepPlanningToolboxController;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
-   public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider,
-                                        boolean startYoVariableServer) throws IOException
+   public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer) throws IOException
    {
       this(drcRobotModel, modelProvider, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
-
-   public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider,
-                                        boolean startYoVariableServer, DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
+   public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer,
+                                        DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
    {
       super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), modelProvider, startYoVariableServer, pubSubImplementation);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
       footstepPlanningToolboxController = new FootstepPlanningToolboxController(drcRobotModel.getContactPointParameters(),
-                                                                                drcRobotModel.getFootstepPlannerParameters(), statusOutputManager, registry,
+                                                                                drcRobotModel.getFootstepPlannerParameters(),
+                                                                                drcRobotModel.getVisibilityGraphsParameters(), statusOutputManager, registry,
                                                                                 yoGraphicsListRegistry,
                                                                                 Conversions.millisecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
       footstepPlanningToolboxController.setTextToSpeechPublisher(textToSpeechPublisher);
@@ -50,10 +48,19 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> footstepPlanningToolboxController.processRequest(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlannerParametersPacket.class, getSubscriberTopicNameGenerator(),
-                                           s -> footstepPlanningToolboxController.processPlannerParameters(s.takeNextData()));
+                                           s -> footstepPlanningToolboxController.processFootstepPlannerParameters(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, VisibilityGraphsParametersPacket.class, getSubscriberTopicNameGenerator(),
+                                           s -> footstepPlanningToolboxController.processVisibilityGraphsParameters(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanningStatisticsRequestMessage.class, getSubscriberTopicNameGenerator(),
                                            s -> footstepPlanningToolboxController.processPlanningStatisticsRequest());
       textToSpeechPublisher = ROS2Tools.createPublisher(realtimeRos2Node, TextToSpeechPacket.class, ROS2Tools::generateDefaultTopicName);
+   }
+   
+   @Override
+   public void sleep()
+   {
+      footstepPlanningToolboxController.finishUp();
+      super.sleep();
    }
 
    @Override

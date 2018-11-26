@@ -8,6 +8,16 @@ import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC footstep planning module.
+       * Maximum step reach when stepping up.
+       * 
+       * Long steps forward are rejected by the planner if two criteria are met:
+       * The x-position of the value of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * Step height for considering stepping up.
+       * 
+       * Long steps forward are rejected by the planner if two criteria are met:
+       * The x-position of the value of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
        */
 public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParametersPacket> implements Settable<FootstepPlannerParametersPacket>, EpsilonComparable<FootstepPlannerParametersPacket>
 {
@@ -20,6 +30,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * to run slower.
             */
    public boolean check_for_body_box_collisions_;
+   /**
+            * Sets whether or not to perform the defined heuristic search policies.
+            */
+   public boolean perform_heuristic_search_policies_;
    /**
             * Returns the ideal step width for walking on flat ground.
             */
@@ -83,6 +97,18 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double minimum_step_yaw_ = -1.0;
    /**
+            * Large steps forward and up can cause the robot to surpass its torque limits.
+            * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+            * it's very close to saturating its torque limits.
+            */
+   public double maximum_step_reach_when_stepping_up_ = -1.0;
+   /**
+            * Large steps forward and up can cause the robot to surpass its torque limits.
+            * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+            * it's very close to saturating its torque limits.
+            */
+   public double maximum_step_z_when_stepping_up_ = -1.0;
+   /**
             * Maximum step length when stepping forward and down.
             * 
             * Large steps forward and down are rejected by the planner if two criteria are met:
@@ -93,7 +119,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
             * it's very close to hitting it's ankle pitch joint limit.
             */
-   public double maximum_step_x_when_forward_and_down_ = -10.0;
+   public double maximum_step_x_when_forward_and_down_ = -1.0;
    /**
             * Maximum step height when stepping forward and down.
             * 
@@ -105,7 +131,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
             * it's very close to hitting it's ankle pitch joint limit.
             */
-   public double maximum_step_z_when_forward_and_down_ = -10.0;
+   public double maximum_step_z_when_forward_and_down_ = -1.0;
    /**
             * Maximum vertical distance between consecutive footsteps
             * 
@@ -279,6 +305,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       check_for_body_box_collisions_ = other.check_for_body_box_collisions_;
 
+      perform_heuristic_search_policies_ = other.perform_heuristic_search_policies_;
+
       ideal_footstep_width_ = other.ideal_footstep_width_;
 
       ideal_footstep_length_ = other.ideal_footstep_length_;
@@ -294,6 +322,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       minimum_step_length_ = other.minimum_step_length_;
 
       minimum_step_yaw_ = other.minimum_step_yaw_;
+
+      maximum_step_reach_when_stepping_up_ = other.maximum_step_reach_when_stepping_up_;
+
+      maximum_step_z_when_stepping_up_ = other.maximum_step_z_when_stepping_up_;
 
       maximum_step_x_when_forward_and_down_ = other.maximum_step_x_when_forward_and_down_;
 
@@ -376,6 +408,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public boolean getCheckForBodyBoxCollisions()
    {
       return check_for_body_box_collisions_;
+   }
+
+   /**
+            * Sets whether or not to perform the defined heuristic search policies.
+            */
+   public void setPerformHeuristicSearchPolicies(boolean perform_heuristic_search_policies)
+   {
+      perform_heuristic_search_policies_ = perform_heuristic_search_policies;
+   }
+   /**
+            * Sets whether or not to perform the defined heuristic search policies.
+            */
+   public boolean getPerformHeuristicSearchPolicies()
+   {
+      return perform_heuristic_search_policies_;
    }
 
    /**
@@ -556,6 +603,44 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getMinimumStepYaw()
    {
       return minimum_step_yaw_;
+   }
+
+   /**
+            * Large steps forward and up can cause the robot to surpass its torque limits.
+            * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+            * it's very close to saturating its torque limits.
+            */
+   public void setMaximumStepReachWhenSteppingUp(double maximum_step_reach_when_stepping_up)
+   {
+      maximum_step_reach_when_stepping_up_ = maximum_step_reach_when_stepping_up;
+   }
+   /**
+            * Large steps forward and up can cause the robot to surpass its torque limits.
+            * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+            * it's very close to saturating its torque limits.
+            */
+   public double getMaximumStepReachWhenSteppingUp()
+   {
+      return maximum_step_reach_when_stepping_up_;
+   }
+
+   /**
+            * Large steps forward and up can cause the robot to surpass its torque limits.
+            * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+            * it's very close to saturating its torque limits.
+            */
+   public void setMaximumStepZWhenSteppingUp(double maximum_step_z_when_stepping_up)
+   {
+      maximum_step_z_when_stepping_up_ = maximum_step_z_when_stepping_up;
+   }
+   /**
+            * Large steps forward and up can cause the robot to surpass its torque limits.
+            * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+            * it's very close to saturating its torque limits.
+            */
+   public double getMaximumStepZWhenSteppingUp()
+   {
+      return maximum_step_z_when_stepping_up_;
    }
 
    /**
@@ -1107,6 +1192,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.check_for_body_box_collisions_, other.check_for_body_box_collisions_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_heuristic_search_policies_, other.perform_heuristic_search_policies_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_footstep_width_, other.ideal_footstep_width_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_footstep_length_, other.ideal_footstep_length_, epsilon)) return false;
@@ -1122,6 +1209,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_length_, other.minimum_step_length_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_yaw_, other.minimum_step_yaw_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_reach_when_stepping_up_, other.maximum_step_reach_when_stepping_up_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_when_stepping_up_, other.maximum_step_z_when_stepping_up_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_x_when_forward_and_down_, other.maximum_step_x_when_forward_and_down_, epsilon)) return false;
 
@@ -1189,6 +1280,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.check_for_body_box_collisions_ != otherMyClass.check_for_body_box_collisions_) return false;
 
+      if(this.perform_heuristic_search_policies_ != otherMyClass.perform_heuristic_search_policies_) return false;
+
       if(this.ideal_footstep_width_ != otherMyClass.ideal_footstep_width_) return false;
 
       if(this.ideal_footstep_length_ != otherMyClass.ideal_footstep_length_) return false;
@@ -1204,6 +1297,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.minimum_step_length_ != otherMyClass.minimum_step_length_) return false;
 
       if(this.minimum_step_yaw_ != otherMyClass.minimum_step_yaw_) return false;
+
+      if(this.maximum_step_reach_when_stepping_up_ != otherMyClass.maximum_step_reach_when_stepping_up_) return false;
+
+      if(this.maximum_step_z_when_stepping_up_ != otherMyClass.maximum_step_z_when_stepping_up_) return false;
 
       if(this.maximum_step_x_when_forward_and_down_ != otherMyClass.maximum_step_x_when_forward_and_down_) return false;
 
@@ -1268,6 +1365,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("check_for_body_box_collisions=");
       builder.append(this.check_for_body_box_collisions_);      builder.append(", ");
+      builder.append("perform_heuristic_search_policies=");
+      builder.append(this.perform_heuristic_search_policies_);      builder.append(", ");
       builder.append("ideal_footstep_width=");
       builder.append(this.ideal_footstep_width_);      builder.append(", ");
       builder.append("ideal_footstep_length=");
@@ -1284,6 +1383,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.minimum_step_length_);      builder.append(", ");
       builder.append("minimum_step_yaw=");
       builder.append(this.minimum_step_yaw_);      builder.append(", ");
+      builder.append("maximum_step_reach_when_stepping_up=");
+      builder.append(this.maximum_step_reach_when_stepping_up_);      builder.append(", ");
+      builder.append("maximum_step_z_when_stepping_up=");
+      builder.append(this.maximum_step_z_when_stepping_up_);      builder.append(", ");
       builder.append("maximum_step_x_when_forward_and_down=");
       builder.append(this.maximum_step_x_when_forward_and_down_);      builder.append(", ");
       builder.append("maximum_step_z_when_forward_and_down=");

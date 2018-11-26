@@ -2,12 +2,12 @@ package us.ihmc.sensorProcessing.frames;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 
 public class CommonReferenceFrames implements ReferenceFrames
 {
-   private final TLongObjectHashMap<ReferenceFrame> nameBasedHashCodeToReferenceFrameMap = new TLongObjectHashMap<ReferenceFrame>();
+   private final TLongObjectHashMap<ReferenceFrame> hashCodeToReferenceFrameMap = new TLongObjectHashMap<ReferenceFrame>();
    private final CenterOfMassReferenceFrame centerOfMassFrame;
    private final FullRobotModel fullRobotModel;
 
@@ -15,7 +15,7 @@ public class CommonReferenceFrames implements ReferenceFrames
    {
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
       this.fullRobotModel = fullRobotModel;
-      nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.CENTER_OF_MASS_FRAME.getHashId(), centerOfMassFrame);
+      hashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.CENTER_OF_MASS_FRAME.getHashId(), centerOfMassFrame);
    }
 
    @Override

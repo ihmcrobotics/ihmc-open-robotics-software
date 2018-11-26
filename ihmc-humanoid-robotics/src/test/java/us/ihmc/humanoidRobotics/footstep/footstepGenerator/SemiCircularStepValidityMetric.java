@@ -11,8 +11,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepValidityMetric;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class SemiCircularStepValidityMetric implements FootstepValidityMetric
 {
@@ -24,10 +24,10 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
 
    private final double footTwistLimitInRadians;
    private final double footReachLimitInMeters;
-   private final RigidBody leftFootBody;
+   private final RigidBodyBasics leftFootBody;
    private boolean valid = true;
 
-   public SemiCircularStepValidityMetric(RigidBody leftFootBody, double circleCenterOffsetFromStanceCenter, double footTwistLimitInRadians,
+   public SemiCircularStepValidityMetric(RigidBodyBasics leftFootBody, double circleCenterOffsetFromStanceCenter, double footTwistLimitInRadians,
          double footReachLimitInMeters, double validRegionChordOffset)
    {
       this.circleCenterOffset = circleCenterOffsetFromStanceCenter;
@@ -39,7 +39,7 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       this.leftFootBody = leftFootBody;
    }
 
-   public SemiCircularStepValidityMetric(RigidBody leftFootBody, double circleCenterOffsetFromStanceCenter, double footTwistLimitInRadians,
+   public SemiCircularStepValidityMetric(RigidBodyBasics leftFootBody, double circleCenterOffsetFromStanceCenter, double footTwistLimitInRadians,
          double footReachLimitInMeters, boolean checkForValidRegionOfSemiCircle)
    {
       this.circleCenterOffset = circleCenterOffsetFromStanceCenter;
@@ -51,7 +51,7 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       this.leftFootBody = leftFootBody;
    }
 
-   public SemiCircularStepValidityMetric(RigidBody leftFootBody, double circleCenterOffsetFromStanceCenter, double footTwistLimitInRadians,
+   public SemiCircularStepValidityMetric(RigidBodyBasics leftFootBody, double circleCenterOffsetFromStanceCenter, double footTwistLimitInRadians,
          double footReachLimitInMeters)
    {
       this.circleCenterOffset = circleCenterOffsetFromStanceCenter;

@@ -36,13 +36,12 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessa
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ContactSensor;
@@ -356,7 +355,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                         YoGraphicsListRegistry yoGraphicsListRegistry, DRCRobotSensorInformation sensorInformation,
                                         ForceSensorDataHolderReadOnly forceSensorDataHolder, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
                                         ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                        JointDesiredOutputList lowLevelControllerOutput, InverseDynamicsJoint... jointsToIgnore)
+                                        JointDesiredOutputList lowLevelControllerOutput, JointBasics... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -534,11 +533,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          controllerToolbox.attachControllerStateChangedListener(listener);
       else
          controllerStateChangedListenersToAttach.add(listener);
-   }
-
-   public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
-   {
-      controllerToolbox.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
    public void attachRobotMotionStatusChangedListener(RobotMotionStatusChangedListener listener)

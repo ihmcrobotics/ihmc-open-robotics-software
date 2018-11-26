@@ -36,4 +36,16 @@ public enum FootstepPlannerType
       throw new IllegalArgumentException("Unable to find a corresponding FootstepPlannerType to string : " + name);
    }
 
+   public boolean plansPath()
+   {
+      switch (this)
+      {
+      case SIMPLE_BODY_PATH:
+      case VIS_GRAPH_WITH_A_STAR:
+         return true;
+      default:
+         return false;
+      }
+   }
+
 }

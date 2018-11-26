@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.ui.components;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -9,10 +11,8 @@ import javafx.scene.input.PickResult;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.javaFXToolkit.messager.Messager;
-import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
-
-import java.util.concurrent.atomic.AtomicReference;
+import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory;
 
 public class FootPositionEditor extends AnimationTimer
 {

@@ -16,12 +16,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Wrench;
 
 /**
  * @author twan
@@ -48,7 +48,7 @@ public class PlaneContactWrenchProcessor
    public PlaneContactWrenchProcessor(List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
-      Map<RigidBody, ReferenceFrame> soleFrames = new HashMap<>();
+      Map<RigidBodyBasics, ReferenceFrame> soleFrames = new HashMap<>();
 
       this.contactablePlaneBodies = contactablePlaneBodies;
       for (ContactablePlaneBody contactableBody : contactablePlaneBodies)
@@ -98,7 +98,7 @@ public class PlaneContactWrenchProcessor
    private final FramePoint3D tempCoP3d = new FramePoint3D();
    private final FrameVector3D tempForce = new FrameVector3D();
 
-   public void compute(Map<RigidBody, Wrench> externalWrenches)
+   public void compute(Map<RigidBodyBasics, Wrench> externalWrenches)
    {
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
@@ -111,7 +111,7 @@ public class PlaneContactWrenchProcessor
 
          if (wrench != null)
          {
-            wrench.getLinearPartIncludingFrame(tempForce);
+            tempForce.setIncludingFrame(wrench.getLinearPart());
 
             double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(cop, wrench, contactablePlaneBody.getSoleFrame());
 

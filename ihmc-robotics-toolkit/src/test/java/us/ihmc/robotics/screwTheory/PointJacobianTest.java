@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -17,6 +17,13 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
+import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
 /**
@@ -44,11 +51,11 @@ public class PointJacobianTest
       {
          X, Y, Z, Y, Y, X
       };
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
-      randomFloatingChain.setRandomPositionsAndVelocities(random);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      randomFloatingChain.nextState(random, JointStateType.CONFIGURATION, JointStateType.VELOCITY);
 
-      RigidBody base = randomFloatingChain.getRootJoint().getSuccessor();
-      RigidBody endEffector = randomFloatingChain.getLeafBody();
+      RigidBodyBasics base = randomFloatingChain.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = randomFloatingChain.getLeafBody();
       GeometricJacobian geometricJacobian = new GeometricJacobian(base, endEffector, base.getBodyFixedFrame());
       geometricJacobian.compute();
 
@@ -57,10 +64,10 @@ public class PointJacobianTest
       pointJacobian.set(geometricJacobian, point);
       pointJacobian.compute();
 
-      InverseDynamicsJoint[] joints = geometricJacobian.getJointsInOrder();
+      JointBasics[] joints = geometricJacobian.getJointsInOrder();
 
-      DenseMatrix64F jointVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(joints), 1);
-      ScrewTools.getJointVelocitiesMatrix(joints, jointVelocities);
+      DenseMatrix64F jointVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
+      MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocities);
 
       DenseMatrix64F pointVelocityFromJacobianMatrix = new DenseMatrix64F(3, 1);
       CommonOps.mult(pointJacobian.getJacobianMatrix(), jointVelocities, pointVelocityFromJacobianMatrix);
@@ -70,7 +77,9 @@ public class PointJacobianTest
       FramePoint3D point2 = new FramePoint3D(point);
       point2.changeFrame(endEffector.getBodyFixedFrame());
       double dt = 1e-8;
-      ScrewTestTools.integrateVelocities(randomFloatingChain.getRevoluteJoints(), dt);
+      MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(dt);
+      integrator.integrateFromVelocity(randomFloatingChain.getRevoluteJoints());
+      randomFloatingChain.getElevator().updateFramesRecursively();
       point2.changeFrame(base.getBodyFixedFrame());
 
       FrameVector3D pointVelocityFromNumericalDifferentiation = new FrameVector3D(point2);
@@ -89,11 +98,11 @@ public class PointJacobianTest
       {
          X, Y, Z, Y, Y, X
       };
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
-      randomFloatingChain.setRandomPositionsAndVelocities(random);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      randomFloatingChain.nextState(random, JointStateType.CONFIGURATION, JointStateType.VELOCITY);
 
-      RigidBody base = randomFloatingChain.getRootJoint().getSuccessor();
-      RigidBody endEffector = randomFloatingChain.getLeafBody();
+      RigidBodyBasics base = randomFloatingChain.getRootJoint().getSuccessor();
+      RigidBodyBasics endEffector = randomFloatingChain.getLeafBody();
       GeometricJacobian geometricJacobian = new GeometricJacobian(base, endEffector, base.getBodyFixedFrame());
       geometricJacobian.compute();
 
@@ -108,7 +117,7 @@ public class PointJacobianTest
       pointJacobian2.set(geometricJacobian, point2);
       pointJacobian2.compute();
 
-      DenseMatrix64F assembledJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, geometricJacobian.getNumberOfColumns());
+      DenseMatrix64F assembledJacobian = new DenseMatrix64F(SpatialVector.SIZE, geometricJacobian.getNumberOfColumns());
       CommonOps.insert(pointJacobian1.getJacobianMatrix(), assembledJacobian, 0, 0);
       CommonOps.insert(pointJacobian2.getJacobianMatrix(), assembledJacobian, 3, 0);
 
