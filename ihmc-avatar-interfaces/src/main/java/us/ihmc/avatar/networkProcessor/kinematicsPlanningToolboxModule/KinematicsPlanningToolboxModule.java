@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
@@ -16,21 +20,24 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 public class KinematicsPlanningToolboxModule extends ToolboxModule
 {
    private final KinematicsPlanningToolboxController kinematicsPlanningToolboxController;
 
-   public KinematicsPlanningToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider,
-                                          boolean startYoVariableServer)
-         throws IOException
+   public KinematicsPlanningToolboxModule(DRCRobotModel drcRobotModel, boolean startYoVariableServer) throws IOException
    {
-      super(drcRobotModel.getSimpleRobotName(), fullRobotModelToLog, modelProvider, startYoVariableServer);
-      kinematicsPlanningToolboxController = new KinematicsPlanningToolboxController(drcRobotModel, fullRobotModel, commandInputManager, statusOutputManager,
-                                                                                    registry);
+      this(drcRobotModel, startYoVariableServer, PubSubImplementation.FAST_RTPS);
+   }
+
+   public KinematicsPlanningToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation) throws IOException
+   {
+      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
+            DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+      kinematicsPlanningToolboxController = new KinematicsPlanningToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager,
+                                                                                    yoGraphicsListRegistry, registry);
       commandInputManager.registerConversionHelper(new KinematicsPlanningToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
    }
@@ -38,13 +45,30 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
+      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
 
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> {
+         if (kinematicsPlanningToolboxController != null)
+            kinematicsPlanningToolboxController.updateRobotConfigurationData(s.takeNextData());
+      });
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s -> {
+         if (kinematicsPlanningToolboxController != null)
+            kinematicsPlanningToolboxController.updateCapturabilityBasedStatus(s.takeNextData());
+      });
    }
 
    @Override
    public ToolboxController getToolboxController()
    {
       return kinematicsPlanningToolboxController;
+   }
+
+   public static List<Class<? extends Settable<?>>> supportedStatus()
+   {
+      List<Class<? extends Settable<?>>> status = new ArrayList<>();
+      status.add(KinematicsPlanningToolboxOutputStatus.class);
+      status.add(KinematicsToolboxOutputStatus.class);
+      return status;
    }
 
    @Override
@@ -65,9 +89,7 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
    {
-      List<Class<? extends Settable<?>>> status = new ArrayList<>();
-      status.add(KinematicsPlanningToolboxOutputStatus.class);
-      return status;
+      return supportedStatus();
    }
 
    @Override

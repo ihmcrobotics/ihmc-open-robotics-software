@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -56,7 +55,7 @@ public class KinematicsPlanningToolboxCommandConverter implements CommandConvers
    @Override
    public <C extends Command<?, M>, M extends Settable<M>> boolean isConvertible(C command, M message)
    {
-      return message instanceof KinematicsToolboxRigidBodyMessage;
+      return message instanceof KinematicsPlanningToolboxRigidBodyMessage;
    }
 
    @Override
@@ -66,5 +65,4 @@ public class KinematicsPlanningToolboxCommandConverter implements CommandConvers
       KinematicsPlanningToolboxRigidBodyCommand rigiBodyCommand = (KinematicsPlanningToolboxRigidBodyCommand) command;
       rigiBodyCommand.set(rigiBodyMessage, rigidBodyHashMap, referenceFrameHashCodeResolver);
    }
-
 }
