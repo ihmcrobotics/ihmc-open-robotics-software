@@ -100,13 +100,9 @@ public class CenterOfMassHeightManager
    public void initialize()
    {
       if (useStateMachine)
-      {
          stateMachine.resetToInitialState();
-      }
-      else
-      {
-         pelvisHeightControlState.goHome(0.5);
-      }
+      centerOfMassHeightControlState.initialize();
+      pelvisHeightControlState.initialize();
    }
 
    /**
