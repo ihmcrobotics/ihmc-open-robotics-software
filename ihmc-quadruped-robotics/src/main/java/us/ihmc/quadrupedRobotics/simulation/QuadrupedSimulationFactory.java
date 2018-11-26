@@ -272,6 +272,7 @@ public class QuadrupedSimulationFactory
          stateEstimatorFactory.setCenterOfMassDataHolder(centerOfMassDataHolder);
          stateEstimatorFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
          stateEstimator = stateEstimatorFactory.createStateEstimator();
+         factoryRegistry.addChild(stateEstimator.getYoVariableRegistry());
       }
       else
       {
