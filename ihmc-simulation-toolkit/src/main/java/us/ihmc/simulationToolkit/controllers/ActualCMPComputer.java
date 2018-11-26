@@ -48,13 +48,13 @@ public class ActualCMPComputer extends SimpleRobotController
       simulateDT = scs.getDT();
       gravity = simulatedRobot.getGravityZ();
 
-      momentumChange = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("rateOfChangeLinearMomentum", "", alpha, simulateDT, registry, yoLinearMomentum);
+      momentumChange = FilteredVelocityYoFrameVector
+            .createFilteredVelocityYoFrameVector("rateOfChangeLinearMomentum", "", alpha, simulateDT, registry, yoLinearMomentum);
 
       if (createViz)
       {
          yoGraphicsListRegistry = new YoGraphicsListRegistry();
-         YoArtifactPosition cmpViz = new YoArtifactPosition("SimulationCMP", yoCmp.getYoX(), yoCmp.getYoY(),
-               GraphicType.BALL_WITH_CROSS, Color.RED , 0.005);
+         YoArtifactPosition cmpViz = new YoArtifactPosition("SimulationCMP", yoCmp.getYoX(), yoCmp.getYoY(), GraphicType.BALL_WITH_CROSS, Color.RED, 0.005);
          cmpViz.setVisible(visibleByDefault);
          yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), cmpViz);
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
@@ -85,8 +85,8 @@ public class ActualCMPComputer extends SimpleRobotController
       // CMP = COMxy - (z/Fz)*Fxy
       cmp.set(comAcceleration);
       double z = comPosition.getZ();
-      double normalizedFz= -gravity +  comAcceleration.getZ();
-      cmp.scale(- z/normalizedFz);
+      double normalizedFz = -gravity + comAcceleration.getZ();
+      cmp.scale(-z / normalizedFz);
       cmp.add(comPosition2d);
 
       yoCmp.set(cmp);
