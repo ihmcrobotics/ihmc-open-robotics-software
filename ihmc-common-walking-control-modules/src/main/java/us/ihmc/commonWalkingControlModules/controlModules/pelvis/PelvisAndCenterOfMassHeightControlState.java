@@ -32,6 +32,15 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
 
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
 
+   /**
+    * This method is intended to reset the internal state of this control state to be identical to
+    * when starting up the whole controller.
+    * <p>
+    * This allows to re-initialize the walking controller.
+    * </p>
+    */
+   public abstract void initialize();
+
    public abstract void initializeDesiredHeightToCurrent();
 
    public abstract void goHome(double trajectoryTime);

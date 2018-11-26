@@ -564,13 +564,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       return humanoidHighLevelControllerManager.getCurrentHighLevelControlState();
    }
 
-   public void reinitializeWalking(boolean keepPosition)
-   {
-      humanoidHighLevelControllerManager.requestHighLevelControllerState(HighLevelControllerName.WALKING);
-      if (keepPosition)
-         humanoidHighLevelControllerManager.reinitializeWalking();
-   }
-
    public void setListenToHighLevelStatePackets(boolean isListening)
    {
       if (humanoidHighLevelControllerManager != null)
