@@ -26,8 +26,8 @@ mainDependencies {
    compile group: "com.google.guava", name: "guava", version: "18.0"
 
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
-   compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.6"
+   compile group: "us.ihmc", name: "euclid-core", version: "0.7.0"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.7"
 }
 
 testDependencies {

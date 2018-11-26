@@ -4,15 +4,15 @@ import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.TurningOverheadPath;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class TurnInPlaceFootstepGenerator extends AbstractSimpleParametersFootstepGenerator
 {
    private TurningOverheadPath footstepPath;
    private FrameOrientation2D endOrientation;
 
-   public TurnInPlaceFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FrameOrientation2D pathYaw, PathTypeStepParameters pathType)
+   public TurnInPlaceFootstepGenerator(SideDependentList<RigidBodyBasics> feet, SideDependentList<ReferenceFrame> soleFrames, FrameOrientation2D pathYaw, PathTypeStepParameters pathType)
    {
       super(feet, soleFrames, pathType);
       this.endOrientation = pathYaw;

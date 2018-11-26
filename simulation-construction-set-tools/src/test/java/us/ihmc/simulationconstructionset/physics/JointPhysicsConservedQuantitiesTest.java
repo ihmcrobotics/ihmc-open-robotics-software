@@ -18,7 +18,8 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -63,7 +64,7 @@ public class JointPhysicsConservedQuantitiesTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private ScrewTestTools.RandomFloatingChain getRandomFloatingChain(int minNumberOfAxes, int maxNumberOfAxes)
+   private RandomFloatingRevoluteJointChain getRandomFloatingChain(int minNumberOfAxes, int maxNumberOfAxes)
    {
       Random random = new Random(519651L);
       int numberOfAxes = RandomNumbers.nextInt(random, minNumberOfAxes, maxNumberOfAxes);
@@ -74,8 +75,8 @@ public class JointPhysicsConservedQuantitiesTest
          jointAxes[i] = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
       }
 
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
-      randomFloatingChain.setRandomPositionsAndVelocities(random);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
+      randomFloatingChain.nextState(random, JointStateType.CONFIGURATION, JointStateType.VELOCITY);
       return randomFloatingChain;
    }
 

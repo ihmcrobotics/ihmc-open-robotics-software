@@ -13,46 +13,44 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class KinematicsPlanningToolboxCommandConverter implements CommandConversionInterface
 {
-   private final Map<Long, RigidBody> rigidBodyNamedBasedHashMap = new HashMap<>();
+   private final Map<Integer, RigidBodyBasics> rigidBodyHashMap = new HashMap<>();
    private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
 
    public KinematicsPlanningToolboxCommandConverter(FullHumanoidRobotModel fullRobotModel)
    {
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, new HumanoidReferenceFrames(fullRobotModel));
 
-      RigidBody rootBody = ScrewTools.getRootBody(fullRobotModel.getElevator());
-      RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
-      for (RigidBody rigidBody : allRigidBodies)
-         rigidBodyNamedBasedHashMap.put(rigidBody.getNameBasedHashCode(), rigidBody);
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(fullRobotModel.getElevator());
+      for (RigidBodyBasics rigidBody : rootBody.subtreeIterable())
+         rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody);
    }
 
-   public KinematicsPlanningToolboxCommandConverter(RigidBody rootBody)
+   public KinematicsPlanningToolboxCommandConverter(RigidBodyBasics rootBody)
    {
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
-      for (InverseDynamicsJoint joint : ScrewTools.computeSubtreeJoints(rootBody))
+      for (JointBasics joint : rootBody.childrenSubtreeIterable())
       {
          referenceFrames.add(joint.getFrameAfterJoint());
          referenceFrames.add(joint.getFrameBeforeJoint());
       }
 
-      for (RigidBody rigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(rootBody))
+      for (RigidBodyBasics rigidBody : rootBody.subtreeIterable())
       {
          referenceFrames.add(rigidBody.getBodyFixedFrame());
       }
 
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(referenceFrames);
 
-      RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
-      for (RigidBody rigidBody : allRigidBodies)
-         rigidBodyNamedBasedHashMap.put(rigidBody.getNameBasedHashCode(), rigidBody);
+      for (RigidBodyBasics rigidBody : rootBody.subtreeIterable())
+         rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody);
    }
 
    @Override
@@ -66,7 +64,7 @@ public class KinematicsPlanningToolboxCommandConverter implements CommandConvers
    {
       KinematicsPlanningToolboxRigidBodyMessage rigiBodyMessage = (KinematicsPlanningToolboxRigidBodyMessage) message;
       KinematicsPlanningToolboxRigidBodyCommand rigiBodyCommand = (KinematicsPlanningToolboxRigidBodyCommand) command;
-      rigiBodyCommand.set(rigiBodyMessage, rigidBodyNamedBasedHashMap, referenceFrameHashCodeResolver);
+      rigiBodyCommand.set(rigiBodyMessage, rigidBodyHashMap, referenceFrameHashCodeResolver);
    }
 
 }

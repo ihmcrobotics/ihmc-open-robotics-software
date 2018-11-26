@@ -47,9 +47,9 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesired
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -92,9 +92,9 @@ public class WalkingCommandConsumer
       this.commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, controllerToolbox.getYoTime());
       this.statusMessageOutputManager = statusMessageOutputManager;
 
-      RigidBody head = controllerToolbox.getFullRobotModel().getHead();
-      RigidBody chest = controllerToolbox.getFullRobotModel().getChest();
-      RigidBody pelvis = controllerToolbox.getFullRobotModel().getPelvis();
+      RigidBodyBasics head = controllerToolbox.getFullRobotModel().getHead();
+      RigidBodyBasics chest = controllerToolbox.getFullRobotModel().getChest();
+      RigidBodyBasics pelvis = controllerToolbox.getFullRobotModel().getPelvis();
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
 
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
@@ -122,7 +122,7 @@ public class WalkingCommandConsumer
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
+         RigidBodyBasics hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
          if(hand != null)
          {
             ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);

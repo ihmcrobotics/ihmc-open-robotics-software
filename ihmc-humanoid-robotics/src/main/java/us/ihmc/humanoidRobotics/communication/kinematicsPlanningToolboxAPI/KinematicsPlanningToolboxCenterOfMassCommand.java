@@ -10,7 +10,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -36,7 +36,7 @@ public class KinematicsPlanningToolboxCenterOfMassCommand
       weightMatrix.set(other.weightMatrix);
    }
 
-   public void set(KinematicsPlanningToolboxCenterOfMassMessage message, Map<Long, RigidBody> rigidBodyNamedBasedHashMap,
+   public void set(KinematicsPlanningToolboxCenterOfMassMessage message, Map<Long, RigidBodyBasics> rigidBodyNamedBasedHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       for (int i = 0; i < message.getWayPointTimes().size(); i++)
@@ -55,9 +55,9 @@ public class KinematicsPlanningToolboxCenterOfMassCommand
 
       if (referenceFrameResolver != null)
       {
-         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrameFromNameBaseHashCode(linearSelection.getSelectionFrameId());
+         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrameFromHashCode(linearSelection.getSelectionFrameId());
          selectionMatrix.setSelectionFrame(linearSelectionFrame);
-         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrameFromNameBaseHashCode(linearWeight.getWeightFrameId());
+         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrameFromHashCode(linearWeight.getWeightFrameId());
          weightMatrix.setWeightFrame(linearWeightFrame);
       }
    }

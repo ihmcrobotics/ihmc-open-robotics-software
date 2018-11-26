@@ -15,8 +15,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoRoo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
@@ -42,7 +42,7 @@ public class WholeBodyControllerCore
    private final RootJointDesiredConfigurationDataBasics rootJointDesiredConfigurationData;
    private final JointDesiredOutputListBasics jointDesiredOutputList;
 
-   private OneDoFJoint[] controlledOneDoFJoints;
+   private OneDoFJointBasics[] controlledOneDoFJoints;
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreSubmitTimer = new ExecutionTimer("controllerCoreSubmitTimer", 1.0, registry);
 
@@ -74,7 +74,7 @@ public class WholeBodyControllerCore
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
-      FloatingInverseDynamicsJoint rootJoint = toolbox.getRootJoint();
+      FloatingJointBasics rootJoint = toolbox.getRootJoint();
 
       if (DEBUG)
       {
@@ -241,8 +241,6 @@ public class WholeBodyControllerCore
          throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
       }
 
-      clearOnEDoFJointOutputs();
-
       if (rootJointDesiredConfigurationData != null)
          controllerCoreOutput.setRootJointDesiredConfigurationData(rootJointDesiredConfigurationData);
       controllerCoreOutput.setLowLevelOneDoFJointDesiredDataHolder(jointDesiredOutputList);
@@ -299,41 +297,6 @@ public class WholeBodyControllerCore
    {
       numberOfFBControllerEnabled.set(0);
       jointDesiredOutputList.insertDesiredTorquesIntoOneDoFJoints(controlledOneDoFJoints);
-   }
-
-   //TODO: Clear OneDoFJoint of these fields and get rid of this.
-   private void clearOnEDoFJointOutputs()
-   {
-      for (int i = 0; i < controlledOneDoFJoints.length; i++)
-      {
-         OneDoFJoint joint = controlledOneDoFJoints[i];
-         //         System.out.println("Checking " + joint.getName());
-
-         // Zero out joint for testing purposes
-         joint.setqDesired(Double.NaN);
-         joint.setQdDesired(Double.NaN);
-         joint.setQddDesired(Double.NaN);
-         joint.setTau(Double.NaN);
-
-         if (joint.getKp() != 0.0)
-         {
-            throw new RuntimeException(joint.toString() + " is not zero kp " + joint.getKp() + " - function is removed");
-         }
-         if (joint.getKd() != 0.0)
-         {
-            throw new RuntimeException(joint.toString() + " is not zero kd " + joint.getKd() + " - function is removed");
-         }
-
-         if (joint.isUnderPositionControl())
-         {
-            throw new RuntimeException(joint.toString() + " is under position control - function is removed");
-         }
-
-         if (!joint.isUseFeedBackForceControl())
-         {
-            throw new RuntimeException(joint.toString() + " disabled feedback force control - function is removed");
-         }
-      }
    }
 
    public ControllerCoreOutput getControllerCoreOutput()

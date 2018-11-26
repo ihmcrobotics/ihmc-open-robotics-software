@@ -1,6 +1,12 @@
 package us.ihmc.avatar.logProcessor;
 
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.*;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQsName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQxName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQyName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQzName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createXName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createYName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createZName;
 
 import java.util.ArrayList;
 
@@ -15,11 +21,19 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactW
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -29,15 +43,6 @@ import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.wholeBodyController.DRCControllerThread;
 
 public class LogDataProcessorHelper
 {

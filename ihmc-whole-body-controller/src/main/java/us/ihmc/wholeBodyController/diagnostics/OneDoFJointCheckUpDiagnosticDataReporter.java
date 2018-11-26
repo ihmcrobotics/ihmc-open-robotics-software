@@ -9,16 +9,16 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
 import us.ihmc.wholeBodyController.diagnostics.logging.JointForceTrackingDelayLogRecord;
 import us.ihmc.wholeBodyController.diagnostics.logging.ProcessedJointPositionDelayLogRecord;
 import us.ihmc.wholeBodyController.diagnostics.logging.ProcessedJointVelocityDelayLogRecord;
 import us.ihmc.wholeBodyController.diagnostics.logging.RawJointVelocityDelayLogRecord;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataReporter
 {
@@ -65,7 +65,7 @@ public class OneDoFJointCheckUpDiagnosticDataReporter implements DiagnosticDataR
 
    private final AtomicBoolean isDoneExportingData = new AtomicBoolean(false);
 
-   public OneDoFJointCheckUpDiagnosticDataReporter(String loggerName, OneDoFJoint joint, DiagnosticParameters diagnosticParameters,
+   public OneDoFJointCheckUpDiagnosticDataReporter(String loggerName, OneDoFJointBasics joint, DiagnosticParameters diagnosticParameters,
          YoDouble processedPositionQualityMean, YoDouble processedPositionQualityStandardDeviation, YoDouble processedPositionDelayMean, YoDouble processedPositionDelayStandardDeviation,
          YoDouble rawVelocityQualityMean, YoDouble rawVelocityQualityStandardDeviation, YoDouble rawVelocityDelayMean, YoDouble rawVelocityDelayStandardDeviation,
          YoDouble processedVelocityQualityMean, YoDouble processedVelocityQualityStandardDeviation, YoDouble processedVelocityDelayMean, YoDouble processedVelocityDelayStandardDeviation,

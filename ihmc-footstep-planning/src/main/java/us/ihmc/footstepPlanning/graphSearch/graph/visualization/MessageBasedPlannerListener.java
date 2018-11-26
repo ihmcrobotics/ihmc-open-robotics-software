@@ -25,9 +25,6 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    private final HashSet<PlannerCell> exploredCells = new HashSet<>();
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
 
-   private final FootstepNodeDataListMessage nodeDataListMessage = new FootstepNodeDataListMessage();
-   private final FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
-
    private final long occupancyMapBroadcastDt;
    private long lastBroadcastTime = -1;
 
@@ -40,7 +37,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    @Override
    public void addNode(FootstepNode node, FootstepNode previousNode)
    {
-      if(previousNode == null)
+      if (previousNode == null)
       {
          rejectionReasons.clear();
          childMap.clear();
@@ -72,15 +69,16 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    {
       long currentTime = System.currentTimeMillis();
 
-      if(lastBroadcastTime == -1)
+      if (lastBroadcastTime == -1)
          lastBroadcastTime = currentTime;
 
-      if(currentTime - lastBroadcastTime > occupancyMapBroadcastDt)
+      if (currentTime - lastBroadcastTime > occupancyMapBroadcastDt)
       {
-         packOccupancyMapMessage();
+         FootstepPlannerOccupancyMapMessage occupancyMapMessage = packOccupancyMapMessage();
          broadcastOccupancyMap(occupancyMapMessage);
 
-         if(packLowestCostPlanMessage())
+         FootstepNodeDataListMessage nodeDataListMessage = packLowestCostPlanMessage();
+         if (nodeDataListMessage != null)
             broadcastNodeData(nodeDataListMessage);
 
          lastBroadcastTime = currentTime;
@@ -90,7 +88,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    @Override
    public void plannerFinished(List<FootstepNode> plan)
    {
-      packOccupancyMapMessage();
+      FootstepPlannerOccupancyMapMessage occupancyMapMessage = packOccupancyMapMessage();
       broadcastOccupancyMap(occupancyMapMessage);
    }
 
@@ -98,24 +96,27 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
 
    abstract void broadcastNodeData(FootstepNodeDataListMessage nodeDataListMessage);
 
-   private void packOccupancyMapMessage()
+   FootstepPlannerOccupancyMapMessage packOccupancyMapMessage()
    {
       PlannerCell[] plannerCells = exploredCells.toArray(new PlannerCell[0]);
-      Object<FootstepPlannerCellMessage> occupiedCells = occupancyMapMessage.getOccupiedCells();
-      occupiedCells.clear();
+      FootstepPlannerOccupancyMapMessage message = new FootstepPlannerOccupancyMapMessage();
+      Object<FootstepPlannerCellMessage> occupiedCells = message.getOccupiedCells();
       for (int i = 0; i < plannerCells.length; i++)
       {
          FootstepPlannerCellMessage plannerCell = occupiedCells.add();
          plannerCell.setXIndex(plannerCells[i].xIndex);
          plannerCell.setYIndex(plannerCells[i].yIndex);
       }
+
+      return message;
    }
 
-   private boolean packLowestCostPlanMessage()
+   FootstepNodeDataListMessage packLowestCostPlanMessage()
    {
-      if(lowestCostPlan.isEmpty())
-         return false;
+      if (lowestCostPlan.isEmpty())
+         return null;
 
+      FootstepNodeDataListMessage nodeDataListMessage = new FootstepNodeDataListMessage();
       Object<FootstepNodeDataMessage> nodeDataList = nodeDataListMessage.getNodeData();
       nodeDataList.clear();
       for (int i = 0; i < lowestCostPlan.size(); i++)
@@ -127,7 +128,8 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
 
       nodeDataListMessage.setIsFootstepGraph(false);
       lowestCostPlan.clear();
-      return true;
+
+      return nodeDataListMessage;
    }
 
    private void setNodeDataMessage(FootstepNodeDataMessage nodeDataMessage, FootstepNode node, int parentNodeIndex)
@@ -148,35 +150,4 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       snapData.getSnapTransform().get(snapRotationToSet, snapTranslationToSet);
    }
 
-   private class PlannerCell
-   {
-      int xIndex;
-      int yIndex;
-
-      PlannerCell(int xIndex, int yIndex)
-      {
-         this.xIndex = xIndex;
-         this.yIndex = yIndex;
-      }
-
-      @Override
-      public int hashCode()
-      {
-         final int prime = 31;
-         int result = 1;
-         result = prime * result + xIndex;
-         result = prime * result + yIndex;
-         return result;
-      }
-
-      @Override
-      public boolean equals(java.lang.Object other)
-      {
-         if(!(other instanceof PlannerCell))
-            return false;
-
-         PlannerCell otherCell = (PlannerCell) other;
-         return otherCell.xIndex == xIndex && otherCell.yIndex == yIndex;
-      }
-   }
 }

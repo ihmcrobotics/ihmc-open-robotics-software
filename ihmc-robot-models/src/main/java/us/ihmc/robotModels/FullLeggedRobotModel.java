@@ -1,16 +1,14 @@
 package us.ihmc.robotModels;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public interface FullLeggedRobotModel<E extends Enum<E> & RobotSegment<E>> extends FullRobotModel
 {
@@ -25,19 +23,19 @@ public interface FullLeggedRobotModel<E extends Enum<E> & RobotSegment<E>> exten
    MovingReferenceFrame getFrameAfterLegJoint(E robotSegment, LegJointName legJointName);
 
    /**
-    * Return the {@link OneDoFJoint} describing the the corresponding leg joint.
+    * Return the {@link OneDoFJointBasics} describing the the corresponding leg joint.
     * @param robotSegment Refers to which leg the joint belongs to (assuming there is only one left leg and one right leg).
     * @param legJointName Refers to the joint's name.
     */
-   OneDoFJoint getLegJoint(E robotSegment, LegJointName legJointName);
+   OneDoFJointBasics getLegJoint(E robotSegment, LegJointName legJointName);
 
    /**
-    * Returns the {@link RigidBody} describing the left or right foot of this robot.
+    * Returns the {@link RigidBodyBasics} describing the left or right foot of this robot.
     * A foot is considered as the end-effector (thus the last {@RigidBody}) of the leg to which it belongs to.
     *
     * @param robotSegment Refers to which side the foot belongs to (assuming there is only one left foot and one right foot).
     */
-   RigidBody getFoot(E robotSegment);
+   RigidBodyBasics getFoot(E robotSegment);
 
    /**
     * This method is equivalent to:
@@ -46,7 +44,7 @@ public interface FullLeggedRobotModel<E extends Enum<E> & RobotSegment<E>> exten
     * @param robotSegment refers to the end-effector side.
     * @param limbName refers to the limb the end-effector is attached to (either a leg or an arm).
     */
-   RigidBody getEndEffector(E robotSegment, LimbName limbName);
+   RigidBodyBasics getEndEffector(E robotSegment, LimbName limbName);
 
    /**
     * This methods returns the frame located right after the parent joint of this end-effector (see {@link FullLeggedRobotModel#getEndEffector(E, LimbName)}).

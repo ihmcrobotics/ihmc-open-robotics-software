@@ -3,13 +3,14 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinema
 import java.util.ArrayList;
 import java.util.List;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableDouble;
+
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<PrivilegedConfigurationCommand>, InverseDynamicsCommand<PrivilegedConfigurationCommand>
 {
@@ -21,7 +22,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     */
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
    /** internal memory to save the joints to be controlled. */
-   private final List<OneDoFJoint> joints = new ArrayList<>(initialCapacity);
+   private final List<OneDoFJointBasics> joints = new ArrayList<>(initialCapacity);
    /** internal memory to save the desired configurations in */
    private final RecyclingArrayList<MutableDouble> privilegedOneDoFJointConfigurations = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
    /** internal memory to save the privileged configuration options in */
@@ -189,13 +190,13 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     * @param joint the joint to set the configuration of.
     * @param privilegedConfiguration the desired privileged configuration for the joint to achieve.
     */
-   public void addJoint(OneDoFJoint joint, double privilegedConfiguration)
+   public void addJoint(OneDoFJointBasics joint, double privilegedConfiguration)
    {
       enable();
       joints.add(joint);
       jointNames.add(joint.getName());
       privilegedOneDoFJointConfigurations.add().setValue(privilegedConfiguration);
-      privilegedOneDoFJointConfigurationOptions.put(joint.getNameBasedHashCode(), null);
+      privilegedOneDoFJointConfigurationOptions.put(joint.hashCode(), null);
 
       weights.add().setValue(Double.NaN);
       configurationGains.add().setValue(Double.NaN);
@@ -210,13 +211,13 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     * @param joint the joint to set the configuration of.
     * @param privilegedConfiguration the desired privileged configuration option for the joint to achieve.
     */
-   public void addJoint(OneDoFJoint joint, PrivilegedConfigurationOption privilegedConfiguration)
+   public void addJoint(OneDoFJointBasics joint, PrivilegedConfigurationOption privilegedConfiguration)
    {
       enable();
       joints.add(joint);
       jointNames.add(joint.getName());
       privilegedOneDoFJointConfigurations.add().setValue(Double.NaN);
-      privilegedOneDoFJointConfigurationOptions.put(joint.getNameBasedHashCode(), privilegedConfiguration);
+      privilegedOneDoFJointConfigurationOptions.put(joint.hashCode(), privilegedConfiguration);
 
       weights.add().setValue(Double.NaN);
       configurationGains.add().setValue(Double.NaN);
@@ -232,7 +233,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
     * @param joint the joint to set the configuration of.
     * @param privilegedConfiguration the desired privileged configuration for the joint to achieve.
     */
-   public void addOrSetOneDoFJoint(OneDoFJoint joint, double privilegedConfiguration)
+   public void addOrSetOneDoFJoint(OneDoFJointBasics joint, double privilegedConfiguration)
    {
       String jointName = joint.getName();
       for(int i = 0; i < joints.size(); i++)
@@ -258,7 +259,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       MathTools.checkEquals(joints.get(jointIndex).getDegreesOfFreedom(), 1);
       enable();
       privilegedOneDoFJointConfigurations.get(jointIndex).setValue(privilegedConfiguration);
-      privilegedOneDoFJointConfigurationOptions.put(joints.get(jointIndex).getNameBasedHashCode(), null);
+      privilegedOneDoFJointConfigurationOptions.put(joints.get(jointIndex).hashCode(), null);
    }
 
    /**
@@ -272,7 +273,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       MathTools.checkEquals(joints.get(jointIndex).getDegreesOfFreedom(), 1);
       enable();
       privilegedOneDoFJointConfigurations.get(jointIndex).setValue(Double.NaN);
-      privilegedOneDoFJointConfigurationOptions.put(joints.get(jointIndex).getNameBasedHashCode(), privilegedConfiguration);
+      privilegedOneDoFJointConfigurationOptions.put(joints.get(jointIndex).hashCode(), privilegedConfiguration);
    }
 
    /**
@@ -295,11 +296,11 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
 
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
-         OneDoFJoint joint = other.joints.get(i);
+         OneDoFJointBasics joint = other.joints.get(i);
          joints.add(joint);
          jointNames.add(other.jointNames.get(i));
          privilegedOneDoFJointConfigurations.add().setValue(other.privilegedOneDoFJointConfigurations.get(i));
-         privilegedOneDoFJointConfigurationOptions.put(joint.getNameBasedHashCode(), other.privilegedOneDoFJointConfigurationOptions.get(joint.getNameBasedHashCode()));
+         privilegedOneDoFJointConfigurationOptions.put(joint.hashCode(), other.privilegedOneDoFJointConfigurationOptions.get(joint.hashCode()));
 
          weights.add().setValue(other.weights.get(i));
          configurationGains.add().setValue(other.configurationGains.get(i));
@@ -566,7 +567,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
 
    public PrivilegedConfigurationOption getPrivilegedConfigurationOption(int jointIndex)
    {
-      return privilegedOneDoFJointConfigurationOptions.get(joints.get(jointIndex).getNameBasedHashCode());
+      return privilegedOneDoFJointConfigurationOptions.get(joints.get(jointIndex).hashCode());
    }
 
    public int getNumberOfJoints()
@@ -574,7 +575,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       return joints.size();
    }
 
-   public OneDoFJoint getJoint(int jointIndex)
+   public OneDoFJointBasics getJoint(int jointIndex)
    {
       return joints.get(jointIndex);
    }

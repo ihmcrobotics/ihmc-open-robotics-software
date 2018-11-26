@@ -13,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -21,13 +20,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -95,7 +94,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final YoDouble currentLegLength;
    private final YoDouble correctedDesiredLegLength;
 
-   private final RigidBody pelvis;
+   private final RigidBodyBasics pelvis;
 
    private final FrameVector3D unachievedSwingTranslationTemp = new FrameVector3D();
    private final FrameVector3D unachievedSwingVelocityTemp = new FrameVector3D();
@@ -153,7 +152,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final AlphaFilteredYoVariable unachievedSwingAccelerationFiltered;
 
    private final double controlDT;
-   private final OneDoFJoint hipPitchJoint;
+   private final OneDoFJointBasics hipPitchJoint;
 
    public LegSingularityAndKneeCollapseAvoidanceControlModule(String namePrefix, ContactablePlaneBody contactablePlaneBody, final RobotSide robotSide,
          WalkingControllerParameters walkingControllerParameters, final HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
@@ -474,7 +473,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
       pelvis.getBodyFixedFrame().getTwistOfFrame(pelvisTwist);
       //      pelvisTwist.changeFrame(virtualLegTangentialFrameAnkleCentered);
-      pelvisTwist.getLinearPart(pelvisLinearVelocity);
+      pelvisLinearVelocity.setIncludingFrame(pelvisTwist.getLinearPart());
       pelvisLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
 
       isSwingMechanicalLimitAvoidanceUsed.set(true);
@@ -579,7 +578,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
       desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
       pelvis.getBodyFixedFrame().getTwistOfFrame(pelvisTwist);
-      pelvisTwist.getLinearPart(pelvisLinearVelocity);
+      pelvisLinearVelocity.setIncludingFrame(pelvisTwist.getLinearPart());
       pelvisLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
 
       if (checkVelocityForSwingSingularityAvoidance.getBooleanValue() && (desiredFootLinearVelocity.getZ() - pelvisLinearVelocity.getZ() > -1e-10))

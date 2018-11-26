@@ -11,6 +11,16 @@ module controller_msgs
 
       /**
        * This message is part of the IHMC footstep planning module.
+       * Maximum step reach when stepping up.
+       * 
+       * Long steps forward are rejected by the planner if two criteria are met:
+       * The x-position of the value of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * Step height for considering stepping up.
+       * 
+       * Long steps forward are rejected by the planner if two criteria are met:
+       * The x-position of the value of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
        */
       @TypeCode(type="controller_msgs::msg::dds_::FootstepPlannerParametersPacket_")
       struct FootstepPlannerParametersPacket
@@ -24,6 +34,10 @@ module controller_msgs
          * to run slower.
          */
         boolean check_for_body_box_collisions;
+        /**
+         * Sets whether or not to perform the defined heuristic search policies.
+         */
+        boolean perform_heuristic_search_policies;
         /**
          * Returns the ideal step width for walking on flat ground.
          */
@@ -94,6 +108,20 @@ module controller_msgs
         @defaultValue(value=-1.0)
         double minimum_step_yaw;
         /**
+         * Large steps forward and up can cause the robot to surpass its torque limits.
+         * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+         * it's very close to saturating its torque limits.
+         */
+        @defaultValue(value=-1.0)
+        double maximum_step_reach_when_stepping_up;
+        /**
+         * Large steps forward and up can cause the robot to surpass its torque limits.
+         * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+         * it's very close to saturating its torque limits.
+         */
+        @defaultValue(value=-1.0)
+        double maximum_step_z_when_stepping_up;
+        /**
          * Maximum step length when stepping forward and down.
          * 
          * Large steps forward and down are rejected by the planner if two criteria are met:
@@ -104,7 +132,7 @@ module controller_msgs
          * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
          * it's very close to hitting it's ankle pitch joint limit.
          */
-        @defaultValue(value=-10.0)
+        @defaultValue(value=-1.0)
         double maximum_step_x_when_forward_and_down;
         /**
          * Maximum step height when stepping forward and down.
@@ -117,7 +145,7 @@ module controller_msgs
          * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
          * it's very close to hitting it's ankle pitch joint limit.
          */
-        @defaultValue(value=-10.0)
+        @defaultValue(value=-1.0)
         double maximum_step_z_when_forward_and_down;
         /**
          * Maximum vertical distance between consecutive footsteps

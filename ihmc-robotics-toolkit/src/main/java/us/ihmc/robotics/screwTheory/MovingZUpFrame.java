@@ -2,6 +2,8 @@ package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.geometry.RotationTools;
 
 public class MovingZUpFrame extends MovingReferenceFrame
@@ -73,8 +75,8 @@ public class MovingZUpFrame extends MovingReferenceFrame
       double yawDot = (sinRoll * wy + cosRoll * wz) / cosPitch;
 
       twistRelativeToParentToPack.changeFrame(this);
-      twistRelativeToParentToPack.changeBodyFrameNoRelativeTwist(this);
-      twistRelativeToParentToPack.changeBaseFrameNoRelativeTwist(rootFrame);
-      twistRelativeToParentToPack.setAngularPart(0.0, 0.0, yawDot);
+      twistRelativeToParentToPack.setBodyFrame(this);
+      twistRelativeToParentToPack.setBaseFrame(rootFrame);
+      twistRelativeToParentToPack.getAngularPart().set(0.0, 0.0, yawDot);
    }
 }

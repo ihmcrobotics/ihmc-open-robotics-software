@@ -2,6 +2,8 @@ package us.ihmc.exampleSimulations.genericQuadruped.parameters;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedOrderedJointMap;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
 
 public class GenericQuadrupedSquaredUpInitialPosition extends GenericQuadrupedInitialPositionParameters
 {
@@ -42,5 +44,20 @@ public class GenericQuadrupedSquaredUpInitialPosition extends GenericQuadrupedIn
    double getKneePitchAngle()
    {
       return -1.275;
+   }
+
+   public static void main(String[] args)
+   {
+      GenericQuadrupedSquaredUpInitialPosition initialPositionParameters = new GenericQuadrupedSquaredUpInitialPosition();
+      System.out.println("Initial position: " + initialPositionParameters.getInitialBodyPosition());
+      System.out.println("Initial orientation: " + initialPositionParameters.getInitialBodyOrientation());
+
+      System.out.println("Initial positions:");
+      for (GenericQuadrupedOrderedJointMap jointName : GenericQuadrupedOrderedJointMap.values)
+      {
+         QuadrupedJointName quadrupedJointName = QuadrupedJointName.getName(jointName.getRobotQuadrant(), jointName.getLegJointName());
+         double initialJointPosition = initialPositionParameters.getInitialJointPosition(quadrupedJointName);
+         System.out.println(quadrupedJointName + "\t\t" + initialJointPosition);
+      }
    }
 }

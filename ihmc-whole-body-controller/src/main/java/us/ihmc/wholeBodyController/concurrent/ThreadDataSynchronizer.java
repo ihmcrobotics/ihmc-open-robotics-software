@@ -7,10 +7,10 @@ import java.util.Map;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
@@ -57,7 +57,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       estimatorRobotMotionStatusHolder = new RobotMotionStatusHolder();
       estimatorDesiredJointDataHolder = new JointDesiredOutputList(estimatorFullRobotModel.getControllableOneDoFJoints());
 
-      Map<RigidBody, ReferenceFrame> estimatorFeetFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
+      Map<RigidBodyBasics, ReferenceFrame> estimatorFeetFrames = new LinkedHashMap<RigidBodyBasics, ReferenceFrame>();
       for(RobotSide robotSide : RobotSide.values)
       {
          estimatorFeetFrames.put(estimatorFullRobotModel.getFoot(robotSide), estimatorFullRobotModel.getSoleFrame(robotSide));
@@ -72,7 +72,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       controllerRobotMotionStatusHolder = new RobotMotionStatusHolder();
       controllerDesiredJointDataHolder = new JointDesiredOutputList(controllerFullRobotModel.getControllableOneDoFJoints());
 
-      Map<RigidBody, ReferenceFrame> controllerFeetFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
+      Map<RigidBodyBasics, ReferenceFrame> controllerFeetFrames = new LinkedHashMap<RigidBodyBasics, ReferenceFrame>();
       for(RobotSide robotSide : RobotSide.values)
       {
          controllerFeetFrames.put(controllerFullRobotModel.getFoot(robotSide), controllerFullRobotModel.getSoleFrame(robotSide));

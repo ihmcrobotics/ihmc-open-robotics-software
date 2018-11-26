@@ -1,5 +1,9 @@
 package us.ihmc.quadrupedRobotics.vmc;
 
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
+
+import java.util.ArrayList;
+
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -7,13 +11,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullLeggedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -21,21 +26,14 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.util.ArrayList;
-
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class QuadrupedVMCController implements RobotController
 {
@@ -74,9 +72,9 @@ public class QuadrupedVMCController implements RobotController
 
       for (RobotQuadrant robotQuadrant : quadrants)
       {
-         RigidBody foot = fullRobotModel.getFoot(robotQuadrant);
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotQuadrant);
          ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotQuadrant);
-         RigidBody body = fullRobotModel.getBody();
+         RigidBodyBasics body = fullRobotModel.getBody();
 
          FramePoint3D currentPosition = new FramePoint3D(soleFrame);
          currentPosition.changeFrame(foot.getBodyFixedFrame());
@@ -86,7 +84,7 @@ public class QuadrupedVMCController implements RobotController
          feedbackControlCommand.setBodyFixedPointToControl(currentPosition);
          feedbackControlCommands.put(robotQuadrant, feedbackControlCommand);
 
-         RigidBody rigidBody = foot;
+         RigidBodyBasics rigidBody = foot;
          while (rigidBody.getParentJoint().getPredecessor() != body)
             rigidBody = rigidBody.getParentJoint().getPredecessor();
          ReferenceFrame shoulderBaseFrame = rigidBody.getParentJoint().getFrameBeforeJoint();

@@ -8,15 +8,15 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ForceBasedTouchDownDetection implements TouchdownDetector
 {
@@ -28,7 +28,7 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(6);   
    private final DenseMatrix64F jointTorques = new DenseMatrix64F(3, 1);
    private final DenseMatrix64F footLinearForce = new DenseMatrix64F(3, 1);
-   private final List<OneDoFJoint> legOneDoFJoints;
+   private final List<OneDoFJointBasics> legOneDoFJoints;
    
    private final YoBoolean isInContact;
    private final YoDouble zForceThreshold;
@@ -46,8 +46,8 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       
       zForceThreshold.set(40.0);
       
-      RigidBody body = robotModel.getRootBody();
-      RigidBody foot = robotModel.getFoot(robotQuadrant);
+      RigidBodyBasics body = robotModel.getRootBody();
+      RigidBodyBasics foot = robotModel.getFoot(robotQuadrant);
       footJacobian = new GeometricJacobian(body, foot, soleFrame);
       
       legOneDoFJoints = robotModel.getLegJointsList(robotQuadrant);
@@ -71,8 +71,8 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
    {
       for(int i = 0; i < legOneDoFJoints.size(); i++)
       {
-         OneDoFJoint oneDoFJoint = legOneDoFJoints.get(i);
-         jointTorques.set(i, 0, oneDoFJoint.getTauMeasured());
+         OneDoFJointBasics oneDoFJoint = legOneDoFJoints.get(i);
+         jointTorques.set(i, 0, oneDoFJoint.getTau());
       }
       
       footJacobian.compute();

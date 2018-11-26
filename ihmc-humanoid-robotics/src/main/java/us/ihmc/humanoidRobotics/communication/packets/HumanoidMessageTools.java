@@ -148,6 +148,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -155,7 +156,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -461,7 +461,7 @@ public class HumanoidMessageTools
    /**
     * To set disable exploration on this rigid body.
     */
-   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBody rigidBody)
+   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBodyBasics rigidBody)
    {
       ConfigurationSpaceName[] configurations = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, ConfigurationSpaceName.YAW,
             ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
@@ -473,14 +473,14 @@ public class HumanoidMessageTools
    /**
     * To set enable exploration on this rigid body with following order of ConfigurationSpaceName.
     */
-   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBody rigidBody,
+   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBodyBasics rigidBody,
                                                                                                          ConfigurationSpaceName[] degreesOfFreedomToExplore)
    {
       return createRigidBodyExplorationConfigurationMessage(rigidBody, degreesOfFreedomToExplore,
                                                             WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationAmplitudeArray(degreesOfFreedomToExplore));
    }
 
-   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBody rigidBody,
+   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBodyBasics rigidBody,
                                                                                                          ConfigurationSpaceName[] degreesOfFreedomToExplore,
                                                                                                          double[] explorationRangeAmplitudes)
    {
@@ -488,7 +488,7 @@ public class HumanoidMessageTools
       if (degreesOfFreedomToExplore.length != explorationRangeAmplitudes.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length);
 
-      message.setRigidBodyNameBasedHashCode(rigidBody.getNameBasedHashCode());
+      message.setRigidBodyHashCode(rigidBody.hashCode());
       byte[] degreesOfFreedomToExplore1 = ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore);
       if (degreesOfFreedomToExplore1.length != explorationRangeAmplitudes.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
@@ -509,7 +509,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBody rigidBody,
+   public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBodyBasics rigidBody,
                                                                                                          ConfigurationSpaceName[] degreesOfFreedomToExplore,
                                                                                                          double[] explorationRangeUpperLimits,
                                                                                                          double[] explorationRangeLowerLimits)
@@ -518,7 +518,7 @@ public class HumanoidMessageTools
       if (degreesOfFreedomToExplore.length != explorationRangeUpperLimits.length || degreesOfFreedomToExplore.length != explorationRangeLowerLimits.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length);
 
-      message.setRigidBodyNameBasedHashCode(rigidBody.getNameBasedHashCode());
+      message.setRigidBodyHashCode(rigidBody.hashCode());
       byte[] degreesOfFreedomToExplore1 = ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore);
       if (degreesOfFreedomToExplore1.length != explorationRangeUpperLimits.length || degreesOfFreedomToExplore1.length != explorationRangeLowerLimits.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
@@ -565,16 +565,16 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static WaypointBasedTrajectoryMessage createWaypointBasedTrajectoryMessage(RigidBody endEffector, double[] waypointTimes, Pose3D[] waypoints)
+   public static WaypointBasedTrajectoryMessage createWaypointBasedTrajectoryMessage(RigidBodyBasics endEffector, double[] waypointTimes, Pose3D[] waypoints)
    {
       return createWaypointBasedTrajectoryMessage(endEffector, waypointTimes, waypoints);
    }
 
-   public static WaypointBasedTrajectoryMessage createWaypointBasedTrajectoryMessage(RigidBody endEffector, double[] waypointTimes, Pose3D[] waypoints,
+   public static WaypointBasedTrajectoryMessage createWaypointBasedTrajectoryMessage(RigidBodyBasics endEffector, double[] waypointTimes, Pose3D[] waypoints,
                                                                                      SelectionMatrix6D selectionMatrix)
    {
       WaypointBasedTrajectoryMessage message = new WaypointBasedTrajectoryMessage();
-      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
+      message.setEndEffectorHashCode(endEffector.hashCode());
       if (waypointTimes.length != waypoints.length)
          throw new RuntimeException("Inconsistent array lengths.");
 
@@ -1182,8 +1182,7 @@ public class HumanoidMessageTools
 
    public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(FullHumanoidRobotModel fullRobotModel)
    {
-      return MessageTools.createKinematicsToolboxOutputStatus(fullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel),
-                                                              false);
+      return MessageTools.createKinematicsToolboxOutputStatus(fullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
    }
 
    public static HumanoidBehaviorTypePacket createHumanoidBehaviorTypePacket(HumanoidBehaviorType behaviorType)
@@ -1325,10 +1324,10 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static ReachingManifoldMessage createReachingManifoldMessage(RigidBody rigidBody)
+   public static ReachingManifoldMessage createReachingManifoldMessage(RigidBodyBasics rigidBody)
    {
       ReachingManifoldMessage message = new ReachingManifoldMessage();
-      message.setEndEffectorNameBasedHashCode(rigidBody.getNameBasedHashCode());
+      message.setEndEffectorHashCode(rigidBody.hashCode());
       return message;
    }
 

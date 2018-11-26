@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -124,6 +125,8 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       if (planarRegionList.size() == 0)
          return true;
 
+//      PrintTools.info("Body dimensions = (" + parameters.getBodyBoxDepth() + ", " + parameters.getBodyBoxWidth() + ", " + parameters.getBodyBoxHeight() + ")");
+      
       bodyCollisionBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
       if (!MathTools.epsilonEquals(1.0, scaleFactor, 1e-5))
          bodyCollisionBox.scale(scaleFactor);

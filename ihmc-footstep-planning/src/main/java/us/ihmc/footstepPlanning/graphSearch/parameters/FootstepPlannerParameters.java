@@ -21,6 +21,14 @@ public interface FootstepPlannerParameters
    }
 
    /**
+    * Sets whether or not to perform the defined heuristic search policies.
+    */
+   default boolean performHeuristicSearchPolicies()
+   {
+      return true;
+   }
+
+   /**
     * Returns the ideal step width for walking on flat ground.
     */
    double getIdealFootstepWidth();
@@ -121,13 +129,57 @@ public interface FootstepPlannerParameters
    }
 
    /**
+    * Maximum step reach when stepping up.
+    *
+    * <p>
+    * Long steps forward are rejected by the planner if two criteria are met:
+    * <ul>
+    *    <li> The x-position of the value of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
+    * </ul>
+    * </p>
+    *
+    * <p>
+    *    Large steps forward and up can cause the robot to surpass its torque limits.
+    *    These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+    *    it's very close to saturating its torque limits.
+    * </p>
+    */
+   default double getMaximumStepReachWhenSteppingUp()
+   {
+      return getMaximumStepReach();
+   }
+
+   /**
+    * Step height for considering stepping up.
+    *
+    * <p>
+    * Long steps forward are rejected by the planner if two criteria are met:
+    * <ul>
+    *    <li> The x-position of the value of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
+    * </ul>
+    * </p>
+    *
+    * <p>
+    *    Large steps forward and up can cause the robot to surpass its torque limits.
+    *    These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+    *    it's very close to saturating its torque limits.
+    * </p>
+    */
+   default double getMaximumStepZWhenSteppingUp()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   /**
     * Maximum step length when stepping forward and down.
     *
     * <p>
     * Large steps forward and down are rejected by the planner if two criteria are met:
     * <ul>
-    * <li> The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame </li>
-    * <li> The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame </li>
+    * <li> The x-position of the value of the footstep exceeds {@link #getMaximumStepXWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * <li> The z-position of the value of the footstep is less than -{@link #getMaximumStepZWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
     * </ul>
     * </p>
     *

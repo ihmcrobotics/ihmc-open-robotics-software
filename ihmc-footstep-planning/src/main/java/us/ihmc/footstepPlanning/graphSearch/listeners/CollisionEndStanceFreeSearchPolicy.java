@@ -85,7 +85,7 @@ public class CollisionEndStanceFreeSearchPolicy implements PlannerHeuristicNodeS
    @Override
    public boolean performSearchForValidNode(FootstepNode rejectedNode, FootstepNode parentNode)
    {
-      if (!checkFarEnoughFromStart(rejectedNode) || !checkFarEnoughFromEnd(rejectedNode))
+      if (!parameters.performHeuristicSearchPolicies() || !checkFarEnoughFromStart(rejectedNode) || !checkFarEnoughFromEnd(rejectedNode))
          return false;
 
       double currentRotation = 0.0;

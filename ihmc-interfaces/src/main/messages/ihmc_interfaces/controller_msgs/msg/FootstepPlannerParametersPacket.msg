@@ -7,6 +7,9 @@ uint32 sequence_id
 # to run slower.
 bool check_for_body_box_collisions false
 
+# Sets whether or not to perform the defined heuristic search policies.
+bool perform_heuristic_search_policies false
+
 # Returns the ideal step width for walking on flat ground.
 float64 ideal_footstep_width -1.0
 
@@ -60,6 +63,28 @@ float64 minimum_step_length -1.0
 # Minimum step yaw.
 float64 minimum_step_yaw -1.0
 
+# Maximum step reach when stepping up.
+#
+# Long steps forward are rejected by the planner if two criteria are met:
+#    The x-position of the value of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+#    The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+
+# Large steps forward and up can cause the robot to surpass its torque limits.
+# These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+# it's very close to saturating its torque limits.
+float64 maximum_step_reach_when_stepping_up -1.0
+
+# Step height for considering stepping up.
+#
+# Long steps forward are rejected by the planner if two criteria are met:
+#    The x-position of the value of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+#    The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+
+# Large steps forward and up can cause the robot to surpass its torque limits.
+# These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+# it's very close to saturating its torque limits.
+float64 maximum_step_z_when_stepping_up -1.0
+
 # Maximum step length when stepping forward and down.
 #
 # Large steps forward and down are rejected by the planner if two criteria are met:
@@ -69,7 +94,7 @@ float64 minimum_step_yaw -1.0
 # Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
 # These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
 # it's very close to hitting it's ankle pitch joint limit.
-float64 maximum_step_x_when_forward_and_down -10.0
+float64 maximum_step_x_when_forward_and_down -1.0
 
 # Maximum step height when stepping forward and down.
 #
@@ -80,7 +105,7 @@ float64 maximum_step_x_when_forward_and_down -10.0
 # Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
 # These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
 # it's very close to hitting it's ankle pitch joint limit.
-float64 maximum_step_z_when_forward_and_down -10.0
+float64 maximum_step_z_when_forward_and_down -1.0
 
 # Maximum vertical distance between consecutive footsteps
 #

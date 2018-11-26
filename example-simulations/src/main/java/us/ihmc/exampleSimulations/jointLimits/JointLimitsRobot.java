@@ -6,10 +6,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -28,7 +29,7 @@ public class JointLimitsRobot extends Robot
 
    private final PinJoint joint;
    private final RevoluteJoint idJoint;
-   private final RigidBody elevator;
+   private final RigidBodyBasics elevator;
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
@@ -38,9 +39,9 @@ public class JointLimitsRobot extends Robot
 
       // --- id robot ---
       elevator = new RigidBody("elevator", worldFrame);
-      idJoint = ScrewTools.addRevoluteJoint("idJoint", elevator, new Vector3D(0.0, 0.0, 0.0), new Vector3D(0.0, 1.0, 0.0));
+      idJoint = new RevoluteJoint("idJoint", elevator, new Vector3D(0.0, 0.0, 0.0), new Vector3D(0.0, 1.0, 0.0));
       Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, length, Axis.Z);
-      RigidBody arm = ScrewTools.addRigidBody("arm", idJoint, inertia, mass, new Vector3D(0.0, 0.0, length/2.0));
+      RigidBodyBasics arm = new RigidBody("arm", idJoint, inertia, mass, new Vector3D(0.0, 0.0, length/2.0));
 
       // --- scs robot ---
       joint = new PinJoint("joint", new Vector3D(), this, Axis.Y);
@@ -50,7 +51,8 @@ public class JointLimitsRobot extends Robot
       this.addRootJoint(joint);
 
       // --- setup ID calculator ---
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, -this.getGravityZ());
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator);
+      inverseDynamicsCalculator.setGravitionalAcceleration(getGravityZ());
    }
 
    private Link makeLink()
@@ -92,8 +94,9 @@ public class JointLimitsRobot extends Robot
    public void setQdd(double qdd)
    {
       updateInverseDynamicsStructureFromSimulation();
-      idJoint.setQddDesired(qdd);
+      idJoint.setQdd(qdd);
       inverseDynamicsCalculator.compute();
+      inverseDynamicsCalculator.writeComputedJointWrench(idJoint);
       joint.setTau(idJoint.getTau());
    }
 

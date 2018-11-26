@@ -6,29 +6,30 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.StagePlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.listeners.HeuristicSearchAndActionPolicyDefinitions;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
+import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedAStarPlanner;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -41,6 +42,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -51,10 +53,8 @@ public class FootstepPlanningStage implements FootstepPlanner
 
    private final YoVariableRegistry registry;
 
-   private FootstepPlanningResult pathPlanResult = null;
    private FootstepPlanningResult stepPlanResult = null;
 
-   private final AtomicReference<BodyPathPlan> pathPlan = new AtomicReference<>();
    private final AtomicReference<FootstepPlan> stepPlan = new AtomicReference<>();
 
    private final EnumMap<FootstepPlannerType, FootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
@@ -86,8 +86,9 @@ public class FootstepPlanningStage implements FootstepPlanner
    private final PlannerGoalRecommendationHolder plannerGoalRecommendationHolder;
 
    public FootstepPlanningStage(int stageId, RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
-                                EnumProvider<FootstepPlannerType> activePlanner, IntegerProvider planId, YoGraphicsListRegistry graphicsListRegistry,
-                                long tickDurationMs)
+                                BodyPathPlanner bodyPathPlanner, EnumProvider<FootstepPlannerType> activePlanner, MultiStagePlannerListener plannerListener,
+                                IntegerProvider planId, long tickDurationMs)
+
    {
       this.stageId = stageId;
       this.footstepPlanningParameters = footstepPlannerParameters;
@@ -95,13 +96,15 @@ public class FootstepPlanningStage implements FootstepPlanner
       this.tickDurationMs = tickDurationMs;
       this.activePlannerEnum = activePlanner;
 
+      String prefix = stageId + "_Step_";
+
       plannerGoalRecommendationHolder = new PlannerGoalRecommendationHolder(stageId);
 
-      registry = new YoVariableRegistry(stageId + getClass().getSimpleName());
+      registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
-      stageTime = new YoDouble(stageId + "_StageTime", registry);
-      initialize = new YoBoolean(stageId + "_Initialize" + registry.getName(), registry);
-      sequenceId = new YoInteger(stageId + "_PlanningSequenceId", registry);
+      stageTime = new YoDouble(prefix + "StageTime", registry);
+      initialize = new YoBoolean(prefix + "Initialize", registry);
+      sequenceId = new YoInteger(prefix + "PlanningSequenceId", registry);
 
       SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame;
       if (contactPointParameters == null)
@@ -109,12 +112,15 @@ public class FootstepPlanningStage implements FootstepPlanner
       else
          contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
 
-      plannerMap.put(FootstepPlannerType.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
-      plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame));
-      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedFootstepPlanner(footstepPlanningParameters, contactPointsInSoleFrame, registry));
+      plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame, plannerListener));
+      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedAStarPlanner("simple_", bodyPathPlanner, footstepPlannerParameters, contactPointsInSoleFrame,
+                                                                                         footstepPlannerParameters.getCostParameters()
+                                                                                                                  .getBodyPathBasedHeuristicsWeight(),
+                                                                                         registry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
-                     new VisibilityGraphWithAStarPlanner(stageId + "", footstepPlanningParameters, contactPointsInSoleFrame, graphicsListRegistry, registry));
+                     new BodyPathBasedAStarPlanner("visGraph_", bodyPathPlanner, footstepPlannerParameters, contactPointsInSoleFrame,
+                                                   footstepPlannerParameters.getCostParameters().getAStarHeuristicsWeight(), registry));
 
       initialize.set(true);
    }
@@ -124,7 +130,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       return registry;
    }
 
-   private AStarFootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons)
+   private AStarFootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons, MultiStagePlannerListener multiStageListener)
    {
       HeuristicSearchAndActionPolicyDefinitions heuristicPolicies = new HeuristicSearchAndActionPolicyDefinitions();
       heuristicPolicies.setGoalRecommendationListener(plannerGoalRecommendationHolder);
@@ -132,23 +138,42 @@ public class FootstepPlanningStage implements FootstepPlanner
       heuristicPolicies.setParameters(footstepPlanningParameters);
 
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlanningParameters);
-      AStarFootstepPlanner planner = AStarFootstepPlanner
-            .createPlanner(footstepPlanningParameters, null, footPolygons, expansion, heuristicPolicies, registry);
+
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, footstepPlanningParameters);
+      FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlanningParameters);
+
+      SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlanningParameters, footPolygons, snapper);
+      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(footstepPlanningParameters, snapper);
+      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlanningParameters, snapper, footPolygons);
+
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(footstepPlanningParameters.getCostParameters().getAStarHeuristicsWeight(),
+                                                                                   footstepPlanningParameters);
+
+      StagePlannerListener plannerListener = new StagePlannerListener(snapper, multiStageListener.getBroadcastDt());
+      FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
+      nodeChecker.addPlannerListener(plannerListener);
+      multiStageListener.addStagePlannerListener(plannerListener);
+
+      FootstepCostBuilder costBuilder = new FootstepCostBuilder();
+      costBuilder.setFootstepPlannerParameters(footstepPlanningParameters);
+      costBuilder.setSnapper(snapper);
+      costBuilder.setIncludeHeightCost(true);
+      costBuilder.setIncludeHeightCost(true);
+      costBuilder.setIncludePitchAndRollCost(true);
+
+      FootstepCost footstepCost = costBuilder.buildCost();
+
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(footstepPlanningParameters, nodeChecker, heuristics, expansion, footstepCost,
+                                                              postProcessingSnapper, plannerListener, registry);
+
+      heuristicPolicies.setCollisionNodeChecker(bodyCollisionNodeChecker);
+      heuristicPolicies.setNodeSnapper(snapper);
+      heuristicPolicies.build();
+
+      heuristicPolicies.getPlannerListeners().forEach(nodeChecker::addPlannerListener);
+      heuristicPolicies.getStartAndGoalListeners().forEach(planner::addStartAndGoalListener);
+
       return planner;
-   }
-
-   private DepthFirstFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
-   {
-      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, footstepPlanningParameters);
-      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, footstepPlanningParameters);
-      ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
-
-      DepthFirstFootstepPlanner footstepPlanner = new DepthFirstFootstepPlanner(footstepPlanningParameters, snapper, nodeChecker, stepCostCalculator, registry);
-      footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
-      footstepPlanner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
-      footstepPlanner.setExitAfterInitialSolution(false);
-
-      return footstepPlanner;
    }
 
    private FootstepPlanner getPlanner()
@@ -156,12 +181,24 @@ public class FootstepPlanningStage implements FootstepPlanner
       return plannerMap.get(activePlannerEnum.getValue());
    }
 
+   public int getPlanSequenceId()
+   {
+      return sequenceId.getIntegerValue();
+   }
+
+   public int getStageId()
+   {
+      return stageId;
+   }
+
+   @Override
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
    {
       this.stanceFootPose.set(stanceFootPose);
       this.stanceFootSide.set(side);
    }
 
+   @Override
    public void setGoal(FootstepPlannerGoal goal)
    {
       this.goal.set(goal);
@@ -173,16 +210,19 @@ public class FootstepPlanningStage implements FootstepPlanner
       getPlanner().setGoal(goal);
    }
 
+   @Override
    public void setTimeout(double timeout)
    {
       this.timeout.set(timeout);
    }
 
+   @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList.set(planarRegionsList.copy());
    }
 
+   @Override
    public void setPlanningHorizonLength(double planningHorizonLength)
    {
       this.horizonLength.set(planningHorizonLength);
@@ -193,36 +233,25 @@ public class FootstepPlanningStage implements FootstepPlanner
       this.sequenceId.set(sequenceId);
    }
 
+   @Override
    public double getPlanningDuration()
    {
       return getPlanner().getPlanningDuration();
    }
 
+   @Override
    public PlannerStatistics<?> getPlannerStatistics()
    {
       return getPlanner().getPlannerStatistics();
    }
 
-   public BodyPathPlan getPathPlan()
-   {
-      return pathPlan.getAndSet(null);
-   }
-
+   @Override
    public FootstepPlan getPlan()
    {
       return stepPlan.getAndSet(null);
    }
 
-   public int getPlanSequenceId()
-   {
-      return sequenceId.getIntegerValue();
-   }
 
-   @Override
-   public FootstepPlanningResult planPath()
-   {
-      return getPlanner().planPath();
-   }
 
    @Override
    public FootstepPlanningResult plan()
@@ -230,11 +259,6 @@ public class FootstepPlanningStage implements FootstepPlanner
       return getPlanner().plan();
    }
 
-
-   public int getStageId()
-   {
-      return stageId;
-   }
 
    public Runnable createStageRunnable()
    {
@@ -281,6 +305,22 @@ public class FootstepPlanningStage implements FootstepPlanner
       getPlanner().requestInitialize();
    }
 
+
+   public boolean initialize()
+   {
+      stageTime.set(0.0);
+
+      stepPlanResult = null;
+
+      getPlanner().setInitialStanceFoot(stanceFootPose.get(), stanceFootSide.get());
+      getPlanner().setGoal(goal.get());
+      getPlanner().setTimeout(timeout.get());
+      getPlanner().setPlanarRegions(planarRegionsList.get());
+      getPlanner().setPlanningHorizonLength(horizonLength.get());
+
+      return true;
+   }
+
    public void update()
    {
       if (initialize.getBooleanValue())
@@ -308,21 +348,9 @@ public class FootstepPlanningStage implements FootstepPlanner
                   + " on stage " + stageId);
 
       if (debug)
-         PrintTools.info("Stage " + stageId + " planning path.");
-
-      pathPlanResult = planPath();
-      if (pathPlanResult.validForExecution())
-         pathPlan.set(getPlanner().getPathPlan());
-
-      for (PlannerCompletionCallback completionCallback : completionCallbackList)
-         completionCallback.pathPlanningIsComplete(pathPlanResult, this);
-
-      if (debug)
          PrintTools.info("Stage " + stageId + " planning steps.");
 
-      stepPlanResult = pathPlanResult;
-      if (pathPlanResult.validForExecution())
-         stepPlanResult = plan();
+      stepPlanResult = plan();
 
       if (stepPlanResult.validForExecution())
          stepPlan.set(getPlanner().getPlan());
@@ -331,20 +359,17 @@ public class FootstepPlanningStage implements FootstepPlanner
          completionCallback.stepPlanningIsComplete(stepPlanResult, this);
    }
 
-   public boolean initialize()
+
+   @Override
+   public void cancelPlanning()
    {
-      stageTime.set(0.0);
-
-      pathPlanResult = null;
+      getPlanner().cancelPlanning();
       stepPlanResult = null;
-
-      getPlanner().setInitialStanceFoot(stanceFootPose.get(), stanceFootSide.get());
-      getPlanner().setGoal(goal.get());
-      getPlanner().setTimeout(timeout.get());
-      getPlanner().setPlanarRegions(planarRegionsList.get());
-      getPlanner().setPlanningHorizonLength(horizonLength.get());
-
-      return true;
+      stepPlan.set(null);
+      for (PlannerCompletionCallback completionCallback : completionCallbackList)
+      {
+         completionCallback.stepPlanningIsComplete(stepPlanResult, this);
+      }
    }
 
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher)

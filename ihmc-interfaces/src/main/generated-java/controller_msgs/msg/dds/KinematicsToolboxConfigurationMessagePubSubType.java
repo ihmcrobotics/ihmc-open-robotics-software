@@ -46,7 +46,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -71,7 +71,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getPrivilegedRootJointOrientation(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getPrivilegedJointNameBasedHashCodes().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += (data.getPrivilegedJointHashCodes().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -88,9 +88,9 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPrivilegedRootJointPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getPrivilegedRootJointOrientation(), cdr);
-      if(data.getPrivilegedJointNameBasedHashCodes().size() <= 100)
-      cdr.write_type_e(data.getPrivilegedJointNameBasedHashCodes());else
-          throw new RuntimeException("privileged_joint_name_based_hash_codes field exceeds the maximum length");
+      if(data.getPrivilegedJointHashCodes().size() <= 100)
+      cdr.write_type_e(data.getPrivilegedJointHashCodes());else
+          throw new RuntimeException("privileged_joint_hash_codes field exceeds the maximum length");
 
       if(data.getPrivilegedJointAngles().size() <= 100)
       cdr.write_type_e(data.getPrivilegedJointAngles());else
@@ -104,7 +104,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPrivilegedRootJointPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getPrivilegedRootJointOrientation(), cdr);	
-      cdr.read_type_e(data.getPrivilegedJointNameBasedHashCodes());	
+      cdr.read_type_e(data.getPrivilegedJointHashCodes());	
       cdr.read_type_e(data.getPrivilegedJointAngles());	
 
    }
@@ -117,7 +117,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
       ser.write_type_a("privileged_root_joint_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getPrivilegedRootJointOrientation());
 
-      ser.write_type_e("privileged_joint_name_based_hash_codes", data.getPrivilegedJointNameBasedHashCodes());
+      ser.write_type_e("privileged_joint_hash_codes", data.getPrivilegedJointHashCodes());
       ser.write_type_e("privileged_joint_angles", data.getPrivilegedJointAngles());
    }
 
@@ -129,7 +129,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
       ser.read_type_a("privileged_root_joint_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getPrivilegedRootJointOrientation());
 
-      ser.read_type_e("privileged_joint_name_based_hash_codes", data.getPrivilegedJointNameBasedHashCodes());
+      ser.read_type_e("privileged_joint_hash_codes", data.getPrivilegedJointHashCodes());
       ser.read_type_e("privileged_joint_angles", data.getPrivilegedJointAngles());
    }
 

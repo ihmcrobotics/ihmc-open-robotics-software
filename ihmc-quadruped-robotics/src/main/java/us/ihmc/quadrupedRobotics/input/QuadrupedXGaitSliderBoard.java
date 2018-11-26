@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.input;
 
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -25,8 +25,8 @@ public class QuadrupedXGaitSliderBoard
       sliderBoard.setKnob(2, "teleopDesiredVelocityZ", scs, -0.4, 0.4);
 
 //      sliderBoard.setButtonEnum(0, "teleopControllerRequestedEvent", scs, QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP);
-      sliderBoard.setButtonEnum(9, "teleopControllerRequestedEvent", scs, QuadrupedControllerRequestedEvent.REQUEST_STEPPING);
-      sliderBoard.setButtonEnum(1, "teleopControllerRequestedEvent", scs, QuadrupedControllerRequestedEvent.REQUEST_FREEZE);
+      sliderBoard.setButtonEnum(9, "teleopControllerRequestedEvent", scs, HighLevelControllerName.WALKING);
+      sliderBoard.setButtonEnum(1, "teleopControllerRequestedEvent", scs, HighLevelControllerName.FREEZE_STATE);
       sliderBoard.setButton(2, "xGaitRequested", scs);
       sliderBoard.setButton(3, "standingRequested", scs);
 

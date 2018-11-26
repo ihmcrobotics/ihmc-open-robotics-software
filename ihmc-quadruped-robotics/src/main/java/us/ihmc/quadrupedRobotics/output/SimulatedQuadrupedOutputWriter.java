@@ -1,25 +1,30 @@
 package us.ihmc.quadrupedRobotics.output;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.*;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelActuatorMode;
+import us.ihmc.sensorProcessing.outputData.LowLevelState;
+import us.ihmc.sensorProcessing.outputData.LowLevelStateList;
 import us.ihmc.simulationToolkit.controllers.LowLevelActuatorSimulator;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 public class SimulatedQuadrupedOutputWriter implements OutputWriter
 {
-   private final OneDoFJoint[] controllerJoints;
+   private final OneDoFJointBasics[] controllerJoints;
 
    protected final JointDesiredOutputListReadOnly jointDesiredOutputList;
    protected final LowLevelStateList lowLevelStateList;
-   private final HashMap<OneDoFJoint, LowLevelActuatorSimulator> quadrupedActuators = new HashMap<>();
+   private final HashMap<OneDoFJointBasics, LowLevelActuatorSimulator> quadrupedActuators = new HashMap<>();
 
    private final List<QuadrupedJointController> quadrupedJoints = new ArrayList<>();
 
@@ -32,7 +37,7 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
       lowLevelStateList = new LowLevelStateList(controllerJoints);
 
       YoVariableRegistry registry = new YoVariableRegistry("quadrupedOutputWriter");
-      for (OneDoFJoint controllerJoint : controllerJoints)
+      for (OneDoFJointBasics controllerJoint : controllerJoints)
       {
          String name = controllerJoint.getName();
          OneDegreeOfFreedomJoint simulatedJoint = robot.getOneDegreeOfFreedomJoint(name);
@@ -66,7 +71,7 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
          quadrupedJoints.get(i).computeDesiredStateFromJointController();
       }
 
-      for (OneDoFJoint controllerJoint : controllerJoints)
+      for (OneDoFJointBasics controllerJoint : controllerJoints)
       {
          LowLevelState desiredState = lowLevelStateList.getLowLevelState(controllerJoint);
          JointDesiredOutputReadOnly jointSetpoints = jointDesiredOutputList.getJointDesiredOutput(controllerJoint);
@@ -81,6 +86,10 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
             desiredState.setPosition(jointSetpoints.getDesiredPosition());
          if (jointSetpoints.hasDesiredTorque())
             desiredState.setEffort(jointSetpoints.getDesiredTorque());
+         if(jointSetpoints.hasStiffness())
+            quadrupedActuators.get(controllerJoint).setKp(jointSetpoints.getStiffness());
+         if(jointSetpoints.hasDamping())
+            quadrupedActuators.get(controllerJoint).setKd(jointSetpoints.getDamping());
 
          // Apply velocity scaling
          if (desiredState.isVelocityValid() && jointSetpoints.hasVelocityScaling())

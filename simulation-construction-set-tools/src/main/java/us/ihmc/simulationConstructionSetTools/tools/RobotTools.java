@@ -10,17 +10,18 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.PlanarJoint;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotDescription.Plane;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.PlanarJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
 import us.ihmc.simulationconstructionset.FloatingSCSJoint;
@@ -34,13 +35,13 @@ public class RobotTools
 {
    public static class SCSRobotFromInverseDynamicsRobotModel extends Robot
    {
-      private final FloatingInverseDynamicsJoint idFloatingJoint;
+      private final FloatingJointBasics idFloatingJoint;
       private final FloatingSCSJoint scsFloatingJoint;
 
-      private final LinkedHashMap<OneDoFJoint, OneDegreeOfFreedomJoint> idToSCSJointMap = new LinkedHashMap<OneDoFJoint, OneDegreeOfFreedomJoint>();
-      private final LinkedHashMap<OneDegreeOfFreedomJoint, OneDoFJoint> scsToIDJointMap = new LinkedHashMap<OneDegreeOfFreedomJoint, OneDoFJoint>();
+      private final LinkedHashMap<OneDoFJointBasics, OneDegreeOfFreedomJoint> idToSCSJointMap = new LinkedHashMap<OneDoFJointBasics, OneDegreeOfFreedomJoint>();
+      private final LinkedHashMap<OneDegreeOfFreedomJoint, OneDoFJointBasics> scsToIDJointMap = new LinkedHashMap<OneDegreeOfFreedomJoint, OneDoFJointBasics>();
 
-      private final ArrayList<OneDoFJoint> allIDOneDoFJoints;
+      private final ArrayList<OneDoFJointBasics> allIDOneDoFJoints;
       private final ArrayList<OneDegreeOfFreedomJoint> allSCSOneDoFJoints;
 
       // Temporary variables
@@ -49,19 +50,19 @@ public class RobotTools
       private final FrameVector3D angularVelocity = new FrameVector3D();
       private final Twist rootJointTwist = new Twist();
 
-      public SCSRobotFromInverseDynamicsRobotModel(String name, InverseDynamicsJoint rootJoint)
+      public SCSRobotFromInverseDynamicsRobotModel(String name, JointBasics rootJoint)
       {
          super(name);
 
          Joint scsRootJoint = addSCSJointUsingIDJoint(rootJoint, this, true);
          this.addRootJoint(scsRootJoint);
 
-         ArrayList<InverseDynamicsJoint> idChildJoints = new ArrayList<InverseDynamicsJoint>();
+         ArrayList<JointBasics> idChildJoints = new ArrayList<JointBasics>();
          idChildJoints.addAll(rootJoint.getSuccessor().getChildrenJoints());
 
          while (!idChildJoints.isEmpty())
          {
-            InverseDynamicsJoint currentIDJoint = idChildJoints.remove(0);
+            JointBasics currentIDJoint = idChildJoints.remove(0);
             addSCSJointUsingIDJoint(currentIDJoint, this, false);
             idChildJoints.addAll(currentIDJoint.getSuccessor().getChildrenJoints());
          }
@@ -81,8 +82,8 @@ public class RobotTools
             scsFloatingJoint = null;
             idFloatingJoint = null;
 
-            idToSCSJointMap.put((OneDoFJoint) rootJoint, (OneDegreeOfFreedomJoint) scsRootJoint);
-            scsToIDJointMap.put((OneDegreeOfFreedomJoint) scsRootJoint, (OneDoFJoint) rootJoint);
+            idToSCSJointMap.put((OneDoFJointBasics) rootJoint, (OneDegreeOfFreedomJoint) scsRootJoint);
+            scsToIDJointMap.put((OneDegreeOfFreedomJoint) scsRootJoint, (OneDoFJointBasics) rootJoint);
          }
          else
          {
@@ -91,8 +92,7 @@ public class RobotTools
 
          allSCSOneDoFJoints = new ArrayList<OneDegreeOfFreedomJoint>();
          getAllOneDegreeOfFreedomJoints(allSCSOneDoFJoints);
-         allIDOneDoFJoints = new ArrayList<OneDoFJoint>(Arrays.asList(ScrewTools.filterJoints(ScrewTools.computeSubtreeJoints(rootJoint.getPredecessor()),
-               OneDoFJoint.class)));
+         allIDOneDoFJoints = new ArrayList<OneDoFJointBasics>(Arrays.asList(MultiBodySystemTools.filterJoints(rootJoint.subtreeArray(), OneDoFJointBasics.class)));
 
          if (allIDOneDoFJoints.size() != allSCSOneDoFJoints.size())
             throw new RuntimeException("Should not get there...");
@@ -107,7 +107,7 @@ public class RobotTools
 
          for (int i = 0; i < allIDOneDoFJoints.size(); i++)
          {
-            OneDoFJoint idJoint = allIDOneDoFJoints.get(i);
+            OneDoFJointBasics idJoint = allIDOneDoFJoints.get(i);
 
             idToSCSJointMap.put(idJoint, scsJointsByName.get(idJoint.getName()));
             scsToIDJointMap.put(scsJointsByName.get(idJoint.getName()), idJoint);
@@ -124,7 +124,7 @@ public class RobotTools
 
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
          {
-            OneDoFJoint idJoint = scsToIDJointMap.get(scsJoint);
+            OneDoFJointBasics idJoint = scsToIDJointMap.get(scsJoint);
             scsJoint.setQ(idJoint.getQ());
          }
       }
@@ -134,9 +134,9 @@ public class RobotTools
          if (scsFloatingJoint != null)
          {
             ReferenceFrame rootBodyFrame = idFloatingJoint.getFrameAfterJoint();
-            idFloatingJoint.getJointTwist(rootJointTwist);
-            rootJointTwist.getLinearPart(linearVelocity);
-            rootJointTwist.getAngularPart(angularVelocity);
+            rootJointTwist.setIncludingFrame(idFloatingJoint.getJointTwist());
+            linearVelocity.setIncludingFrame(rootJointTwist.getLinearPart());
+            angularVelocity.setIncludingFrame(rootJointTwist.getAngularPart());
             linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
             angularVelocity.changeFrame(rootBodyFrame);
             scsFloatingJoint.setVelocity(linearVelocity);
@@ -145,7 +145,7 @@ public class RobotTools
 
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
          {
-            OneDoFJoint idJoint = scsToIDJointMap.get(scsJoint);
+            OneDoFJointBasics idJoint = scsToIDJointMap.get(scsJoint);
             scsJoint.setQd(idJoint.getQd());
          }
       }
@@ -156,12 +156,12 @@ public class RobotTools
          {
             scsFloatingJoint.getTransformToWorld(transformToWorld);
             transformToWorld.normalizeRotationPart();
-            idFloatingJoint.setPositionAndRotation(transformToWorld);
+            idFloatingJoint.setJointConfiguration(transformToWorld);
          }
 
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
          {
-            OneDoFJoint idJoint = scsToIDJointMap.get(scsJoint);
+            OneDoFJointBasics idJoint = scsToIDJointMap.get(scsJoint);
             idJoint.setQ(scsJoint.getQYoVariable().getDoubleValue());
          }
       }
@@ -175,13 +175,13 @@ public class RobotTools
             scsFloatingJoint.getVelocity(linearVelocity);
             linearVelocity.changeFrame(rootBodyFrame);
             scsFloatingJoint.getAngularVelocity(angularVelocity, rootBodyFrame);
-            rootJointTwist.set(rootBodyFrame, elevatorFrame, rootBodyFrame, linearVelocity, angularVelocity);
+            rootJointTwist.setIncludingFrame(rootBodyFrame, elevatorFrame, rootBodyFrame, angularVelocity, linearVelocity);
             idFloatingJoint.setJointTwist(rootJointTwist);
          }
 
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
          {
-            OneDoFJoint idJoint = scsToIDJointMap.get(scsJoint);
+            OneDoFJointBasics idJoint = scsToIDJointMap.get(scsJoint);
             idJoint.setQd(scsJoint.getQDYoVariable().getDoubleValue());
          }
       }
@@ -190,12 +190,12 @@ public class RobotTools
       {
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
          {
-            OneDoFJoint idJoint = scsToIDJointMap.get(scsJoint);
+            OneDoFJointBasics idJoint = scsToIDJointMap.get(scsJoint);
             scsJoint.setTau(idJoint.getTau());
          }
       }
       
-      public void packIdJoints(InverseDynamicsJoint[] idJoints)
+      public void packIdJoints(JointBasics[] idJoints)
       {
          int jointIndx = 0;
          if(idFloatingJoint != null)
@@ -213,17 +213,18 @@ public class RobotTools
          
       }
            
-      public PinJoint findSCSPinJoint(InverseDynamicsJoint joint)
+      public PinJoint findSCSPinJoint(JointBasics joint)
       {
          return (PinJoint) idToSCSJointMap.get(joint);
       }
    }
 
-   public static Joint addSCSJointUsingIDJoint(InverseDynamicsJoint idJoint, Robot scsRobot, boolean isRootJoint)
+   public static Joint addSCSJointUsingIDJoint(JointBasics idJoint, Robot scsRobot, boolean isRootJoint)
    {
       Joint scsJoint;
       String jointName = idJoint.getName();
-      RigidBodyTransform offsetTransform = idJoint.getOffsetTransform3D();
+      RigidBodyTransform offsetTransform = new RigidBodyTransform();
+      idJoint.getJointOffset(offsetTransform);
       Vector3D offsetVector = new Vector3D();
       offsetTransform.getTranslation(offsetVector);
 
@@ -255,16 +256,16 @@ public class RobotTools
          throw new RuntimeException("Not implemented yet for joint of the type: " + idJoint.getClass().getSimpleName());
       }
 
-      RigidBody idRigidBody = idJoint.getSuccessor();
-      RigidBodyInertia idInertia = idRigidBody.getInertia();
+      RigidBodyBasics idRigidBody = idJoint.getSuccessor();
+      SpatialInertiaBasics idInertia = idRigidBody.getInertia();
 
       String bodyName = idRigidBody.getName();
       Vector3D comOffset = new Vector3D();
-      FramePoint3D centerOfMassOffset = idInertia.getCenterOfMassOffset();
+      FramePoint3D centerOfMassOffset = new FramePoint3D(idInertia.getCenterOfMassOffset());
       centerOfMassOffset.changeFrame(idJoint.getFrameAfterJoint());
       comOffset.set(centerOfMassOffset);
       double mass = idInertia.getMass();
-      Matrix3D momentOfInertia = idInertia.getMassMomentOfInertiaPartCopy();
+      Matrix3D momentOfInertia = new Matrix3D(idInertia.getMomentOfInertia());
 
       Link scsRigidBody = new Link(bodyName);
       scsRigidBody.setComOffset(comOffset);

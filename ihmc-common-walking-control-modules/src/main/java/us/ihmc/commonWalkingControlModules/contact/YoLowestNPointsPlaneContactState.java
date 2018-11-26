@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.tools.lists.ArraySorter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -25,7 +25,7 @@ public class YoLowestNPointsPlaneContactState extends YoPlaneContactState
    private final ContactPointComparator contactPointComparator = new ContactPointComparator();
    private final TObjectIntHashMap<YoContactPoint> contactPointIndexLookup = new TObjectIntHashMap<>();
 
-   public YoLowestNPointsPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
+   public YoLowestNPointsPlaneContactState(String namePrefix, RigidBodyBasics rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
                                            double numberOfContactsToActivate, double coefficientOfFriction, YoVariableRegistry parentRegistry)
    {
       super(namePrefix, rigidBody, planeFrame, contactFramePoints, coefficientOfFriction, parentRegistry);

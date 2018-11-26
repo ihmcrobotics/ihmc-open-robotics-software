@@ -1,6 +1,6 @@
 package us.ihmc.robotics.kinematics;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 /** This class is replaced with JointLimitData. It will be removed on 02/04/2018 (April 2). */
 @Deprecated
@@ -30,7 +30,7 @@ public class JointLimit
       torqueLimit = Double.POSITIVE_INFINITY;   
    }
    
-   public JointLimit(OneDoFJoint oneDoFJoint)
+   public JointLimit(OneDoFJointBasics oneDoFJoint)
    {
       upperPositionLimit = oneDoFJoint.getJointLimitUpper();     
       lowerPositionLimit = oneDoFJoint.getJointLimitLower(); 

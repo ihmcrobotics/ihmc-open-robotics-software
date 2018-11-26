@@ -17,16 +17,18 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.RosBasedPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
+import us.ihmc.footstepPlanning.graphSearch.planners.*;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -35,6 +37,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
+import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
@@ -48,19 +52,19 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlanningToolboxController extends ToolboxController
 {
-   private static final boolean debug = false;
-
    private final YoEnum<FootstepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry, FootstepPlannerType.class);
-   private final EnumMap<FootstepPlannerType, FootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
+   private final EnumMap<FootstepPlannerType, BodyPathAndFootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
 
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<>(null);
-   private final AtomicReference<FootstepPlannerParametersPacket> latestParametersReference = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlannerParametersPacket> latestFootstepPlannerParametersReference = new AtomicReference<>(null);
+   private final AtomicReference<VisibilityGraphsParametersPacket> latestVisibilityGraphsParametersReference = new AtomicReference<>(null);
    private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
@@ -74,11 +78,12 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private double dt;
 
    private final YoFootstepPlannerParameters footstepPlanningParameters;
+   private final YoVisibilityGraphParameters visibilityGraphsParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
    public FootstepPlanningToolboxController(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
-                                            StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry,
-                                            YoGraphicsListRegistry graphicsListRegistry, double dt)
+                                            VisibilityGraphsParameters visibilityGraphsParameters, StatusMessageOutputManager statusOutputManager,
+                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, double dt)
    {
       super(statusOutputManager, parentRegistry);
       this.dt = dt;
@@ -91,14 +96,16 @@ public class FootstepPlanningToolboxController extends ToolboxController
          contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
 
       footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
+      this.visibilityGraphsParameters = new YoVisibilityGraphParameters(visibilityGraphsParameters, registry);
 
       plannerMap.put(FootstepPlannerType.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame));
       plannerMap
-            .put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedFootstepPlanner(footstepPlanningParameters, contactPointsInSoleFrame, parentRegistry));
+            .put(FootstepPlannerType.SIMPLE_BODY_PATH, new SplinePathWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, parentRegistry, null));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
-                     new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, graphicsListRegistry, parentRegistry));
+                     new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, this.visibilityGraphsParameters, contactPointsInSoleFrame,
+                                                         graphicsListRegistry, parentRegistry));
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
 
       graphicsListRegistry.registerYoGraphic("footstepPlanningToolbox", yoGraphicPlanarRegionsList);
@@ -109,7 +116,37 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private AStarFootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons)
    {
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlanningParameters);
-      AStarFootstepPlanner planner = AStarFootstepPlanner.createPlanner(footstepPlanningParameters, null, footPolygons, expansion, registry);
+
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons, footstepPlanningParameters);
+      FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlanningParameters);
+
+      SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlanningParameters, footPolygons, snapper);
+      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(footstepPlanningParameters, snapper);
+      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlanningParameters, snapper, footPolygons);
+
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(footstepPlanningParameters.getCostParameters().getAStarHeuristicsWeight(), footstepPlanningParameters);
+
+      FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
+//      nodeChecker.addPlannerListener(nu);
+
+      FootstepCostBuilder costBuilder = new FootstepCostBuilder();
+      costBuilder.setFootstepPlannerParameters(footstepPlanningParameters);
+      costBuilder.setSnapper(snapper);
+      costBuilder.setIncludeHeightCost(true);
+      costBuilder.setIncludeHeightCost(true);
+      costBuilder.setIncludePitchAndRollCost(true);
+
+      FootstepCost footstepCost = costBuilder.buildCost();
+
+      long updateFrequency = 1000;
+      RosBasedPlannerListener plannerListener = new RosBasedPlannerListener(statusOutputManager, snapper, updateFrequency);
+
+      snapBasedNodeChecker.addPlannerListener(plannerListener);
+      bodyCollisionNodeChecker.addPlannerListener(plannerListener);
+
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(footstepPlanningParameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, plannerListener,
+                                                              registry);
+
       return planner;
    }
 
@@ -141,14 +178,14 @@ public class FootstepPlanningToolboxController extends ToolboxController
       toolboxTime.add(dt);
       if (toolboxTime.getDoubleValue() > 20.0)
       {
-         if (debug)
+         if (DEBUG)
             PrintTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
          reportMessage(packStepResult(null, null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
          isDone.set(true);
          return;
       }
 
-      FootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
+      BodyPathAndFootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
 
       if (planarRegionsList.isPresent())
       {
@@ -183,8 +220,16 @@ public class FootstepPlanningToolboxController extends ToolboxController
       sendMessageToUI("Result: " + planId.getIntegerValue() + ", " + status.toString());
 
       reportMessage(packStepResult(footstepPlan, bodyPathPlan, status));
+      
+      finishUp();
+   }
+   
+   public void finishUp()
+   {
+      if (DEBUG)
+         PrintTools.info("Finishing up the planner");
+      plannerMap.get(activePlanner.getEnumValue()).cancelPlanning();
       reportMessage(packStatus(FootstepPlannerStatus.IDLE));
-
       isDone.set(true);
    }
 
@@ -202,11 +247,15 @@ public class FootstepPlanningToolboxController extends ToolboxController
       planId.set(request.getPlannerRequestId());
       FootstepPlannerType requestedPlannerType = FootstepPlannerType.fromByte(request.getRequestedFootstepPlannerType());
 
-      FootstepPlannerParametersPacket parameters = latestParametersReference.getAndSet(null);
-      if (parameters != null)
-         footstepPlanningParameters.set(parameters);
+      FootstepPlannerParametersPacket footstepPlannerParameters = latestFootstepPlannerParametersReference.getAndSet(null);
+      if (footstepPlannerParameters != null)
+         footstepPlanningParameters.set(footstepPlannerParameters);
 
-      if (debug)
+      VisibilityGraphsParametersPacket visibilityGraphParameters = latestVisibilityGraphsParametersReference.getAndSet(null);
+      if (visibilityGraphParameters != null)
+         this.visibilityGraphsParameters.set(visibilityGraphParameters);
+
+      if (DEBUG)
       {
          PrintTools.info("Starting to plan. Plan id: " + request.getPlannerRequestId() + ". Timeout: " + request.getTimeout());
       }
@@ -253,7 +302,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
          planner.setTimeout(timeout);
          this.timeout.set(timeout);
 
-         if (debug)
+         if (DEBUG)
          {
             PrintTools.info("Setting timeout to " + timeout);
          }
@@ -279,7 +328,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private BodyPathPlanMessage packPathResult(BodyPathPlan bodyPathPlan, FootstepPlanningResult status)
    {
-      if (debug)
+      if (DEBUG)
       {
          PrintTools.info("Finished planning path. Result: " + status);
       }
@@ -302,7 +351,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private FootstepPlanningToolboxOutputStatus packStepResult(FootstepPlan footstepPlan, BodyPathPlan bodyPathPlan, FootstepPlanningResult status)
    {
-      if (debug)
+      if (DEBUG)
       {
          PrintTools.info("Finished planning. Result: " + status);
       }
@@ -353,9 +402,16 @@ public class FootstepPlanningToolboxController extends ToolboxController
       latestRequestReference.set(request);
    }
 
-   public void processPlannerParameters(FootstepPlannerParametersPacket parameters)
+   public void processFootstepPlannerParameters(FootstepPlannerParametersPacket parameters)
    {
-      latestParametersReference.set(parameters);
+      latestFootstepPlannerParametersReference.set(parameters);
+   }
+
+   public void processVisibilityGraphsParameters(VisibilityGraphsParametersPacket parameters)
+   {
+      if (DEBUG)
+         PrintTools.info("Received new planning parameters");
+      latestVisibilityGraphsParametersReference.set(parameters);
    }
 
    public void processPlanningStatisticsRequest()
@@ -372,7 +428,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
          sendListOfStatistics((ListOfStatistics) plannerStatistics);
          break;
       case VISIBILITY_GRAPH:
-         reportMessage(VisibilityGraphMessagesConverter.convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(), (VisibilityGraphStatistics) plannerStatistics));
+         reportMessage(VisibilityGraphMessagesConverter
+                             .convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(), (VisibilityGraphStatistics) plannerStatistics));
          break;
       }
    }
@@ -382,7 +439,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
       while (listOfStatistics.getNumberOfStatistics() > 0)
          sendPlannerStatistics(listOfStatistics.pollStatistics());
    }
-
 
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> publisher)
    {

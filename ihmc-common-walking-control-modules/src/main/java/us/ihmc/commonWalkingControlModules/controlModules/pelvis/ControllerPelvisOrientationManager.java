@@ -14,6 +14,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -21,8 +23,6 @@ import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -98,8 +98,8 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
 
       this.gains = gains;
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      RigidBody elevator = fullRobotModel.getElevator();
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics elevator = fullRobotModel.getElevator();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       orientationFeedbackControlCommand.set(elevator, pelvis);
       selectionMatrix.resetSelection();
 

@@ -22,7 +22,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
             * It is used on the solver side to retrieve the desired end-effector to be controlled.
             * See RigidBody.getNameBasedHashCode() for the computation of a rigid-body hash code.
             */
-   public long end_effector_name_based_hash_code_;
+   public int end_effector_hash_code_;
    /**
             * This is the desired position of the control frame's origin.
             * If the control frame has not been defined, it represents the desired position endEffector.getBodyFixedFrame().
@@ -99,7 +99,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    {
       sequence_id_ = other.sequence_id_;
 
-      end_effector_name_based_hash_code_ = other.end_effector_name_based_hash_code_;
+      end_effector_hash_code_ = other.end_effector_hash_code_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_position_in_world_, desired_position_in_world_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.desired_orientation_in_world_, desired_orientation_in_world_);
@@ -131,18 +131,18 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
             * It is used on the solver side to retrieve the desired end-effector to be controlled.
             * See RigidBody.getNameBasedHashCode() for the computation of a rigid-body hash code.
             */
-   public void setEndEffectorNameBasedHashCode(long end_effector_name_based_hash_code)
+   public void setEndEffectorHashCode(int end_effector_hash_code)
    {
-      end_effector_name_based_hash_code_ = end_effector_name_based_hash_code;
+      end_effector_hash_code_ = end_effector_hash_code;
    }
    /**
             * The is the unique hash code of the end-effector to be solved for.
             * It is used on the solver side to retrieve the desired end-effector to be controlled.
             * See RigidBody.getNameBasedHashCode() for the computation of a rigid-body hash code.
             */
-   public long getEndEffectorNameBasedHashCode()
+   public int getEndEffectorHashCode()
    {
-      return end_effector_name_based_hash_code_;
+      return end_effector_hash_code_;
    }
 
 
@@ -258,7 +258,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_effector_name_based_hash_code_, other.end_effector_name_based_hash_code_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_effector_hash_code_, other.end_effector_hash_code_, epsilon)) return false;
 
       if (!this.desired_position_in_world_.epsilonEquals(other.desired_position_in_world_, epsilon)) return false;
       if (!this.desired_orientation_in_world_.epsilonEquals(other.desired_orientation_in_world_, epsilon)) return false;
@@ -283,7 +283,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.end_effector_name_based_hash_code_ != otherMyClass.end_effector_name_based_hash_code_) return false;
+      if(this.end_effector_hash_code_ != otherMyClass.end_effector_hash_code_) return false;
 
       if (!this.desired_position_in_world_.equals(otherMyClass.desired_position_in_world_)) return false;
       if (!this.desired_orientation_in_world_.equals(otherMyClass.desired_orientation_in_world_)) return false;
@@ -305,8 +305,8 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       builder.append("KinematicsToolboxRigidBodyMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("end_effector_name_based_hash_code=");
-      builder.append(this.end_effector_name_based_hash_code_);      builder.append(", ");
+      builder.append("end_effector_hash_code=");
+      builder.append(this.end_effector_hash_code_);      builder.append(", ");
       builder.append("desired_position_in_world=");
       builder.append(this.desired_position_in_world_);      builder.append(", ");
       builder.append("desired_orientation_in_world=");

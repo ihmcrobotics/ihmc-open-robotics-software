@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.ArrayList;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -20,12 +20,12 @@ public class OneDoFJointWayPointTrajectoryGenerator implements OneDoFJointTrajec
    private final YoDouble subTrajectoryTime;
    private final DoubleProvider trajectoryTimeProvider;
    private final YoDouble currentTime;
-   private final OneDoFJoint joint;
+   private final OneDoFJointBasics joint;
    private final YoDouble currentTimeOffset;
    private final YoInteger currentPolynomialIndex;
    private final YoInteger currentNumberOfWaypoints;
 
-   public OneDoFJointWayPointTrajectoryGenerator(String namePrefix, OneDoFJoint joint, DoubleProvider trajectoryTimeProvider, int maxNumberOfWayPoints,
+   public OneDoFJointWayPointTrajectoryGenerator(String namePrefix, OneDoFJointBasics joint, DoubleProvider trajectoryTimeProvider, int maxNumberOfWayPoints,
          YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());

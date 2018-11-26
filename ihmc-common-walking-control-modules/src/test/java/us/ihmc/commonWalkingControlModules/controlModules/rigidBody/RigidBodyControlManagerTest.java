@@ -43,14 +43,15 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -70,10 +71,10 @@ public class RigidBodyControlManagerTest
 
    private YoVariableRegistry testRegistry;
    private YoDouble yoTime;
-   private RigidBody bodyToControl;
+   private RigidBodyBasics bodyToControl;
 
-   private OneDoFJoint joint1;
-   private OneDoFJoint joint2;
+   private OneDoFJointBasics joint1;
+   private OneDoFJointBasics joint2;
 
    private double q1_init = random.nextDouble();
    private double q2_init = random.nextDouble();
@@ -199,7 +200,7 @@ public class RigidBodyControlManagerTest
          assertEquals(ControllerCoreCommandType.TASKSPACE, feedbackControlCommand.getCommandType());
          SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
 
-         assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
+         assertEquals(taskspaceCommand.getEndEffector().hashCode(), bodyToControl.hashCode());
          taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
          taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
          taskspaceCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
@@ -218,7 +219,7 @@ public class RigidBodyControlManagerTest
          assertEquals(ControllerCoreCommandType.TASKSPACE, feedbackControlCommand.getCommandType());
          SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
 
-         assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
+         assertEquals(taskspaceCommand.getEndEffector().hashCode(), bodyToControl.hashCode());
          taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
          taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
          taskspaceCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
@@ -444,7 +445,7 @@ public class RigidBodyControlManagerTest
          assertEquals(ControllerCoreCommandType.TASKSPACE, feedbackControlCommand.getCommandType());
          SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
 
-         assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
+         assertEquals(taskspaceCommand.getEndEffector().hashCode(), bodyToControl.hashCode());
          taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
          taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
          taskspaceCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
@@ -469,7 +470,7 @@ public class RigidBodyControlManagerTest
          assertEquals(ControllerCoreCommandType.TASKSPACE, feedbackControlCommand.getCommandType());
          SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
 
-         assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
+         assertEquals(taskspaceCommand.getEndEffector().hashCode(), bodyToControl.hashCode());
          taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
          taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
          taskspaceCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
@@ -493,11 +494,11 @@ public class RigidBodyControlManagerTest
       yoTime = new YoDouble("yoTime", testRegistry);
 
       // create a dummy robot with elevator, two joints, and two rigid bodies
-      RigidBody elevator = new RigidBody("elevator", worldFrame);
-      joint1 = ScrewTools.addRevoluteJoint("Joint1", elevator, new Vector3D(), new Vector3D(1.0, 0.0, 0.0));
-      RigidBody link1 = ScrewTools.addRigidBody("Link1", joint1, new Matrix3D(), 0.0, new Vector3D());
-      joint2 = ScrewTools.addRevoluteJoint("Joint2", link1, new Vector3D(), new Vector3D(1.0, 0.0, 0.0));
-      RigidBody link2 = ScrewTools.addRigidBody("Link2", joint2, new Matrix3D(), 0.0, new Vector3D());
+      RigidBodyBasics elevator = new RigidBody("elevator", worldFrame);
+      joint1 = new RevoluteJoint("Joint1", elevator, new Vector3D(), new Vector3D(1.0, 0.0, 0.0));
+      RigidBodyBasics link1 = new RigidBody("Link1", joint1, new Matrix3D(), 0.0, new Vector3D());
+      joint2 = new RevoluteJoint("Joint2", link1, new Vector3D(), new Vector3D(1.0, 0.0, 0.0));
+      RigidBodyBasics link2 = new RigidBody("Link2", joint2, new Matrix3D(), 0.0, new Vector3D());
 
       joint1.setQ(q1_init);
       joint2.setQ(q2_init);
@@ -517,7 +518,7 @@ public class RigidBodyControlManagerTest
 
       // use default control and base frames
       bodyToControl = link2;
-      RigidBody baseBody = link1;
+      RigidBodyBasics baseBody = link1;
       ReferenceFrame controlFrame = bodyToControl.getBodyFixedFrame();
       ReferenceFrame baseFrame = baseBody.getBodyFixedFrame();
 

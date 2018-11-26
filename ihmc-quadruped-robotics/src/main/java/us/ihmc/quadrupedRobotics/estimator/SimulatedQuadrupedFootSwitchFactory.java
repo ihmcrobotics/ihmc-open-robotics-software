@@ -5,10 +5,10 @@ import java.util.List;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedFootSwitchFactory;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -35,7 +35,7 @@ public class SimulatedQuadrupedFootSwitchFactory extends QuadrupedFootSwitchFact
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          ContactablePlaneBody contactablePlaneBody = footContactableBodies.get().get(robotQuadrant);
-         InverseDynamicsJoint parentJoint = contactablePlaneBody.getRigidBody().getParentJoint();
+         JointBasics parentJoint = contactablePlaneBody.getRigidBody().getParentJoint();
          String jointName = parentJoint.getName();
          String forceSensorName = contactablePlaneBody.getName() + "ForceSensor";
          FloatingRootJointRobot robot = simulatedRobot.get();

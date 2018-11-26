@@ -52,6 +52,7 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
    protected void bindFieldBidirectionalToBooleanProperty(Property<Boolean> property, Field field)
    {
       BooleanBidirectionalBind binding = new BooleanBidirectionalBind(property, field);
+      setBooleanValue(property, field);
       property.addListener(binding);
       field.addListener(binding);
    }
@@ -254,7 +255,7 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
       @Override
       public void invalidated(Observable observable)
       {
-         if (condition.checkCondition())
+         if (!condition.checkCondition())
             return;
 
          if (numberProperty.getValue().doubleValue() == field.getNumber(getValue()).doubleValue())
@@ -289,6 +290,11 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
          ((Property<Byte>) numberProperty).setValue(new Byte(field.getNumber(getValue()).byteValue()));
       else
          throw new RuntimeException("Unhandled instance of Number: " + numberProperty.getValue().getClass().getSimpleName());
+   }
+
+   private void setBooleanValue(Property<Boolean> booleanProperty, Field field)
+   {
+      booleanProperty.setValue(getNumberAsBoolean(field.getNumber(getValue())));
    }
 
 

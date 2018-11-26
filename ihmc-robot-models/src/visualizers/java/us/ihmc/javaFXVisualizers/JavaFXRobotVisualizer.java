@@ -10,11 +10,11 @@ import javafx.scene.Node;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
@@ -25,7 +25,7 @@ public class JavaFXRobotVisualizer
    private GraphicsRobot graphicsRobot;
    private JavaFXGraphics3DNode robotRootNode;
    private final FullHumanoidRobotModel fullRobotModel;
-   private final OneDoFJoint[] allJoints;
+   private final OneDoFJointBasics[] allJoints;
    private final int jointNameHash;
    private final AtomicReference<RigidBodyTransform> newRootJointPoseReference = new AtomicReference<>(null);
    private final AtomicReference<float[]> newJointConfigurationReference = new AtomicReference<>(null);
@@ -58,7 +58,7 @@ public class JavaFXRobotVisualizer
 
             RigidBodyTransform newRootJointPose = newRootJointPoseReference.getAndSet(null);
             if (newRootJointPose != null)
-               fullRobotModel.getRootJoint().setPositionAndRotation(newRootJointPose);
+               fullRobotModel.getRootJoint().setJointConfiguration(newRootJointPose);
 
             float[] newJointConfiguration = newJointConfigurationReference.getAndSet(null);
             if (newJointConfiguration != null)
@@ -73,10 +73,10 @@ public class JavaFXRobotVisualizer
       };
    }
 
-   public static int calculateJointNameHash(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
+   public static int calculateJointNameHash(OneDoFJointBasics[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
    {
       CRC32 crc = new CRC32();
-      for (OneDoFJoint joint : joints)
+      for (OneDoFJointBasics joint : joints)
       {
          crc.update(joint.getName().getBytes());
       }

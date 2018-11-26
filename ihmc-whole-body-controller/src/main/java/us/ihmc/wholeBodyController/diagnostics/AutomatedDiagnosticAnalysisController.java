@@ -10,13 +10,12 @@ import java.util.logging.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -39,14 +38,14 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
    private final DiagnosticTaskExecutor diagnosticTaskExecutor;
 
-   private final PairList<OneDoFJoint, JointDesiredOutputBasics> controlledJoints = new PairList<>();
-   private final Map<OneDoFJoint, PDController> jointPDControllerMap = new LinkedHashMap<>();
-   private final Map<OneDoFJoint, YoDouble> jointDesiredPositionMap = new LinkedHashMap<>();
-   private final Map<OneDoFJoint, YoDouble> jointDesiredVelocityMap = new LinkedHashMap<>();
-   private final Map<OneDoFJoint, YoDouble> jointDesiredTauMap = new LinkedHashMap<>();
+   private final PairList<OneDoFJointBasics, JointDesiredOutputBasics> controlledJoints = new PairList<>();
+   private final Map<OneDoFJointBasics, PDController> jointPDControllerMap = new LinkedHashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointDesiredPositionMap = new LinkedHashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointDesiredVelocityMap = new LinkedHashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointDesiredTauMap = new LinkedHashMap<>();
 
    private final DoubleProvider trajectoryTimeProvider;
-   private final Map<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> jointTrajectories = new LinkedHashMap<>();
+   private final Map<OneDoFJointBasics, OneDoFJointQuinticTrajectoryGenerator> jointTrajectories = new LinkedHashMap<>();
 
    private final ArrayDeque<DiagnosticDataReporter> dataReportersToExecute = new ArrayDeque<>();
    private DiagnosticDataReporter diagnosticDataReporterRunning = null;
@@ -79,7 +78,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
       qddMaxIdle.set(diagnosticParameters.getIdleQddMax());
       tauMaxIdle.set(diagnosticParameters.getIdleTauMax());
 
-      for(OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      for(OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
          controlledJoints.add(joint, lowLevelOutput.getJointDesiredOutput(joint));
       }
@@ -98,7 +97,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
       for (int i = 0; i < controlledJoints.size(); i++)
       {
-         OneDoFJoint joint = controlledJoints.first(i);
+         OneDoFJointBasics joint = controlledJoints.first(i);
          String name = joint.getName();
          OneDoFJointQuinticTrajectoryGenerator jointTrajectory = new OneDoFJointQuinticTrajectoryGenerator(name, joint, trajectoryTimeProvider, registry);
          jointTrajectories.put(joint, jointTrajectory);
@@ -157,7 +156,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
       for (int i = 0; i < controlledJoints.size(); i++)
       {
-         OneDoFJoint joint = controlledJoints.first(i);
+         OneDoFJointBasics joint = controlledJoints.first(i);
          String jointName = joint.getName();
          
          PDController jointPDController = new PDController(jointName, registry);
@@ -220,7 +219,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    {
       for (int i = 0; i < controlledJoints.size(); i++)
       {
-         OneDoFJoint state = controlledJoints.first(i);
+         OneDoFJointBasics state = controlledJoints.first(i);
          jointTrajectories.get(state).initialize(state.getQ(), 0.0);
       }
 
@@ -253,7 +252,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
       for (int i = 0; i < controlledJoints.size(); i++)
       {
-         OneDoFJoint state = controlledJoints.first(i);
+         OneDoFJointBasics state = controlledJoints.first(i);
          JointDesiredOutputBasics output = controlledJoints.second(i);
          PDController jointPDController = jointPDControllerMap.get(state);
 
@@ -311,7 +310,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    {
       for (int i = 0; i < controlledJoints.size(); i++)
       {
-         OneDoFJoint state = controlledJoints.first(i);
+         OneDoFJointBasics state = controlledJoints.first(i);
          JointDesiredOutputBasics output = controlledJoints.second(i);
          PDController jointPDController = jointPDControllerMap.get(state);
 

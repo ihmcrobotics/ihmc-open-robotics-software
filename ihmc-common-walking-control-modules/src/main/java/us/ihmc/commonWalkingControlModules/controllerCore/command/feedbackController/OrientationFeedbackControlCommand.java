@@ -15,11 +15,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
@@ -117,7 +117,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     *           end-effector.
     * @param endEffector the rigid-body to be controlled.
     */
-   public void set(RigidBody base, RigidBody endEffector)
+   public void set(RigidBodyBasics base, RigidBodyBasics endEffector)
    {
       spatialAccelerationCommand.set(base, endEffector);
       resetBodyFixedOrientation();
@@ -142,7 +142,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     *
     * @param primaryBase
     */
-   public void setPrimaryBase(RigidBody primaryBase)
+   public void setPrimaryBase(RigidBodyBasics primaryBase)
    {
       spatialAccelerationCommand.setPrimaryBase(primaryBase);
    }
@@ -428,12 +428,12 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       return feedForwardAngularActionInWorld;
    }
 
-   public RigidBody getBase()
+   public RigidBodyBasics getBase()
    {
       return spatialAccelerationCommand.getBase();
    }
 
-   public RigidBody getEndEffector()
+   public RigidBodyBasics getEndEffector()
    {
       return spatialAccelerationCommand.getEndEffector();
    }

@@ -6,7 +6,7 @@ import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class WholeBodyTrajectoryToolboxMessageTools
@@ -51,13 +51,13 @@ public class WholeBodyTrajectoryToolboxMessageTools
       };
    }
 
-   public static WaypointBasedTrajectoryMessage createTrajectoryMessage(RigidBody endEffector, double t0, double tf, FunctionTrajectory trajectoryToDiscretize,
+   public static WaypointBasedTrajectoryMessage createTrajectoryMessage(RigidBodyBasics endEffector, double t0, double tf, FunctionTrajectory trajectoryToDiscretize,
                                                                         SelectionMatrix6D selectionMatrix)
    {
       return createTrajectoryMessage(endEffector, t0, tf, 0.1, trajectoryToDiscretize, selectionMatrix);
    }
 
-   public static WaypointBasedTrajectoryMessage createTrajectoryMessage(RigidBody endEffector, double t0, double tf, double timeResolution,
+   public static WaypointBasedTrajectoryMessage createTrajectoryMessage(RigidBodyBasics endEffector, double t0, double tf, double timeResolution,
                                                                         FunctionTrajectory trajectoryToDiscretize, SelectionMatrix6D selectionMatrix)
    {
       int numberOfWaypoints = (int) Math.round((tf - t0) / timeResolution) + 1;

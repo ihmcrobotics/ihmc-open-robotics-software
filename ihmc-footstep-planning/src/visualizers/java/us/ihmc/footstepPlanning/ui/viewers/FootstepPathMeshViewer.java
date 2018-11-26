@@ -1,5 +1,15 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.NodeDataTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowFootstepPlanTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowNodeDataTopic;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.FootstepNodeDataListMessage;
 import controller_msgs.msg.dds.FootstepNodeDataMessage;
 import javafx.animation.AnimationTimer;
@@ -22,18 +32,11 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
-import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public class FootstepPathMeshViewer extends AnimationTimer
 {
@@ -56,19 +59,16 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
    public FootstepPathMeshViewer(Messager messager)
    {
-      messager.registerTopicListener(FootstepPlanTopic, footstepPlan -> executorService.submit(() ->
-                                                                                               {
-                                                                                                  solutionWasReceived.set(true);
-                                                                                                  processFootstepPath(footstepPlan);
-                                                                                               }));
+      messager.registerTopicListener(FootstepPlanTopic, footstepPlan -> executorService.submit(() -> {
+         solutionWasReceived.set(true);
+         processFootstepPath(footstepPlan);
+      }));
 
-      messager.registerTopicListener(NodeDataTopic, nodeData -> executorService.submit(() ->
-                                                                                       {
-                                                                                          solutionWasReceived.set(false);
-                                                                                          processLowestCostNodeList(nodeData);
-                                                                                       }));
+      messager.registerTopicListener(NodeDataTopic, nodeData -> executorService.submit(() -> {
+         solutionWasReceived.set(false);
+         processLowestCostNodeList(nodeData);
+      }));
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, data -> reset.set(true));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
 
       showSolution = messager.createInput(ShowFootstepPlanTopic, true);
@@ -77,7 +77,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
    private void processLowestCostNodeList(FootstepNodeDataListMessage message)
    {
-      if(message.getIsFootstepGraph())
+      if (message.getIsFootstepGraph())
          return;
 
       IDLSequence.Object<FootstepNodeDataMessage> nodeDataList = message.getNodeData();
@@ -123,7 +123,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          footPose.get(transformToWorld);
          transformToWorld.appendTranslation(0.0, 0.0, 0.01);
 
-         if(footstep.hasFoothold())
+         if (footstep.hasFoothold())
             footstep.getFoothold(foothold);
          else
             foothold.set(defaultFootPolygon);
@@ -146,15 +146,15 @@ public class FootstepPathMeshViewer extends AnimationTimer
    {
       boolean addIntermediatePlan = showIntermediatePlan.get() && !solutionWasReceived.get() && root.getChildren().isEmpty();
       boolean addFinalPlan = showSolution.get() && solutionWasReceived.get() && root.getChildren().isEmpty();
-      if(addIntermediatePlan || addFinalPlan)
+      if (addIntermediatePlan || addFinalPlan)
          root.getChildren().add(footstepPathMeshView);
 
       boolean removeIntermediatePlan = !showIntermediatePlan.get() && !solutionWasReceived.get() && !root.getChildren().isEmpty();
       boolean removeFinalPlan = !showSolution.get() && solutionWasReceived.get() && !root.getChildren().isEmpty();
-      if(removeIntermediatePlan || removeFinalPlan)
+      if (removeIntermediatePlan || removeFinalPlan)
          root.getChildren().clear();
 
-      if(reset.getAndSet(false))
+      if (reset.getAndSet(false))
       {
          footstepPathMeshView.setMesh(null);
          footstepPathMeshView.setMaterial(null);

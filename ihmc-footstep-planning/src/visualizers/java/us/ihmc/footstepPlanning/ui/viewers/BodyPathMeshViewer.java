@@ -1,5 +1,14 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters.BODYPATH_LINE_THICKNESS;
+
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -16,18 +25,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
-
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters.BODYPATH_LINE_THICKNESS;
 
 public class BodyPathMeshViewer extends AnimationTimer
 {
@@ -46,6 +47,9 @@ public class BodyPathMeshViewer extends AnimationTimer
 
    private final AtomicReference<Pair<Mesh, Material>> bodyPathMeshToRender = new AtomicReference<>(null);
    private final AtomicReference<Boolean> show;
+   private final AtomicBoolean reset = new AtomicBoolean(false);
+
+
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
 
    public BodyPathMeshViewer(Messager messager)
@@ -60,6 +64,9 @@ public class BodyPathMeshViewer extends AnimationTimer
 
       show = messager.createInput(FootstepPlannerMessagerAPI.ShowBodyPath, true);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.BodyPathDataTopic, this::processBodyPathOnThread);
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
+
 
       root.getChildren().addAll(bodyPathMeshView);
    }
@@ -76,8 +83,15 @@ public class BodyPathMeshViewer extends AnimationTimer
          root.getChildren().clear();
       }
 
-      Pair<Mesh, Material> newMesh = bodyPathMeshToRender.get();
+      if (reset.getAndSet(false))
+      {
+         bodyPathMeshView.setMesh(null);
+         bodyPathMeshView.setMaterial(null);
+         bodyPathMeshToRender.set(null);
+         return;
+      }
 
+      Pair<Mesh, Material> newMesh = bodyPathMeshToRender.getAndSet(null);
       if (newMesh != null)
       {
          if (VERBOSE)
@@ -98,7 +112,8 @@ public class BodyPathMeshViewer extends AnimationTimer
       {
          bodyPathMeshToRender.set(new Pair<>(null, null));
          activeBodyPathReference.set(null);
-         PrintTools.warn("Received body path that is null.");
+         if (VERBOSE)
+            PrintTools.warn("Received body path that is null.");
          return;
       }
 

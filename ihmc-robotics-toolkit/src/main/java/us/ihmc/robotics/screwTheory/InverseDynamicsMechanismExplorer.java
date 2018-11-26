@@ -2,17 +2,24 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.List;
 
-import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 
 public class InverseDynamicsMechanismExplorer
 {
-   private final RigidBody rootbody;
+   private final RigidBodyBasics rootbody;
 
-   public InverseDynamicsMechanismExplorer(RigidBody rootbody)
+   public InverseDynamicsMechanismExplorer(RigidBodyBasics rootbody)
    {
       super();
       this.rootbody = rootbody;
@@ -23,12 +30,12 @@ public class InverseDynamicsMechanismExplorer
       printLinkInformation(rootbody, buffer);
    }
 
-   private void printJointInformation(InverseDynamicsJoint joint, StringBuffer buffer)
+   private void printJointInformation(JointBasics joint, StringBuffer buffer)
    {
       String jointName = joint.getName();
 
       buffer.append("Joint name = " + jointName + "\n");
-      InverseDynamicsJoint parentJoint = joint.getPredecessor().getParentJoint();
+      JointBasics parentJoint = joint.getPredecessor().getParentJoint();
       if (parentJoint == null)
       {
          buffer.append("Root joint\n");
@@ -57,7 +64,7 @@ public class InverseDynamicsMechanismExplorer
 
       else if (joint instanceof SixDoFJoint)
       {
-         printFloatingJointInformation((AbstractInverseDynamicsJoint) joint, buffer);
+         printFloatingJointInformation((SixDoFJoint) joint, buffer);
       }
 
       else
@@ -65,7 +72,7 @@ public class InverseDynamicsMechanismExplorer
          throw new RuntimeException("Only Pin and Slider implemented right now");
       }
 
-      RigidBody linkRigidBody = joint.getSuccessor();
+      RigidBodyBasics linkRigidBody = joint.getSuccessor();
       printLinkInformation(linkRigidBody, buffer);
 
    }
@@ -73,7 +80,7 @@ public class InverseDynamicsMechanismExplorer
    private void printPinJointInformation(RevoluteJoint revoluteJoint, StringBuffer buffer)
    {
       Twist twist = new Twist();
-      revoluteJoint.getUnitJointTwist(twist);
+      twist.setIncludingFrame(revoluteJoint.getUnitJointTwist());
       Vector3DReadOnly jointAxis = twist.getAngularPart();
       buffer.append("Joint axis = " + jointAxis + "\n");
       buffer.append("Joint is a Pin Joint.\n");
@@ -83,21 +90,21 @@ public class InverseDynamicsMechanismExplorer
    private void printSliderJointInformation(PrismaticJoint prismaticJoint, StringBuffer buffer)
    {
       Twist twist = new Twist();
-      prismaticJoint.getUnitJointTwist(twist);
+      twist.setIncludingFrame(prismaticJoint.getUnitJointTwist());
       Vector3DReadOnly jointAxis = twist.getLinearPart();
       buffer.append("Joint axis = " + jointAxis + "\n");
       buffer.append("Joint is a Slider Joint.\n");
    }
 
-   private void printFloatingJointInformation(AbstractInverseDynamicsJoint floatingJoint, StringBuffer buffer)
+   private void printFloatingJointInformation(SixDoFJoint floatingJoint, StringBuffer buffer)
    {
       buffer.append("Joint is a Floating Joint.\n");
    }
 
-   private void printLinkInformation(RigidBody link, StringBuffer buffer)
+   private void printLinkInformation(RigidBodyBasics link, StringBuffer buffer)
    {
-      RigidBodyInertia inertia = link.getInertia();
-      InverseDynamicsJoint parentJoint = link.getParentJoint();
+      SpatialInertiaBasics inertia = link.getInertia();
+      JointBasics parentJoint = link.getParentJoint();
       if (inertia != null)
       {
          double mass = inertia.getMass();
@@ -106,16 +113,16 @@ public class InverseDynamicsMechanismExplorer
          RigidBodyTransform comOffsetTransform = link.getBodyFixedFrame().getTransformToDesiredFrame(parentJoint.getFrameAfterJoint());
          comOffsetTransform.getTranslation(comOffset);
 
-         Matrix3D momentOfInertia = inertia.getMassMomentOfInertiaPartCopy();
+         Matrix3DBasics momentOfInertia = inertia.getMomentOfInertia();
 
          buffer.append("Mass = " + mass + "\n");
          buffer.append("comOffset = " + comOffset + "\n");
          buffer.append("momentOfInertia = \n" + momentOfInertia + "\n");
       }
 
-      List<InverseDynamicsJoint> childrenJoints = link.getChildrenJoints();
+      List<? extends JointBasics> childrenJoints = link.getChildrenJoints();
 
-      for (InverseDynamicsJoint childJoint : childrenJoints)
+      for (JointBasics childJoint : childrenJoints)
       {
          String parentJointName;
          if (parentJoint != null)

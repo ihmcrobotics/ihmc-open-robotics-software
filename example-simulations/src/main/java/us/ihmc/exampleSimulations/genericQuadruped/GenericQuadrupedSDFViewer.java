@@ -18,11 +18,14 @@ public class GenericQuadrupedSDFViewer
       GenericQuadrupedModelFactory modelFactory = new GenericQuadrupedModelFactory();
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
       sdfRobot.setPositionInWorld(new Vector3D(0.0, 0.0, 0.6));
+      sdfRobot.setDynamic(false);
 
       if(SHOW_INERTIA_ELLIPSOIDS)
          addInertialEllipsoidsToVisualizer(sdfRobot);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
+      scs.setGroundVisible(false);
+      scs.setDT(1e-4, 1);
       scs.startOnAThread();
    }
 

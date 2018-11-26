@@ -15,10 +15,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleSO3TrajectoryPoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class EndToEndTestTools
@@ -27,7 +27,7 @@ public class EndToEndTestTools
 
    /**
     * This method will assert the number of waypoints used by a {@link RigidBodyTaskspaceControlState} that is
-    * controlling the {@link RigidBody} with given name. The number of waypoints checked is the total number
+    * controlling the {@link RigidBodyBasics} with given name. The number of waypoints checked is the total number
     * of trajectory points (in queue and in generator) of the controller.
     */
    public static void assertNumberOfPoints(String bodyName, String postfix, int points, SimulationConstructionSet scs)
