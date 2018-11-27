@@ -149,14 +149,6 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return false;
    }
 
-   public abstract double getContactThresholdForce();
-
-   public abstract double getFootSwitchCoPThresholdFraction();
-
-   public abstract double getContactThresholdHeight();
-
-   public abstract FootSwitchType getFootSwitchType();
-
    public abstract FootSwitchFactory getFootSwitchFactory();
 
    public abstract boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact();

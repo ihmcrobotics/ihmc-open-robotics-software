@@ -20,7 +20,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -327,18 +326,6 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getContactThresholdForce()
-   {
-      return 120.0;
-   }
-
-   @Override
-   public double getFootSwitchCoPThresholdFraction()
-   {
-      return 0.02;
-   }
-
-   @Override
    public boolean useIMUsForSpineJointVelocityEstimation()
    {
       return target == RobotTarget.REAL_ROBOT;
@@ -361,24 +348,11 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getContactThresholdHeight()
-   {
-      return 0.05;
-   }
-
-   @Override
-   public FootSwitchType getFootSwitchType()
-   {
-      return FootSwitchType.WrenchBased;
-      //      return runningOnRealRobot ? FootSwitchType.WrenchAndContactSensorFused : FootSwitchType.WrenchBased;
-   }
-
-   @Override
    public FootSwitchFactory getFootSwitchFactory()
    {
       WrenchBasedFootSwitchFactory footSwitchFactory = new WrenchBasedFootSwitchFactory();
-      footSwitchFactory.setDefaultContactThresholdForce(getContactThresholdForce());
-      footSwitchFactory.setDefaultCoPThresholdFraction(getFootSwitchCoPThresholdFraction());
+      footSwitchFactory.setDefaultContactThresholdForce(120.0);
+      footSwitchFactory.setDefaultCoPThresholdFraction(0.02);
       footSwitchFactory.setDefaultSecondContactThresholdForceIgnoringCoP(Double.POSITIVE_INFINITY);
       return footSwitchFactory;
    }

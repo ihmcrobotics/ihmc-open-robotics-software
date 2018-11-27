@@ -5,7 +5,6 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -149,30 +148,6 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
    public double getPelvisLinearVelocityAlphaNewTwist()
    {
       return 0.15;
-   }
-
-   @Override
-   public double getContactThresholdForce()
-   {
-      return 120.0;
-   }
-
-   @Override
-   public double getFootSwitchCoPThresholdFraction()
-   {
-      return Double.NaN;
-   }
-
-   @Override
-   public double getContactThresholdHeight()
-   {
-      return 0.01;
-   }
-
-   @Override
-   public FootSwitchType getFootSwitchType()
-   {
-      return FootSwitchType.TouchdownBased;
    }
 
    // TODO Need to figure out how to get the quadruped to use this factory.
