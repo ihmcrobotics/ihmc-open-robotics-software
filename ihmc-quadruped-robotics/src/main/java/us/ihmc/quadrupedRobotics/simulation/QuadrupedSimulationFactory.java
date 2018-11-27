@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -150,6 +151,7 @@ public class QuadrupedSimulationFactory
    private QuadrupedLegInverseKinematicsCalculator legInverseKinematicsCalculator;
    private List<CameraConfiguration> cameraConfigurations = new ArrayList<>();
    private YoVariableServer yoVariableServer;
+   private StateEstimatorModeSubscriber stateEstimatorModeSubscriber = new StateEstimatorModeSubscriber();
 
    /**
     * The PacketCommunicator used as input of the controller is either equal to the output
@@ -271,6 +273,7 @@ public class QuadrupedSimulationFactory
          stateEstimatorFactory.setStateEstimatorParameters(stateEstimatorParameters.get());
          stateEstimatorFactory.setCenterOfMassDataHolder(centerOfMassDataHolder);
          stateEstimatorFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
+         stateEstimatorFactory.setStateEstimatorModeSubscriber(stateEstimatorModeSubscriber);
          stateEstimator = stateEstimatorFactory.createStateEstimator();
          factoryRegistry.addChild(stateEstimator.getYoVariableRegistry());
       }
@@ -368,6 +371,12 @@ public class QuadrupedSimulationFactory
       }
 
       controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get(), initialForceControlState.get());
+
+
+      if(useStateEstimator.get())
+      {
+         controllerManager.setStateEstimatorModeSubscriber(stateEstimatorModeSubscriber);
+      }
    }
 
    private void createPoseCommunicator()

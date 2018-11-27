@@ -180,6 +180,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.FRONT_RIGHT).setFootContactState(false);
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_LEFT).setFootContactState(false);
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_RIGHT).setFootContactState(true);
+         if (stateEstimatorModeSubscriber != null)
+            stateEstimatorModeSubscriber.requestMode(StateEstimatorMode.FROZEN);
          break;
       case STAND_READY:
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
