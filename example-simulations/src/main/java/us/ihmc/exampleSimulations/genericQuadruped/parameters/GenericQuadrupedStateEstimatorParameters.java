@@ -210,4 +210,11 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
    {
       return true;
    }
+
+   @Override
+   public boolean requestFrozenModeAtStart()
+   {
+      return true;
+   }
+
 }
