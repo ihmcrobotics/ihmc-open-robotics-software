@@ -77,6 +77,7 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.enableKinematicsToolbox(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
          networkProcessorParameters.enableFootstepPlanningToolbox(modulesToStart.contains(Modules.FOOTSTEP_PLANNING_TOOLBOX));
          networkProcessorParameters.enableWholeBodyTrajectoryToolbox(modulesToStart.contains(Modules.WHOLE_BODY_TRAJECTORY_TOOLBOX));
+         networkProcessorParameters.enableKinematicsPlanningToolbox(true);
          boolean startREAModule = modulesToStart.contains(Modules.REA_MODULE) && !modulesToStart.contains(Modules.REA_UI);
          networkProcessorParameters.enableRobotEnvironmentAwerenessModule(startREAModule);
          networkProcessorParameters.enableMocapModule(modulesToStart.contains(Modules.MOCAP_MODULE));
