@@ -25,21 +25,27 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.WholeBodyTrajectoryToolboxOutputConverter;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsPlanningToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -58,8 +64,9 @@ public class GraspingJavaFXController
 {
    private final JavaFXMessager messager;
    private final FullHumanoidRobotModel fullRobotModel;
+   private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final WholeBodyTrajectoryToolboxOutputConverter outputConverter;
+   private final KinematicsPlanningToolboxOutputConverter outputConverter;
 
    private final SideDependentList<AtomicReference<Boolean>> sendFingerMessages = new SideDependentList<>();
    private final SideDependentList<AtomicReference<Double>> desiredThumbRolls = new SideDependentList<>();
@@ -112,10 +119,11 @@ public class GraspingJavaFXController
                                    JavaFXRobotVisualizer javaFXRobotVisualizer, HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher)
    {
       fullRobotModel = javaFXRobotVisualizer.getFullRobotModel();
-      outputConverter = new WholeBodyTrajectoryToolboxOutputConverter(fullRobotModelFactory);
+      outputConverter = new KinematicsPlanningToolboxOutputConverter(fullRobotModelFactory);
 
       this.messager = messager;
       motionPreviewVisualizer = new ValkyrieJavaFXMotionPreviewVisualizer(fullRobotModelFactory);
+      motionPreviewVisualizer.enable(false);
 
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
@@ -154,7 +162,7 @@ public class GraspingJavaFXController
       messager.registerJavaFXSyncedTopicListener(XBoxOneJavaFXController.RightTriggerAxis, this::appendingYawNegative);
 
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonXState, state -> submitReachingManifoldsToToolbox(state));
-      //messager.registerTopicListener(XBoxOneJavaFXController.ButtonYState, state -> confirmReachingMotion(state));
+      messager.registerTopicListener(XBoxOneJavaFXController.ButtonYState, state -> confirmReachingMotion(state));
 
       ROS2Tools.MessageTopicNameGenerator toolboxRequestTopicNameGenerator = KinematicsPlanningToolboxModule.getSubscriberTopicNameGenerator(robotName);
       ROS2Tools.MessageTopicNameGenerator toolboxResponseTopicNameGenerator = KinematicsPlanningToolboxModule.getPublisherTopicNameGenerator(robotName);
@@ -176,6 +184,7 @@ public class GraspingJavaFXController
          {
             updateSelectedObject();
             updateVisualizationObjects();
+            rootNode.getChildren().add(motionPreviewVisualizer.getRootNode());
             submitDesiredFingerConfigurationMessage();
          }
       };
@@ -186,6 +195,14 @@ public class GraspingJavaFXController
       LogTools.info("packet arrived");
       toolboxOutputPacket.set(packet);
       LogTools.info("key frame robot configurations " + toolboxOutputPacket.get().getRobotConfigurations());
+      LogTools.info("solution quality " + toolboxOutputPacket.get().getSolutionQuality());
+
+      LogTools.info("motion previewed ");
+      if (toolboxOutputPacket.get().getSolutionQuality() > 0.0)
+      {
+         motionPreviewVisualizer.enable(true);
+         motionPreviewVisualizer.submitKinematicsPlanningToolboxOutputStatus(toolboxOutputPacket.get());
+      }
    }
 
    private void submitDesiredFingerConfigurationMessage()
@@ -244,6 +261,46 @@ public class GraspingJavaFXController
                   System.out.println(keyFramePoses.get(i));
                }
 
+               RigidBodyBasics endEffector = fullRobotModel.getHand(selectedSide);
+               double trajectoryTime = 5.0;
+
+               TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
+               List<Pose3DReadOnly> keyFramePoses = new ArrayList<Pose3DReadOnly>();
+
+               // TODO : replace to use all key frames that are selected by xbox controller.
+               //               for (int i = 0; i < this.keyFramePoses.size(); i++)
+               //               {
+               //                  // TODO : calculate good alpha considering displacement.
+               //                  // TODO : current alpha is fixed for number of key frames.
+               //                  double alpha = (i + 1) / (double) (this.keyFramePoses.size());
+               //                  keyFrameTimes.add(alpha * trajectoryTime);
+               //                  keyFramePoses.add(new Pose3D(this.keyFramePoses.get(i)));
+               //               }
+
+               int tempNumberOfKeyFrames = 10;
+               FramePose3D initialPose = new FramePose3D(endEffector.getBodyFixedFrame());
+               Pose3D desiredPose = new Pose3D(this.keyFramePoses.get(0));
+
+               initialPose.changeFrame(worldFrame);
+
+               for (int i = 0; i < tempNumberOfKeyFrames; i++)
+               {
+                  double alpha = (i + 1) / (double) (tempNumberOfKeyFrames);
+                  keyFrameTimes.add(alpha * trajectoryTime);
+                  Pose3D pose = new Pose3D(initialPose);
+                  pose.interpolate(desiredPose, alpha);
+                  keyFramePoses.add(pose);
+               }
+
+               KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
+                                                                                                                                                   keyFrameTimes,
+                                                                                                                                                   keyFramePoses);
+
+               endEffectorMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0)); // TODO : use static final value.
+               endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+
+               toolboxMessagePublisher.publish(endEffectorMessage);
+
                selectedSide = null;
             }
             else
@@ -251,6 +308,30 @@ public class GraspingJavaFXController
          }
          else
             System.out.println("robot side is not selected");
+      }
+   }
+
+   private void confirmReachingMotion(ButtonState state)
+   {
+      if (state == ButtonState.PRESSED)
+      {
+         if (toolboxOutputPacket.get().getSolutionQuality() > 0.0)
+         {
+            LogTools.info("confirmReachingMotion");
+
+            motionPreviewVisualizer.enable(false);
+            WholeBodyTrajectoryMessage message = new WholeBodyTrajectoryMessage();
+
+            message.setDestination(PacketDestination.CONTROLLER.ordinal());
+            outputConverter.setMessageToCreate(message);
+            outputConverter.computeWholeBodyTrajectoryMessage(toolboxOutputPacket.get());
+
+            wholeBodyTrajectoryPublisher.publish(message);
+         }
+         else
+         {
+            LogTools.info("bad solution");
+         }
       }
    }
 
@@ -413,6 +494,7 @@ public class GraspingJavaFXController
 
    public void start()
    {
+      motionPreviewVisualizer.start();
       animationTimer.start();
    }
 
