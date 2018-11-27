@@ -86,7 +86,7 @@ public class DivergentComponentOfMotionEstimator
       dcmPositionEstimateToPack.scale(1.0 / lipModel.getNaturalFrequency());
       yoDcmPositionEstimate.setMatchingFrame(dcmPositionEstimateToPack);
       yoIcpPositionEstimate.set(yoDcmPositionEstimate);
-      yoIcpPositionEstimate.add(0, 0, -lipModel.getComHeight());
+      yoIcpPositionEstimate.subZ(lipModel.getLipmHeight());
       centerOfMass.setFromReferenceFrame(comZUpFrame);
 
       dcmPositionEstimateToPack.changeFrame(dcmPositionEstimateFrame);
