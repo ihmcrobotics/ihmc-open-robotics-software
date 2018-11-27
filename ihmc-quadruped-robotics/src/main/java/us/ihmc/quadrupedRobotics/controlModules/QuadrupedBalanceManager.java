@@ -26,6 +26,8 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlanner;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
@@ -63,6 +65,8 @@ public class QuadrupedBalanceManager
    private final YoFramePoint3D yoAchievedECMP = new YoFramePoint3D("achievedECMP", worldFrame, registry);
 
    private final YoInteger numberOfStepsToConsider = new YoInteger("numberOfStepsToConsider", registry);
+
+   private final BooleanProvider updateLipmHeightFromDesireds = new BooleanParameter("updateLipmHeightFromDesireds", registry, true);
 
    private final ReferenceFrame supportFrame;
 
@@ -231,7 +235,8 @@ public class QuadrupedBalanceManager
 
       // update model
       centerOfMassHeightManager.update();
-      linearInvertedPendulumModel.setComHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
+      if (updateLipmHeightFromDesireds.getValue())
+         linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
       // update dcm estimate
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
@@ -248,7 +253,8 @@ public class QuadrupedBalanceManager
    {
       // update model
       centerOfMassHeightManager.update();
-      linearInvertedPendulumModel.setComHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
+      if (updateLipmHeightFromDesireds.getValue())
+         linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
       dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), dcmPositionEstimate);
    }
@@ -261,11 +267,12 @@ public class QuadrupedBalanceManager
    public void compute()
    {
       centerOfMassHeightManager.update();
-      linearInvertedPendulumModel.setComHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
+      if (updateLipmHeightFromDesireds.getValue())
+         linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
       // update dcm estimate
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
-      dcmPlanner.setCoMHeight(linearInvertedPendulumModel.getComHeight());
+      dcmPlanner.setCoMHeight(linearInvertedPendulumModel.getLipmHeight());
 
       dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
