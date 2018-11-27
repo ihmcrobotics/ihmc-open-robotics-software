@@ -145,7 +145,7 @@ public class QuadrupedMomentumRateOfChangeModule
       double omega0 = linearInvertedPendulumModel.getNaturalFrequency();
 
       achievedECMPToPack.set(achievedCoMAcceleration);
-      achievedECMPToPack.subZ(gravity);
+      achievedECMPToPack.addZ(gravity); // needs to be an addZ, because gravity in this case is positive.
       achievedECMPToPack.scale(-1.0 / (omega0 * omega0));
       achievedECMPToPack.add(centerOfMass);
    }
