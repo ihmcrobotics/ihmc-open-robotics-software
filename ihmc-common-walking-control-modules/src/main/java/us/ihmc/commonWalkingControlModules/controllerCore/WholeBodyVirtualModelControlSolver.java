@@ -209,9 +209,11 @@ public class WholeBodyVirtualModelControlSolver
       for (JointBasics jointToCompute : jointsToCompute)
          jointToCompute.setJointAcceleration(0, forwardDynamicsCalculator.getComputedJointAcceleration(jointToCompute));
 
+      lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
+      boundCalculator.enforceJointTorqueLimits(lowLevelOneDoFJointDesiredDataHolder);
+
       updateLowLevelData();
 
-      boundCalculator.enforceJointTorqueLimits(lowLevelOneDoFJointDesiredDataHolder);
 
       if (rootJoint != null)
       {
@@ -230,7 +232,6 @@ public class WholeBodyVirtualModelControlSolver
    {
       if (rootJoint != null)
          rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
-      lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setDesiredAccelerationFromJoints(controlledOneDoFJoints);
 
       jointAccelerationIntegrationCalculator.computeAndUpdateDataHolder(lowLevelOneDoFJointDesiredDataHolder);
