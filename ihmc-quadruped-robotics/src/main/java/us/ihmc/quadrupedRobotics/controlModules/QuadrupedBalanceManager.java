@@ -57,7 +57,6 @@ public class QuadrupedBalanceManager
 
    private final YoFramePoint3D yoDesiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
    private final YoFrameVector3D yoDesiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
-   private final YoFramePoint3D yoTransitionFinalDCM = new YoFramePoint3D("desiredDCMPositionAtEndOfTransition", worldFrame, registry);
    private final YoFramePoint3D yoFinalDesiredDCM = new YoFramePoint3D("finalDesiredDCMPosition", worldFrame, registry);
    private final YoFramePoint3D yoVrpPositionSetpoint = new YoFramePoint3D("vrpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D yoDesiredECMP = new YoFramePoint3D("desiredECMP", ReferenceFrame.getWorldFrame(), registry);
@@ -128,20 +127,18 @@ public class QuadrupedBalanceManager
       YoGraphicPosition finalDesiredDCMViz = new YoGraphicPosition("Final Desired DCM", yoFinalDesiredDCM, 0.01, Beige(),
                                                                    YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
       YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition("Desired eCMP", yoDesiredECMP, 0.012, YoAppearance.Purple(), BALL_WITH_CROSS);
+      YoGraphicPosition yoVRPPositionSetpointViz = new YoGraphicPosition("Desired VRP", yoVrpPositionSetpoint, 0.012, YoAppearance.Purple());
       YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved eCMP", yoAchievedECMP, 0.005, DarkRed(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition spedUpDcmViz = new YoGraphicPosition("Sped Up Desired DCM", yoDesiredDCMPosition, 0.01, PaleGoldenRod(),
-                                                              YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
 
       graphicsList.add(desiredDCMViz);
       graphicsList.add(finalDesiredDCMViz);
       graphicsList.add(yoCmpPositionSetpointViz);
-      graphicsList.add(spedUpDcmViz);
+      graphicsList.add(yoVRPPositionSetpointViz);
 
       artifactList.add(desiredDCMViz.createArtifact());
       artifactList.add(finalDesiredDCMViz.createArtifact());
       artifactList.add(yoCmpPositionSetpointViz.createArtifact());
       artifactList.add(achievedCMPViz.createArtifact());
-      artifactList.add(spedUpDcmViz.createArtifact());
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
