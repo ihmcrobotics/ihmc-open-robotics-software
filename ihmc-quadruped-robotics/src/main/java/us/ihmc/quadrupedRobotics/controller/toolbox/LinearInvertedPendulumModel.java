@@ -95,20 +95,20 @@ public class LinearInvertedPendulumModel
    /**
     * Compute the total contact force acting on the CoM given the desired eCMP.
     * @param comForceToPack computed contact force acting on the center of mass
-    * @param cmpPosition known position of the enhanced centroidal moment pivot
+    * @param eCMPPosition known position of the enhanced centroidal moment pivot
     */
-   public void computeComForce(FrameVector3D comForceToPack, FramePoint3D cmpPosition)
+   public void computeComForce(FrameVector3D comForceToPack, FramePoint3D eCMPPosition)
    {
-      ReferenceFrame cmpPositionFrame = cmpPosition.getReferenceFrame();
+      ReferenceFrame cmpPositionFrame = eCMPPosition.getReferenceFrame();
       ReferenceFrame comForceFrame = comForceToPack.getReferenceFrame();
-      cmpPosition.changeFrame(comZUpFrame);
+      eCMPPosition.changeFrame(comZUpFrame);
       comForceToPack.setToNaN(comZUpFrame);
 
       double omega = getNaturalFrequency();
-      comForceToPack.set(cmpPosition);
+      comForceToPack.set(eCMPPosition);
       comForceToPack.scale(-mass * Math.pow(omega, 2));
       comForceToPack.changeFrame(comForceFrame);
-      cmpPosition.changeFrame(cmpPositionFrame);
+      eCMPPosition.changeFrame(cmpPositionFrame);
    }
 
    /**
