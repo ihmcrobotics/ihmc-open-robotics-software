@@ -8,16 +8,13 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.humanoidRobotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
@@ -420,7 +417,6 @@ public abstract class WalkingControllerParameters
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#WrenchBased}
     */
-   @Deprecated // this is duplicated in the state estimator parameters
    public abstract double getContactThresholdForce();
 
    /**
@@ -432,7 +428,6 @@ public abstract class WalkingControllerParameters
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#WrenchBased}
     */
-   @Deprecated // move this to the state estimator parameters
    public abstract double getSecondContactThresholdForceIgnoringCoP();
 
    /**
@@ -444,7 +439,6 @@ public abstract class WalkingControllerParameters
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#WrenchBased}
     */
-   @Deprecated // this is duplicated in the state estimator parameters
    public abstract double getCoPThresholdFraction();
 
    /**
@@ -455,10 +449,18 @@ public abstract class WalkingControllerParameters
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#KinematicBased}
     */
-   @Deprecated // this is duplicated in the state estimator parameters
    public double getContactThresholdHeight()
    {
       return 0.05;
+   }
+
+   public FootSwitchFactory getFootSwitchFactory()
+   {
+      WrenchBasedFootSwitchFactory footSwitchFactory = new WrenchBasedFootSwitchFactory();
+      footSwitchFactory.setDefaultContactThresholdForce(getContactThresholdForce());
+      footSwitchFactory.setDefaultCoPThresholdFraction(getCoPThresholdFraction());
+      footSwitchFactory.setDefaultSecondContactThresholdForceIgnoringCoP(getSecondContactThresholdForceIgnoringCoP());
+      return footSwitchFactory;
    }
 
    /**
