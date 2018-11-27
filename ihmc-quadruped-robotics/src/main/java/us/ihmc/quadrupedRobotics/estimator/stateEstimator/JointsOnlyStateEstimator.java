@@ -11,11 +11,12 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class JointsOnlyStateEstimator implements RobotController
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final FullRobotModel fullRobotModel;
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final JointStateUpdater jointStateUpdater;
 
-   public JointsOnlyStateEstimator(FullRobotModel fullRobotModel, SensorOutputMapReadOnly sensorOutputMapReadOnly, YoVariableRegistry registry)
+   public JointsOnlyStateEstimator(FullRobotModel fullRobotModel, SensorOutputMapReadOnly sensorOutputMapReadOnly)
    {
       this.fullRobotModel = fullRobotModel;
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
@@ -62,7 +63,7 @@ public class JointsOnlyStateEstimator implements RobotController
    @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
-      return null;
+      return registry;
    }
 
    @Override

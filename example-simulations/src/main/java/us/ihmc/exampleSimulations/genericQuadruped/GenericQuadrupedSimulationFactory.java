@@ -69,7 +69,7 @@ public class GenericQuadrupedSimulationFactory
             fullRobotModel.getTotalMass());
 
       SensorTimestampHolder timestampProvider = new GenericQuadrupedTimestampProvider(sdfRobot);
-      QuadrantDependentList<Boolean> kneeOrientationsOutward = new QuadrantDependentList<>(false, false, false, false);
+      QuadrantDependentList<Double> kneeTorqueTouchdownDetectionThreshold = new QuadrantDependentList<>(20.0, 20.0, 20.0, 20.0);
 
       JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
@@ -83,7 +83,7 @@ public class GenericQuadrupedSimulationFactory
       simulationFactory.setGroundContactParameters(groundContactParameters);
       simulationFactory.setModelFactory(modelFactory);
       simulationFactory.setSDFRobot(sdfRobot);
-      simulationFactory.setKneeOrientationsOutward(kneeOrientationsOutward);
+      simulationFactory.setKneeTorqueTouchdownDetectionThreshold(kneeTorqueTouchdownDetectionThreshold);
       simulationFactory.setSCSParameters(scsParameters);
       simulationFactory.setOutputWriter(outputWriter);
       simulationFactory.setShowPlotter(SHOW_PLOTTER);
