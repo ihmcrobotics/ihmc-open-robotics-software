@@ -166,32 +166,58 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    {
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
 
-      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.5);
-      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.5);
-      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, JointDesiredControlMode.EFFORT, 12.0, 1.2);
-      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, JointDesiredControlMode.EFFORT, 12.0, 3.0);
+      if (target == RobotTarget.SCS)
+      {
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_PITCH, JointDesiredControlMode.POSITION, 500.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_ROLL, JointDesiredControlMode.POSITION, 500.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, JointDesiredControlMode.POSITION, 250.0, 25.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, JointDesiredControlMode.POSITION, 250.0, 25.0);
 
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 30.0, 6.2);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 150.0, 7.5);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 160.0, 7.0);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 75.0, 3.0);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 25.0, 2.0);
-      configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 17.0, 1.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.POSITION, 500.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.POSITION, 500.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.POSITION, 500.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.POSITION, 100.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.POSITION, 40.0, 10.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.POSITION, 40.0, 10.0);
 
-      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, JointDesiredControlMode.EFFORT, 30.0, 3.0);
-      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, JointDesiredControlMode.EFFORT, 180.0, 12.0);
-      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, JointDesiredControlMode.EFFORT, 180.0, 12.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, JointDesiredControlMode.POSITION, 1500.0, 150.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, JointDesiredControlMode.POSITION, 1500.0, 150.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, JointDesiredControlMode.POSITION, 1500.0, 150.0);
 
-      // position controlled on the real robot:
-      JointDesiredControlMode controlMode = (target == RobotTarget.REAL_ROBOT) ? JointDesiredControlMode.POSITION : JointDesiredControlMode.EFFORT;
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, JointDesiredControlMode.POSITION, 50.0, 10.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, JointDesiredControlMode.POSITION, 30.0, 5.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, JointDesiredControlMode.POSITION, 30.0, 5.0);
 
-      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, controlMode, 15.0, 0.0);
-      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, controlMode, 6.0, 0.3);
-      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, controlMode, 6.0, 0.3);
+         configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, JointDesiredControlMode.POSITION, 50.0, 10.0);
+         configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, JointDesiredControlMode.POSITION, 50.0, 10.0);
+         configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, JointDesiredControlMode.POSITION, 50.0, 10.0);
+      }
+      else
+      {
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, JointDesiredControlMode.EFFORT, 12.0, 1.2);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, JointDesiredControlMode.EFFORT, 12.0, 3.0);
 
-      configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, controlMode, 0.0, 0.0);
-      configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, controlMode, 0.0, 0.0);
-      configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, controlMode, 0.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 30.0, 6.2);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 150.0, 7.5);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 160.0, 7.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 75.0, 3.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 25.0, 2.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 17.0, 1.0);
+
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, JointDesiredControlMode.EFFORT, 30.0, 3.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, JointDesiredControlMode.EFFORT, 180.0, 12.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, JointDesiredControlMode.EFFORT, 180.0, 12.0);
+
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, JointDesiredControlMode.POSITION, 15.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, JointDesiredControlMode.POSITION, 6.0, 0.3);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, JointDesiredControlMode.POSITION, 6.0, 0.3);
+
+         configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, JointDesiredControlMode.POSITION, 0.0, 0.0);
+         configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, JointDesiredControlMode.POSITION, 0.0, 0.0);
+         configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, JointDesiredControlMode.POSITION, 0.0, 0.0);
+      }
 
       return behaviors;
    }
