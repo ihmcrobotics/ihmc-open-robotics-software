@@ -80,7 +80,7 @@ public class GraspingJavaFXController
 
    private final Group rootNode = new Group();
 
-   private final static double timeDurationForFinger = 2.0;
+   private final static double timeDurationForFinger = 5.0;
    private final static double ratioJoyStickToPosition = 0.01;
    private final static double ratioJoyStickToRotation = 0.02;
    private final static double lengthOfControlFrame = 0.3;
@@ -262,7 +262,7 @@ public class GraspingJavaFXController
                }
 
                RigidBodyBasics endEffector = fullRobotModel.getHand(selectedSide);
-               double trajectoryTime = 5.0;
+               double trajectoryTime = 7.5;
 
                TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
                List<Pose3DReadOnly> keyFramePoses = new ArrayList<Pose3DReadOnly>();
