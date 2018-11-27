@@ -340,9 +340,9 @@ public class GraspingJavaFXController
       pelvisZUpFrame.update();
 
       controlPosition.add(velocityXProperty.getValue(), velocityYProperty.getValue(), velocityZProperty.getValue());
-      controlOrientation.prependRollRotation(velocityRollProperty.getValue());
-      controlOrientation.prependPitchRotation(velocityPitchProperty.getValue());
-      controlOrientation.prependYawRotation(velocityYawProperty.getValue());
+      controlOrientation.appendRollRotation(velocityRollProperty.getValue());
+      controlOrientation.appendPitchRotation(velocityPitchProperty.getValue());
+      controlOrientation.appendYawRotation(velocityYawProperty.getValue());
    }
 
    private void appendingRoll(double alpha)
