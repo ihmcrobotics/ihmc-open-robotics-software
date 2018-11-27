@@ -3,8 +3,8 @@ package us.ihmc.valkyrie.joystick;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Node;
 import us.ihmc.communication.packets.MessageTools;
@@ -35,7 +35,7 @@ public class ValkyrieJavaFXMotionPreviewVisualizer
 
    private final AtomicBoolean enable = new AtomicBoolean(false);
    private double localTime = 0.0;
-   private WholeBodyTrajectoryToolboxOutputStatus packetInProgress = null;
+   private KinematicsPlanningToolboxOutputStatus packetInProgress = null;
 
    private final double onetickTime = 0.05;
 
@@ -69,7 +69,7 @@ public class ValkyrieJavaFXMotionPreviewVisualizer
             if (packetInProgress != null)
             {
                rootNode.setVisible(true);
-               double trajectoryTime = packetInProgress.getTrajectoryTimes().get(packetInProgress.getTrajectoryTimes().size() - 1);
+               double trajectoryTime = packetInProgress.getKeyFrameTimes().get(packetInProgress.getKeyFrameTimes().size() - 1);
 
                KinematicsToolboxOutputStatus toShowOutputStatus = findFrameFromTime(packetInProgress, localTime); //get close output status based on inverseKinematicsSolution.trajectoryTimes.
 
@@ -113,11 +113,10 @@ public class ValkyrieJavaFXMotionPreviewVisualizer
       enable.set(value);
    }
 
-   public void submitWholeBodyTrajectoryToolboxOutputStatus(WholeBodyTrajectoryToolboxOutputStatus outputStatus)
+   public void submitKinematicsPlanningToolboxOutputStatus(KinematicsPlanningToolboxOutputStatus outputStatus)
    {
       packetInProgress = outputStatus;
       System.out.println("submitWholeBodyTrajectoryToolboxOutputStatus");
-      System.out.println("planning_result_ " + packetInProgress.planning_result_);
       System.out.println("robot_configurations_ " + packetInProgress.robot_configurations_.size());
    }
 
@@ -138,23 +137,22 @@ public class ValkyrieJavaFXMotionPreviewVisualizer
       graphics3dNode.getChildrenNodes().forEach(child -> addNodesRecursively(child, node));
    }
 
-   private KinematicsToolboxOutputStatus findFrameFromTime(WholeBodyTrajectoryToolboxOutputStatus outputStatus, double time)
+   private KinematicsToolboxOutputStatus findFrameFromTime(KinematicsPlanningToolboxOutputStatus outputStatus, double time)
    {
       if (time <= 0.0)
          return outputStatus.getRobotConfigurations().get(0);
-
-      else if (time >= outputStatus.getTrajectoryTimes().get(outputStatus.getTrajectoryTimes().size() - 1))
+      else if (time >= outputStatus.getKeyFrameTimes().get(outputStatus.getKeyFrameTimes().size() - 1))
          return outputStatus.getRobotConfigurations().get(outputStatus.getRobotConfigurations().size() - 1);
       else
       {
          double timeGap = 0.0;
 
          int indexOfFrame = 0;
-         int numberOfTrajectoryTimes = outputStatus.getTrajectoryTimes().size();
+         int numberOfTrajectoryTimes = outputStatus.getKeyFrameTimes().size();
 
-         for (int i = 0; i < numberOfTrajectoryTimes; i++)
+         for (int i = 1; i < numberOfTrajectoryTimes; i++)
          {
-            timeGap = time - outputStatus.getTrajectoryTimes().get(i);
+            timeGap = time - outputStatus.getKeyFrameTimes().get(i);
             if (timeGap < 0)
             {
                indexOfFrame = i;
@@ -165,8 +163,8 @@ public class ValkyrieJavaFXMotionPreviewVisualizer
          KinematicsToolboxOutputStatus frameOne = outputStatus.getRobotConfigurations().get(indexOfFrame - 1);
          KinematicsToolboxOutputStatus frameTwo = outputStatus.getRobotConfigurations().get(indexOfFrame);
 
-         double timeOne = outputStatus.getTrajectoryTimes().get(indexOfFrame - 1);
-         double timeTwo = outputStatus.getTrajectoryTimes().get(indexOfFrame);
+         double timeOne = outputStatus.getKeyFrameTimes().get(indexOfFrame - 1);
+         double timeTwo = outputStatus.getKeyFrameTimes().get(indexOfFrame);
 
          double alpha = (time - timeOne) / (timeTwo - timeOne);
 
