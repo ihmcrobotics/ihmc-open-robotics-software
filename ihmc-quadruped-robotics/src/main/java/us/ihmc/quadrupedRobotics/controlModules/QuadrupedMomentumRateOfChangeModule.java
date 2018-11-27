@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -99,16 +100,18 @@ public class QuadrupedMomentumRateOfChangeModule
       dcmPositionController.compute(vrpPositionSetpointToPack, dcmPositionEstimate, dcmPositionSetpoint, dcmVelocitySetpoint);
 
       double vrpHeightOffsetFromHeightManagement = desiredCoMHeightAcceleration * linearInvertedPendulumModel.getComHeight() / gravity;
-      vrpPositionSetpointToPack.subZ(comPositionGravityCompensationParameter.getValue() * vrpHeightOffsetFromHeightManagement);
+      vrpPositionSetpointToPack.subZ(vrpHeightOffsetFromHeightManagement);
+
+      double modifiedHeight = comPositionGravityCompensationParameter.getValue() * linearInvertedPendulumModel.getComHeight();
       eCMPPositionSetpoint.setIncludingFrame(vrpPositionSetpointToPack);
-      eCMPPositionSetpoint.subZ(linearInvertedPendulumModel.getComHeight());
-
-      centerOfMassPosition.setToZero(centerOfMassFrame);
-      double fZ = mass * (desiredCoMHeightAcceleration + gravity);
-      WrenchDistributorTools.computeForce(linearMomentumRateOfChange, centerOfMassPosition, eCMPPositionSetpoint, fZ);
-
+      eCMPPositionSetpoint.subZ(modifiedHeight);
       eCMPPositionSetpointToPack.setMatchingFrame(eCMPPositionSetpoint);
 
+      centerOfMassPosition.setToZero(centerOfMassFrame);
+      eCMPPositionSetpoint.changeFrame(centerOfMassFrame);
+      linearMomentumRateOfChange.setIncludingFrame(centerOfMassPosition);
+      linearMomentumRateOfChange.sub(eCMPPositionSetpoint);
+      linearMomentumRateOfChange.scale(mass * MathTools.square(linearInvertedPendulumModel.getNaturalFrequency()));
       linearMomentumRateOfChange.changeFrame(worldFrame);
       linearMomentumRateOfChange.subZ(mass * gravity);
 
