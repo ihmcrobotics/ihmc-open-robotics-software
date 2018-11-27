@@ -1,12 +1,9 @@
-package us.ihmc.humanoidRobotics.sensors;
+package us.ihmc.robotics.sensors;
 
 import java.util.Collection;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.sensors.ContactSensorHolder;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public interface FootSwitchFactory
