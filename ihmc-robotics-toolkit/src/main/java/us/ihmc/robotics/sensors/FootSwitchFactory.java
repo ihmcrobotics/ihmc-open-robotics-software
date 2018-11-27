@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public interface FootSwitchFactory
 {
-   FootSwitchInterface newFootSwitch(ContactablePlaneBody foot, Collection<? extends ContactablePlaneBody> otherFeet, ForceSensorDataReadOnly footForceSensor,
-                                     ContactSensorHolder contactSensorHolder, double totalRobotWeight, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                     YoVariableRegistry registry);
+   FootSwitchInterface newFootSwitch(String namePrefix, ContactablePlaneBody foot, Collection<? extends ContactablePlaneBody> otherFeet,
+                                     ForceSensorDataReadOnly footForceSensor, ContactSensor footContactSensor, double totalRobotWeight,
+                                     YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry);
 }

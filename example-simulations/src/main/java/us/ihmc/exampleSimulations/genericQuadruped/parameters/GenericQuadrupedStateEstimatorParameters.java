@@ -1,13 +1,13 @@
 package us.ihmc.exampleSimulations.genericQuadruped.parameters;
 
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorParameters
 {
@@ -173,6 +173,13 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
    public FootSwitchType getFootSwitchType()
    {
       return FootSwitchType.TouchdownBased;
+   }
+
+   // TODO Need to figure out how to get the quadruped to use this factory.
+   @Override
+   public FootSwitchFactory getFootSwitchFactory()
+   {
+      return null;
    }
 
    @Override

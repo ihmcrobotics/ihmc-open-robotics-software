@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.sensors.ContactSensorHolder;
+import us.ihmc.robotics.sensors.ContactSensor;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
@@ -17,6 +17,10 @@ public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
    private double defaultContactThresholdForce = Double.NaN;
    private double defaultCoPThresholdFraction = Double.NaN;
    private double defaultSecondContactThresholdForceIgnoringCoP = Double.NaN;
+
+   private DoubleProvider contactThresholdForceParameter;
+   private DoubleProvider copThresholdFractionParameter;
+   private DoubleProvider secondContactThresholdForceParameter;
 
    public WrenchBasedFootSwitchFactory()
    {
@@ -38,16 +42,18 @@ public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
    }
 
    @Override
-   public FootSwitchInterface newFootSwitch(ContactablePlaneBody foot, Collection<? extends ContactablePlaneBody> otherFeet,
-                                            ForceSensorDataReadOnly footForceSensor, ContactSensorHolder contactSensorHolder, double totalRobotWeight,
+   public FootSwitchInterface newFootSwitch(String namePrefix, ContactablePlaneBody foot, Collection<? extends ContactablePlaneBody> otherFeet,
+                                            ForceSensorDataReadOnly footForceSensor, ContactSensor footContactSensor, double totalRobotWeight,
                                             YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
-      DoubleProvider contactThresholdForceParameter = new DoubleParameter("ContactThresholdForce", registry, defaultContactThresholdForce);
-      DoubleProvider copThresholdFractionParameter = new DoubleParameter("CoPThresholdFraction", registry, defaultCoPThresholdFraction);
-      DoubleProvider secondContactThresholdForceParameter = new DoubleParameter("SecondContactThresholdForce", registry,
-                                                                                defaultSecondContactThresholdForceIgnoringCoP);
+      if (contactThresholdForceParameter == null)
+      {
+         contactThresholdForceParameter = new DoubleParameter("ContactThresholdForce", registry, defaultContactThresholdForce);
+         copThresholdFractionParameter = new DoubleParameter("CoPThresholdFraction", registry, defaultCoPThresholdFraction);
+         secondContactThresholdForceParameter = new DoubleParameter("SecondContactThresholdForce", registry, defaultSecondContactThresholdForceIgnoringCoP);
+      }
 
-      return new WrenchBasedFootSwitch(foot.getName(), footForceSensor, totalRobotWeight, foot, contactThresholdForceParameter,
+      return new WrenchBasedFootSwitch(namePrefix, footForceSensor, totalRobotWeight, foot, contactThresholdForceParameter,
                                        secondContactThresholdForceParameter, copThresholdFractionParameter, yoGraphicsListRegistry, registry);
    }
 }
