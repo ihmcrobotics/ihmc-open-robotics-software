@@ -9,12 +9,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.HighLevelStateMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.RequestedControllerStateTransitionFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StandPrepControllerStateFactory;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -27,6 +28,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListCorruptor;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -37,6 +39,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterface
 {
@@ -199,7 +203,12 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_BOTTOM;
 
+     YoEnum<HighLevelControllerName> localRequestedControllerState = new YoEnum<>("test", new YoVariableRegistry("Dummy"), HighLevelControllerName.class, true);
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.registerHighLevelControllerState(new StandPrepControllerStateFactory());
+      drcSimulationTestHelper.registerControllerStateTransition(new RequestedControllerStateTransitionFactory<>(localRequestedControllerState, HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.WALKING));
+      drcSimulationTestHelper.registerControllerStateTransition(new RequestedControllerStateTransitionFactory<>(localRequestedControllerState, HighLevelControllerName.WALKING, HighLevelControllerName.STAND_PREP_STATE));
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation("DRCWalkingUpRampTest");
 
@@ -231,9 +240,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       // Moving the robot back to the starting position
       scsRootJoint.setPinned(true);
-      HighLevelStateMessage goToDoNothing = new HighLevelStateMessage();
-      goToDoNothing.setHighLevelControllerName(HighLevelStateMessage.DO_NOTHING_BEHAVIOR);
-      drcSimulationTestHelper.publishToController(goToDoNothing);
+      localRequestedControllerState.set(HighLevelControllerName.STAND_PREP_STATE);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.2);
 
       scsRootJoint.setRotationAndTranslation(new RigidBodyTransform(aboveInitialPose.getOrientation(),
@@ -243,7 +250,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       ArrayList<GroundContactPoint> allGCPs = drcSimulationTestHelper.getRobot().getAllGroundContactPoints();
 
-      for (double alpha = 0.0; allGCPs.stream().anyMatch(gc -> gc.getZ() > 0.05); alpha += 0.1)
+      for (double alpha = 0.0; allGCPs.stream().anyMatch(gc -> gc.getZ() > 0.01); alpha += 0.1)
       { // Putting the robot down gently
          Point3D position = new Point3D();
          position.interpolate(aboveInitialPose.getPosition(), initialPose.getPosition(), alpha);
@@ -251,9 +258,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
       }
 
-      HighLevelStateMessage goToWalking = new HighLevelStateMessage();
-      goToWalking.setHighLevelControllerName(HighLevelStateMessage.WALKING);
-      drcSimulationTestHelper.publishToController(goToWalking);
+      localRequestedControllerState.set(HighLevelControllerName.WALKING);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.2);
       scsRootJoint.setPinned(false);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
