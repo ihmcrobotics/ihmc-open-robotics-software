@@ -32,7 +32,6 @@ public class QuadrupedCenterOfMassHeightManager
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleParameter initializationDuration = new DoubleParameter("heightInitializationDuration", registry, 0.5);
 
    private final YoDouble controllerTime;
 
@@ -159,10 +158,8 @@ public class QuadrupedCenterOfMassHeightManager
          currentVelocity.changeFrame(supportFrame);
 
          double startTime = controllerTime.getDoubleValue();
-         double endTime = startTime + initializationDuration.getValue();
          centerOfMassHeightTrajectory.clear();
-         centerOfMassHeightTrajectory.appendWaypoint(startTime, currentPosition, currentVelocity);
-         centerOfMassHeightTrajectory.appendWaypoint(endTime, nominalPosition, nominalVelocity);
+         centerOfMassHeightTrajectory.appendWaypoint(startTime, nominalPosition, nominalVelocity);
          centerOfMassHeightTrajectory.initialize();
       }
 
