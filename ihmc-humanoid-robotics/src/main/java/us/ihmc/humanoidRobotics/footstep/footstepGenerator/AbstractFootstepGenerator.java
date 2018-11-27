@@ -13,7 +13,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
@@ -23,6 +22,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnapper
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.InsufficientDataException;

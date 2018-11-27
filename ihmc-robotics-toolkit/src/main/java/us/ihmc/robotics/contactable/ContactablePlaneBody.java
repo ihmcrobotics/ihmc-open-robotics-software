@@ -1,4 +1,4 @@
-package us.ihmc.humanoidRobotics.bipedSupportPolygons;
+package us.ihmc.robotics.contactable;
 
 import java.util.List;
 
