@@ -76,6 +76,8 @@ public class JoystickBasedGraspingMainUI
 
       Translate rootJointOffset = new Translate();
       cameraController.prependTransform(rootJointOffset);
+      Translate manipulationFocusPoint = new Translate(0.0, 0.0, 1.0);
+      cameraController.prependTransform(manipulationFocusPoint);
 
       messager.startMessager();
 
