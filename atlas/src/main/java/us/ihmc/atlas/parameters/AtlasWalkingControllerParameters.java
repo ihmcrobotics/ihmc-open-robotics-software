@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -37,9 +38,7 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-
-
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 
 public class AtlasWalkingControllerParameters extends WalkingControllerParameters
 {
@@ -47,9 +46,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final boolean runningOnRealRobot;
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
-// USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
+   // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround;// = 0.625;
-   private double       nominalHeightAboveGround;// = 0.705;
+   private double nominalHeightAboveGround;// = 0.705;
    private final double maximumHeightAboveGround;// = 0.765 + 0.08;
 
    private final AtlasJointMap jointMap;
@@ -77,9 +76,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       momentumOptimizationSettings = new AtlasMomentumOptimizationSettings(jointMap, contactPointParameters.getNumberOfContactableBodies());
       angularMomentumModifierParameters = new ICPAngularMomentumModifierParameters();
 
-      minimumHeightAboveGround = jointMap.getModelScale() * ( 0.625 + 0.08 );
-      nominalHeightAboveGround = jointMap.getModelScale() * ( 0.705 + 0.08 );
-      maximumHeightAboveGround = jointMap.getModelScale() * ( 0.845 + 0.08 );
+      minimumHeightAboveGround = jointMap.getModelScale() * (0.625 + 0.08);
+      nominalHeightAboveGround = jointMap.getModelScale() * (0.705 + 0.08);
+      maximumHeightAboveGround = jointMap.getModelScale() * (0.845 + 0.08);
 
       runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -97,16 +96,16 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
          RigidBodyTransform transform = new RigidBodyTransform();
 
          double x = 0.20;
-         double y = robotSide.negateIfRightSide(0.35);    // 0.30);
+         double y = robotSide.negateIfRightSide(0.35); // 0.30);
          double z = -0.40;
          Vector3D translation = new Vector3D(x, y, z);
          translation.scale(jointMap.getModelScale());
          transform.setTranslation(translation);
 
          RotationMatrix rotation = new RotationMatrix();
-         double yaw = 0.0;    // robotSide.negateIfRightSide(-1.7);
+         double yaw = 0.0; // robotSide.negateIfRightSide(-1.7);
          double pitch = 0.7;
-         double roll = 0.0;    // robotSide.negateIfRightSide(-0.8);
+         double roll = 0.0; // robotSide.negateIfRightSide(-0.8);
          rotation.setYawPitchRoll(yaw, pitch, roll);
          transform.setRotation(rotation);
 
@@ -119,7 +118,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       // TODO probably need to be tuned.
       return (runningOnRealRobot ? 3.4 : 3.0) / Math.sqrt(jointMap.getModelScale()); // 3.0 seems more appropriate.
-//      return 3.0;
+      //      return 3.0;
    }
 
    /** {@inheritDoc} */
@@ -164,20 +163,20 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
          return 0.3;
    }
 
-// USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
-//   private final double minimumHeightAboveGround = 0.785;
-//   private double nominalHeightAboveGround = 0.865;
-//   private final double maximumHeightAboveGround = 0.925;
+   // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
+   //   private final double minimumHeightAboveGround = 0.785;
+   //   private double nominalHeightAboveGround = 0.865;
+   //   private final double maximumHeightAboveGround = 0.925;
 
-//   // USE THESE FOR VRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
-//   private double minimumHeightAboveGround = 0.68;
-//   private double nominalHeightAboveGround = 0.76;
-//   private double maximumHeightAboveGround = 0.82;
+   //   // USE THESE FOR VRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
+   //   private double minimumHeightAboveGround = 0.68;
+   //   private double nominalHeightAboveGround = 0.76;
+   //   private double maximumHeightAboveGround = 0.82;
 
-//   // USE THESE FOR IMPROVING WALKING, BUT DONT CHECK THEM IN UNTIL IT IMPROVED WALKING THROUGH MUD.
-//   private double minimumHeightAboveGround = 0.68;
-//   private double nominalHeightAboveGround = 0.80;  // NOTE: used to be 0.76, jojo
-//   private double maximumHeightAboveGround = 0.84;  // NOTE: used to be 0.82, jojo
+   //   // USE THESE FOR IMPROVING WALKING, BUT DONT CHECK THEM IN UNTIL IT IMPROVED WALKING THROUGH MUD.
+   //   private double minimumHeightAboveGround = 0.68;
+   //   private double nominalHeightAboveGround = 0.80;  // NOTE: used to be 0.76, jojo
+   //   private double maximumHeightAboveGround = 0.84;  // NOTE: used to be 0.82, jojo
 
    @Override
    public double minimumHeightAboveAnkle()
@@ -212,7 +211,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaximumLegLengthForSingularityAvoidance()
    {
-      return jointMap.getPhysicalProperties().getShinLength()  + jointMap.getPhysicalProperties().getThighLength();
+      return jointMap.getPhysicalProperties().getShinLength() + jointMap.getPhysicalProperties().getThighLength();
    }
 
    @Override
@@ -230,7 +229,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setKi(ki);
       gains.setIntegralLeakRatio(kiBleedOff);
 
-//      if (runningOnRealRobot) gains.setFeedbackPartMaxRate(1.0);
+      //      if (runningOnRealRobot) gains.setFeedbackPartMaxRate(1.0);
       return gains;
    }
 
@@ -379,35 +378,19 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return (runningOnRealRobot ? 1.2 : 0.6); //Math.sqrt(jointMap.getModelScale()) *
    }
 
-   @Override
-   public double getContactThresholdForce()
+   public FootSwitchFactory getFootSwitchFactory()
    {
-      switch (target)
-      {
-         case REAL_ROBOT :
-            return massScale * 80.0;
+      WrenchBasedFootSwitchFactory footSwitchFactory = new WrenchBasedFootSwitchFactory();
+      double contactThresholdForce = 5.0;
+      if (target == RobotTarget.GAZEBO)
+         contactThresholdForce = 50.0;
+      else if (target == RobotTarget.REAL_ROBOT)
+         contactThresholdForce = 80.0;
 
-         case GAZEBO :
-            return massScale * 50.0;
-
-         case SCS:
-            return massScale * 5.0;
-
-         default :
-            throw new RuntimeException();
-      }
-   }
-
-   @Override
-   public double getSecondContactThresholdForceIgnoringCoP()
-   {
-      return massScale * 220.0;
-   }
-
-   @Override
-   public double getCoPThresholdFraction()
-   {
-      return 0.02;
+      footSwitchFactory.setDefaultContactThresholdForce(massScale * contactThresholdForce);
+      footSwitchFactory.setDefaultCoPThresholdFraction(0.02);
+      footSwitchFactory.setDefaultSecondContactThresholdForceIgnoringCoP(massScale * 220.0);
+      return footSwitchFactory;
    }
 
    @Override
@@ -426,18 +409,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
    {
       return angularMomentumModifierParameters;
-   }
-
-   @Override
-   public double getContactThresholdHeight()
-   {
-      return jointMap.getModelScale() * 0.05;
-   }
-
-   @Override
-   public FootSwitchType getFootSwitchType()
-   {
-      return FootSwitchType.WrenchBased;
    }
 
    @Override
@@ -502,7 +473,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       JointLimitParameters parameters = new JointLimitParameters();
       parameters.setMaxAbsJointVelocity(9.0);
-      parameters.setJointLimitDistanceForMaxVelocity(30.0 * Math.PI/180.0);
+      parameters.setJointLimitDistanceForMaxVelocity(30.0 * Math.PI / 180.0);
       parameters.setJointLimitFilterBreakFrequency(15.0);
       parameters.setVelocityControlGain(30.0);
       return parameters;
