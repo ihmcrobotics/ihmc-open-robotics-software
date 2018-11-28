@@ -3,7 +3,6 @@ package us.ihmc.robotEnvironmentAwareness.planarRegion;
 import java.util.Scanner;
 
 import us.ihmc.jOctoMap.tools.ScannerTools;
-import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory;
 
 public class PolygonizerParameters
 {

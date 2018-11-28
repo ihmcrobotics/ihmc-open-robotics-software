@@ -30,7 +30,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
    private final PlanarRegionSegmentationDataExporter dataExporter = EXPORT_SEGMENTATION_ON_EXCEPTION ? new PlanarRegionSegmentationDataExporter(new File("DataThrowingException/Segmentation")) : null;
 
-   private final TimeReporter timeReporter = new TimeReporter(this);
+   private final TimeReporter timeReporter = new TimeReporter();
    private final NormalOcTree octree;
 
    private final PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();

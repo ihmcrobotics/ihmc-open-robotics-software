@@ -1,7 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.publisherTopicNameGenerator;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberTopicNameGenerator;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,11 +12,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.util.concurrent.AtomicDouble;
 
 import controller_msgs.msg.dds.LidarScanMessage;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -36,7 +35,7 @@ public class LIDARBasedREAModule
    private static final String planarRegionsTimeReport = "OcTreePlanarRegion update took: ";
    private static final String reportPlanarRegionsStateTimeReport = "Reporting Planar Regions state took: ";
 
-   private final TimeReporter timeReporter = new TimeReporter(this);
+   private final TimeReporter timeReporter = new TimeReporter();
 
    private static final int THREAD_PERIOD_MILLISECONDS = 200;
    private static final int BUFFER_THREAD_PERIOD_MILLISECONDS = 10;
@@ -146,7 +145,7 @@ public class LIDARBasedREAModule
          }
          else
          {
-            PrintTools.error(LIDARBasedREAModule.class, e.getClass().getSimpleName());
+            LogTools.error(e.getClass().getSimpleName());
          }
       }
 
@@ -172,7 +171,7 @@ public class LIDARBasedREAModule
 
    public void stop() throws Exception
    {
-      PrintTools.info("REA Module is going down.");
+      LogTools.info("REA Module is going down.");
 
       reaMessager.closeMessager();
       ros2Node.destroy();

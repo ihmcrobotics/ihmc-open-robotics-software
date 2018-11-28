@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.KryoObjectClient;
 import us.ihmc.communication.net.KryoObjectServer;
@@ -14,6 +13,7 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.local.IntraprocessObjectCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Message;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
@@ -70,7 +70,7 @@ public class KryoMessager implements Messager
       Topic<T> messageTopic = messagerAPI.findTopic(message.getTopicID());
 
       if (DEBUG)
-         PrintTools.info("Packet received from network with message name: " + messageTopic.getName());
+         LogTools.info("Packet received from network with message name: " + messageTopic.getName());
 
       List<AtomicReference<Object>> inputVariablesForTopic = inputVariablesMap.get(messageTopic);
       if (inputVariablesForTopic != null)
@@ -91,12 +91,12 @@ public class KryoMessager implements Messager
 
       if (!objectCommunicator.isConnected())
       {
-         PrintTools.warn(this, "This messager is closed, message's topic: " + messageTopic.getName());
+         LogTools.warn("This messager is closed, message's topic: " + messageTopic.getName());
          return;
       }
 
       if (DEBUG)
-         PrintTools.info("Submit message for topic: " + messageTopic.getName());
+         LogTools.info("Submit message for topic: " + messageTopic.getName());
 
       // Variable update over network
       objectCommunicator.send(message);
