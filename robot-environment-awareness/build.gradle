@@ -19,7 +19,7 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: "com.vividsolutions", name: "jts", version: "1.13"
+   compile group: "com.vividsolutions", name: "jts", version: "1.13" // TODO Update to https://github.com/locationtech/jts
    compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
    
    compile group: "us.ihmc", name: "euclid", version: "0.10.0"
