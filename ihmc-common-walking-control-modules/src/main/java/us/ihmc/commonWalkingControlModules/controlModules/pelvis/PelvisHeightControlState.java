@@ -137,7 +137,6 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    @Override
    public void initialize()
    {
-      // TODO Here we need to force the position control to snap to the default height WITHOUT any kind of smooth trajectory.
    }
 
    public void setGains(PIDGainsReadOnly gains)
