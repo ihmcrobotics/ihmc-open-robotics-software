@@ -95,8 +95,6 @@ public class GraspingJavaFXController
    private final static Vector3D defaultPositionToCreateObject = new Vector3D(0.6, 0.3, 1.0);
    private final Point3D controlPosition = new Point3D(defaultPositionToCreateObject);
    private final RotationMatrix controlOrientation = new RotationMatrix();
-   //   private final FramePoint3D controlFramePosition;
-   //   private final FrameQuaternion controlFrameOrientation;
    private final ReferenceFrame pelvisZUpFrame;
 
    private boolean selectingSide = false;
@@ -109,7 +107,7 @@ public class GraspingJavaFXController
    private final DoubleProperty velocityPitchProperty = new SimpleDoubleProperty(this, "velocityPitchProperty", 0.0);
    private final DoubleProperty velocityYawProperty = new SimpleDoubleProperty(this, "velocityYawProperty", 0.0);
 
-   private int indexOfSelectedObject = 0;
+   private int indexOfSelectedKeyFrame = 0;
    private final List<RigidBodyTransform> keyFramePoses = new ArrayList<>();
 
    private final AtomicReference<KinematicsPlanningToolboxOutputStatus> toolboxOutputPacket = new AtomicReference<>(null);
@@ -127,8 +125,6 @@ public class GraspingJavaFXController
 
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-      //      controlFramePosition = new FramePoint3D(pelvisZUpFrame, defaultPositionToCreateObject);
-      //      controlFrameOrientation = new FrameQuaternion(pelvisZUpFrame, new Quaternion());
 
       sendFingerMessages.put(RobotSide.RIGHT, messager.createInput(GraspingJavaFXTopics.RightSendMessage, false));
       sendFingerMessages.put(RobotSide.LEFT, messager.createInput(GraspingJavaFXTopics.LeftSendMessage, false));
@@ -147,8 +143,9 @@ public class GraspingJavaFXController
       desiredMiddles.put(RobotSide.LEFT, messager.createInput(GraspingJavaFXTopics.LeftMiddle, 0.0));
       desiredPinkys.put(RobotSide.LEFT, messager.createInput(GraspingJavaFXTopics.LeftPinky, 0.0));
 
-      messager.registerTopicListener(XBoxOneJavaFXController.ButtonSelectState, state -> clearObjects(state));
-      messager.registerTopicListener(XBoxOneJavaFXController.ButtonAState, state -> createObject(state));
+      messager.registerTopicListener(XBoxOneJavaFXController.ButtonAState, state -> clearKeyFrame(state));
+      messager.registerTopicListener(XBoxOneJavaFXController.ButtonSelectState, state -> createKeyFrame(state, RobotSide.LEFT));
+      messager.registerTopicListener(XBoxOneJavaFXController.ButtonStartState, state -> createKeyFrame(state, RobotSide.RIGHT));
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonBState, state -> switchSelectedObject(state));
 
       messager.registerJavaFXSyncedTopicListener(XBoxOneJavaFXController.LeftStickYAxis, this::appendingXAxis);
@@ -182,8 +179,8 @@ public class GraspingJavaFXController
          @Override
          public void handle(long arg0)
          {
-            updateSelectedObject();
-            updateVisualizationObjects();
+            updateSelectedKeyFrame();
+            updateVisualizedKeyFrames();
             rootNode.getChildren().add(motionPreviewVisualizer.getRootNode());
             submitDesiredFingerConfigurationMessage();
          }
@@ -267,6 +264,7 @@ public class GraspingJavaFXController
                TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
                List<Pose3DReadOnly> keyFramePoses = new ArrayList<Pose3DReadOnly>();
 
+               // TODO : create message by selected keyFrames.
                // TODO : replace to use all key frames that are selected by xbox controller.
                //               for (int i = 0; i < this.keyFramePoses.size(); i++)
                //               {
@@ -335,7 +333,7 @@ public class GraspingJavaFXController
       }
    }
 
-   private void updateSelectedObject()
+   private void updateSelectedKeyFrame()
    {
       pelvisZUpFrame.update();
 
@@ -414,18 +412,27 @@ public class GraspingJavaFXController
          return false;
    }
 
-   private void createObject(ButtonState state)
+   private void createKeyFrame(ButtonState state, RobotSide preferredSide)
    {
       if (state == ButtonState.PRESSED)
       {
-         RigidBodyTransform rigidBodyTransformToCreateKeyFrame = new RigidBodyTransform();
+         RigidBodyTransform transformToCreateKeyFrame = new RigidBodyTransform();
+         int numberOfKeyFrames = keyFramePoses.size();
+         if (numberOfKeyFrames == 0)
+         {
+            transformToCreateKeyFrame.set(fullRobotModel.getHand(preferredSide).getBodyFixedFrame().getTransformToWorldFrame());
+         }
+         else
+         {
+            transformToCreateKeyFrame.set(keyFramePoses.get(numberOfKeyFrames - 1));
+         }
 
-         rigidBodyTransformToCreateKeyFrame.setTranslation(controlPosition);
-         rigidBodyTransformToCreateKeyFrame.setRotation(controlOrientation);
+         transformToCreateKeyFrame.getTranslation(controlPosition);
+         transformToCreateKeyFrame.getRotation(controlOrientation);
 
-         keyFramePoses.add(rigidBodyTransformToCreateKeyFrame);
+         keyFramePoses.add(transformToCreateKeyFrame);
 
-         indexOfSelectedObject = keyFramePoses.size() - 1;
+         indexOfSelectedKeyFrame = keyFramePoses.size() - 1;
       }
    }
 
@@ -439,32 +446,41 @@ public class GraspingJavaFXController
       if (state == ButtonState.RELEASED)
          return;
 
-      indexOfSelectedObject++;
-      if (indexOfSelectedObject == numberOfObjects)
-         indexOfSelectedObject = 0;
+      indexOfSelectedKeyFrame++;
+      if (indexOfSelectedKeyFrame == numberOfObjects)
+         indexOfSelectedKeyFrame = 0;
 
-      keyFramePoses.get(indexOfSelectedObject).getTranslation(controlPosition);
-      keyFramePoses.get(indexOfSelectedObject).getRotation(controlOrientation);
+      snapControlTransformToSelectedKeyFrame();
    }
 
-   private void clearObjects(ButtonState state)
+   private void clearKeyFrame(ButtonState state)
    {
-      if (state == ButtonState.PRESSED)
+      if (state == ButtonState.RELEASED)
       {
-         motionPreviewVisualizer.enable(false);
-         keyFramePoses.clear();
-         indexOfSelectedObject = 0;
+         if(keyFramePoses.size() > 0)
+         {
+            keyFramePoses.remove(indexOfSelectedKeyFrame);
+            indexOfSelectedKeyFrame = keyFramePoses.size() - 1;
+
+            snapControlTransformToSelectedKeyFrame();   
+         }
       }
    }
 
-   private void updateVisualizationObjects()
+   private void snapControlTransformToSelectedKeyFrame()
+   {
+      keyFramePoses.get(indexOfSelectedKeyFrame).getTranslation(controlPosition);
+      keyFramePoses.get(indexOfSelectedKeyFrame).getRotation(controlOrientation);
+   }
+
+   private void updateVisualizedKeyFrames()
    {
       List<Node> objectsToPutReference = new ArrayList<Node>();
       for (int i = 0; i < keyFramePoses.size(); i++)
       {
          RigidBodyTransform objectToVisualize = keyFramePoses.get(i);
          double lengthOfFrame = lengthOfkeyFrameReferenceFrame;
-         if (i == indexOfSelectedObject)
+         if (i == indexOfSelectedKeyFrame)
          {
             lengthOfFrame = lengthOfControlFrame;
             objectToVisualize.setTranslation(controlPosition);
