@@ -57,11 +57,16 @@ public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanne
       ConnectionPoint3D closestPointToGoal = startPoint;
       double closestDistanceToGoalSquared = startPoint.distanceSquared(goalPoint);
 
+      double bestCostToGoal = Double.POSITIVE_INFINITY;
+
       stackLoop:
       while(!stack.isEmpty())
       {
          ConnectionPoint3D sourcePoint = stack.poll();
+         double sourceNodeCost = nodeCosts.get(sourcePoint);
 
+         if (sourceNodeCost > bestCostToGoal) break stackLoop;
+         
          HashSet<ConnectionData> connections = visibilityMap.computeIfAbsent(sourcePoint, (p) -> new HashSet<>());
          double distanceToGoalSquared = sourcePoint.distanceSquared(goalPoint);
          if(distanceToGoalSquared < closestDistanceToGoalSquared)
@@ -75,16 +80,16 @@ public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanne
             Connection connection = connectionData.connection;
             ConnectionPoint3D targetPoint = connection.getOppositePoint(sourcePoint);
 
-            double nodeCost = nodeCosts.get(sourcePoint) + connectionData.edgeWeight;
+            double targetNodeCost = sourceNodeCost + connectionData.edgeWeight;
 
-            if(!nodeCosts.containsKey(targetPoint) || nodeCosts.get(targetPoint) > nodeCost)
+            if(!nodeCosts.containsKey(targetPoint) || nodeCosts.get(targetPoint) > targetNodeCost)
             {
-               nodeCosts.put(targetPoint, nodeCost);
+               nodeCosts.put(targetPoint, targetNodeCost);
                incomingBestEdge.put(targetPoint, connectionData);
 
                if(targetPoint.equals(goalPoint))
-               {
-                  break stackLoop;
+               {                  
+                  bestCostToGoal = targetNodeCost;
                }
                else
                {
@@ -106,7 +111,8 @@ public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanne
 
    private List<Point3DReadOnly> getPathToPoint(ConnectionPoint3D point)
    {
-      List<Point3DReadOnly> path = new ArrayList<Point3DReadOnly>(){{add(point);}};
+      List<Point3DReadOnly> path = new ArrayList<Point3DReadOnly>();
+      path.add(point);
 
       ConnectionData incomingEdge = incomingBestEdge.get(point);
       ConnectionPoint3D previousTargetPoint = new ConnectionPoint3D(point);
