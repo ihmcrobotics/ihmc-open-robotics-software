@@ -14,13 +14,18 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class KinematicsBasedFootSwitchFactory implements FootSwitchFactory
 {
-   private double defaultContactThresholdHeight;
+   private double defaultContactThresholdHeight = 0.05;
    private DoubleProvider contactThresholdHeight;
 
    public KinematicsBasedFootSwitchFactory()
    {
    }
 
+   /**
+    * When determining whether a foot has hit the ground the controller can use the height difference
+    * between the swing foot and the lowest of the feet of the robot. If the difference falls below
+    * this threshold foot-ground contact is assumed.
+    */
    public void setDefaultContactThresholdHeight(double defaultContactThresholdHeight)
    {
       this.defaultContactThresholdHeight = defaultContactThresholdHeight;

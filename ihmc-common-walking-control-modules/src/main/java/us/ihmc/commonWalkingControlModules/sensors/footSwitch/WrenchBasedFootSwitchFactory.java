@@ -26,16 +26,37 @@ public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
    {
    }
 
+   /**
+    * When determining that a foot has hit the floor after a step the z-force on the foot needs to be
+    * past the threshold defined by this method. In addition the center of pressure needs to be inside
+    * certain bounds of the foot (see {@link #setDefaultCoPThresholdFraction(double)}).
+    * </p>
+    * See also {@link #setDefaultSecondContactThresholdForceIgnoringCoP(double)} for another threshold
+    * on the contact force that does not require the CoP to be within bounds.
+    * </p>
+    */
    public void setDefaultContactThresholdForce(double defaultContactThresholdForce)
    {
       this.defaultContactThresholdForce = defaultContactThresholdForce;
    }
 
+   /**
+    * When determining whether a foot has touched down after a step the controller will make sure that
+    * the CoP of the foot is within bounds before the touchdown is triggered. This fraction of the foot
+    * length is used to move these bounds in. In addition the ground reaction force needs to be above
+    * the threshold defined in {@link #setDefaultContactThresholdForce(double)}
+    */
    public void setDefaultCoPThresholdFraction(double defaultCoPThresholdFraction)
    {
       this.defaultCoPThresholdFraction = defaultCoPThresholdFraction;
    }
 
+   /**
+    * This threshold is a second boundary for the ground contact force required for the controller to
+    * assume foot contact after a step. If the ground contact force in z goes above this threshold the
+    * foot touchdown is triggered regardless of the position of the CoP within the foothold. See
+    * {@link #setDefaultContactThresholdForce(double)} for the first threshold.
+    */
    public void setDefaultSecondContactThresholdForceIgnoringCoP(double defaultSecondContactThresholdForceIgnoringCoP)
    {
       this.defaultSecondContactThresholdForceIgnoringCoP = defaultSecondContactThresholdForceIgnoringCoP;
