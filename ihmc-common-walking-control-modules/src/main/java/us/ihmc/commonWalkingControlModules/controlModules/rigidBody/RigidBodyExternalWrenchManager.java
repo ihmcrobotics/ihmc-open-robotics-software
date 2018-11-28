@@ -197,6 +197,7 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
 
          if (command.getTrajectoryPointTime(0) > RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint)
          {
+            desiredWrench.changeFrame(activeControlFrame);
             queueInitialPoint(desiredWrench);
          }
       }
