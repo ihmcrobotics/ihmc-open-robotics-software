@@ -111,7 +111,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       GenericQuadrupedSitDownParameters sitDownParameters = new GenericQuadrupedSitDownParameters();
 
       fullRobotModel = modelFactory.createFullRobotModel();
-      FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
+      FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.getRobotDescription());
       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(
             fullRobotModel.getTotalMass());
       robotName = sdfRobot.getName();
