@@ -9,21 +9,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 public class ConnectionPoint3D implements Point3DReadOnly
 {
-   public static final double PRECISION     = 1.0e-4;
+   public static final double PRECISION = 1.0e-4;
    public static final double INV_PRECISION = 1.0e+4;
 
    private final int regionId;
    private final double x, y, z;
    private final int hashCode;
-
-   public ConnectionPoint3D(int regionId)
-   {
-      x = 0.0;
-      y = 0.0;
-      z = 0.0;
-      this.regionId = regionId;
-      hashCode = computeHashCode();
-   }
 
    public ConnectionPoint3D(ConnectionPoint3D other)
    {
@@ -60,9 +51,9 @@ public class ConnectionPoint3D implements Point3DReadOnly
    private int computeHashCode()
    {
       long bits = 1L;
-      bits = 31L * bits + Double.doubleToLongBits(getRoundedX());
-      bits = 31L * bits + Double.doubleToLongBits(getRoundedY());
-      bits = 31L * bits + Double.doubleToLongBits(getRoundedZ());
+      bits = 31L * bits + Double.doubleToLongBits(round(x));
+      bits = 31L * bits + Double.doubleToLongBits(round(y));
+      bits = 31L * bits + Double.doubleToLongBits(round(z));
       return (int) (bits ^ bits >> 32);
    }
 
@@ -89,21 +80,6 @@ public class ConnectionPoint3D implements Point3DReadOnly
       return regionId;
    }
 
-   public double getRoundedX()
-   {
-      return round(x);
-   }
-
-   public double getRoundedY()
-   {
-      return round(y);
-   }
-
-   public double getRoundedZ()
-   {
-      return round(z);
-   }
-
    @Override
    public int hashCode()
    {
@@ -113,23 +89,36 @@ public class ConnectionPoint3D implements Point3DReadOnly
    @Override
    public boolean equals(Object obj)
    {
+      if (obj instanceof ConnectionPoint3D)
+      {
+         ConnectionPoint3D other = (ConnectionPoint3D) obj;
+         return equals(other);
+      }
+
       if (obj == null)
          return false;
 
-      try
-      {
-         return epsilonEquals((Tuple3DReadOnly) obj, PRECISION);
-      }
-      catch (ClassCastException e)
-      {
-         return false;
-      }
+      return obj.equals(this);
    }
 
-   @Override
-   public boolean equals(Tuple3DReadOnly other)
+   public boolean equals(ConnectionPoint3D other)
    {
-      return epsilonEquals(other, PRECISION);
+      if (other == null)
+         return false;
+
+      if (this.hashCode != other.hashCode)
+         return false;
+
+      if (round(this.x) != round(other.x))
+         return false;
+
+      if (round(this.y) != round(other.y))
+         return false;
+
+      if (round(this.z) != round(other.z))
+         return false;
+
+      return true;
    }
 
    @Override
