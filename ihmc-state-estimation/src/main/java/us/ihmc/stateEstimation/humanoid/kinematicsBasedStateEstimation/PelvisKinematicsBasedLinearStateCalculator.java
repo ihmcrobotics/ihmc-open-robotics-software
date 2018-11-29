@@ -95,6 +95,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final BooleanProvider useControllerDesiredCoP;
    private final BooleanProvider trustCoPAsNonSlippingContactPoint;
 
+   private final BooleanParameter assumeTrustedFootAtZeroHeight = new BooleanParameter("assumeTrustedFootAtZeroHeight", registry, false);
+
    // temporary variables
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final FrameVector3D tempFrameVector = new FrameVector3D();
@@ -448,6 +450,14 @@ public class PelvisKinematicsBasedLinearStateCalculator
    {
       if (!kinematicsIsUpToDate.getBooleanValue())
          throw new RuntimeException("Leg kinematics needs to be updated before trying to estimate the pelvis position/linear velocity.");
+
+      if (assumeTrustedFootAtZeroHeight.getValue())
+      {
+         for (int i = 0; i < trustedFeet.size(); i++)
+         {
+            footPositionsInWorld.get(trustedFeet.get(i)).setZ(0.0);
+         }
+      }
 
       for(int i = 0; i < trustedFeet.size(); i++)
       {
