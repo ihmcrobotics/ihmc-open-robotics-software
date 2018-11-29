@@ -1,11 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+import static us.ihmc.communication.packets.Packet.*;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
@@ -20,6 +19,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector2D;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -257,7 +257,7 @@ public class PelvisICPBasedTranslationManager
       }
       else
       {
-         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + se3Trajectory.getExecutionMode() + ". Command ignored.");
+         LogTools.warn("Unknown " + ExecutionMode.class.getSimpleName() + " value: " + se3Trajectory.getExecutionMode() + ". Command ignored.");
       }
    }
 
@@ -265,7 +265,7 @@ public class PelvisICPBasedTranslationManager
    {
       if (!isReadyToHandleQueuedCommands.getBooleanValue())
       {
-         PrintTools.warn(this, "The very first " + command.getClass().getSimpleName() + " of a series must be " + ExecutionMode.OVERRIDE + ". Aborting motion.");
+         LogTools.warn("The very first " + command.getClass().getSimpleName() + " of a series must be " + ExecutionMode.OVERRIDE + ". Aborting motion.");
          return false;
       }
 
@@ -274,14 +274,14 @@ public class PelvisICPBasedTranslationManager
 
       if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
       {
-         PrintTools.warn(this, "Previous command ID mismatch: previous ID from command = " + previousCommandId
+         LogTools.warn("Previous command ID mismatch: previous ID from command = " + previousCommandId
                + ", last message ID received by the controller = " + lastCommandId.getLongValue() + ". Aborting motion.");
          return false;
       }
 
       if (se3Trajectory.getTrajectoryPoint(0).getTime() < 1.0e-5)
       {
-         PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
+         LogTools.warn("Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
          return false;
       }
 
