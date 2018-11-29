@@ -299,7 +299,10 @@ public class WalkingCommandConsumer
             HandTrajectoryCommand command = handTrajectoryCommands.get(i);
             RobotSide robotSide = command.getRobotSide();
             if (handManagers.get(robotSide) != null)
+            {
                handManagers.get(robotSide).handleTaskspaceTrajectoryCommand(command.getSE3Trajectory());
+               handManagers.get(robotSide).handleWrenchTrajectoryCommand(command.getWrenchTrajectory());
+            }
          }
 
          for (int i = 0; i < armTrajectoryCommands.size(); i++)
