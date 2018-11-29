@@ -3,13 +3,12 @@ package us.ihmc.robotics.linearAlgebra.commonOps;
 import java.util.Random;
 
 import org.apache.commons.math3.util.Precision;
+import org.ejml.alg.dense.linsol.qr.LinearSolverQrHouseCol_D64;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commons.Conversions;
@@ -18,12 +17,6 @@ import us.ihmc.robotics.testing.JUnitTools;
 
 public class NativeCommonOpsTest
 {
-   @Before
-   public void testLoading()
-   {
-      Assert.assertTrue("Was not able to load native matrix operations.", NativeCommonOps.useNativeOps);
-   }
-
    @Test
    public void testMult()
    {
@@ -32,7 +25,7 @@ public class NativeCommonOpsTest
       int iterations = 3000;
       int maxSize = 150;
 
-      System.out.println("Testing matrix multiplications with random matrices up to size " + maxSize + "...");
+      System.out.println("Testing matrix multiplications with random matrices...");
 
       long nativeTime = 0;
       long ejmlTime = 0;
@@ -74,7 +67,7 @@ public class NativeCommonOpsTest
       int iterations = 3000;
       int maxSize = 150;
 
-      System.out.println("Testing solving linear equations with random matrices up to size " + maxSize + "...");
+      System.out.println("Testing solving linear equations with random matrices...");
 
       long nativeTime = 0;
       long ejmlTime = 0;
@@ -120,7 +113,7 @@ public class NativeCommonOpsTest
       int iterations = 3000;
       int maxSize = 200;
 
-      System.out.println("Testing solving least square problem with random matrices up to size " + maxSize + "...");
+      System.out.println("Testing solving least square problem with random matrices...");
 
       long nativeDampedTime = 0;
       long nativeUndampedTime = 0;
@@ -129,7 +122,7 @@ public class NativeCommonOpsTest
       double matrixSizes = 0;
       double alpha = 0.01;
       LinearSolver<DenseMatrix64F> dampedSolver = new DampedLeastSquaresSolver(maxSize, alpha);
-      LinearSolver<DenseMatrix64F> undampedSolver = LinearSolverFactory.leastSquares(maxSize, maxSize);
+      LinearSolver<DenseMatrix64F> undampedSolver = new LinearSolverQrHouseCol_D64();
 
       for (int i = 0; i < iterations; i++)
       {
