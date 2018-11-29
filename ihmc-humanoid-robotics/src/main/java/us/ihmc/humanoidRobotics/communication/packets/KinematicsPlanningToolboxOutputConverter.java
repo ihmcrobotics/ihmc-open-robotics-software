@@ -24,6 +24,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class KinematicsPlanningToolboxOutputConverter
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final boolean debug = true;
 
    private WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage;
    private final KinematicsToolboxOutputConverter converter;
@@ -86,6 +87,13 @@ public class KinematicsPlanningToolboxOutputConverter
          double time = trajectoryPoints.get(i).get(desiredPositions[i], desiredLinearVelocity);
 
          orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
+
+         if (debug)
+         {
+            System.out.println("hand " + robotSide);
+            System.out.println("desiredLinearVelocity " + i + " " + desiredLinearVelocity);
+            System.out.println("desiredAngularVelocity " + i + " " + desiredAngularVelocity);
+         }
 
          trajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
                           .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, desiredPositions[i], desiredOrientations[i], desiredLinearVelocity,
