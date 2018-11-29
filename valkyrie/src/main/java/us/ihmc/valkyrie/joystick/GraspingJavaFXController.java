@@ -259,40 +259,50 @@ public class GraspingJavaFXController
                }
 
                RigidBodyBasics endEffector = fullRobotModel.getHand(selectedSide);
-               double trajectoryTime = 7.5;
+               double trajectoryTime = 10.0;
+               int numberOfWayPointsBetweenKeyFrames = 1;
+               if(keyFramePoses.size() < 3)
+                  numberOfWayPointsBetweenKeyFrames = 2;
+               TDoubleArrayList keyFrameTimesForMessage = new TDoubleArrayList();
+               List<Pose3DReadOnly> keyFramePosesForMessage = new ArrayList<Pose3DReadOnly>();
 
-               TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
-               List<Pose3DReadOnly> keyFramePoses = new ArrayList<Pose3DReadOnly>();
-
-               // TODO : create message by selected keyFrames.
-               // TODO : replace to use all key frames that are selected by xbox controller.
-               //               for (int i = 0; i < this.keyFramePoses.size(); i++)
-               //               {
-               //                  // TODO : calculate good alpha considering displacement.
-               //                  // TODO : current alpha is fixed for number of key frames.
-               //                  double alpha = (i + 1) / (double) (this.keyFramePoses.size());
-               //                  keyFrameTimes.add(alpha * trajectoryTime);
-               //                  keyFramePoses.add(new Pose3D(this.keyFramePoses.get(i)));
-               //               }
-
-               int tempNumberOfKeyFrames = 10;
-               FramePose3D initialPose = new FramePose3D(endEffector.getBodyFixedFrame());
-               Pose3D desiredPose = new Pose3D(this.keyFramePoses.get(0));
-
-               initialPose.changeFrame(worldFrame);
-
-               for (int i = 0; i < tempNumberOfKeyFrames; i++)
+               for (int i = 0; i < keyFramePoses.size(); i++)
                {
-                  double alpha = (i + 1) / (double) (tempNumberOfKeyFrames);
-                  keyFrameTimes.add(alpha * trajectoryTime);
-                  Pose3D pose = new Pose3D(initialPose);
-                  pose.interpolate(desiredPose, alpha);
-                  keyFramePoses.add(pose);
+                  Pose3D keyFramePose = new Pose3D();
+                  keyFramePose.set(keyFramePoses.get(i));
+                  double keyFrameTimePrevious = trajectoryTime * (i) / (double) keyFramePoses.size();
+                  double keyFrameTime = trajectoryTime * (i + 1) / (double) keyFramePoses.size();
+                  Pose3D posePrevious;
+                  if(i == 0)
+                     posePrevious = new Pose3D(endEffector.getBodyFixedFrame().getTransformToWorldFrame());
+                  else
+                     posePrevious = new Pose3D(keyFramePoses.get(i-1));
+                  Pose3D pose = new Pose3D(keyFramePoses.get(i));
+                  
+                  for (int j = 0; j < numberOfWayPointsBetweenKeyFrames; j++)
+                  {
+                     double alpha = (j + 1) / numberOfWayPointsBetweenKeyFrames;
+                     keyFrameTimesForMessage.add(keyFrameTimePrevious + alpha * (keyFrameTime - keyFrameTimePrevious));
+                     Pose3D poseToAppend = new Pose3D(posePrevious);
+                     poseToAppend.interpolate(pose, alpha);
+                     keyFramePosesForMessage.add(poseToAppend);
+                  }
                }
+               
+               
+               System.out.println(keyFrameTimesForMessage.size());
+               System.out.println(keyFramePosesForMessage.size());
+               
+               
+               
+               
+               
+               
+               
 
                KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
-                                                                                                                                                   keyFrameTimes,
-                                                                                                                                                   keyFramePoses);
+                                                                                                                                                   keyFrameTimesForMessage,
+                                                                                                                                                   keyFramePosesForMessage);
 
                endEffectorMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0)); // TODO : use static final value.
                endEffectorMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
@@ -457,12 +467,13 @@ public class GraspingJavaFXController
    {
       if (state == ButtonState.RELEASED)
       {
-         if(keyFramePoses.size() > 0)
+         if (keyFramePoses.size() > 0)
          {
             keyFramePoses.remove(indexOfSelectedKeyFrame);
             indexOfSelectedKeyFrame = keyFramePoses.size() - 1;
 
-            snapControlTransformToSelectedKeyFrame();   
+            if (keyFramePoses.size() > 0)
+               snapControlTransformToSelectedKeyFrame();
          }
       }
    }
