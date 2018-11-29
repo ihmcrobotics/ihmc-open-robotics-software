@@ -38,6 +38,45 @@ public class NativeCommonOps
       }
    }
 
+   public static void solve(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F x)
+   {
+      x.reshape(a.getNumCols(), 1);
+      if (useNativeOps)
+      {
+         solveNative(a, b, x);
+      }
+      else
+      {
+         throw new RuntimeException("Is only supported native.");
+      }
+   }
+
+   public static void solveRobust(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F x)
+   {
+      x.reshape(a.getNumCols(), 1);
+      if (useNativeOps)
+      {
+         solveRobustNative(a, b, x);
+      }
+      else
+      {
+         throw new RuntimeException("Is only supported native.");
+      }
+   }
+
+   public static void solveDamped(RowD1Matrix64F a, RowD1Matrix64F b, double alpha, RowD1Matrix64F x)
+   {
+      x.reshape(a.getNumCols(), 1);
+      if (useNativeOps)
+      {
+         solveDampedNative(a, b, alpha, x);
+      }
+      else
+      {
+         throw new RuntimeException("Is only supported native.");
+      }
+   }
+
    private static void multNative(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
    {
       if (a.getNumCols() != b.getNumRows())
@@ -45,5 +84,32 @@ public class NativeCommonOps
          throw new RuntimeException("Incompatible Matrix Dimensions.");
       }
       nativeCommonOpsWrapper.computeAB(c.data, a.data, b.data, a.getNumRows(), a.getNumCols(), b.getNumCols());
+   }
+
+   private static void solveNative(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F x)
+   {
+      if (a.getNumRows() != b.getNumRows() || b.getNumCols() != 1 || a.getNumCols() != a.getNumRows())
+      {
+         throw new RuntimeException("Incompatible Matrix Dimensions.");
+      }
+      nativeCommonOpsWrapper.solve(x.data, a.data, b.data, a.getNumRows());
+   }
+
+   private static void solveRobustNative(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F x)
+   {
+      if (a.getNumRows() != b.getNumRows() || b.getNumCols() != 1)
+      {
+         throw new RuntimeException("Incompatible Matrix Dimensions.");
+      }
+      nativeCommonOpsWrapper.solveRobust(x.data, a.data, b.data, a.getNumRows(), a.getNumCols());
+   }
+
+   private static void solveDampedNative(RowD1Matrix64F a, RowD1Matrix64F b, double alpha, RowD1Matrix64F x)
+   {
+      if (a.getNumRows() != b.getNumRows() || b.getNumCols() != 1)
+      {
+         throw new RuntimeException("Incompatible Matrix Dimensions.");
+      }
+      nativeCommonOpsWrapper.solveDamped(x.data, a.data, b.data, a.getNumRows(), a.getNumCols(), alpha);
    }
 }
