@@ -109,68 +109,63 @@ public class VisibilityTools
     * @return an array of booleans informing on whether each individual navigable extrusion of
     *         {@code clusterToBuildMapOf} is actually navigable or not.
     */
-   private static boolean[] addClusterSelfVisibility(Cluster clusterToBuildMapOf, PlanarRegion homeRegion, List<Cluster> allClusters, int mapId,
-                                                     Collection<Connection> connectionsToPack)
+   public static boolean[] addClusterSelfVisibility(Cluster clusterToBuildMapOf, PlanarRegion homeRegion, List<Cluster> allClusters, int mapId,
+                                                    Collection<Connection> connectionsToPack)
    {
-      List<? extends Point2DReadOnly> navigableExtrusions = clusterToBuildMapOf.getNavigableExtrusionsInLocal();
+      List<? extends Point2DReadOnly> navigableExtrusionPoints = clusterToBuildMapOf.getNavigableExtrusionsInLocal();
 
       // We first go through the extrusions and check if they are actually navigable, i.e. inside the home region and not inside any non-navigable zone.
-      boolean[] areActuallyNavigable = new boolean[navigableExtrusions.size()];
-      Arrays.fill(areActuallyNavigable, true);
+      boolean[] arePointsActuallyNavigable = new boolean[navigableExtrusionPoints.size()];
+      Arrays.fill(arePointsActuallyNavigable, true);
 
-      for (int i = 0; i < navigableExtrusions.size() - 1; i++) // <= the extrusions are actually closed by replicating the first extrusion at the end
-      { // Check that the point is actually navigable
-         Point2DReadOnly query = navigableExtrusions.get(i);
+      for (int i = 0; i < navigableExtrusionPoints.size(); i++)
+      {
+         // Check that the point is actually navigable
+         Point2DReadOnly query = navigableExtrusionPoints.get(i);
 
          boolean isNavigable = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, query);
 
          if (isNavigable)
             isNavigable = allClusters.stream().noneMatch(cluster -> cluster.isInsideNonNavigableZone(query));
 
-         areActuallyNavigable[i] = isNavigable;
-      }
-
-      for (int i = 0; i < navigableExtrusions.size() - 1; i++)
-      { // Adding the edges of the navigable extrusion. As long as both the current and next vertices are navigable, the connection is valid.
-         if (areActuallyNavigable[i] && areActuallyNavigable[i + 1])
-            connectionsToPack.add(new Connection(navigableExtrusions.get(i), mapId, navigableExtrusions.get(i + 1), mapId));
+         arePointsActuallyNavigable[i] = isNavigable;
       }
 
       Vector2D directionToCheck = new Vector2D();
       Vector2D nextEdge = new Vector2D();
       Vector2D prevEdge = new Vector2D();
 
-      // Going through all the other possible combinations for finding connections
-      for (int sourceIndex = 0; sourceIndex < navigableExtrusions.size() - 1; sourceIndex++)
+      // Going through all of the possible combinations of two points for finding connections
+      for (int sourceIndex = 0; sourceIndex < navigableExtrusionPoints.size(); sourceIndex++)
       {
-         if (!areActuallyNavigable[sourceIndex])
+         if (!arePointsActuallyNavigable[sourceIndex])
             continue; // Both source and target have to be navigable for the connection to be valid
 
-         Point2DReadOnly source = navigableExtrusions.get(sourceIndex);
+         Point2DReadOnly source = navigableExtrusionPoints.get(sourceIndex);
 
          // Starting from after the next vertex of the source as we already added all the edges as connections
-         for (int targetIndex = sourceIndex + 2; targetIndex < navigableExtrusions.size() - 1; targetIndex++)
+         for (int targetIndex = sourceIndex + 1; targetIndex < navigableExtrusionPoints.size(); targetIndex++)
          {
-            if (!areActuallyNavigable[targetIndex])
+            if (!arePointsActuallyNavigable[targetIndex])
                continue; // Both source and target have to be navigable for the connection to be valid
 
-            Point2DReadOnly target = navigableExtrusions.get(targetIndex);
+            Point2DReadOnly target = navigableExtrusionPoints.get(targetIndex);
 
             if (ENABLE_EXPERIMENTAL_QUICK_CHECK)
             {
                directionToCheck.sub(target, source);
 
                { // Perform quick check on source
-                  prevEdge.sub(source, ListWrappingIndexTools.getPrevious(sourceIndex, navigableExtrusions));
-                  nextEdge.sub(ListWrappingIndexTools.getNext(sourceIndex, navigableExtrusions), source);
+                  prevEdge.sub(source, ListWrappingIndexTools.getPrevious(sourceIndex, navigableExtrusionPoints));
+                  nextEdge.sub(ListWrappingIndexTools.getNext(sourceIndex, navigableExtrusionPoints), source);
                   if (!quickFeasibilityCheck(directionToCheck, prevEdge, nextEdge, clusterToBuildMapOf.getExtrusionSide()))
                      continue;
                }
 
                { // Perform quick check on target
                   directionToCheck.negate();
-                  prevEdge.sub(target, ListWrappingIndexTools.getPrevious(targetIndex, navigableExtrusions));
-                  nextEdge.sub(ListWrappingIndexTools.getNext(targetIndex, navigableExtrusions), target);
+                  prevEdge.sub(target, ListWrappingIndexTools.getPrevious(targetIndex, navigableExtrusionPoints));
+                  nextEdge.sub(ListWrappingIndexTools.getNext(targetIndex, navigableExtrusionPoints), target);
                   if (!quickFeasibilityCheck(directionToCheck, prevEdge, nextEdge, clusterToBuildMapOf.getExtrusionSide()))
                      continue;
                }
@@ -182,7 +177,7 @@ public class VisibilityTools
          }
       }
 
-      return areActuallyNavigable;
+      return arePointsActuallyNavigable;
    }
 
    /**
@@ -206,8 +201,8 @@ public class VisibilityTools
     * @param mapId the ID used to create the connections.
     * @param connectionsToPack the collection in which the connections are stored. Modified.
     */
-   private static void addCrossClusterVisibility(Cluster sourceCluster, boolean[] sourceNavigability, Cluster targetCluster, boolean[] targetNavigability,
-                                                 List<Cluster> allClusters, int mapId, Collection<Connection> connectionsToPack)
+   public static void addCrossClusterVisibility(Cluster sourceCluster, boolean[] sourceNavigability, Cluster targetCluster, boolean[] targetNavigability,
+                                                List<Cluster> allClusters, int mapId, Collection<Connection> connectionsToPack)
    {
       Vector2D directionToCheck = new Vector2D();
       Vector2D nextEdge = new Vector2D();
@@ -252,7 +247,9 @@ public class VisibilityTools
             }
 
             if (isPointVisibleForStaticMaps(allClusters, source, target))
+            {
                connectionsToPack.add(new Connection(source, mapId, target, mapId));
+            }
          }
       }
    }
