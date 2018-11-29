@@ -60,6 +60,49 @@ public class NativeCommonOpsTest
    }
 
    @Test
+   public void testMultQuad()
+   {
+      Random random = new Random(40L);
+      double epsilon = 1.0e-10;
+      int iterations = 3000;
+      int maxSize = 150;
+
+      System.out.println("Testing computing quadratic form with random matrices...");
+
+      long nativeTime = 0;
+      long ejmlTime = 0;
+      double matrixSizes = 0.0;
+
+      for (int i = 0; i < iterations; i++)
+      {
+         int aRows = random.nextInt(maxSize) + 1;
+         int aCols = random.nextInt(maxSize) + 1;
+         matrixSizes += (aRows + aCols) / 2.0;
+
+         DenseMatrix64F A = RandomMatrices.createRandom(aRows, aCols, random);
+         DenseMatrix64F B = RandomMatrices.createRandom(aRows, aRows, random);
+         DenseMatrix64F actual = new DenseMatrix64F(aCols, aCols);
+         DenseMatrix64F expected = new DenseMatrix64F(aCols, aCols);
+         DenseMatrix64F tempBA = new DenseMatrix64F(aRows, aCols);
+
+         nativeTime -= System.nanoTime();
+         NativeCommonOps.multQuad(A, B, actual);
+         nativeTime += System.nanoTime();
+
+         ejmlTime -= System.nanoTime();
+         CommonOps.mult(B, A, tempBA);
+         CommonOps.multTransA(A, tempBA, expected);
+         ejmlTime += System.nanoTime();
+
+         JUnitTools.assertMatrixEquals(expected, actual, epsilon);
+      }
+
+      System.out.println("Native took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (nativeTime / iterations)), 3) + " ms on average");
+      System.out.println("EJML took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (ejmlTime / iterations)), 3) + " ms on average");
+      System.out.println("Average matrix size was " + Precision.round(matrixSizes / iterations, 1) + "\n");
+   }
+
+   @Test
    public void testSolve()
    {
       Random random = new Random(40L);

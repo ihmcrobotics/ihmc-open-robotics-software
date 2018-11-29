@@ -24,6 +24,16 @@ public class NativeCommonOps
       nativeCommonOpsWrapper.computeAB(c.data, a.data, b.data, a.getNumRows(), a.getNumCols(), b.getNumCols());
    }
 
+   public static void multQuad(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
+   {
+      if (a.getNumRows() != b.getNumCols() || b.getNumCols() != b.getNumRows())
+      {
+         throw new RuntimeException("Incompatible Matrix Dimensions.");
+      }
+      c.reshape(a.getNumCols(), a.getNumCols());
+      nativeCommonOpsWrapper.computeAtBA(c.data, a.data, b.data, a.getNumRows(), a.getNumCols());
+   }
+
    public static void solve(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F x)
    {
       if (a.getNumRows() != b.getNumRows() || b.getNumCols() != 1 || a.getNumCols() != a.getNumRows())
