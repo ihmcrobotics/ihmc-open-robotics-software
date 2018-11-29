@@ -60,7 +60,6 @@ public class CenterOfMassHeightManager
    {
       parentRegistry.addChild(registry);
       useStateMachine = !walkingControllerParameters.usePelvisHeightControllerOnly();
-      enableUserPelvisControlDuringWalking.set(false);
 
       // User mode
       pelvisHeightControlState = new PelvisHeightControlState(controllerToolbox, registry);
@@ -99,14 +98,15 @@ public class CenterOfMassHeightManager
 
    public void initialize()
    {
+      enableUserPelvisControlDuringWalking.set(false);
+
       if (useStateMachine)
       {
          stateMachine.resetToInitialState();
+         centerOfMassHeightControlState.initialize();
       }
-      else
-      {
-         pelvisHeightControlState.goHome(0.5);
-      }
+
+      pelvisHeightControlState.initialize();
    }
 
    /**
