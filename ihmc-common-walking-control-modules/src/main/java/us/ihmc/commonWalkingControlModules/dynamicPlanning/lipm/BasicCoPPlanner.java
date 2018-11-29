@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 import us.ihmc.robotics.robotSide.RobotSide;

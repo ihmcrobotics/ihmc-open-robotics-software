@@ -2,6 +2,7 @@ package us.ihmc.avatar.diagnostics;
 
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -10,21 +11,21 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
@@ -55,8 +56,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.logging.DiagnosticLoggerConfiguration;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -177,8 +176,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       Map<RigidBodyBasics, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBodyBasics, FootSwitchInterface>();
       Map<RigidBodyBasics, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBodyBasics, ContactablePlaneBody>();
 
-      DoubleProvider contactThresholdForce = new DoubleParameter("ContactThresholdForce", simulationRegistry, stateEstimatorParameters.getContactThresholdForce());
-      DoubleProvider copThresholdFraction = new DoubleParameter("CoPThresholdFraction", simulationRegistry, stateEstimatorParameters.getFootSwitchCoPThresholdFraction());
+      FootSwitchFactory footSwitchFactory = stateEstimatorParameters.getFootSwitchFactory();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -190,10 +188,11 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
          ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolderToUpdate.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
-         WrenchBasedFootSwitch wrenchBasedFootSwitchForEstimator = new WrenchBasedFootSwitch(namePrefix, footForceSensorForEstimator, totalRobotWeight,
-                                                                                             bipedFeet.get(robotSide), contactThresholdForce, null,
-                                                                                             copThresholdFraction, null, simulationRegistry);
-         footSwitchMap.put(rigidBody, wrenchBasedFootSwitchForEstimator);
+         FootSwitchInterface footSwitchInterface = footSwitchFactory.newFootSwitch(namePrefix, contactablePlaneBody,
+                                                                                   Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())),
+                                                                                   footForceSensorForEstimator, null, totalRobotWeight, null,
+                                                                                   simulationRegistry);
+         footSwitchMap.put(rigidBody, footSwitchInterface);
       }
 
       stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters, sensorOutputMapReadOnly,

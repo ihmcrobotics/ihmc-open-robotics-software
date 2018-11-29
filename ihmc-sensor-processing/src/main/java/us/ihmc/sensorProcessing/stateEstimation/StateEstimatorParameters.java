@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.stateEstimation;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 
 public abstract class StateEstimatorParameters implements SensorProcessingConfiguration
 {
@@ -148,13 +149,7 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return false;
    }
 
-   public abstract double getContactThresholdForce();
-
-   public abstract double getFootSwitchCoPThresholdFraction();
-
-   public abstract double getContactThresholdHeight();
-
-   public abstract FootSwitchType getFootSwitchType();
+   public abstract FootSwitchFactory getFootSwitchFactory();
 
    public abstract boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact();
 
