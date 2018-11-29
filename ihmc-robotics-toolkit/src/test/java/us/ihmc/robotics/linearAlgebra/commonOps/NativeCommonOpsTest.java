@@ -212,4 +212,20 @@ public class NativeCommonOpsTest
       System.out.println("EJML undamped took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (ejmlUndampedTime / iterations)), 3) + " ms on average");
       System.out.println("Average matrix size was " + Precision.round(matrixSizes / iterations, 1) + "\n");
    }
+
+   public static void main(String[] args)
+   {
+      Random random = new Random(40L);
+      int size = 150;
+      DenseMatrix64F A = RandomMatrices.createRandom(size, size, random);
+      DenseMatrix64F B = RandomMatrices.createRandom(size, size, random);
+      DenseMatrix64F AtBA = new DenseMatrix64F(size, size);
+
+      System.out.println("Running...");
+
+      while (true)
+      {
+         NativeCommonOps.multQuad(A, B, AtBA);
+      }
+   }
 }
