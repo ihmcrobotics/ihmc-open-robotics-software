@@ -462,6 +462,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pelvisOrientationManager.initialize();
       balanceManager.initialize();
       feetManager.initialize();
+      comHeightManager.initialize();
+      feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
       //      requestICPPlannerToHoldCurrent(); // Not sure if we want to do this. Might cause robot to fall. Might just be better to recenter ICP whenever switching to walking.
 
       // Need to reset it so the planner will be initialized even when restarting the walking controller.
@@ -469,12 +471,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       stateMachine.resetToInitialState();
 
       commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
-   }
-
-   public void initializeDesiredHeightToCurrent()
-   {
-      comHeightManager.initializeDesiredHeightToCurrent();
-      feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
    }
 
    private void initializeContacts()
@@ -690,11 +686,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
-   }
-
-   public void reinitializePelvisOrientation(boolean reinitialize)
-   {
-      pelvisOrientationManager.initialize();
    }
 
    public ControllerCoreCommand getControllerCoreCommand()

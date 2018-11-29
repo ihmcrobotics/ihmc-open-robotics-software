@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -252,18 +251,5 @@ public class HumanoidHighLevelControllerManager implements RobotController
    public HighLevelControllerName getCurrentHighLevelControlState()
    {
       return stateMachine.getCurrentStateKey();
-   }
-
-   public void reinitializeWalking()
-   {
-      WalkingControllerState walkingControllerState = (WalkingControllerState) stateMachine.getState(HighLevelControllerName.WALKING);
-      if (walkingControllerState != null)
-      {
-         walkingControllerState.initializeDesiredHeightToCurrent();
-         walkingControllerState.reinitializePelvisOrientation(false);
-      }
-
-      if (managerFactory != null)
-         managerFactory.getOrCreatePelvisOrientationManager().setToHoldCurrentInWorldFrame();
    }
 }

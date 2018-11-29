@@ -128,6 +128,13 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    }
 
    @Override
+   public void initialize()
+   {
+      centerOfMassTrajectoryGenerator.reset();
+      coMHeightTimeDerivativesSmoother.reset();
+   }
+
+   @Override
    public void initializeDesiredHeightToCurrent()
    {
       centerOfMassTrajectoryGenerator.initializeDesiredHeightToCurrent();
