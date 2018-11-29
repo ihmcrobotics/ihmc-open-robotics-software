@@ -17,6 +17,14 @@ JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommo
 
 /*
  * Class:     us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper
+ * Method:    computeAtBA
+ * Signature: ([D[D[DII)V
+ */
+JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_computeAtBA
+  (JNIEnv *, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint);
+
+/*
+ * Class:     us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper
  * Method:    solve
  * Signature: ([D[D[DI)V
  */

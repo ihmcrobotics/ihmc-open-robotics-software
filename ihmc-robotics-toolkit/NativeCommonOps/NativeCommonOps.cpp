@@ -31,6 +31,25 @@ JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommo
 	delete resultDataArray;
 }
 
+JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_computeAtBA(JNIEnv *env, jobject thisObj,
+		jdoubleArray result, jdoubleArray aData, jdoubleArray bData, jint aRows, jint aCols)
+{
+	jdouble *aDataArray = env->GetDoubleArrayElements(aData, NULL);
+	jdouble *bDataArray = env->GetDoubleArrayElements(bData, NULL);
+	MatrixXd A = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(aDataArray, aRows, aCols);
+	MatrixXd B = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(bDataArray, aRows, aRows);
+
+	MatrixXd AtBA = A.transpose() * B * A;
+
+	jdouble *resultDataArray = new jdouble[aCols * aCols];
+	Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(resultDataArray, aCols, aCols) = AtBA;
+	env->SetDoubleArrayRegion(result, 0, aCols * aCols, resultDataArray);
+
+	delete aDataArray;
+	delete bDataArray;
+	delete resultDataArray;
+}
+
 JNIEXPORT void JNICALL Java_us_ihmc_robotics_linearAlgebra_commonOps_NativeCommonOpsWrapper_solve(JNIEnv *env, jobject thisObj,
 		jdoubleArray result, jdoubleArray aData, jdoubleArray bData, jint aRows)
 {
