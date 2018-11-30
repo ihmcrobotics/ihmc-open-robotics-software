@@ -277,7 +277,7 @@ public class GraspingJavaFXController
 
                   for (int j = 0; j < numberOfWayPointsBetweenKeyFrames; j++)
                   {
-                     double alpha = (j + 1) / numberOfWayPointsBetweenKeyFrames;
+                     double alpha = (j + 1) / (double) numberOfWayPointsBetweenKeyFrames;
                      keyFrameTimesForMessage.add(keyFrameTimePrevious + alpha * (keyFrameTime - keyFrameTimePrevious));
                      Pose3D poseToAppend = new Pose3D(posePrevious);
                      poseToAppend.interpolate(pose, alpha);
