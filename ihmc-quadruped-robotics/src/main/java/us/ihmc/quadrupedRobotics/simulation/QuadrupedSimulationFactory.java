@@ -100,7 +100,6 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<QuadrupedInitialOffsetAndYaw> initialOffset = new RequiredFactoryField<>("initialOffset");
    private final RequiredFactoryField<OutputWriter> outputWriter = new RequiredFactoryField<>("outputWriter");
    private final RequiredFactoryField<Boolean> useNetworking = new RequiredFactoryField<>("useNetworking");
-   private final RequiredFactoryField<NetClassList> netClassList = new RequiredFactoryField<>("netClassList");
    private final RequiredFactoryField<SensorTimestampHolder> timestampProvider = new RequiredFactoryField<>("timestampProvider");
    private final RequiredFactoryField<Boolean> useStateEstimator = new RequiredFactoryField<>("useStateEstimator");
    private final RequiredFactoryField<QuadrupedSensorInformation> sensorInformation = new RequiredFactoryField<>("sensorInformation");
@@ -135,7 +134,6 @@ public class QuadrupedSimulationFactory
    private QuadrantDependentList<FootSwitchInterface> footSwitches;
    private StateEstimatorController stateEstimator;
    private CenterOfMassDataHolder centerOfMassDataHolder = null;
-   private PacketCommunicator packetCommunicator;
    private RealtimeRos2Node realtimeRos2Node;
    private RobotController headController;
    private QuadrupedControllerManager controllerManager;
@@ -275,32 +273,6 @@ public class QuadrupedSimulationFactory
       else
       {
          stateEstimator = null;
-      }
-   }
-
-   private void createPacketCommunicator() throws IOException
-   {
-      if (useNetworking.get())
-      {
-         try
-         {
-            if (useLocalCommunicator.get())
-            {
-               packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList.get());
-            }
-            else
-            {
-               packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, netClassList.get());
-            }
-
-            packetCommunicator.connect();
-         }
-         catch (BindException bindException)
-         {
-            PrintTools.error(this, bindException.getMessage());
-            PrintTools.warn(this, "Continuing without networking");
-            useNetworking.set(false);
-         }
       }
    }
 
@@ -508,7 +480,7 @@ public class QuadrupedSimulationFactory
       }
    }
 
-   public SimulationConstructionSet createSimulation() throws IOException
+   public SimulationConstructionSet createSimulation()
    {
       groundContactModelType.setDefaultValue(QuadrupedGroundContactModelType.FLAT);
       usePushRobotController.setDefaultValue(false);
@@ -527,7 +499,6 @@ public class QuadrupedSimulationFactory
       createContactablePlaneBodies();
       createFootSwitches();
       createStateEstimator();
-      createPacketCommunicator();
       createRealtimeRos2Node();
       createInverseKinematicsCalculator();
       createControllerManager();
@@ -722,11 +693,6 @@ public class QuadrupedSimulationFactory
    public void setUseNetworking(boolean useNetworking)
    {
       this.useNetworking.set(useNetworking);
-   }
-
-   public void setNetClassList(NetClassList netClassList)
-   {
-      this.netClassList.set(netClassList);
    }
 
    public void setTimestampHolder(SensorTimestampHolder timestampProvider)
