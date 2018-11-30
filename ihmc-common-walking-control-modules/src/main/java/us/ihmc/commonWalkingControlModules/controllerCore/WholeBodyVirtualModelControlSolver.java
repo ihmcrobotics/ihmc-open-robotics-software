@@ -204,14 +204,18 @@ public class WholeBodyVirtualModelControlSolver
          forwardDynamicsCalculator.setExternalWrench(rigidBody, externalWrench);
       }
 
+      // put the joint torque solutions into the holders
       MultiBodySystemTools.insertJointsState(controlledOneDoFJoints, JointStateType.EFFORT, jointTorquesSolution);
+      lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
+      boundCalculator.enforceJointTorqueLimits(lowLevelOneDoFJointDesiredDataHolder);
+
+      // compute the desired accelerations
       forwardDynamicsCalculator.compute();
       for (JointBasics jointToCompute : jointsToCompute)
          jointToCompute.setJointAcceleration(0, forwardDynamicsCalculator.getComputedJointAcceleration(jointToCompute));
 
       updateLowLevelData();
 
-      boundCalculator.enforceJointTorqueLimits(lowLevelOneDoFJointDesiredDataHolder);
 
       if (rootJoint != null)
       {
@@ -230,7 +234,6 @@ public class WholeBodyVirtualModelControlSolver
    {
       if (rootJoint != null)
          rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
-      lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setDesiredAccelerationFromJoints(controlledOneDoFJoints);
 
       jointAccelerationIntegrationCalculator.computeAndUpdateDataHolder(lowLevelOneDoFJointDesiredDataHolder);
