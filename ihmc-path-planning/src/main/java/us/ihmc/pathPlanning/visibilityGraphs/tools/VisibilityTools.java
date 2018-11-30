@@ -211,14 +211,14 @@ public class VisibilityTools
       List<? extends Point2DReadOnly> sources = sourceCluster.getNavigableExtrusionsInLocal();
       List<? extends Point2DReadOnly> targets = targetCluster.getNavigableExtrusionsInLocal();
 
-      for (int sourceIndex = 0; sourceIndex < sourceNavigability.length - 1; sourceIndex++)
+      for (int sourceIndex = 0; sourceIndex < sourceNavigability.length; sourceIndex++)
       {
          if (!sourceNavigability[sourceIndex])
             continue;
 
          Point2DReadOnly source = sources.get(sourceIndex);
 
-         for (int targetIndex = 0; targetIndex < targetNavigability.length - 1; targetIndex++)
+         for (int targetIndex = 0; targetIndex < targetNavigability.length; targetIndex++)
          {
             if (!targetNavigability[targetIndex])
                continue;
@@ -384,7 +384,7 @@ public class VisibilityTools
       return validConnections;
    }
 
-   public static List<Connection> getValidConnections(Collection<Connection> connections, Cluster cluster)
+   private static List<Connection> getValidConnections(Collection<Connection> connections, Cluster cluster)
    {
       List<Connection> filteredConnections = new ArrayList<>();
 

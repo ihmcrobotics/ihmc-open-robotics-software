@@ -13,6 +13,7 @@ import java.util.Random;
 import org.junit.Assert;
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -36,13 +37,40 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTest;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class PlanarRegionToolsTest
 {
    private static final int ITERATIONS = 1000;
    private static final double EPSILON = 1.0e-12;
+
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   public void testProjectPointToPlanes()
+   {
+      ConvexPolygon2D convexPolygon = createUnitSquarePolygon();
+      RigidBodyTransform squarePose = new RigidBodyTransform();
+      PlanarRegion square = new PlanarRegion(squarePose, convexPolygon);
+      
+      Point3D pointToProject = new Point3D(0.0, 0.0, 5.0);
+      PlanarRegionsList regions = new PlanarRegionsList();
+      regions.addPlanarRegion(square);
+      Point3D projectedPoint = PlanarRegionTools.projectPointToPlanes(pointToProject, regions);
+      
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(0.0, 0.0, 0.0), projectedPoint, 1e-10);
+   }
+
+   private ConvexPolygon2D createUnitSquarePolygon()
+   {
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(new Point2D(-0.5, -0.5));
+      convexPolygon.addVertex(new Point2D(0.5, -0.5));
+      convexPolygon.addVertex(new Point2D(0.5, 0.5));
+      convexPolygon.addVertex(new Point2D(-0.5, 0.5));
+      convexPolygon.update();
+      
+      return convexPolygon;
+   }
 
    @Test(timeout = 30000)
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -151,7 +179,6 @@ public class PlanarRegionToolsTest
 
       List<ConvexPolygon2D> polygons = new ArrayList<>();
       polygons.add(polygonInWorld);
-
 
       double layerSeparation = 0.10;
       for (int i = 0; i < numberOfRegions; i++)
@@ -297,7 +324,8 @@ public class PlanarRegionToolsTest
             allRegions.add(planarRegion);
          }
 
-         List<PlanarRegion> regionsWithinDistance = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(new Point2D(randomOrigin), maxRegionDistance, allRegions);
+         List<PlanarRegion> regionsWithinDistance = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(new Point2D(randomOrigin), maxRegionDistance,
+                                                                                                            allRegions);
 
          assertEquals(regionsWithinDistanceExpected.size(), regionsWithinDistance.size());
          for (int i = 0; i < regionsWithinDistance.size(); i++)
@@ -328,7 +356,6 @@ public class PlanarRegionToolsTest
       List<PlanarRegion> planarRegionList = new ArrayList<>();
       planarRegionList.add(planarRegion);
 
-
       // at middle of planar region
       List<PlanarRegion> regionsWithinDistance = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(new Point2D(), 1.0, planarRegionList);
 
@@ -355,7 +382,6 @@ public class PlanarRegionToolsTest
       region1ConvexPolygons.add(polygon1);
       for (ConvexPolygon2D convexPolygon : region1ConvexPolygons)
          convexPolygon.update();
-
 
       // polygons forming a "--"-shaped region.
       List<ConvexPolygon2D> region2ConvexPolygons = new ArrayList<>();
@@ -536,14 +562,15 @@ public class PlanarRegionToolsTest
       List<PlanarRegion> planarRegionList = new ArrayList<>();
       planarRegionList.add(planarRegion);
 
-
       // at middle of planar region
-      List<PlanarRegion> regionsWithinDistance = PlanarRegionTools.filterPlanarRegionsWithBoundingCapsule(new Point3D(0.1, 0.0, 0.0), new Point3D(-0.1, 0.0, 0.0), 1.0, planarRegionList);
+      List<PlanarRegion> regionsWithinDistance = PlanarRegionTools.filterPlanarRegionsWithBoundingCapsule(new Point3D(0.1, 0.0, 0.0),
+                                                                                                          new Point3D(-0.1, 0.0, 0.0), 1.0, planarRegionList);
 
       assertTrue(regionsWithinDistance.contains(planarRegion));
 
       // outside the planar region, but still within the distance
-      regionsWithinDistance = PlanarRegionTools.filterPlanarRegionsWithBoundingCapsule(new Point3D(10.5, 0.1, 0.0), new Point3D(10.5, -0.1, 0.0), 1.0, planarRegionList);
+      regionsWithinDistance = PlanarRegionTools.filterPlanarRegionsWithBoundingCapsule(new Point3D(10.5, 0.1, 0.0), new Point3D(10.5, -0.1, 0.0), 1.0,
+                                                                                       planarRegionList);
 
       assertTrue(regionsWithinDistance.contains(planarRegion));
    }
@@ -558,5 +585,10 @@ public class PlanarRegionToolsTest
       }
 
       return distance;
+   }
+
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegionTools.class, PlanarRegionToolsTest.class);
    }
 }
