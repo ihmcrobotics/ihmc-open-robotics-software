@@ -189,7 +189,12 @@ public class QuadrupedXBoxAdapter implements JoystickEventListener
          return;
 
       XBoxOneMapping mapping = XBoxOneMapping.getMapping(event);
-      if (mapping == XBoxOneMapping.A)
+
+      if (mapping == XBoxOneMapping.START)
+      {
+         stepTeleopManager.requestStandPrep();
+      }
+      else if (mapping == XBoxOneMapping.A)
       {
          stepTeleopManager.requestSteppingState();
          if (stepTeleopManager.isWalking())
