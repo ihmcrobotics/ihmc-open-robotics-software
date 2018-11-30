@@ -1,15 +1,17 @@
 package us.ihmc.robotics.controllers.stiction;
 
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StictionCompensator
 {
-   private final YoDouble desiredTorqueStictionLimitFactor;
+   private final DoubleProvider desiredTorqueStictionLimitFactor;
 
    private final YoDouble stictionCompensationLimit;
-   private final YoDouble stictionCompensationRate;
+   private final DoubleProvider stictionCompensationRate;
    private final RateLimitedYoVariable stictionCompensation;
 
    private final StictionModel stictionModel;
@@ -21,15 +23,12 @@ public class StictionCompensator
 
       YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
-      desiredTorqueStictionLimitFactor = new YoDouble(prefix + "_DesiredTorqueStictionLimitFactor", registry);
+      desiredTorqueStictionLimitFactor = new DoubleParameter(prefix + "_DesiredTorqueStictionLimitFactor", registry, 2.0);
 
       stictionCompensationLimit = new YoDouble(prefix + "_StictionCompensationLimit", registry);
-      stictionCompensationRate = new YoDouble(prefix + "_StictionCompensationRate", registry);
+      stictionCompensationRate = new DoubleParameter(prefix + "_StictionCompensationRate", registry, 10.0);
       stictionCompensation = new RateLimitedYoVariable(prefix + "_StictionCompensation", registry, stictionCompensationRate, controlDT);
-      stictionCompensation.update(0.0);
-
-      desiredTorqueStictionLimitFactor.set(2.0);
-      stictionCompensationRate.set(20.0);
+//      stictionCompensation.update(0.0);
 
       parentRegistry.addChild(registry);
    }
@@ -50,7 +49,7 @@ public class StictionCompensator
       double sign = Math.signum(desiredTorque);
 
       double stictionMagnitude = stictionModel.getStictionMagnitude();
-      stictionCompensationLimit.set(Math.min(sign * desiredTorque * desiredTorqueStictionLimitFactor.getDoubleValue(), stictionMagnitude));
+      stictionCompensationLimit.set(Math.min(sign * desiredTorque * desiredTorqueStictionLimitFactor.getValue(), stictionMagnitude));
       stictionCompensation.update(sign * stictionCompensationLimit.getDoubleValue());
 
       return stictionCompensation.getDoubleValue();
