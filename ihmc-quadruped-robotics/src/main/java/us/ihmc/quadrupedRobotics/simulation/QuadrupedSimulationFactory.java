@@ -8,7 +8,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -21,7 +20,6 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
-import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
@@ -33,7 +31,6 @@ import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDF
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorReaderWrapper;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
-import us.ihmc.quadrupedRobotics.factories.QuadrupedRobotControllerFactory;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedInverseKinematicsCalculators;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.model.*;
@@ -116,7 +113,6 @@ public class QuadrupedSimulationFactory
 
    private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>("simulatedElasticityParameters");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
-   private final OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    private final OptionalFactoryField<TerrainObject3D> providedTerrainObject3D = new OptionalFactoryField<>("providedTerrainObject3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
@@ -140,7 +136,6 @@ public class QuadrupedSimulationFactory
    private StateEstimatorController stateEstimator;
    private CenterOfMassDataHolder centerOfMassDataHolder = null;
    private PacketCommunicator packetCommunicator;
-   private GlobalDataProducer globalDataProducer;
    private RealtimeRos2Node realtimeRos2Node;
    private RobotController headController;
    private QuadrupedControllerManager controllerManager;
@@ -326,26 +321,6 @@ public class QuadrupedSimulationFactory
       }
    }
 
-   private void createGlobalDataProducer()
-   {
-      if (useNetworking.get())
-      {
-         globalDataProducer = new QuadrupedGlobalDataProducer(packetCommunicator);
-      }
-   }
-
-   private void createHeadController()
-   {
-      if (headControllerFactory.hasValue())
-      {
-         headControllerFactory.get().setControlDt(controlDT.get());
-         headControllerFactory.get().setFullRobotModel(fullRobotModel.get());
-         headControllerFactory.get().setGlobalDataProducer(globalDataProducer);
-
-         headController = headControllerFactory.get().createRobotController();
-      }
-   }
-
    private void createInverseKinematicsCalculator()
    {
       if (controlMode.get() == QuadrupedControlMode.POSITION)
@@ -361,9 +336,10 @@ public class QuadrupedSimulationFactory
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
                                                                                        controllerCoreOptimizationSettings.get(), jointDesiredOutputList.get(),
                                                                                        sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry,
-                                                                                       yoGraphicsListRegistryForDetachedOverhead, globalDataProducer,
-                                                                                       contactableFeet, contactablePlaneBodies, centerOfMassDataHolder,
-                                                                                       footSwitches, gravity.get(), highLevelControllerParameters.get(), sitDownParameters.get());
+                                                                                       yoGraphicsListRegistryForDetachedOverhead, contactableFeet,
+                                                                                       contactablePlaneBodies, centerOfMassDataHolder, footSwitches,
+                                                                                       gravity.get(), highLevelControllerParameters.get(),
+                                                                                       sitDownParameters.get());
 
       if(controlMode.get() == QuadrupedControlMode.POSITION)
       {
@@ -553,8 +529,6 @@ public class QuadrupedSimulationFactory
       createStateEstimator();
       createPacketCommunicator();
       createRealtimeRos2Node();
-      createGlobalDataProducer();
-      createHeadController();
       createInverseKinematicsCalculator();
       createControllerManager();
       createControllerNetworkSubscriber();
@@ -708,11 +682,6 @@ public class QuadrupedSimulationFactory
    public void setGroundContactParameters(GroundContactParameters groundContactParameters)
    {
       this.groundContactParameters.set(groundContactParameters);
-   }
-
-   public void setHeadControllerFactory(QuadrupedRobotControllerFactory headControllerFactory)
-   {
-      this.headControllerFactory.set(headControllerFactory);
    }
 
    public void setOutputWriter(OutputWriter outputWriter)
