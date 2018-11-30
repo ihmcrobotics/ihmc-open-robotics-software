@@ -4,6 +4,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
 
 /**
  * {@code NumericalMovingReferenceFrame} can be used to extend a simple {@code ReferenceFrame} to a
@@ -72,7 +74,7 @@ public class NumericalMovingReferenceFrame extends MovingReferenceFrame
       {
          transformToRoot.get(rotation, translation);
          rotation.multiplyConjugateOther(previousRotation);
-         rotation.get(angularVelocity);
+         rotation.getRotationVector(angularVelocity);
          angularVelocity.scale(1.0 / updateDT);
          linearVelocity.sub(translation, previousTranslation);
          linearVelocity.scale(1.0 / updateDT);
@@ -83,6 +85,6 @@ public class NumericalMovingReferenceFrame extends MovingReferenceFrame
          transformToRoot.inverseTransform(linearVelocity);
       }
 
-      twistRelativeToParentToPack.set(this, parentFrame, this, linearVelocity, angularVelocity);
+      twistRelativeToParentToPack.setIncludingFrame(this, getParent(), this, angularVelocity, linearVelocity);
    }
 }

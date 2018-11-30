@@ -1,46 +1,47 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.AdjustFootstepMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 
 public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTestInterface
 {
@@ -48,6 +49,8 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
+   @ContinuousIntegrationTest(estimatedDuration = 59.2)
+   @Test(timeout = 300000)
    public void testAdjustFootstepOnce() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -61,8 +64,8 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
-      SideDependentList<MovingReferenceFrame> soleFrames = fullRobotModel.getSoleFrames();
-      drcSimulationTestHelper.send(createFootsteps(soleFrames));
+      SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>(fullRobotModel.getSoleFrames());
+      drcSimulationTestHelper.publishToController(createFootsteps(soleFrames));
 
       final SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       final SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
@@ -86,7 +89,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          @Override
          public void doScript(double t)
          {
-            if (singleSupportStartConditions.get(swingSideForAdjusting).checkCondition())
+            if (singleSupportStartConditions.get(swingSideForAdjusting).testCondition(Double.NaN))
             {
                if (Double.isNaN(swingInitialTime))
                   swingInitialTime = t;
@@ -101,8 +104,8 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
                      orientation.set(nextFootstepPose.getOrientation());
                      adjustedLocation.setX(adjustedLocation.getX() + 0.1);
                      adjustedLocation.setY(adjustedLocation.getY() - 0.15);
-                     AdjustFootstepMessage adjustFootstepMessage = new AdjustFootstepMessage(swingSideForAdjusting, adjustedLocation, orientation);
-                     drcSimulationTestHelper.send(adjustFootstepMessage);
+                     AdjustFootstepMessage adjustFootstepMessage = HumanoidMessageTools.createAdjustFootstepMessage(swingSideForAdjusting, adjustedLocation, orientation);
+                     drcSimulationTestHelper.publishToController(adjustFootstepMessage);
                      adjustedFootstep = true;
                   }
                }
@@ -136,10 +139,10 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
          final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
-               footPrefix + "State");
+               footPrefix + "CurrentState");
          @SuppressWarnings("unchecked")
          final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
-               "walkingState");
+               "walkingCurrentState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
@@ -163,7 +166,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          framePosition.add(stepLength, side.negateIfRightSide(stepWidth), 0.0);
          Point3D position = new Point3D(framePosition);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         footstepDataListMessage.add(new FootstepDataMessage(side, position, orientation));
+         footstepDataListMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, position, orientation));
          side = side.getOppositeSide();
       }
 
@@ -174,10 +177,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
    {
       String sidePrefix = findUpcomingFootstepSide(0, scs).getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Footstep0Pose";
-      FramePose3D framePose = new FramePose3D();
-      findYoFramePose(FootstepListVisualizer.class.getSimpleName(), namePrefix, scs).getFramePose(framePose);
-      Pose3D pose = new Pose3D(framePose);
-      return pose;
+      return new Pose3D(findYoFramePose(FootstepListVisualizer.class.getSimpleName(), namePrefix, scs));
    }
 
    @SuppressWarnings("unchecked")
@@ -186,23 +186,24 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       return ((YoEnum<RobotSide>)scs.getVariable(WalkingMessageHandler.class.getSimpleName(), "upcomingFoostepSide" + index)).getEnumValue();
    }
 
-   private static YoFramePose findYoFramePose(String nameSpace, String namePrefix, SimulationConstructionSet scs)
+   private static YoFramePose3D findYoFramePose(String nameSpace, String namePrefix, SimulationConstructionSet scs)
    {
-      return findYoFramePose(nameSpace, namePrefix, "", scs);
+      return findYoFramePose3D(nameSpace, namePrefix, "", scs);
    }
 
-   private static YoFramePose findYoFramePose(String nameSpace, String namePrefix, String nameSuffix, SimulationConstructionSet scs)
+   private static YoFramePose3D findYoFramePose3D(String nameSpace, String namePrefix, String nameSuffix, SimulationConstructionSet scs)
    {
       YoDouble x = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(namePrefix, nameSuffix));
       YoDouble y = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(namePrefix, nameSuffix));
       YoDouble z = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createZName(namePrefix, nameSuffix));
-      YoFramePoint position = new YoFramePoint(x, y, z, ReferenceFrame.getWorldFrame());
+      YoFramePoint3D position = new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame());
 
-      YoDouble yaw = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "yaw", nameSuffix));
-      YoDouble pitch = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "pitch", nameSuffix));
-      YoDouble roll = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "roll", nameSuffix));
-      YoFrameOrientation orientation = new YoFrameOrientation(yaw, pitch, roll, ReferenceFrame.getWorldFrame());
-      return new YoFramePose(position, orientation);
+      YoDouble qx = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createQxName(namePrefix, nameSuffix));
+      YoDouble qy = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createQyName(namePrefix, nameSuffix));
+      YoDouble qz = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createQzName(namePrefix, nameSuffix));
+      YoDouble qs = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createQsName(namePrefix, nameSuffix));
+      YoFrameQuaternion orientation = new YoFrameQuaternion(qx, qy, qz, qs, ReferenceFrame.getWorldFrame());
+      return new YoFramePose3D(position, orientation);
    }
 
    private class SingleSupportStartCondition implements StateTransitionCondition
@@ -215,7 +216,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          return footConstraintType.getEnumValue() == ConstraintType.SWING;
       }
@@ -234,7 +235,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          if (side == RobotSide.LEFT)
          {

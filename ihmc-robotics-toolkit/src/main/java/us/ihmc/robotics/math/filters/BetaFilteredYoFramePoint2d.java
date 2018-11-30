@@ -4,10 +4,10 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 
-public class BetaFilteredYoFramePoint2d extends YoFramePoint2d
+public class BetaFilteredYoFramePoint2d extends YoFramePoint2D
 {
    private final BetaFilteredYoVariable x, y;
 
@@ -41,7 +41,7 @@ public class BetaFilteredYoFramePoint2d extends YoFramePoint2d
       return ret;
    }
 
-   public static BetaFilteredYoFramePoint2d createBetaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, int beta, YoFramePoint2d unfilteredPoint)
+   public static BetaFilteredYoFramePoint2d createBetaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, int beta, YoFramePoint2D unfilteredPoint)
    {
       // beta is a int
       BetaFilteredYoVariable x = new BetaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, beta, unfilteredPoint.getYoX());

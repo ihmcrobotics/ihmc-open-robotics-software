@@ -4,26 +4,29 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import controller_msgs.msg.dds.FootLoadBearingMessage;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 
 public class FootLoadBearingBehaviorTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSetInput()
    {
-      CommunicationBridgeInterface outgoingCommunicationBridge = null;
-      FootLoadBearingBehavior footLoadBearingBehavior = new FootLoadBearingBehavior(outgoingCommunicationBridge);
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "test_set_input");
+      FootLoadBearingBehavior footLoadBearingBehavior = new FootLoadBearingBehavior("Bloppy", ros2Node);
 
-      FootLoadBearingMessage message = new FootLoadBearingMessage(RobotSide.LEFT, LoadBearingRequest.LOAD);
+      FootLoadBearingMessage message = HumanoidMessageTools.createFootLoadBearingMessage(RobotSide.LEFT, LoadBearingRequest.LOAD);
 
       PacketDestination destination = PacketDestination.UI;
-      message.setDestination(destination);
+      message.setDestination(destination.ordinal());
 
       footLoadBearingBehavior.setInput(message);
 

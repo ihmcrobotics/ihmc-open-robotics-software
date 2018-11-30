@@ -16,12 +16,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 /**
  * @author twan
@@ -37,9 +37,9 @@ public class PlaneContactWrenchProcessor
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final Map<ContactablePlaneBody, YoDouble> normalTorques = new LinkedHashMap<>();
    private final Map<ContactablePlaneBody, YoDouble> groundReactionForceMagnitudes = new LinkedHashMap<>();
-   private final Map<ContactablePlaneBody, YoFramePoint> centersOfPressureWorld = new LinkedHashMap<>();
-   private final Map<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new LinkedHashMap<>();
-   private final Map<ContactablePlaneBody, YoFramePoint2d> yoCops = new LinkedHashMap<>();
+   private final Map<ContactablePlaneBody, YoFramePoint3D> centersOfPressureWorld = new LinkedHashMap<>();
+   private final Map<ContactablePlaneBody, YoFramePoint2D> centersOfPressure2d = new LinkedHashMap<>();
+   private final Map<ContactablePlaneBody, YoFramePoint2D> yoCops = new LinkedHashMap<>();
 
    private final Map<ContactablePlaneBody, FramePoint2D> cops = new LinkedHashMap<>();
 
@@ -48,7 +48,7 @@ public class PlaneContactWrenchProcessor
    public PlaneContactWrenchProcessor(List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
-      Map<RigidBody, ReferenceFrame> soleFrames = new HashMap<>();
+      Map<RigidBodyBasics, ReferenceFrame> soleFrames = new HashMap<>();
 
       this.contactablePlaneBodies = contactablePlaneBodies;
       for (ContactablePlaneBody contactableBody : contactablePlaneBodies)
@@ -65,17 +65,17 @@ public class PlaneContactWrenchProcessor
          String copName = name + "CoP";
          String listName = getClass().getSimpleName();
 
-         YoFramePoint2d cop2d = new YoFramePoint2d(copName + "2d", "", contactableBody.getSoleFrame(), registry);
+         YoFramePoint2D cop2d = new YoFramePoint2D(copName + "2d", "", contactableBody.getSoleFrame(), registry);
          centersOfPressure2d.put(contactableBody, cop2d);
 
-         YoFramePoint cop = new YoFramePoint(copName, ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoint3D cop = new YoFramePoint3D(copName, ReferenceFrame.getWorldFrame(), registry);
          centersOfPressureWorld.put(contactableBody, cop);
 
          FramePoint2D footCenter2d = new FramePoint2D(contactableBody.getSoleFrame());
          footCenter2d.setToNaN();
          cops.put(contactableBody, footCenter2d);
 
-         YoFramePoint2d yoCop = new YoFramePoint2d(contactableBody.getName() + "CoP", contactableBody.getSoleFrame(), registry);
+         YoFramePoint2D yoCop = new YoFramePoint2D(contactableBody.getName() + "CoP", contactableBody.getSoleFrame(), registry);
          yoCop.set(footCenter2d);
          yoCops.put(contactableBody, yoCop);
 
@@ -98,27 +98,27 @@ public class PlaneContactWrenchProcessor
    private final FramePoint3D tempCoP3d = new FramePoint3D();
    private final FrameVector3D tempForce = new FrameVector3D();
 
-   public void compute(Map<RigidBody, Wrench> externalWrenches)
+   public void compute(Map<RigidBodyBasics, Wrench> externalWrenches)
    {
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
          ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
          FramePoint2D cop = cops.get(contactablePlaneBody);
-         YoFramePoint2d yoCop = yoCops.get(contactablePlaneBody);
+         YoFramePoint2D yoCop = yoCops.get(contactablePlaneBody);
          cop.set(yoCop);
 
          Wrench wrench = externalWrenches.get(contactablePlaneBody.getRigidBody());
 
          if (wrench != null)
          {
-            wrench.getLinearPartIncludingFrame(tempForce);
+            tempForce.setIncludingFrame(wrench.getLinearPart());
 
             double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(cop, wrench, contactablePlaneBody.getSoleFrame());
 
             centersOfPressure2d.get(contactablePlaneBody).set(cop);
 
             tempCoP3d.setIncludingFrame(cop, 0.0);
-            centersOfPressureWorld.get(contactablePlaneBody).setAndMatchFrame(tempCoP3d);
+            centersOfPressureWorld.get(contactablePlaneBody).setMatchingFrame(tempCoP3d);
             groundReactionForceMagnitudes.get(contactablePlaneBody).set(tempForce.length());
             normalTorques.get(contactablePlaneBody).set(normalTorque);
          }
@@ -145,7 +145,7 @@ public class PlaneContactWrenchProcessor
 
    public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoPToPack)
    {
-      YoFramePoint2d yoCop = yoCops.get(contactablePlaneBody);
+      YoFramePoint2D yoCop = yoCops.get(contactablePlaneBody);
       desiredCoPToPack.setIncludingFrame(yoCop);
    }
 

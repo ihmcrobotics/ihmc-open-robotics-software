@@ -8,7 +8,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 
 public class FactoryToolsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFactoryDisposes()
    {
@@ -27,7 +27,7 @@ public class FactoryToolsTest
       });
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFactoryRequiresFieldsSet()
    {
@@ -44,7 +44,7 @@ public class FactoryToolsTest
       });
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFactoryRequiresOptionalNotNull()
    {

@@ -7,10 +7,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 
-public class AccelerationLimitedYoFrameVector2d extends YoFrameVector2d
+public class AccelerationLimitedYoFrameVector2d extends YoFrameVector2D
 {
    private final AccelerationLimitedYoVariable x, y;
 
@@ -35,7 +35,7 @@ public class AccelerationLimitedYoFrameVector2d extends YoFrameVector2d
 
 
    public static AccelerationLimitedYoFrameVector2d createAccelerationLimitedYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-         YoDouble maxRate, YoDouble maxAcceleration, double dt, YoFrameVector2d unfilteredVector)
+         YoDouble maxRate, YoDouble maxAcceleration, double dt, YoFrameVector2D unfilteredVector)
    {
       AccelerationLimitedYoVariable x = new AccelerationLimitedYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, maxAcceleration, unfilteredVector.getYoX(), dt);
       AccelerationLimitedYoVariable y = new AccelerationLimitedYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, maxAcceleration, unfilteredVector.getYoY(), dt);

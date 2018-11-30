@@ -1,0 +1,50 @@
+#ifndef __controller_msgs__msg__SoleTrajectoryMessage__idl__
+#define __controller_msgs__msg__SoleTrajectoryMessage__idl__
+
+#include "controller_msgs/msg/./EuclideanTrajectoryMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet FRONT_LEFT =
+      0;
+
+      const octet FRONT_RIGHT =
+      1;
+
+      const octet HIND_RIGHT =
+      2;
+
+      const octet HIND_LEFT =
+      3;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message commands the controller to move in taskspace a foot to the desired position  while going through the specified trajectory points.
+       * To execute a single straight line trajectory to reach a desired foot pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::SoleTrajectoryMessage_")
+      struct SoleTrajectoryMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Specifies which foot will execute the trajectory.
+         */
+        @defaultValue(value=255)
+        octet robot_quadrant;
+        /**
+         * The position trajectory information.
+         */
+        controller_msgs::msg::dds::EuclideanTrajectoryMessage position_trajectory;
+      };
+    };
+  };
+};
+
+#endif

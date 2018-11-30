@@ -1,6 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -116,6 +117,16 @@ public class PIDController extends AbstractPIDController
    public void setMaxIntegralError(double maxIntegralError)
    {
       this.maxIntegralError.set(maxIntegralError);
+   }
+
+   public void setGains(PIDGainsReadOnly gains)
+   {
+      pdController.setGains(gains);
+
+      setMaximumOutputLimit(gains.getMaximumFeedback());
+      setIntegralLeakRatio(gains.getIntegralLeakRatio());
+      setIntegralGain(gains.getKi());
+      setMaxIntegralError(gains.getMaxIntegralError());
    }
 
    @Override

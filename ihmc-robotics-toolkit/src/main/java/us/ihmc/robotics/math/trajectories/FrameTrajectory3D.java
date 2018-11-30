@@ -125,7 +125,7 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
    public void setConstant(double t0, double tFinal, FramePoint3DReadOnly z0)
    {
       checkReferenceFrameMatch(z0);
-      setConstant(t0, tFinal, z0);
+      super.setConstant(t0, tFinal, z0);
    }
 
    public void setCubic(double t0, double tFinal, FramePoint3DReadOnly z0, FramePoint3DReadOnly zFinal)
@@ -408,6 +408,14 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
                              zf, zdf);
    }
 
+   public void setQuinticWithZeroTerminalVelocityAndAcceleration(double t0, double tFinal, FramePoint3DReadOnly z0, FramePoint3DReadOnly zFinal)
+   {
+      z0.checkReferenceFrameMatch(referenceFrame);
+      zFinal.checkReferenceFrameMatch(referenceFrame);
+
+      super.setQuinticWithZeroTerminalVelocityAndAcceleration(t0, tFinal, z0, zFinal);
+   }
+
    public void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, FramePoint3DReadOnly z0,
                                                                   FrameVector3DReadOnly zd0, FrameVector3DReadOnly zdIntermediate,
                                                                   FrameVector3DReadOnly zddIntermediate, FramePoint3DReadOnly zFinal,
@@ -534,47 +542,47 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
 
    public FramePoint3DReadOnly getFramePosition()
    {
-      framePosition.set(referenceFrame, getPosition());
+      framePosition.setIncludingFrame(referenceFrame, getPosition());
       return framePosition;
    }
 
    public void getFramePosition(FramePoint3D positionToPack)
    {
-      positionToPack.set(referenceFrame, getPosition());
+      positionToPack.setIncludingFrame(referenceFrame, getPosition());
    }
 
    public void getFramePositionInitial(FramePoint3D positionToPack)
    {
       compute(xTrajectory.getInitialTime());
-      positionToPack.set(referenceFrame, getPosition());
+      positionToPack.setIncludingFrame(referenceFrame, getPosition());
    }
 
    public void getFramePositionFinal(FramePoint3D positionToPack)
    {
       compute(xTrajectory.getFinalTime());
-      positionToPack.set(referenceFrame, getPosition());
+      positionToPack.setIncludingFrame(referenceFrame, getPosition());
    }
 
    public FrameVector3DReadOnly getFrameVelocity()
    {
-      frameVelocity.set(referenceFrame, getVelocity());
+      frameVelocity.setIncludingFrame(referenceFrame, getVelocity());
       return frameVelocity;
    }
 
    public void getFrameVelocity(FrameVector3D velocityToPack)
    {
-      velocityToPack.set(referenceFrame, getVelocity());
+      velocityToPack.setIncludingFrame(referenceFrame, getVelocity());
    }
 
    public FrameVector3DReadOnly getFrameAcceleration()
    {
-      frameAcceleration.set(referenceFrame, getAcceleration());
+      frameAcceleration.setIncludingFrame(referenceFrame, getAcceleration());
       return frameAcceleration;
    }
 
    public void getFrameAcceleration(FrameVector3D accelerationToPack)
    {
-      accelerationToPack.set(referenceFrame, getAcceleration());
+      accelerationToPack.setIncludingFrame(referenceFrame, getAcceleration());
    }
 
    public ReferenceFrame getReferenceFrame()
@@ -603,12 +611,6 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
    {
       dQuantity.setIncludingFrame(referenceFrame, xTrajectory.getDerivative(order, x), yTrajectory.getDerivative(order, x),
                                   zTrajectory.getDerivative(order, x));
-   }
-
-   public void getDerivative(FrameTrajectory3D dervTraj, int order)
-   {
-      checkReferenceFrameMatch(dervTraj);
-      super.getDerivative(dervTraj, order);
    }
 
    public void getStartPoint(FramePoint3D positionToPack)

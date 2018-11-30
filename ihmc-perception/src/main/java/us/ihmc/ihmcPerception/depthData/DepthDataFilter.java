@@ -3,9 +3,20 @@ package us.ihmc.ihmcPerception.depthData;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
+import us.ihmc.robotics.dataStructures.DecayingResolutionFilter;
+import us.ihmc.robotics.quadTree.Box;
+import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
+import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
+import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapInterface;
 
-public class DepthDataFilter extends DepthDataStore
+public class DepthDataFilter
 {
+
+   public static final double QUAD_TREE_EXTENT = 200;
+   protected final QuadTreeHeightMapInterface quadTree;
+   protected final DecayingResolutionFilter nearScan;
+   protected DepthDataFilterParameters parameters;
+
    // Adjustment which is applied to LIDAR points.  Must be applied while points are still in LIDAR frame.  Allows users correct for errors
    // See DRCManualLidarTransform and DRCLidarVisualizationManager. This is a bit of a hack but less likely to have unintended consequences.
    private final RigidBodyTransform worldToCorrected = new RigidBodyTransform();
@@ -13,8 +24,27 @@ public class DepthDataFilter extends DepthDataStore
 
    public DepthDataFilter()
    {
-      super();
+      this(DepthDataFilterParameters.getDefaultParameters());
    }
+   
+   public DepthDataFilter(DepthDataFilterParameters parameters)
+   {
+      this.parameters = parameters;
+      nearScan = new DecayingResolutionFilter(parameters.nearScanResolution, parameters.nearScanDecayMillis, parameters.nearScanCapacity);
+      quadTree = setupGroundOnlyQuadTree(parameters);
+
+   }
+
+   public static QuadTreeForGroundHeightMap setupGroundOnlyQuadTree(DepthDataFilterParameters parameters)
+   {
+      Box bounds = new Box(-QUAD_TREE_EXTENT, -QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, QUAD_TREE_EXTENT);
+      QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(DepthDataFilterParameters.GRID_RESOLUTION,
+            parameters.quadtreeHeightThreshold, parameters.quadTreeMaxMultiLevelZChangeToFilterNoise, parameters.maxSameHeightPointsPerNode,
+            parameters.maxAllowableXYDistanceForAPointToBeConsideredClose, parameters.maximumNumberOfPoints);
+
+      return new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
+   }
+
 
    public void setWorldToCorrected(RigidBodyTransform adjustment)
    {
@@ -58,7 +88,24 @@ public class DepthDataFilter extends DepthDataStore
 
       return send;
    }
-   
+
+   public DecayingResolutionFilter getNearScan()
+   {
+      return nearScan;
+   }
+
+   public void setParameters(DepthDataFilterParameters parameters)
+   {
+      this.parameters = parameters;
+
+      nearScan.setResolution(parameters.nearScanResolution);
+      nearScan.setCapacity(parameters.nearScanCapacity);
+      nearScan.setDecay(parameters.nearScanDecayMillis);
+
+      quadTree.setHeightThreshold(parameters.quadtreeHeightThreshold);
+
+   }
+
    public boolean addPoint(Point3D point,Point3D sensorOrigin)
    {
       return addNearScanPoint(point, sensorOrigin)| addQuatreePoint(point, sensorOrigin);

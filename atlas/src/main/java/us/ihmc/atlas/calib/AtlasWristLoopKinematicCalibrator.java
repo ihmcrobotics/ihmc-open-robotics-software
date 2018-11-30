@@ -12,12 +12,12 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.IndexChangedListener;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewer
 {
@@ -58,9 +58,9 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
    }
 
 
-   private ArrayList<OneDoFJoint> getArmJoints()
+   private ArrayList<OneDoFJointBasics> getArmJoints()
    {
-      ArrayList<OneDoFJoint> armJoints = new ArrayList<OneDoFJoint>();
+      ArrayList<OneDoFJointBasics> armJoints = new ArrayList<OneDoFJointBasics>();
       for (int i = 0; i < joints.length; i++)
       {
          if (joints[i].getName().matches(".*arm.*"))
@@ -111,8 +111,8 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
       if (start_scs)
       {
          //Yovariables for display
-         YoFramePose yoResidual0 = new YoFramePose("residual0", "", ReferenceFrame.getWorldFrame(), calibrator.registry);
-         YoFramePose yoResidual = new YoFramePose("residual", "", ReferenceFrame.getWorldFrame(), calibrator.registry);
+         YoFramePoseUsingYawPitchRoll yoResidual0 = new YoFramePoseUsingYawPitchRoll("residual0", "", ReferenceFrame.getWorldFrame(), calibrator.registry);
+         YoFramePoseUsingYawPitchRoll yoResidual = new YoFramePoseUsingYawPitchRoll("residual", "", ReferenceFrame.getWorldFrame(), calibrator.registry);
 
          calibrator.createDisplay(calibrator.q.size());
          calibrator.attachIndexChangedListener();

@@ -8,9 +8,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -25,7 +25,7 @@ public class VisibilityGraphsDataExporter
    private AtomicReference<Point3D> start;
    private AtomicReference<Point3D> goal;
 
-   public VisibilityGraphsDataExporter(REAMessager messager)
+   public VisibilityGraphsDataExporter(Messager messager)
    {
       planarRegionsState = messager.createInput(UIVisibilityGraphsTopics.PlanarRegionData);
       start = messager.createInput(UIVisibilityGraphsTopics.StartPosition);

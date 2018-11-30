@@ -3,7 +3,7 @@ package us.ihmc.parameterTuner.guiElements.tuners;
 public class IntegerSlider extends NumericSlider<Integer>
 {
    @Override
-   public double doDouble(Integer number)
+   public double toDouble(Integer number)
    {
       return number;
    }

@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfiguration;
@@ -29,15 +29,15 @@ public class DiagnosticControllerToolbox
 
    private final DiagnosticParameters diagnosticParameters;
 
-   private final Map<OneDoFJoint, OneDoFJointSensorValidityChecker> jointSensorValidityCheckers;
+   private final Map<OneDoFJointBasics, OneDoFJointSensorValidityChecker> jointSensorValidityCheckers;
    private final Map<String, IMUSensorValidityChecker> imuSensorValidityCheckers;
    private final Map<ForceSensorDefinition, WrenchSensorValidityChecker> wrenchSensorValidityCheckers;
 
-   private final Map<OneDoFJoint, PositionVelocity1DConsistencyChecker> jointPositionVelocityConsistencyCheckers;
+   private final Map<OneDoFJointBasics, PositionVelocity1DConsistencyChecker> jointPositionVelocityConsistencyCheckers;
    private final Map<String, OrientationAngularVelocityConsistencyChecker> orientationAngularVelocityConsistencyCheckers;
 
-   private final Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> jointForceTrackingDelayEstimators;
-   private final Map<OneDoFJoint, OneDoFJointFourierAnalysis> jointFourierAnalysisMap;
+   private final Map<OneDoFJointBasics, OneDoFJointForceTrackingDelayEstimator> jointForceTrackingDelayEstimators;
+   private final Map<OneDoFJointBasics, OneDoFJointFourierAnalysis> jointFourierAnalysisMap;
 
    private final double dt;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -101,7 +101,7 @@ public class DiagnosticControllerToolbox
       return dt;
    }
 
-   public OneDoFJointSensorValidityChecker getJointSensorValidityChecker(OneDoFJoint joint)
+   public OneDoFJointSensorValidityChecker getJointSensorValidityChecker(OneDoFJointBasics joint)
    {
       return jointSensorValidityCheckers.get(joint);
    }
@@ -116,7 +116,7 @@ public class DiagnosticControllerToolbox
       return wrenchSensorValidityCheckers.get(wrenchSensorDefinition);
    }
 
-   public PositionVelocity1DConsistencyChecker getJointPositionVelocityConsistencyChecker(OneDoFJoint joint)
+   public PositionVelocity1DConsistencyChecker getJointPositionVelocityConsistencyChecker(OneDoFJointBasics joint)
    {
       return jointPositionVelocityConsistencyCheckers.get(joint);
    }
@@ -126,12 +126,12 @@ public class DiagnosticControllerToolbox
       return orientationAngularVelocityConsistencyCheckers.get(imuName);
    }
 
-   public OneDoFJointForceTrackingDelayEstimator getJointForceTrackingDelayEstimator(OneDoFJoint joint)
+   public OneDoFJointForceTrackingDelayEstimator getJointForceTrackingDelayEstimator(OneDoFJointBasics joint)
    {
       return jointForceTrackingDelayEstimators.get(joint);
    }
 
-   public OneDoFJointFourierAnalysis getJointFourierAnalysis(OneDoFJoint joint)
+   public OneDoFJointFourierAnalysis getJointFourierAnalysis(OneDoFJointBasics joint)
    {
       return jointFourierAnalysisMap.get(joint);
    }

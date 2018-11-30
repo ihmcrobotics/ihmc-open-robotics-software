@@ -1,0 +1,32 @@
+#ifndef __controller_msgs__msg__HeightQuadTreeMessage__idl__
+#define __controller_msgs__msg__HeightQuadTreeMessage__idl__
+
+#include "controller_msgs/msg/./HeightQuadTreeLeafMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC height quad tree module
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::HeightQuadTreeMessage_")
+      struct HeightQuadTreeMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        float default_height;
+        float resolution;
+        float size_x;
+        float size_y;
+        sequence<controller_msgs::msg::dds::HeightQuadTreeLeafMessage, 5000> leaves;
+      };
+    };
+  };
+};
+
+#endif

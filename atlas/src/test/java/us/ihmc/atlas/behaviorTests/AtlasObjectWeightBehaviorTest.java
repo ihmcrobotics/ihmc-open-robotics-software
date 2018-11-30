@@ -28,8 +28,8 @@ public class AtlasObjectWeightBehaviorTest extends DRCObjectWeightBehaviorTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 14.6)
-   @Test(timeout = 73000)
+   @ContinuousIntegrationTest(estimatedDuration = 21.2)
+   @Test(timeout = 110000)
    public void testConstructorAndSetInput()
    {
       super.testConstructorAndSetInput();

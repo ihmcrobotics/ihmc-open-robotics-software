@@ -2,8 +2,8 @@ package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import org.ejml.data.DenseMatrix64F;
 
+import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.KinematicsToolboxCenterOfMassMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -31,16 +31,30 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
    }
 
    @Override
-   public void set(KinematicsToolboxCenterOfMassMessage message)
+   public void setFromMessage(KinematicsToolboxCenterOfMassMessage message)
    {
       if (message == null)
       {
          clear();
          return;
       }
-      message.getDesiredPosition(desiredPosition);
-      message.getSelectionMatrix(selectionMatrix);
-      message.getWeightVector(weightVector);
+      desiredPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredPositionInWorld());
+      selectionMatrix.clearSelection();
+      selectionMatrix.clearSelection();
+      selectionMatrix.selectXAxis(message.getSelectionMatrix().getXSelected());
+      selectionMatrix.selectYAxis(message.getSelectionMatrix().getYSelected());
+      selectionMatrix.selectZAxis(message.getSelectionMatrix().getZSelected());
+      weightVector.reshape(3, 1);
+      if (message.getWeights() == null)
+      {
+         weightVector.zero();
+      }
+      else
+      {
+         weightVector.set(0, 0, message.getWeights().getXWeight());
+         weightVector.set(1, 0, message.getWeights().getYWeight());
+         weightVector.set(2, 0, message.getWeights().getZWeight());
+      }
    }
 
    public DenseMatrix64F getWeightVector()

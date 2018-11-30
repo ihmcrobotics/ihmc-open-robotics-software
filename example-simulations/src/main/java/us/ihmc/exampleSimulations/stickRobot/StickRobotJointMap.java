@@ -206,6 +206,12 @@ public class StickRobotJointMap implements DRCRobotJointMap
    @Override
    public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide)
    {
+      return getSoleToParentFrameTransform(robotSide);
+   }
+
+   @Override
+   public RigidBodyTransform getSoleToParentFrameTransform(RobotSide robotSide)
+   {
       return StickRobotPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide);
    }
 
@@ -291,13 +297,7 @@ public class StickRobotJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public Enum<?>[] getRobotSegments()
-   {
-      return RobotSide.values;
-   }
-
-   @Override
-   public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
+   public RobotSide getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
    {
       for(RobotSide robotSide : RobotSide.values)
       {

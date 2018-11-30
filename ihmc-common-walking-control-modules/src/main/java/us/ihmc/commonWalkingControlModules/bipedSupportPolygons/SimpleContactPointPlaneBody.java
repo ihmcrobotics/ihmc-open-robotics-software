@@ -8,9 +8,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
  * Simple implementation of {@link #ContactablePlaneBody} for a single contact point.
@@ -21,12 +21,12 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public class SimpleContactPointPlaneBody implements ContactablePlaneBody
 {
    private final String name;
-   private final RigidBody rigidBody;
+   private final RigidBodyBasics rigidBody;
    private final PoseReferenceFrame contactFrame;
 
    private final List<FramePoint2D> contactPoints = new ArrayList<>();
 
-   public SimpleContactPointPlaneBody(String name, RigidBody rigidBody, RigidBodyTransform contactFramePoseInJointFrame)
+   public SimpleContactPointPlaneBody(String name, RigidBodyBasics rigidBody, RigidBodyTransform contactFramePoseInJointFrame)
    {
       this.name = name;
       this.rigidBody = rigidBody;
@@ -44,7 +44,7 @@ public class SimpleContactPointPlaneBody implements ContactablePlaneBody
    }
 
    @Override
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }

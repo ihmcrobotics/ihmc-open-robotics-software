@@ -66,7 +66,7 @@ public class SkippySimulation
 
       blockingSimulationRunner = new BlockingSimulationRunner(sim, 10.0 * 60.0);
 
-      ControllerFailureListener controllerFailureListener = blockingSimulationRunner.createControllerFailureListener();
+      ControllerFailureListener controllerFailureListener = direction -> blockingSimulationRunner.notifyControllerHasFailed();
       skippy.setController(new SkippyFallingChecker(controllerFailureListener, skippy));
 
       sim.startOnAThread();

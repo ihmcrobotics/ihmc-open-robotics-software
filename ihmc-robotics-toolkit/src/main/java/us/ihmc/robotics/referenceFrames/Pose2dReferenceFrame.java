@@ -31,14 +31,14 @@ public class Pose2dReferenceFrame extends ReferenceFrame
 
    public void setPositionAndUpdate(FramePoint2D framePoint)
    {
-      framePoint.checkReferenceFrameMatch(parentFrame);
+      framePoint.checkReferenceFrameMatch(getParent());
       originPose.setPosition(framePoint);
       this.update();
    }
 
    public void setOrientationAndUpdate(FrameOrientation2D frameOrientation)
    {
-      frameOrientation.checkReferenceFrameMatch(parentFrame);
+      frameOrientation.checkReferenceFrameMatch(getParent());
       originPose.setOrientation(frameOrientation);
       this.update();
    }

@@ -6,24 +6,24 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.euclid.tuple3D.Vector3D;
-
 import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class JointStateUpdaterTest
 {
@@ -41,7 +41,7 @@ public class JointStateUpdaterTest
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
       
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(randomFloatingChain.getRevoluteJoints());
       
       FullInverseDynamicsStructure inverseDynamicsStructure = createFullInverseDynamicsStructure(randomFloatingChain, joints);
@@ -68,7 +68,7 @@ public class JointStateUpdaterTest
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
       
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(randomFloatingChain.getRevoluteJoints());
       
       FullInverseDynamicsStructure inverseDynamicsStructure = createFullInverseDynamicsStructure(randomFloatingChain, joints);
@@ -81,6 +81,8 @@ public class JointStateUpdaterTest
       JointStateUpdater jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorMap, null, registry);
       
       fillSensorsWithRandomPositionsAndVelocities(jointsWithPositionSensor, jointsWithVelocitySensor, sensorMap);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
       
       jointStateUpdater.initialize();
       
@@ -100,7 +102,7 @@ public class JointStateUpdaterTest
 
    private static void readAndCheckJointVelocities(ArrayList<RevoluteJoint> jointsWithVelocitySensor, SensorOutputMapReadOnly sensorMap)
    {
-      for (OneDoFJoint joint : jointsWithVelocitySensor)
+      for (OneDoFJointBasics joint : jointsWithVelocitySensor)
       {
          double sensorValue = sensorMap.getJointVelocityProcessedOutput(joint);
          double robotJointValue = joint.getQd();
@@ -111,7 +113,7 @@ public class JointStateUpdaterTest
 
    private static void readAndCheckJointPositions(ArrayList<RevoluteJoint> jointsWithPositionSensor, SensorOutputMapReadOnly sensorMap)
    {
-      for (OneDoFJoint joint : jointsWithPositionSensor)
+      for (OneDoFJointBasics joint : jointsWithPositionSensor)
       {
          double sensorValue = sensorMap.getJointPositionProcessedOutput(joint);
          double robotJointValue = joint.getQ();
@@ -123,13 +125,13 @@ public class JointStateUpdaterTest
    private static void fillSensorsWithRandomPositionsAndVelocities(ArrayList<RevoluteJoint> jointsWithPositionSensor,
          ArrayList<RevoluteJoint> jointsWithVelocitySensor, SensorProcessing sensorMap)
    {
-      for (OneDoFJoint joint : jointsWithPositionSensor)
+      for (OneDoFJointBasics joint : jointsWithPositionSensor)
       {
          double randPosition = RandomNumbers.nextDouble(random, -5000.0, 5000.0);
          sensorMap.setJointPositionSensorValue(joint, randPosition);
       }
       
-      for (OneDoFJoint joint : jointsWithVelocitySensor)
+      for (OneDoFJointBasics joint : jointsWithVelocitySensor)
       {
          double randVelocity = RandomNumbers.nextDouble(random, -5000.0, 5000.0);
          sensorMap.setJointVelocitySensorValue(joint, randVelocity);
@@ -169,18 +171,18 @@ public class JointStateUpdaterTest
          ArrayList<RevoluteJoint> jointsWithVelocitySensor)
    {
       StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
-      for (OneDoFJoint joint : jointsWithPositionSensor)
+      for (OneDoFJointBasics joint : jointsWithPositionSensor)
          stateEstimatorSensorDefinitions.addJointSensorDefinition(joint);
       return stateEstimatorSensorDefinitions;
    }
 
-   private static FullInverseDynamicsStructure createFullInverseDynamicsStructure(ScrewTestTools.RandomFloatingChain randomFloatingChain,
+   private static FullInverseDynamicsStructure createFullInverseDynamicsStructure(RandomFloatingRevoluteJointChain randomFloatingChain,
          ArrayList<RevoluteJoint> joints)
    {
       int indexOfEstimationParentJoint = RandomNumbers.nextInt(random, 0, joints.size() - 1);
-      RigidBody estimationLink = joints.get(indexOfEstimationParentJoint).getSuccessor();
+      RigidBodyBasics estimationLink = joints.get(indexOfEstimationParentJoint).getSuccessor();
       SixDoFJoint rootInverseDynamicsJoint = randomFloatingChain.getRootJoint();
-      RigidBody elevator = randomFloatingChain.getElevator();
+      RigidBodyBasics elevator = randomFloatingChain.getElevator();
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
       return inverseDynamicsStructure;
    }

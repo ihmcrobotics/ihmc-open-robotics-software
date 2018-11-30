@@ -3,23 +3,26 @@ package us.ihmc.sensorProcessing.sensorData;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SpatialVectorMessage;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 public class JointConfigurationGatherer
 {
-   private final ArrayList<OneDoFJoint> joints = new ArrayList<>();
+   private final ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
 
-   private final FloatingInverseDynamicsJoint rootJoint;
+   private final FloatingJointBasics rootJoint;
    private final Vector3D rootTranslation = new Vector3D();
    private final Quaternion rootOrientation = new Quaternion();
 
@@ -84,31 +87,34 @@ public class JointConfigurationGatherer
          return;
       }
 
-      rootJoint.getTranslation(rootTranslation);
-      rootJoint.getRotation(rootOrientation);
-      rootJoint.getAngularVelocity(rootAngularVelocity);
-      rootJoint.getLinearVelocity(rootLinearVelocity);
-      rootJoint.getLinearAcceleration(rootLinearAcceleration);
+      rootTranslation.set(rootJoint.getJointPose().getPosition());
+      rootOrientation.set(rootJoint.getJointPose().getOrientation());
+      rootAngularVelocity.set(rootJoint.getJointTwist().getAngularPart());
+      rootLinearVelocity.set(rootJoint.getJointTwist().getLinearPart());
+      rootLinearAcceleration.set(rootJoint.getJointAcceleration().getLinearPart());
 
-      jointConfigurationData.setPelvisAngularVelocity(rootAngularVelocity);
-      jointConfigurationData.setPelvisLinearVelocity(rootLinearVelocity);
-      jointConfigurationData.setPelvisLinearAcceleration(rootLinearAcceleration);
-      jointConfigurationData.setRootTranslation(rootTranslation);
-      jointConfigurationData.setRootOrientation(rootOrientation);
-      jointConfigurationData.setJointState(joints);
+      jointConfigurationData.getPelvisAngularVelocity().set(rootAngularVelocity);
+      jointConfigurationData.getPelvisLinearVelocity().set(rootLinearVelocity);
+      jointConfigurationData.getPelvisLinearAcceleration().set(rootLinearAcceleration);
+      jointConfigurationData.getRootTranslation().set(rootTranslation);
+      jointConfigurationData.getRootOrientation().set(rootOrientation);
+      RobotConfigurationDataFactory.packJointState(jointConfigurationData, joints);
       jointConfigurationData.setTimestamp(timestamp);
-      jointConfigurationData.setSensorHeadPPSTimestamp(sensorHeadPPSTimestamp);
+      jointConfigurationData.setSensorHeadPpsTimestamp(sensorHeadPPSTimestamp);
+
+      RecyclingArrayList<SpatialVectorMessage> momentAndForceDataAllForceSensors = jointConfigurationData.getForceSensorData();
+      momentAndForceDataAllForceSensors.clear();
 
       for (int sensorNumber = 0; sensorNumber < getNumberOfForceSensors(); sensorNumber++)
       {
-         float[] forceAndMomentVector = jointConfigurationData.getMomentAndForceVectorForSensor(sensorNumber);
-         forceSensorDataList.get(sensorNumber).getWrench(forceAndMomentVector);
+         SpatialVectorMessage wrench = momentAndForceDataAllForceSensors.add();
+         forceSensorDataList.get(sensorNumber).getWrench(wrench.getAngularPart(), wrench.getLinearPart());
       }
    }
 
-   public OneDoFJoint[] getJoints()
+   public OneDoFJointBasics[] getJoints()
    {
-      return joints.toArray(new OneDoFJoint[joints.size()]);
+      return joints.toArray(new OneDoFJointBasics[joints.size()]);
    }
 
    public ForceSensorDefinition[] getForceSensorDefinitions()

@@ -1,113 +1,126 @@
 package us.ihmc.robotModels;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 
 public interface FullRobotModel
 {
-
    /** Returns the specific the joint names of this robot. See {@link RobotSpecificJointNames}. */
-   public abstract RobotSpecificJointNames getRobotSpecificJointNames();
+   RobotSpecificJointNames getRobotSpecificJointNames();
 
    /** Update all the {@link ReferenceFrame}s attached to this robot. */
-   public abstract void updateFrames();
+   void updateFrames();
 
    /** Returns the {@link ReferenceFrame} attached to the elevator (see {@link FullHumanoidRobotModel#getElevator()}).*/
-   public abstract MovingReferenceFrame getElevatorFrame();
+   MovingReferenceFrame getElevatorFrame();
 
    /**
     * Returns the root joint of this robot. It is a six degrees of freedom joint.
     */
-   public abstract FloatingInverseDynamicsJoint getRootJoint();
+   FloatingJointBasics getRootJoint();
 
    /**
     * Returns the elevator of this robot.
-    * The elevator is a virtual {@link RigidBody} that has no size nor mass, and is fixed in world (it does not move at all).
+    * The elevator is a virtual {@link RigidBodyBasics} that has no size nor mass, and is fixed in world (it does not move at all).
     * It is the only predecessor of the root joint.
     * It only has an acceleration that is equal to the opposite of the gravity.
     * It is mainly to easily propagates the effect of gravity to all the robot's joints.
     * @return
     */
-   public abstract RigidBody getElevator();
+   RigidBodyBasics getElevator();
 
    /**
-    * Return the {@link OneDoFJoint} describing the the corresponding spine joint.
+    * Return the {@link OneDoFJointBasics} describing the the corresponding spine joint.
     * @param spineJointName Refers to the joint's name.
     */
-   public abstract OneDoFJoint getSpineJoint(SpineJointName spineJointName);
+   OneDoFJointBasics getSpineJoint(SpineJointName spineJointName);
 
-   public abstract RigidBody getEndEffector(Enum<?> segmentEnum);
+   RigidBodyBasics getEndEffector(Enum<?> segmentEnum);
 
    /**
-    * Return the {@link OneDoFJoint} describing the the corresponding leg joint.
+    * Return the {@link OneDoFJointBasics} describing the the corresponding leg joint.
     * @param robotSide Refers to which leg the joint belongs to (assuming there is only one left and one right leg).
     * @param neckJointName Refers to the joint's name.
     */
-   public abstract OneDoFJoint getNeckJoint(NeckJointName neckJointName);
+   OneDoFJointBasics getNeckJoint(NeckJointName neckJointName);
 
+   
+   /**
+    * 
+    * @return the list of lidar sensor names in this robot model
+    */
+   default List<String> getLidarSensorNames()
+   {
+      return Collections.emptyList();
+   }
+   
+   /**
+    * 
+    * @return the list of camera sensor names in this robot model
+    */
+   default List<String> getCameraSensorNames()
+   {
+      return Collections.emptyList();
+   }
+   
    /**
     * Returns all the lidar joints existing on this robot.
     * @param lidarName TODO
     * @return TODO
     */
-   public abstract InverseDynamicsJoint getLidarJoint(String lidarName);
+   JointBasics getLidarJoint(String lidarName);
 
-   public abstract ReferenceFrame getLidarBaseFrame(String name);
+   ReferenceFrame getLidarBaseFrame(String name);
 
-   public abstract RigidBodyTransform getLidarBaseToSensorTransform(String name);
+   RigidBodyTransform getLidarBaseToSensorTransform(String name);
 
-   public abstract ReferenceFrame getCameraFrame(String name);
+   ReferenceFrame getCameraFrame(String name);
 
    /**
-    * Returns the {@link RigidBody} describing the pelvis of this robot.
-    * In the current framework (on the day: 11/18/2014), the pelvis is the the first successor of the root joint.
+    * Returns the {@link RigidBodyBasics} describing the root link of this robot.
+    * In the current framework (on the day: 2/28/2018), the root link is the the first successor of the root joint.
     */
-   public abstract RigidBody getPelvis();
+   RigidBodyBasics getRootBody();
 
    /**
-    * Returns the {@link RigidBody} describing the chest (or trunk) of this robot.
-    * The chest is considered to be located right after the spine joints, and right before the arms and head.
-    */
-   public abstract RigidBody getChest();
-
-   /**
-    * Returns the {@link RigidBody} describing the head of this robot.
+    * Returns the {@link RigidBodyBasics} describing the head of this robot.
     * It is located right after the neck joints.
     */
-   public abstract RigidBody getHead();
+   RigidBodyBasics getHead();
 
-   public abstract ReferenceFrame getHeadBaseFrame();
+   ReferenceFrame getHeadBaseFrame();
 
    /** Returns all the one DoF joints that this robot has. */
-   public abstract OneDoFJoint[] getOneDoFJoints();
+   OneDoFJointBasics[] getOneDoFJoints();
 
-   public abstract Map<String, OneDoFJoint> getOneDoFJointsAsMap();
+   Map<String, OneDoFJointBasics> getOneDoFJointsAsMap();
 
-   public abstract void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack);
+   void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack);
 
    /** Returns all one DoF joints, excluding joints that do not exist in the controller. */
-   public abstract OneDoFJoint[] getControllableOneDoFJoints();
+   OneDoFJointBasics[] getControllableOneDoFJoints();
 
    /**
     *  Gets all the one DoF joints that this robot has.
     *
     *  @param oneDoFJointsToPack {@code List<OneDoFJoint>} that will be packed will all the one DoF joints.
     */
-   public abstract void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack);
+   void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack);
 
    /**
     * Gets the one DoF joint with the given name.
@@ -115,32 +128,32 @@ public interface FullRobotModel
     * @param name Name of the OneDoFJoint to return.
     * @return
     */
-   public abstract OneDoFJoint getOneDoFJointByName(String name);
+   OneDoFJointBasics getOneDoFJointByName(String name);
 
    /**
     *  Gets all one DoF joints, excluding joints that do not exist in the controller.
     *
     *  @param oneDoFJointsToPack {@code List<OneDoFJoint>} that will be packed will the controllable one DoF joints.
     */
-   public abstract void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack);
+   void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack);
 
    /**
     * Returns all the IMUDefinitions corresponding to each IMU attached to this robot.
     * @return
     */
-   public abstract IMUDefinition[] getIMUDefinitions();
+   IMUDefinition[] getIMUDefinitions();
 
    /**
     * Returns all the ForceSensorDefinitions corresponding to each force sensor attached to this robot.
     * @return
     */
-   public abstract ForceSensorDefinition[] getForceSensorDefinitions();
+   ForceSensorDefinition[] getForceSensorDefinitions();
 
    /**
     * Returns all the ContactSensorDefinitions corresponding to each contact sensor attached to this robot.
     */
-   public abstract ContactSensorDefinition[] getContactSensorDefinitions();
+   ContactSensorDefinition[] getContactSensorDefinitions();
 
 
-   public abstract double getTotalMass();
+   double getTotalMass();
 }

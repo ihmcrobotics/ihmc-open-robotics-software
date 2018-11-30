@@ -16,11 +16,13 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -42,8 +44,8 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    private final YoDouble maxSwingHeight;
    private final YoDouble minSwingHeight;
 
-   private final List<YoDouble> waypointProportions = new ArrayList<>();
-   private final List<YoDouble> obstacleClearanceWaypointProportions = new ArrayList<>();
+   private final List<DoubleProvider> waypointProportions = new ArrayList<>();
+   private final List<DoubleProvider> obstacleClearanceWaypointProportions = new ArrayList<>();
 
    private TrajectoryType trajectoryType;
    private final PositionOptimizedTrajectoryGenerator trajectory;
@@ -102,10 +104,9 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
       for (int i = 0; i < numberWaypoints; i++)
       {
-         YoDouble waypointProportion = new YoDouble(namePrefix + "WaypointProportion" + i, registry);
-         YoDouble obstacleClearanceWaypointProportion = new YoDouble(namePrefix + "ObstacleClearanceWaypointProportion" + i, registry);
-         waypointProportion.set(waypointProportions[i]);
-         obstacleClearanceWaypointProportion.set(obstacleClearanceProportions[i]);
+         DoubleParameter waypointProportion = new DoubleParameter(namePrefix + "WaypointProportion" + i, registry, waypointProportions[i]);
+         DoubleParameter obstacleClearanceWaypointProportion = new DoubleParameter(namePrefix + "ObstacleClearanceWaypointProportion" + i, registry,
+                                                                                   obstacleClearanceProportions[i]);
          this.waypointProportions.add(waypointProportion);
          this.obstacleClearanceWaypointProportions.add(obstacleClearanceWaypointProportion);
       }
@@ -213,7 +214,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       case OBSTACLE_CLEARANCE:
          for (int i = 0; i < numberWaypoints; i++)
          {
-            waypointPositions.get(i).interpolate(initialPosition, finalPosition, obstacleClearanceWaypointProportions.get(i).getDoubleValue());
+            waypointPositions.get(i).interpolate(initialPosition, finalPosition, obstacleClearanceWaypointProportions.get(i).getValue());
             waypointPositions.get(i).setZ(maxStepZ + swingHeight.getDoubleValue());
             if (needToAdjustedSwingForSelfCollision.getBooleanValue())
             {
@@ -224,8 +225,8 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       case DEFAULT:
          for (int i = 0; i < numberWaypoints; i++)
          {
-            waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions.get(i).getDoubleValue());
-            waypointPositions.get(i).add(0.0, 0.0, swingHeight.getDoubleValue());
+            waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions.get(i).getValue());
+            waypointPositions.get(i).addZ(swingHeight.getDoubleValue());
             if (needToAdjustedSwingForSelfCollision.getBooleanValue())
             {
                waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);
@@ -238,7 +239,12 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
          throw new RuntimeException("Trajectory type not implemented");
       }
 
-      double maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + minSwingHeight.getDoubleValue());
+      double maxWaypointZ;
+      if (stanceFootPosition.containsNaN())
+         maxWaypointZ = maxStepZ + maxSwingHeight.getDoubleValue();
+      else
+         maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + minSwingHeight.getDoubleValue());
+
       for (int i = 0; i < numberWaypoints; i++)
       {
          waypointPositions.get(i).setZ(Math.min(waypointPositions.get(i).getZ(), maxWaypointZ));

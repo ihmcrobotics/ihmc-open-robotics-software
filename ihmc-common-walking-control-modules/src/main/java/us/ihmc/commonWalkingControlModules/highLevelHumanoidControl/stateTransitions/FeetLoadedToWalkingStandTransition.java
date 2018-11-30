@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -12,7 +11,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
 {
-   private final FinishableState<HighLevelControllerName> currentState;
    private final HighLevelControllerName nextStateEnum;
    private final YoEnum<HighLevelControllerName> requestedState;
 
@@ -20,13 +18,13 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
 
    private final YoDouble minimumTimeInState;
 
-   public FeetLoadedToWalkingStandTransition(FinishableState<HighLevelControllerName> currentState, HighLevelControllerName nextStateEnum,
-                                             YoEnum<HighLevelControllerName> requestedState, ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetForceSensors,
-                                             double controlDT, double totalMass, double gravityZ, HighLevelControllerParameters highLevelControllerParameters, YoVariableRegistry parentRegistry)
+   public FeetLoadedToWalkingStandTransition(HighLevelControllerName nextStateEnum, YoEnum<HighLevelControllerName> requestedState,
+                                             ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetForceSensors, double controlDT,
+                                             double totalMass, double gravityZ, HighLevelControllerParameters highLevelControllerParameters,
+                                             YoVariableRegistry parentRegistry)
    {
       super(forceSensorDataHolder, feetForceSensors, controlDT, totalMass, gravityZ, parentRegistry);
 
-      this.currentState = currentState;
       this.nextStateEnum = nextStateEnum;
       this.requestedState = requestedState;
 
@@ -38,12 +36,12 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
    }
 
    @Override
-   public boolean checkCondition()
+   public boolean testCondition(double timeInState)
    {
-      if (!super.checkCondition())
+      if (!super.testCondition(timeInState))
          return false;
 
-      if (currentState.getTimeInCurrentState() < minimumTimeInState.getDoubleValue())
+      if (timeInState < minimumTimeInState.getDoubleValue())
          return false;
 
       boolean transitionRequested = nextStateEnum.equals(requestedState.getEnumValue());

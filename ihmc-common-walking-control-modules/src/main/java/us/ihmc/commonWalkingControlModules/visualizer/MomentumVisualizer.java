@@ -7,39 +7,38 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
-import us.ihmc.robotics.screwTheory.Momentum;
+import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.robotics.screwTheory.MomentumCalculator;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class MomentumVisualizer implements Updatable
 {
    private final CenterOfMassCalculator comCalculator;
    private final MomentumCalculator momentumCalculator;
-   private final YoFramePoint centerOfMass;
-   private final YoFrameVector linearMomentum;
+   private final YoFramePoint3D centerOfMass;
+   private final YoFrameVector3D linearMomentum;
 
    private final Momentum momentum = new Momentum(ReferenceFrame.getWorldFrame());
    private final FrameVector3D frameVector = new FrameVector3D();
 
-   public MomentumVisualizer(String name, OneDoFJoint rootJoint, YoVariableRegistry registry,
+   public MomentumVisualizer(String name, OneDoFJointBasics rootJoint, YoVariableRegistry registry,
          YoGraphicsListRegistry graphicsRegistry)
    {
-      this(name, registry, graphicsRegistry, ScrewTools.computeRigidBodiesAfterThisJoint(rootJoint));
+      this(name, registry, graphicsRegistry, rootJoint.getSuccessor());
    }
 
    public MomentumVisualizer(String name, YoVariableRegistry registry, YoGraphicsListRegistry graphicsRegistry,
-         RigidBody... rigidBodies)
+         RigidBodyBasics rootBody)
    {
-      comCalculator = new CenterOfMassCalculator(rigidBodies, ReferenceFrame.getWorldFrame());
-      momentumCalculator = new MomentumCalculator(rigidBodies);
-      centerOfMass = new YoFramePoint(name + "CoM", ReferenceFrame.getWorldFrame(), registry);
-      linearMomentum = new YoFrameVector(name + "Momentum", ReferenceFrame.getWorldFrame(), registry);
+      comCalculator = new CenterOfMassCalculator(rootBody, ReferenceFrame.getWorldFrame());
+      momentumCalculator = new MomentumCalculator(rootBody);
+      centerOfMass = new YoFramePoint3D(name + "CoM", ReferenceFrame.getWorldFrame(), registry);
+      linearMomentum = new YoFrameVector3D(name + "Momentum", ReferenceFrame.getWorldFrame(), registry);
 
       YoGraphicPosition yoCoMGraphics = new YoGraphicPosition(name + "CoM", centerOfMass, 0.05, YoAppearance.Brown());
       YoGraphicVector yoMomentumGraphics = new YoGraphicVector(name + "Momentum", centerOfMass, linearMomentum, 0.05, YoAppearance.Brown());
@@ -50,11 +49,11 @@ public class MomentumVisualizer implements Updatable
    @Override
    public void update(double time)
    {
-      comCalculator.compute();
+      comCalculator.reset();
       centerOfMass.set(comCalculator.getCenterOfMass());
 
       momentumCalculator.computeAndPack(momentum);
-      momentum.getLinearPart(frameVector);
+      frameVector.set(momentum.getLinearPart());
       linearMomentum.set(frameVector);
    }
 }

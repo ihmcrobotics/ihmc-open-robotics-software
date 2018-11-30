@@ -1,5 +1,7 @@
 package us.ihmc.avatar.testTools;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -8,14 +10,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
  * This is using footstep poses for the ankle (only used in some old unit tests). Use footstep poses at the sole frame instead.
@@ -32,7 +33,7 @@ public class ScriptedFootstepGenerator
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
+         RigidBodyBasics foot = bipedFeet.get(robotSide).getRigidBody();
          ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
          RigidBodyTransform ankleToSole = new RigidBodyTransform();
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
@@ -48,16 +49,15 @@ public class ScriptedFootstepGenerator
 
    public FootstepDataListMessage generateFootstepsFromLocationsAndOrientations(RobotSide[] robotSides, double[][][] footstepLocationsAndOrientations, double swingTime, double transferTime)
    {
-      FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
       for (int i = 0; i < robotSides.length; i++)
       {
          RobotSide robotSide = robotSides[i];
          double[][] footstepLocationAndOrientation = footstepLocationsAndOrientations[i];
          Footstep footstep = generateFootstepFromLocationAndOrientation(robotSide, footstepLocationAndOrientation);
-         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, footstep.getFootstepPose().getPosition(),
-                                                                    footstep.getFootstepPose().getOrientation());
-         footstepDataList.add(footstepData);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, footstep.getFootstepPose().getPosition(), footstep.getFootstepPose().getOrientation());
+         footstepDataList.getFootstepDataList().add().set(footstepData);
       }
 
       return footstepDataList;
@@ -99,7 +99,7 @@ public class ScriptedFootstepGenerator
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody footBody = fullRobotModel.getFoot(robotSide);
+         RigidBodyBasics footBody = fullRobotModel.getFoot(robotSide);
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
          double left = footWidth / 2.0;
          double right = -footWidth / 2.0;

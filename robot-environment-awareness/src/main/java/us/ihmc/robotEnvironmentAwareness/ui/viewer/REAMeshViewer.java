@@ -13,16 +13,15 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
-import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.BoundingBoxMeshView;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.BufferOctreeMeshBuilder;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.LidarScanViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.PlanarRegionsIntersectionsMeshBuilder;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.PlanarRegionsMeshBuilder;
-import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.LidarScanViewer;
 
 public class REAMeshViewer
 {
@@ -84,19 +83,11 @@ public class REAMeshViewer
          }
       };
 
-      uiMessager.registerModuleConnectionStateListener(new ConnectionStateListener()
-      {
-         @Override
-         public void disconnected()
-         {
-            sleep();
-         }
-         
-         @Override
-         public void connected()
-         {
+      uiMessager.registerModuleMessagerStateListener(isMessagerOpen -> {
+         if (isMessagerOpen)
             start();
-         }
+         else
+            sleep();
       });
    }
 

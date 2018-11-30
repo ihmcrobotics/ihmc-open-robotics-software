@@ -6,6 +6,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,11 +16,12 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
 
 
@@ -30,7 +32,7 @@ public class ConstantPoseTrajectoryGeneratorTest
    private YoVariableRegistry registry = new YoVariableRegistry("registry");
    private final boolean allowMultipleFrames = true;
    private ReferenceFrame referenceFrame;
-   private YoFramePoint positionYoFramePoint;
+   private YoFramePoint3D positionYoFramePoint;
    private YoFrameQuaternion orientationQuaternion;
    private YoFramePointInMultipleFrames positionMultipleFrames;
    private YoFrameQuaternionInMultipleFrames orientationMultipleFrames;
@@ -45,12 +47,18 @@ public class ConstantPoseTrajectoryGeneratorTest
       //      referenceFrame = ReferenceFrame.constructARootFrame("rootFrame");
       referenceFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("referenceFrame", rootFrame1, transformToParent);
 
-      positionYoFramePoint = new YoFramePoint("prefixTEST", referenceFrame, registry);
+      positionYoFramePoint = new YoFramePoint3D("prefixTEST", referenceFrame, registry);
       orientationQuaternion = new YoFrameQuaternion("orientationPrefix", referenceFrame, registry);
       frame2 = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame2", rootFrame1, transformToParent);
       positionMultipleFrames = new YoFramePointInMultipleFrames("positionMultipleFrames", registry, rootFrame1, frame2);
       orientationMultipleFrames = new YoFrameQuaternionInMultipleFrames("orientationMultipleFrames", registry, rootFrame1, frame2);
       generator = new ConstantPoseTrajectoryGenerator(positionYoFramePoint, orientationQuaternion);
+   }
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

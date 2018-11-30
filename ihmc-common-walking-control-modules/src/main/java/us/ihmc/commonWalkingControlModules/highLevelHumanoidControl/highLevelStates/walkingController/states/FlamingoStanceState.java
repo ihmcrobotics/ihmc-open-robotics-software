@@ -1,19 +1,19 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
+import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -38,11 +38,11 @@ public class FlamingoStanceState extends SingleSupportState
    private final FootstepTiming footstepTiming = new FootstepTiming();
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   public FlamingoStanceState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
-         HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
+   public FlamingoStanceState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
+                              HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
+                              YoVariableRegistry parentRegistry)
    {
-      super(supportSide, WalkingStateEnum.getFlamingoSingleSupportState(supportSide), walkingMessageHandler, controllerToolbox, managerFactory,
-            parentRegistry);
+      super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, parentRegistry);
       this.controllerToolbox = controllerToolbox;
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
@@ -65,13 +65,16 @@ public class FlamingoStanceState extends SingleSupportState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
-      super.doAction();
+      super.doAction(timeInState);
+
+      if (loadFoot.getBooleanValue() && loadFootStartTime.isNaN())
+         loadFootStartTime.set(timeInState);
 
       if (walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
       {
-         while(walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
+         while (walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
             feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
       }
 
@@ -81,8 +84,8 @@ public class FlamingoStanceState extends SingleSupportState
 
       if (icpErrorIsTooLarge)
       {
-         FrameConvexPolygon2d supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
-         FrameConvexPolygon2d combinedFootPolygon = failureDetectionControlModule.getCombinedFootPolygon();
+         FrameConvexPolygon2D supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+         FrameConvexPolygon2D combinedFootPolygon = failureDetectionControlModule.getCombinedFootPolygon();
          if (!supportPolygonInWorld.isPointInside(capturePoint2d, 2.0e-2) && combinedFootPolygon.isPointInside(capturePoint2d))
          {
             feetManager.requestMoveStraightTouchdownForDisturbanceRecovery(swingSide);
@@ -95,12 +98,12 @@ public class FlamingoStanceState extends SingleSupportState
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
-      if (super.isDone())
+      if (super.isDone(timeInState))
          return true;
 
-      if (loadFoot.getBooleanValue() && getTimeInCurrentState() > loadFootStartTime.getDoubleValue() + loadFootDuration.getDoubleValue())
+      if (loadFoot.getBooleanValue() && timeInState > loadFootStartTime.getDoubleValue() + loadFootDuration.getDoubleValue())
       {
          loadFoot.set(false);
          return true;
@@ -110,7 +113,7 @@ public class FlamingoStanceState extends SingleSupportState
    }
 
    @Override
-   protected boolean hasMinimumTimePassed()
+   protected boolean hasMinimumTimePassed(double timeInState)
    {
       double minimumSwingTime;
       if (balanceManager.isRecoveringFromDoubleSupportFall())
@@ -118,13 +121,13 @@ public class FlamingoStanceState extends SingleSupportState
       else
          minimumSwingTime = walkingMessageHandler.getDefaultSwingTime() * minimumSwingFraction.getDoubleValue();
 
-      return getTimeInCurrentState() > minimumSwingTime;
+      return timeInState > minimumSwingTime;
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
-      super.doTransitionIntoAction();
+      super.onEntry();
 
       balanceManager.enablePelvisXYControl();
       balanceManager.setNextFootstep(null);
@@ -135,6 +138,7 @@ public class FlamingoStanceState extends SingleSupportState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       footstepTiming.setTimings(swingTime, initialTransferTime);
 
+      balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming);
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport(swingTime, initialTransferTime, finalTransferTime);
@@ -142,15 +146,16 @@ public class FlamingoStanceState extends SingleSupportState
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(supportSide);
       comHeightManager.setSupportLeg(getSupportSide());
       loadFoot.set(false);
+      loadFootStartTime.setToNaN();
 
       legConfigurationManager.startSwing(swingSide);
       controllerToolbox.updateContactPointsForUpcomingFootstep(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
-      super.doTransitionOutOfAction();
+      super.onExit();
 
       balanceManager.disablePelvisXYControl();
    }
@@ -177,7 +182,6 @@ public class FlamingoStanceState extends SingleSupportState
    private void initiateFootLoadingProcedure(RobotSide swingSide)
    {
       loadFoot.set(true);
-      loadFootStartTime.set(getTimeInCurrentState());
       balanceManager.clearICPPlan();
 
       double swingTime = loadFootDuration.getDoubleValue();
@@ -185,6 +189,7 @@ public class FlamingoStanceState extends SingleSupportState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       footstepTiming.setTimings(swingTime, transferTime);
 
+      balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming);
       balanceManager.setUpcomingFootstep(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
       balanceManager.setICPPlanSupportSide(supportSide);

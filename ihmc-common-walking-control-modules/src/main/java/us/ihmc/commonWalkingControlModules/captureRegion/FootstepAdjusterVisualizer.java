@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import java.awt.Color;
 
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 public class FootstepAdjusterVisualizer
 {
@@ -20,8 +20,8 @@ public class FootstepAdjusterVisualizer
 
    private final FootstepAdjustor footstepAdjustor;
 
-   private YoFrameConvexPolygon2d yoNextFootstepPolygon;
-   private FrameConvexPolygon2d nextFootstepPolygon;
+   private YoFrameConvexPolygon2D yoNextFootstepPolygon;
+   private FrameConvexPolygon2D nextFootstepPolygon;
 
    public FootstepAdjusterVisualizer(FootstepAdjustor footstepAdjustor, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -29,8 +29,8 @@ public class FootstepAdjusterVisualizer
 
       String nextFootstepCaption = "DesiredTouchdown";
 
-      yoNextFootstepPolygon = new YoFrameConvexPolygon2d(nextFootstepCaption, "", worldFrame, 8, registry);
-      nextFootstepPolygon = new FrameConvexPolygon2d(worldFrame);
+      yoNextFootstepPolygon = new YoFrameConvexPolygon2D(nextFootstepCaption, "", worldFrame, 8, registry);
+      nextFootstepPolygon = new FrameConvexPolygon2D(worldFrame);
 
       nextFootstepPolygonArtifact = new YoArtifactPolygon(nextFootstepCaption, yoNextFootstepPolygon, colorDefault, false);
       nextFootstepPolygonArtifact.setVisible(false);
@@ -41,17 +41,17 @@ public class FootstepAdjusterVisualizer
 
    public void hide()
    {
-      yoNextFootstepPolygon.hide();
+      yoNextFootstepPolygon.clear();
    }
 
    public void update()
    {
-      nextFootstepPolygon.setIncludingFrameAndUpdate(footstepAdjustor.getTouchdownFootPolygon());
+      nextFootstepPolygon.setIncludingFrame(footstepAdjustor.getTouchdownFootPolygon());
       nextFootstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
       try
       {
-         yoNextFootstepPolygon.setFrameConvexPolygon2d(nextFootstepPolygon);
+         yoNextFootstepPolygon.set(nextFootstepPolygon);
       }
       catch (Exception e)
       {

@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.modules.mocap;
 
 import java.util.HashMap;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import optiTrack.MocapRigidBody;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -11,7 +12,6 @@ import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataRecei
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 
 /**

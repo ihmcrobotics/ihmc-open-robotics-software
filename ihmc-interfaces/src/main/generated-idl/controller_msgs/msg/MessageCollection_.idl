@@ -1,0 +1,34 @@
+#ifndef __controller_msgs__msg__MessageCollection__idl__
+#define __controller_msgs__msg__MessageCollection__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message is used mainly with the IHMC whole-body controller.
+       * When the execution of a collection of messages is to be synchronized, these messages should be attributed
+       * a unique sequence ID. Then by sending beforehand a MessageCollection holding onto the sequence IDs of all these messages,
+       * the controller will wait to receive all the messages before processing them.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::MessageCollection_")
+      struct MessageCollection
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * The sequence IDs of all the messages that are expected to be received.
+         */
+        sequence<unsigned long> sequences;
+      };
+    };
+  };
+};
+
+#endif

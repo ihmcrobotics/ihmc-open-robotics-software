@@ -9,14 +9,20 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -25,21 +31,19 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -145,6 +149,8 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    }
 
 
+   @ContinuousIntegrationTest(estimatedDuration = 130.4)
+   @Test(timeout = 650000)
    public void testMultipleHeightFootsteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -172,7 +178,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
          FootstepDataListMessage footstepDataList = createBasicFootstepFromDefaultForSwingHeightTest(currentHeight);
-         drcSimulationTestHelper.send(footstepDataList);
+         drcSimulationTestHelper.publishToController(footstepDataList);
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
          maxHeights[i] = testController.getMaxFootHeight();
          assertTrue(success);
@@ -196,6 +202,8 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 55.8)
+   @Test(timeout = 280000)
    public void testReallyHighFootstep() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -213,7 +221,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
       assertTrue(success);
 
@@ -225,6 +233,8 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 47.8)
+   @Test(timeout = 240000)
    public void testNegativeSwingHeight() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -242,7 +252,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
       assertTrue(success);
 
@@ -256,35 +266,37 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
 
    private FootstepDataListMessage createBasicFootstepFromDefaultForSwingHeightTest(double swingHeight)
    {
-      FootstepDataListMessage desiredFootsteps = new FootstepDataListMessage(0.0, 0.0);
-      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3D(0.4, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
-      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
+      FootstepDataListMessage desiredFootsteps = HumanoidMessageTools.createFootstepDataListMessage(0.0, 0.0);
+      FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.4, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
+      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
-      desiredFootsteps.footstepDataList.add(footstep);
+      desiredFootsteps.getFootstepDataList().add().set(footstep);
 
       return desiredFootsteps;
    }
 
    private FootstepDataListMessage createFootstepsForSwingHeightTest(double swingHeight)
    {
-      FootstepDataListMessage desiredFootsteps = new FootstepDataListMessage(0.0, 0.0);
-      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3D(0.6, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
-      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
+      FootstepDataListMessage desiredFootsteps = HumanoidMessageTools.createFootstepDataListMessage(0.0, 0.0);
+      FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.6, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
+      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
-      desiredFootsteps.footstepDataList.add(footstep);
+      desiredFootsteps.getFootstepDataList().add().set(footstep);
 
-      footstep = new FootstepDataMessage(RobotSide.LEFT, new Point3D(1.2, 0.125, 0.0), new Quaternion(0, 0, 0, 1));
-      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(1.2, 0.125, 0.0), new Quaternion(0, 0, 0, 1));
+      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
-      desiredFootsteps.footstepDataList.add(footstep);
+      desiredFootsteps.getFootstepDataList().add().set(footstep);
 
-      footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3D(1.2, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
-      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(1.2, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
+      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
-      desiredFootsteps.footstepDataList.add(footstep);
+      desiredFootsteps.getFootstepDataList().add().set(footstep);
       return desiredFootsteps;
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 126.9)
+   @Test(timeout = 630000)
    public void testSelfCollisionAvoidance() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -299,12 +311,12 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
 
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(drcSimulationTestHelper.getControllerFullRobotModel());
       referenceFrames.updateFrames();
-      SideDependentList<ArrayList<Point2D>> footContactPoints = robotModel.getContactPointParameters().getFootContactPoints();
+      SideDependentList<ArrayList<Point2D>> footContactPoints = new SideDependentList<>(robotModel.getContactPointParameters().getFootContactPoints());
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
       ConvexPolygonScaler scaler = new ConvexPolygonScaler();
       for (RobotSide robotSide : RobotSide.values)
       {
-         ConvexPolygon2D footPolygon = new ConvexPolygon2D(footContactPoints.get(robotSide));
+         ConvexPolygon2D footPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footContactPoints.get(robotSide)));
          ConvexPolygon2D shrunkFootPolygon = new ConvexPolygon2D();
          scaler.scaleConvexPolygon(footPolygon, 0.025, shrunkFootPolygon);
          footPolygons.put(robotSide, shrunkFootPolygon);
@@ -348,13 +360,13 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          stepLocation.add(lastPosition);
 
          lastPosition.set(stepLocation);
-         FootstepDataMessage footstepData = new FootstepDataMessage(swingSide, stepLocation, stepOrientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(swingSide, stepLocation, stepOrientation);
          footstepData.setSwingDuration(swingTime);
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
          swingSide = swingSide.getOppositeSide();
       }
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       double simulationTime = initialTransfer + steps * stepTime + 0.5;
       while (drcSimulationTestHelper.getYoVariable("t").getValueAsDouble() < simulationTime)
       {
@@ -368,7 +380,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       private final HumanoidReferenceFrames referenceFrames;
       private final SideDependentList<ConvexPolygon2D> footPolygonsInSole;
       private final SideDependentList<ConvexPolygon2D> footPolygonsInWorld;
-      private final FrameConvexPolygon2d framePolygon = new FrameConvexPolygon2d();
+      private final FrameConvexPolygon2D framePolygon = new FrameConvexPolygon2D();
 
       private boolean collision = false;
 
@@ -388,7 +400,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
             MovingReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
             framePolygon.setIncludingFrame(soleFrame, footPolygonsInSole.get(robotSide));
             framePolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
-            footPolygonsInWorld.get(robotSide).setAndUpdate(framePolygon.getConvexPolygon2d());
+            footPolygonsInWorld.get(robotSide).set(framePolygon);
          }
 
          ConvexPolygon2D leftPolygon = footPolygonsInWorld.get(RobotSide.LEFT);

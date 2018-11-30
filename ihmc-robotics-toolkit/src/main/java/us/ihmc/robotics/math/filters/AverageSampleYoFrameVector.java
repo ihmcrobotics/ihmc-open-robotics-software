@@ -4,11 +4,11 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 
 
-public class AverageSampleYoFrameVector extends YoFrameVector
+public class AverageSampleYoFrameVector extends YoFrameVector3D
 {
    private final AverageSampleYoDouble x, y, z;
    
@@ -37,12 +37,12 @@ public class AverageSampleYoFrameVector extends YoFrameVector
       return ret;
    }
 
-   public static AverageSampleYoFrameVector createAverageSampleYoFrameVector(String namePrefix, YoVariableRegistry registry, YoFrameVector dataSource, ReferenceFrame referenceFrame)
+   public static AverageSampleYoFrameVector createAverageSampleYoFrameVector(String namePrefix, YoVariableRegistry registry, YoFrameVector3D dataSource, ReferenceFrame referenceFrame)
    {
       return createAverageSampleYoFrameVector(namePrefix, "", registry, dataSource, referenceFrame);
    }
 
-   public static AverageSampleYoFrameVector createAverageSampleYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoFrameVector dataSource, ReferenceFrame referenceFrame)
+   public static AverageSampleYoFrameVector createAverageSampleYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoFrameVector3D dataSource, ReferenceFrame referenceFrame)
    {
       AverageSampleYoDouble x = new AverageSampleYoDouble(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), dataSource.getYoX(), registry);
       AverageSampleYoDouble y = new AverageSampleYoDouble(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), dataSource.getYoY(), registry);

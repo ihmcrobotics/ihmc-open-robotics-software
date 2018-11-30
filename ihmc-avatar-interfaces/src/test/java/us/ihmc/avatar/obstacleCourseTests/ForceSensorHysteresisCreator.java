@@ -2,11 +2,11 @@ package us.ihmc.avatar.obstacleCourseTests;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotController.ModularRobotController;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * A fairly crude implementation of injecting hysteresis into a force sensor signal.

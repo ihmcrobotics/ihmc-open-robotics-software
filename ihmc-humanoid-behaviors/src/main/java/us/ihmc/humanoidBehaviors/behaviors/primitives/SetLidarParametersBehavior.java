@@ -1,21 +1,25 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+/**
+ * @deprecated This is not working anymore. See {@link ClearLidarBehavior}.
+ *
+ */
 public class SetLidarParametersBehavior extends AbstractBehavior
 {
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
    private DepthDataFilterParameters lidarParamPacket;
 
-   public SetLidarParametersBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
+   public SetLidarParametersBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(outgoingCommunicationBridge);
+      super(robotName, ros2Node);
 
    }
-   
+
    public void setInput(DepthDataFilterParameters clearLidarPacket)
    {
       this.lidarParamPacket = clearLidarPacket;
@@ -34,7 +38,7 @@ public class SetLidarParametersBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         sendPacket(lidarParamPacket);
+         //         sendPacket(lidarParamPacket);
          packetHasBeenSent.set(true);
       }
    }
@@ -57,15 +61,11 @@ public class SetLidarParametersBehavior extends AbstractBehavior
       isAborted.set(false);
    }
 
-
-
    @Override
    public boolean isDone()
    {
       return packetHasBeenSent.getBooleanValue() && !isPaused.getBooleanValue();
    }
-
-   
 
    public boolean hasInputBeenSet()
    {

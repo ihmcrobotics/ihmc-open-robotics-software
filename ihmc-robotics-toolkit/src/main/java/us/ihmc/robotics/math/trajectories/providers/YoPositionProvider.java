@@ -1,15 +1,15 @@
 package us.ihmc.robotics.math.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 
 public class YoPositionProvider implements PositionProvider
 {
-   private final YoFramePoint framePoint;
+   private final YoFramePoint3D framePoint;
 
-   public YoPositionProvider(YoFramePoint yoFramePoint)
+   public YoPositionProvider(YoFramePoint3D yoFramePoint)
    {
       this.framePoint = yoFramePoint;
    }

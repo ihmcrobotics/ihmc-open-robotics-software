@@ -435,13 +435,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public Enum<?>[] getRobotSegments()
-   {
-      return RobotSide.values;
-   }
-
-   @Override
-   public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
+   public RobotSide getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

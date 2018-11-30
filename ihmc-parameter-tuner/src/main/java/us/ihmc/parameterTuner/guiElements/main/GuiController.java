@@ -1,16 +1,20 @@
 package us.ihmc.parameterTuner.guiElements.main;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.ClipboardContent;
@@ -21,14 +25,15 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.parameterTuner.ParameterTuningTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
+import us.ihmc.parameterTuner.guiElements.GuiParameterStatus;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
+import us.ihmc.parameterTuner.guiElements.tabs.TuningTabManager;
 import us.ihmc.parameterTuner.guiElements.tree.ParameterTree;
 import us.ihmc.parameterTuner.guiElements.tree.ParameterTreeParameter;
 import us.ihmc.parameterTuner.guiElements.tree.ParameterTreeValue;
-import us.ihmc.parameterTuner.guiElements.tuners.TuningBoxManager;
+import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
 
 public class GuiController
 {
@@ -39,24 +44,33 @@ public class GuiController
    @FXML
    private CheckBox hideNamespaces;
    @FXML
-   private ParameterTree tree;
+   private StackPane treePane;
    @FXML
-   private ScrollPane scrollPane;
-   @FXML
-   private VBox tuningBox;
+   private TabPane tabPane;
    @FXML
    private StackPane inputPane;
+   @FXML
+   private ChoiceBox<GuiParameterStatus> statusFilter;
 
    private final HashMap<String, GuiParameter> parameterMap = new HashMap<>();
    private ChangeCollector changeCollector;
-   private TuningBoxManager tuningBoxManager;
+   private TuningTabManager tuningTabManager;
+
+   private final ParameterTree tree = new ParameterTree();
+
+   private final List<GuiRegistry> allRegistries = new ArrayList<>();
+   private final BooleanProperty rootRegistriesChanged = new SimpleBooleanProperty();
 
    public void initialize()
    {
       searchFieldParameters.textProperty().addListener(observable -> updateTree());
       searchFieldNamespaces.textProperty().addListener(observable -> updateTree());
-      tuningBoxManager = new TuningBoxManager(tuningBox);
 
+      statusFilter.getItems().addAll(GuiParameterStatus.values());
+      statusFilter.getSelectionModel().select(GuiParameterStatus.ANY);
+      statusFilter.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> updateTree());
+
+      treePane.getChildren().add(tree);
       tree.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
       tree.setOnMouseClicked(new EventHandler<MouseEvent>()
       {
@@ -92,7 +106,7 @@ public class GuiController
             dragboard.setContent(clipboardContent);
          }
       });
-      scrollPane.setOnDragOver(new EventHandler<DragEvent>()
+      tabPane.setOnDragOver(new EventHandler<DragEvent>()
       {
          @Override
          public void handle(DragEvent event)
@@ -100,14 +114,19 @@ public class GuiController
             event.acceptTransferModes(TransferMode.MOVE);
          }
       });
-      scrollPane.setOnDragDropped(new EventHandler<DragEvent>()
+      tabPane.setOnDragDropped(new EventHandler<DragEvent>()
       {
          @Override
          public void handle(DragEvent event)
          {
-            addSelectedParametersToTuner();
+            if (event.getGestureSource() == tree)
+            {
+               addSelectedParametersToTuner();
+            }
          }
       });
+
+      tuningTabManager = new TuningTabManager(tabPane);
    }
 
    private void addSelectedParametersToTuner()
@@ -118,21 +137,16 @@ public class GuiController
          if (selectedItem != null && !selectedItem.getValue().isRegistry())
          {
             GuiParameter parameter = ((ParameterTreeParameter) selectedItem.getValue()).getParameter();
-            tuningBoxManager.handleNewParameter(parameter);
+            tuningTabManager.handleNewParameter(parameter.getUniqueName());
          }
       }
    }
 
    @FXML
-   protected void handleNamespaceButton(ActionEvent event)
-   {
-      updateTree();
-      searchFieldNamespaces.setDisable(hideNamespaces.isSelected());
-   }
-
    private void updateTree()
    {
-      tree.filterRegistries(hideNamespaces.isSelected(), searchFieldParameters.getText(), searchFieldNamespaces.getText());
+      tree.filterRegistries(hideNamespaces.isSelected(), statusFilter.getValue(), searchFieldParameters.getText(), searchFieldNamespaces.getText());
+      searchFieldNamespaces.setDisable(hideNamespaces.isSelected());
    }
 
    public void addInputNode(Node node)
@@ -143,19 +157,44 @@ public class GuiController
       }
    }
 
-   public void setRegistry(GuiRegistry fullRegistry)
+   public void setRegistries(List<GuiRegistry> registries)
    {
-      tree.setRegistries(fullRegistry);
+      Map<String, Tuner> tunerMap = ParameterTuningTools.createTunerMap(registries);
+      tuningTabManager.setTunerMap(tunerMap);
+      tree.setRegistries(registries, tunerMap);
       updateTree();
-      tuningBoxManager.clearAllParameters();
 
       changeCollector = new ChangeCollector();
       parameterMap.clear();
-      List<GuiParameter> allParameters = fullRegistry.getAllParameters();
-      allParameters.stream().forEach(parameter -> {
+      List<GuiParameter> allParameters = new ArrayList<>();
+      registries.forEach(registry -> allParameters.addAll(registry.getAllParameters()));
+      allParameters.forEach(parameter -> {
          parameter.addChangedListener(changeCollector);
+         parameter.addStatusUpdater();
+         parameter.saveStateForReset();
          parameterMap.put(parameter.getUniqueName(), parameter);
       });
+
+      allRegistries.clear();
+      registries.stream().forEach(registry -> {
+         allRegistries.add(registry);
+         allRegistries.addAll(registry.getAllRegistries());
+      });
+      allRegistries.forEach(registry -> registry.isRoot().addListener((observable, oldValue, newValue) -> rootRegistriesChanged.set(true)));
+      rootRegistriesChanged.set(true);
+   }
+
+   public boolean areRootRegistriesChanged()
+   {
+      return rootRegistriesChanged.getValue();
+   }
+
+   public List<String> pollRootRegistryNames()
+   {
+      rootRegistriesChanged.set(false);
+      List<String> rootRegistries = new ArrayList<>();
+      allRegistries.stream().filter(registry -> registry.isRoot().get()).forEach(registry -> rootRegistries.add(registry.getUniqueName()));
+      return rootRegistries;
    }
 
    public List<GuiParameter> pollChangedParameters()
@@ -177,16 +216,23 @@ public class GuiController
 
       changeCollector.stopRecording();
       externallyChangesParameters.stream().forEach(externalParameter -> {
-         GuiParameter localParameter = parameterMap.get(externalParameter.getUniqueName());
-         if (localParameter == null)
+         String uniqueName = externalParameter.getUniqueName();
+         GuiParameter localParameter = parameterMap.get(uniqueName);
+         if (changeCollector.isPending(uniqueName))
          {
-            PrintTools.warn("Did not find " + externalParameter.getName() + " skipping...");
+            changeCollector.parameterWasUpdated(uniqueName, externalParameter.getCurrentValue());
          }
-         else
+         else if (!localParameter.getCurrentValue().equals(externalParameter.getCurrentValue()))
          {
-            localParameter.setValue(externalParameter.getCurrentValue());
+            localParameter.setValueAndStatus(externalParameter);
+            localParameter.saveStateForReset();
          }
       });
       changeCollector.startRecording();
+   }
+
+   public void close()
+   {
+      tuningTabManager.close();
    }
 }

@@ -5,8 +5,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 
 public class PointMean extends Point3D
 {
-   private static final long serialVersionUID = -3110940850302600107L;
-
    private int sampleSize = 0;
 
    public PointMean()

@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -17,20 +18,20 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends YoDouble impl
    private final double dt;
 
    private final FilteredVelocityYoVariable finiteDifferenceVelocity;
-   
-   private final YoDouble alphaVariable;
+
+   private final DoubleProvider alphaVariable;
    private final YoDouble position;
 
    private final YoDouble lastPosition;
    private final YoBoolean hasBeenCalled;
 
    private final YoEnum<BacklashState> backlashState;
-   private final YoDouble slopTime;
+   private final DoubleProvider slopTime;
 
    private final YoDouble timeSinceSloppy;
 
-   public RevisedBacklashCompensatingVelocityYoVariable(String name, String description, YoDouble alphaVariable, YoDouble positionVariable,
-           double dt, YoDouble slopTime, YoVariableRegistry registry)
+   public RevisedBacklashCompensatingVelocityYoVariable(String name, String description, DoubleProvider alphaVariable, YoDouble positionVariable,
+           double dt, DoubleProvider slopTime, YoVariableRegistry registry)
    {
       super(name, description, registry);
       
@@ -86,6 +87,7 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends YoDouble impl
       backlashState.set(null);
    }
 
+   @Override
    public void update()
    {
       if (position == null)
@@ -151,7 +153,7 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends YoDouble impl
 //            this.set(0.0);
             backlashState.set(BacklashState.FORWARD_SLOP);
          }
-         else if (timeSinceSloppy.getDoubleValue() > slopTime.getDoubleValue())
+         else if (timeSinceSloppy.getDoubleValue() > slopTime.getValue())
          {
             backlashState.set(BacklashState.BACKWARD_OK);
          }
@@ -167,7 +169,7 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends YoDouble impl
 //            this.set(0.0);
             backlashState.set(BacklashState.BACKWARD_SLOP);
          }
-         else if (timeSinceSloppy.getDoubleValue() > slopTime.getDoubleValue())
+         else if (timeSinceSloppy.getDoubleValue() > slopTime.getValue())
          {
             backlashState.set(BacklashState.FORWARD_OK);
          }
@@ -178,7 +180,7 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends YoDouble impl
 
       double difference = currentPosition - lastPosition.getDoubleValue();
 
-      double percent = timeSinceSloppy.getDoubleValue() / slopTime.getDoubleValue();
+      double percent = timeSinceSloppy.getDoubleValue() / slopTime.getValue();
       percent = MathTools.clamp(percent, 0.0, 1.0);
       if (Double.isNaN(percent))
          percent = 1.0;
@@ -195,18 +197,8 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends YoDouble impl
       double previousFilteredDerivative = getDoubleValue();
       double currentRawDerivative = difference / dt;
 
-      double alpha = alphaVariable.getDoubleValue();
+      double alpha = alphaVariable.getValue();
       this.set(alpha * previousFilteredDerivative + (1.0 - alpha) * currentRawDerivative);
-   }
-
-   public void setAlpha(double alpha)
-   {
-      this.alphaVariable.set(alpha);
-   }
-
-   public void setSlopTime(double slopTime)
-   {
-      this.slopTime.set(slopTime);
    }
 
    private enum BacklashState {BACKWARD_OK, FORWARD_OK, BACKWARD_SLOP, FORWARD_SLOP;}

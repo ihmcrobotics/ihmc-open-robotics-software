@@ -1,23 +1,38 @@
 package us.ihmc.robotics.partNames;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public interface HumanoidJointNameMap extends JointNameMap
+public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
 {
-   public ImmutablePair<RobotSide, LegJointName> getLegJointName(String jointName);
+   ImmutablePair<RobotSide, ArmJointName> getArmJointName(String jointName);
 
-   public ImmutablePair<RobotSide, ArmJointName> getArmJointName(String jointName);
+   String getJointBeforeHandName(RobotSide robotSide);
 
-   public ImmutablePair<RobotSide, LimbName> getLimbName(String limbName);
+   RigidBodyTransform getHandControlFrameToWristTransform(RobotSide robotSide);
 
-   public String getJointBeforeFootName(RobotSide robotSide);
+   default RigidBodyTransform getSoleToParentFrameTransform(RobotSide robotSide)
+   {
+      return getSoleToAnkleFrameTransform(robotSide);
+   }
 
-   public String getJointBeforeHandName(RobotSide robotSide);
+   String getPelvisName();
 
-   public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide);
+   String getChestName();
 
-   public RigidBodyTransform getHandControlFrameToWristTransform(RobotSide robotSide);
+   @Deprecated
+   RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide);
+
+   @Override
+   default RobotSide[] getRobotSegments()
+   {
+      return RobotSide.values;
+   }
+
+   @Override
+   default String getRootBodyName()
+   {
+      return getPelvisName();
+   }
 }

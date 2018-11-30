@@ -3,10 +3,12 @@ package us.ihmc.humanoidRobotics.communication.subscribers;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -14,7 +16,7 @@ public class CapturabilityBasedStatusSubscriber implements PacketConsumer<Captur
 {
    private final AtomicReference<FramePoint2D> capturePointReference = new AtomicReference<FramePoint2D>(null);
    private final AtomicReference<FramePoint2D> desiredCapturePointReference = new AtomicReference<FramePoint2D>(null);
-   private final SideDependentList<AtomicReference<FrameConvexPolygon2d>> footSupportPolygonReferences = new SideDependentList<>();
+   private final SideDependentList<AtomicReference<FrameConvexPolygon2D>> footSupportPolygonReferences = new SideDependentList<>();
    private final AtomicReference<Boolean> doubleSupportReference = new AtomicReference<Boolean>(null);
 
    private ArrayList<CapturabilityBasedStatusListener> listOfListener = new ArrayList<>();
@@ -22,7 +24,7 @@ public class CapturabilityBasedStatusSubscriber implements PacketConsumer<Captur
    public CapturabilityBasedStatusSubscriber()
    {
       for (RobotSide robotSide : RobotSide.values)
-         footSupportPolygonReferences.put(robotSide, new AtomicReference<FrameConvexPolygon2d>(null));
+         footSupportPolygonReferences.put(robotSide, new AtomicReference<FrameConvexPolygon2D>(null));
    }
 
    public void registerListener(CapturabilityBasedStatusListener listener)
@@ -40,7 +42,7 @@ public class CapturabilityBasedStatusSubscriber implements PacketConsumer<Captur
       return desiredCapturePointReference.getAndSet(null);
    }
 
-   public FrameConvexPolygon2d getFootSupportPolygon(RobotSide robotSide)
+   public FrameConvexPolygon2D getFootSupportPolygon(RobotSide robotSide)
    {
       return footSupportPolygonReferences.get(robotSide).getAndSet(null);
    }
@@ -56,11 +58,11 @@ public class CapturabilityBasedStatusSubscriber implements PacketConsumer<Captur
       if (object == null)
          return;
 
-      capturePointReference.set(object.getCapturePoint());
-      desiredCapturePointReference.set(object.getDesiredCapturePoint());
+      capturePointReference.set(new FramePoint2D(ReferenceFrame.getWorldFrame(), object.getCapturePoint2d()));
+      desiredCapturePointReference.set(new FramePoint2D(ReferenceFrame.getWorldFrame(), object.getDesiredCapturePoint2d()));
       for (RobotSide robotSide : RobotSide.values)
-         footSupportPolygonReferences.get(robotSide).set(object.getFootSupportPolygon(robotSide));
-      doubleSupportReference.set(object.isInDoubleSupport());
+         footSupportPolygonReferences.get(robotSide).set(HumanoidMessageTools.unpackFootSupportPolygon(object, robotSide));
+      doubleSupportReference.set(HumanoidMessageTools.unpackIsInDoubleSupport(object));
 
       for (CapturabilityBasedStatusListener listener : listOfListener)
       {

@@ -245,7 +245,7 @@ public class ROSMessageFileCreator
 
    private String camelCaseToLowerCaseWithUnderscores(String in)
    {
-      String regex = "([a-z])([A-Z]+)";
+      String regex = "([a-z0-9])([A-Z]+)";
       String replacement = "$1_$2";
 
       String inWithUnderscores = in.replaceAll(regex, replacement);

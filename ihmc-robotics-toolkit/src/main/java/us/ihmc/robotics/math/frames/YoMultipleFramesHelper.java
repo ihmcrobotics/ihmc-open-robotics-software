@@ -19,7 +19,7 @@ public class YoMultipleFramesHelper implements ReferenceFrameHolder
          throw new RuntimeException("Need to provide at least one ReferenceFrame.");
       
       currentFrameId = new YoLong(namePrefix + "FrameId", registry);
-      currentFrameId.set(referenceFrames[0].getNameBasedHashCode());
+      currentFrameId.set(referenceFrames[0].hashCode());
 
       for (ReferenceFrame referenceFrame : referenceFrames)
       {
@@ -58,12 +58,12 @@ public class YoMultipleFramesHelper implements ReferenceFrameHolder
    public ReferenceFrame switchCurrentReferenceFrame(ReferenceFrame newCurrentReferenceFrame)
    {
       ReferenceFrame previousReferenceFrame = getCurrentReferenceFrame();
-      if(!referenceFrames.contains(newCurrentReferenceFrame.getNameBasedHashCode()))
+      if(!referenceFrames.contains(newCurrentReferenceFrame.hashCode()))
       {
          throw new RuntimeException("The frame: " + newCurrentReferenceFrame.getName() + " has not been registered.");
       }
       
-      currentFrameId.set(newCurrentReferenceFrame.getNameBasedHashCode());
+      currentFrameId.set(newCurrentReferenceFrame.hashCode());
       return previousReferenceFrame;
    }
 
@@ -81,7 +81,7 @@ public class YoMultipleFramesHelper implements ReferenceFrameHolder
          return;
       }
 
-      referenceFrames.put(newReferenceFrame.getNameBasedHashCode(), newReferenceFrame);
+      referenceFrames.put(newReferenceFrame.hashCode(), newReferenceFrame);
    }
 
    /**
@@ -91,7 +91,7 @@ public class YoMultipleFramesHelper implements ReferenceFrameHolder
     */
    public boolean isReferenceFrameRegistered(ReferenceFrame referenceFrame)
    {
-      return referenceFrames.contains(referenceFrame.getNameBasedHashCode());
+      return referenceFrames.contains(referenceFrame.hashCode());
    }
 
    /**

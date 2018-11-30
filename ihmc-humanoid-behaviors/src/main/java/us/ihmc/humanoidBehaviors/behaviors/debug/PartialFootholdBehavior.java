@@ -2,21 +2,25 @@ package us.ihmc.humanoidBehaviors.behaviors.debug;
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 
 public class PartialFootholdBehavior extends AbstractBehavior
 {
+   private final IHMCROS2Publisher<FootstepDataListMessage> publisher;
 
-   public PartialFootholdBehavior(CommunicationBridgeInterface communicationBridge)
+   public PartialFootholdBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(communicationBridge);
+      super(robotName, ros2Node);
+      publisher = createPublisherForController(FootstepDataListMessage.class);
    }
 
    @Override
@@ -28,7 +32,7 @@ public class PartialFootholdBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      FootstepDataListMessage message = new FootstepDataListMessage(1.5, 0.5);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(1.5, 0.5);
       RobotSide side = RobotSide.LEFT;
 
       for (int i = 0; i < 10; i++)
@@ -54,12 +58,12 @@ public class PartialFootholdBehavior extends AbstractBehavior
             contactPoints.add(new Point2D(-0.1, 0.0));
          }
 
-         FootstepDataMessage footstepData = new FootstepDataMessage(side, location, new Quaternion(0.0, 0.0, 0.0, 1.0), contactPoints);
-         message.add(footstepData);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(side, location, new Quaternion(0.0, 0.0, 0.0, 1.0), contactPoints);
+         message.getFootstepDataList().add().set(footstepData);
          side = side.getOppositeSide();
       }
 
-      sendPacket(message);
+      publisher.publish(message);
    }
 
    @Override

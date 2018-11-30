@@ -4,7 +4,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
@@ -25,7 +25,7 @@ public class StackOfBouncyBallsRobot extends Robot
       double gravity = -9.81;
       this.setGravity(gravity);
 
-      final YoFrameVector yoLinearMomentum = new YoFrameVector("linearMomentum", null, this.getRobotsYoVariableRegistry());
+      final YoFrameVector3D yoLinearMomentum = new YoFrameVector3D("linearMomentum", null, this.getRobotsYoVariableRegistry());
       final YoDouble potentialEnergy = new YoDouble("potentialEnergy", this.getRobotsYoVariableRegistry());
       final YoDouble kineticEnergy = new YoDouble("kineticEnergy", this.getRobotsYoVariableRegistry());
       final YoDouble totalEnergy = new YoDouble("totalEnergy", this.getRobotsYoVariableRegistry());

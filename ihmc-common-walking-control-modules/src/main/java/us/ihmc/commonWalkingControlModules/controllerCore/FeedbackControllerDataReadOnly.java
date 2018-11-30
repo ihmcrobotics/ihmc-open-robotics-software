@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public interface FeedbackControllerDataReadOnly
 {
@@ -40,7 +40,9 @@ public interface FeedbackControllerDataReadOnly
       LINEAR_VELOCITY("LinearVelocity"),
       ANGULAR_VELOCITY("AngularVelocity"),
       LINEAR_ACCELERATION("LinearAcceleration"),
-      ANGULAR_ACCELERATION("AngularAcceleration");
+      ANGULAR_ACCELERATION("AngularAcceleration"),
+      LINEAR_FORCE("LinearForce"),
+      ANGULAR_TORQUE("AngularTorque");
 
       private final String name;
 
@@ -106,7 +108,7 @@ public interface FeedbackControllerDataReadOnly
     *           {@link Type} are not applicable.
     * @return whether the data is available or not.
     */
-   boolean getPositionData(RigidBody endEffector, FramePoint3D positionDataToPack, Type type);
+   boolean getPositionData(RigidBodyBasics endEffector, FramePoint3D positionDataToPack, Type type);
 
    /**
     * Retrieves if possible the orientation data about a specific end-effector.
@@ -122,7 +124,7 @@ public interface FeedbackControllerDataReadOnly
     *           {@link Type} are not applicable.
     * @return whether the data is available or not.
     */
-   boolean getOrientationData(RigidBody endEffector, FrameQuaternion orientationDataToPack, Type type);
+   boolean getOrientationData(RigidBodyBasics endEffector, FrameQuaternion orientationDataToPack, Type type);
 
    /**
     * Retrieves if possible the vector data about a specific end-effector.
@@ -139,5 +141,5 @@ public interface FeedbackControllerDataReadOnly
     *           {@link Space}.
     * @return whether the data is available or not.
     */
-   boolean getVectorData(RigidBody endEffector, FrameVector3D vectorDataToPack, Type type, Space space);
+   boolean getVectorData(RigidBodyBasics endEffector, FrameVector3D vectorDataToPack, Type type, Space space);
 }

@@ -6,9 +6,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
+import controller_msgs.msg.dds.DrillDetectionPacket;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.net.PacketConsumer;
 
 public class DrillDetectionStatusSubscriber implements PacketConsumer<DrillDetectionPacket>
 {

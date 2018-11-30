@@ -5,17 +5,26 @@ import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityPar
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 import static org.junit.Assert.*;
+
+import org.junit.After;
 
 public class TimeAdjustmentSolverTest
 {
    private static final double epsilon = 0.00001;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.0)
-   @Test(timeout = 2000)
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testWithoutHigherSteps()
    {
       int maximumNumberOfSteps = 3;
@@ -147,8 +156,8 @@ public class TimeAdjustmentSolverTest
    /**
     * We only have only told it to consider 3 steps, so none of the higher steps should be allowed.
     */
-   @ContinuousIntegrationTest(estimatedDuration = 2.0)
-   @Test(timeout = 2000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testWithHigherStepsButOutOfBounds()
    {
       int maximumNumberOfSteps = 3;
@@ -272,8 +281,8 @@ public class TimeAdjustmentSolverTest
    /**
     * We are not submitting higher gradients, so there should be zero adjustment
     */
-   @ContinuousIntegrationTest(estimatedDuration = 2.0)
-   @Test(timeout = 2000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testWithHigherStepsButNotSubmitted()
    {
       int maximumNumberOfSteps = 4;
@@ -410,8 +419,8 @@ public class TimeAdjustmentSolverTest
    /**
     * The higher gradients are really small, so the adjustment should be really small.
     */
-   @ContinuousIntegrationTest(estimatedDuration = 2.0)
-   @Test(timeout = 2000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testWithHigherSteps()
    {
       int maximumNumberOfSteps = 4;

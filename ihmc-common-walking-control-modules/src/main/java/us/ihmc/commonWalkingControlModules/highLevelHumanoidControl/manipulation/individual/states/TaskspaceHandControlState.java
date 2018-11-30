@@ -17,19 +17,19 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.lists.RecyclingArrayDeque;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.commons.FormattingTools;
 
@@ -52,7 +52,7 @@ public class TaskspaceHandControlState extends HandControlState
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
 
    // viz stuff:
-   private final YoFramePose yoDesiredPose;
+   private final YoFramePoseUsingYawPitchRoll yoDesiredPose;
 
    // temp stuff:
    private final FramePose3D desiredPose = new FramePose3D();
@@ -74,8 +74,8 @@ public class TaskspaceHandControlState extends HandControlState
    private final ReferenceFrame chestFrame;
 
    private final YoPIDSE3Gains gains;
-   private final YoFrameVector yoAngularWeight;
-   private final YoFrameVector yoLinearWeight;
+   private final YoFrameVector3D yoAngularWeight;
+   private final YoFrameVector3D yoLinearWeight;
    private final Vector3D angularWeight = new Vector3D();
    private final Vector3D linearWeight = new Vector3D();
 
@@ -84,9 +84,9 @@ public class TaskspaceHandControlState extends HandControlState
 
    private final YoBoolean isReadyToHandleQueuedCommands;
    private final YoLong numberOfQueuedCommands;
-   private final RecyclingArrayDeque<HandTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(HandTrajectoryCommand.class);
+   private final RecyclingArrayDeque<HandTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(HandTrajectoryCommand.class, HandTrajectoryCommand::set);
 
-   public TaskspaceHandControlState(String namePrefix, RigidBody base, RigidBody endEffector, RigidBody chest, YoPIDSE3Gains gains,
+   public TaskspaceHandControlState(String namePrefix, RigidBodyBasics base, RigidBodyBasics endEffector, RigidBodyBasics chest, YoPIDSE3Gains gains,
          Collection<ReferenceFrame> trajectoryFrames, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
@@ -98,8 +98,8 @@ public class TaskspaceHandControlState extends HandControlState
       endEffectorFrame = endEffector.getBodyFixedFrame();
       chestFrame = chest.getBodyFixedFrame();
 
-      yoAngularWeight = new YoFrameVector(namePrefix + "AngularTaskspaceWeight", null, registry);
-      yoLinearWeight = new YoFrameVector(namePrefix + "LinearTaskspaceWeight", null, registry);
+      yoAngularWeight = new YoFrameVector3D(namePrefix + "AngularTaskspaceWeight", null, registry);
+      yoLinearWeight = new YoFrameVector3D(namePrefix + "LinearTaskspaceWeight", null, registry);
       yoAngularWeight.set(SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT);
       yoLinearWeight.set(SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT);
       angularWeight.set(yoAngularWeight);
@@ -109,7 +109,7 @@ public class TaskspaceHandControlState extends HandControlState
       spatialFeedbackControlCommand.setPrimaryBase(chest);
 
       controlFrame = new PoseReferenceFrame("trackingFrame", endEffectorFrame);
-      yoDesiredPose = new YoFramePose(namePrefix + "DesiredPose", worldFrame, registry);
+      yoDesiredPose = new YoFramePoseUsingYawPitchRoll(namePrefix + "DesiredPose", worldFrame, registry);
 
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix, true, worldFrame, registry);
       orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix, true, worldFrame, registry);
@@ -174,7 +174,7 @@ public class TaskspaceHandControlState extends HandControlState
    public boolean handleHandTrajectoryCommand(HandTrajectoryCommand command, ReferenceFrame newControlFrame, boolean initializeToCurrent)
    {
       isReadyToHandleQueuedCommands.set(true);
-      clearCommandQueue(command.getCommandId());
+      clearCommandQueue(command.getSE3Trajectory().getCommandId());
       initializeTrajectoryGenerators(command, newControlFrame, initializeToCurrent, 0.0);
       return true;
    }
@@ -187,7 +187,7 @@ public class TaskspaceHandControlState extends HandControlState
          return false;
       }
 
-      long previousCommandId = command.getPreviousCommandId();
+      long previousCommandId = command.getSE3Trajectory().getPreviousCommandId();
 
       if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
       {
@@ -199,7 +199,7 @@ public class TaskspaceHandControlState extends HandControlState
          return false;
       }
 
-      if (command.getTrajectoryPoint(0).getTime() < 1.0e-5)
+      if (command.getSE3Trajectory().getTrajectoryPoint(0).getTime() < 1.0e-5)
       {
          PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
          isReadyToHandleQueuedCommands.set(false);
@@ -210,7 +210,7 @@ public class TaskspaceHandControlState extends HandControlState
 
       commandQueue.add(command);
       numberOfQueuedCommands.increment();
-      lastCommandId.set(command.getCommandId());
+      lastCommandId.set(command.getSE3Trajectory().getCommandId());
 
       return true;
    }
@@ -234,10 +234,11 @@ public class TaskspaceHandControlState extends HandControlState
       positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
       desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
-      yoDesiredPose.setAndMatchFrame(desiredPose);
+      yoDesiredPose.setMatchingFrame(desiredPose);
 
-      spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-      spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity);
+      spatialFeedbackControlCommand.changeFrameAndSetFeedForward(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
       spatialFeedbackControlCommand.setGains(gains);
       angularWeight.set(yoAngularWeight);
       linearWeight.set(yoLinearWeight);
@@ -263,18 +264,18 @@ public class TaskspaceHandControlState extends HandControlState
    private void initializeTrajectoryGenerators(HandTrajectoryCommand command, ReferenceFrame newControlFrame, boolean initializeToCurrent, double firstTrajectoryPointTime)
    {
       updateControlFrameAndDesireds(newControlFrame, initializeToCurrent, initialTrajectoryPoint);
-      command.addTimeOffset(firstTrajectoryPointTime);
+      command.getSE3Trajectory().addTimeOffset(firstTrajectoryPointTime);
 
-      ReferenceFrame trajectoryFrame = command.getTrajectoryFrame();
+      ReferenceFrame trajectoryFrame = command.getSE3Trajectory().getTrajectoryFrame();
 
       if (trajectoryFrame == null)
       {
-         PrintTools.error(this, "The base: " + command.getTrajectoryFrame() + " is not handled.");
+         PrintTools.error(this, "The base: " + command.getSE3Trajectory().getTrajectoryFrame() + " is not handled.");
          abortTaskspaceControlState.set(true);
          return;
       }
 
-      if (command.getTrajectoryPoint(0).getTime() > firstTrajectoryPointTime + 1.0e-5)
+      if (command.getSE3Trajectory().getTrajectoryPoint(0).getTime() > firstTrajectoryPointTime + 1.0e-5)
       {
          initialTrajectoryPoint.changeFrame(worldFrame);
 
@@ -293,8 +294,8 @@ public class TaskspaceHandControlState extends HandControlState
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
-         positionTrajectoryGenerator.appendWaypoint(command.getTrajectoryPoint(trajectoryPointIndex));
-         orientationTrajectoryGenerator.appendWaypoint(command.getTrajectoryPoint(trajectoryPointIndex));
+         positionTrajectoryGenerator.appendWaypoint(command.getSE3Trajectory().getTrajectoryPoint(trajectoryPointIndex));
+         orientationTrajectoryGenerator.appendWaypoint(command.getSE3Trajectory().getTrajectoryPoint(trajectoryPointIndex));
       }
 
       positionTrajectoryGenerator.changeFrame(trajectoryFrame);
@@ -306,7 +307,7 @@ public class TaskspaceHandControlState extends HandControlState
 
    private int queueExceedingTrajectoryPointsIfNeeded(HandTrajectoryCommand command)
    {
-      int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
+      int numberOfTrajectoryPoints = command.getSE3Trajectory().getNumberOfTrajectoryPoints();
 
       int maximumNumberOfWaypoints = positionTrajectoryGenerator.getMaximumNumberOfWaypoints() - positionTrajectoryGenerator.getCurrentNumberOfWaypoints();
 
@@ -320,11 +321,11 @@ public class TaskspaceHandControlState extends HandControlState
 
       for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
-         commandForExcedent.addTrajectoryPoint(command.getTrajectoryPoint(trajectoryPointIndex));
+         commandForExcedent.getSE3Trajectory().addTrajectoryPoint(command.getSE3Trajectory().getTrajectoryPoint(trajectoryPointIndex));
       }
 
-      double timeOffsetToSubtract = command.getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
-      commandForExcedent.subtractTimeOffset(timeOffsetToSubtract);
+      double timeOffsetToSubtract = command.getSE3Trajectory().getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
+      commandForExcedent.getSE3Trajectory().subtractTimeOffset(timeOffsetToSubtract);
 
       return maximumNumberOfWaypoints;
    }

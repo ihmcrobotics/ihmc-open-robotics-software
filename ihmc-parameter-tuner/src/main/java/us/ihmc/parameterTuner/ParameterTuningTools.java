@@ -1,15 +1,14 @@
 package us.ihmc.parameterTuner;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import javafx.application.Platform;
@@ -17,6 +16,8 @@ import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
+import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
+import us.ihmc.yoVariables.parameters.ParameterLoadStatus;
 import us.ihmc.yoVariables.parameters.xml.Parameter;
 import us.ihmc.yoVariables.parameters.xml.Parameters;
 import us.ihmc.yoVariables.parameters.xml.Registry;
@@ -38,39 +39,20 @@ public class ParameterTuningTools
       }
    }
 
-   public static void save(List<Registry> registries, File file) throws IOException
+   public static List<GuiRegistry> buildGuiRegistryFromXML(List<Registry> registries)
    {
-      Parameters parameterRoot = new Parameters();
-      parameterRoot.setRegistries(registries);
-
-      try
+      List<GuiRegistry> guiRegistries = new ArrayList<>();
+      if (registries != null)
       {
-         JAXBContext jaxbContext = JAXBContext.newInstance(Parameters.class);
-         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-         FileOutputStream os = new FileOutputStream(file);
-         jaxbMarshaller.marshal(parameterRoot, os);
-         os.close();
+         registries.stream().forEach(registry -> guiRegistries.add(buildGuiRegistryFromXML(registry)));
       }
-      catch (JAXBException e)
-      {
-         throw new IOException(e);
-      }
-      catch (FileNotFoundException e)
-      {
-         throw new IOException(e);
-      }
+      return guiRegistries;
    }
 
-   public static GuiRegistry buildGuiRegistryFromXML(List<Registry> registries)
+   public static GuiRegistry buildGuiRegistryFromXML(Registry registry)
    {
-      if (registries.size() != 1)
-      {
-         throw new RuntimeException("Expecting one root registry for a parameter file.");
-      }
-      Registry xmlRoot = registries.get(0);
-      GuiRegistry guiRoot = new GuiRegistry(xmlRoot.getName(), null);
-      recursiveAddXmlToGui(guiRoot, xmlRoot);
+      GuiRegistry guiRoot = new GuiRegistry(registry.getName(), null);
+      recursiveAddXmlToGui(guiRoot, registry);
       return guiRoot;
    }
 
@@ -91,6 +73,7 @@ public class ParameterTuningTools
             guiParameter.setMin(xmlParameter.getMin());
             guiParameter.setMax(xmlParameter.getMax());
             guiParameter.setDescription(xmlParameter.getDescription());
+            guiParameter.setLoadStatus(ParameterLoadStatus.LOADED);
             guiRegistry.addParameter(guiParameter);
          }
       }
@@ -107,13 +90,18 @@ public class ParameterTuningTools
       }
    }
 
-   public static List<Registry> buildXMLRegistryFromGui(GuiRegistry guiRoot)
+   public static List<Registry> buildXMLRegistriesFromGui(List<GuiRegistry> guiRegistries)
    {
-      Registry xmlRoot = new Registry(guiRoot.getName());
-      recursiveAddGuiToXml(xmlRoot, guiRoot);
       List<Registry> xmlRegistries = new ArrayList<>();
-      xmlRegistries.add(xmlRoot);
+      guiRegistries.stream().forEach(guiRegistry -> xmlRegistries.add(buildXMLRegistryFromGui(guiRegistry)));
       return xmlRegistries;
+   }
+
+   public static Registry buildXMLRegistryFromGui(GuiRegistry guiRegistry)
+   {
+      Registry xmlRegistry = new Registry(guiRegistry.getName());
+      recursiveAddGuiToXml(xmlRegistry, guiRegistry);
+      return xmlRegistry;
    }
 
    private static void recursiveAddGuiToXml(Registry xmlRegistry, GuiRegistry guiRegistry)
@@ -155,5 +143,19 @@ public class ParameterTuningTools
             runnable.run();
          }
       });
+   }
+
+   public static Map<String, Tuner> createTunerMap(List<GuiRegistry> registries)
+   {
+      Map<String, Tuner> tunerMap = new HashMap<>();
+
+      List<GuiParameter> allParameters = new ArrayList<>();
+      registries.stream().forEach(registry -> allParameters.addAll(registry.getAllParameters()));
+      allParameters.stream().forEach(parameter -> {
+         Tuner tuner = new Tuner(parameter);
+         tunerMap.put(parameter.getUniqueName(), tuner);
+      });
+
+      return tunerMap;
    }
 }

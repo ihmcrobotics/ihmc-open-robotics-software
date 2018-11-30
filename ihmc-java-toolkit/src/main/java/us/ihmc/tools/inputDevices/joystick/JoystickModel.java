@@ -21,6 +21,7 @@ public enum JoystickModel
    SAITEK_X52("Saitek X52 Flight Control System", SaitekX52Mapping.getCompatibilityFilters()),
    THRUSTMASTER_16000M("T.16000M", Thrustmaster16000M.getCompatibilityFilters()),
    XBOX_ONE("Xbox One For Windows", "Xbox One Wired Controller", "Microsoft X-Box One pad", XBoxOneMapping.getCompatibilityFilters()),
+   XBOX_ONE_S("Xbox One S For Windows", "Xbox One S Wired Controller", "Microsoft X-Box One S pad", XBoxOneMapping.getCompatibilityFilters()),
    UNKNOWN("Unknown", new ArrayList<JoystickCompatibilityFilter>()),
    
    ;

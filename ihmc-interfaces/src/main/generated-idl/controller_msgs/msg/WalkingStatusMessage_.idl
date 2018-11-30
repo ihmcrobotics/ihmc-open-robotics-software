@@ -1,0 +1,41 @@
+#ifndef __controller_msgs__msg__WalkingStatusMessage__idl__
+#define __controller_msgs__msg__WalkingStatusMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet STARTED =
+      0;
+
+      const octet COMPLETED =
+      1;
+
+      const octet ABORT_REQUESTED =
+      2;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * The controller sends this message to notify the user of the status of walking.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::WalkingStatusMessage_")
+      struct WalkingStatusMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Status of walking.
+         */
+        @defaultValue(value=255)
+        octet walking_status;
+      };
+    };
+  };
+};
+
+#endif

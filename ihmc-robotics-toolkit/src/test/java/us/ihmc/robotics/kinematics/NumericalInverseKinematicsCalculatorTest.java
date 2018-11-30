@@ -15,10 +15,10 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
 
 /**
  * @author twan
@@ -35,7 +35,7 @@ public class NumericalInverseKinematicsCalculatorTest
     * make sure there are no exceptions when you pass in an infeasible desired transform
     */
 
-	@ContinuousIntegrationTest(estimatedDuration = 3.7)
+	@ContinuousIntegrationTest(estimatedDuration = 2.8)
 	@Test(timeout = 30000)
    public void testInfeasible()
    {
@@ -44,7 +44,7 @@ public class NumericalInverseKinematicsCalculatorTest
       {
          X, Y, Z, Y, Y, X
       };
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       GeometricJacobian jacobian = new GeometricJacobian(randomFloatingChain.getRootJoint().getSuccessor(), randomFloatingChain.getLeafBody(),
                                       randomFloatingChain.getLeafBody().getBodyFixedFrame());
 
@@ -77,7 +77,7 @@ public class NumericalInverseKinematicsCalculatorTest
       if (DEBUG) printStatistics(iterationStatistics, timeStatistics);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.4)
+	@ContinuousIntegrationTest(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void testForwardThenInverse()
    {
@@ -86,11 +86,11 @@ public class NumericalInverseKinematicsCalculatorTest
       {
          X, Y, Z, Y, Y, X
       };
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       GeometricJacobian jacobian = new GeometricJacobian(randomFloatingChain.getRootJoint().getSuccessor(), randomFloatingChain.getLeafBody(),
                                       randomFloatingChain.getLeafBody().getBodyFixedFrame());
 
-      RandomRestartInverseKinematicsCalculator calculator = createCalculator(jacobian, 200);
+      RandomRestartInverseKinematicsCalculator calculator = createCalculator(jacobian, 500);
 
       List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
 

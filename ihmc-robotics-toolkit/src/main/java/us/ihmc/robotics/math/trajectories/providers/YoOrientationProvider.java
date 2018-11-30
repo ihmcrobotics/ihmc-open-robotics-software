@@ -1,15 +1,15 @@
 package us.ihmc.robotics.math.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 
 public class YoOrientationProvider implements OrientationProvider
 {
-   private final YoFrameOrientation frameOrientation;
+   private final YoFrameYawPitchRoll frameOrientation;
 
-   public YoOrientationProvider(YoFrameOrientation frameOrientation)
+   public YoOrientationProvider(YoFrameYawPitchRoll frameOrientation)
    {
       this.frameOrientation = frameOrientation;
    }

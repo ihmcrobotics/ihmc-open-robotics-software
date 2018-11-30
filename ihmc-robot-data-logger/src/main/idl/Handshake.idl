@@ -22,6 +22,13 @@ module robotDataLogger{
 		OneDoFJoint
 	};
 	
+	enum LoadStatus
+	{
+		NoParameter,
+		Unloaded,
+		Default,
+		Loaded
+	}
 	
 	struct YoVariableDefinition
 	{
@@ -34,6 +41,7 @@ module robotDataLogger{
 		boolean isParameter;
 		double min;
 		double max;
+		LoadStatus loadStatus;
 	};
 	
 	struct JointDefinition
@@ -54,7 +62,7 @@ module robotDataLogger{
 	
 	struct GraphicObjectMessage
 	{
-		unsigned short type;
+		long registrationID;
 		string name;
 		
 		sequence<unsigned short, 1024> yoVariableIndex;

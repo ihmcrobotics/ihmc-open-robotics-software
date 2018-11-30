@@ -4,6 +4,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
 /**
  * {@code MovingMidFrame} represents a the average of two given reference frames.
@@ -34,10 +37,10 @@ public class MovingMidFrame extends MovingReferenceFrame
       poseOne.setToZero(frameOne);
       poseTwo.setToZero(frameTwo);
 
-      poseOne.changeFrame(parentFrame);
-      poseTwo.changeFrame(parentFrame);
+      poseOne.changeFrame(getParent());
+      poseTwo.changeFrame(getParent());
 
-      pose.setToZero(parentFrame);
+      pose.setToZero(getParent());
       pose.interpolate(poseOne, poseTwo, 0.5);
       pose.get(transformToParent);
    }
@@ -58,26 +61,26 @@ public class MovingMidFrame extends MovingReferenceFrame
    @Override
    protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
    {
-      twistRelativeToParentToPack.setToZero(this, parentFrame, this);
+      twistRelativeToParentToPack.setToZero(this, getParent(), this);
 
-      Twist twistOfFrameOne = frameOne.getTwistOfFrame();
-      Twist twistOfFrameTwo = frameTwo.getTwistOfFrame();
+      TwistReadOnly twistOfFrameOne = frameOne.getTwistOfFrame();
+      TwistReadOnly twistOfFrameTwo = frameTwo.getTwistOfFrame();
 
-      twistOfFrameOne.getLinearPart(linearVelocityOne);
-      twistOfFrameTwo.getLinearPart(linearVelocityTwo);
+      linearVelocityOne.setIncludingFrame(twistOfFrameOne.getLinearPart());
+      linearVelocityTwo.setIncludingFrame(twistOfFrameTwo.getLinearPart());
 
       linearVelocityOne.changeFrame(this);
       linearVelocityTwo.changeFrame(this);
       linearVelocity.setToZero(this);
       linearVelocity.interpolate(linearVelocityOne, linearVelocityTwo, 0.5);
-      twistRelativeToParentToPack.setLinearPart(linearVelocity);
+      twistRelativeToParentToPack.getLinearPart().set(linearVelocity);
 
-      twistOfFrameOne.getAngularPart(angularVelocityOne);
-      twistOfFrameTwo.getAngularPart(angularVelocityTwo);
+      angularVelocityOne.setIncludingFrame(twistOfFrameOne.getAngularPart());
+      angularVelocityTwo.setIncludingFrame(twistOfFrameTwo.getAngularPart());
 
       computeAngularVelocityNumeric();
 
-      twistRelativeToParentToPack.setAngularPart(angularVelocity);
+      twistRelativeToParentToPack.getAngularPart().set(angularVelocity);
    }
 
    /**
@@ -123,8 +126,8 @@ public class MovingMidFrame extends MovingReferenceFrame
       angularVelocityOne.scale(integrationDT);
       angularVelocityTwo.scale(integrationDT);
 
-      quaternionFutureOne.set(angularVelocityOne);
-      quaternionFutureTwo.set(angularVelocityTwo);
+      quaternionFutureOne.setRotationVector(angularVelocityOne);
+      quaternionFutureTwo.setRotationVector(angularVelocityTwo);
 
       quaternionFutureOne.preMultiply(poseOne.getOrientation());
       quaternionFutureTwo.preMultiply(poseTwo.getOrientation());
@@ -132,7 +135,7 @@ public class MovingMidFrame extends MovingReferenceFrame
       quaternionFuture.interpolate(quaternionFutureOne, quaternionFutureTwo, 0.5);
       difference.difference(pose.getOrientation(), quaternionFuture);
       angularVelocity.setToZero(this);
-      difference.get(angularVelocity);
+      difference.getRotationVector(angularVelocity);
       angularVelocity.scale(1.0 / integrationDT);
    }
 }

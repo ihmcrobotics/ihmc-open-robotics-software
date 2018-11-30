@@ -36,6 +36,15 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
    protected void bindFieldBidirectionalToNumberProperty(Property<? extends Number> property, Field field)
    {
       NumberBidirectionalBind binding = new NumberBidirectionalBind(property, field);
+      setNumberValue(property, field);
+      property.addListener(binding);
+      field.addListener(binding);
+   }
+
+   protected void bindFieldBidirectionalToConditionalNumberProperty(Condition condition, Property<? extends Number> property, Field field)
+   {
+      ConditionalNumberBidirectionalBind binding = new ConditionalNumberBidirectionalBind(condition, property, field);
+      setNumberValue(property, field);
       property.addListener(binding);
       field.addListener(binding);
    }
@@ -43,13 +52,14 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
    protected void bindFieldBidirectionalToBooleanProperty(Property<Boolean> property, Field field)
    {
       BooleanBidirectionalBind binding = new BooleanBidirectionalBind(property, field);
+      setBooleanValue(property, field);
       property.addListener(binding);
       field.addListener(binding);
    }
 
    protected abstract T getValueCopy(T valueToCopy);
 
-   private abstract class Field implements Observable, NumberGetter<T>, NumberSetter<T>
+   protected abstract class Field implements Observable, NumberGetter<T>, NumberSetter<T>
    {
       private NumberGetter<T> numberGetter;
       private NumberSetter<T> numberSetter;
@@ -215,13 +225,28 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
       }
    }
 
-   private class NumberBidirectionalBind implements InvalidationListener
+   protected interface Condition
    {
+      boolean checkCondition();
+   }
+
+   private class NumberBidirectionalBind extends ConditionalNumberBidirectionalBind
+   {
+      private NumberBidirectionalBind(Property<? extends Number> numberProperty, Field field)
+      {
+         super(() -> true, numberProperty, field);
+      }
+   }
+
+   private class ConditionalNumberBidirectionalBind implements InvalidationListener
+   {
+      private final Condition condition;
       private final Property<? extends Number> numberProperty;
       private final ParametersProperty<T>.Field field;
 
-      private NumberBidirectionalBind(Property<? extends Number> numberProperty, Field field)
+      private ConditionalNumberBidirectionalBind(Condition condition, Property<? extends Number> numberProperty, Field field)
       {
+         this.condition = condition;
          this.numberProperty = numberProperty;
          this.field = field;
       }
@@ -230,6 +255,9 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
       @Override
       public void invalidated(Observable observable)
       {
+         if (!condition.checkCondition())
+            return;
+
          if (numberProperty.getValue().doubleValue() == field.getNumber(getValue()).doubleValue())
             return;
 
@@ -241,23 +269,34 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
          }
          else
          {
-            if (numberProperty.getValue() instanceof Double)
-               ((Property<Double>) numberProperty).setValue(new Double(field.getNumber(getValue()).doubleValue()));
-            else if (numberProperty.getValue() instanceof Integer)
-               ((Property<Integer>) numberProperty).setValue(new Integer(field.getNumber(getValue()).intValue()));
-            else if (numberProperty.getValue() instanceof Float)
-               ((Property<Float>) numberProperty).setValue(new Float(field.getNumber(getValue()).floatValue()));
-            else if (numberProperty.getValue() instanceof Long)
-               ((Property<Long>) numberProperty).setValue(new Long(field.getNumber(getValue()).longValue()));
-            else if (numberProperty.getValue() instanceof Short)
-               ((Property<Short>) numberProperty).setValue(new Short(field.getNumber(getValue()).shortValue()));
-            else if (numberProperty.getValue() instanceof Byte)
-               ((Property<Byte>) numberProperty).setValue(new Byte(field.getNumber(getValue()).byteValue()));
-            else
-               throw new RuntimeException("Unhandled instance of Number: " + numberProperty.getValue().getClass().getSimpleName());
+            setNumberValue(numberProperty, field);
          }
       }
    }
+
+   private void setNumberValue(Property<? extends Number> numberProperty, Field field)
+   {
+      if (numberProperty.getValue() instanceof Double)
+         ((Property<Double>) numberProperty).setValue(new Double(field.getNumber(getValue()).doubleValue()));
+      else if (numberProperty.getValue() instanceof Integer)
+         ((Property<Integer>) numberProperty).setValue(new Integer(field.getNumber(getValue()).intValue()));
+      else if (numberProperty.getValue() instanceof Float)
+         ((Property<Float>) numberProperty).setValue(new Float(field.getNumber(getValue()).floatValue()));
+      else if (numberProperty.getValue() instanceof Long)
+         ((Property<Long>) numberProperty).setValue(new Long(field.getNumber(getValue()).longValue()));
+      else if (numberProperty.getValue() instanceof Short)
+         ((Property<Short>) numberProperty).setValue(new Short(field.getNumber(getValue()).shortValue()));
+      else if (numberProperty.getValue() instanceof Byte)
+         ((Property<Byte>) numberProperty).setValue(new Byte(field.getNumber(getValue()).byteValue()));
+      else
+         throw new RuntimeException("Unhandled instance of Number: " + numberProperty.getValue().getClass().getSimpleName());
+   }
+
+   private void setBooleanValue(Property<Boolean> booleanProperty, Field field)
+   {
+      booleanProperty.setValue(getNumberAsBoolean(field.getNumber(getValue())));
+   }
+
 
    private class BooleanBidirectionalBind implements InvalidationListener
    {

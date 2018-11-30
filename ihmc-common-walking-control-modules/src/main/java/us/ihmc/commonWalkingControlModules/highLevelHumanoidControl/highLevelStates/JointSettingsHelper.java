@@ -13,9 +13,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -38,10 +38,23 @@ public class JointSettingsHelper
 
    private final JointLoadStatusProvider jointLoadStatusProvider;
 
-   public JointSettingsHelper(HighLevelControllerParameters parameters, OneDoFJoint[] joints, JointLoadStatusProvider jointLoadStatusProvider,
-                              HighLevelControllerName state, YoVariableRegistry parentRegistry)
+
+   public JointSettingsHelper(HighLevelControllerParameters parameters, OneDoFJointBasics[] joints, HighLevelControllerState jointLoadStatusProvider,
+                              HighLevelControllerName stateEnum, YoVariableRegistry parentRegistry)
    {
-      String stateName = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, state.toString());
+      this(JointSettingConfiguration.extract(parameters, stateEnum), joints, jointLoadStatusProvider,
+           CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, stateEnum.toString()), parentRegistry);
+   }
+
+   public JointSettingsHelper(JointSettingConfiguration configuration, List<OneDoFJointBasics> joints, JointLoadStatusProvider jointLoadStatusProvider,
+                              String stateName, YoVariableRegistry parentRegistry)
+   {
+      this(configuration, joints.toArray(new OneDoFJointBasics[joints.size()]), jointLoadStatusProvider, stateName, parentRegistry);
+   }
+
+   public JointSettingsHelper(JointSettingConfiguration configuration, OneDoFJointBasics[] joints, JointLoadStatusProvider jointLoadStatusProvider, String stateName,
+                              YoVariableRegistry parentRegistry)
+   {
       registry = new YoVariableRegistry(stateName + "JointSettings");
       parentRegistry.addChild(registry);
 
@@ -52,17 +65,17 @@ public class JointSettingsHelper
       // TODO: this is not state dependent
       // For now we can not load different parameters from a parameter class for different states.
       Map<String, JointAccelerationIntegrationParametersReadOnly> parameterJointNameMapNoLoad = new HashMap<>();
-      ParameterTools.extractAccelerationIntegrationParameterMap("NoLoad", parameters.getJointAccelerationIntegrationParametersNoLoad(),
+      ParameterTools.extractAccelerationIntegrationParameterMap("NoLoad", configuration.getJointAccelerationIntegrationParameters(),
                                                                 parameterJointNameMapNoLoad, registry);
       Map<String, JointAccelerationIntegrationParametersReadOnly> parameterJointNameMapLoaded = new HashMap<>();
-      ParameterTools.extractAccelerationIntegrationParameterMap("Loaded", parameters.getJointAccelerationIntegrationParametersLoaded(),
+      ParameterTools.extractAccelerationIntegrationParameterMap("Loaded", configuration.getJointAccelerationIntegrationParametersUnderLoad(),
                                                                 parameterJointNameMapLoaded, registry);
 
       // TODO: these use the same default values
       Map<String, JointDesiredBehaviorReadOnly> jointBehaviorMapNoLoad = new HashMap<>();
-      ParameterTools.extractJointBehaviorMap("NoLoad", parameters.getDesiredJointBehaviors(state), jointBehaviorMapNoLoad, registry);
+      ParameterTools.extractJointBehaviorMap("NoLoad", configuration.getDesiredJointBehaviors(), jointBehaviorMapNoLoad, registry);
       Map<String, JointDesiredBehaviorReadOnly> jointBehaviorMapLoaded = new HashMap<>();
-      ParameterTools.extractJointBehaviorMap("Loaded", parameters.getDesiredJointBehaviors(state), jointBehaviorMapLoaded, registry);
+      ParameterTools.extractJointBehaviorMap("Loaded", configuration.getDesiredJointBehaviorsUnderLoad(), jointBehaviorMapLoaded, registry);
 
       jointNames = new String[joints.length];
       jointsLoaded = new YoBoolean[joints.length];
@@ -75,10 +88,9 @@ public class JointSettingsHelper
       List<String> jointsWithoutBehaviors = new ArrayList<>();
       for (int jointIdx = 0; jointIdx < joints.length; jointIdx++)
       {
-         OneDoFJoint joint = joints[jointIdx];
+         OneDoFJointBasics joint = joints[jointIdx];
          String jointName = joint.getName();
          jointNames[jointIdx] = jointName;
-         jointsLoaded[jointIdx] = new YoBoolean(jointName + "_isUnderLoad", registry);
          jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(joint);
 
          JointAccelerationIntegrationParametersReadOnly integrationParametersNoLoad = parameterJointNameMapNoLoad.get(jointName);
@@ -98,17 +110,26 @@ public class JointSettingsHelper
          {
             jointsWithoutBehaviors.add(jointName);
          }
+
+         if ((integrationParametersNoLoad == null && desiredBehaviorNoLoad == null) || (integrationParametersLoaded == null && desiredBehaviorLoaded == null))
+         {
+            jointsLoaded[jointIdx] = null;
+         }
+         else
+         {
+            jointsLoaded[jointIdx] = new YoBoolean(jointName + "_isUnderLoad", registry);
+         }
       }
 
       if (!jointsWithoutParameters.isEmpty())
       {
-         PrintTools.warn("In State " + state.toString() + "\n"
+         PrintTools.warn("In State " + stateName + "\n"
                + "Got joints without acceleration integration parameters.\n"
                + "Will use default values for: " + jointsWithoutParameters);
       }
       if (!jointsWithoutBehaviors.isEmpty())
       {
-         throw new RuntimeException("In State " + state.toString() + "\n"
+         throw new RuntimeException("In State " + stateName + "\n"
                + "Must define joint behaviors for: " + jointsWithoutBehaviors);
       }
    }
@@ -117,9 +138,18 @@ public class JointSettingsHelper
    {
       for (int jointIdx = 0; jointIdx < jointNames.length; jointIdx++)
       {
-         JointDesiredOutput jointDesiredOutput = stateSpecificJointSettings.getJointDesiredOutput(jointIdx);
-         boolean isLoaded = jointLoadStatusProvider.isJointLoaded(jointNames[jointIdx]);
-         jointsLoaded[jointIdx].set(isLoaded);
+         JointDesiredOutputBasics jointDesiredOutput = stateSpecificJointSettings.getJointDesiredOutput(jointIdx);
+         boolean isLoaded = jointLoadStatusProvider.isJointLoadBearing(jointNames[jointIdx]);
+         if (jointsLoaded[jointIdx] != null)
+         {
+            boolean wasLoaded = jointsLoaded[jointIdx].getValue();
+            jointDesiredOutput.setResetIntegrators(isLoaded != wasLoaded);
+            jointsLoaded[jointIdx].set(isLoaded);
+         }
+         else
+         {
+            jointDesiredOutput.setResetIntegrators(false);
+         }
 
          JointAccelerationIntegrationParametersReadOnly integrationParametersNoLoad = accelerationIntegrationSettingsNoLoad[jointIdx];
          JointAccelerationIntegrationParametersReadOnly integrationParametersLoaded = accelerationIntegrationSettingsLoaded[jointIdx];
@@ -127,14 +157,18 @@ public class JointSettingsHelper
          if (isLoaded && integrationParametersLoaded != null)
          { // The joint is loaded and we have parameters for this case.
             jointAccelerationIntegrationCommand.setJointParameters(jointIdx, integrationParametersLoaded);
-            jointDesiredOutput.setVelocityIntegrationLeakRate(integrationParametersLoaded.getAlphaVelocity());
-            jointDesiredOutput.setPositionIntegrationLeakRate(integrationParametersLoaded.getAlphaPosition());
+            jointDesiredOutput.setVelocityIntegrationBreakFrequency(integrationParametersLoaded.getVelocityBreakFrequency());
+            jointDesiredOutput.setPositionIntegrationBreakFrequency(integrationParametersLoaded.getPositionBreakFrequency());
+            jointDesiredOutput.setMaxPositionError(integrationParametersLoaded.getMaxPositionError());
+            jointDesiredOutput.setMaxVelocityError(integrationParametersLoaded.getMaxVelocity());
          }
          else if (integrationParametersNoLoad != null)
          { // The joint is not loaded or we do not have parameters for the loaded joint but we have default no load parameters.
             jointAccelerationIntegrationCommand.setJointParameters(jointIdx, integrationParametersNoLoad);
-            jointDesiredOutput.setVelocityIntegrationLeakRate(integrationParametersNoLoad.getAlphaVelocity());
-            jointDesiredOutput.setPositionIntegrationLeakRate(integrationParametersNoLoad.getAlphaPosition());
+            jointDesiredOutput.setVelocityIntegrationBreakFrequency(integrationParametersNoLoad.getVelocityBreakFrequency());
+            jointDesiredOutput.setPositionIntegrationBreakFrequency(integrationParametersNoLoad.getPositionBreakFrequency());
+            jointDesiredOutput.setMaxPositionError(integrationParametersNoLoad.getMaxPositionError());
+            jointDesiredOutput.setMaxVelocityError(integrationParametersNoLoad.getMaxVelocity());
          }
 
          JointDesiredBehaviorReadOnly desiredBehaviorNoLoad = jointDesiredBehaviorNoLoad[jointIdx];

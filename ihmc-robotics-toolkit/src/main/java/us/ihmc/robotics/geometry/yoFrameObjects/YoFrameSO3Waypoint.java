@@ -9,17 +9,17 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.geometry.frameObjects.FrameSO3Waypoint;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, FrameSO3Waypoint, SO3Waypoint>
       implements SO3WaypointInterface<YoFrameSO3Waypoint>
 {
    private final YoFrameQuaternion orientation;
-   private final YoFrameVector angularVelocity;
+   private final YoFrameVector3D angularVelocity;
 
    public YoFrameSO3Waypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
    {
@@ -42,10 +42,10 @@ public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, Fram
       };
    }
 
-   public static YoFrameVector createYoAngularVelocity(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix,
+   public static YoFrameVector3D createYoAngularVelocity(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix,
          YoVariableRegistry registry)
    {
-      return new YoFrameVector(createName(namePrefix, "angularVelocity", ""), nameSuffix, null, registry)
+      return new YoFrameVector3D(createName(namePrefix, "angularVelocity", ""), nameSuffix, null, registry)
       {
          @Override
          public ReferenceFrame getReferenceFrame()

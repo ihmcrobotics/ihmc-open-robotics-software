@@ -1,9 +1,10 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
@@ -14,16 +15,26 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class BlendedPoseTrajectoryGeneratorTest
 {
    private final double EPSILON = 1e-3;
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    private void assertGeometricEquals(FramePose3D poseA, FramePose3D poseB, double epsilon)
    {
@@ -93,8 +104,8 @@ public class BlendedPoseTrajectoryGeneratorTest
          linearVelocity.changeFrame(expressedInFrame);
          angularVelocity.changeFrame(expressedInFrame);
          Twist twist = new Twist(bodyFrame, baseFrame, expressedInFrame);
-         twist.setLinearPart(linearVelocity);
-         twist.setAngularPart(angularVelocity);
+         twist.getLinearPart().set(linearVelocity);
+         twist.getAngularPart().set(angularVelocity);
          return twist;
       }
 
@@ -109,12 +120,12 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   private PoseTrajectoryGenerator createRandomReferenceTrajectory(Random random, double duration, ReferenceFrame referenceFrame, YoVariableRegistry registry)
+   private PoseTrajectoryGenerator createRandomReferenceTrajectory(Random random, int numberOfWaypoints, double duration, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
       MultipleWaypointsPoseTrajectoryGenerator referenceTrajectory = new MultipleWaypointsPoseTrajectoryGenerator("referenceTrajectory", 10, registry);
-      for (int i = 0; i < 10; i++)
+      for (int i = 0; i < numberOfWaypoints; i++)
       {
-         double time = i * duration / (10 - 1);
+         double time = i * duration / (numberOfWaypoints - 1);
          PoseTrajectoryState state = new PoseTrajectoryState(random, time, referenceFrame, referenceFrame, referenceFrame);
          referenceTrajectory.appendPoseWaypoint(state.getWaypoint());
       }
@@ -122,7 +133,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       return referenceTrajectory;
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testNoConstraints()
    {
@@ -134,7 +145,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
       YoVariableRegistry registry = new YoVariableRegistry("trajectory");
-      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, trajectoryDuration, worldFrame, registry);
+      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
       // Check if blended trajectory is equal to reference trajectory
@@ -148,7 +159,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInitialPoseConstraint()
    {
@@ -161,7 +172,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
       YoVariableRegistry registry = new YoVariableRegistry("trajectory");
-      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, trajectoryDuration, worldFrame, registry);
+      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
       // Blend initial constraint
@@ -187,7 +198,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInitialPoseAndTwistConstraint()
    {
@@ -200,7 +211,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
       YoVariableRegistry registry = new YoVariableRegistry("trajectory");
-      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, trajectoryDuration, worldFrame, registry);
+      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
       // Blend initial constraint
@@ -238,7 +249,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
       YoVariableRegistry registry = new YoVariableRegistry("trajectory");
-      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, trajectoryDuration, worldFrame, registry);
+      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
       // Blend final constraint
@@ -290,7 +301,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
       YoVariableRegistry registry = new YoVariableRegistry("trajectory");
-      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, trajectoryDuration, worldFrame, registry);
+      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
       // Blend final constraint
@@ -339,7 +350,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
       YoVariableRegistry registry = new YoVariableRegistry("trajectory");
-      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, trajectoryDuration, worldFrame, registry);
+      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
       // Blend final constraint
@@ -364,7 +375,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInitialAndFinalConstraint()
    {
@@ -378,10 +389,10 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
       YoVariableRegistry registry = new YoVariableRegistry("trajectory");
-      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, trajectoryDuration, worldFrame, registry);
+      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
-      // Blend initial and final constraints
+      // Blend initial constraints
       PoseTrajectoryState initialState = new PoseTrajectoryState(random, 0.0, bodyFrame, worldFrame, worldFrame);
       blendedTrajectory.blendInitialConstraint(initialState.getPose(), initialState.getTwist(), 0.0, initialBlendDuration);
 
@@ -412,7 +423,91 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 1.3)
+   @Test(timeout = 30000)
+   public void testDerivativesConsistency() throws Exception
+   {
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
+      Random random = new Random(5165165161L);
+      double dt = 1.0e-5;
+      double trajectoryDuration = 1.0;
+      double startIntegrationTime = 0.05;
+      double endIntegrationTime = 1.0;
+
+      FramePoint3D currentPosition = new FramePoint3D();
+      FrameVector3D currentLinearVelocity = new FrameVector3D();
+      FrameVector3D currentLinearAcceleration = new FrameVector3D();
+      FrameQuaternion currentOrientation = new FrameQuaternion();
+      FrameVector3D currentAngularVelocity = new FrameVector3D();
+      FrameVector3D currentAngularAcceleration = new FrameVector3D();
+
+      FramePoint3D positionFromIntegration = new FramePoint3D();
+      Vector3D integratedLinearVelocity = new Vector3D();
+      FrameVector3D linearVelocityFromIntegration = new FrameVector3D();
+      Vector3D integratedLinearAcceleration = new Vector3D();
+
+      FrameQuaternion orientationFromIntegration = new FrameQuaternion();
+      Vector3D angularVelocityVector = new Vector3D();
+      Quaternion quaternionFromIntegration = new Quaternion();
+      Quaternion integratedAngularVelocity = new Quaternion();
+      FrameVector3D angularVelocityFromIntegration = new FrameVector3D();
+      Vector3D integratedAngularAcceleration = new Vector3D();
+
+      YoVariableRegistry registry = new YoVariableRegistry("null");
+      PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 2, trajectoryDuration, worldFrame, registry);
+      BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blended", referenceTrajectory, worldFrame, registry);
+      blendedTrajectory.initialize();
+
+      // Blend initial and final constraints
+      PoseTrajectoryState initialState = new PoseTrajectoryState(random, 0.0, bodyFrame, worldFrame, worldFrame);
+      blendedTrajectory.blendInitialConstraint(initialState.getPose(), initialState.getTwist(), 0.0, 0.3);
+
+      // Blend final constraint
+      PoseTrajectoryState finalState = new PoseTrajectoryState(random, trajectoryDuration, bodyFrame, worldFrame, worldFrame);
+      blendedTrajectory.blendFinalConstraint(finalState.getPose(), finalState.getTwist(), trajectoryDuration, 0.3);
+
+      blendedTrajectory.compute(startIntegrationTime - dt);
+      blendedTrajectory.getPosition(positionFromIntegration);
+      blendedTrajectory.getVelocity(linearVelocityFromIntegration);
+      blendedTrajectory.getOrientation(orientationFromIntegration);
+      blendedTrajectory.getAngularVelocity(angularVelocityFromIntegration);
+
+      for (double time = startIntegrationTime; time <= endIntegrationTime; time += dt)
+      {
+         blendedTrajectory.compute(time);
+         blendedTrajectory.getPosition(currentPosition);
+         blendedTrajectory.getOrientation(currentOrientation);
+         blendedTrajectory.getVelocity(currentLinearVelocity);
+         blendedTrajectory.getAngularVelocity(currentAngularVelocity);
+         blendedTrajectory.getAcceleration(currentLinearAcceleration);
+         blendedTrajectory.getAngularAcceleration(currentAngularAcceleration);
+
+         integratedLinearVelocity.set(currentLinearVelocity);
+         integratedLinearVelocity.scale(dt);
+         positionFromIntegration.add(integratedLinearVelocity);
+         integratedLinearAcceleration.set(currentLinearAcceleration);
+         integratedLinearAcceleration.scale(dt);
+         linearVelocityFromIntegration.add(integratedLinearAcceleration);
+
+         angularVelocityVector.set(currentAngularVelocity);
+         RotationTools.integrateAngularVelocity(angularVelocityVector, dt, integratedAngularVelocity);
+         quaternionFromIntegration.set(orientationFromIntegration);
+         quaternionFromIntegration.multiply(integratedAngularVelocity, quaternionFromIntegration);
+         orientationFromIntegration.set(quaternionFromIntegration);
+         integratedAngularAcceleration.set(currentAngularAcceleration);
+         integratedAngularAcceleration.scale(dt);
+         angularVelocityFromIntegration.add(integratedAngularAcceleration);
+
+         assertTrue(currentPosition.geometricallyEquals(positionFromIntegration, 1.0e-3));
+         assertTrue(currentOrientation.geometricallyEquals(orientationFromIntegration, 1.0e-3));
+         assertTrue(currentLinearVelocity.geometricallyEquals(linearVelocityFromIntegration, 1.0e-2));
+         assertTrue(currentAngularVelocity.geometricallyEquals(angularVelocityFromIntegration, 1.0e-2));
+      }
+   }
+
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTroublingDataSet1WithBlending()
    {
@@ -476,7 +571,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTroublingDataSet1WithoutBlending()
    {
@@ -529,7 +624,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTroublingDataSet2WithBlending()
    {

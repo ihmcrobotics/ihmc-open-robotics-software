@@ -17,18 +17,18 @@ import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class FootStepPlanner
 {
@@ -37,23 +37,24 @@ public class FootStepPlanner
    private FullRobotModel fullRobotModel;
    private HexapodReferenceFrames referenceFrames;
 
-   private SegmentDependentList<RobotSextant, YoFrameVector> nominalOffsetsFromBodyToFeet = new SegmentDependentList<>(RobotSextant.class);
+   private SegmentDependentList<RobotSextant, YoFrameVector3D> nominalOffsetsFromBodyToFeet = new SegmentDependentList<>(RobotSextant.class);
    private final CenterOfMassJacobian centerOfMassJacobian;
    private FrameVector3D centerOfMassVelocity = new FrameVector3D();
    private FrameVector3D desiredVelocityScaled = new FrameVector3D();
    private ReferenceFrame centerOfMassFrameWithOrientation;
    private ReferenceFrame bodyZUpFrame;
    private YoDouble swingTimeScalar = new YoDouble("swingTimeScalar", registry);
-   private final YoFrameConvexPolygon2d stancePolygon = new YoFrameConvexPolygon2d("stancePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
-   private final YoFrameConvexPolygon2d swingPolygon = new YoFrameConvexPolygon2d("swingPolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
-   private final YoFrameVector footScalarFromNominalToBody;
-   private final YoFrameVector feetOffsetFromBody;
+   private final YoFrameConvexPolygon2D stancePolygon = new YoFrameConvexPolygon2D("stancePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
+   private final YoFrameConvexPolygon2D swingPolygon = new YoFrameConvexPolygon2D("swingPolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
+   private final YoFrameVector3D footScalarFromNominalToBody;
+   private final YoFrameVector3D feetOffsetFromBody;
 
-   private final RigidBody pelvis;
+   private final RigidBodyBasics pelvis;
    private final Twist twistToPack = new Twist();
    private FrameVector3D angularVelocity = new FrameVector3D();
    private Vector3D perpindicularToCenterOfMassVelocity = new Vector3D();
    private FramePoint3D centerOfTurn = new FramePoint3D();
+   private final Vector3D offset = new Vector3D();
 
    private final CircleArtifact turnRadiusVisual = new CircleArtifact("turnRadiusVisual", 0.0, 0.0, 0.0, false);
    private final PoseReferenceFrame bodyFrameProjectedInFuture;
@@ -68,16 +69,16 @@ public class FootStepPlanner
    {
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = hexapodReferenceFrames;
-      pelvis = fullRobotModel.getPelvis();
+      pelvis = fullRobotModel.getRootBody();
       swingTimeScalar.set(1.1);
 
       bodyZUpFrame = hexapodReferenceFrames.getBodyZUpFrame();
-      centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
+      centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), fullRobotModel.getElevator().getBodyFixedFrame());
       centerOfMassFrameWithOrientation = referenceFrames.getCenterOfMassFrameWithBodyZUpOrientation();
 
       bodyFrameProjectedInFuture = new PoseReferenceFrame("bodyProjectedInFuture", bodyZUpFrame);
       bodyFrameEndRotationProjectedInFuture = new PoseReferenceFrame("bodyFrameEndRotationProjectedInFuture", bodyFrameProjectedInFuture);
-      bodyFrameProjectedInFutureViz = new YoGraphicReferenceFrame(bodyFrameEndRotationProjectedInFuture, registry, 0.3);
+      bodyFrameProjectedInFutureViz = new YoGraphicReferenceFrame(bodyFrameEndRotationProjectedInFuture, registry, true, 0.3);
       
       yoGraphicsListRegistry.registerYoGraphic("bodyFrameProjectedInFutureViz", bodyFrameProjectedInFutureViz);
 
@@ -90,10 +91,10 @@ public class FootStepPlanner
       bodyFrameProjectedInFutureLineArtifact.setColor(Color.RED);
       bodyFrameProjectedInFutureLineArtifact.setRecordHistory(true);
 
-      footScalarFromNominalToBody = new YoFrameVector(prefix + "footScalarFromNominalToBody", bodyZUpFrame, registry);
+      footScalarFromNominalToBody = new YoFrameVector3D(prefix + "footScalarFromNominalToBody", bodyZUpFrame, registry);
       footScalarFromNominalToBody.set(1.0, 0.6, 1.0);
 
-      feetOffsetFromBody = new YoFrameVector(prefix + "feetOffsetFromBody", bodyZUpFrame, registry);
+      feetOffsetFromBody = new YoFrameVector3D(prefix + "feetOffsetFromBody", bodyZUpFrame, registry);
       feetOffsetFromBody.set(-0.002, 0.0, 0.0);
 
       FramePoint3D temp = new FramePoint3D();
@@ -103,7 +104,7 @@ public class FootStepPlanner
          temp.setToZero(footFrame);
          temp.changeFrame(bodyZUpFrame);
          Vector3D offsetFromBodyToFoot = new Vector3D(temp);
-         YoFrameVector yoOffset = new YoFrameVector(prefix + robotSextant.name() + "offsetFromBodyToFoot", bodyZUpFrame, registry);
+         YoFrameVector3D yoOffset = new YoFrameVector3D(prefix + robotSextant.name() + "offsetFromBodyToFoot", bodyZUpFrame, registry);
          yoOffset.set(offsetFromBodyToFoot);
          if (robotSextant == RobotSextant.FRONT_LEFT || robotSextant == RobotSextant.FRONT_RIGHT)
          {
@@ -139,7 +140,7 @@ public class FootStepPlanner
    
    public void getDesiredFootPosition(RobotSextant robotSextant, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity, double swingTime, FramePoint3D framePointToPack)
    {
-      YoFrameVector offsetFromBodyToFootDesired = nominalOffsetsFromBodyToFeet.get(robotSextant);
+      YoFrameVector3D offsetFromBodyToFootDesired = nominalOffsetsFromBodyToFeet.get(robotSextant);
       offsetFromBodyToFoot.setIncludingFrame(offsetFromBodyToFootDesired);
       offsetFromBodyToFoot.scale(footScalarFromNominalToBody.getX(), footScalarFromNominalToBody.getY(), footScalarFromNominalToBody.getZ());
       
@@ -192,8 +193,17 @@ public class FootStepPlanner
 //      }
       
       framePointToPack.setToZero(bodyFrameEndRotationProjectedInFuture);
-      framePointToPack.add(offsetFromBodyToFoot);
-      framePointToPack.add(feetOffsetFromBody);
+      
+      
+//      framePointToPack.add(offsetFromBodyToFoot.getVector());
+//      framePointToPack.add(feetOffsetFromBody.getFrameTuple().getVector());
+      
+      offset.set(offsetFromBodyToFoot);
+      framePointToPack.add(offset);
+      
+      offset.set(feetOffsetFromBody);
+      framePointToPack.add(offset);
+      
       framePointToPack.changeFrame(ReferenceFrame.getWorldFrame());
       framePointToPack.setZ(0.0);
       
@@ -213,10 +223,10 @@ public class FootStepPlanner
    {
       pelvis.getBodyFixedFrame().getTwistOfFrame(twistToPack);
       twistToPack.changeFrame(ReferenceFrame.getWorldFrame());
-      twistToPack.getAngularPart(angularVelocity);
+      angularVelocity.setIncludingFrame(twistToPack.getAngularPart());
 
-      centerOfMassJacobian.compute();
-      centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
+      centerOfMassJacobian.reset();
+      centerOfMassVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
       centerOfMassVelocity.changeFrame(ReferenceFrame.getWorldFrame());
 
       getDesiredFootPosition(robotSextant, centerOfMassVelocity, angularVelocity, swingTime, framePointToPack);
@@ -235,7 +245,7 @@ public class FootStepPlanner
    FramePoint3D footPosition = new FramePoint3D();
    ConvexPolygon2D polygon = new ConvexPolygon2D();
 
-   private void drawSupportPolygon(RobotSextant[] feet, YoFrameConvexPolygon2d yoFramePolygon)
+   private void drawSupportPolygon(RobotSextant[] feet, YoFrameConvexPolygon2D yoFramePolygon)
    {
       polygon = new ConvexPolygon2D();
       for (RobotSextant robotSextant : feet)
@@ -247,6 +257,6 @@ public class FootStepPlanner
 
       }
       polygon.update();
-      yoFramePolygon.setConvexPolygon2d(polygon);
+      yoFramePolygon.set(polygon);
    }
 }

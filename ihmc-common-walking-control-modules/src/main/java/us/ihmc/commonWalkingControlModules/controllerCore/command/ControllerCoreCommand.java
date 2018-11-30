@@ -8,6 +8,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 /**
@@ -19,7 +21,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
 {
    private final InverseDynamicsCommandList inverseDynamicsCommandList;
    private final InverseKinematicsCommandList inverseKinematicsCommandList;
-   private final InverseDynamicsCommandList virtualModelControlCommandList;
+   private final VirtualModelControlCommandList virtualModelControlCommandList;
    private final FeedbackControlCommandList feedbackControlCommandList;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
    private WholeBodyControllerCoreMode controllerCoreMode;
@@ -38,7 +40,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       this.controllerCoreMode = controllerCoreMode;
 
       inverseDynamicsCommandList = new InverseDynamicsCommandList();
-      virtualModelControlCommandList = new InverseDynamicsCommandList();
+      virtualModelControlCommandList = new VirtualModelControlCommandList();
       feedbackControlCommandList = new FeedbackControlCommandList();
       inverseKinematicsCommandList = new InverseKinematicsCommandList();
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
@@ -72,7 +74,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
     * 
     * @param inverseDynamicsCommand command to add to the list
     */
-   public void addVirtualModelControlCommand(InverseDynamicsCommand<?> inverseDynamicsCommand)
+   public void addVirtualModelControlCommand(VirtualModelControlCommand<?> inverseDynamicsCommand)
    {
       if (inverseDynamicsCommand != null)
          virtualModelControlCommandList.addCommand(inverseDynamicsCommand);
@@ -156,7 +158,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
     *         core.
     */
    @Override
-   public InverseDynamicsCommandList getVirtualModelControlCommandList()
+   public VirtualModelControlCommandList getVirtualModelControlCommandList()
    {
       return virtualModelControlCommandList;
    }

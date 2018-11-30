@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 
 public class CollisionCylinderTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testInsideCylinderPoints()
    {

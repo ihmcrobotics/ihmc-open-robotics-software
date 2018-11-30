@@ -3,12 +3,11 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import java.util.ArrayList;
 import java.util.List;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
 /*
@@ -19,11 +18,11 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
  */
 public class GeometricJacobianHolder
 {
-   public static final long NULL_JACOBIAN_ID = NameBasedHashCodeTools.NULL_HASHCODE;
+   public static final int NULL_JACOBIAN_ID = 0;
 
-   private final TLongObjectHashMap<GeometricJacobian> nameBasedHashCodeToJacobianMap = new TLongObjectHashMap<GeometricJacobian>();
+   private final TIntObjectHashMap<GeometricJacobian> hashCodeToJacobianMap = new TIntObjectHashMap<GeometricJacobian>();
    private final List<GeometricJacobian> geometricJacobians = new ArrayList<GeometricJacobian>();
-   private final InverseDynamicsJoint[] temporaryToStoreJointPath = new InverseDynamicsJoint[30];
+   private final JointBasics[] temporaryToStoreJointPath = new JointBasics[30];
 
    public void compute()
    {
@@ -41,7 +40,7 @@ public class GeometricJacobianHolder
     * @param jacobianFrame
     * @return
     */
-   public long getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
+   public int getOrCreateGeometricJacobian(RigidBodyBasics ancestor, RigidBodyBasics descendant, ReferenceFrame jacobianFrame)
    {
       int numberOfJoints = ScrewTools.createJointPath(temporaryToStoreJointPath, ancestor, descendant);
       return getOrCreateGeometricJacobian(temporaryToStoreJointPath, numberOfJoints, jacobianFrame);
@@ -55,12 +54,12 @@ public class GeometricJacobianHolder
     * @param jacobianFrame
     * @return
     */
-   public long getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
+   public int getOrCreateGeometricJacobian(JointBasics[] joints, ReferenceFrame jacobianFrame)
    {
       return getOrCreateGeometricJacobian(joints, joints.length, jacobianFrame);
    }
 
-   private long getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, int numberOfJointsToConsider, ReferenceFrame jacobianFrame)
+   private int getOrCreateGeometricJacobian(JointBasics[] joints, int numberOfJointsToConsider, ReferenceFrame jacobianFrame)
    {
       if (joints == null || numberOfJointsToConsider == 0)
          return NULL_JACOBIAN_ID;
@@ -69,7 +68,7 @@ public class GeometricJacobianHolder
       // On top of that, this class makes the different modules use the same instances of each Jacobian, so it would not be good if one module changes the frame of a Jacobian shared with another module. 
       boolean allowChangeFrame = false;
 
-      long jacobianId = ScrewTools.computeGeometricJacobianNameBasedHashCode(joints, 0, numberOfJointsToConsider - 1, jacobianFrame, allowChangeFrame);
+      int jacobianId = ScrewTools.computeGeometricJacobianHashCode(joints, 0, numberOfJointsToConsider - 1, jacobianFrame, allowChangeFrame);
       GeometricJacobian jacobian = getJacobian(jacobianId);
 
       if (jacobian == null)
@@ -80,16 +79,16 @@ public class GeometricJacobianHolder
          }
          else
          {
-            InverseDynamicsJoint[] jointsForNewJacobian = new InverseDynamicsJoint[numberOfJointsToConsider];
+            JointBasics[] jointsForNewJacobian = new JointBasics[numberOfJointsToConsider];
             System.arraycopy(joints, 0, jointsForNewJacobian, 0, numberOfJointsToConsider);
             jacobian = new GeometricJacobian(jointsForNewJacobian, jacobianFrame, allowChangeFrame);
          }
          jacobian.compute(); // Compute in case you need it right away
          geometricJacobians.add(jacobian);
-         nameBasedHashCodeToJacobianMap.put(jacobian.getNameBasedHashCode(), jacobian);
+         hashCodeToJacobianMap.put(jacobian.hashCode(), jacobian);
       }
 
-      return jacobian.getNameBasedHashCode();
+      return jacobian.hashCode();
    }
 
    /**
@@ -97,11 +96,11 @@ public class GeometricJacobianHolder
     * @param jacobianId
     * @return
     */
-   public GeometricJacobian getJacobian(long jacobianId)
+   public GeometricJacobian getJacobian(int jacobianId)
    {
       if (jacobianId == NULL_JACOBIAN_ID)
          return null;
       else
-         return nameBasedHashCodeToJacobianMap.get(jacobianId);
+         return hashCodeToJacobianMap.get(jacobianId);
    }
 }

@@ -9,7 +9,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
@@ -29,16 +30,15 @@ public class GraphicsExample
 
 
       // create geometry
-      YoFramePoint testPoint = new YoFramePoint("testPoint", "", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint testPoint2 = new YoFramePoint("testPoint2", "", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D testPoint = new YoFramePoint3D("testPoint", "", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D testPoint2 = new YoFramePoint3D("testPoint2", "", ReferenceFrame.getWorldFrame(), registry);
 
-      YoFramePoint worldOrigin = new YoFramePoint("worldOrigin", "", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D worldOrigin = new YoFramePoint3D("worldOrigin", "", ReferenceFrame.getWorldFrame(), registry);
       YoDouble yaw = new YoDouble("yaw", registry);
       YoDouble pitch = new YoDouble("pitch", registry);
       YoDouble roll = new YoDouble("roll", registry);
 
-      YoGraphicCoordinateSystem worldCoordinateSystem = new YoGraphicCoordinateSystem("Example", worldOrigin.getYoX(), worldOrigin.getYoY(),
-                                                                worldOrigin.getYoZ(), yaw, pitch, roll, 2.0);
+      YoGraphicCoordinateSystem worldCoordinateSystem = new YoGraphicCoordinateSystem("Example", worldOrigin, new YoFrameYawPitchRoll(yaw, pitch, roll, ReferenceFrame.getWorldFrame()), 2.0);
 
       // setup slider board
       setupEvolution(scs, testPoint);
@@ -71,7 +71,7 @@ public class GraphicsExample
       testPoint2.set(0.6, 0.6, 0.6);
    }
 
-   private void setupEvolution(SimulationConstructionSet scs, YoFramePoint pointToControl)
+   private void setupEvolution(SimulationConstructionSet scs, YoFramePoint3D pointToControl)
    {
       MidiSliderBoard evolution = new MidiSliderBoard(scs);
 

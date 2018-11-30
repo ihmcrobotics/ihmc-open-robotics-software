@@ -20,27 +20,27 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
 {
    //YoVariables for Display
-   private final YoFramePoint ypLeftEE, ypRightEE;
-   private final YoFramePose yposeLeftEE, yposeRightEE;
+   private final YoFramePoint3D ypLeftEE, ypRightEE;
+   private final YoFramePoseUsingYawPitchRoll yposeLeftEE, yposeRightEE;
    Map<String, YoDouble> yoQout = new HashMap<>();
    Map<String, YoDouble> yoQdiff = new HashMap<>();
 
    public AtlasCalibrationDataViewer(DRCRobotModel robotModel)
    {
       super(robotModel);
-      ypLeftEE = new YoFramePoint("leftEE", ReferenceFrame.getWorldFrame(), registry);
-      ypRightEE = new YoFramePoint("rightEE", ReferenceFrame.getWorldFrame(), registry);
-      yposeLeftEE = new YoFramePose("leftPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
-      yposeRightEE = new YoFramePose("rightPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
+      ypLeftEE = new YoFramePoint3D("leftEE", ReferenceFrame.getWorldFrame(), registry);
+      ypRightEE = new YoFramePoint3D("rightEE", ReferenceFrame.getWorldFrame(), registry);
+      yposeLeftEE = new YoFramePoseUsingYawPitchRoll("leftPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
+      yposeRightEE = new YoFramePoseUsingYawPitchRoll("rightPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
    }
 
    @Override

@@ -17,16 +17,16 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
+import us.ihmc.robotics.robotDescription.InertiaTools;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.InertiaTools;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.robotController.RobotController;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.RigidBodyInertia;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotController
 {
@@ -35,7 +35,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoFrameVector inertiaEllipsoidGhostOffset = new YoFrameVector("inertiaEllipsoidGhostOffset", "", worldFrame, registry);
+   private final YoFrameVector3D inertiaEllipsoidGhostOffset = new YoFrameVector3D("inertiaEllipsoidGhostOffset", "", worldFrame, registry);
 
    private final ArrayList<YoGraphic> yoGraphics = new ArrayList<YoGraphic>();
 
@@ -44,11 +44,11 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
    private class RigidBodyVisualizationData
    {
-      public RigidBody rigidBody;
-      public YoFramePoint position;
-      public YoFrameOrientation orientation;
+      public RigidBodyBasics rigidBody;
+      public YoFramePoint3D position;
+      public YoFrameYawPitchRoll orientation;
 
-      public RigidBodyVisualizationData(RigidBody rigidBody, YoFramePoint position, YoFrameOrientation orientation)
+      public RigidBodyVisualizationData(RigidBodyBasics rigidBody, YoFramePoint3D position, YoFrameYawPitchRoll orientation)
       {
          this.rigidBody = rigidBody;
          this.position = position;
@@ -59,13 +59,13 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
    private final ArrayList<RigidBodyVisualizationData> centerOfMassData = new ArrayList<RigidBodyVisualizationData>();
 
-   public CommonInertiaEllipsoidsVisualizer(RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public CommonInertiaEllipsoidsVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this(rootBody, yoGraphicsListRegistry);
       parentRegistry.addChild(registry);
    }
 
-   public CommonInertiaEllipsoidsVisualizer(RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CommonInertiaEllipsoidsVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       inertiaEllipsoidGhostOffset.set(0, 0.0, 0.0);
 
@@ -76,9 +76,9 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
    }
 
-   private void findMinimumAndMaximumMassOfRigidBodies(RigidBody body)
+   private void findMinimumAndMaximumMassOfRigidBodies(RigidBodyBasics body)
    {
-      RigidBodyInertia inertia = body.getInertia();
+      SpatialInertiaBasics inertia = body.getInertia();
       if (inertia != null)
       {
          double mass = body.getInertia().getMass();
@@ -93,11 +93,11 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
       if (body.hasChildrenJoints())
       {
-         List<InverseDynamicsJoint> childJoints = body.getChildrenJoints();
+         List<? extends JointBasics> childJoints = body.getChildrenJoints();
 
-         for (InverseDynamicsJoint joint : childJoints)
+         for (JointBasics joint : childJoints)
          {
-            RigidBody nextBody = joint.getSuccessor();
+            RigidBodyBasics nextBody = joint.getSuccessor();
             if (nextBody != null)
                findMinimumAndMaximumMassOfRigidBodies(nextBody);
          }
@@ -123,14 +123,14 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
       return Color.getHSBColor(H, S, B);
    }
 
-   private void addRigidBodyAndChilderenToVisualization(RigidBody currentRigidBody)
+   private void addRigidBodyAndChilderenToVisualization(RigidBodyBasics currentRigidBody)
    {
 
-      RigidBodyInertia inertia = currentRigidBody.getInertia();
+      SpatialInertiaBasics inertia = currentRigidBody.getInertia();
 
       if (inertia != null)
       {
-         Matrix3D inertiaMatrix = inertia.getMassMomentOfInertiaPartCopy();
+         Matrix3D inertiaMatrix = new Matrix3D(inertia.getMomentOfInertia());
          double mass = inertia.getMass();
 
          //         Vector3d principalMomentsOfInertia = new Vector3d(inertiaMatrix.m00, inertiaMatrix.m11, inertiaMatrix.m22);
@@ -138,8 +138,8 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
          //         if(radii.length() > 1e-4)
          //         {
          String rigidBodyName = currentRigidBody.getName();
-         YoFramePoint comPosition = new YoFramePoint("centerOfMassPosition", rigidBodyName, worldFrame, registry);
-         YoFrameOrientation comOrientation = new YoFrameOrientation("rigidBodyOrientation", rigidBodyName, worldFrame, registry);
+         YoFramePoint3D comPosition = new YoFramePoint3D("centerOfMassPosition", rigidBodyName, worldFrame, registry);
+         YoFrameYawPitchRoll comOrientation = new YoFrameYawPitchRoll("rigidBodyOrientation", rigidBodyName, worldFrame, registry);
          RigidBodyVisualizationData comData = new RigidBodyVisualizationData(currentRigidBody, comPosition, comOrientation);
          centerOfMassData.add(comData);
 
@@ -155,11 +155,11 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
       if (currentRigidBody.hasChildrenJoints())
       {
-         List<InverseDynamicsJoint> childJoints = currentRigidBody.getChildrenJoints();
+         List<? extends JointBasics> childJoints = currentRigidBody.getChildrenJoints();
 
-         for (InverseDynamicsJoint joint : childJoints)
+         for (JointBasics joint : childJoints)
          {
-            RigidBody nextRigidBody = joint.getSuccessor();
+            RigidBodyBasics nextRigidBody = joint.getSuccessor();
             if (nextRigidBody != null)
                addRigidBodyAndChilderenToVisualization(nextRigidBody);
          }
@@ -179,7 +179,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
       FramePoint3D tempCoMPosition = new FramePoint3D(worldFrame);
       for (RigidBodyVisualizationData comData : centerOfMassData)
       {
-         comData.rigidBody.getCoMOffset(tempCoMPosition);
+         comData.rigidBody.getCenterOfMass(tempCoMPosition);
          tempCoMPosition.changeFrame(worldFrame);
          tempCoMPosition.add(inertiaEllipsoidGhostOffset);
 

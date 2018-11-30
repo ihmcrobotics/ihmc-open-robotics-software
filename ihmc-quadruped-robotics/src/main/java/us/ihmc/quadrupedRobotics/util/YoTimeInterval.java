@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.util;
 
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -36,5 +37,11 @@ public class YoTimeInterval extends TimeInterval
    public void setEndTime(double endTime)
    {
       this.endTime.set(endTime);
+   }
+
+   @Override
+   public String toString()
+   {
+      return EuclidCoreIOTools.getStringOf("(", " )", ", ", startTime.getDoubleValue(), endTime.getDoubleValue());
    }
 }

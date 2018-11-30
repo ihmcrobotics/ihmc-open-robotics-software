@@ -2,9 +2,10 @@ package us.ihmc.robotiq.simulatedHand;
 
 import java.util.EnumMap;
 
+import controller_msgs.msg.dds.HandJointAnglePacket;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandSensorData;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
@@ -17,14 +18,15 @@ public class SimulatedRobotiqHandJointAngleProducer
    private final SideDependentList<EnumMap<RobotiqHandJointNameMinimal, OneDegreeOfFreedomJoint>> handJoints = SideDependentList.createListOfEnumMaps(RobotiqHandJointNameMinimal.class);
 
    private final SideDependentList<Boolean> hasRobotiqHand = new SideDependentList<Boolean>(false, false);
-   
+
    private final SideDependentList<HandJointAngleCommunicator> jointAngleCommunicators = new SideDependentList<>();
 
-   public SimulatedRobotiqHandJointAngleProducer(HumanoidGlobalDataProducer dataProducer, FloatingRootJointRobot simulatedRobot, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public SimulatedRobotiqHandJointAngleProducer(IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher, FloatingRootJointRobot simulatedRobot,
+                                                 CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, dataProducer, closeableAndDisposableRegistry));
+         jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, jointAnglePublisher, closeableAndDisposableRegistry));
 
          for (RobotiqHandJointNameMinimal jointEnum : RobotiqHandJointNameMinimal.values)
          {

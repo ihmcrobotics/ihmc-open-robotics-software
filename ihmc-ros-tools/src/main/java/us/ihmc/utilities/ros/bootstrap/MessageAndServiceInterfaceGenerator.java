@@ -18,8 +18,7 @@ import ihmc_msgs.WholeBodyTrajectoryRosMessage;
  * This is the second step when updating the ROS API. The first step is DRCROSMessageGenerator.
  * </p>
  * <p>
- * The program arguments should be something like : "../ihmc-ros-tools/generated-src
- * ROSMessagesAndServices"
+ * The program arguments should be something like : "../ihmc-ros-tools/generated-src ROSMessagesAndServices"
  * </p>
  * <p>
  * For most messages, this will be enough, but for some other like

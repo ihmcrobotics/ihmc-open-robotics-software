@@ -1,41 +1,41 @@
 package us.ihmc.valkyrie.parameters;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 public class ValkyrieWalkingControllerParameters extends WalkingControllerParameters
 {
@@ -47,13 +47,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
-   private ArrayList<String> positionControlledJoints = null;
-   private Map<String, JointAccelerationIntegrationParameters> integrationSettings = null;
 
    private final LegConfigurationParameters legConfigurationParameters;
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
    private final ValkyrieSteppingParameters steppingParameters;
+   private final ICPOptimizationParameters icpOptimizationParameters;
 
    public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap)
    {
@@ -65,11 +64,11 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       this.jointMap = jointMap;
       this.target = target;
 
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-      legConfigurationParameters = new ValkyrieLegConfigurationParameters(runningOnRealRobot);
-      toeOffParameters = new ValkyrieToeOffParameters();
+      legConfigurationParameters = new ValkyrieLegConfigurationParameters(target);
+      toeOffParameters = new ValkyrieToeOffParameters(target);
       swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
       steppingParameters = new ValkyrieSteppingParameters(target);
+      icpOptimizationParameters = new ValkyrieICPOptimizationParameters(target);
 
       // Generated using ValkyrieFullRobotModelVisualizer
       RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
@@ -183,10 +182,10 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setKpParallelToMotion(kpParallel);
       gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
-      gains.setKiBleedOff(kiBleedOff);
+      gains.setIntegralLeakRatio(kiBleedOff);
 
       if (target == RobotTarget.REAL_ROBOT)
-         gains.setFeedbackPartMaxRate(1.0);
+         gains.setFeedbackPartMaxRate(1.5);
 
       return gains;
    }
@@ -215,25 +214,14 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
    {
-      List<String> spineNames = new ArrayList<>();
-      List<String> neckNames = new ArrayList<>();
-      List<String> armNames = new ArrayList<>();
-
-      Arrays.stream(jointMap.getSpineJointNames()).forEach(n -> spineNames.add(jointMap.getSpineJointName(n)));
-      Arrays.stream(jointMap.getNeckJointNames()).forEach(n -> neckNames.add(jointMap.getNeckJointName(n)));
-      for (RobotSide side : RobotSide.values)
-      {
-         Arrays.stream(jointMap.getArmJointNames()).forEach(n -> armNames.add(jointMap.getArmJointName(side, n)));
-      }
-
       PIDGains spineGains = createSpineControlGains();
       PIDGains neckGains = createNeckControlGains();
       PIDGains armGains = createArmControlGains();
 
       List<GroupParameter<PIDGainsReadOnly>> jointspaceGains = new ArrayList<>();
-      jointspaceGains.add(new GroupParameter<>("_SpineJointGains", spineGains, spineNames));
-      jointspaceGains.add(new GroupParameter<>("_NeckJointGains", neckGains, neckNames));
-      jointspaceGains.add(new GroupParameter<>("_ArmJointGains", armGains, armNames));
+      jointspaceGains.add(new GroupParameter<>("SpineJoints", spineGains, jointMap.getSpineJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("NeckJoints", neckGains, jointMap.getNeckJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("ArmJoints", armGains, jointMap.getArmJointNamesAsStrings()));
 
       return jointspaceGains;
    }
@@ -287,8 +275,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double zeta = runningOnRealRobot ? 1.0 : 0.7;
       double ki = runningOnRealRobot ? 0.0 : 0.0;
       double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 50.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 750.0 : Double.POSITIVE_INFINITY;
+      double maxAccel = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 2000.0 : Double.POSITIVE_INFINITY;
 
       armGains.setKp(kp);
       armGains.setZeta(zeta);
@@ -302,56 +290,45 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public List<GroupParameter<PID3DGainsReadOnly>> getTaskspaceOrientationControlGains()
+   public List<GroupParameter<PID3DConfiguration>> getTaskspaceOrientationControlGains()
    {
-      List<GroupParameter<PID3DGainsReadOnly>> taskspaceAngularGains = new ArrayList<>();
+      List<GroupParameter<PID3DConfiguration>> taskspaceAngularGains = new ArrayList<>();
 
-      PID3DGains chestAngularGains = createChestOrientationControlGains();
-      List<String> chestGainBodies = new ArrayList<>();
-      chestGainBodies.add(jointMap.getChestName());
-      taskspaceAngularGains.add(new GroupParameter<>("Chest", chestAngularGains, chestGainBodies));
+      PID3DConfiguration chestAngularGains = createChestOrientationControlGains();
+      taskspaceAngularGains.add(new GroupParameter<>("Chest", chestAngularGains, jointMap.getChestName()));
 
-      PID3DGains headAngularGains = createHeadOrientationControlGains();
-      List<String> headGainBodies = new ArrayList<>();
-      headGainBodies.add(jointMap.getHeadName());
-      taskspaceAngularGains.add(new GroupParameter<>("Head", headAngularGains, headGainBodies));
+      PID3DConfiguration headAngularGains = createHeadOrientationControlGains();
+      taskspaceAngularGains.add(new GroupParameter<>("Head", headAngularGains, jointMap.getHeadName()));
 
-      PID3DGains handAngularGains = createHandOrientationControlGains();
-      List<String> handGainBodies = new ArrayList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handGainBodies.add(jointMap.getHandName(robotSide));
-      }
-      taskspaceAngularGains.add(new GroupParameter<>("Hand", handAngularGains, handGainBodies));
+      PID3DConfiguration handAngularGains = createHandOrientationControlGains();
+      taskspaceAngularGains.add(new GroupParameter<>("Hand", handAngularGains, jointMap.getHandNames()));
 
-      PID3DGains pelvisAngularGains = createPelvisOrientationControlGains();
-      List<String> pelvisGainBodies = new ArrayList<>();
-      pelvisGainBodies.add(jointMap.getPelvisName());
-      taskspaceAngularGains.add(new GroupParameter<>("Pelvis", pelvisAngularGains, pelvisGainBodies));
+      PID3DConfiguration pelvisAngularGains = createPelvisOrientationControlGains();
+      taskspaceAngularGains.add(new GroupParameter<>("Pelvis", pelvisAngularGains, jointMap.getPelvisName()));
 
       return taskspaceAngularGains;
    }
 
-   private PID3DGains createPelvisOrientationControlGains()
+   private PID3DConfiguration createPelvisOrientationControlGains()
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
-      double kpXY = runningOnRealRobot ? 100.0 : 100.0; // 160.0
-      double kpZ = runningOnRealRobot ? 80.0 : 100.0; // 120.0
-      double zetaXY = runningOnRealRobot ? 0.9 : 0.8; // 0.7
-      double zetaZ = runningOnRealRobot ? 1.00 : 0.8; // 0.7
-      double maxAccel = runningOnRealRobot ? 18.0 : 18.0;
-      double maxJerk = runningOnRealRobot ? 270.0 : 270.0;
+      double kpXY = runningOnRealRobot ? 100.0 : 100.0; // Was 100.0 before tuneup of sep 2018
+      double kpZ = runningOnRealRobot ? 90.0 : 100.0; // Was 80.0 before tuneup of sep 2018
+      double zetaXY = runningOnRealRobot ? 0.8 : 0.8; // Was 0.9 before tuneup of sep 2018
+      double zetaZ = runningOnRealRobot ? 0.8 : 0.8;
+      double maxAccel = runningOnRealRobot ? 100.0 : 18.0; // Was 18.0 before tuneup of sep 2018
+      double maxJerk = runningOnRealRobot ? 1500.0 : 270.0; // Was 270.0 before tuneup of sep 2018
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XY, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kpXY, kpXY, kpZ);
       gains.setDampingRatios(zetaXY, zetaXY, zetaZ);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.XY, false, gains);
    }
 
-   private PID3DGains createHeadOrientationControlGains()
+   private PID3DConfiguration createHeadOrientationControlGains()
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -361,34 +338,34 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAccel = 18.0;
       double maxJerk = 270.0;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.YZ, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kpX, kpYZ, kpYZ);
       gains.setDampingRatios(zeta, zeta, zeta);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.YZ, false, gains);
    }
 
-   private PID3DGains createChestOrientationControlGains()
+   private PID3DConfiguration createChestOrientationControlGains()
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
-      double kpXY = runningOnRealRobot ? 80.0 : 100.0;
-      double kpZ = runningOnRealRobot ? 60.0 : 100.0;
-      double zetaXY = runningOnRealRobot ? 0.8 : 0.8;
-      double zetaZ = runningOnRealRobot ? 0.8 : 0.8;
+      double kpXY = runningOnRealRobot ? 80.0 : 100.0; // Was 80.0 before tuneup of sep 2018
+      double kpZ = runningOnRealRobot ? 80.0 : 100.0; // Was 60.0 before tuneup of sep 2018
+      double zetaXY = runningOnRealRobot ? 0.8 : 0.8; // Was 0.8 before tuneup of sep 2018
+      double zetaZ = runningOnRealRobot ? 0.8 : 0.8; // Was 0.8 before tuneup of sep 2018
       double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
-      double maxJerk = runningOnRealRobot ? 180.0 : 270.0;
+      double maxJerk = runningOnRealRobot ? 360.0 : 270.0;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XY, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kpXY, kpXY, kpZ);
       gains.setDampingRatios(zetaXY, zetaXY, zetaZ);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.XY, false, gains);
    }
 
-   private PID3DGains createHandOrientationControlGains()
+   private PID3DConfiguration createHandOrientationControlGains()
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -397,32 +374,27 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XYZ, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kp);
       gains.setDampingRatios(zeta);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.XYZ, false, gains);
    }
 
    /** {@inheritDoc} */
    @Override
-   public List<GroupParameter<PID3DGainsReadOnly>> getTaskspacePositionControlGains()
+   public List<GroupParameter<PID3DConfiguration>> getTaskspacePositionControlGains()
    {
-      List<GroupParameter<PID3DGainsReadOnly>> taskspaceLinearGains = new ArrayList<>();
+      List<GroupParameter<PID3DConfiguration>> taskspaceLinearGains = new ArrayList<>();
 
-      PID3DGains handLinearGains = createHandPositionControlGains();
-      List<String> handGainBodies = new ArrayList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handGainBodies.add(jointMap.getHandName(robotSide));
-      }
-      taskspaceLinearGains.add(new GroupParameter<>("Hand", handLinearGains, handGainBodies));
+      PID3DConfiguration handLinearGains = createHandPositionControlGains();
+      taskspaceLinearGains.add(new GroupParameter<>("Hand", handLinearGains, jointMap.getHandNames()));
 
       return taskspaceLinearGains;
    }
 
-   private PID3DGains createHandPositionControlGains()
+   private PID3DConfiguration createHandPositionControlGains()
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -431,12 +403,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XYZ, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kp);
       gains.setDampingRatios(zeta);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.XYZ, false, gains);
    }
 
    /** {@inheritDoc} */
@@ -461,9 +433,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 0.0);
       jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 0.0);
 
-      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), 0.0);
+      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), 0.6);
       jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW), 0.0);
-      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), 0.0);
+      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), -0.1);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -495,37 +467,38 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public PIDSE3Gains getSwingFootControlGains()
+   public PIDSE3Configuration getSwingFootControlGains()
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
-      double kpX = 150.0; // Might cause some shakies.
-      double kpY = 100.0; // 150.0
-      double kpZ = runningOnRealRobot ? 200.0 : 200.0;
-      double zetaXZ = runningOnRealRobot ? 0.8 : 0.7; // Might cause some shakies.
-      double zetaY = runningOnRealRobot ? 0.5 : 0.7;
+      double kpX = runningOnRealRobot? 100.0 : 150.0; // Was 150.0 before tuneup of sep 2018
+      double kpY = runningOnRealRobot? 100.0 : 150.0; // Was 100.0 before tuneup of sep 2018
+      double kpZ = runningOnRealRobot ? 250.0 : 200.0;  // Was 200.0 before tuneup of sep 2018
+      // zeta was [0.8, 0.5, 0.8] before tuneup of sep 2018
+      double zetaXY = runningOnRealRobot ? 0.7 : 0.7;
+      double zetaZ = runningOnRealRobot ? 0.8 : 0.7;
       double kpXYOrientation = runningOnRealRobot ? 200.0 : 300.0;
       double kpZOrientation = runningOnRealRobot ? 150.0 : 200.0; // 160
-      double zetaOrientationXY = runningOnRealRobot ? 0.7 : 0.7;
-      double zetaOrientationZ = runningOnRealRobot ? 0.5 : 0.7;
+      double zetaOrientationXY = runningOnRealRobot ? 0.8 : 0.7; // Was 0.7 before tuneup of sep 2018
+      double zetaOrientationZ = runningOnRealRobot ? 0.8 : 0.7; // Was 0.5 before tuneup of sep 2018
       double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxLinearJerk = runningOnRealRobot ? 250.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains(GainCoupling.NONE, false);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpX, kpY, kpZ);
-      gains.setPositionDampingRatios(zetaXZ, zetaY, zetaXZ);
+      gains.setPositionDampingRatios(zetaXY, zetaXY, zetaZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatios(zetaOrientationXY, zetaOrientationXY, zetaOrientationZ);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return gains;
+      return new PIDSE3Configuration(GainCoupling.NONE, false, gains);
    }
 
    @Override
-   public PIDSE3Gains getHoldPositionFootControlGains()
+   public PIDSE3Configuration getHoldPositionFootControlGains()
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -540,7 +513,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains(GainCoupling.XY, false);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
       gains.setPositionDampingRatios(zetaXYZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
@@ -548,11 +521,11 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setOrientationDampingRatios(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return gains;
+      return new PIDSE3Configuration(GainCoupling.XY, false, gains);
    }
 
    @Override
-   public PIDSE3Gains getToeOffFootControlGains()
+   public PIDSE3Configuration getToeOffFootControlGains()
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -567,7 +540,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains(GainCoupling.XY, false);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
       gains.setPositionDampingRatios(zetaXYZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
@@ -575,7 +548,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setOrientationDampingRatios(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return gains;
+      return new PIDSE3Configuration(GainCoupling.XY, false, gains);
    }
 
    @Override
@@ -649,9 +622,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 //            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.UpperNeckPitch]);
 //            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LowerNeckPitch]);
 //            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.NeckYaw]);
-//            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw]);
-//            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll]);
-//            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch]);
+            if (!ValkyrieRosControlController.HAS_FOREARMS_ON)
+            {
+               jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw]);
+               jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll]);
+               jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch]);
+            }
          }
       }
 
@@ -662,6 +638,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
       return new ValkyrieMomentumOptimizationSettings(jointMap);
+   }
+
+   @Override
+   public FeedbackControllerSettings getFeedbackControllerSettings()
+   {
+      return new ValkyrieFeedbackControllerSettings(jointMap, target);
    }
 
    @Override
@@ -715,12 +697,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return Double.POSITIVE_INFINITY;
    }
 
-   @Override
-   public boolean useOptimizationBasedICPController()
-   {
-      return false;
-   }
-
    /** {@inheritDoc} */
    @Override
    public LegConfigurationParameters getLegConfigurationParameters()
@@ -762,5 +738,28 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public double getMinSwingTrajectoryClearanceFromStanceFoot()
    {
       return 0.18;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useOptimizationBasedICPController()
+   {
+      switch (target)
+      {
+      case SCS:
+         return true;
+      case GAZEBO:
+      case REAL_ROBOT:
+      default:
+         // TODO Need to be re-enabled once tuned on unit A which appears to be more sensitive.
+         return false;
+      }
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public ICPOptimizationParameters getICPOptimizationParameters()
+   {
+      return icpOptimizationParameters;
    }
 }

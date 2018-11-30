@@ -23,6 +23,8 @@ public class ConvexPolygon2dIntersectionSetCalculator
    private final ArrayList<ConvexPolygon2D> convexPolygon2dsToSearchForIntersection = new ArrayList<ConvexPolygon2D>();
    private final ArrayList<BoundingBox2D> boundingBoxes = new ArrayList<>();
 
+   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+
    public ConvexPolygon2dIntersectionSetCalculator(ArrayList<ConvexPolygon2D> convexPolygon2d)
    {
       resetBaseConvexPolygon2ds(convexPolygon2d);
@@ -60,7 +62,7 @@ public class ConvexPolygon2dIntersectionSetCalculator
       for (ConvexPolygon2D tentativePolygon : tentativeList)
       {
          ConvexPolygon2D intersection = new ConvexPolygon2D();
-         boolean success = ConvexPolygonTools.computeIntersectionOfPolygons(targetPolygon, tentativePolygon, intersection);
+         boolean success = convexPolygonTools.computeIntersectionOfPolygons(targetPolygon, tentativePolygon, intersection);
 
          if (success)
             ret.add(intersection);

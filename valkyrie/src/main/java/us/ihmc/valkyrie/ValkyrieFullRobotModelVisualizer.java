@@ -12,7 +12,8 @@ import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVis
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
+import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
+import us.ihmc.simulationConstructionSetTools.util.visualizers.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 
@@ -54,7 +55,7 @@ public class ValkyrieFullRobotModelVisualizer
 
 //      ((OneDoFJoint)fullRobotModel.getChest().getParentJoint()).setQ(1.0);
 
-      GraphicsRobot robotGraphics = new GraphicsRobot(robotDescription.getName(), fullRobotModel.getElevator(), robotDescription, false);
+      GraphicsRobot robotGraphics = new GraphicsIDRobot(robotDescription.getName(), fullRobotModel.getElevator(), robotDescription, false);
       robotGraphics.update();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();

@@ -77,7 +77,7 @@ public class QuinticSplineInterpolatorTest
     * timing parameters.
     */
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.7)
 	@Test(timeout=300000)
    public void testQuinticSplineCalculationSpeed() throws IOException
    {

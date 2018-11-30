@@ -62,9 +62,26 @@ public class JVMStatisticsGenerator
       visualizer.addRegistry(registry, null);
    }
 
+   public JVMStatisticsGenerator(YoVariableRegistry parentRegistry)
+   {
+      this.visualizer = null;
+      createGCBeanHolders();
+
+      availableProcessors.set(operatingSystemMXBean.getAvailableProcessors());
+      maxMemory.set(Runtime.getRuntime().maxMemory());
+
+      parentRegistry.addChild(registry);
+   }
+
+
    public void start()
    {
       executor.scheduleAtFixedRate(jvmStatisticsGeneratorThread, 0, 1, TimeUnit.SECONDS);
+   }
+   
+   public void runManual()
+   {
+      jvmStatisticsGeneratorThread.run();
    }
 
    public void createGCBeanHolders()
@@ -115,7 +132,10 @@ public class JVMStatisticsGenerator
 
          systemLoadAverage.set(operatingSystemMXBean.getSystemLoadAverage());
 
-         visualizer.update(visualizer.getLatestTimestamp(), registry);
+         if(visualizer != null)
+         {
+            visualizer.update(visualizer.getLatestTimestamp(), registry);
+         }
       }
 
       public void updateMemoryUsageStatistics()

@@ -1,6 +1,7 @@
 package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -78,6 +79,12 @@ public class PoseReferenceFrame extends ReferenceFrame
       this.update();
    }
 
+   public void setPoseAndUpdate(Pose3D pose)
+   {
+      originPose.set(pose);
+      this.update();
+   }
+
    public void setPoseAndUpdate(RigidBodyTransform transformToParent)
    {
       originPose.set(transformToParent);
@@ -98,7 +105,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void setPositionAndUpdate(FramePoint3DReadOnly framePoint)
    {
-      framePoint.checkReferenceFrameMatch(parentFrame);
+      framePoint.checkReferenceFrameMatch(getParent());
       originPose.setPosition(framePoint);
       this.update();
    }
@@ -123,14 +130,14 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void setOrientationAndUpdate(FrameQuaternionReadOnly frameOrientation)
    {
-      frameOrientation.checkReferenceFrameMatch(parentFrame);
+      frameOrientation.checkReferenceFrameMatch(getParent());
       originPose.setOrientation(frameOrientation);
       this.update();
    }
    
    public void setXYFromPosition2dAndUpdate(FramePoint2DReadOnly position2d)
    {
-      position2d.checkReferenceFrameMatch(parentFrame);
+      position2d.checkReferenceFrameMatch(getParent());
       originPose.setPosition(position2d);
       this.update();
    }
@@ -258,7 +265,7 @@ public class PoseReferenceFrame extends ReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      originPose.checkReferenceFrameMatch(parentFrame);
+      originPose.checkReferenceFrameMatch(getParent());
       originPose.get(transformToParent);
    }
 

@@ -31,11 +31,6 @@ public class MultipleWaypointsBlendedPoseTrajectoryGenerator extends BlendedPose
       this.trajectory.clear(referenceFrame);
    }
 
-   public void initializeTrajectory()
-   {
-      trajectory.initialize();
-   }
-
    public void appendPositionWaypoint(FrameEuclideanTrajectoryPoint positionWaypoint)
    {
       this.trajectory.appendPositionWaypoint(positionWaypoint);

@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.common.util.concurrent.AtomicDouble;
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -15,14 +17,17 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerCostParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -37,20 +42,28 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarPlanarRegionsPlannerTest
 {
-   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+//   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   private static final boolean visualize = false;
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testFootstepGraph()
    {
       FootstepNode startNode = new FootstepNode(0.0, 0.0);
@@ -105,7 +118,7 @@ public class AStarPlanarRegionsPlannerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testFootstepNode()
    {
       double gridX = FootstepNode.gridSizeXY;
@@ -134,7 +147,7 @@ public class AStarPlanarRegionsPlannerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testNodeExpansion()
    {
       if (!visualize)
@@ -150,7 +163,7 @@ public class AStarPlanarRegionsPlannerTest
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
 
-      YoFramePose originPose = new YoFramePose("OrgionPose", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll originPose = new YoFramePoseUsingYawPitchRoll("OrgionPose", ReferenceFrame.getWorldFrame(), registry);
       originPose.setYawPitchRoll(node.getYaw(), 0.0, 0.0);
       originPose.setXYZ(node.getX(), node.getY(), 0.0);
       YoGraphicCoordinateSystem originNode = new YoGraphicCoordinateSystem("OrginNode", originPose, 0.4);
@@ -159,7 +172,7 @@ public class AStarPlanarRegionsPlannerTest
       int count = 0;
       for (FootstepNode neighbor : neighbors)
       {
-         YoFramePose pose = new YoFramePose("NeighborPose" + count, ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoseUsingYawPitchRoll pose = new YoFramePoseUsingYawPitchRoll("NeighborPose" + count, ReferenceFrame.getWorldFrame(), registry);
          pose.setYawPitchRoll(neighbor.getYaw(), 0.0, 0.0);
          pose.setXYZ(neighbor.getX(), neighbor.getY(), 0.0);
          YoGraphicCoordinateSystem neighborNode = new YoGraphicCoordinateSystem("NeighborNode" + count, pose, 0.1);
@@ -174,7 +187,7 @@ public class AStarPlanarRegionsPlannerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testSimpleExpansion()
    {
       // make planar regions
@@ -202,13 +215,23 @@ public class AStarPlanarRegionsPlannerTest
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters()
       {
          @Override
-         public double getCostPerStep()
+         public FootstepPlannerCostParameters getCostParameters()
          {
-            return 0.0;
+            return new DefaultFootstepPlannerCostParameters()
+            {
+               @Override
+               public double getCostPerStep()
+               {
+                  return 0.0;
+               }
+            };
          }
       };
       FootstepNodeChecker nodeChecker = new SimpleNodeChecker();
-      EuclideanDistanceHeuristics heuristics = new EuclideanDistanceHeuristics(registry);
+
+      final AtomicDouble heuristicCost = new AtomicDouble(1.0);
+      DoubleProvider heuristicCostProvider = () -> heuristicCost.get();
+      EuclideanDistanceHeuristics heuristics = new EuclideanDistanceHeuristics(heuristicCostProvider);
       SimpleGridResolutionBasedExpansion expansion = new SimpleGridResolutionBasedExpansion();
       EuclideanBasedCost stepCostCalculator = new EuclideanBasedCost(parameters);
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
@@ -233,7 +256,8 @@ public class AStarPlanarRegionsPlannerTest
          goalPose.setY(-parameters.getIdealFootstepWidth() / 2.0);
          assertTrue(goalPose.epsilonEquals(achievedGoalPose, FootstepNode.gridSizeXY));
 
-         planner.setWeight(5.0);
+         heuristicCost.set(5.0);
+
          assertEquals(FootstepPlanningResult.SUB_OPTIMAL_SOLUTION, planner.plan());
 
          planner.setTimeout(1.0e-10);

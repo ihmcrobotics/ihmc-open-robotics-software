@@ -2,12 +2,14 @@ package us.ihmc.utilities.ros.publisher;
 
 import org.ros.message.Time;
 
+import controller_msgs.msg.dds.IMUPacket;
 import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 import std_msgs.Header;
-import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class RosImuPublisher extends RosTopicPublisher<sensor_msgs.Imu>
 {
@@ -17,7 +19,7 @@ public class RosImuPublisher extends RosTopicPublisher<sensor_msgs.Imu>
       super(sensor_msgs.Imu._TYPE,latched);
    }
    
-   public void publish(long timestamp, Vector3D32 linearAcceleration, Quaternion32 orientation, Vector3D32 angularVelocity, String frameId)
+   public void publish(long timestamp, Vector3DReadOnly linearAcceleration, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity, String frameId)
    {
       sensor_msgs.Imu message = getMessage();
 

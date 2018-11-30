@@ -2,9 +2,12 @@ package us.ihmc.wholeBodyController.parameters;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.Skully;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.yoVariables.parameters.AbstractParameterReader;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.parameters.XmlParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -13,19 +16,24 @@ public class ParameterLoaderHelper
 {
    private static final boolean debugLoading = false;
 
-   public static void loadParameters(Object caller, WholeBodyControllerParameters controllerParameters, YoVariableRegistry registry)
+   public static void loadParameters(Object caller, WholeBodyControllerParameters<?> controllerParameters, YoVariableRegistry registry)
    {
       InputStream parameterFile = controllerParameters.getWholeBodyControllerParametersFile();
       InputStream overwriteFile = controllerParameters.getParameterOverwrites();
-      loadParameters(caller, parameterFile, overwriteFile, registry);
+      loadParameters(caller, parameterFile, overwriteFile, registry, true);
    }
 
    public static void loadParameters(Object caller, InputStream parameterFile, YoVariableRegistry registry)
    {
-      loadParameters(caller, parameterFile, null, registry);
+      loadParameters(caller, parameterFile, null, registry, true);
    }
 
-   public static void loadParameters(Object caller, InputStream parameterFile, InputStream overwriteFile, YoVariableRegistry registry)
+   public static void loadParameters(Object caller, InputStream parameterFile, YoVariableRegistry registry, boolean printWarnings)
+   {
+      loadParameters(caller, parameterFile, null, registry, printWarnings);
+   }
+
+   public static void loadParameters(Object caller, InputStream parameterFile, InputStream overwriteFile, YoVariableRegistry registry, boolean printWarnings)
    {
       if (parameterFile == null)
       {
@@ -38,12 +46,12 @@ public class ParameterLoaderHelper
          XmlParameterReader reader;
          try
          {
-            reader = new XmlParameterReader(debugLoading, parameterFile);
+            reader = new XmlParameterReader(debugLoading, registry.getName(), parameterFile);
             if (overwriteFile != null)
             {
                reader.overwrite(overwriteFile);
             }
-            loadAndCheckStatistics(registry, reader);
+            loadAndCheckStatistics(registry, reader, printWarnings);
          }
          catch (IOException e)
          {
@@ -58,19 +66,28 @@ public class ParameterLoaderHelper
     * turning on the debug flag {@link ParameterLoaderHelper#debugLoading} to see
     * what parameters were not specified in the XML file.
     */
-   private static void loadAndCheckStatistics(YoVariableRegistry registry, XmlParameterReader reader)
+   private static void loadAndCheckStatistics(YoVariableRegistry registry, AbstractParameterReader reader, boolean printWarnings)
    {
-      int defaults = reader.readParametersInRegistry(registry);
-      int parametersInXML = reader.getNumberOfParameters();
-      int parametersInRegistry = registry.getAllParameters().size();
-      int loadedParameters = parametersInRegistry - defaults;
-      int parametersInXMLWithoutMatch = parametersInXML - loadedParameters;
-      if (defaults != 0 || parametersInXMLWithoutMatch != 0)
+      HashSet<String> defaultParameters = new HashSet<>();
+      HashSet<String> unmatchedParameters = new HashSet<>();
+      reader.readParametersInRegistry(registry, defaultParameters, unmatchedParameters);
+
+      if (printWarnings && !unmatchedParameters.isEmpty() && !debugLoading)
       {
-         PrintTools.warn("There might be something wrong with your parameter file:\n"
-               + "   Number of parameters in registry: " + parametersInRegistry + "\n"
-               + "   Number of parameters using their default value: " + defaults + "\n"
-               + "   Number of parameters in XML with no match: " + parametersInXMLWithoutMatch);
+         String message = "I think something is off in your parameter file.";
+         String additionalInfo = "Parameters in registry: " + registry.getAllParameters().size() + "\n" +
+                                 "Parameters using their default value: " + defaultParameters.size() + "\n" +
+                                 "Parameters in XML with no match: " + unmatchedParameters.size();
+         Skully.say(message, additionalInfo);
+      }
+
+      if (debugLoading)
+      {
+         PrintTools.info("When loading " + registry.getName() + " with " + registry.getAllParameters().size() + " parameters:");
+         PrintTools.info("\n---> Unmatched in XML <---");
+         unmatchedParameters.forEach(parameter -> PrintTools.info(parameter));
+         PrintTools.info("\n---> Default Values: <---");
+         defaultParameters.forEach(parameter -> PrintTools.info(parameter));
       }
    }
 }

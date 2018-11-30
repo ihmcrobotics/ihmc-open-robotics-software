@@ -77,7 +77,7 @@ public class GUICaptureRecorder extends JFrame
       setLocationByPlatform(true);
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-      Runtime.getRuntime().addShutdownHook(new Thread()
+      Runtime.getRuntime().addShutdownHook(new Thread("IHMC-GUICaptureRecorderShutdown")
       {
          @Override
          public void run()

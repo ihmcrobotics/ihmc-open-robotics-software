@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.environments;
 
 
-import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 
 public class SimpleBoxEnvironment extends CombinedTerrainObject3D
 {

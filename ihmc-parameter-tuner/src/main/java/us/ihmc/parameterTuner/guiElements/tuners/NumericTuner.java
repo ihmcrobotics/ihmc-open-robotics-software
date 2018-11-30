@@ -1,52 +1,29 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
-import java.io.IOException;
-
 import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.text.Text;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
-public abstract class NumericTuner<T extends Number> extends HBox
+public abstract class NumericTuner<T extends Number> extends HBox implements InputNode
 {
-   private static final String FXML_PATH = "numeric_tuner.fxml";
-
-   @FXML
-   private StackPane valuePane;
    private final NumericSpinner<T> value = createSpinner();
-
-   @FXML
-   private StackPane minPane;
    private final NumericSpinner<T> min = createSpinner();
-
-   @FXML
-   private StackPane maxPane;
    private final NumericSpinner<T> max = createSpinner();
+   private final NumericSlider<T> slider = createSlider();
 
-   @FXML
-   private StackPane sliderPane;
-   private NumericSlider<T> slider = createSlider();
+   private final String parameterName;
+   private boolean haveSliderBoundsBeenInvalid = false;
 
    public NumericTuner(GuiParameter parameter)
    {
-      FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
-      loader.setRoot(this);
-      loader.setController(this);
-      try
-      {
-         loader.load();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-
-      valuePane.getChildren().add(value);
-      minPane.getChildren().add(min);
-      maxPane.getChildren().add(max);
-      sliderPane.getChildren().add(slider);
+      setupNode();
+      parameterName = parameter.getName();
 
       value.addListener((observable, oldValue, newValue) -> {
          Platform.runLater(() -> parameter.setValue(value.getValueAsText()));
@@ -60,7 +37,7 @@ public abstract class NumericTuner<T extends Number> extends HBox
          Platform.runLater(() -> parameter.setMax(max.getValueAsText()));
       });
 
-      // Use the slider value when it gets clicked or dragged and released.
+      // Use the slider value when it gets clicked or dragged and released. Otherwise unwanted rounding will happen.
       slider.valueChangingProperty().addListener((observable, oldValue, newValue) -> {
          if (!newValue && oldValue)
          {
@@ -74,6 +51,21 @@ public abstract class NumericTuner<T extends Number> extends HBox
          setFromParameter(parameter);
       });
       setFromParameter(parameter);
+   }
+
+   private void setupNode()
+   {
+      setSpacing(10.0);
+      setAlignment(Pos.CENTER_LEFT);
+      HBox.setHgrow(slider, Priority.ALWAYS);
+
+      getChildren().add(new Text("Value"));
+      getChildren().add(value);
+      getChildren().add(new Text("Min"));
+      getChildren().add(min);
+      getChildren().add(slider);
+      getChildren().add(new Text("Max"));
+      getChildren().add(max);
    }
 
    private void setFromParameter(GuiParameter parameter)
@@ -93,4 +85,51 @@ public abstract class NumericTuner<T extends Number> extends HBox
    public abstract NumericSpinner<T> createSpinner();
 
    public abstract NumericSlider<T> createSlider();
+
+   @Override
+   public Node getSimpleInputNode(double width, double height)
+   {
+      NumericSpinner<T> duplicate = value.createLinkedDuplicate();
+      duplicate.setPrefHeight(height);
+      duplicate.setPrefWidth(width);
+      return duplicate;
+   }
+
+   @Override
+   public Node getFullInputNode()
+   {
+      return this;
+   }
+
+   @Override
+   public void setValueFromPercent(double percent)
+   {
+      if (slider.isDisabled())
+      {
+         if (!haveSliderBoundsBeenInvalid)
+         {
+            PrintTools.warn("Slider bounds not valid for " + parameterName + ".");
+         }
+         haveSliderBoundsBeenInvalid = true;
+         return;
+      }
+      haveSliderBoundsBeenInvalid = false;
+
+      double min = slider.toDouble(this.min.getValue());
+      double max = slider.toDouble(this.max.getValue());
+      double newValue = min + percent * (max - min);
+
+      double rounded = slider.roundToPrecision(newValue);
+      rounded = MathTools.clamp(rounded, min, max);
+      value.setValue(slider.toNumber(rounded));
+   }
+
+   @Override
+   public double getValuePercent()
+   {
+      double min = slider.toDouble(this.min.getValue());
+      double max = slider.toDouble(this.max.getValue());
+      double value = slider.toDouble(this.value.getValue());
+      return MathTools.clamp((value - min) / (max - min), 0.0, 1.0);
+   }
 }

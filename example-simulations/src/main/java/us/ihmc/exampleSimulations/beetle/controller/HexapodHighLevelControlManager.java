@@ -11,12 +11,12 @@ import us.ihmc.exampleSimulations.beetle.footContact.SimulatedPlaneContactStateU
 import us.ihmc.exampleSimulations.beetle.parameters.HexapodControllerParameters;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class HexapodHighLevelControlManager
 {
@@ -45,8 +45,8 @@ public class HexapodHighLevelControlManager
       controllerCoreMode.set(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       controllerCoreCommandList = new ControllerCoreCommand(controllerCoreMode.getEnumValue());
 
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      String bodyName = pelvis.getName();
+      RigidBodyBasics body = fullRobotModel.getRootBody();
+      String bodyName = body.getName();
 
       bodySpatialManager = new HexapodBodySpatialManager(bodyName, fullRobotModel, referenceFrames, controllerDt, yoGraphicsListRegistry, registry);
       stepController = new HexapodStepController("HexapodStepController", fullRobotModel, contactStateUpdaters, yoGraphicsListRegistry, controllerDt, registry, referenceFrames);
@@ -79,8 +79,8 @@ public class HexapodHighLevelControlManager
       
       controllerCoreCommandList.addVirtualModelControlCommand(hexapodMomentumController.getMomentumRateCommand());
       controllerCoreCommandList.addVirtualModelControlCommand(hexapodMomentumController.getMomentumRateCommand());
-      controllerCoreCommandList.addVirtualModelControlCommand(stepController.getContactStates());
-      controllerCoreCommandList.addInverseDynamicsCommand(stepController.getContactStates());
+      controllerCoreCommandList.addVirtualModelControlCommand(stepController.getVirtualModelControlCommand());
+      controllerCoreCommandList.addInverseDynamicsCommand(stepController.getInverseDynamicsCommand());
       controllerCoreCommandList.addFeedbackControlCommand(bodySpatialManager.getSpatialFeedbackControlCommand());
       controllerCoreCommandList.addFeedbackControlCommand(stepController.getFeedbackCommandList());
    }
@@ -117,9 +117,9 @@ public class HexapodHighLevelControlManager
       return ret;
    }
    
-   private void addBodiesToControl(RigidBody[] rigidBodiesToControl)
+   private void addBodiesToControl(RigidBodyBasics[] rigidBodiesToControl)
    {
-      for (RigidBody rigidBody : rigidBodiesToControl)
+      for (RigidBodyBasics rigidBody : rigidBodiesToControl)
       {
          controlledBodiesCommand.addBodyToControl(rigidBody);
       }

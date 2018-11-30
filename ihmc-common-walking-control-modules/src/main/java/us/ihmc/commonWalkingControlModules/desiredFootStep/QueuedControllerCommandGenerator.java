@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -18,7 +20,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -125,12 +127,12 @@ public class QueuedControllerCommandGenerator implements Updatable
    
    private void createFootstepStatusListener()
    {
-      StatusMessageListener<FootstepStatus> footstepStatusListener = new StatusMessageListener<FootstepStatus>()
+      StatusMessageListener<FootstepStatusMessage> footstepStatusListener = new StatusMessageListener<FootstepStatusMessage>()
       {
          @Override
-         public void receivedNewMessageStatus(FootstepStatus footstepStatus)
+         public void receivedNewMessageStatus(FootstepStatusMessage footstepStatus)
          {
-            switch (footstepStatus.status)
+            switch (FootstepStatus.fromByte(footstepStatus.getFootstepStatus()))
             {
             case COMPLETED:
             {
@@ -147,14 +149,14 @@ public class QueuedControllerCommandGenerator implements Updatable
             }
          }
       };
-      statusOutputManager.attachStatusMessageListener(FootstepStatus.class, footstepStatusListener);
+      statusOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, footstepStatusListener);
 
       StatusMessageListener<WalkingStatusMessage> walkingStatusListener = new StatusMessageListener<WalkingStatusMessage>()
       {
          @Override
          public void receivedNewMessageStatus(WalkingStatusMessage walkingStatusListener)
          {
-            switch (walkingStatusListener.getWalkingStatus())
+            switch (WalkingStatus.fromByte(walkingStatusListener.getWalkingStatus()))
             {
             case COMPLETED:
             {

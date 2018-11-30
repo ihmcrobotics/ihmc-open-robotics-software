@@ -1,10 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.streamingData;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.HandJointAnglePacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class HumanoidGlobalDataProducer extends GlobalDataProducer
 {

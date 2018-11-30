@@ -2,27 +2,26 @@ package us.ihmc.avatar.networkProcessor.lidarScanPublisher;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SimulatedLidarScanPacket;
 import gnu.trove.list.array.TFloatArrayList;
 import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.LidarScanMessage;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.RequestLidarScanMessage;
-import us.ihmc.communication.packets.SimulatedLidarScanPacket;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -38,9 +37,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
@@ -50,7 +48,6 @@ import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 public class LidarScanPublisher
 {
    private static final double DEFAULT_SHADOW_ANGLE_THRESHOLD = Math.toRadians(12.0);
-   private static final int MAX_NUMBER_OF_LISTENERS = 10;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -58,9 +55,6 @@ public class LidarScanPublisher
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
 
    private final AtomicReference<ScanData> scanDataToPublish = new AtomicReference<>(null);
-
-   private final PacketCommunicator packetCommunicator;
-   private final ConcurrentLinkedDeque<RequestLidarScanMessage> listeners = new ConcurrentLinkedDeque<>();
 
    private final String robotName;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -72,20 +66,23 @@ public class LidarScanPublisher
    private CollisionShapeTester collisionBoxNode = null;
    private PPSTimestampOffsetProvider ppsTimestampOffsetProvider = null;
 
+   private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
+
    private double shadowAngleThreshold = DEFAULT_SHADOW_ANGLE_THRESHOLD;
 
-   public LidarScanPublisher(String lidarName, FullHumanoidRobotModelFactory modelFactory, PacketCommunicator packetCommunicator)
+   public LidarScanPublisher(String lidarName, FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
-      this.packetCommunicator = packetCommunicator;
       robotName = modelFactory.getRobotDescription().getName();
+      PrintTools.info(robotName);
       fullRobotModel = modelFactory.createFullRobotModel();
 
       lidarBaseFrame = fullRobotModel.getLidarBaseFrame(lidarName);
       RigidBodyTransform transformToLidarBaseFrame = fullRobotModel.getLidarBaseToSensorTransform(lidarName);
       lidarSensorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("lidarSensorFrame", lidarBaseFrame, transformToLidarBaseFrame);
 
-      packetCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
-      packetCommunicator.attachListener(RequestLidarScanMessage.class, createRequestLidarScanMessageConsumer());
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
    }
 
    public void start()
@@ -200,14 +197,14 @@ public class LidarScanPublisher
          @Override
          public void consumeObject(SimulatedLidarScanPacket packet)
          {
-            LidarScanParameters lidarScanParameters = packet.getLidarScanParameters();
-            float[] ranges = packet.getRanges();
+            LidarScanParameters lidarScanParameters = MessageTools.toLidarScanParameters(packet.getLidarScanParameters());
+            TFloatArrayList ranges = packet.getRanges();
             int sensorId = packet.getSensorId();
-            LidarScan scan = new LidarScan(lidarScanParameters, ranges, sensorId);
+            LidarScan scan = new LidarScan(lidarScanParameters, ranges.toArray(), sensorId);
             // Set the world transforms to nothing, so points are in lidar scan frame
             scan.setWorldTransforms(identityTransform, identityTransform);
             List<Point3D> scanPoints = scan.getAllPoints();
-            long timestamp = packet.getScanStartTime();
+            long timestamp = packet.getLidarScanParameters().getTimestamp();
 
             scanDataToPublish.set(new ScanData(timestamp, scanPoints));
          }
@@ -229,19 +226,6 @@ public class LidarScanPublisher
             ScanData scanData = scanDataToPublish.getAndSet(null);
             if (scanData == null)
                return;
-
-            if (listeners.isEmpty())
-               return;
-
-            int count = 0;
-            Set<RequestLidarScanMessage> listenerSet = new HashSet<>();
-
-            while (!listeners.isEmpty() && count < MAX_NUMBER_OF_LISTENERS)
-            {
-               listenerSet.add(listeners.poll());
-               count++;
-            }
-            listeners.clear();
 
             long robotTimestamp;
 
@@ -288,46 +272,25 @@ public class LidarScanPublisher
                lidarOrientation = null;
             }
 
-            for (RequestLidarScanMessage requestLidarScanMessage : listenerSet)
+            lidarPosition = lidarPosition == null ? null : new Point3D32(lidarPosition);
+            lidarOrientation = lidarOrientation == null ? null : new Quaternion32(lidarOrientation);
+
+            PriorityQueue<Integer> indicesToRemove = new PriorityQueue<>();
+
+            //            if (requestLidarScanMessage.getRemoveSelfCollisions())
             {
-               lidarPosition = lidarPosition == null ? null : new Point3D32(lidarPosition);
-               lidarOrientation = lidarOrientation == null ? null : new Quaternion32(lidarOrientation);
-
-               PriorityQueue<Integer> indicesToRemove = new PriorityQueue<>();
-
-               if (requestLidarScanMessage.isRemoveSelfCollisions())
-               {
-                  indicesToRemove.addAll(selfCollisionRemovalIndices);
-               }
-
-               if (requestLidarScanMessage.isRemoveShadows())
-               {
-                  indicesToRemove.addAll(shadowRemovalIndices);
-               }
-
-               float[] scanPointBuffer = scanData.getScanBuffer(indicesToRemove);
-
-               LidarScanMessage message = new LidarScanMessage(robotTimestamp, lidarPosition, lidarOrientation, scanPointBuffer);
-
-               PacketDestination destination = PacketDestination.fromOrdinal(requestLidarScanMessage.getSource());
-               message.setDestination(destination);
-               packetCommunicator.send(message);
+               indicesToRemove.addAll(selfCollisionRemovalIndices);
             }
 
-            listeners.clear();
-         }
-      };
-   }
+            //            if (requestLidarScanMessage.getRemoveShadows())
+            {
+               indicesToRemove.addAll(shadowRemovalIndices);
+            }
 
-   private PacketConsumer<RequestLidarScanMessage> createRequestLidarScanMessageConsumer()
-   {
-      return new PacketConsumer<RequestLidarScanMessage>()
-      {
-         @Override
-         public void receivedPacket(RequestLidarScanMessage packet)
-         {
-            if (packet != null)
-               listeners.add(packet);
+            float[] scanPointBuffer = scanData.getScanBuffer(indicesToRemove);
+
+            LidarScanMessage message = MessageTools.createLidarScanMessage(robotTimestamp, lidarPosition, lidarOrientation, scanPointBuffer);
+            lidarScanPublisher.publish(message);
          }
       };
    }

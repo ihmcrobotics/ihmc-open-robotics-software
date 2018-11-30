@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
+import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 
 public interface AuxiliaryRobotDataProvider
 {
-   AuxiliaryRobotData newAuxiliaryRobotDataInstance();
+   AtlasAuxiliaryRobotData newAuxiliaryRobotDataInstance();
 }

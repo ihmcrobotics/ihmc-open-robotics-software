@@ -4,19 +4,21 @@ import javafx.scene.control.TreeItem;
 
 public class ParameterTreeItem extends TreeItem<ParameterTreeValue>
 {
+   private static final int minParametersToExpand = 4;
+
    public ParameterTreeItem(ParameterTreeValue parameterTreeValue)
    {
       super(parameterTreeValue);
-      expandedProperty().addListener((observable, oldValue, newValue) -> expandChildrenIfEmpty());
+      expandedProperty().addListener((observable, oldValue, newValue) -> expandChildrenForSmallRegistries());
    }
 
-   public void expandChildrenIfEmpty()
+   public void expandChildrenForSmallRegistries()
    {
-      getChildren().stream().filter(child -> !hasParameters(child)).forEach(child -> child.setExpanded(true));
+      getChildren().stream().filter(child -> !hasParameters(child, minParametersToExpand)).forEach(child -> child.setExpanded(true));
    }
 
-   private static boolean hasParameters(TreeItem<ParameterTreeValue> item)
+   private static boolean hasParameters(TreeItem<ParameterTreeValue> item, int minSize)
    {
-      return !item.getChildren().filtered(child -> !child.getValue().isRegistry()).isEmpty();
+      return item.getChildren().filtered(child -> !child.getValue().isRegistry()).size() > minSize;
    }
 }

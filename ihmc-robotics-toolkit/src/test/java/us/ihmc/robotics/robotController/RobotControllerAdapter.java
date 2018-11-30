@@ -1,5 +1,6 @@
 package us.ihmc.robotics.robotController;
 
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**

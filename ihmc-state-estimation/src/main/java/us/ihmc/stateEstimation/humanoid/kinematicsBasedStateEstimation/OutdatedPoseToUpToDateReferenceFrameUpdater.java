@@ -13,7 +13,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 /**
  * @author Nicolas EYSSETTE
  * 
- * The aim of this class is to express the outdated localization transform in the updated stateEstimator reference.
+ * The aim of this class is to express the outdated localization transform in the updated estimator reference.
  * It will compare the outdated transform to the updated transform at the same timeStamp in the past,
  * and express the result in the up to date referenceFrame in the present.
  *
@@ -141,7 +141,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
     */
    public void updateLocalizationTransform(TimeStampedTransform3D localizationTimeStampedTransformInWorld)
    {
-      //update the stateEstimator reference frame in the past
+      //update the estimator reference frame in the past
       stateEstimatorTimeStampedTransformBuffer.findTransform(localizationTimeStampedTransformInWorld.getTimeStamp(), stateEstimatorTimeStampedTransformInPast);
       stateEstimatorPoseInThePast.setIncludingFrame(worldFrame, stateEstimatorTimeStampedTransformInPast.getTransform3D());
       stateEstimatorReferenceFrameInThePast.setPoseAndUpdate(stateEstimatorPoseInThePast);

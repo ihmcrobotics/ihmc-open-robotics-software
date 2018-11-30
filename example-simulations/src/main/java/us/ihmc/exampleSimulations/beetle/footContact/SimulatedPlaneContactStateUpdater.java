@@ -14,14 +14,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class SimulatedPlaneContactStateUpdater implements PlaneContactState
 {
    private final PlaneContactStateCommand planeContactStateCommand = new PlaneContactStateCommand();
-   private final RigidBody rigidBody;
+   private final RigidBodyBasics rigidBody;
    private final ArrayList<ContactPointWrapper> contactPoints = new ArrayList<>();
    private final GroundContactPoint contactPoint;
    private FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
@@ -32,7 +32,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    private final FramePoint3D touchdownPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final ReferenceFrame soleFrame;
 
-   public SimulatedPlaneContactStateUpdater(GroundContactPoint contactPoint, RigidBody footRigiBody, ReferenceFrame soleFrame)
+   public SimulatedPlaneContactStateUpdater(GroundContactPoint contactPoint, RigidBodyBasics footRigiBody, ReferenceFrame soleFrame)
    {
       this.rigidBody = footRigiBody;
       this.contactPoint = contactPoint;
@@ -51,7 +51,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
 
       if (isFootInContact())
       {
-         YoFramePoint yoPosition = contactPoint.getYoPosition();
+         YoFramePoint3D yoPosition = contactPoint.getYoPosition();
          touchdownPoint.setIncludingFrame(yoPosition);
          touchdownPoint.changeFrame(soleFrame);
          planeContactStateCommand.addPointInContact(touchdownPoint);
@@ -68,7 +68,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       planeContactStateCommand.setContactNormal(contactNormal);
       planeContactStateCommand.setHasContactStateChanged(hasContactStateChanged);
 
-      YoFramePoint yoPosition = contactPoint.getYoPosition();
+      YoFramePoint3D yoPosition = contactPoint.getYoPosition();
       touchdownPoint.setIncludingFrame(yoPosition);
       touchdownPoint.changeFrame(soleFrame);
       planeContactStateCommand.addPointInContact(touchdownPoint);
@@ -94,7 +94,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    }
 
    @Override
-   public RigidBody getRigidBody()
+   public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
    }
@@ -197,6 +197,11 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       return ret;
    }
 
+   @Override
+   public boolean peekContactHasChangedNotification()
+   {
+      return hasContactStateChanged;
+   }
 
    private class ContactPointWrapper implements ContactPointInterface
    {

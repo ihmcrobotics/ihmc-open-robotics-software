@@ -216,6 +216,11 @@ public class SpecificLogVariableUpdater
 
       }
    }
+   
+   public int getNumberOfEntries()
+   {
+      return logIndex.getNumberOfEntries();
+   }
 
    public void close()
    {

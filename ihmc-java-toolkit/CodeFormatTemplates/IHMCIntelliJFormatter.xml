@@ -1,8 +1,8 @@
-<code_scheme name="IHMCEclipseFormatter" version="173">
+<code_scheme name="IHMCIntelliJFormatter" version="173">
   <option name="LINE_SEPARATOR" value="&#xA;" />
   <option name="RIGHT_MARGIN" value="160" />
-  <option name="ENABLE_JAVADOC_FORMATTING" value="false" />
   <JavaCodeStyleSettings>
+    <option name="INSERT_INNER_CLASS_IMPORTS" value="true" />
     <option name="ENABLE_JAVADOC_FORMATTING" value="false" />
   </JavaCodeStyleSettings>
   <JetCodeStyleSettings>
@@ -71,7 +71,6 @@
       <option name="INDENT_SIZE" value="3" />
       <option name="CONTINUATION_INDENT_SIZE" value="6" />
       <option name="TAB_SIZE" value="3" />
-      <option name="KEEP_INDENTS_ON_EMPTY_LINES" value="true" />
     </indentOptions>
   </codeStyleSettings>
 </code_scheme>

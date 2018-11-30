@@ -1,12 +1,13 @@
 package us.ihmc.avatar.networkProcessor.quadTreeHeightMap;
 
+import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple2D.Vector2D32;
+
 public class HeightQuadTreeNode
 {
    private float height;
-   private float centerX;
-   private float centerY;
-   private float sizeX;
-   private float sizeY;
+   private Point2D32 center = new Point2D32();
+   private Vector2D32 size = new Vector2D32();
    private HeightQuadTreeNode[] children;
 
    public HeightQuadTreeNode()
@@ -50,24 +51,34 @@ public class HeightQuadTreeNode
       return height;
    }
 
+   public Point2D32 getCenter()
+   {
+      return center;
+   }
+
    public float getCenterX()
    {
-      return centerX;
+      return center.getX32();
    }
 
    public float getCenterY()
    {
-      return centerY;
+      return center.getY32();
+   }
+
+   public Vector2D32 getSize()
+   {
+      return size;
    }
 
    public float getSizeX()
    {
-      return sizeX;
+      return size.getX32();
    }
 
    public float getSizeY()
    {
-      return sizeY;
+      return size.getY32();
    }
 
    public void setHeight(float height)
@@ -77,21 +88,21 @@ public class HeightQuadTreeNode
 
    public void setCenterX(float centerX)
    {
-      this.centerX = centerX;
+      this.center.setX(centerX);
    }
 
    public void setCenterY(float centerY)
    {
-      this.centerY = centerY;
+      this.center.setY(centerY);
    }
 
    public void setSizeX(float sizeX)
    {
-      this.sizeX = sizeX;
+      this.size.setX(sizeX);
    }
 
    public void setSizeY(float sizeY)
    {
-      this.sizeY = sizeY;
+      this.size.setY(sizeY);
    }
 }

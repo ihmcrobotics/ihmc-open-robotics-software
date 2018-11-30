@@ -4,6 +4,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -15,17 +16,18 @@ public class QuadrupedCenterOfPressureTools
     * @param solePosition contact position for each quadrant (input)
     * @param contactPressure vertical ground reaction forces for each quadrant (input)
     */
-   public static void computeCenterOfPressure(FramePoint3D copPosition, QuadrantDependentList<FramePoint3D> solePosition,
-         QuadrantDependentList<MutableDouble> contactPressure)
+   public static void computeCenterOfPressure(FixedFramePoint3DBasics copPosition, QuadrantDependentList<FramePoint3D> solePosition,
+                                              QuadrantDependentList<MutableDouble> contactPressure)
    {
       // Compute center of pressure given the vertical force at each contact.
       double pressure = 1e-6;
-      copPosition.setToZero(ReferenceFrame.getWorldFrame());
+      copPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      copPosition.setToZero();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          pressure += contactPressure.get(robotQuadrant).doubleValue();
          solePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-         addPointWithScaleFactor(copPosition, solePosition.get(robotQuadrant), contactPressure.get(robotQuadrant).doubleValue());
+         copPosition.scaleAdd(contactPressure.get(robotQuadrant).doubleValue(), solePosition.get(robotQuadrant), copPosition);
       }
       copPosition.scale(1.0 / pressure);
    }
@@ -77,11 +79,5 @@ public class QuadrupedCenterOfPressureTools
          pressure /= Math.max((robotQuadrant.isQuadrantInFront() ? numberOfFrontFeetInContact : numberOfHindFeetInContact), 1.0);
          contactPressure.get(robotQuadrant).setValue(pressure);
       }
-   }
-
-   private static void addPointWithScaleFactor(FramePoint3D point, FramePoint3D pointToAdd, double scaleFactor)
-   {
-      point.checkReferenceFrameMatch(pointToAdd);
-      point.add(scaleFactor * pointToAdd.getX(), scaleFactor * pointToAdd.getY(), scaleFactor * pointToAdd.getZ());
    }
 }

@@ -15,19 +15,21 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MultiBodySystemFactories;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * Created by agrabertilton on 4/13/15.
@@ -47,9 +49,9 @@ public class LegJointLimitAvoidanceControlModule
 
    private final YoDouble percentJointRangeForThreshold;
    private FullHumanoidRobotModel robotModel;
-   private RigidBody base;
-   private OneDoFJoint[] robotJoints;
-   private OneDoFJoint[] ikJoints;
+   private RigidBodyBasics base;
+   private OneDoFJointBasics[] robotJoints;
+   private OneDoFJointBasics[] ikJoints;
    private NumericalInverseKinematicsCalculator inverseKinematicsCalculator;
    private GeometricJacobian jacobian;
    private int numJoints;
@@ -60,14 +62,14 @@ public class LegJointLimitAvoidanceControlModule
    private YoDouble[] adjustedDesiredPositions;
    private YoDouble[] lowerLimits;
    private YoDouble[] upperLimits;
-   private YoFramePose originalDesiredYoPose;
+   private YoFramePoseUsingYawPitchRoll originalDesiredYoPose;
    private FramePose3D originalDesiredPose;
    private FramePoint3D adjustedDesiredPosition;
    private FrameQuaternion adjustedDesiredOrientation;
-   private YoFramePose adjustedDesiredPose;
+   private YoFramePoseUsingYawPitchRoll adjustedDesiredPose;
    private RigidBodyTransform desiredTransform;
-   private YoFrameVector originalDesiredLinearVelocity;
-   private YoFrameVector adjustedDesiredLinearVelocity;
+   private YoFrameVector3D originalDesiredLinearVelocity;
+   private YoFrameVector3D adjustedDesiredLinearVelocity;
 
    private final LinearSolver<DenseMatrix64F> solver;
    private final DenseMatrix64F jacobianMatrix;
@@ -88,9 +90,9 @@ public class LegJointLimitAvoidanceControlModule
    {
       robotModel = controllerToolbox.getFullRobotModel();
       base = robotModel.getPelvis();
-      RigidBody foot = robotModel.getFoot(robotSide);
-      robotJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(base, foot), OneDoFJoint.class);
-      ikJoints = ScrewTools.filterJoints(ScrewTools.cloneJointPath(robotJoints), OneDoFJoint.class);
+      RigidBodyBasics foot = robotModel.getFoot(robotSide);
+      robotJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(base, foot), OneDoFJointBasics.class);
+      ikJoints = MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(robotJoints), OneDoFJointBasics.class);
       jacobian = new GeometricJacobian(ikJoints, ikJoints[ikJoints.length - 1].getSuccessor().getBodyFixedFrame());
 
       inverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterationsForIK, maxStepSize,
@@ -117,8 +119,8 @@ public class LegJointLimitAvoidanceControlModule
          }
 
          originalDesiredPose = new FramePose3D();
-         originalDesiredYoPose = new YoFramePose(prefix + "originalDesiredYoPose", ReferenceFrame.getWorldFrame(), registry);
-         adjustedDesiredPose = new YoFramePose(prefix + "adjustedDesiredPose", ReferenceFrame.getWorldFrame(), registry);
+         originalDesiredYoPose = new YoFramePoseUsingYawPitchRoll(prefix + "originalDesiredYoPose", ReferenceFrame.getWorldFrame(), registry);
+         adjustedDesiredPose = new YoFramePoseUsingYawPitchRoll(prefix + "adjustedDesiredPose", ReferenceFrame.getWorldFrame(), registry);
          desiredTransform = new RigidBodyTransform();
          adjustedDesiredPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
          adjustedDesiredOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
@@ -127,30 +129,30 @@ public class LegJointLimitAvoidanceControlModule
       percentJointRangeForThreshold = new YoDouble(prefix + "percentJointRangeForThreshold", registry);
       percentJointRangeForThreshold.set(0.5);
 
-      jacobianMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, numJoints);
-      jacobianMatrixTransposed = new DenseMatrix64F(numJoints, SpatialMotionVector.SIZE);
-      jacobianTimesJaconianTransposedMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      jacobianMatrix = new DenseMatrix64F(SpatialVector.SIZE, numJoints);
+      jacobianMatrixTransposed = new DenseMatrix64F(numJoints, SpatialVector.SIZE);
+      jacobianTimesJaconianTransposedMatrix = new DenseMatrix64F(SpatialVector.SIZE, SpatialVector.SIZE);
 
       lamdaSquaredMatrix = new DenseMatrix64F(numJoints, numJoints);
       jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix = new DenseMatrix64F(numJoints, numJoints);
 
-      solver = LinearSolverFactory.leastSquares(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-      translationSelectionMatrix = new DenseMatrix64F(3, SpatialMotionVector.SIZE);
+      solver = LinearSolverFactory.leastSquares(SpatialVector.SIZE, SpatialVector.SIZE);
+      translationSelectionMatrix = new DenseMatrix64F(3, SpatialVector.SIZE);
       translationSelectionMatrix.set(0, 3, 1.0);
       translationSelectionMatrix.set(1, 4, 1.0);
       translationSelectionMatrix.set(2, 5, 1.0);
 
-      allSelectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      allSelectionMatrix = new DenseMatrix64F(SpatialVector.SIZE, SpatialVector.SIZE);
       allSelectionMatrix.set(5, 5, 1.0);
 
-      originalDesiredVelocity = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
-      intermediateResult = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+      originalDesiredVelocity = new DenseMatrix64F(SpatialVector.SIZE, 1);
+      intermediateResult = new DenseMatrix64F(SpatialVector.SIZE, 1);
 
       jointVelocities = new DenseMatrix64F(numJoints, 1);
-      adjustedDesiredVelocity = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+      adjustedDesiredVelocity = new DenseMatrix64F(SpatialVector.SIZE, 1);
 
-      originalDesiredLinearVelocity = new YoFrameVector(prefix + "originalDesiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
-      adjustedDesiredLinearVelocity = new YoFrameVector(prefix + "adjustedDesiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
+      originalDesiredLinearVelocity = new YoFrameVector3D(prefix + "originalDesiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
+      adjustedDesiredLinearVelocity = new YoFrameVector3D(prefix + "adjustedDesiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       if (visualize)
@@ -177,9 +179,9 @@ public class LegJointLimitAvoidanceControlModule
       updateJointPositions();
 
       Twist rootJointTist = new Twist();
-      robotModel.getRootJoint().getJointTwist(rootJointTist);
+      rootJointTist.setIncludingFrame(robotModel.getRootJoint().getJointTwist());
       FrameVector3D linearRootJointVelocity = new FrameVector3D();
-      rootJointTist.getLinearPart(linearRootJointVelocity);
+      linearRootJointVelocity.setIncludingFrame(rootJointTist.getLinearPart());
 
       linearRootJointVelocity.scale(0.004);
 
@@ -304,7 +306,7 @@ public class LegJointLimitAvoidanceControlModule
 
    private void calculateAdjustedVelocities()
    {
-      int numberOfConstraints = SpatialMotionVector.SIZE;
+      int numberOfConstraints = SpatialVector.SIZE;
 
       updateJointPositions();
       jacobian.compute();

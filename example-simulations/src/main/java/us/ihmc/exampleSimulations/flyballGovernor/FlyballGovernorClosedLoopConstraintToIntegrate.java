@@ -5,8 +5,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.simulationconstructionset.Robot;
@@ -15,9 +15,9 @@ public class FlyballGovernorClosedLoopConstraintToIntegrate implements FunctionT
 {
    private final YoVariableRegistry registry;
 
-   private final YoFramePoint positionA, positionB;
-   private final YoFrameVector velocityA, velocityB;
-   private final YoFrameVector forceA, forceB;
+   private final YoFramePoint3D positionA, positionB;
+   private final YoFrameVector3D velocityA, velocityB;
+   private final YoFrameVector3D forceA, forceB;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoDouble positionErrorMagnitude;

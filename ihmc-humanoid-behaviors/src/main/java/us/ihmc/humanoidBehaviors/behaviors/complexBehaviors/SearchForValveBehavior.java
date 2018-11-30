@@ -1,31 +1,29 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import us.ihmc.communication.packets.TextToSpeechPacket;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import controller_msgs.msg.dds.ValveLocationPacket;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
+import us.ihmc.ros2.Ros2Node;
 
 public class SearchForValveBehavior extends AbstractBehavior
 {
-   private RigidBodyTransform valveTransformToWorld;
+   private Pose3D valveTransformToWorld;
    private double valveRadius;
    private boolean recievedNewValveLocation = false;
 
    protected final ConcurrentListeningQueue<ValveLocationPacket> valveLocationQueue = new ConcurrentListeningQueue<ValveLocationPacket>(10);
 
-   public SearchForValveBehavior(CommunicationBridge behaviorCommunicationBridge)
+   public SearchForValveBehavior(String robotName, Ros2Node ros2Node)
    {
-      super("SearchForSpehereFar", behaviorCommunicationBridge);
-      attachNetworkListeningQueue(valveLocationQueue, ValveLocationPacket.class);
+      super(robotName, "SearchForSpehereFar", ros2Node);
+      createBehaviorInputSubscriber(ValveLocationPacket.class, valveLocationQueue::put);
    }
 
    @Override
    public void onBehaviorEntered()
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Searching For The Valve");
-      sendPacket(p1);
+      publishTextToSpeack("Searching For The Valve");
    }
 
    @Override
@@ -49,7 +47,7 @@ public class SearchForValveBehavior extends AbstractBehavior
       recievedNewValveLocation = false;
    }
 
-   public RigidBodyTransform getLocation()
+   public Pose3D getLocation()
    {
       return valveTransformToWorld;
    }
@@ -61,9 +59,8 @@ public class SearchForValveBehavior extends AbstractBehavior
 
    private void recievedValveLocation(ValveLocationPacket valveLocationPacket)
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Recieved Valve Location From UI");
-      sendPacket(p1);
-      valveTransformToWorld = valveLocationPacket.getValveTransformToWorld();
+      publishTextToSpeack("Recieved Valve Location From UI");
+      valveTransformToWorld = valveLocationPacket.getValvePoseInWorld();
 
       valveRadius = valveLocationPacket.getValveRadius();
       recievedNewValveLocation = true;

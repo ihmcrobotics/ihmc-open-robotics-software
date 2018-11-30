@@ -2,5 +2,5 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 public interface JointLoadStatusProvider
 {
-   public abstract boolean isJointLoaded(String jointName);
+   public abstract boolean isJointLoadBearing(String jointName);
 }

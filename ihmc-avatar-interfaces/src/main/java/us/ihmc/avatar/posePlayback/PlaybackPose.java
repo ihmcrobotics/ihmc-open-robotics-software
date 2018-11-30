@@ -4,23 +4,23 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJointHolder;
 
 public class PlaybackPose
 {
-   private final LinkedHashMap<OneDoFJoint, Double> playbackPoseMap;
+   private final LinkedHashMap<OneDoFJointBasics, Double> playbackPoseMap;
    private double playBackDelayBeforePose = 1.0;
    private double playBackDuration = 1.0;
 
    public PlaybackPose(FullRobotModel fullRobotModel, OneDegreeOfFreedomJointHolder oneDegreeOfFreedomJointHolder)
    {
-      playbackPoseMap = new LinkedHashMap<OneDoFJoint, Double>();
-      OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+      playbackPoseMap = new LinkedHashMap<OneDoFJointBasics, Double>();
+      OneDoFJointBasics[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          String jointName = oneDoFJoint.getName();
          OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = oneDegreeOfFreedomJointHolder.getOneDegreeOfFreedomJoint(jointName);
@@ -39,25 +39,25 @@ public class PlaybackPose
       this.playBackDuration = playbackDuration;
    }
 
-   public PlaybackPose(LinkedHashMap<OneDoFJoint, Double> playbackPoseMap)
+   public PlaybackPose(LinkedHashMap<OneDoFJointBasics, Double> playbackPoseMap)
    {
       if (playbackPoseMap == null) throw new RuntimeException("playbackPoseMap == null");
       this.playbackPoseMap = playbackPoseMap;
    }
 
 
-   public PlaybackPose(OneDoFJoint[] oneDoFJoints, double[] jointAngles, double delay, double duration)
+   public PlaybackPose(OneDoFJointBasics[] oneDoFJoints, double[] jointAngles, double delay, double duration)
    {
       int length = oneDoFJoints.length;
 
       if (jointAngles.length != length)
          throw new RuntimeException("jointAngles.length != length");
 
-      playbackPoseMap = new LinkedHashMap<OneDoFJoint, Double>();
+      playbackPoseMap = new LinkedHashMap<OneDoFJointBasics, Double>();
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint oneDoFJoint = oneDoFJoints[i];
+         OneDoFJointBasics oneDoFJoint = oneDoFJoints[i];
          playbackPoseMap.put(oneDoFJoint, jointAngles[i]);
       }
 
@@ -65,11 +65,11 @@ public class PlaybackPose
       this.playBackDuration = duration;
    }
 
-   public PlaybackPose(OneDoFJoint[] joints, double playBackDelayBeforePose, double playbackDuration)
+   public PlaybackPose(OneDoFJointBasics[] joints, double playBackDelayBeforePose, double playbackDuration)
    {
-      playbackPoseMap = new LinkedHashMap<OneDoFJoint, Double>();
+      playbackPoseMap = new LinkedHashMap<OneDoFJointBasics, Double>();
 
-      for (OneDoFJoint oneDoFJoint : joints)
+      for (OneDoFJointBasics oneDoFJoint : joints)
       {
          playbackPoseMap.put(oneDoFJoint, oneDoFJoint.getQ());
       }
@@ -78,7 +78,7 @@ public class PlaybackPose
       this.playBackDuration = playbackDuration;
    }
 
-   public PlaybackPose(LinkedHashMap<OneDoFJoint, Double> playbackPoseMap, double playBackDelayBeforePose, double playbackDuration)
+   public PlaybackPose(LinkedHashMap<OneDoFJointBasics, Double> playbackPoseMap, double playBackDelayBeforePose, double playbackDuration)
    {
       if (playbackPoseMap == null) throw new RuntimeException("playbackPoseMap == null");
 
@@ -89,9 +89,9 @@ public class PlaybackPose
 
    public void setRobotAtPose(OneDegreeOfFreedomJointHolder oneDegreeOfFreedomJointHolder)
    {
-      Set<OneDoFJoint> oneDoFJoints = playbackPoseMap.keySet();
+      Set<OneDoFJointBasics> oneDoFJoints = playbackPoseMap.keySet();
 
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          String jointName = oneDoFJoint.getName();
          OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = oneDegreeOfFreedomJointHolder.getOneDegreeOfFreedomJoint(jointName);
@@ -109,10 +109,10 @@ public class PlaybackPose
          morphPercentage = 1.0;
 
 
-      Set<OneDoFJoint> oneDoFJoints = pose1.playbackPoseMap.keySet();
-      LinkedHashMap<OneDoFJoint, Double> playbackPoseMap = new LinkedHashMap<OneDoFJoint, Double>();
+      Set<OneDoFJointBasics> oneDoFJoints = pose1.playbackPoseMap.keySet();
+      LinkedHashMap<OneDoFJointBasics, Double> playbackPoseMap = new LinkedHashMap<OneDoFJointBasics, Double>();
 
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          double angleOne = pose1.getJointAngle(oneDoFJoint);
          double angleTwo = pose2.getJointAngle(oneDoFJoint);
@@ -125,7 +125,7 @@ public class PlaybackPose
       return new PlaybackPose(playbackPoseMap);
    }
 
-   public Double getJointAngle(OneDoFJoint oneDoFJoint)
+   public Double getJointAngle(OneDoFJointBasics oneDoFJoint)
    {
       if (!playbackPoseMap.containsKey(oneDoFJoint)) return null;
       return playbackPoseMap.get(oneDoFJoint);
@@ -155,10 +155,10 @@ public class PlaybackPose
    {
       String ret = "{";
 
-      Set<OneDoFJoint> oneDoFJoints = playbackPoseMap.keySet();
+      Set<OneDoFJointBasics> oneDoFJoints = playbackPoseMap.keySet();
 
       boolean firstOne = true;
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          if (!firstOne)
          {
@@ -185,7 +185,7 @@ public class PlaybackPose
       if (Math.abs(this.playBackDuration - pose.getPlayBackDuration()) > timeEpsilon)
          return false;
 
-      for (OneDoFJoint oneDoFJoint : playbackPoseMap.keySet())
+      for (OneDoFJointBasics oneDoFJoint : playbackPoseMap.keySet())
       {
          Double value = pose.playbackPoseMap.get(oneDoFJoint);
          if (value == null)
@@ -230,10 +230,10 @@ public class PlaybackPose
 
    public PlaybackPose copy()
    {
-      LinkedHashMap<OneDoFJoint, Double> playbackPoseMapCopy = new LinkedHashMap<OneDoFJoint, Double>();
-      Set<OneDoFJoint> oneDoFJoints = this.playbackPoseMap.keySet();
+      LinkedHashMap<OneDoFJointBasics, Double> playbackPoseMapCopy = new LinkedHashMap<OneDoFJointBasics, Double>();
+      Set<OneDoFJointBasics> oneDoFJoints = this.playbackPoseMap.keySet();
 
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          playbackPoseMapCopy.put(oneDoFJoint, playbackPoseMap.get(oneDoFJoint));
       }
@@ -243,13 +243,13 @@ public class PlaybackPose
 
    public double[] getJointAngles()
    {
-      Set<OneDoFJoint> oneDoFJoints = this.playbackPoseMap.keySet();
+      Set<OneDoFJointBasics> oneDoFJoints = this.playbackPoseMap.keySet();
 
       int size = oneDoFJoints.size();
       int index = 0;
       double[] ret = new double[size];
 
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          ret[index] = playbackPoseMap.get(oneDoFJoint);
          index++;
@@ -258,12 +258,12 @@ public class PlaybackPose
       return ret;
    }
 
-   public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+   public void getOneDoFJoints(ArrayList<OneDoFJointBasics> oneDoFJointsToPack)
    {
       oneDoFJointsToPack.addAll(playbackPoseMap.keySet());
    }
 
-   public void getJointAngles(ArrayList<OneDoFJoint> oneDoFJoints, double[] jointAnglesToPack)
+   public void getJointAngles(ArrayList<OneDoFJointBasics> oneDoFJoints, double[] jointAnglesToPack)
    {
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {

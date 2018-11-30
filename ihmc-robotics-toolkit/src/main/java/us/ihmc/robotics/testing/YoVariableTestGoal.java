@@ -156,7 +156,7 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
          @Override
          public boolean currentlyMeetsGoal()
          {
-            return yoEnum.getEnumValue().equals(enumValue);
+            return yoEnum.getEnumValue() == enumValue;
          }
 
          @Override
@@ -254,7 +254,8 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
 
    private static <T extends Enum<T>> String getFormattedEnumYoVariable(final YoEnum<T> yoEnum)
    {
-      return yoEnum.getName() + ":" + yoEnum.getEnumValue().name();
+      String enumValueName = yoEnum.getEnumValue() != null ? yoEnum.getEnumValue().name() : "null";
+      return yoEnum.getName() + ":" + enumValueName;
    }
 
    public static String getFormattedDoubleYoVariable(YoDouble yoDouble)

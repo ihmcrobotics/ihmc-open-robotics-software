@@ -22,13 +22,13 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapp
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnapper;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public abstract class AbstractFootstepGenerator implements FootstepGenerator
 {
@@ -43,7 +43,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    protected RobotSide closestSideToEnd;
    protected RobotSide stanceStartSide;
    protected RobotSide currentFootstepSide;
-   protected SideDependentList<RigidBody> feet;
+   protected SideDependentList<RigidBodyBasics> feet;
    protected SideDependentList<ReferenceFrame> soleFrames;
    protected boolean startStancePreferenceSpecified = false;
 
@@ -63,13 +63,13 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    protected double initialDeltaFeetX;
    protected final FramePose2D startPose = new FramePose2D();
 
-   public AbstractFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames)
+   public AbstractFootstepGenerator(SideDependentList<RigidBodyBasics> feet, SideDependentList<ReferenceFrame> soleFrames)
    {
       this.feet = feet;
       this.soleFrames = soleFrames;
    }
 
-   public AbstractFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, RobotSide stanceStart)
+   public AbstractFootstepGenerator(SideDependentList<RigidBodyBasics> feet, SideDependentList<ReferenceFrame> soleFrames, RobotSide stanceStart)
    {
       this(feet, soleFrames);
       setStanceStartPreference(stanceStart);
@@ -97,7 +97,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
 
    protected Footstep createFootstep(RobotSide currentFootstepSide, FramePose2D solePose)
    {
-      RigidBody foot = feet.get(currentFootstepSide);
+      RigidBodyBasics foot = feet.get(currentFootstepSide);
       ReferenceFrame soleFrame = soleFrames.get(currentFootstepSide);
 
       Footstep footstep;

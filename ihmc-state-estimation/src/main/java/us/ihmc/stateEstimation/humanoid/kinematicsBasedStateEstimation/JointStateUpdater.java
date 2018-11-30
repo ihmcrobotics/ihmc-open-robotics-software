@@ -1,17 +1,18 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
+import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 
 /**
  * JointStateUpdater simply reads the joint position/velocity sensors and updates the FullInverseDynamicsStructure.
@@ -23,13 +24,13 @@ public class JointStateUpdater
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
-   private final RigidBody rootBody;
+   private final RigidBodyBasics rootBody;
 
-   private OneDoFJoint[] oneDoFJoints;
+   private OneDoFJointBasics[] oneDoFJoints;
    private final SensorOutputMapReadOnly sensorMap;
-   private final IMUBasedJointVelocityEstimator iMUBasedJointVelocityEstimator;
+   private final IMUBasedJointStateEstimator iMUBasedJointStateEstimator;
 
-   private final YoBoolean enableIMUBasedJointVelocityEstimator = new YoBoolean("enableIMUBasedJointVelocityEstimator", registry);
+   private final BooleanProvider enableIMUBasedJointVelocityEstimator;
 
    public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
          StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
@@ -39,26 +40,33 @@ public class JointStateUpdater
 
       this.sensorMap = sensorOutputMapReadOnly;
 
-      InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
-      this.oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
+      JointBasics[] joints = MultiBodySystemTools.collectSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
+      this.oneDoFJoints = MultiBodySystemTools.filterJoints(joints, OneDoFJointBasics.class);
 
-      iMUBasedJointVelocityEstimator = createIMUBasedJointVelocityEstimator(sensorOutputMapReadOnly, stateEstimatorParameters, registry);
+      if (stateEstimatorParameters == null)
+      {
+         enableIMUBasedJointVelocityEstimator = new BooleanParameter("enableIMUBasedJointVelocityEstimator", registry);
+      }
+      else
+      {
+         boolean initialValue = stateEstimatorParameters.useIMUsForSpineJointVelocityEstimation();
+         enableIMUBasedJointVelocityEstimator = new BooleanParameter("enableIMUBasedJointVelocityEstimator", registry, initialValue);
+      }
+      iMUBasedJointStateEstimator = createIMUBasedJointVelocityEstimator(sensorOutputMapReadOnly, stateEstimatorParameters, registry);
 
       parentRegistry.addChild(registry);
    }
 
-   public void setJointsToUpdate(OneDoFJoint[] oneDoFJoints)
+   public void setJointsToUpdate(OneDoFJointBasics[] oneDoFJoints)
    {
       this.oneDoFJoints = oneDoFJoints;
    }
 
-   public IMUBasedJointVelocityEstimator createIMUBasedJointVelocityEstimator(SensorOutputMapReadOnly sensorOutputMapReadOnly,
-         StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
+   public IMUBasedJointStateEstimator createIMUBasedJointVelocityEstimator(SensorOutputMapReadOnly sensorOutputMapReadOnly,
+                                                                           StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
    {
       if (stateEstimatorParameters == null || stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation() == null)
          return null;
-
-      enableIMUBasedJointVelocityEstimator.set(stateEstimatorParameters.useIMUsForSpineJointVelocityEstimation());
 
       IMUSensorReadOnly pelvisIMU = null;
       IMUSensorReadOnly chestIMU = null;
@@ -79,14 +87,7 @@ public class JointStateUpdater
       // TODO create the module with the two IMUs to compute and smoothen the spine joint velocities here.
       if (pelvisIMU != null && chestIMU != null)
       {
-         double estimatorDT = stateEstimatorParameters.getEstimatorDT();
-         double slopTime = stateEstimatorParameters.getIMUJointVelocityEstimationBacklashSlopTime();
-         IMUBasedJointVelocityEstimator iMUBasedJointVelocityEstimator = new IMUBasedJointVelocityEstimator(pelvisIMU, chestIMU, sensorOutputMapReadOnly, estimatorDT, slopTime, parentRegistry);
-         iMUBasedJointVelocityEstimator.compute();
-         double alphaIMUsForSpineJointVelocityEstimation = stateEstimatorParameters.getAlphaIMUsForSpineJointVelocityEstimation();
-         double alphaIMUsForSpineJointPositionEstimation = stateEstimatorParameters.getAlphaIMUsForSpineJointPositionEstimation();
-         iMUBasedJointVelocityEstimator.setAlphaFuse(alphaIMUsForSpineJointVelocityEstimation, alphaIMUsForSpineJointPositionEstimation);
-         return iMUBasedJointVelocityEstimator;
+         return new IMUBasedJointStateEstimator(pelvisIMU, chestIMU, sensorOutputMapReadOnly, stateEstimatorParameters, parentRegistry);
       }
       else
       {
@@ -112,38 +113,36 @@ public class JointStateUpdater
 
    public void updateJointState()
    {
-      if (iMUBasedJointVelocityEstimator != null)
+      if (iMUBasedJointStateEstimator != null)
       {
-         iMUBasedJointVelocityEstimator.compute();
+         iMUBasedJointStateEstimator.compute();
       }
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint oneDoFJoint = oneDoFJoints[i];
+         OneDoFJointBasics oneDoFJoint = oneDoFJoints[i];
 
          double positionSensorData = sensorMap.getJointPositionProcessedOutput(oneDoFJoint);
          double velocitySensorData = sensorMap.getJointVelocityProcessedOutput(oneDoFJoint);
          double torqueSensorData = sensorMap.getJointTauProcessedOutput(oneDoFJoint);
-         boolean jointEnabledIndicator = sensorMap.isJointEnabled(oneDoFJoint);
 
-         if (enableIMUBasedJointVelocityEstimator.getBooleanValue() && iMUBasedJointVelocityEstimator != null)
+         if (enableIMUBasedJointVelocityEstimator.getValue() && iMUBasedJointStateEstimator != null)
          {
-            double estimatedJointVelocity = iMUBasedJointVelocityEstimator.getEstimatedJointVelocitiy(oneDoFJoint);
+            double estimatedJointVelocity = iMUBasedJointStateEstimator.getEstimatedJointVelocitiy(oneDoFJoint);
             if (!Double.isNaN(estimatedJointVelocity))
                velocitySensorData = estimatedJointVelocity;
 
-            double estimatedJointPosition = iMUBasedJointVelocityEstimator.getEstimatedJointPosition(oneDoFJoint);
+            double estimatedJointPosition = iMUBasedJointStateEstimator.getEstimatedJointPosition(oneDoFJoint);
             if (!Double.isNaN(estimatedJointPosition))
                positionSensorData = estimatedJointPosition;
          }
 
          oneDoFJoint.setQ(positionSensorData);
          oneDoFJoint.setQd(velocitySensorData);
-         oneDoFJoint.setTauMeasured(torqueSensorData);
-         oneDoFJoint.setEnabled(jointEnabledIndicator);
+         oneDoFJoint.setTau(torqueSensorData);
       }
 
       rootBody.updateFramesRecursively();
-      spatialAccelerationCalculator.compute();
+      spatialAccelerationCalculator.reset();
    }
 }

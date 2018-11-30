@@ -9,23 +9,23 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class TurnTranslateTurnFootstepGenerator implements FootstepGenerator
 {
    private TurnInPlaceFootstepGenerator firstTurn;
    private TranslationFootstepGenerator translate;
    private TurnInPlaceFootstepGenerator lastTurn;
-   private final SideDependentList<RigidBody> feet;
+   private final SideDependentList<RigidBodyBasics> feet;
    private final SideDependentList<ReferenceFrame> soleFrames;
    private SideDependentList<Footstep> transitionStanceFeet = new SideDependentList<Footstep>();
    private FrameOrientation2D endOrientation;
    private PathTypeStepParameters pathType;
 
-   public TurnTranslateTurnFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FrameOrientation2D pathYaw, FramePose2D endPose,
+   public TurnTranslateTurnFootstepGenerator(SideDependentList<RigidBodyBasics> feet, SideDependentList<ReferenceFrame> soleFrames, FrameOrientation2D pathYaw, FramePose2D endPose,
          PathTypeStepParameters pathType, TranslationalPathParameters translationalPathType)
    {
       this.feet = feet;

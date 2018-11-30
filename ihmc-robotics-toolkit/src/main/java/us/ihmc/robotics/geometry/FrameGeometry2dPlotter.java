@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -29,7 +30,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
 
    private ArrayList<FramePoint2D> testPoints = new ArrayList<FramePoint2D>();
 
-   private FrameConvexPolygon2d polygonToCheckInside = null;
+   private FrameConvexPolygon2D polygonToCheckInside = null;
 
    private LinkedHashMap<Color, FrameLineGroup> frameLineGroups = new LinkedHashMap<Color, FrameLineGroup>();
    private LinkedHashMap<Color, FramePointGroup> framePointGroups = new LinkedHashMap<Color, FramePointGroup>();
@@ -101,7 +102,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
 
    private class FrameConvexPolygonGroup
    {
-      private ArrayList<FrameConvexPolygon2d> polygons = new ArrayList<FrameConvexPolygon2d>();
+      private ArrayList<FrameConvexPolygon2D> polygons = new ArrayList<FrameConvexPolygon2D>();
       private final Color color;
 
       public FrameConvexPolygonGroup(Color color)
@@ -109,20 +110,20 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
          this.color = color;
       }
 
-      public void addFrameConvexPolygon2d(FrameConvexPolygon2d frameConvexPolygon2d)
+      public void addFrameConvexPolygon2d(FrameConvexPolygon2D frameConvexPolygon2d)
       {
          polygons.add(frameConvexPolygon2d);
       }
 
-      public void addFrameConvexPolygon2ds(ArrayList<FrameConvexPolygon2d> frameConvexPolygon2ds)
+      public void addFrameConvexPolygon2ds(ArrayList<FrameConvexPolygon2D> frameConvexPolygon2ds)
       {
          polygons.addAll(frameConvexPolygon2ds);
       }
 
       @SuppressWarnings("unused")
-      public void addFrameConvexPolygon2ds(FrameConvexPolygon2d[] frameConvexPolygon2ds)
+      public void addFrameConvexPolygon2ds(FrameConvexPolygon2D[] frameConvexPolygon2ds)
       {
-         for (FrameConvexPolygon2d frameConvexPolygon2d : frameConvexPolygon2ds)
+         for (FrameConvexPolygon2D frameConvexPolygon2d : frameConvexPolygon2ds)
          {
             polygons.add(frameConvexPolygon2d);
          }
@@ -273,12 +274,12 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       frameLineSegmentGroup.addFrameLineSegments(frameLinesSegments2d);
    }
 
-   public synchronized void addPolygon(FrameConvexPolygon2d polygon)
+   public synchronized void addPolygon(FrameConvexPolygon2D polygon)
    {
       addPolygon(polygon, Color.BLACK);
    }
 
-   public synchronized void addPolygon(FrameConvexPolygon2d polygon, Color color)
+   public synchronized void addPolygon(FrameConvexPolygon2D polygon, Color color)
    {
       FrameConvexPolygonGroup frameConvexPolygonGroup = frameConvexPolygonGroups.get(color);
       if (frameConvexPolygonGroup == null)
@@ -290,7 +291,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       frameConvexPolygonGroup.addFrameConvexPolygon2d(polygon);
    }
 
-   public synchronized void addFrameConvexPolygons(ArrayList<FrameConvexPolygon2d> frameConvexPolygons, Color color)
+   public synchronized void addFrameConvexPolygons(ArrayList<FrameConvexPolygon2D> frameConvexPolygons, Color color)
    {
       FrameConvexPolygonGroup frameConvexPolygonGroup = frameConvexPolygonGroups.get(color);
       if (frameConvexPolygonGroup == null)
@@ -311,10 +312,10 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
          frameConvexPolygonGroups.put(color, frameConvexPolygonGroup);
       }
 
-      ArrayList<FrameConvexPolygon2d> frameConvexPolygons = new ArrayList<FrameConvexPolygon2d>();
+      ArrayList<FrameConvexPolygon2D> frameConvexPolygons = new ArrayList<FrameConvexPolygon2D>();
       for (ConvexPolygon2D polygon : convexPolygons)
       {
-         frameConvexPolygons.add(new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), polygon));
+         frameConvexPolygons.add(new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame(), polygon));
       }
 
       frameConvexPolygonGroup.addFrameConvexPolygon2ds(frameConvexPolygons);
@@ -329,12 +330,12 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
          frameConvexPolygonGroups.put(color, frameConvexPolygonGroup);
       }
 
-      ArrayList<FrameConvexPolygon2d> frameConvexPolygons = new ArrayList<FrameConvexPolygon2d>();
+      ArrayList<FrameConvexPolygon2D> frameConvexPolygons = new ArrayList<FrameConvexPolygon2D>();
       for (ConvexPolygon2D polygon : convexPolygons)
       {
          if (polygon == null)
             continue;
-         frameConvexPolygons.add(new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), polygon));
+         frameConvexPolygons.add(new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame(), polygon));
       }
 
       frameConvexPolygonGroup.addFrameConvexPolygon2ds(frameConvexPolygons);
@@ -349,11 +350,11 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
          frameConvexPolygonGroups.put(color, frameConvexPolygonGroup);
       }
 
-      ArrayList<FrameConvexPolygon2d> frameConvexPolygons = new ArrayList<FrameConvexPolygon2d>();
+      ArrayList<FrameConvexPolygon2D> frameConvexPolygons = new ArrayList<FrameConvexPolygon2D>();
 
       if (convexPolygon == null)
          return;
-      frameConvexPolygons.add(new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), convexPolygon));
+      frameConvexPolygons.add(new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame(), convexPolygon));
 
       frameConvexPolygonGroup.addFrameConvexPolygon2ds(frameConvexPolygons);
    }
@@ -368,7 +369,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       testPoints.add(testPoint);
    }
 
-   public synchronized void setPolygonToCheckInside(FrameConvexPolygon2d polygon)
+   public synchronized void setPolygonToCheckInside(FrameConvexPolygon2D polygon)
    {
       this.polygonToCheckInside = polygon;
    }
@@ -481,7 +482,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       }
    }
 
-   private void drawTestPoints(ArrayList<FramePoint2D> testPoints, FrameConvexPolygon2d polygon, Graphics graphics)
+   private void drawTestPoints(ArrayList<FramePoint2D> testPoints, FrameConvexPolygon2D polygon, Graphics graphics)
    {
       for (FramePoint2D testPoint : testPoints)
       {
@@ -526,15 +527,15 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       graphics.fillOval(xInt - 2, yInt - 2, 4, 4);
    }
 
-   private void drawPolygons(ArrayList<FrameConvexPolygon2d> polygons, Graphics graphics)
+   private void drawPolygons(ArrayList<FrameConvexPolygon2D> polygons, Graphics graphics)
    {
-      for (FrameConvexPolygon2d polygon : polygons)
+      for (FrameConvexPolygon2D polygon : polygons)
       {
          drawPolygon(polygon, graphics);
       }
    }
 
-   private void drawPolygon(FrameConvexPolygon2d frameConvexPolygon2d, Graphics graphics)
+   private void drawPolygon(FrameConvexPolygon2D frameConvexPolygon2d, Graphics graphics)
    {
       Polygon polygon = new Polygon();
 

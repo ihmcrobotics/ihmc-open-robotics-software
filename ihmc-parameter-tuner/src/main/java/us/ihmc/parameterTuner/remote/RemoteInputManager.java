@@ -1,47 +1,28 @@
 package us.ihmc.parameterTuner.remote;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javafx.event.ActionEvent;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.layout.HBox;
-import javafx.stage.FileChooser;
-import us.ihmc.parameterTuner.ParameterTuningTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
+import us.ihmc.parameterTuner.guiElements.main.ParameterSavingNode;
 import us.ihmc.robotDataLogger.YoVariableClient;
-import us.ihmc.yoVariables.parameters.xml.Registry;
 
-public class RemoteInputManager extends HBox implements ParameterGuiInterface
+public class RemoteInputManager implements ParameterGuiInterface
 {
-   private GuiRegistry localRegistry;
    private final HashMap<String, GuiParameter> parameterMap = new HashMap<>();
-   private final Button saveAs = new Button("Save as...");
+   private final ParameterSavingNode savingNode = new ParameterSavingNode(false, false);
 
    private final ParameterUpdateListener updateListener;
 
    public RemoteInputManager()
    {
-      setupNode();
       updateListener = new ParameterUpdateListener();
       YoVariableClient client = new YoVariableClient(updateListener);
       client.start();
-   }
-
-   private void setupNode()
-   {
-      setMaxHeight(Double.NEGATIVE_INFINITY);
-      setMaxWidth(Double.NEGATIVE_INFINITY);
-      setSpacing(10.0);
-      setAlignment(Pos.CENTER_LEFT);
-      saveAs.setOnAction(this::saveAs);
-      getChildren().add(saveAs);
    }
 
    @Override
@@ -51,24 +32,35 @@ public class RemoteInputManager extends HBox implements ParameterGuiInterface
    }
 
    @Override
-   public GuiRegistry getFullRegistryCopy()
+   public List<GuiRegistry> getRegistriesCopy()
    {
-      GuiRegistry fullGuiRegistry = updateListener.pollGuiRegistry();
+      List<GuiRegistry> guiRegistries = updateListener.pollGuiRegistries();
 
       // Maintain a local copy for saving that is only modified from the GUI thread.
-      localRegistry = fullGuiRegistry.createFullCopy();
       parameterMap.clear();
-      localRegistry.getAllParameters().stream().forEach(parameter -> {
+      List<GuiRegistry> localRegistries = new ArrayList<>();
+      List<GuiParameter> allParameters = new ArrayList<>();
+      guiRegistries.stream().forEach(fullGuiRegistry -> {
+         GuiRegistry localRegistry = fullGuiRegistry.createFullCopy();
+         allParameters.addAll(localRegistry.getAllParameters());
+         localRegistries.add(localRegistry);
+      });
+      allParameters.stream().forEach(parameter -> {
          parameterMap.put(parameter.getUniqueName(), parameter);
       });
+      savingNode.setRegistries(localRegistries);
 
-      return fullGuiRegistry;
+      return guiRegistries;
    }
 
    @Override
    public void submitChangedParameters(List<GuiParameter> changedParameters)
    {
-      updateLocalRegistry(changedParameters);
+      // For changes from the GUI set all properties of the parameter.
+      changedParameters.stream().forEach(parameter -> {
+         parameterMap.get(parameter.getUniqueName()).set(parameter);
+      });
+
       updateListener.changeVariables(changedParameters);
    }
 
@@ -76,21 +68,23 @@ public class RemoteInputManager extends HBox implements ParameterGuiInterface
    public List<GuiParameter> pollUpdatedParameters()
    {
       List<GuiParameter> changedParameters = updateListener.getChangedParametersAndClear();
-      updateLocalRegistry(changedParameters);
-      return changedParameters;
-   }
 
-   private void updateLocalRegistry(List<GuiParameter> changedParameters)
-   {
-      changedParameters.stream().forEach(parameter -> {
-         parameterMap.get(parameter.getUniqueName()).set(parameter);
+      // For changes from the server only update if the value changes to avoid loosing the status.
+      changedParameters.stream().forEach(externalParameter -> {
+         GuiParameter localParameter = parameterMap.get(externalParameter.getUniqueName());
+         if (!localParameter.getCurrentValue().equals(externalParameter.getCurrentValue()))
+         {
+            localParameter.setValueAndStatus(externalParameter);
+         }
       });
+
+      return changedParameters;
    }
 
    @Override
    public Node getInputManagerNode()
    {
-      return this;
+      return savingNode;
    }
 
    @Override
@@ -99,25 +93,9 @@ public class RemoteInputManager extends HBox implements ParameterGuiInterface
       updateListener.exitActionPerformed();
    }
 
-   private void saveAs(ActionEvent event)
+   @Override
+   public void changeRootRegistries(List<String> rootRegistryNames)
    {
-      FileChooser fileChooser = new FileChooser();
-      FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
-      fileChooser.getExtensionFilters().add(extFilter);
-      fileChooser.setTitle("Select Parameter File");
-      File file = fileChooser.showSaveDialog(saveAs.getScene().getWindow());
-
-      if (file != null)
-      {
-         List<Registry> xmlRegistries = ParameterTuningTools.buildXMLRegistryFromGui(localRegistry);
-         try
-         {
-            ParameterTuningTools.save(xmlRegistries, file);
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-         }
-      }
+      savingNode.setRootRegistries(rootRegistryNames);
    }
 }

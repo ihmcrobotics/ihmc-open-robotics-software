@@ -1,38 +1,66 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.SettablePacket;
-import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
+import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.ros2.RealtimeRos2Node;
+
+import java.io.IOException;
+import java.util.List;
 
 public class FootstepPlanningToolboxModule extends ToolboxModule
 {
-   private static final PacketDestination PACKET_DESTINATION = PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE;
-   private static final NetworkPorts NETWORK_PORT = NetworkPorts.FOOTSTEP_PLANNING_TOOLBOX_MODULE_PORT;
-
    private final FootstepPlanningToolboxController footstepPlanningToolboxController;
+   private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
-   public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel, LogModelProvider modelProvider,
-                                        boolean startYoVariableServer)
-         throws IOException
+   public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer) throws IOException
    {
-      super(fullHumanoidRobotModel, modelProvider, startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
+      this(drcRobotModel, modelProvider, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
+   }
+
+   public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer,
+                                        DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
+   {
+      super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), modelProvider, startYoVariableServer, pubSubImplementation);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
-      footstepPlanningToolboxController = new FootstepPlanningToolboxController(drcRobotModel, fullHumanoidRobotModel, statusOutputManager, packetCommunicator,
-                                                                                registry, yoGraphicsListRegistry, Conversions.millisecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
+      footstepPlanningToolboxController = new FootstepPlanningToolboxController(drcRobotModel.getContactPointParameters(),
+                                                                                drcRobotModel.getFootstepPlannerParameters(),
+                                                                                drcRobotModel.getVisibilityGraphsParameters(), statusOutputManager, registry,
+                                                                                yoGraphicsListRegistry,
+                                                                                Conversions.millisecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
+      footstepPlanningToolboxController.setTextToSpeechPublisher(textToSpeechPublisher);
       startYoVariableServer();
+   }
+
+   @Override
+   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
+   {
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
+                                           s -> footstepPlanningToolboxController.processRequest(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlannerParametersPacket.class, getSubscriberTopicNameGenerator(),
+                                           s -> footstepPlanningToolboxController.processFootstepPlannerParameters(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, VisibilityGraphsParametersPacket.class, getSubscriberTopicNameGenerator(),
+                                           s -> footstepPlanningToolboxController.processVisibilityGraphsParameters(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanningStatisticsRequestMessage.class, getSubscriberTopicNameGenerator(),
+                                           s -> footstepPlanningToolboxController.processPlanningStatisticsRequest());
+      textToSpeechPublisher = ROS2Tools.createPublisher(realtimeRos2Node, TextToSpeechPacket.class, ROS2Tools::generateDefaultTopicName);
+   }
+   
+   @Override
+   public void sleep()
+   {
+      footstepPlanningToolboxController.finishUp();
+      super.sleep();
    }
 
    @Override
@@ -44,16 +72,34 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
-      List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
-      return commands;
+      return FootstepPlannerCommunicationProperties.getSupportedCommands();
    }
 
    @Override
-   public List<Class<? extends SettablePacket<?>>> createListOfSupportedStatus()
+   public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
    {
-      List<Class<? extends SettablePacket<?>>> status = new ArrayList<>();
-      status.add(FootstepPlanningToolboxOutputStatus.class);
-      return status;
+      return FootstepPlannerCommunicationProperties.getSupportedStatusMessages();
    }
 
+   @Override
+   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   {
+      return getPublisherTopicNameGenerator(robotName);
+   }
+
+   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   {
+      return FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName);
+   }
+
+   @Override
+   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   {
+      return getSubscriberTopicNameGenerator(robotName);
+   }
+
+   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   {
+      return FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName);
+   }
 }

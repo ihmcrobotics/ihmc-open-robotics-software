@@ -14,12 +14,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajectoryGenerator
@@ -39,11 +39,11 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    private final YoDouble startOfSplineTime;
    private final YoDouble endOfSplineTime;
 
-   private final YoFramePoint yoStartOfSplineICP;
-   private final YoFramePoint yoEndOfSplineICP;
+   private final YoFramePoint3D yoStartOfSplineICP;
+   private final YoFramePoint3D yoEndOfSplineICP;
 
-   private final YoFramePoint yoStartOfSplineCoM;
-   private final YoFramePoint yoEndOfSplineCoM;
+   private final YoFramePoint3D yoStartOfSplineCoM;
+   private final YoFramePoint3D yoEndOfSplineCoM;
 
    private final YoInteger currentSegment;
 
@@ -122,11 +122,11 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
       spline = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix, trajectoryFrame, registry);
 
-      yoStartOfSplineICP = new YoFramePoint(namePrefix + "InitialICPSpline", trajectoryFrame, registry);
-      yoEndOfSplineICP = new YoFramePoint(namePrefix + "FinalICPSpline", trajectoryFrame, registry);
+      yoStartOfSplineICP = new YoFramePoint3D(namePrefix + "InitialICPSpline", trajectoryFrame, registry);
+      yoEndOfSplineICP = new YoFramePoint3D(namePrefix + "FinalICPSpline", trajectoryFrame, registry);
 
-      yoStartOfSplineCoM = new YoFramePoint(namePrefix + "InitialCoMSpline", trajectoryFrame, registry);
-      yoEndOfSplineCoM = new YoFramePoint(namePrefix + "FinalCoMSpline", trajectoryFrame, registry);
+      yoStartOfSplineCoM = new YoFramePoint3D(namePrefix + "InitialCoMSpline", trajectoryFrame, registry);
+      yoEndOfSplineCoM = new YoFramePoint3D(namePrefix + "FinalCoMSpline", trajectoryFrame, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -459,7 +459,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       return progressionInPercent.getDoubleValue() * totalTrajectoryTime.getDoubleValue() > endOfSplineTime.getDoubleValue();
    }
 
-   public void getPosition(YoFramePoint positionToPack)
+   public void getPosition(YoFramePoint3D positionToPack)
    {
       positionToPack.set(desiredICPOutput);
    }
@@ -470,7 +470,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       velocityToPack.setIncludingFrame(desiredICPVelocityOutput);
    }
 
-   public void getVelocity(YoFrameVector velocityToPack)
+   public void getVelocity(YoFrameVector3D velocityToPack)
    {
       velocityToPack.set(desiredICPVelocityOutput);
    }
@@ -481,12 +481,12 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       accelerationToPack.setToZero(trajectoryFrame);
    }
 
-   public void getAcceleration(YoFrameVector accelerationToPack)
+   public void getAcceleration(YoFrameVector3D accelerationToPack)
    {
       accelerationToPack.setToZero();
    }
 
-   public void getCoMPosition(YoFramePoint positionToPack)
+   public void getCoMPosition(YoFramePoint3D positionToPack)
    {
       positionToPack.set(desiredCoMPosition);
    }
@@ -499,7 +499,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       getAcceleration(accelerationToPack);
    }
 
-   public void getLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack, YoFrameVector accelerationToPack)
+   public void getLinearData(YoFramePoint3D positionToPack, YoFrameVector3D velocityToPack, YoFrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

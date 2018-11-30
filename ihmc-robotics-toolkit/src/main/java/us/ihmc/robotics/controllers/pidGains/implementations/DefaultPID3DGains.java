@@ -18,9 +18,6 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
  */
 public class DefaultPID3DGains implements PID3DGains
 {
-   private final GainCoupling gainCoupling;
-   private final boolean useIntegrator;
-
    private double[] proportionalGains = new double[3];
    private double[] derivativeGains = new double[3];
    private double[] integralGains = new double[3];
@@ -34,24 +31,11 @@ public class DefaultPID3DGains implements PID3DGains
 
    public DefaultPID3DGains()
    {
-      this(true);
-   }
-
-   public DefaultPID3DGains(boolean useIntegrator)
-   {
-      this(GainCoupling.NONE, useIntegrator);
    }
 
    public DefaultPID3DGains(PID3DGainsReadOnly other)
    {
-      this(other.getGainCoupling(), other.isUseIntegrator());
       set(other);
-   }
-
-   public DefaultPID3DGains(GainCoupling gainCoupling, boolean useIntegrator)
-   {
-      this.gainCoupling = gainCoupling;
-      this.useIntegrator = useIntegrator;
    }
 
    @Override
@@ -175,17 +159,5 @@ public class DefaultPID3DGains implements PID3DGains
    public void setMaxProportionalError(double maxProportionalError)
    {
       this.maxProportionalError = maxProportionalError;
-   }
-
-   @Override
-   public GainCoupling getGainCoupling()
-   {
-      return gainCoupling;
-   }
-
-   @Override
-   public boolean isUseIntegrator()
-   {
-      return useIntegrator;
    }
 }

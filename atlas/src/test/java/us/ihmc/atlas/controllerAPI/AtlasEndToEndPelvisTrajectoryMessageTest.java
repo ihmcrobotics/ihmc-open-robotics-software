@@ -1,14 +1,15 @@
 package us.ihmc.atlas.controllerAPI;
 
 import org.junit.Test;
-
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.controllerAPI.EndToEndPelvisTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 
 public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTrajectoryMessageTest
 {
@@ -27,67 +28,17 @@ public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraj
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 55.2)
-   @Test(timeout = 70000)
-   public void testHeightModeSwitchWhileWalking() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 200000)
+   public void testSixDoFMovementsOfPelvis() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      super.testHeightModeSwitchWhileWalking();
+      super.testSixDoFMovementsOfPelvis();
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 50.7)
-   @Test(timeout = 120000)
-   public void testHeightUsingMultipleWaypoints() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration = 91.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @Test(timeout = 460000)
+   public void testSingleWaypointThenManualChange() throws Exception
    {
-      super.testHeightUsingMultipleWaypoints();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 58.4)
-   @Test(timeout = 80000)
-   public void testHeightUsingMultipleWaypointsWhileWalking() throws Exception
-   {
-      super.testHeightUsingMultipleWaypointsWhileWalking();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 18.0)
-   @Test(timeout = 80000)
-   public void testMultipleWaypoints() throws Exception
-   {
-      super.testMultipleWaypoints();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 21.1)
-   @Test(timeout = 80000)
-   public void testSingleWaypoint() throws Exception
-   {
-      super.testSingleWaypoint();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 58.7)
-   @Test(timeout = 80000)
-   public void testSingleWaypointAndAbort() throws Exception
-   {
-      super.testSingleWaypointAndAbort();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 58.7)
-   @Test(timeout = 80000)
-   public void testSingleWaypointAndWalk() throws Exception
-   {
-      super.testSingleWaypointAndWalk();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 23.1)
-   @Test(timeout = 80000)
-   public void testStopAllTrajectory() throws Exception
-   {
-      super.testStopAllTrajectory();
+      super.testSingleWaypointThenManualChange();
    }
 }

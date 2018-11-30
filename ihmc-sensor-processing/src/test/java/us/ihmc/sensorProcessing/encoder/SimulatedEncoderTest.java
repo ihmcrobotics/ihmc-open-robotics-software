@@ -117,6 +117,8 @@ public class SimulatedEncoderTest
 
 
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testGetPositionFromEncoder()
    {
       double ticksPerPosition = 0.5;

@@ -31,7 +31,7 @@ public class IHMCMsgToPacketSubscriber<T extends Message> extends AbstractRosTop
          packet.setDestination(packetDestination);
          controllerCommunicator.send(packet);
       }
-      catch (ClassNotFoundException | InvocationTargetException | RosEnumConversionException | IllegalAccessException | InstantiationException | NoSuchFieldException e)
+      catch (ClassNotFoundException | InvocationTargetException | RosEnumConversionException | IllegalAccessException | InstantiationException | NoSuchFieldException | IllegalArgumentException | NoSuchMethodException | SecurityException e)
       {
          System.err.println("Could not convert ROS Message to IHMC Message. Will not publish.");
          System.err.println("Original ROS message: " + message);

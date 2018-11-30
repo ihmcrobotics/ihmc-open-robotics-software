@@ -1,14 +1,13 @@
 package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
-import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ZeroHeuristics extends CostToGoHeuristics
 {
-   public ZeroHeuristics(YoVariableRegistry registry)
+   public ZeroHeuristics(YoDouble weight)
    {
-      super(registry);
+      super(weight);
    }
 
    @Override

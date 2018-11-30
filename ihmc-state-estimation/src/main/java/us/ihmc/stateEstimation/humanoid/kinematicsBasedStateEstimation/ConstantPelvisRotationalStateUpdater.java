@@ -4,20 +4,20 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class ConstantPelvisRotationalStateUpdater implements PelvisRotationalStateUpdaterInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoFrameOrientation yoRootJointFrameOrientation = new YoFrameOrientation("constantRootJoint", worldFrame, registry);
+   private final YoFrameYawPitchRoll yoRootJointFrameOrientation = new YoFrameYawPitchRoll("constantRootJoint", worldFrame, registry);
 
-   private final FloatingInverseDynamicsJoint rootJoint;
+   private final FloatingJointBasics rootJoint;
 
    public ConstantPelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, YoVariableRegistry parentRegistry)
    {
@@ -50,9 +50,9 @@ public class ConstantPelvisRotationalStateUpdater implements PelvisRotationalSta
    public void updateRootJointOrientationAndAngularVelocity()
    {
       yoRootJointFrameOrientation.getQuaternion(rootJointOrientation);
-      rootJoint.setRotation(rootJointOrientation);
+      rootJoint.setJointOrientation(rootJointOrientation);
 
-      rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
+      twistRootBodyRelativeToWorld.setIncludingFrame(rootJoint.getJointTwist());
       twistRootBodyRelativeToWorld.setToZero();
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
    }

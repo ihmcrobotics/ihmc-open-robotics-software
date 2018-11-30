@@ -13,19 +13,17 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameEuclideanWaypoint;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoFrameEuclideanTrajectoryPoint
       extends YoFrameTrajectoryPoint<YoFrameEuclideanTrajectoryPoint, FrameEuclideanTrajectoryPoint, SimpleEuclideanTrajectoryPoint>
       implements EuclideanTrajectoryPointInterface<YoFrameEuclideanTrajectoryPoint>
 {
-   private final YoFramePoint position;
-   private final YoFrameVector linearVelocity;
+   private final YoFramePoint3D position;
+   private final YoFrameVector3D linearVelocity;
 
    public YoFrameEuclideanTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
    {
@@ -104,7 +102,6 @@ public class YoFrameEuclideanTrajectoryPoint
    @Override
    public void setToNaN()
    {
-      super.setToNaN();
       setTimeToNaN();
       setPositionToNaN();
       setLinearVelocityToNaN();
@@ -113,7 +110,7 @@ public class YoFrameEuclideanTrajectoryPoint
    @Override
    public void setToNaN(ReferenceFrame referenceFrame)
    {
-      super.setToNaN(referenceFrame);
+      switchCurrentReferenceFrame(referenceFrame);
       setToNaN();
    }
 
@@ -160,7 +157,7 @@ public class YoFrameEuclideanTrajectoryPoint
    /**
     * Return the original position held by this trajectory point.
     */
-   public YoFramePoint getPosition()
+   public YoFramePoint3D getPosition()
    {
       return position;
    }
@@ -168,7 +165,7 @@ public class YoFrameEuclideanTrajectoryPoint
    /**
     * Return the original linearVelocity held by this trajectory point.
     */
-   public YoFrameVector getLinearVelocity()
+   public YoFrameVector3D getLinearVelocity()
    {
       return linearVelocity;
    }

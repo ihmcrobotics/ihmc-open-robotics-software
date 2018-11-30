@@ -1,0 +1,39 @@
+#ifndef __controller_msgs__msg__HeadHybridJointspaceTaskspaceTrajectoryMessage__idl__
+#define __controller_msgs__msg__HeadHybridJointspaceTaskspaceTrajectoryMessage__idl__
+
+#include "controller_msgs/msg/./JointspaceTrajectoryMessage_.idl"
+#include "controller_msgs/msg/./SO3TrajectoryMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message commands the controller to move the head in both taskspace and jointspace
+       * to the desired orientation and joint angles while going through the specified trajectory points.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::HeadHybridJointspaceTaskspaceTrajectoryMessage_")
+      struct HeadHybridJointspaceTaskspaceTrajectoryMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * The taskspace trajectory information.
+         */
+        controller_msgs::msg::dds::SO3TrajectoryMessage taskspace_trajectory_message;
+        /**
+         * The jointspace trajectory information.
+         * The indexing for the joints goes increasingly from the joint the closest to the chest to the joint the closest to the head.
+         */
+        controller_msgs::msg::dds::JointspaceTrajectoryMessage jointspace_trajectory_message;
+      };
+    };
+  };
+};
+
+#endif

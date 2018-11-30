@@ -12,8 +12,7 @@ import org.junit.runners.Suite;
    AtlasObstacleCoursePlatformTest.class,
    AtlasObstacleCourseRocksTest.class,
    AtlasObstacleCourseTrialsWalkingTaskTest.class,
-   AtlasObstacleCourseTrialsTerrainTest.class,
-   AtlasWallWorldTest.class
+   AtlasObstacleCourseTrialsTerrainTest.class
 })
 
 public class AtlasObstacleCourseBambooTestSuiteNightly

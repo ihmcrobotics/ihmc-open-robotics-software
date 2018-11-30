@@ -1,9 +1,10 @@
 package us.ihmc.trajectoryOptimization;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
 
-public class VariableVectorBuilder extends GenericTypeBuilder<DenseMatrix64F>
+import java.util.function.Supplier;
+
+public class VariableVectorBuilder implements Supplier<DenseMatrix64F>
 {
    private final int rows;
    private final int cols;
@@ -15,7 +16,7 @@ public class VariableVectorBuilder extends GenericTypeBuilder<DenseMatrix64F>
    }
 
    @Override
-   public DenseMatrix64F newInstance()
+   public DenseMatrix64F get()
    {
       return new DenseMatrix64F(rows, cols);
    }

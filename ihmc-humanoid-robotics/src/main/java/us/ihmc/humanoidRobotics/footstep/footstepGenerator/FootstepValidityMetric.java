@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 
 /**
  * Created by agrabertilton on 2/20/15.

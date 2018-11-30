@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
 
 import us.ihmc.euclid.tuple2D.Vector2D;
 
@@ -62,7 +62,7 @@ public class DefaultSwingTargetGeneratorParameters implements QuadrupedPositionB
    }
 
    @Override
-   public double getInitalCoMHeight()
+   public double getInitialCoMHeight()
    {
       return 0;
    }

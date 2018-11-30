@@ -53,6 +53,127 @@
                         <parameter name="HighLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                         <parameter name="HighLinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                     </registry>
+                    <registry name="JointspaceGains">
+                        <parameter name="kpSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
+                        <parameter name="zetaSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                        <parameter name="maximumFeedbackSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackRateSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="positionDeadbandSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="kiSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="maxIntegralErrorSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="integralLeakRatioSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="kpNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
+                        <parameter name="zetaNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                        <parameter name="maximumFeedbackNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="36.0"/>
+                        <parameter name="maximumFeedbackRateNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="540.0"/>
+                        <parameter name="positionDeadbandNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="kiNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="maxIntegralErrorNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="integralLeakRatioNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="kpArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="80.0"/>
+                        <parameter name="zetaArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.6"/>
+                        <parameter name="maximumFeedbackArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackRateArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="positionDeadbandArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="kiArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="maxIntegralErrorArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="integralLeakRatioArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    </registry>
+                    <registry name="RigidBodyGains">
+                        <parameter name="kpXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
+                        <parameter name="kpZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
+                        <parameter name="zetaXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                        <parameter name="zetaZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                        <parameter name="maxDerivativeErrorChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maxProportionalErrorChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.17453292519943295"/>
+                        <parameter name="maximumFeedbackChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="36.0"/>
+                        <parameter name="maximumFeedbackRateChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="540.0"/>
+                        <parameter name="kpXYZHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
+                        <parameter name="zetaXYZHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                        <parameter name="maxDerivativeErrorHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maxProportionalErrorHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="36.0"/>
+                        <parameter name="maximumFeedbackRateHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="540.0"/>
+                        <parameter name="kpXYZHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="zetaXYZHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="maxDerivativeErrorHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maxProportionalErrorHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackRateHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="kpXYPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
+                        <parameter name="kpZPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
+                        <parameter name="zetaXYPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                        <parameter name="zetaZPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                        <parameter name="maxDerivativeErrorPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maxProportionalErrorPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="36.0"/>
+                        <parameter name="maximumFeedbackRatePelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="540.0"/>
+                        <parameter name="kpXYZHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="zetaXYZHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="maxDerivativeErrorHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maxProportionalErrorHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackRateHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                    </registry>
+                    <registry name="FootGains">
+                        <parameter name="kpXYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="150.0"/>
+                        <parameter name="kpZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                        <parameter name="zetaXYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7"/>
+                        <parameter name="zetaZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7"/>
+                        <parameter name="maxDerivativeErrorSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maxProportionalErrorSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackRateSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="kpXYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                        <parameter name="kpZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                        <parameter name="zetaXYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.7"/>
+                        <parameter name="zetaZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.7"/>
+                        <parameter name="maxDerivativeErrorSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maxProportionalErrorSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackRateSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="kpXYHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="kpZHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="zetaXYHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="zetaZHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="maxDerivativeErrorHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maxProportionalErrorHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackRateHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="kpXYHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="175.0"/>
+                        <parameter name="kpZHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                        <parameter name="zetaXYHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="zetaZHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="maxDerivativeErrorHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maxProportionalErrorHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackRateHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="kpXYToeOffFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="kpZToeOffFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="zetaXYToeOffFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.4"/>
+                        <parameter name="zetaZToeOffFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.4"/>
+                        <parameter name="maxDerivativeErrorToeOffFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maxProportionalErrorToeOffFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackToeOffFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackRateToeOffFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="kpXYToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                        <parameter name="kpZToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                        <parameter name="zetaXYToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.4"/>
+                        <parameter name="zetaZToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.4"/>
+                        <parameter name="maxDerivativeErrorToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maxProportionalErrorToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                        <parameter name="maximumFeedbackRateToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                    </registry>
+                    <registry name="HighLevelControlManagerFactory">
+                        <registry name="CenterOfMassHeightManager">
+                            <registry name="PelvisHeightControlState">
+<parameter name="PelvisHeightControlStateDefaultHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+<parameter name="PelvisHeightControlStateOffsetTrajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+<parameter name="PelvisHeightControlStateMaxDistanceAnklePelvis" type="DoubleParameter" min="0.0" max="1.0" value="0.9"/>
+                            </registry>
+                        </registry>
+                    </registry>
                 </registry>
             </registry>
         </registry>

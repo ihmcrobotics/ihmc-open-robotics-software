@@ -5,10 +5,13 @@ import static org.junit.Assert.*;
 import java.util.Random;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -20,7 +23,14 @@ public class RateLimitedYoFrameOrientationTest
 {
    private static final double EPSILON = 1.0e-11;
 
-   @Test(timeout = 10000)
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 3.1)
+   @Test(timeout = 30000)
    public void testConvergenceWithConstantInput() throws Exception
    {
       Random random = new Random(46363);

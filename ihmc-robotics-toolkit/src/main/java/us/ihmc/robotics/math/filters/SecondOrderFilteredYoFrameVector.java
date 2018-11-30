@@ -4,10 +4,10 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 
-public class SecondOrderFilteredYoFrameVector extends YoFrameVector implements ProcessingYoVariable
+public class SecondOrderFilteredYoFrameVector extends YoFrameVector3D implements ProcessingYoVariable
 {
    private final SecondOrderFilteredYoVariable x, y, z;
 
@@ -40,7 +40,7 @@ public class SecondOrderFilteredYoFrameVector extends YoFrameVector implements P
    }
 
    public static SecondOrderFilteredYoFrameVector createSecondOrderFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-         double dt, double naturalFrequencyInHz, double dampingRatio, SecondOrderFilterType filterType, YoFrameVector unfilteredVector)
+         double dt, double naturalFrequencyInHz, double dampingRatio, SecondOrderFilterType filterType, YoFrameVector3D unfilteredVector)
    {
       SecondOrderFilteredYoVariableParameters parameters = new SecondOrderFilteredYoVariableParameters(namePrefix + nameSuffix, registry, naturalFrequencyInHz,
             dampingRatio, filterType);
@@ -48,7 +48,7 @@ public class SecondOrderFilteredYoFrameVector extends YoFrameVector implements P
    }
 
    public static SecondOrderFilteredYoFrameVector createSecondOrderFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-         double dt, SecondOrderFilteredYoVariableParameters parameters, YoFrameVector unfilteredVector)
+         double dt, SecondOrderFilteredYoVariableParameters parameters, YoFrameVector3D unfilteredVector)
    {
       SecondOrderFilteredYoVariable x, y, z;
       x = new SecondOrderFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, dt, parameters, unfilteredVector.getYoX());

@@ -4,16 +4,16 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeSlippingDetectorPar
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class ToeSlippingDetector
 {
@@ -25,7 +25,7 @@ public class ToeSlippingDetector
    private final AlphaFilteredYoVariable toeForceFiltered;
    private final AlphaFilteredYoFrameVector toeLinearVelocityFiltered;
 
-   private final YoFramePoint initialToePosition;
+   private final YoFramePoint3D initialToePosition;
    private final YoDouble toeSlippageDistance;
 
    private final YoDouble forceMagnitudeThreshold;
@@ -35,10 +35,10 @@ public class ToeSlippingDetector
    private final YoBoolean isToeSlipping;
 
    private final double dt;
-   private final RigidBody foot;
+   private final RigidBodyBasics foot;
    private final FootSwitchInterface footSwitch;
 
-   public ToeSlippingDetector(String namePrefix, double controlDT, RigidBody foot, FootSwitchInterface footSwitch,
+   public ToeSlippingDetector(String namePrefix, double controlDT, RigidBodyBasics foot, FootSwitchInterface footSwitch,
                               YoVariableRegistry parentRegistry)
    {
       dt = controlDT;
@@ -51,7 +51,7 @@ public class ToeSlippingDetector
       toeLinearVelocityFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "ToeLinearVelocityFiltered", "", registry, alpha,
                                                                                               worldFrame);
 
-      initialToePosition = new YoFramePoint(namePrefix + "ToeInitial", worldFrame, registry);
+      initialToePosition = new YoFramePoint3D(namePrefix + "ToeInitial", worldFrame, registry);
       toeSlippageDistance = new YoDouble(namePrefix + "ToeSlippageDistance", registry);
 
       forceMagnitudeThreshold = new YoDouble(namePrefix + "ForceMagnitudeThreshold", registry);
@@ -87,7 +87,7 @@ public class ToeSlippingDetector
    {
       this.toeContactPointPosition.setIncludingFrame(toeContactPointPosition);
       this.toeContactPointPosition.changeFrame(foot.getBodyFixedFrame());
-      initialToePosition.setAndMatchFrame(toeContactPointPosition);
+      initialToePosition.setMatchingFrame(toeContactPointPosition);
    }
 
    public void clear()
@@ -109,10 +109,10 @@ public class ToeSlippingDetector
    public void update()
    {
       footSwitch.computeAndPackFootWrench(footWrench);
-      toeForceFiltered.update(footWrench.getLinearPartMagnitude());
+      toeForceFiltered.update(footWrench.getLinearPart().length());
 
       foot.getBodyFixedFrame().getTwistOfFrame(footTwist);
-      footTwist.getLinearVelocityOfPointFixedInBodyFrame(toeLinearVelocity, toeContactPointPosition);
+      footTwist.getLinearVelocityAt(toeContactPointPosition, toeLinearVelocity);
       toeLinearVelocity.changeFrame(worldFrame);
       toeLinearVelocityFiltered.update(toeLinearVelocity);
 

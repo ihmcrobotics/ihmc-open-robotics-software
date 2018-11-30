@@ -16,23 +16,23 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class WalkToLocationBehavior extends AbstractBehavior
 {
@@ -53,15 +53,15 @@ public class WalkToLocationBehavior extends AbstractBehavior
    private final Point3D robotLocation = new Point3D();
    private final Quaternion robotOrientation = new Quaternion();
 
-   private final YoFramePose robotYoPose = new YoFramePose("robotYoPose", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll robotYoPose = new YoFramePoseUsingYawPitchRoll("robotYoPose", worldFrame, registry);
 
    private final YoBoolean hasTargetBeenProvided = new YoBoolean("hasTargetBeenProvided", registry);
    private final YoBoolean hasInputBeenSet = new YoBoolean("hasInputBeenSet", registry);
    private final YoBoolean haveFootstepsBeenGenerated = new YoBoolean("haveFootstepsBeenGenerated", registry);
 
-   private final YoFramePoint targetLocation = new YoFramePoint(getName() + "TargetLocation", worldFrame, registry);
-   private final YoFrameOrientation targetOrientation = new YoFrameOrientation(getName() + "TargetOrientation", worldFrame, registry);
-   private final YoFrameVector walkPathVector = new YoFrameVector(getName(), worldFrame, registry);
+   private final YoFramePoint3D targetLocation = new YoFramePoint3D(getName() + "TargetLocation", worldFrame, registry);
+   private final YoFrameYawPitchRoll targetOrientation = new YoFrameYawPitchRoll(getName() + "TargetOrientation", worldFrame, registry);
+   private final YoFrameVector3D walkPathVector = new YoFrameVector3D(getName(), worldFrame, registry);
    private final YoDouble walkDistance = new YoDouble(getName() + "WalkDistance", registry);
 
    private SimplePathParameters pathType;// = new SimplePathParameters(0.4, 0.30, 0.0, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
@@ -69,15 +69,15 @@ public class WalkToLocationBehavior extends AbstractBehavior
    private ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
    private FootstepListBehavior footstepListBehavior;
 
-   private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
+   private final SideDependentList<RigidBodyBasics> feet = new SideDependentList<RigidBodyBasics>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
 
    private double minDistanceThresholdForWalking, minYawThresholdForWalking;
 
-   public WalkToLocationBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
-         HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
+   public WalkToLocationBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
+                                 HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
    {
-      super(outgoingCommunicationBridge);
+      super(robotName, ros2Node);
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
@@ -88,7 +88,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
       this.pathType = new SimplePathParameters(walkingControllerParameters.getSteppingParameters().getMaxStepLength() / 2,
                                                walkingControllerParameters.getSteppingParameters().getInPlaceWidth(), 0.0, Math.toRadians(20.0),
                                                Math.toRadians(10.0), 0.4); // 10 5 0.4
-      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
+      footstepListBehavior = new FootstepListBehavior(robotName, ros2Node, walkingControllerParameters);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -239,7 +239,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
          {
             pathType.setAngle(-pathType.getAngle());
             TurnStraightTurnFootstepGenerator footstepGeneratorFlippedInitialTurnDirection = new TurnStraightTurnFootstepGenerator(feet, soleFrames, endPose,
-                  pathType); //FIXME: should be able to re-use other footStepGenerator, but doesn't work so far..
+                                                                                                                                   pathType); //FIXME: should be able to re-use other footStepGenerator, but doesn't work so far..
             footstepGeneratorFlippedInitialTurnDirection.initialize();
             List<Footstep> footstepsFlippedOrientation = footstepGeneratorFlippedInitialTurnDirection.generateDesiredFootstepList();
             pathType.setAngle(-pathType.getAngle());

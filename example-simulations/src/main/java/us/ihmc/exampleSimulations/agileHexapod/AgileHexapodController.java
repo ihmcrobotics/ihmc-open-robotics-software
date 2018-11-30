@@ -1,9 +1,9 @@
 package us.ihmc.exampleSimulations.agileHexapod;
 
 import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.robotController.RobotController;
 
 public class AgileHexapodController extends AgileHexapodControllerBase implements RobotController
 {

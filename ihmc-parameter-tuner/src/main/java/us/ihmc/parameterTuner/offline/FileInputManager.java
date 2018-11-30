@@ -2,45 +2,34 @@ package us.ihmc.parameterTuner.offline;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.layout.HBox;
-import javafx.scene.text.Text;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import us.ihmc.parameterTuner.ParameterSavingTools;
 import us.ihmc.parameterTuner.ParameterTuningTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
+import us.ihmc.parameterTuner.guiElements.main.ParameterSavingNode;
 import us.ihmc.yoVariables.parameters.xml.Registry;
 
-public class FileInputManager extends HBox implements ParameterGuiInterface
+public class FileInputManager extends VBox implements ParameterGuiInterface
 {
-   private static final String FXML_PATH = "file_input_manager.fxml";
-
-   @FXML
-   private Button saveAs;
-   @FXML
-   private Button save;
-   @FXML
-   private Button open;
-   @FXML
-   private Text fileName;
+   private final Button open = new Button("Open");
+   private final ParameterSavingNode savingNode = new ParameterSavingNode(true, true);
 
    private boolean reloadAll;
-   private File originalFile;
-
-   private GuiRegistry localRegistry;
+   private List<GuiRegistry> localRegistries;
    private HashMap<String, GuiParameter> parameterMap = new HashMap<>();
+
+   private final List<GuiParameter> changedParameters = new ArrayList<>();
 
    public FileInputManager()
    {
@@ -49,18 +38,22 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
 
    public FileInputManager(File defaultFile)
    {
-      FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
-      loader.setRoot(this);
-      loader.setController(this);
-      try
-      {
-         loader.load();
-         openFile(defaultFile);
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
+      setupNode();
+      openFileSafe(defaultFile);
+      savingNode.addSavedListener(file -> openFileSafe(file));
+   }
+
+   private void setupNode()
+   {
+      setMaxHeight(Double.NEGATIVE_INFINITY);
+      setMaxWidth(Double.NEGATIVE_INFINITY);
+      setSpacing(10.0);
+      setAlignment(Pos.CENTER_LEFT);
+
+      getChildren().add(open);
+      getChildren().add(savingNode);
+
+      open.setOnAction(event -> handleOpen(event));
    }
 
    @Override
@@ -78,9 +71,11 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
    }
 
    @Override
-   public GuiRegistry getFullRegistryCopy()
+   public List<GuiRegistry> getRegistriesCopy()
    {
-      return localRegistry.createFullCopy();
+      List<GuiRegistry> registriesCopy = new ArrayList<>();
+      localRegistries.stream().forEach(registry -> registriesCopy.add(registry.createFullCopy()));
+      return registriesCopy;
    }
 
    @Override
@@ -89,12 +84,18 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
       changedParameters.stream().forEach(parameter -> {
          parameterMap.get(parameter.getUniqueName()).set(parameter);
       });
+
+      this.changedParameters.clear();
+      this.changedParameters.addAll(changedParameters);
    }
 
    @Override
    public List<GuiParameter> pollUpdatedParameters()
    {
-      return null;
+      List<GuiParameter> changedParameters = new ArrayList<>();
+      changedParameters.addAll(this.changedParameters);
+      this.changedParameters.clear();
+      return changedParameters;
    }
 
    @Override
@@ -102,87 +103,55 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
    {
    }
 
-   @FXML
-   protected void handleOpen(ActionEvent event) throws IOException
+   private void handleOpen(ActionEvent event)
    {
       FileChooser fileChooser = new FileChooser();
-      FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
-      fileChooser.getExtensionFilters().add(extFilter);
+      fileChooser.getExtensionFilters().add(ParameterSavingTools.getExtensionFilter());
       fileChooser.setTitle("Select Parameter File");
-      if (originalFile != null)
+
+      // If a file is open initialize the folder path to the directory of the active file:
+      File initialPath = savingNode.getDefaultFilePath();
+      if (initialPath != null)
       {
-         fileChooser.setInitialDirectory(originalFile.getParentFile());
+         fileChooser.setInitialDirectory(initialPath);
       }
       File file = fileChooser.showOpenDialog(open.getScene().getWindow());
 
-      openFile(file);
+      openFileSafe(file);
+   }
+
+   private void openFileSafe(File file)
+   {
+      try
+      {
+         openFile(file);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
    }
 
    private void openFile(File file) throws IOException
    {
       if (file != null)
       {
-         fileName.setText(file.getName());
-         originalFile = file;
-         List<Registry> xmlRegistries = ParameterTuningTools.getParameters(originalFile);
-         localRegistry = ParameterTuningTools.buildGuiRegistryFromXML(xmlRegistries);
+         List<Registry> xmlRegistries = ParameterTuningTools.getParameters(file);
+         localRegistries = ParameterTuningTools.buildGuiRegistryFromXML(xmlRegistries);
          parameterMap.clear();
-         localRegistry.getAllParameters().stream().forEach(parameter -> parameterMap.put(parameter.getUniqueName(), parameter));
+         List<GuiParameter> allParameters = new ArrayList<>();
+         localRegistries.stream().forEach(registry -> allParameters.addAll(registry.getAllParameters()));
+         allParameters.stream().forEach(parameter -> parameterMap.put(parameter.getUniqueName(), parameter));
          reloadAll = true;
+
+         savingNode.setActiveFile(file);
+         savingNode.setRegistries(localRegistries);
       }
    }
 
-   @FXML
-   protected void handleSave(ActionEvent event) throws IOException
+   @Override
+   public void changeRootRegistries(List<String> rootRegistryNames)
    {
-      if (originalFile == null)
-      {
-         handleSaveAs(event);
-         return;
-      }
-      if (localRegistry == null)
-      {
-         return;
-      }
-
-      Alert alert = new Alert(AlertType.CONFIRMATION);
-      alert.setTitle("Confirmation Dialog");
-      alert.setHeaderText("Confirm Save");
-      alert.setContentText("This will overwrite the original XML parameter file.");
-      Optional<ButtonType> result = alert.showAndWait();
-
-      if (result.get() == ButtonType.OK)
-      {
-         List<Registry> xmlRegistries = ParameterTuningTools.buildXMLRegistryFromGui(localRegistry);
-         ParameterTuningTools.save(xmlRegistries, originalFile);
-      }
+      savingNode.setRootRegistries(rootRegistryNames);
    }
-
-   @FXML
-   protected void handleSaveAs(ActionEvent event) throws IOException
-   {
-      if (localRegistry == null)
-      {
-         return;
-      }
-
-      FileChooser fileChooser = new FileChooser();
-      FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
-      fileChooser.getExtensionFilters().add(extFilter);
-      fileChooser.setTitle("Select Parameter File");
-      if (originalFile != null)
-      {
-         fileChooser.setInitialDirectory(originalFile.getParentFile());
-      }
-      File file = fileChooser.showSaveDialog(saveAs.getScene().getWindow());
-
-      if (file != null)
-      {
-         List<Registry> xmlRegistries = ParameterTuningTools.buildXMLRegistryFromGui(localRegistry);
-         ParameterTuningTools.save(xmlRegistries, file);
-         originalFile = file;
-         fileName.setText(file.getName());
-      }
-   }
-
 }

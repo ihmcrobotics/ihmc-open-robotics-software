@@ -5,7 +5,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
   <long>120107865808</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -32,7 +32,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>143789245117</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -59,7 +59,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>151027273531</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -86,7 +86,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>170975096884</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -113,7 +113,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>182665332322</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -140,7 +140,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>193456886219</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -167,7 +167,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>214472163124</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -194,7 +194,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>230450837093</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -221,7 +221,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>276650090638</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -248,7 +248,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>293462178470</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -275,7 +275,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>315276756688</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -302,7 +302,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>323549985820</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -329,7 +329,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>336492635424</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -356,7 +356,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>381640461858</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -383,7 +383,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>391748114876</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -410,7 +410,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>402422415592</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -437,7 +437,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>407309275877</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
@@ -464,7 +464,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
   <long>423704538642</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>

@@ -10,9 +10,10 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -21,8 +22,8 @@ public class PolygonSnapperVisualizer
    private final SimulationConstructionSet scs;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoFrameConvexPolygon2d polygonToSnap, snappedPolygon;
-   private final YoFramePose polygonToSnapPose, snappedPolygonPose;
+   private final YoFrameConvexPolygon2D polygonToSnap, snappedPolygon;
+   private final YoFramePoseUsingYawPitchRoll polygonToSnapPose, snappedPolygonPose;
    private final YoGraphicPolygon polygonToSnapViz, snappedPolygonViz;
 
    public PolygonSnapperVisualizer(ConvexPolygon2D snappingPolygonShape)
@@ -31,14 +32,14 @@ public class PolygonSnapperVisualizer
       scs = new SimulationConstructionSet(robot);
       scs.setDT(0.1, 1);
 
-      polygonToSnap = new YoFrameConvexPolygon2d("polygonToSnap", ReferenceFrame.getWorldFrame(), 4, registry);
-      snappedPolygon = new YoFrameConvexPolygon2d("snappedPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
+      polygonToSnap = new YoFrameConvexPolygon2D("polygonToSnap", ReferenceFrame.getWorldFrame(), 4, registry);
+      snappedPolygon = new YoFrameConvexPolygon2D("snappedPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
 
-      polygonToSnap.setConvexPolygon2d(snappingPolygonShape);
-      snappedPolygon.setConvexPolygon2d(snappingPolygonShape);
+      polygonToSnap.set(snappingPolygonShape);
+      snappedPolygon.set(snappingPolygonShape);
 
-      polygonToSnapPose = new YoFramePose("polygonToSnapPose", ReferenceFrame.getWorldFrame(), registry);
-      snappedPolygonPose = new YoFramePose("snappedPolygonPose", ReferenceFrame.getWorldFrame(), registry);
+      polygonToSnapPose = new YoFramePoseUsingYawPitchRoll("polygonToSnapPose", ReferenceFrame.getWorldFrame(), registry);
+      snappedPolygonPose = new YoFramePoseUsingYawPitchRoll("snappedPolygonPose", ReferenceFrame.getWorldFrame(), registry);
 
       polygonToSnapPose.setToNaN();
       snappedPolygonPose.setToNaN();
@@ -60,7 +61,7 @@ public class PolygonSnapperVisualizer
    public void addPlanarRegionsList(PlanarRegionsList planarRegions, AppearanceDefinition... appearances)
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
-      graphics3DObject.addPlanarRegionsList(planarRegions, appearances);
+      Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, planarRegions, appearances);
       scs.addStaticLinkGraphics(graphics3DObject);
 
       scs.setTime(scs.getTime() + 1.0);
@@ -122,7 +123,7 @@ public class PolygonSnapperVisualizer
       }
       else
       {
-         snappedPolygonViz.updateConvexPolygon2d(snappedPolygon.getConvexPolygon2d());
+         snappedPolygonViz.updateConvexPolygon2d(snappedPolygon);
       }
 
       scs.setTime(scs.getTime() + 1.0);

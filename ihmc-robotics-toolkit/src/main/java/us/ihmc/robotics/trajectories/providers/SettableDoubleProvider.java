@@ -1,5 +1,6 @@
 package us.ihmc.robotics.trajectories.providers;
 
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class SettableDoubleProvider implements DoubleProvider
 {

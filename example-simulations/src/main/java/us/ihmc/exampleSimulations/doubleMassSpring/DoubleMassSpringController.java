@@ -1,9 +1,9 @@
 package us.ihmc.exampleSimulations.doubleMassSpring;
 
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.robotController.RobotController;
 
 public class DoubleMassSpringController implements RobotController
 {

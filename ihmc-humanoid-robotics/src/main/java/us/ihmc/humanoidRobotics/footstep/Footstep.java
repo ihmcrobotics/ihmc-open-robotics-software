@@ -2,6 +2,8 @@ package us.ihmc.humanoidRobotics.footstep;
 
 import java.util.List;
 
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -14,8 +16,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -23,7 +23,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class Footstep implements Settable<Footstep>
 {
-   public static final int maxNumberOfSwingWaypoints = 100;
+   public static final int maxNumberOfSwingWaypoints = 10;
 
    // --- TODO: GW nuke this:
    public static enum FootstepType
@@ -92,8 +92,13 @@ public class Footstep implements Settable<Footstep>
       this(robotSide, footstepPose, trustHeight, isAdjustable, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
 
-   public Footstep(RobotSide robotSide, FramePose3D footstepPose, boolean trustHeight, boolean isAdjustable, List<Point2D> predictedContactPoints, TrajectoryType trajectoryType,
-                   double swingHeight)
+   public Footstep(RobotSide robotSide, FramePose3D footstepPose, boolean trustHeight, boolean isAdjustable, TrajectoryType trajectoryType, double swingHeight)
+   {
+      this(robotSide, footstepPose, trustHeight, isAdjustable, null, trajectoryType, swingHeight);
+   }
+
+   public Footstep(RobotSide robotSide, FramePose3D footstepPose, boolean trustHeight, boolean isAdjustable, List<Point2D> predictedContactPoints,
+                   TrajectoryType trajectoryType, double swingHeight)
    {
       this.robotSide = robotSide;
       this.trustHeight = trustHeight;
@@ -265,6 +270,22 @@ public class Footstep implements Settable<Footstep>
       this.isAdjustable = isAdjustable;
    }
 
+   public void setPredictedContactPoints(Point2DReadOnly[] contactPointArray)
+   {
+      predictedContactPoints.clear();
+
+      if (contactPointArray == null)
+      {
+         return;
+      }
+
+      for (int i = 0; i < contactPointArray.length; i++)
+      {
+         Point2DReadOnly point = contactPointArray[i];
+         this.predictedContactPoints.add().set(point);
+      }
+   }
+
    public void setPredictedContactPoints(List<? extends Point2DReadOnly> contactPointList)
    {
       predictedContactPoints.clear();
@@ -425,7 +446,7 @@ public class Footstep implements Settable<Footstep>
       boolean arePosesEqual = footstepPose.epsilonEquals(otherFootstep.footstepPose, epsilon);
       boolean sameRobotSide = robotSide == otherFootstep.robotSide;
       boolean isTrustHeightTheSame = trustHeight == otherFootstep.trustHeight;
-      boolean isAdjustableTheSame = isAdjustable = otherFootstep.isAdjustable;
+      boolean isAdjustableTheSame = isAdjustable == otherFootstep.isAdjustable;
 
       boolean sameWaypoints = customPositionWaypoints.size() == otherFootstep.customPositionWaypoints.size();
       if (sameWaypoints)
@@ -500,7 +521,7 @@ public class Footstep implements Settable<Footstep>
       orientationToPack.setIncludingFrame(footstepPose.getReferenceFrame(), tempTransform.getRotationMatrix());
    }
 
-   public void setFromAnklePose(FramePose3D anklePose, RigidBodyTransform transformFromAnkleToSole)
+   public void setFromAnklePose(FramePose3DReadOnly anklePose, RigidBodyTransform transformFromAnkleToSole)
    {
       tempTransform.setRotation(anklePose.getOrientation());
       tempTransform.setTranslation(anklePose.getPosition());
@@ -508,7 +529,7 @@ public class Footstep implements Settable<Footstep>
       footstepPose.setIncludingFrame(anklePose.getReferenceFrame(), tempTransform);
    }
 
-   public void addOffset(FrameVector3D offset)
+   public void addOffset(FrameVector3DReadOnly offset)
    {
       footstepPose.prependTranslation(offset);
 

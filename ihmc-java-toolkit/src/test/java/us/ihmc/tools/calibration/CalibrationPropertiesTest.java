@@ -72,7 +72,7 @@ public class CalibrationPropertiesTest
       assertEquals(0.0, calibrationProperties.getDoubleProperty("notAKey"), EPSILON);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSaveAndLoad()
    {

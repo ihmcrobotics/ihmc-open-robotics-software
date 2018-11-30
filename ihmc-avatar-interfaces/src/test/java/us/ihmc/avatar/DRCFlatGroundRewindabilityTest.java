@@ -7,18 +7,21 @@ import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Before;
 
+import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -48,6 +51,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 9.2)
+   @Test(timeout = 520000)
    public void testCanRewindAndGoForward() throws UnreasonableAccelerationException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -67,6 +72,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 43.4)
+   @Test(timeout = 520000)
    public void testRunsTheSameWayTwice() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -76,8 +83,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       SimulationRewindabilityVerifier checker = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
       BlockingSimulationRunner blockingSimulationRunner1 = new BlockingSimulationRunner(scs1, 1000.0);
       BlockingSimulationRunner blockingSimulationRunner2 = new BlockingSimulationRunner(scs2, 1000.0);
-      YoBoolean walk1 = (YoBoolean) scs1.getVariable("walk");
-      YoBoolean walk2 = (YoBoolean) scs2.getVariable("walk");
+      YoBoolean walk1 = (YoBoolean) scs1.getVariable("walkCSG");
+      YoBoolean walk2 = (YoBoolean) scs2.getVariable("walkCSG");
       double standingTimeDuration = 1.0;
       double walkingTimeDuration = 4.0;
       initiateWalkingMotion(standingTimeDuration, walkingTimeDuration, blockingSimulationRunner1, walk1);
@@ -96,6 +103,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
+   @Test(timeout = 520000)
    public void testRewindabilityWithSimpleFastMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -119,8 +128,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
 
       // checker.checkRewindabilityUsingIndividualVariableChangesAndTrackingStackTraces(numTicksToStartComparingAt, numberTicksBeforeWalking, maxDifferenceAllowed, variableDifferences);
       checkForVariableDifferences(variableDifferences);
-      YoBoolean walk1 = (YoBoolean) scs1.getVariable("walk");
-      YoBoolean walk2 = (YoBoolean) scs2.getVariable("walk");
+      YoBoolean walk1 = (YoBoolean) scs1.getVariable("walkCSG");
+      YoBoolean walk2 = (YoBoolean) scs2.getVariable("walkCSG");
       walk1.set(true);
       walk2.set(true);
       numTicksToSimulateAhead = 1;
@@ -143,6 +152,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
+   @Test(timeout = 520000)
    public void testRewindabilityWithSlowerMoreExtensiveMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -165,8 +176,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       checker.checkRewindabilityUsingIndividualVariableChangesAndTrackingStackTraces(numTicksToStartComparingAt, numberTicksBeforeWalking,
               maxDifferenceAllowed, variableDifferences);
       checkForVariableDifferences(variableDifferences);
-      YoBoolean walk1 = (YoBoolean) scs1.getVariable("walk");
-      YoBoolean walk2 = (YoBoolean) scs2.getVariable("walk");
+      YoBoolean walk1 = (YoBoolean) scs1.getVariable("walkCSG");
+      YoBoolean walk2 = (YoBoolean) scs2.getVariable("walkCSG");
       walk1.set(true);
       walk2.set(true);
 

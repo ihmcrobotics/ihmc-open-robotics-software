@@ -17,13 +17,14 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.tools.MemoryTools;
 
 public class CenterOfPressureResolverTest
@@ -39,10 +40,11 @@ public class CenterOfPressureResolverTest
    @After
    public void showMemoryUsageAfterTest()
    {
+      ReferenceFrameTools.clearWorldFrameTree();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testCenterOfPressureResolverSimpleCaseWithNoTorque()
    {
@@ -102,7 +104,7 @@ public class CenterOfPressureResolverTest
             expectedCenterOfPressure, expectedNormalTorque);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testRandomExamples()
    {
@@ -126,7 +128,7 @@ public class CenterOfPressureResolverTest
          Vector3D centerOfMassTorque = new Vector3D(0.0, 0.0, 0.0);
 
          PoseReferenceFrame centerOfMassFrame = createTranslatedZUpFrame("centerOfMassFrame", centerOfMassPoint);
-         SpatialForceVector spatialForceVector = new SpatialForceVector(centerOfMassFrame, centerOfMassForce, centerOfMassTorque);
+         SpatialForce spatialForceVector = new SpatialForce(centerOfMassFrame, centerOfMassTorque, centerOfMassForce);
 
          ImmutablePair<FramePoint3D, Double> centerOfPressureAndNormalTorque = computeCenterOfPressureAndNormalTorque(groundPoint, groundNormal,
                centerOfMassFrame, spatialForceVector);
@@ -138,8 +140,8 @@ public class CenterOfPressureResolverTest
          PoseReferenceFrame centerOfPressurePlaneFrame = createPlaneFrame("groundPlaneFrame", copPoint3d, groundNormal);
          spatialForceVector.changeFrame(centerOfPressurePlaneFrame);
 
-         FrameVector3D forceResolvedInCenterOfPressureFrame = spatialForceVector.getLinearPartAsFrameVectorCopy();
-         FrameVector3D torqueResolvedInCenterOfPressureFrame = spatialForceVector.getAngularPartAsFrameVectorCopy();
+         FrameVector3D forceResolvedInCenterOfPressureFrame = new FrameVector3D(spatialForceVector.getLinearPart());
+         FrameVector3D torqueResolvedInCenterOfPressureFrame = new FrameVector3D(spatialForceVector.getAngularPart());
 
          forceResolvedInCenterOfPressureFrame.changeFrame(worldFrame);
 
@@ -157,7 +159,7 @@ public class CenterOfPressureResolverTest
          Vector3D centerOfMassForce, Vector3D centerOfMassTorque, Vector3D expectedCenterOfPressure, double expectedNormalTorque)
    {
       PoseReferenceFrame centerOfMassFrame = createTranslatedZUpFrame("centerOfMassFrame", centerOfMassPoint);
-      SpatialForceVector spatialForceVector = new SpatialForceVector(centerOfMassFrame, centerOfMassForce, centerOfMassTorque);
+      SpatialForce spatialForceVector = new SpatialForce(centerOfMassFrame, centerOfMassTorque, centerOfMassForce);
 
       ImmutablePair<FramePoint3D, Double> centerOfPressureAndNormalTorque = computeCenterOfPressureAndNormalTorque(groundPoint, groundNormal, centerOfMassFrame,
             spatialForceVector);
@@ -168,7 +170,7 @@ public class CenterOfPressureResolverTest
 
       if (Double.isNaN(expectedCenterOfPressureFramePoint.getX()) && Double.isNaN(expectedCenterOfPressureFramePoint.getY())
             && Double.isNaN(expectedCenterOfPressureFramePoint.getZ()))
-         assertTrue(Double.isNaN(centerOfPressure.getX()) && Double.isNaN(centerOfPressure.getY()) && Double.isNaN(centerOfPressure.getZ()));
+         assertTrue(Double.isNaN(centerOfPressure.getX()) && Double.isNaN(centerOfPressure.getY()));
       else
          assertTrue("expectedCenterOfPressureFramePoint = " + expectedCenterOfPressureFramePoint + ", centerOfPressure = " + centerOfPressure,
                expectedCenterOfPressureFramePoint.epsilonEquals(centerOfPressure, 1e-7));
@@ -177,7 +179,7 @@ public class CenterOfPressureResolverTest
    }
 
    private static ImmutablePair<FramePoint3D, Double> computeCenterOfPressureAndNormalTorque(Point3D groundPoint, Vector3D groundNormal,
-         ReferenceFrame centerOfMassFrame, SpatialForceVector spatialForceVector)
+         ReferenceFrame centerOfMassFrame, SpatialForce spatialForceVector)
    {
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 

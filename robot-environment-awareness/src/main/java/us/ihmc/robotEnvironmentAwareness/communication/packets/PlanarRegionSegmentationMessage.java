@@ -1,12 +1,10 @@
 package us.ihmc.robotEnvironmentAwareness.communication.packets;
 
 import java.util.Arrays;
-import java.util.List;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.jOctoMap.key.OcTreeKey;
 
@@ -22,22 +20,20 @@ public class PlanarRegionSegmentationMessage extends Packet<PlanarRegionSegmenta
    {
    }
 
-   public PlanarRegionSegmentationMessage(int id, Point3D origin, Vector3D normal, OcTreeKeyMessage[] regionNodeKeys, List<Point3D> hitLocations)
+   @Override
+   public void set(PlanarRegionSegmentationMessage other)
    {
-      this.id = id;
-      this.origin = new Point3D32(origin);
-      this.normal = new Vector3D32(normal);
-      this.nodeKeys = regionNodeKeys;
-      this.hitLocations = hitLocations.stream().map(Point3D32::new).toArray(Point3D32[]::new);
-   }
-
-   public PlanarRegionSegmentationMessage(int id, Point3D32 origin, Vector3D32 normal, OcTreeKeyMessage[] regionNodeKeys, Point3D32[] hitLocations)
-   {
-      this.id = id;
-      this.origin = origin;
-      this.normal = normal;
-      this.nodeKeys = regionNodeKeys;
-      this.hitLocations = hitLocations;
+      id = other.id;
+      origin = new Point3D32(other.origin);
+      normal = new Vector3D32(other.normal);
+      nodeKeys = new OcTreeKeyMessage[other.nodeKeys.length];
+      for (int i = 0; i < nodeKeys.length; i++)
+      {
+         nodeKeys[i] = new OcTreeKeyMessage();
+         nodeKeys[i].set(other.nodeKeys[i]);
+      }
+      hitLocations = Arrays.stream(other.hitLocations).map(Point3D32::new).toArray(Point3D32[]::new);
+      setPacketInformation(other);
    }
 
    public int getRegionId()
@@ -77,7 +73,7 @@ public class PlanarRegionSegmentationMessage extends Packet<PlanarRegionSegmenta
 
    public void getNodeKey(int index, OcTreeKey nodeKeyToPack)
    {
-      nodeKeyToPack.set(nodeKeys[index]);
+      nodeKeyToPack.set(nodeKeys[index].k);
    }
 
    public void getHitLocation(int index, Point3D hitLocationToPack)

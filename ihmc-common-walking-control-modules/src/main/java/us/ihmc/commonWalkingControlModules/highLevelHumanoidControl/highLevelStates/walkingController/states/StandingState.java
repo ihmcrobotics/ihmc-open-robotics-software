@@ -2,25 +2,26 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import java.util.Collection;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PrepareForLocomotionCommand;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StandingState extends WalkingState
 {
@@ -37,6 +38,7 @@ public class StandingState extends WalkingState
 
    private final YoBoolean doPrepareManipulationForLocomotion = new YoBoolean("doPrepareManipulationForLocomotion", registry);
    private final YoBoolean doPreparePelvisForLocomotion = new YoBoolean("doPreparePelvisForLocomotion", registry);
+   private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
 
    public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
@@ -51,14 +53,14 @@ public class StandingState extends WalkingState
 
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       
-      RigidBody chest = controllerToolbox.getFullRobotModel().getChest();
+      RigidBodyBasics chest = controllerToolbox.getFullRobotModel().getChest();
       if(chest != null)
       {
          ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
          
          for (RobotSide robotSide : RobotSide.values)
          {
-            RigidBody hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
+            RigidBodyBasics hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
             if(hand != null)
             {
                ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
@@ -75,26 +77,29 @@ public class StandingState extends WalkingState
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
       doPreparePelvisForLocomotion.set(walkingControllerParameters.doPreparePelvisForLocomotion());
+      finalTransferTime.set(walkingControllerParameters.getDefaultFinalTransferTime());
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       comHeightManager.setSupportLeg(RobotSide.LEFT);
       consumePrepareForLocomotion();
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       consumePrepareForLocomotion();
-      commandInputManager.flushAllCommands();
+      commandInputManager.clearAllCommands();
 
-      balanceManager.clearICPPlan();
+      // need to always update biped support polygons after a change to the contact states
+      controllerToolbox.updateBipedSupportPolygons();
+
       balanceManager.resetPushRecovery();
       balanceManager.enablePelvisXYControl();
-
-      controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
+      balanceManager.setICPPlanTransferFromSide(null);
+      balanceManager.initializeICPPlanForStanding();
 
       walkingMessageHandler.reportWalkingComplete();
 
@@ -112,7 +117,7 @@ public class StandingState extends WalkingState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       if (doPrepareManipulationForLocomotion.getBooleanValue())
       {
@@ -156,7 +161,7 @@ public class StandingState extends WalkingState
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
       return true;
    }

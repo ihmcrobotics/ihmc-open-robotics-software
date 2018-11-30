@@ -19,7 +19,7 @@ public class FitPlaneWeighted3DTest
    Random rand = new Random(1231L);
    double eps = 3e-7;
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAgainstUnweighted() {
       for (int i = 0; i<100; i++) {

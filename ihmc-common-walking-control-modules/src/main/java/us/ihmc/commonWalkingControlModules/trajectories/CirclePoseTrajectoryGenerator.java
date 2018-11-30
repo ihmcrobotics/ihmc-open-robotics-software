@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static us.ihmc.robotics.geometry.AngleTools.*;
+import static us.ihmc.robotics.geometry.AngleTools.computeAngleDifferenceMinusPiToPi;
+import static us.ihmc.robotics.geometry.AngleTools.trimAngleMinusPiToPi;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -18,20 +20,19 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
 * @author twan
@@ -77,24 +78,24 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final FrameVector3D currentAngularVelocity = new FrameVector3D();
    private final FrameVector3D currentAngularAcceleration = new FrameVector3D();
 
-   private final YoFramePoint yoInitialPosition;
-   private final YoFramePoint yoFinalPosition;
+   private final YoFramePoint3D yoInitialPosition;
+   private final YoFramePoint3D yoFinalPosition;
 
-   private final YoFramePoint yoCurrentPosition;
-   private final YoFrameVector yoCurrentVelocity;
-   private final YoFrameVector yoCurrentAcceleration;
+   private final YoFramePoint3D yoCurrentPosition;
+   private final YoFrameVector3D yoCurrentVelocity;
+   private final YoFrameVector3D yoCurrentAcceleration;
 
    private final YoFrameQuaternion yoInitialOrientation;
    private final YoFrameQuaternion yoFinalOrientation;
 
    private final YoFrameQuaternion yoCurrentOrientation;
-   private final YoFrameVector yoCurrentAngularVelocity;
-   private final YoFrameVector yoCurrentAngularAcceleration;
+   private final YoFrameVector3D yoCurrentAngularVelocity;
+   private final YoFrameVector3D yoCurrentAngularAcceleration;
 
-   private final YoFramePoint yoInitialPositionWorld;
-   private final YoFramePoint yoFinalPositionWorld;
-   private final YoFramePoint yoCurrentPositionWorld;
-   private final YoFramePoint yoCurrentAdjustedPositionWorld;
+   private final YoFramePoint3D yoInitialPositionWorld;
+   private final YoFramePoint3D yoFinalPositionWorld;
+   private final YoFramePoint3D yoCurrentPositionWorld;
+   private final YoFramePoint3D yoCurrentAdjustedPositionWorld;
 
    private boolean rotateHandAngleAboutAxis = false;
 
@@ -103,14 +104,14 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final FramePoint3D ballPosition = new FramePoint3D();
    private final int numberOfBalls = 50;
 
-   private final YoFramePoint circleOrigin;
-   private final YoFrameVector rotationAxis;
+   private final YoFramePoint3D circleOrigin;
+   private final YoFrameVector3D rotationAxis;
    private final ReferenceFrame circleFrame;
    private final ReferenceFrame trajectoryFrame;
    private ReferenceFrame controlledFrame;
    private final PoseReferenceFrame tangentialCircleFrame;
    private final FramePose3D tangentialCircleFramePose = new FramePose3D();
-   private final YoFramePose yoTangentialCircleFramePose;
+   private final YoFramePoseUsingYawPitchRoll yoTangentialCircleFramePose;
 
    /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
    private final YoBoolean showViz;
@@ -145,27 +146,27 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       desiredRotationAngle = new YoDouble(namePrefix + "DesiredRotationAngle", registry);
       currentRelativeAngle = new YoDouble(namePrefix + "CurrentRelativeAngle", registry);
 
-      yoInitialPosition = new YoFramePoint(namePrefix + "InitialPosition", trajectoryFrame, registry);
-      yoFinalPosition = new YoFramePoint(namePrefix + "FinalPosition", trajectoryFrame, registry);
+      yoInitialPosition = new YoFramePoint3D(namePrefix + "InitialPosition", trajectoryFrame, registry);
+      yoFinalPosition = new YoFramePoint3D(namePrefix + "FinalPosition", trajectoryFrame, registry);
 
-      yoCurrentPosition = new YoFramePoint(namePrefix + "CurrentPosition", trajectoryFrame, registry);
-      yoCurrentVelocity = new YoFrameVector(namePrefix + "CurrentVelocity", trajectoryFrame, registry);
-      yoCurrentAcceleration = new YoFrameVector(namePrefix + "CurrentAcceleration", trajectoryFrame, registry);
+      yoCurrentPosition = new YoFramePoint3D(namePrefix + "CurrentPosition", trajectoryFrame, registry);
+      yoCurrentVelocity = new YoFrameVector3D(namePrefix + "CurrentVelocity", trajectoryFrame, registry);
+      yoCurrentAcceleration = new YoFrameVector3D(namePrefix + "CurrentAcceleration", trajectoryFrame, registry);
 
       yoInitialOrientation = new YoFrameQuaternion(namePrefix + "InitialOrientation", trajectoryFrame, registry);
       yoFinalOrientation = new YoFrameQuaternion(namePrefix + "FinalOrientation", trajectoryFrame, registry);
 
       yoCurrentOrientation = new YoFrameQuaternion(namePrefix + "CurrentOrientation", trajectoryFrame, registry);
-      yoCurrentAngularVelocity = new YoFrameVector(namePrefix + "CurrentAngularVelocity", trajectoryFrame, registry);
-      yoCurrentAngularAcceleration = new YoFrameVector(namePrefix + "CurrentAngularAcceleration", trajectoryFrame, registry);
+      yoCurrentAngularVelocity = new YoFrameVector3D(namePrefix + "CurrentAngularVelocity", trajectoryFrame, registry);
+      yoCurrentAngularAcceleration = new YoFrameVector3D(namePrefix + "CurrentAngularAcceleration", trajectoryFrame, registry);
 
-      yoInitialPositionWorld = new YoFramePoint(namePrefix + "InitialPositionWorld", worldFrame, registry);
-      yoFinalPositionWorld = new YoFramePoint(namePrefix + "FinalPositionWorld", worldFrame, registry);
-      yoCurrentPositionWorld = new YoFramePoint(namePrefix + "CurrentPositionWorld", worldFrame, registry);
-      yoCurrentAdjustedPositionWorld = new YoFramePoint(namePrefix + "CurrentAdjustedPositionWorld", worldFrame, registry);
+      yoInitialPositionWorld = new YoFramePoint3D(namePrefix + "InitialPositionWorld", worldFrame, registry);
+      yoFinalPositionWorld = new YoFramePoint3D(namePrefix + "FinalPositionWorld", worldFrame, registry);
+      yoCurrentPositionWorld = new YoFramePoint3D(namePrefix + "CurrentPositionWorld", worldFrame, registry);
+      yoCurrentAdjustedPositionWorld = new YoFramePoint3D(namePrefix + "CurrentAdjustedPositionWorld", worldFrame, registry);
 
-      circleOrigin = new YoFramePoint(namePrefix + "CircleOrigin", trajectoryFrame, registry);
-      rotationAxis = new YoFrameVector(namePrefix + "RotationAxis", trajectoryFrame, registry);
+      circleOrigin = new YoFramePoint3D(namePrefix + "CircleOrigin", trajectoryFrame, registry);
+      rotationAxis = new YoFrameVector3D(namePrefix + "RotationAxis", trajectoryFrame, registry);
       rotationAxis.set(0.0, 0.0, 1.0);
 
       circleFrame = new ReferenceFrame("CircleFrame", trajectoryFrame)
@@ -185,7 +186,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       };
 
       tangentialCircleFrame = new PoseReferenceFrame("TangentialCircleFrame", circleFrame);
-      yoTangentialCircleFramePose = new YoFramePose(namePrefix + "TangentialCircleFramePose", worldFrame, registry);
+      yoTangentialCircleFramePose = new YoFramePoseUsingYawPitchRoll(namePrefix + "TangentialCircleFramePose", worldFrame, registry);
 
       if (this.visualize && yoGraphicsListRegistry != null)
       {
@@ -250,8 +251,8 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void updateCircleFrame(FramePoint3D circleCenter, FrameVector3D circleNormal)
    {
-      circleOrigin.setAndMatchFrame(circleCenter);
-      rotationAxis.setAndMatchFrame(circleNormal);
+      circleOrigin.setMatchingFrame(circleCenter);
+      rotationAxis.setMatchingFrame(circleNormal);
       rotationAxis.normalize();
       circleFrame.update();
    }
@@ -325,7 +326,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       double yFinal = initialRadius.getDoubleValue() * Math.sin(finalAngle.getDoubleValue());
       double zFinal = initialZ.getDoubleValue();
       finalPosition.setIncludingFrame(circleFrame, xFinal, yFinal, zFinal);
-      yoFinalPosition.setAndMatchFrame(finalPosition);
+      yoFinalPosition.setMatchingFrame(finalPosition);
 
       rotateInitialOrientation(finalOrientation, finalAngle.getDoubleValue());
 
@@ -362,7 +363,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       double z = initialZ.getDoubleValue();
 
       currentPosition.setIncludingFrame(circleFrame, x, y, z);
-      yoCurrentPositionWorld.setAndMatchFrame(currentPosition);
+      yoCurrentPositionWorld.setMatchingFrame(currentPosition);
 
       currentRelativeAngle.set(computeAngleDifferenceMinusPiToPi(angle, initialAngle.getDoubleValue()));
       if (adjustAngle)
@@ -410,15 +411,15 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
          currentAngularAcceleration.setIncludingFrame(circleFrame, 0.0, 0.0, 0.0);
       }
 
-      yoCurrentPosition.setAndMatchFrame(currentPosition);
-      yoCurrentAdjustedPositionWorld.setAndMatchFrame(currentPosition);
-      yoCurrentVelocity.setAndMatchFrame(currentVelocity);
-      yoCurrentAcceleration.setAndMatchFrame(currentAcceleration);
+      yoCurrentPosition.setMatchingFrame(currentPosition);
+      yoCurrentAdjustedPositionWorld.setMatchingFrame(currentPosition);
+      yoCurrentVelocity.setMatchingFrame(currentVelocity);
+      yoCurrentAcceleration.setMatchingFrame(currentAcceleration);
 
       currentOrientation.changeFrame(trajectoryFrame);
       yoCurrentOrientation.set(currentOrientation);
-      yoCurrentAngularVelocity.setAndMatchFrame(currentAngularVelocity);
-      yoCurrentAngularAcceleration.setAndMatchFrame(currentAngularAcceleration);
+      yoCurrentAngularVelocity.setMatchingFrame(currentAngularVelocity);
+      yoCurrentAngularAcceleration.setMatchingFrame(currentAngularAcceleration);
 
       updateTangentialCircleFrame();
    }
@@ -443,7 +444,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       double yaw = trimAngleMinusPiToPi(Math.PI / 2.0 + Math.atan2(y, x));
       tangentialCircleFramePose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
       tangentialCircleFrame.setPoseAndUpdate(tangentialCircleFramePose);
-      yoTangentialCircleFramePose.setAndMatchFrame(tangentialCircleFramePose);
+      yoTangentialCircleFramePose.setMatchingFrame(tangentialCircleFramePose);
    }
 
    private final FramePoint3D currentControlledFramePosition = new FramePoint3D();
@@ -498,9 +499,9 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private void visualizeTrajectory()
    {
       initialPosition.setIncludingFrame(yoInitialPosition);
-      yoInitialPositionWorld.setAndMatchFrame(initialPosition);
+      yoInitialPositionWorld.setMatchingFrame(initialPosition);
       finalPosition.setIncludingFrame(yoFinalPosition);
-      yoFinalPositionWorld.setAndMatchFrame(finalPosition);
+      yoFinalPositionWorld.setMatchingFrame(finalPosition);
 
       for (int i = 0; i < numberOfBalls; i++)
       {

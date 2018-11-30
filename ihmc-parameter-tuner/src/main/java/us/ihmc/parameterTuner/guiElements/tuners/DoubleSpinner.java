@@ -1,5 +1,15 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextInputDialog;
+
 public class DoubleSpinner extends NumericSpinner<Double>
 {
    public DoubleSpinner()
@@ -18,6 +28,10 @@ public class DoubleSpinner extends NumericSpinner<Double>
       {
          return Double.parseDouble(numberString.substring(0, numberString.length() - 1));
       }
+      else if (numberString.endsWith("e-") || numberString.endsWith("E-"))
+      {
+         return Double.parseDouble(numberString.substring(0, numberString.length() - 2));
+      }
       return Double.parseDouble(numberString);
    }
 
@@ -28,8 +42,47 @@ public class DoubleSpinner extends NumericSpinner<Double>
    }
 
    @Override
-   public String[] getSpecialStringOptions()
+   public List<MenuItem> getContextMenuOptions()
    {
-      return new String[] {convertNumberToString(Double.POSITIVE_INFINITY), convertNumberToString(Double.NEGATIVE_INFINITY)};
+      List<MenuItem> items = new ArrayList<>();
+      for (ImmutablePair<String, String> option : getSpecialStringOptions())
+      {
+         MenuItem menuItem = new MenuItem(option.getLeft());
+         Double number = getValueFactory().getConverter().fromString(option.getRight());
+         menuItem.setOnAction(actionEvent -> setValue(number));
+         items.add(menuItem);
+      }
+      items.add(new SeparatorMenuItem());
+      items.add(getAngleConversionOption());
+      return items;
+   }
+
+   private List<ImmutablePair<String, String>> getSpecialStringOptions()
+   {
+      List<ImmutablePair<String, String>> ret = new ArrayList<>();
+      ret.add(new ImmutablePair<String, String>("Infinity", convertNumberToString(Double.POSITIVE_INFINITY)));
+      ret.add(new ImmutablePair<String, String>("Negative Infinity", convertNumberToString(Double.NEGATIVE_INFINITY)));
+      return ret;
+   }
+
+   private MenuItem getAngleConversionOption()
+   {
+      MenuItem menuItem = new MenuItem("Input Angle");
+
+      menuItem.setOnAction(actionEvent -> {
+         TextInputDialog dialog = new TextInputDialog();
+         dialog.setTitle("Convert Angle");
+         dialog.setHeaderText("Convert Degree to Radian");
+         dialog.setContentText("Enter Angle in Degrees:");
+
+         Optional<String> result = dialog.showAndWait();
+         if (result.isPresent() && isValidString(result.get()))
+         {
+            Double number = getValueFactory().getConverter().fromString(result.get());
+            setValue(Math.toRadians(number));
+         }
+      });
+
+      return menuItem;
    }
 }

@@ -2,12 +2,11 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import java.util.Map;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -19,7 +18,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
 
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand;
 
-   private final OneDoFJoint[] jointsToControl;
+   private final OneDoFJointBasics[] jointsToControl;
    private final int numberOfJoints;
 
    private final YoDouble[] userDesiredJointAccelerations;
@@ -28,7 +27,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    private final YoBoolean abortUserControlMode;
    private final YoBoolean hasWeights;
 
-   public RigidBodyUserControlState(String bodyName, OneDoFJoint[] jointsToControl, YoDouble yoTime, YoVariableRegistry parentRegistry)
+   public RigidBodyUserControlState(String bodyName, OneDoFJointBasics[] jointsToControl, YoDouble yoTime, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.USER, bodyName, yoTime, parentRegistry);
       String prefix = bodyName + "UserMode";
@@ -51,7 +50,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       abortUserControlMode = new YoBoolean(prefix + "Abort", registry);
    }
 
-   public boolean handleDesiredAccelerationsCommand(DesiredAccelerationCommand<?, ?> command)
+   public boolean handleDesiredAccelerationsCommand(DesiredAccelerationsCommand command)
    {
       if (!hasWeights.getBooleanValue())
       {
@@ -76,7 +75,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       if (getTimeInTrajectory() > TIME_WITH_NO_MESSAGE_BEFORE_ABORT)
       {
@@ -97,7 +96,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       hasWeights.set(true);
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         OneDoFJoint joint = jointsToControl[jointIdx];
+         OneDoFJointBasics joint = jointsToControl[jointIdx];
          if (weights.containsKey(joint.getName()))
             this.weights[jointIdx] = weights.get(joint.getName());
          else
@@ -113,12 +112,12 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       abortUserControlMode.set(false);
    }
@@ -127,18 +126,6 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return jointspaceAccelerationCommand;
-   }
-
-   @Override
-   public FeedbackControlCommand<?> getFeedbackControlCommand()
-   {
-      return null;
-   }
-
-   @Override
-   public FeedbackControlCommand<?> createFeedbackControlTemplate()
-   {
-      return getFeedbackControlCommand();
    }
 
    @Override
@@ -160,11 +147,4 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       // this control mode does not support command queuing
       return 0.0;
    }
-
-   @Override
-   public void clear()
-   {
-
-   }
-
 }

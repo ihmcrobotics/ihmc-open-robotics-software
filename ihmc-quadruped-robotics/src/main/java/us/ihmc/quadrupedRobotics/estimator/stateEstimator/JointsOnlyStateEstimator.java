@@ -1,23 +1,27 @@
 package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
-import us.ihmc.stateEstimation.humanoid.DRCStateEstimatorInterface;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdater;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
+public class JointsOnlyStateEstimator implements RobotController
 {
    private final FullRobotModel fullRobotModel;
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final JointStateUpdater jointStateUpdater;
 
-
+   public JointsOnlyStateEstimator(FullRobotModel fullRobotModel, SensorOutputMapReadOnly sensorOutputMapReadOnly, YoVariableRegistry registry)
+   {
+      this.fullRobotModel = fullRobotModel;
+      this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
+      FullInverseDynamicsStructure inverseDynamicsStructure = FullInverseDynamicsStructure.createInverseDynamicStructure(fullRobotModel);
+      this.jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, null, registry);
+   }
 
    public JointsOnlyStateEstimator(FullRobotModel fullRobotModel, SensorOutputMapReadOnly sensorOutputMapReadOnly, JointStateUpdater jointStateUpdater)
    {
@@ -26,6 +30,7 @@ public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
       this.jointStateUpdater = jointStateUpdater;
    }
 
+   @Override
    public void initialize()
    {
       jointStateUpdater.initialize();
@@ -37,6 +42,7 @@ public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
 
    }
 
+   @Override
    public void doControl()
    {
       jointStateUpdater.updateJointState();
@@ -69,18 +75,6 @@ public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
    public String getDescription()
    {
       return null;
-   }
-
-   @Override
-   public StateEstimator getStateEstimator()
-   {
-      return null;
-   }
-
-   @Override
-   public void initializeEstimatorToActual(Tuple3DReadOnly initialCoMPosition, QuaternionReadOnly initialEstimationLinkOrientation)
-   {
-
    }
 
 }

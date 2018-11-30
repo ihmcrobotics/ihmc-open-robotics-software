@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.AbortWalkingMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingMessage;
 
 public class AbortWalkingCommand implements Command<AbortWalkingCommand, AbortWalkingMessage>
 {
@@ -20,7 +20,7 @@ public class AbortWalkingCommand implements Command<AbortWalkingCommand, AbortWa
    }
 
    @Override
-   public void set(AbortWalkingMessage message)
+   public void setFromMessage(AbortWalkingMessage message)
    {
       abortWalkingRequested = true;
    }

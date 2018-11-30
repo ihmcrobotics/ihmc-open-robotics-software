@@ -26,11 +26,11 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
 public class BodyPathMeshViewer extends AnimationTimer
 {
@@ -59,12 +59,12 @@ public class BodyPathMeshViewer extends AnimationTimer
    private final AtomicReference<Boolean> enableWalkerAnimation;
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
 
-   public BodyPathMeshViewer(REAMessager messager)
+   public BodyPathMeshViewer(Messager messager)
    {
       this(messager, null);
    }
 
-   public BodyPathMeshViewer(REAMessager messager, ExecutorService executorService)
+   public BodyPathMeshViewer(Messager messager, ExecutorService executorService)
    {
       isExecutorServiceProvided = executorService == null;
 

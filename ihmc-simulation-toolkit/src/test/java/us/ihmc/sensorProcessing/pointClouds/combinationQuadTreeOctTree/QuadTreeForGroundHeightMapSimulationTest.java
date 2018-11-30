@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -14,6 +15,7 @@ import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -27,19 +29,25 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationToolkit.visualizers.QuadTreeHeightMapVisualizer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.commons.thread.ThreadTools;
 
 public class QuadTreeForGroundHeightMapSimulationTest
 {
    private static final boolean DO_ASSERTS = true;
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout = 300000)
@@ -153,7 +161,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       if (visualizeAndKeepUp) ThreadTools.sleepForever();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testUsingStairGroundProfile()
    {
@@ -308,7 +316,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       private final SimulationConstructionSet scs;
       
       private final BagOfBalls bagOfBalls;
-      private final YoFramePoint queryPoint;
+      private final YoFramePoint3D queryPoint;
       
 //      private SimplifiedGroundOnlyQuadTree heightMap;
       private QuadTreeHeightMapInterface heightMap;
@@ -329,7 +337,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
          this.visualize = visualize;
          
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-         queryPoint = new YoFramePoint("queryPoint", worldFrame, registry);
+         queryPoint = new YoFramePoint3D("queryPoint", worldFrame, registry);
          this.rangeOfPointsToTest = rangeOfPointsToTest;
 
          if (visualize)

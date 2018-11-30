@@ -2,11 +2,11 @@ package us.ihmc.robotBehaviors.watson;
 
 import java.io.IOException;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class TextToSpeechNetworkClientManualTest
 {
@@ -25,6 +25,6 @@ public class TextToSpeechNetworkClientManualTest
 
       ThreadTools.sleep(2000);
       System.out.println("started");
-      ttsModuleCommunicator.send(new TextToSpeechPacket(""));
+      ttsModuleCommunicator.send(MessageTools.createTextToSpeechPacket(""));
    }
 }
