@@ -85,7 +85,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    private StateEstimatorModeSubscriber stateEstimatorModeSubscriber;
 
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
-                                     HighLevelControllerName initialControllerState)
+                                     HighLevelControllerName initialControllerState, HighLevelControllerState calibrationState)
    {
       this.controllerToolbox = new QuadrupedControllerToolbox(runtimeEnvironment, physicalProperties, registry, runtimeEnvironment.getGraphicsListRegistry());
       this.runtimeEnvironment = runtimeEnvironment;
@@ -140,7 +140,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          initialControllerState = runtimeEnvironment.getHighLevelControllerParameters().getDefaultInitialControllerState();
       }
 
-      this.stateMachine = buildStateMachine(runtimeEnvironment, initialControllerState);
+      this.stateMachine = buildStateMachine(runtimeEnvironment, initialControllerState, calibrationState);
    }
 
    public State getState(HighLevelControllerName state)
@@ -243,7 +243,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    }
 
    private StateMachine<HighLevelControllerName, HighLevelControllerState> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
-                                                                                             HighLevelControllerName initialControllerState)
+                                                                                             HighLevelControllerName initialControllerState,
+                                                                                             HighLevelControllerState calibrationState)
    {
       OneDoFJointBasics[] controlledJoints = runtimeEnvironment.getFullRobotModel().getControllableOneDoFJoints();
       HighLevelControllerParameters highLevelControllerParameters = runtimeEnvironment.getHighLevelControllerParameters();
@@ -314,6 +315,13 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       for (HighLevelControllerName state : HighLevelControllerName.values)
       {
          factory.addTransition(state, HighLevelControllerName.DO_NOTHING_BEHAVIOR, createRequestedTransition(HighLevelControllerName.DO_NOTHING_BEHAVIOR));
+      }
+
+      if (calibrationState != null)
+      {
+         factory.addState(HighLevelControllerName.CALIBRATION, calibrationState);
+         factory.addTransition(HighLevelControllerName.FREEZE_STATE, HighLevelControllerName.CALIBRATION, createRequestedTransition(HighLevelControllerName.CALIBRATION));
+         factory.addDoneTransition(HighLevelControllerName.CALIBRATION, HighLevelControllerName.FREEZE_STATE);
       }
 
       // Set up standard operating transitions
