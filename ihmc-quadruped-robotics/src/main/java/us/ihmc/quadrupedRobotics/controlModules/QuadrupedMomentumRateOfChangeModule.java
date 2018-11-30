@@ -1,10 +1,8 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -99,10 +97,10 @@ public class QuadrupedMomentumRateOfChangeModule
    {
       dcmPositionController.compute(vrpPositionSetpointToPack, dcmPositionEstimate, dcmPositionSetpoint, dcmVelocitySetpoint);
 
-      double vrpHeightOffsetFromHeightManagement = desiredCoMHeightAcceleration * linearInvertedPendulumModel.getComHeight() / gravity;
+      double vrpHeightOffsetFromHeightManagement = desiredCoMHeightAcceleration * linearInvertedPendulumModel.getLipmHeight() / gravity;
       vrpPositionSetpointToPack.subZ(vrpHeightOffsetFromHeightManagement);
 
-      double modifiedHeight = comPositionGravityCompensationParameter.getValue() * linearInvertedPendulumModel.getComHeight();
+      double modifiedHeight = comPositionGravityCompensationParameter.getValue() * linearInvertedPendulumModel.getLipmHeight();
       eCMPPositionSetpoint.setIncludingFrame(vrpPositionSetpointToPack);
       eCMPPositionSetpoint.subZ(modifiedHeight);
       eCMPPositionSetpointToPack.setMatchingFrame(eCMPPositionSetpoint);
@@ -145,7 +143,7 @@ public class QuadrupedMomentumRateOfChangeModule
       double omega0 = linearInvertedPendulumModel.getNaturalFrequency();
 
       achievedECMPToPack.set(achievedCoMAcceleration);
-      achievedECMPToPack.subZ(gravity);
+      achievedECMPToPack.addZ(gravity); // needs to be an addZ, because gravity in this case is positive.
       achievedECMPToPack.scale(-1.0 / (omega0 * omega0));
       achievedECMPToPack.add(centerOfMass);
    }
