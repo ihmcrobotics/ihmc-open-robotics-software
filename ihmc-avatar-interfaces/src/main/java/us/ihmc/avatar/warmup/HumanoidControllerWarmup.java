@@ -399,4 +399,9 @@ public abstract class HumanoidControllerWarmup
    {
       return registry;
    }
+
+   public DRCRobotModel getRobotModel()
+   {
+      return robotModel;
+   }
 }
