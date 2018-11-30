@@ -223,6 +223,12 @@ public class Cluster
    {
       return navigableExtrusionsInLocal;
    }
+   
+   public void setNavigableExtrusionsInLocal(List<Point2DReadOnly> points)
+   {
+      navigableExtrusionsInLocal.clear();
+      navigableExtrusionsInLocal.addAll(points);
+   }
 
    public List<Point3DReadOnly> getNavigableExtrusionsInWorld()
    {

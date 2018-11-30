@@ -15,7 +15,7 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
    @Override
    public double getNormalZThresholdForAccessibleRegions()
    {
-      return 0.6;
+      return 0.75;
    }
 
    @Override
@@ -62,7 +62,7 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
          @Override
          public double computeExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
          {
-            return 0.01;
+            return 0.02;
          }
       };
    }

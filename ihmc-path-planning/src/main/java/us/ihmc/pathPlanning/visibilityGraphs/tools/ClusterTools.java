@@ -90,10 +90,6 @@ public class ClusterTools
             extrusions.add(extrusion);
          }
       }
- 
-      //TODO: Get rid of the redundant extra vertex at the end!
-      if (!extrusions.isEmpty())
-         extrusions.add(extrusions.get(0));
 
       return extrusions;
    }
@@ -208,7 +204,6 @@ public class ClusterTools
       List<Point2D> extrusions2 = extrudeCorner(endpoint2, edge1, edge2, true, numberOfExtrusionsAtEndpoints, extrusionDistance2);
       extrusions.addAll(extrusions1);
       extrusions.addAll(extrusions2);
-//      extrusions.add(extrusions1.get(0));
 
       return extrusions;
    }
