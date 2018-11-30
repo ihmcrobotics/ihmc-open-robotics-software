@@ -21,6 +21,7 @@ import us.ihmc.avatar.joystickBasedJavaFXController.ButtonState;
 import us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
@@ -40,6 +41,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
+import us.ihmc.javaFXVisualizers.JavaFXRobotHandVisualizer;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -61,7 +63,6 @@ public class GraspingJavaFXController
 {
    private final JavaFXMessager messager;
    private final FullHumanoidRobotModel fullRobotModel;
-   private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final KinematicsPlanningToolboxOutputConverter outputConverter;
 
@@ -93,7 +94,6 @@ public class GraspingJavaFXController
 
    private final ReferenceFrame pelvisZUpFrame;
 
-   private boolean selectingSide = false;
    private RobotSide selectedSide = null;
 
    private final DoubleProperty velocityXProperty = new SimpleDoubleProperty(this, "velocityXProperty", 0.0);
@@ -109,9 +109,12 @@ public class GraspingJavaFXController
    private final AtomicReference<KinematicsPlanningToolboxOutputStatus> toolboxOutputPacket = new AtomicReference<>(null);
    private final ValkyrieJavaFXMotionPreviewVisualizer motionPreviewVisualizer;
 
+   FullHumanoidRobotModelFactory fullRobotModelFactory;
+
    public GraspingJavaFXController(String robotName, JavaFXMessager messager, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                    JavaFXRobotVisualizer javaFXRobotVisualizer, HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher)
    {
+      this.fullRobotModelFactory = fullRobotModelFactory;
       fullRobotModel = javaFXRobotVisualizer.getFullRobotModel();
       outputConverter = new KinematicsPlanningToolboxOutputConverter(fullRobotModelFactory);
 
@@ -176,9 +179,11 @@ public class GraspingJavaFXController
          public void handle(long arg0)
          {
             updateSelectedKeyFrame();
-            updateVisualizedKeyFrames();
-            rootNode.getChildren().add(motionPreviewVisualizer.getRootNode());
             submitDesiredFingerConfigurationMessage();
+            rootNode.getChildren().clear();
+            rootNode.getChildren().add(motionPreviewVisualizer.getRootNode());
+            updateVisualizedKeyFrames();
+            updateControlHand();
          }
       };
    }
@@ -230,11 +235,6 @@ public class GraspingJavaFXController
 
    private void submitReachingManifoldsToToolbox(ButtonState state)
    {
-      if (state == ButtonState.PRESSED)
-         selectingSide = true;
-      else
-         selectingSide = false;
-
       if (state == ButtonState.RELEASED)
       {
          if (selectedSide != null)
@@ -258,7 +258,7 @@ public class GraspingJavaFXController
                double trajectoryTime = 10.0;
                int numberOfWayPointsBetweenKeyFrames = 1;
                if (keyFramePoses.size() < 3)
-                  numberOfWayPointsBetweenKeyFrames = 2;
+                  numberOfWayPointsBetweenKeyFrames = 3;
                TDoubleArrayList keyFrameTimesForMessage = new TDoubleArrayList();
                List<Pose3DReadOnly> keyFramePosesForMessage = new ArrayList<Pose3DReadOnly>();
 
@@ -284,6 +284,8 @@ public class GraspingJavaFXController
                      keyFramePosesForMessage.add(poseToAppend);
                   }
                }
+               
+               System.out.println("keyFramePosesForMessage "+keyFramePosesForMessage.size());
 
                KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
                                                                                                                                                    keyFrameTimesForMessage,
@@ -354,15 +356,10 @@ public class GraspingJavaFXController
 
    private void appendingYawPositive(ButtonState state)
    {
-      if (toolboxSelectRobotSide(state, RobotSide.RIGHT))
-         ;
+      if (state == ButtonState.PRESSED)
+         velocityYawProperty.set(ratioJoyStickToRotation);
       else
-      {
-         if (state == ButtonState.PRESSED)
-            velocityYawProperty.set(ratioJoyStickToRotation);
-         else
-            velocityYawProperty.set(0.0);
-      }
+         velocityYawProperty.set(0.0);
    }
 
    private void appendingXAxis(double alpha)
@@ -382,34 +379,17 @@ public class GraspingJavaFXController
 
    private void appendingZAxisPositive(ButtonState state)
    {
-      if (toolboxSelectRobotSide(state, RobotSide.LEFT))
-         ;
+      if (state == ButtonState.PRESSED)
+         velocityZProperty.set(ratioJoyStickToPosition);
       else
-      {
-         if (state == ButtonState.PRESSED)
-            velocityZProperty.set(ratioJoyStickToPosition);
-         else
-            velocityZProperty.set(0.0);
-      }
-   }
-
-   private boolean toolboxSelectRobotSide(ButtonState state, RobotSide robotSide)
-   {
-      if (selectingSide)
-      {
-         if (state == ButtonState.PRESSED)
-            selectedSide = robotSide;
-
-         return true;
-      }
-      else
-         return false;
+         velocityZProperty.set(0.0);
    }
 
    private void createKeyFrame(ButtonState state, RobotSide preferredSide)
    {
       if (state == ButtonState.PRESSED)
       {
+         selectedSide = preferredSide;
          RigidBodyTransform transformToCreateKeyFrame = new RigidBodyTransform();
          int numberOfKeyFrames = keyFramePoses.size();
          if (numberOfKeyFrames == 0)
@@ -422,9 +402,7 @@ public class GraspingJavaFXController
          }
 
          controlTransform.set(transformToCreateKeyFrame);
-
          keyFramePoses.add(transformToCreateKeyFrame);
-
          indexOfSelectedKeyFrame = keyFramePoses.size() - 1;
       }
    }
@@ -495,8 +473,21 @@ public class GraspingJavaFXController
 
       if (objectsToVisualize != null)
       {
-         children.clear();
          children.addAll(objectsToVisualize);
+      }
+   }
+
+   private void updateControlHand()
+   {
+      if(selectedSide != null)
+      {
+         Tuple3DBasics translation = new Point3D(controlTransform.getTranslationVector());
+         Quaternion orientation = new Quaternion(controlTransform.getRotationMatrix());
+
+         Affine controlTransform = JavaFXTools.createAffineFromQuaternionAndTuple(new Quaternion(orientation), translation);
+         JavaFXRobotHandVisualizer handViz = new JavaFXRobotHandVisualizer(fullRobotModelFactory, selectedSide);
+         handViz.updateTransform(controlTransform);
+         rootNode.getChildren().add(handViz.getRootNode());   
       }
    }
 
