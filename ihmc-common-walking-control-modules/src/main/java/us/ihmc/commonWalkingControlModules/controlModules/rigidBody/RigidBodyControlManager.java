@@ -86,6 +86,10 @@ public class RigidBodyControlManager
       {
          RigidBodyOrientationController taskspaceControlState = new RigidBodyOrientationController(bodyToControl, baseBody, elevator, trajectoryFrames,
                                                                                                    baseFrame, yoTime, jointControlHelper, parentRegistry);
+         if (taskspaceOrientationGains == null)
+         {
+            throw new RuntimeException("Can not create orientation control manager with null gains for " + bodyName);
+         }
          taskspaceControlState.setGains(taskspaceOrientationGains);
          taskspaceControlState.setWeights(taskspaceAngularWeight);
          this.taskspaceControlState = taskspaceControlState;
@@ -95,19 +99,33 @@ public class RigidBodyControlManager
       {
          RigidBodyPositionController taskspaceControlState = new RigidBodyPositionController(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame,
                                                                                              baseFrame, yoTime, parentRegistry, graphicsListRegistry);
+         if (taskspacePositionGains == null)
+         {
+            throw new RuntimeException("Can not create position control manager with null gains for " + bodyName);
+         }
          taskspaceControlState.setGains(taskspacePositionGains);
          taskspaceControlState.setWeights(taskspaceLinearWeight);
          this.taskspaceControlState = taskspaceControlState;
          LogTools.info("Creating manager for " + bodyName + " with position controller.");
       }
-      else
+      else if (taskspaceAngularWeight != null && taskspaceLinearWeight != null)
       {
          RigidBodyPoseController taskspaceControlState = new RigidBodyPoseController(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame,
                                                                                      baseFrame, yoTime, jointControlHelper, graphicsListRegistry, registry);
+         if (taskspaceOrientationGains == null || taskspacePositionGains == null)
+         {
+            System.out.println("Orientation gains exist: " + (taskspaceOrientationGains != null));
+            System.out.println("Position gains exist: " + (taskspacePositionGains != null));
+            throw new RuntimeException("Can not create pose control manager with null gains for " + bodyName);
+         }
          taskspaceControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
          taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
          this.taskspaceControlState = taskspaceControlState;
          LogTools.info("Creating manager for " + bodyName + " with pose controller.");
+      }
+      else
+      {
+         throw new RuntimeException("No gains or weights for " + bodyName);
       }
 
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
