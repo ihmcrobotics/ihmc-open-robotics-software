@@ -6,11 +6,11 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
@@ -160,7 +160,7 @@ public class RigidBodyJointControlHelper
    {
       if (!hasGains.getBooleanValue() || !hasWeights.getBooleanValue())
       {
-         PrintTools.warn(warningPrefix + "Can not send joint trajectory commands. Do not have all weights and gains set.");
+         LogTools.warn(warningPrefix + "Can not send joint trajectory commands. Do not have all weights and gains set.");
          throw new RuntimeException(warningPrefix + "Has no gains or weights.");
       }
 
@@ -250,7 +250,7 @@ public class RigidBodyJointControlHelper
    {
       if (!hasGains.getBooleanValue() || !hasWeights.getBooleanValue())
       {
-         PrintTools.warn(warningPrefix + "Can not send joint trajectory commands. Do not have all weights and gains set.");
+         LogTools.warn(warningPrefix + "Can not send joint trajectory commands. Do not have all weights and gains set.");
          return false;
       }
 
@@ -366,7 +366,7 @@ public class RigidBodyJointControlHelper
    {
       if (pointQueue.size() >= RigidBodyJointspaceControlState.maxPoints)
       {
-         PrintTools.info(warningPrefix + "Reached maximum capacity of " + RigidBodyJointspaceControlState.maxPoints + " can not execute trajectory.");
+         LogTools.info(warningPrefix + "Reached maximum capacity of " + RigidBodyJointspaceControlState.maxPoints + " can not execute trajectory.");
          return true;
       }
       return false;
@@ -377,7 +377,7 @@ public class RigidBodyJointControlHelper
       boolean timeValid = time > getLastTrajectoryPointTime(jointIdx);
       if (!timeValid)
       {
-         PrintTools.warn(warningPrefix + "Time in trajectory must be strictly increasing.");
+         LogTools.warn(warningPrefix + "Time in trajectory must be strictly increasing.");
       }
       return timeValid;
    }

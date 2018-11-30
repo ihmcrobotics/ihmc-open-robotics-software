@@ -25,7 +25,6 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 public class WalkingControllerState extends HighLevelControllerState
 {
@@ -138,11 +137,6 @@ public class WalkingControllerState extends HighLevelControllerState
       requestIntegratorReset = true;
    }
 
-   public void initializeDesiredHeightToCurrent()
-   {
-      walkingController.initializeDesiredHeightToCurrent();
-   }
-
    @Override
    public void doAction(double timeInState)
    {
@@ -174,11 +168,6 @@ public class WalkingControllerState extends HighLevelControllerState
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
       controllerCoreTimer.stopMeasurement();
-   }
-
-   public void reinitializePelvisOrientation(boolean reinitialize)
-   {
-      walkingController.reinitializePelvisOrientation(reinitialize);
    }
 
    @Override

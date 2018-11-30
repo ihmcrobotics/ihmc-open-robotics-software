@@ -417,7 +417,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       planningTime.set(Conversions.nanosecondsToSeconds(timeInNano - planningStartTime));
       percentRejectedNodes.set(100.0 * rejectedNodesCount / expandedNodesCount);
       itarationCount.set(iterations);
-      numberOfExpandedNodes.set(expandedNodesCount / iterations);
+      numberOfExpandedNodes.set(expandedNodesCount / Math.max(iterations, 1));
 
       return true;
    }

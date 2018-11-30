@@ -4,8 +4,8 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -54,13 +54,13 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    {
       if (!hasWeights.getBooleanValue())
       {
-         PrintTools.warn(warningPrefix + "Can not send joint desired accelerations. Do not have all weights set.");
+         LogTools.warn(warningPrefix + "Can not send joint desired accelerations. Do not have all weights set.");
          return false;
       }
 
       if (command.getNumberOfJoints() != jointsToControl.length)
       {
-         PrintTools.warn(warningPrefix + "Unexpected number of joints.");
+         LogTools.warn(warningPrefix + "Unexpected number of joints.");
          return false;
       }
 

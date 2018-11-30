@@ -57,6 +57,9 @@ import controller_msgs.msg.dds.HighLevelStateMessage;
 import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import controller_msgs.msg.dds.IntrinsicParametersMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
+import controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
+import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.LegCompliancePacket;
 import controller_msgs.msg.dds.LocalizationPacket;
@@ -99,6 +102,8 @@ import controller_msgs.msg.dds.WallPosePacket;
 import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
@@ -107,6 +112,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -130,6 +136,7 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIRobotBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
@@ -1663,6 +1670,17 @@ public class HumanoidMessageTools
       return message;
    }
 
+   public static WrenchTrajectoryPointMessage createWrenchTrajectoryPointMessage(double time, Vector3DReadOnly torque, Vector3DReadOnly force)
+   {
+      WrenchTrajectoryPointMessage message = new WrenchTrajectoryPointMessage();
+      message.setTime(time);
+      if (torque != null)
+         message.getWrench().getTorque().set(torque);
+      if (force != null)
+         message.getWrench().getForce().set(force);
+      return message;
+   }
+
    public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation)
    {
       return createFootstepDataMessage(robotSide, new Point3D(location), new Quaternion(orientation), null);
@@ -1728,6 +1746,81 @@ public class HumanoidMessageTools
       return message;
    }
 
+   public static KinematicsPlanningToolboxRigidBodyMessage createKinematicsPlanningToolboxRigidBodyMessage(RigidBodyBasics endEffector)
+   {
+      KinematicsPlanningToolboxRigidBodyMessage message = new KinematicsPlanningToolboxRigidBodyMessage();
+      message.setEndEffectorHashCode(endEffector.hashCode());
+      return message;
+   }
+
+   public static KinematicsPlanningToolboxRigidBodyMessage createKinematicsPlanningToolboxRigidBodyMessage(RigidBodyBasics endEffector,
+                                                                                                           TDoubleArrayList keyFrameTimes,
+                                                                                                           List<Pose3DReadOnly> keyFramePoses)
+   {
+      KinematicsPlanningToolboxRigidBodyMessage message = new KinematicsPlanningToolboxRigidBodyMessage();
+      message.setEndEffectorHashCode(endEffector.hashCode());
+
+      if (keyFrameTimes.size() != keyFramePoses.size())
+         throw new RuntimeException("Inconsistent list lengths: keyFrameTimes.size() = " + keyFrameTimes.size() + ", keyFramePoses.size() = "
+               + keyFramePoses.size());
+
+      for (int i = 0; i < keyFrameTimes.size(); i++)
+      {
+         message.getKeyFrameTimes().add(keyFrameTimes.get(i));
+         message.getKeyFramePoses().add().set(keyFramePoses.get(i));
+      }
+      KinematicsPlanningToolboxMessageFactory.setDefaultAllowableDisplacement(message, keyFrameTimes.size());
+      
+      return message;
+   }
+
+   public static KinematicsPlanningToolboxRigidBodyMessage createKinematicsPlanningToolboxRigidBodyMessage(RigidBodyBasics endEffector, ReferenceFrame controlFrame,
+                                                                                                           TDoubleArrayList keyFrameTimes,
+                                                                                                           List<Pose3DReadOnly> keyFramePoses)
+   {
+      KinematicsPlanningToolboxRigidBodyMessage message = new KinematicsPlanningToolboxRigidBodyMessage();
+      message.setEndEffectorHashCode(endEffector.hashCode());
+
+      RigidBodyTransform transformToBodyFixedFrame = new RigidBodyTransform();
+      controlFrame.getTransformToDesiredFrame(transformToBodyFixedFrame, endEffector.getBodyFixedFrame());
+      message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslationVector());
+      message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotationMatrix());
+
+      if (keyFrameTimes.size() != keyFramePoses.size())
+         throw new RuntimeException("Inconsistent list lengths: keyFrameTimes.size() = " + keyFrameTimes.size() + ", keyFramePoses.size() = "
+               + keyFramePoses.size());
+
+      for (int i = 0; i < keyFrameTimes.size(); i++)
+      {
+         message.getKeyFrameTimes().add(keyFrameTimes.get(i));
+         message.getKeyFramePoses().add().set(keyFramePoses.get(i));
+      }
+      KinematicsPlanningToolboxMessageFactory.setDefaultAllowableDisplacement(message, keyFrameTimes.size());
+
+      return message;
+   }
+
+   public static KinematicsPlanningToolboxCenterOfMassMessage createKinematicsPlanningToolboxCenterOfMassMessage(TDoubleArrayList keyFrameTimes,
+                                                                                                                 List<Point3DReadOnly> keyFramePoints)
+   {
+      KinematicsPlanningToolboxCenterOfMassMessage message = new KinematicsPlanningToolboxCenterOfMassMessage();
+      if (keyFrameTimes.size() != keyFramePoints.size())
+         throw new RuntimeException("Inconsistent list lengths: keyFrameTimes.size() = " + keyFrameTimes.size() + ", keyFramePoints.size() = "
+               + keyFramePoints.size());
+      for (int i = 0; i < keyFrameTimes.size(); i++)
+      {
+         message.getWayPointTimes().add(keyFrameTimes.get(i));
+         message.getDesiredWayPointPositionsInWorld().add().set(keyFramePoints.get(i));
+      }
+      return message;
+   }
+
+   public static KinematicsPlanningToolboxOutputStatus createKinematicsPlanningToolboxOutputStatus()
+   {
+      KinematicsPlanningToolboxOutputStatus message = new KinematicsPlanningToolboxOutputStatus();
+      return message;
+   }
+   
    public static PlanOffsetStatus createPlanOffsetStatus(Vector3DReadOnly offsetVector)
    {
       PlanOffsetStatus message = new PlanOffsetStatus();

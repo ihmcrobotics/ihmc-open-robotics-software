@@ -45,7 +45,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    private final YoDouble minimumTimeDoneWithStandPrep;
 
    private final YoDouble toWalkingTransitionDuration;
-   private final YoDouble exitWalkingTransitionDuration;
+   private final YoDouble timeToMoveSittingDown;
 
    private final Quaternion bodyOrientation = new Quaternion();
 
@@ -85,7 +85,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       timeToPrepareForStanding = (YoDouble) scs.getVariable("timeToPrepareForStanding");
       minimumTimeDoneWithStandPrep = (YoDouble) scs.getVariable("minimumTimeDoneWithStandPrep");
       toWalkingTransitionDuration = (YoDouble) scs.getVariable("toWalkingTransitionDuration");
-      exitWalkingTransitionDuration = (YoDouble) scs.getVariable("exitWalkingTransitionDuration");
+      timeToMoveSittingDown = (YoDouble) scs.getVariable("timeToMoveSittingDown");
    }
 
    public YoEnum<HighLevelControllerName> getUserTrigger()
@@ -214,13 +214,13 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       return timeToPrepareForStanding.getDoubleValue() + minimumTimeDoneWithStandPrep.getDoubleValue();
    }
 
-   public double getToWaklkingTransitionDuration()
+   public double getToWalkingTransitionDuration()
    {
       return toWalkingTransitionDuration.getDoubleValue();
    }
 
-   public double getExitWalkingTransitionDuration()
+   public double getTimeToMoveSittingDown()
    {
-      return exitWalkingTransitionDuration.getDoubleValue();
+      return timeToMoveSittingDown.getDoubleValue();
    }
 }

@@ -26,6 +26,8 @@ public class DoNothingControllerState extends HighLevelControllerState
          controlledJoints[i].setTau(0.0);
          lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(controlledJoints[i]).clear();
          lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(controlledJoints[i], 0.0);
+         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointPosition(controlledJoints[i], controlledJoints[i].getQ());
+         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointVelocity(controlledJoints[i], controlledJoints[i].getQd());
       }
 
       lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());

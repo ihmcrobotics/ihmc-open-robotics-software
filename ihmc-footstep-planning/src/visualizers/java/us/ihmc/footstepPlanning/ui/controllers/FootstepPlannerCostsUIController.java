@@ -1,24 +1,20 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
-import javafx.scene.control.ToggleButton;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.ui.components.FootstepPlannerCostParametersProperty;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
-import us.ihmc.footstepPlanning.ui.components.SettableFootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.ui.components.SettableFootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
-import us.ihmc.javaFXToolkit.messager.TopicListener;
-
-import java.util.concurrent.atomic.AtomicReference;
+import us.ihmc.messager.TopicListener;
 
 public class FootstepPlannerCostsUIController
 {
