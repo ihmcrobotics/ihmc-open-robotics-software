@@ -29,12 +29,9 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -92,9 +89,8 @@ public class GraspingJavaFXController
    private final IHMCROS2Publisher<KinematicsPlanningToolboxRigidBodyMessage> toolboxMessagePublisher;
 
    private final AtomicReference<List<Node>> objectsToVisualizeReference = new AtomicReference<>(new ArrayList<>());
-   private final static Vector3D defaultPositionToCreateObject = new Vector3D(0.6, 0.3, 1.0);
-   private final Point3D controlPosition = new Point3D(defaultPositionToCreateObject);
-   private final RotationMatrix controlOrientation = new RotationMatrix();
+   private final RigidBodyTransform controlTransform = new RigidBodyTransform();
+
    private final ReferenceFrame pelvisZUpFrame;
 
    private boolean selectingSide = false;
@@ -261,7 +257,7 @@ public class GraspingJavaFXController
                RigidBodyBasics endEffector = fullRobotModel.getHand(selectedSide);
                double trajectoryTime = 10.0;
                int numberOfWayPointsBetweenKeyFrames = 1;
-               if(keyFramePoses.size() < 3)
+               if (keyFramePoses.size() < 3)
                   numberOfWayPointsBetweenKeyFrames = 2;
                TDoubleArrayList keyFrameTimesForMessage = new TDoubleArrayList();
                List<Pose3DReadOnly> keyFramePosesForMessage = new ArrayList<Pose3DReadOnly>();
@@ -273,12 +269,12 @@ public class GraspingJavaFXController
                   double keyFrameTimePrevious = trajectoryTime * (i) / (double) keyFramePoses.size();
                   double keyFrameTime = trajectoryTime * (i + 1) / (double) keyFramePoses.size();
                   Pose3D posePrevious;
-                  if(i == 0)
+                  if (i == 0)
                      posePrevious = new Pose3D(endEffector.getBodyFixedFrame().getTransformToWorldFrame());
                   else
-                     posePrevious = new Pose3D(keyFramePoses.get(i-1));
+                     posePrevious = new Pose3D(keyFramePoses.get(i - 1));
                   Pose3D pose = new Pose3D(keyFramePoses.get(i));
-                  
+
                   for (int j = 0; j < numberOfWayPointsBetweenKeyFrames; j++)
                   {
                      double alpha = (j + 1) / numberOfWayPointsBetweenKeyFrames;
@@ -288,17 +284,6 @@ public class GraspingJavaFXController
                      keyFramePosesForMessage.add(poseToAppend);
                   }
                }
-               
-               
-               System.out.println(keyFrameTimesForMessage.size());
-               System.out.println(keyFramePosesForMessage.size());
-               
-               
-               
-               
-               
-               
-               
 
                KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
                                                                                                                                                    keyFrameTimesForMessage,
@@ -346,11 +331,10 @@ public class GraspingJavaFXController
    private void updateSelectedKeyFrame()
    {
       pelvisZUpFrame.update();
-
-      controlPosition.add(velocityXProperty.getValue(), velocityYProperty.getValue(), velocityZProperty.getValue());
-      controlOrientation.appendRollRotation(velocityRollProperty.getValue());
-      controlOrientation.appendPitchRotation(velocityPitchProperty.getValue());
-      controlOrientation.appendYawRotation(velocityYawProperty.getValue());
+      controlTransform.appendTranslation(velocityXProperty.getValue(), velocityYProperty.getValue(), velocityZProperty.getValue());
+      controlTransform.appendRollRotation(velocityRollProperty.getValue());
+      controlTransform.appendPitchRotation(velocityPitchProperty.getValue());
+      controlTransform.appendYawRotation(velocityYawProperty.getValue());
    }
 
    private void appendingRoll(double alpha)
@@ -437,8 +421,7 @@ public class GraspingJavaFXController
             transformToCreateKeyFrame.set(keyFramePoses.get(numberOfKeyFrames - 1));
          }
 
-         transformToCreateKeyFrame.getTranslation(controlPosition);
-         transformToCreateKeyFrame.getRotation(controlOrientation);
+         controlTransform.set(transformToCreateKeyFrame);
 
          keyFramePoses.add(transformToCreateKeyFrame);
 
@@ -480,8 +463,7 @@ public class GraspingJavaFXController
 
    private void snapControlTransformToSelectedKeyFrame()
    {
-      keyFramePoses.get(indexOfSelectedKeyFrame).getTranslation(controlPosition);
-      keyFramePoses.get(indexOfSelectedKeyFrame).getRotation(controlOrientation);
+      controlTransform.set(keyFramePoses.get(indexOfSelectedKeyFrame));
    }
 
    private void updateVisualizedKeyFrames()
@@ -494,8 +476,7 @@ public class GraspingJavaFXController
          if (i == indexOfSelectedKeyFrame)
          {
             lengthOfFrame = lengthOfControlFrame;
-            objectToVisualize.setTranslation(controlPosition);
-            objectToVisualize.setRotation(controlOrientation);
+            objectToVisualize.set(controlTransform);
          }
 
          Tuple3DBasics translation = new Point3D(objectToVisualize.getTranslationVector());
