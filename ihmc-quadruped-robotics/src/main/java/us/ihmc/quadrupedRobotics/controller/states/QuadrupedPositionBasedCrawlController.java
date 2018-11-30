@@ -379,8 +379,8 @@ public class QuadrupedPositionBasedCrawlController implements State
 
       runOpenLoop.set(true);
 
-      this.postureProvider = new QuadrupedPostureInputProvider(physicalProperties, environment.getGlobalDataProducer(), registry);
-      this.planarVelocityProvider = new QuadrupedPlanarVelocityInputProvider(environment.getGlobalDataProducer(), registry);
+      this.postureProvider = new QuadrupedPostureInputProvider(physicalProperties, null, registry);
+      this.planarVelocityProvider = new QuadrupedPlanarVelocityInputProvider(null, registry);
       this.robotTimestamp = environment.getRobotTimestamp();
       this.dt = environment.getControlDT();
       this.actualFullRobotModel = environment.getFullRobotModel();
