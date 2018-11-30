@@ -21,6 +21,7 @@ public class Cluster
    private final List<Point2DReadOnly> navigableExtrusionsInLocal = new ArrayList<>();
    private final List<Point2DReadOnly> nonNavigableExtrusionsInLocal = new ArrayList<>();
 
+   private boolean nonNavigableExtrusionsBoundingBoxIsDirty = true;
    private final BoundingBox2D nonNavigableExtrusionsBoundingBox = new BoundingBox2D();
 
    public enum ExtrusionSide
@@ -72,19 +73,22 @@ public class Cluster
    public void updateBoundingBox()
    {
       nonNavigableExtrusionsInLocal.forEach(nonNavigableExtrusionsBoundingBox::updateToIncludePoint);
+      nonNavigableExtrusionsBoundingBoxIsDirty = false;
    }
 
    public boolean isInsideNonNavigableZone(Point2DReadOnly query)
    {
+      BoundingBox2D boundingBox = getNonNavigableExtrusionsBoundingBox();
+      
       if (extrusionSide == ExtrusionSide.INSIDE)
       {
-         if (!nonNavigableExtrusionsBoundingBox.isInsideInclusive(query))
+         if (!boundingBox.isInsideInclusive(query))
             return true;
          return !PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionsInLocal, query);
       }
       else
       {
-         if (!nonNavigableExtrusionsBoundingBox.isInsideInclusive(query))
+         if (!boundingBox.isInsideInclusive(query))
             return false;
          return PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionsInLocal, query);
       }
@@ -229,20 +233,26 @@ public class Cluster
    public void addNonNavigableExtrusionInLocal(Point2DReadOnly nonNavigableExtrusionInLocal)
    {
       nonNavigableExtrusionsInLocal.add(new Point2D(nonNavigableExtrusionInLocal));
+      nonNavigableExtrusionsBoundingBoxIsDirty = true;
    }
 
    public void addNonNavigableExtrusionInLocal(Point3DReadOnly nonNavigableExtrusionInLocal)
    {
       nonNavigableExtrusionsInLocal.add(new Point2D(nonNavigableExtrusionInLocal));
+      nonNavigableExtrusionsBoundingBoxIsDirty = true;
    }
 
    public void addNonNavigableExtrusionsInLocal(List<? extends Point2DReadOnly> nonNavigableExtrusionInLocal)
    {
       nonNavigableExtrusionInLocal.forEach(this::addNonNavigableExtrusionInLocal);
+      nonNavigableExtrusionsBoundingBoxIsDirty = true;
    }
 
    public BoundingBox2D getNonNavigableExtrusionsBoundingBox()
    {
+      if (nonNavigableExtrusionsBoundingBoxIsDirty) 
+         updateBoundingBox();
+
       return nonNavigableExtrusionsBoundingBox;
    }
 
